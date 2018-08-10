@@ -1,0 +1,36 @@
+.govuk-related-items {
+  margin-top: 30px;
+  border-top: 10px solid #005ea5;
+  padding-top: 5px;
+
+  .heading-medium {
+    margin-top: 0.3em;
+    margin-bottom: 0.5em;
+  }
+
+  li {
+    margin-bottom: 10px;
+    list-style-type: none;
+  }
+}
+
+
+.related-container {
+  padding: 0 15px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.govuk-related-items ul {
+  font-size: 16px;
+  line-height: 1.25;
+
+  li.related-items-more {
+    font-weight: bold;
+  }
+}
+
+.side-nav {
+    border-right: 1px solid #bfc1c3
+}

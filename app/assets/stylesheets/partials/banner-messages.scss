@@ -1,0 +1,58 @@
+/*** New banner message styling from gov uk - used for new login page only so far ***/
+
+.banner-success-with-action, .banner-success-without-action {
+    color: #00823b;
+}
+
+.banner-destructive-without-action,
+.banner-destructive-with-action,
+.banner-warning-with-action,
+.banner-warning-without-action,
+.banner-success-with-action,
+.banner-success-without-action,
+.banner-information-with-action,
+.banner-information-without-action,
+.banner-temporary-message-without-action {
+    font-family: "nta", Arial, sans-serif;
+    font-weight: 400;
+    text-transform: none;
+    font-size: 18px;
+    line-height: 1.2;
+    padding: 20px;
+    margin-top: 15px;
+    border-width: 5px;
+    border-style: solid;
+}
+
+@media (min-width: 641px) {
+
+    .banner-destructive-without-action,
+    .banner-destructive-with-action,
+    .banner-warning-with-action,
+    .banner-warning-without-action,
+    .banner-success-with-action,
+    .banner-success-without-action,
+    .banner-information-with-action,
+    .banner-information-without-action,
+    .banner-temporary-message-without-action {
+        font-size: 24px;
+        line-height: 1.25;
+    }
+}
+
+.content__body p.banner-message {
+    font-family: "nta", Arial, sans-serif;
+    font-weight: 400;
+    text-transform: none;
+    font-size: 18px;
+    line-height: 1.2;
+    font-weight: bold;
+    margin: 0;
+}
+
+@media (min-width: 641px) {
+    .content__body p.banner-message {
+        font-size: 20px;
+        line-height: 1.25;
+    }
+}

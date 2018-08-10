@@ -1,0 +1,110 @@
+/*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package controllers
+
+import connectors.ThirdPartyDeveloperConnector
+import domain._
+import play.api.Play.current
+import play.api.data.Form
+import play.api.i18n.Messages.Implicits._
+import play.api.mvc._
+import service._
+
+import scala.concurrent.Future
+
+trait Details extends ApplicationController {
+
+  val applicationService: ApplicationService
+  val developerConnector: ThirdPartyDeveloperConnector
+  val auditService: AuditService
+
+  def details(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
+    Future.successful(Ok(views.html.details(request.role, request.application)))
+  }
+
+  def changeDetails(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), request.application)))
+  }
+
+  def changeDetailsAction(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+    val application = request.application
+    val access = application.access.asInstanceOf[Standard]
+
+    def buildCheckInformation(updateRequest: UpdateApplicationRequest): CheckInformation = {
+      val updatedAccess = updateRequest.access.asInstanceOf[Standard]
+
+      def confirmedNameValue(checkInformation: CheckInformation): Boolean =
+        updateRequest.name == application.name && checkInformation.confirmedName
+
+      def providedPrivacyPolicyUrlValue(checkInformation: CheckInformation): Boolean = {
+        updatedAccess.privacyPolicyUrl == access.privacyPolicyUrl && checkInformation.providedPrivacyPolicyURL
+      }
+
+      def providedTermsAndConditionsUrlValue(checkInformation: CheckInformation): Boolean = {
+        updatedAccess.termsAndConditionsUrl == access.termsAndConditionsUrl && checkInformation.providedTermsAndConditionsURL
+      }
+
+      val checkInformation = application.checkInformation.getOrElse(CheckInformation())
+
+      CheckInformation(
+        confirmedName = confirmedNameValue(checkInformation),
+        applicationDetails = checkInformation.applicationDetails,
+        contactDetails = checkInformation.contactDetails,
+        providedPrivacyPolicyURL = providedPrivacyPolicyUrlValue(checkInformation),
+        providedTermsAndConditionsURL = providedTermsAndConditionsUrlValue(checkInformation),
+        termsOfUseAgreements = checkInformation.termsOfUseAgreements
+      )
+    }
+
+    def updateApplication(updateRequest: UpdateApplicationRequest) = {
+      applicationService.update(updateRequest)
+    }
+
+    def updateCheckInformation(updateRequest: UpdateApplicationRequest) = {
+      if (application.deployedTo == Environment.PRODUCTION) {
+        applicationService.updateCheckInformation(applicationId, buildCheckInformation(updateRequest))
+      } else {
+        Future.successful(ApplicationUpdateSuccessful)
+      }
+    }
+
+    def handleValidForm(form: EditApplicationForm) = {
+      val updateRequest = UpdateApplicationRequest.from(form, application)
+
+      for {
+        _ <- updateApplication(updateRequest)
+        _ <- updateCheckInformation(updateRequest)
+      } yield Redirect(controllers.routes.Details.details(applicationId))
+    }
+
+    def handleInvalidForm(formWithErrors: Form[EditApplicationForm]) = errorView(application.id, formWithErrors, application)
+
+    EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
+  private def errorView(id: String,
+                        form: Form[EditApplicationForm], application: Application)
+                       (implicit request: ApplicationRequest[_]): Future[Result] =
+    Future.successful(BadRequest(views.html.changeDetails(form, application)))
+}
+
+object Details extends Details with WithAppConfig {
+  override val sessionService = SessionService
+  override val applicationService = ApplicationServiceImpl
+  override val developerConnector = ThirdPartyDeveloperConnector
+  override val auditService = AuditService
+}

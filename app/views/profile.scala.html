@@ -1,0 +1,83 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain._
+@import include._
+@import model.Crumb
+
+@(form: Form[controllers.ProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "manage-profile")
+
+@devMain(
+    title = "Manage profile",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Manage profile"),
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(None, Option(navSection)))
+) {
+
+    @errorSummary(form)
+
+    <header>
+        <h1 class="heading-large">Manage profile</h1>
+    </header>
+
+    @helper.form(action = controllers.routes.Profile.updateProfile) {
+        @helper.CSRF.formField
+        <div class="form-group @if(form.errors("firstname").nonEmpty) {form-group-error form-field--error}">
+            <label class="form-label-bold" for="firstname" id="firstname-label">First name</label>
+            @fieldError(form.errors, "firstname", true)
+            <input type="text"
+                   class="form-control-2-3"
+                   id="firstname"
+                   name="firstname"
+                   aria-labelledby="firstname-label"
+                   value="@form.data.getOrElse("firstname", "")" class="input--medium @if(form.errors("firstname").nonEmpty) {error-field}"/>
+        </div>
+        <div class="form-group @if(form.errors("lastname").nonEmpty) {form-group-error form-field--error}">
+            <label class="form-label-bold" for="lastname" id="lastname-label">Last name</label>
+            @fieldError(form.errors, "lastname", true)
+            <input type="text"
+                   class="form-control-2-3"
+                   id="lastname"
+                   name="lastname"
+                   aria-labelledby="lastname-label"
+                   value="@form.data.getOrElse("lastname", "")" class="input--medium @if(form.errors("lastname").nonEmpty) {error-field}"/>
+        </div>
+        <div class="form-group @if(form.errors("organisation").nonEmpty) {form-group-error form-field--error}">
+            <label class="form-label-bold" for="organisation" id="organisation-label">Organisation (optional)</label>
+            @fieldError(form.errors, "organisation", true)
+            <input type="text"
+                   class="form-control-2-3"
+                   id="organisation"
+                   name="organisation"
+                   aria-labelledby="organisation-label"
+                   value="@form.data.getOrElse("organisation", "")" class="input--medium @if(form.errors("organisation").nonEmpty) {error-field}"/>
+        </div>
+        <div class="form-group">
+            <button id="submit" class="button" type="submit">Save changes</button>
+        </div>
+    }
+
+    <div class="form-field-group">
+        <h2 class="heading-medium">Delete account</h2>
+        <p>You can ask us to delete your account and we will respond within 2 working days.</p>
+        <p>
+            <a href="@controllers.routes.Profile.requestDeletion" id="account-deletion">Request account deletion</a>
+        </p>
+    </div>
+}

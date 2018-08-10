@@ -1,0 +1,68 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import model.Crumb
+@import uk.gov.hmrc.urls.Link
+@import controllers.AddRedirectForm
+
+@(application: Application, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+
+@devMain(
+    title = "Delete a redirect URI",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Delete a redirect URI"),
+        Crumb.application(application),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(application), Option(navSection)))
+) {
+    @errorSummary(form)
+
+    <h1 class="heading-large">Delete a redirect URI</h1>
+
+    @appEnvironment(application)
+
+    <h2 class="heading-medium">Redirect URI</h2>
+    <p id="redirectUriToDelete" class="break-word">@redirectUri</p>
+
+    @helper.form(action = controllers.routes.Redirects.deleteRedirectAction(application.id), 'class -> "form") {
+        <div class="form-group @if(form.errors("deleteRedirectConfirm").nonEmpty) {form-group-error}">
+            <h2 class="heading-medium">Are you sure you want to delete this redirect URI?</h2>
+
+            <fieldset id="deleteRedirectConfirm" class="inline">
+                @helper.CSRF.formField
+                <input id="redirectUri" name="redirectUri" class="form-control" hidden aria-hidden="true" type="text" value="@redirectUri">
+                @fieldError(form.errors, "deleteRedirectConfirm")
+                <div class="multiple-choice">
+                    <input id="confirm-delete-redirect-yes" type="radio" name="deleteRedirectConfirm" value="Yes">
+                    <label for="confirm-delete-redirect-yes">Yes</label>
+                </div>
+                <div class="multiple-choice">
+                    <input id="confirm-delete-redirect-no" type="radio" name="deleteRedirectConfirm" value="No">
+                    <label for="confirm-delete-redirect-no">No</label>
+                </div>
+            </fieldset>
+        </div>
+        <div class="form-group">
+            <button id="submit" class="button" type="submit">Submit</button>
+        </div>
+    }
+}

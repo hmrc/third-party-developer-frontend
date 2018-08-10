@@ -1,0 +1,181 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import org.joda.time.format.DateTimeFormat
+
+@()(implicit applicationConfig: config.ApplicationConfig)
+
+@defining(DateTimeFormat.forPattern("dd MMMM yyyy")) { dateFormatter =>
+    <p>Version @{applicationConfig.currentTermsOfUseVersion} issued @{dateFormatter.print(applicationConfig.currentTermsOfUseDate)}</p>
+}
+<p>These terms of use explain what you can expect from us and what we expect from you when using the HMRC Developer Hub.
+    They do not create a legal obligation or a legal relationship between HMRC and any software developer.</p>
+<p>We reserve the right to remove your access to the Developer Hub and API Platform temporarily or permanently.</p>
+<p>If we change these terms we’ll let you know. If you have any questions <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support">ask for support</a>.</p>
+
+<section>
+    <h2 class="heading-medium">Background checks</h2>
+    <p>We’ll carry out basic background checks on your organisation. They include checking:</p>
+    <ul class="list list-bullet">
+        <li>information held by Companies House</li>
+        <li>your website</li>
+    </ul>
+</section>
+
+<section>
+    <h2 class="heading-medium">What you can expect from us</h2>
+    <p>We will:</p>
+    <ul class="list list-bullet">
+        <li>give you at least 6 months’ notice of changes affecting any stable APIs</li>
+        <li>make sure any minor changes made to stable APIs are backwards compatible</li>
+        <li>provide reasonable notice of changes affecting beta APIs, which can change fairly frequently</li>
+        <li>warn you before we retire an API</li>
+        <li>provide a robust test environment</li>
+    </ul>
+</section>
+
+<section>
+    <h2 class="heading-medium">What we expect from you</h2>
+    <p>We take the protection of customer data seriously. We expect you to do the same by following data protection law and protecting users in line with the:</p>
+    <ul class="list list-bullet" style="margin-bottom: 20px">
+        <li><a href="https://www.ncsc.gov.uk/guidance/security-design-principles-digital-services-main" target="_blank">National Cyber Security Centre’s Security Design Principles (opens in a new tab)</a></li>
+        <li><a href="https://www.ncsc.gov.uk/blog-post/secure-development-and-deployment" target="_blank">National Cyber Security Centre’s Guidance for secure development and deployment (opens in a new tab)</a></li>
+        <li><a href="https://www.ncsc.gov.uk/guidance/tls-external-facing-services" target="_blank">Transport Layer Security principles for protecting data (opens in a new tab)</a></li>
+        <li><a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr" target="_blank">General Data Protection Regulation – GDPR (opens in a new tab)</a></li>
+        <li><a href="https://ico.org.uk/about-the-ico/what-we-do/legislation-we-cover/privacy-and-electronic-communications-regulations/" target="_blank">Privacy and Electronic Communications (EC Directive) Regulations 2003 – as amended (opens in a new tab)</a></li>
+        <li><a href="http://www.legislation.gov.uk/ukpga/2010/15/contents" target="_blank">Equality Act 2010 (opens in a new tab)</a></li>
+        <li><a href="https://ico.org.uk/for-organisations/" target="_blank">Information Commissioner’s Office (opens in a new tab)</a></li>
+        <li><a href="https://ico.org.uk/for-organisations/data-protection-act-2018/" target="_blank">Data Protection Act 2018 (opens in a new tab)</a></li>
+    </ul>
+    <p>You must also follow these acts and regulations if they’re changed or replaced.</p>
+    <section>
+        <h3 class="heading-small">Accessing data</h3>
+        <p>You must give your users access to their data. We may also ask to access their data if we open an investigation.</p>
+        <p>If you withdraw a piece of software or a user stops using it, you must let them retrieve and export all their data so they can meet their obligations to us.</p>
+        <p>We recommend using multi-factor authentication to protect personal data.</p>
+    </section>
+    <section>
+        <h3 class="heading-small">Processing data</h3>
+        <p>You may need to <a href="https://ico.org.uk/for-organisations/register/" target="_blank">register with the Information Commissioner’s Office (opens in a new tab)</a> or pay a <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/accountability-and-governance/guide-to-the-data-protection-fee/" target="_blank">data protection fee (opens in a new tab)</a> if your software processes personal data.</p>
+    </section>
+    <section>
+        <h3 class="heading-small">Storing data</h3>
+        <p>If you store and process their personal data, you must tell users:</p>
+        <ul class="list list-bullet" style="margin-bottom: 20px">
+            <li>what personal data you’ll be processing and what you’ll use it for</li>
+            <li>that you’re responsible for protecting their data</li>
+            <li>if you intend to store their data outside the European Economic Area</li>
+            <li>your <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/lawful-basis-for-processing/" target="_blank">lawful basis (opens in a new tab)</a> for processing their personal data
+            </li>
+        </ul>
+        <p>If you need users’ consent to store and process their personal data you’ll need to follow <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/lawful-basis-for-processing/consent/" target="_blank">GDPR rules on obtaining consent (opens in a new tab)</a>.</p>
+        <p>If you store or process data outside the European Economic Area, you must:</p>
+        <ul class="list list-bullet" style="margin-bottom: 20px">
+            <li>follow <a href="https://ico.org.uk/for-organisations/guide-to-data-protection/principle-8-international/" target="_blank">the eighth data protection principle of the Information Commissioner’s Office’s Guide to Data Protection (opens in a new tab)</a>              or</li>
+            <li>follow GDPR guidance on <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/international-transfers/" target="_blank">international transfers (opens in a new tab)</a></li>
+        </ul>
+        <p>You must store data to meet our policy on <a href="https://www.gov.uk/keeping-your-pay-tax-records/how-long-to-keep-your-records" target="_blank">keeping your pay and tax records (opens in a new tab)</a>.</p>
+    </section>
+    <section>
+        <h3 class="heading-small">Data breaches</h3>
+        <p>If there’s a data breach or any other issue concerning customer data you must tell us immediately by emailing <a href="mailto:SDSTeam@@hmrc.gsi.gov.uk">SDSTeam@@hmrc.gsi.gov.uk</a>.</p>
+        <p>Under GDPR rules, you must also <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/personal-data-breaches/" target="_blank">notify ICO about certain types of personal data breach (opens in a new tab)</a>            within 72 hours of becoming aware of it.</p>
+    </section>
+    <section>
+        <h3 class="heading-small">Service standard</h3>
+        <p>Your software must take into account the <a href="https://www.gov.uk/service-manual/service-standard">Digital Service Standard</a>.</p>
+    </section>
+    <section>
+        <h3 class="heading-small">Accessibility</h3>
+        <p>You must:</p>
+        <ul class="list list-bullet">
+            <li>meet <a href="https://www.w3.org/TR/WCAG20/" target="_blank">W3C’s Web Content Accessibility Guidelines (opens in a new tab)</a> at a minimum level of AA if your software’s web-based, or <a href="https://www.w3.org/TR/mobile-accessibility-mapping/" target="_blank">W3C’s guidelines for mobile software (opens in a new tab)</a></li>
+            <li>give us evidence that your software meets the guidelines, if we ask for it</li>
+            <li><a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support">ask for support</a> if you have any concerns meeting these guidelines</li>
+        </ul>
+    </section>
+    <section>
+        <h3 class="heading-small">Advertising and marketing</h3>
+        <p>Any advertising that appears in your software must follow both:</p>
+        <ul class="list list-bullet" style="margin-bottom: 20px">
+            <li><a href="https://www.asa.org.uk/codes-and-rulings/advertising-codes.html" target="_blank">Advertising Standards Authority Codes (opens in a new tab)</a></li>
+            <li><a href="https://www.gov.uk/marketing-advertising-law/regulations-that-affect-advertising" target="_blank">UK marketing and advertising laws (opens in a new tab)</a></li>
+        </ul>
+        <p>You must not use advertising that promotes:</p>
+        <ul class="list list-bullet" style="margin-bottom: 20px">
+            <li>adult themes</li>
+            <li>dating</li>
+            <li>gaming</li>
+        </ul>
+        <p>You cannot share personal data for marketing without users’ consent, as defined in the Direct Marketing Guidance PDF from the <a href="https://ico.org.uk/for-organisations/marketing/" target="_blank">Information Commissioner’s Office (opens in a new tab)</a>.</p>
+        <p>You cannot advertise your software as ‘HMRC accredited’, ‘HMRC endorsed’, ‘HMRC certified’ or similar.</p>
+        <p>You cannot use our HMRC brand in any way including logo placement on your website.</p>
+    </section>
+    <section>
+        <h3 class="heading-small">Licence agreements</h3>
+        <p>You must make the terms of the licence agreement between you and your users clear to them.</p>
+    </section>
+    <section>
+        <h3 class="heading-small">Security</h3>
+        <p></p>You must:<p></p>
+        <ul class="list list-bullet">
+            <li>check software for vulnerabilities through secure development and pre-release testing</li>
+            <li>check open source or reused proprietary code using resources like the <a href="https://cve.mitre.org/" target="_blank">Common Vulnerabilities and Exposures (opens in a new tab)</a> database</li>
+            <li>react quickly if you find vulnerabilities in your code</li>
+            <li>have a patching policy in place</li>
+        </ul>
+        <p></p>Your re-releases and upgrades should also follow secure development practices and pre-release testing.<p></p>
+        <p></p>We recommend following the security principles of:<p></p>
+        <ul class="list list-bullet">
+            <li>the <a href="https://www.ncsc.gov.uk" target="_blank">National Cyber Security Centre (opens in a new tab)</a></li>
+            <li><a href="https://www.ncsc.gov.uk/blog-post/secure-development-and-deployment" target="_blank">National Cyber Security Centre’s Guidance for secure development and deployment (opens in a new tab)</a></li>
+            <li>the <a href="https://www.owasp.org/index.php/Main_Page" target="_blank">Open Web Application Security Project (opens in a new tab)</a></li>
+            <li><a href="https://www.cyberessentials.ncsc.gov.uk/" target="_blank">Cyber Essentials or Cyber Essentials Plus certification (opens in a new tab)</a></li>
+        </ul>
+    </section>
+    <section>
+        <h3 class="heading-small">Suspicious activity</h3>
+        <p>We expect you to look out for and block suspicious attempts to access or manipulate user accounts.</p>
+    </section>
+    <section>
+        <h3 class="heading-small">Support</h3>
+        <p>You must give software support to your users. If you need help <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support">ask for support</a>.</p>
+    </section>
+    <section>
+        <h3 class="heading-small">Dispute process</h3>
+        <ol class="list list-number" style="padding: 0 0 0 20px; margin-left: 0px">
+            <li>We’ll contact you if we learn about an issue that affects us or your clients.</li>
+            <li>We’ll work together to solve the issue.</li>
+            <li>If the problem’s under your control we expect you to solve it straight away.</li>
+            <li>If you can’t solve it, we’ll refer it to your managing director or accountable officer.</li>
+            <li>If we can’t find a solution together, we’ll remove your access to the API Platform temporarily or permanently.</li>
+            <li>If we remove your access, we’ll tell your users and give them time to find other ways to submit information - during this period we won’t give them penalties or charge interest for late submissions.</li>
+            <li>We can remove your access to the API Platform for a number of reasons, including:
+                <ul class="list list-bullet">
+                    <li> using personal data for something the user has not given you permission for</li>
+                    <li>having serious data or cybersecurity concerns for our systems or customer data</li>
+                    <li>not maintaining and supporting your product</li>
+                </ul>
+                We can also remove your access if you don’t follow the rules around paying taxes or making social security contributions, as long as:
+                <ul class="list list-bullet">
+                    <li>it’s supported by a final UK court decision (or the equivalent in the country you’re based)</li>
+                    <li>or we can show you’ve broken those rules in another way</li>
+                </ul>
+                However, we won’t remove your access in this case if you’ve repaid everything you owe (plus interest and fines), or you’ve made arrangements with us to pay the amount.</li>
+            <li>If you’re listed on GOV.UK, we may remove you.</li>
+        </ol>
+    </section>
+</section>

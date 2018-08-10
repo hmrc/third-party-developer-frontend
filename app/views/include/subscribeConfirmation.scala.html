@@ -1,0 +1,72 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.{Application, Developer}
+@import model.Crumb
+@import include._
+
+@(app: Application, form: Form[SubscriptionConfirmationForm], id: String, name: String, context: String, version: String, afterSubscriptionRedirectTo: SubscriptionRedirect.Value)(
+    implicit request: play.api.mvc.Request[Any],
+    loggedIn: Developer,
+    messages: Messages,
+    applicationConfig: ApplicationConfig,
+    navSection: String = "subscriptions"
+)
+
+@devMain(
+    title = "Confirm subscribe",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Manage API subscriptions"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+) {
+    @errorSummary(form)
+    <h1 class="heading-large">Manage API subscriptions</h1>
+
+    <div class="panel panel-border-wide">
+        <p>For security reasons we must approve any API subscription changes. This takes up to 2 working days.</p>
+    </div>
+
+    @helper.form(action = routes.Subscriptions.subscribeToApiAction(id, name, context, version, afterSubscriptionRedirectTo.toString), 'class -> "no-fields-subscription") {
+        <fieldset class="inline @if(form.errors("subscribeConfirm").nonEmpty) {form-group-error}">
+            <div class="form-group">
+                <h2 class="heading-medium">Are you sure you want to request to subscribe to @name @version?</h2>
+
+                <fieldset id="subscribeConfirm" class="inline">
+                    @helper.CSRF.formField
+                    @fieldError(form.errors, "subscribeConfirm")
+                    <div class="multiple-choice">
+                        <input id="confirm-subscribe-yes" type="radio" name="subscribeConfirm" value="Yes">
+                        <label for="confirm-subscribe-yes">Yes</label>
+                    </div>
+                    <div class="multiple-choice">
+                        <input id="confirm-subscribe-no" type="radio" name="subscribeConfirm" value="No">
+                        <label for="confirm-subscribe-no">No</label>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="form-group">
+                <button id="submit" class="button" type="submit">Submit</button>
+                <a href="@routes.Subscriptions.subscriptions(id)" class="secondary-button">Cancel</a>
+            </div>
+        </fieldset>
+    }
+}

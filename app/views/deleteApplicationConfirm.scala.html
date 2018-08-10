@@ -1,0 +1,63 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.{Application, Developer}
+@import include._
+@import model.Crumb
+
+@(app: Application, form: Form[DeleteApplicationForm])(
+        implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
+
+@devMain(
+    title = "Delete application",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Delete application"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    back = Some(routes.DeleteApplication.deleteApplication(app.id, None).url)
+) {
+
+    @errorSummary(form)
+    <h1 class="heading-large">Delete application</h1>
+    @appEnvironment(app)
+    @helper.form(action = controllers.routes.DeleteApplication.deleteApplicationAction(app.id), 'class -> "form") {
+        <fieldset id="deleteConfirm" class="inline @if(form.errors("deleteConfirm").nonEmpty) {form-group-error}">
+        <legend>
+            <h2 class="heading-medium">Are you sure you want us to delete this application?</h2>
+        </legend>
+        <div class="form-group">
+            @helper.CSRF.formField
+            @fieldError(form.errors, "deleteConfirm")
+            <div class="multiple-choice">
+                <input id="yes" type="radio" name="deleteConfirm" value="Yes">
+                <label for="yes">Yes</label>
+            </div>
+            <div class="multiple-choice">
+                <input id="no" type="radio" name="deleteConfirm" value="No">
+                <label for="no">No</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <button id="submit" class="button" type="submit">Continue</button>
+        </div>
+        </fieldset>
+    }
+}

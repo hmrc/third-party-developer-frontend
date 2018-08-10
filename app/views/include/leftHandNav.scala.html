@@ -1,0 +1,62 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain.Application
+@import domain.AccessType
+@(application: Option[Application] = None, navSection: Option[String])
+
+    @(application, navSection) match {
+        case (Some(app), Some(section)) => {
+            <div class="side-nav" role="navigation" aria-labelledby="nav1">
+                <span class="heading-small" id="nav1">@app.name</span>
+                <ul>
+                    <li class="side-nav__list @if(section == "details") { side-nav__list--selected }"><a id="nav-manage-details" class="side-nav__link" href="@routes.Details.details(app.id)">Manage details</a></li>
+                    @if(app.access.accessType != AccessType.PRIVILEGED && app.access.accessType != AccessType.ROPC) {
+
+                        <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }"><a id="nav-manage-subscriptions" class="side-nav__link" href="@routes.Subscriptions.subscriptions(app.id)">Manage API subscriptions</a></li>
+                        <li class="side-nav__list @if(section == "credentials") { side-nav__list--selected }"><a id="nav-manage-credentials" class="side-nav__link" href="@routes.Credentials.credentials(app.id, None)">Manage credentials</a></li>
+                        <li class="side-nav__list @if(section == "redirects") { side-nav__list--selected }"><a id="nav-manage-redirects" class="side-nav__link" href="@routes.Redirects.redirects(app.id)">Manage redirect URIs</a></li>
+                        <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Manage team members</a></li>
+                        <li class="side-nav__list @if(section == "delete-application") { side-nav__list--selected }"><a id="nav-delete-application" class="side-nav__link" href="@routes.DeleteApplication.deleteApplication(app.id, None)">Delete application</a></li>
+                    }
+                </ul>
+                <br>
+            </div>
+        }
+        case (_, _) => {}
+    }
+
+    @(navSection) match {
+        case (Some(section)) => {
+            <div class="side-nav" role="navigation" aria-labelledby="nav2">
+                <span class="heading-small" id="nav2">Manage applications</span>
+                <ul>
+                    <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.ManageApplications.manageApps">View all applications</a></li>
+                    <li class="side-nav__list @if(section == "add-application") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.ManageApplications.addApplication">Add an application</a></li>
+                </ul>
+                <br>
+            </div>
+
+            <div class="side-nav" role="navigation" aria-labelledby="nav3">
+                <span class="heading-small" id="nav3">Manage account</span>
+                <ul>
+                    <li class="side-nav__list @if(section == "manage-profile") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.Profile.showProfile">Manage profile</a></li>
+                    <li class="side-nav__list @if(section == "change-password") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.Profile.showPasswordPage">Change password</a></li>
+                </ul>
+            </div>
+        }
+        case _ => {}
+    }

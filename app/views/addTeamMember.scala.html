@@ -1,0 +1,100 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.{Developer, Application, Role}
+@import include._
+@import model.Crumb
+
+@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: Developer)(
+implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
+
+@devMain(
+title = "Add a team member",
+userFullName = Some(loggedIn.displayedName),
+breadcrumbs = Seq(
+Crumb("Manage team members"),
+Crumb.application(app),
+Crumb.viewAllApplications,
+Crumb.home
+),
+leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+) {
+
+    @errorSummary(form)
+
+    <h1 class="heading-large">Add a team member</h1>
+
+    @appEnvironment(app)
+
+    <h2 class="heading-medium">Team member</h2>
+
+
+    @helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id)) {
+    @helper.CSRF.formField
+
+    <div class="form-group @if(form.errors("email").nonEmpty) {form-group-error}">
+        <label class="form-label-bold" for="email" id="email-label">Email address</label>
+        @fieldError(form.errors, "email", form.error("submissionError").isEmpty)
+        <input type="text"
+               id="email"
+               name="email"
+               value="@form.data.getOrElse("email", "")"
+        class="form-control @if(form.errors("email").nonEmpty) {form-control-error}"
+        aria-labelledby="email-label"
+        aria-describedby="email-note"/>
+    </div>
+
+    <h2 class="heading-medium">What permissions do you want to give them?</h2>
+    <div class="form-group @if(form.errors("role").nonEmpty) {form-group-error}">
+        @fieldError(form.errors, "role", form.error("submissionError").isEmpty)
+        <br>
+        <fieldset id="role">
+            <div class="multiple-choice">
+                <input id="Developer" type="radio" name="role" value="Developer">
+                <label for="Developer"><strong class="bold">Developer</strong>
+                    <span class="form-hint">
+                                            Test an application<br>
+                                            Subscribe to sandbox APIs<br>
+                                            Add redirect URIs<br>
+                                            View team members
+                                         </span>
+                </label>
+            </div>
+            <div class="multiple-choice">
+                <input id="Admin" type="radio" name="role" value="Administrator">
+                <label for="Admin"><strong class="bold">Administrator</strong>
+                    <span class="form-hint">
+                                            Test an application<br>
+                                            Subscribe to sandbox APIs and request to change production APIs<br>
+                                            Change application details<br>
+                                            Add or remove team members
+                                         </span>
+                </label>
+            </div>
+        </fieldset>
+    </div>
+
+    <div class="form-field">
+        <button id="submit" class="button button--padded" type="submit">Add</button>
+        <a href="@routes.ManageTeam.manageTeam(app.id, None)" class="secondary-button">Cancel</a>
+    </div>
+    }
+
+
+
+
+}

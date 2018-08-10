@@ -1,0 +1,171 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import model.Crumb
+
+@(title: String,
+    navTitle: Option[String] = None,
+    navTitleLink: Option[play.api.mvc.Call] = None,
+    headerNavLinks: Html = HtmlFormat.empty,
+    contentHeader: Option[Html] = None,
+    sidebar: Option[Html] = None,
+    serviceInfoContent : Option[Html] = None,
+    fullWidthBanner: Option[Html] = None,
+    leftNav: Option[Html] = None,
+    breadcrumbs: Seq[Crumb] = Seq.empty,
+    back: Option[String] = None,
+    fullWidthContent: Boolean = false,
+    hotJarEnabledOnPage: Boolean = false
+    )(mainContent: Html = HtmlFormat.empty)(implicit messages: Messages, applicationConfig: config.ApplicationConfig)
+
+@import layouts.{govuk_template => hmrcGovUkTemplate}
+@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
+@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
+
+@headScripts = {
+@hotjar(applicationConfig, hotJarEnabledOnPage)
+}
+
+@head = {
+@uiLayouts.head(
+    linkElem = None,
+    headScripts = Some(headScripts))
+
+    <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/main.css")'/>
+    <meta data-title="@applicationConfig.title"/>
+}
+
+
+@insideHeader = {
+@uiLayouts.header_nav(
+    navTitle = navTitle.map(t => s"HMRC $t"),
+    navTitleLink = navTitleLink,
+    showBetaLink = false,
+    navLinks = Some(headerNavLinks))
+}
+
+@afterHeader = {}
+
+@scriptElem = {
+    <script src='@routes.Assets.versioned("javascripts/apis-app.min.js")' type="text/javascript"></script>
+}
+
+@bodyEnd = {
+@uiLayouts.footer(
+    analyticsToken = applicationConfig.analyticsToken,
+    analyticsHost = applicationConfig.analyticsHost,
+    ssoUrl = None,
+    scriptElem = Some(scriptElem),
+    gaCalls = None)
+}
+
+@footerTop = {}
+@footerLinks = {
+
+<ul class="platform-help-links">
+    <li><a href="/api-documentation/docs/help/cookies" target="_blank" data-sso="false" data-journey-click="footer:Click:Cookies">@Messages("footer.links.cookies.text")</a></li>
+    <li><a href="/api-documentation/docs/help/privacy" target="_blank" data-sso="false" data-journey-click="footer:Click:Privacy policy">@Messages("footer.links.privacy_policy.text")</a></li>
+    <li><a href='/api-documentation/docs/help/terms-and-conditions' target="_blank" data-sso="false" data-journey-click="footer:Click:Terms and conditions">@Messages("footer.links.terms_and_conditions.text")</a></li>
+    <li><a href='@Messages("footer.links.help_page.url")' target="_blank" data-sso="false" data-journey-click="footer:Click:Help">@Messages("footer.links.help_page.text")</a></li>
+</ul>
+}
+
+@betaBanner = {
+@uiLayouts.betaBanner(
+    userLoggedIn = false,
+    betaFeedbackUrl = applicationConfig.betaFeedbackUrl,
+    betaFeedbackUnauthenticatedUrl = applicationConfig.betaFeedbackUnauthenticatedUrl,
+    showFeedbackLinkInBetaBanner = true)
+}
+
+@serviceInfo = {
+    @if(serviceInfoContent.isDefined) {
+        @uiLayouts.serviceInfo(
+            betaBanner = betaBanner,
+            includeGridWrapper = false,
+            includeHMRCBranding = false,
+            serviceInfoContent = serviceInfoContent)
+    }
+}
+
+@mainContentHeader = {
+    @if(contentHeader.isDefined) {
+        @uiLayouts.main_content_header(contentHeader = contentHeader.getOrElse(HtmlFormat.empty))
+    }
+}
+
+@getHelpForm = @{uiHelpers.reportAProblemLink(applicationConfig.reportAProblemPartialUrl, applicationConfig.reportAProblemNonJSUrl)}
+
+@backLink = {
+    @if(back.isDefined) {
+        <a href="@back.get" class="link-back">Back</a>
+    }
+}
+
+@contentWithLeftNav = {
+    <div class="column-one-quarter">
+        @leftNav.getOrElse(HtmlFormat.empty)
+    </div>
+    <div class="column-three-quarters">
+        @backLink
+        <div id="content">
+            @mainContentHeader
+            @mainContent
+            @sidebar
+        </div>
+    </div>
+    @getHelpForm
+}
+
+@content = {
+    <div class="@if(fullWidthContent) {column-full} else {column-three-quarters}">
+        <div id="content">
+            @mainContentHeader
+            @mainContent
+            @sidebar
+            @getHelpForm
+        </div>
+    </div>
+}
+
+@bodyContent = {
+    @if(fullWidthBanner.isDefined) {
+        <section class="full-width-banner">
+            @fullWidthBanner
+        </section>
+    }
+
+    <main id="wrapper" role="main">
+        <div class="centered-content">
+            @serviceInfo
+            @if(breadcrumbs.nonEmpty) {@include.breadcrumbs(breadcrumbs: _*)}
+        </div>
+        <div class="centered-content">
+            <div class="grid-row">
+                @if(leftNav.isDefined) { @contentWithLeftNav } else { @content }
+            </div>
+        </div>
+    </main>
+}
+
+@hmrcGovUkTemplate(title = Some(title),
+    bodyClasses = if(applicationConfig.isExternalTestEnvironment) { Some("sandbox") } else None)(head = head,
+    bodyEnd = bodyEnd,
+    insideHeader = insideHeader,
+    afterHeader = afterHeader,
+    footerTop = footerTop,
+    footerLinks = Some(footerLinks),
+    nav = true)(bodyContent)

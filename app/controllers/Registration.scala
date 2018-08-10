@@ -1,0 +1,99 @@
+/*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package controllers
+
+import config.ApplicationGlobal
+import connectors.ThirdPartyDeveloperConnector
+import domain.{EmailAlreadyInUse, RegistrationSuccessful}
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
+import play.api.mvc.{Action, Flash}
+import service.SessionService
+import views.html.signIn
+
+import scala.concurrent.Future
+import uk.gov.hmrc.http.{ BadRequestException, NotFoundException }
+
+trait Registration extends LoggedOutController {
+
+  val connector: ThirdPartyDeveloperConnector
+
+  import ErrorFormBuilder.GlobalError
+  import play.api.data._
+
+  val regForm: Form[RegisterForm] = RegistrationForm.form
+
+  def registration() = loggedOutAction { implicit request =>
+    Future.successful(Ok(views.html.registration(regForm)))
+  }
+
+  def register() = Action.async {
+    implicit request =>
+      val requestForm = regForm.bindFromRequest
+      requestForm.fold(
+        formWithErrors => {
+          Future.successful(BadRequest(views.html.registration(
+            formWithErrors.firstnameGlobal().lastnameGlobal().emailaddressGlobal().passwordGlobal().passwordNoMatchField()
+          )))
+        },
+        userData => {
+          val registration = domain.Registration(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
+          connector.register(registration).map {
+            case RegistrationSuccessful => Redirect(controllers.routes.Registration.confirmation()).addingToSession("email" -> userData.emailaddress)
+            case EmailAlreadyInUse => BadRequest(views.html.registration(requestForm.emailAddressAlreadyInUse))
+          }
+        }
+      )
+  }
+
+  def resendVerification = Action.async {
+    implicit request =>
+      request.session.get("email").fold(Future.successful(BadRequest(signIn("Sign in", LoginForm.form)))) { email =>
+        connector.resendVerificationEmail(email) map {
+          case status if status >= 200 && status < 300 => Redirect(controllers.routes.Registration.confirmation())
+          case _ => NotFound(ApplicationGlobal.notFoundTemplate).removingFromSession("email")
+        } recover {
+          case e: NotFoundException => NotFound(ApplicationGlobal.notFoundTemplate).removingFromSession("email")
+        }
+      }
+  }
+
+  def verify(code: String) = Action.async { implicit request =>
+    (for {
+      _ <- ensureLoggedOut
+      _ <- connector.verify(code)
+    } yield Ok(views.html.accountVerified())) recover {
+      case e: BadRequestException => BadRequest(ApplicationGlobal.standardErrorTemplate(
+        "Invalid link", "Invalid verification code", "The verification link is invalid, please check your mail and enter valid link."))
+    }
+  }
+
+  def confirmation = Action.async {
+    implicit request =>
+      Future.successful(Ok(views.html.confirmation()))
+  }
+
+  def resendConfirmation = Action.async {
+    implicit request =>
+      Future.successful(Ok(views.html.resendConfirmation()))
+  }
+}
+
+object Registration extends Registration with WithAppConfig {
+  override val sessionService = SessionService
+  override val connector = ThirdPartyDeveloperConnector
+}

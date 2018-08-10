@@ -1,0 +1,109 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain.Developer
+@import include._
+@import model.Crumb
+
+@(form: Form[controllers.AddApplicationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
+
+@devMain(
+    title = "Add an application",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-add-application")),
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(None, Option(navSection)))
+) {
+
+    @errorSummary(form)
+
+    <h1 class="heading-large">Add an application</h1>
+
+    @helper.form(action = controllers.routes.ManageApplications.addApplicationAction) {
+        @helper.CSRF.formField
+        <div class="form-group @if(form.errors("applicationName").nonEmpty) {form-group-error}">
+            <label class="form-label-bold" for="applicationName" id="applicationName-label">Application name</label>
+            @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
+            <input type="text"
+                   id="applicationName"
+                   name="applicationName"
+                   aria-labelledby="applicationName-label"
+                   value="@form.data.get("applicationName")"
+                   class="form-control @if(form.errors("applicationName").nonEmpty) {form-control-error}"
+                   maxLength="50"/>
+        </div>
+        <div class="form-group @if(form.errors("description").nonEmpty) {form-group-error}">
+            <label class="form-label-bold" for="description">
+                <span id="description-label">Description (optional)</span>
+                <span class="form-hint" id="description-note">This won't be shown to your application's users.</span>
+            </label>
+            @fieldError(form.errors, "description", form.error("submissionError").isEmpty)
+            <div class="char-counter" data-char-counter>
+                <textarea id="description"
+                          class="form-control form-control-3-4 @if(form.errors("description").nonEmpty) {form-control-error}"
+                          name="description"
+                          aria-labelledby="description-label"
+                          aria-describedby="description-note"
+                          data-char-field
+                          cols="50"
+                          maxLength="250">@form.data.get("description")</textarea>
+            </div>
+        </div>
+
+        @if(appConfig.isExternalTestEnvironment) {
+            <input type="hidden" id="environment" name="environment" value="SANDBOX"/>
+        } else {
+            @if(appConfig.strategicSandboxEnabled) {
+                <div class="form-group @if(form.errors("environment").nonEmpty) {form-group-error}" id="environment">
+                    <fieldset>
+                        <legend><span class="form-label-bold">Choose an environment for your application</span></legend>
+                        @fieldError(form.errors, "environment", form.error("submissionError").isEmpty)
+                        <br>
+
+                        <div class="multiple-choice">
+                            <input id="sandbox" type="radio" name="environment" value="SANDBOX" @if(form.data.get("environment") == Some("SANDBOX")) {checked}/>
+                            <label for="sandbox" data-type="sandbox" aria-describedby="sandboxTypeHint">
+                                <strong class="bold">Sandbox</strong>
+                                <span id="sandboxTypeHint" class="form-hint">
+                                Allows you to call sandbox APIs to test your application
+                            </span>
+                            </label>
+                        </div>
+
+                        <div class="multiple-choice">
+                            <input id="production" type="radio" name="environment" value="PRODUCTION" @if(form.data.get("environment") == Some("PRODUCTION")) {checked}/>
+                            <label for="production" data-type="production" aria-describedby="productionTypeHint">
+                                <strong class="bold">Production</strong>
+                                <span id="productionTypeHint" class="form-hint">
+                                    Allows you to call production APIs to access live data
+                                </span>
+                            </label>
+                        </div>
+                    </fieldset>
+                </div>
+            } else {
+                <input type="hidden" id="environment" name="environment" value="PRODUCTION"/>
+            }
+        }
+        <div class="form-group">
+            <button id="add" class="button" type="submit" role="button">Add</button>
+            <a id="cancel" href="@routes.ManageApplications.manageApps" class="secondary-button">Cancel</a>
+        </div>
+    }
+}
+

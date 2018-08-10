@@ -1,0 +1,153 @@
+.header__menu .header__menu__proposition-links {
+  float: none;
+}
+
+.service-info {
+  .header__menu__proposition-links {
+    margin-top: -2.2em;
+
+    .link-style {
+      color: #005ea5;
+      font-weight: normal;
+      text-decoration: underline;
+    }
+  }
+}
+
+.beta-banner .phase-tag {
+  background-color: #005ea5;
+}
+
+.header__menu__proposition--sub-header {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  #global-header .header-proposition #proposition-links li {
+    float: left;
+    display: block;
+    width: auto;
+    padding: 0 15px 0 0;
+    border-bottom: 0;
+  }
+  #global-header .header-proposition #proposition-links li.desktop-only {
+    display: none;
+  }
+  #global-header .header-proposition #proposition-links li.clear-child {
+    clear: left;
+  }
+}
+
+@media (min-width: 801px) {
+  .header__menu__proposition--sub-header {
+    display: block;
+  }
+}
+
+textarea#applicationDetails {
+  height: 350px;
+}
+
+a.secondary-button, button.secondary-button, input.secondary-button {
+  position: relative;
+  display: inline-block;
+  font-size: 1em;
+  line-height: 1.25;
+  box-sizing: border-box;
+  box-shadow: none;
+  vertical-align: top;
+  background-color: #fff;
+  color: #005ea5;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+a.secondary-button, button.secondary-button {
+  padding: .526315em .789473em .263157em;
+}
+
+input.secondary-button {
+    border: 0px;
+}
+
+a.secondary-button:hover, button.secondary-button:hover, input.secondary-button:hover,
+a.secondary-button:focus, button.secondary-button:focus, input.secondary-button:hover {
+  position: relative;
+  display: inline-block;
+  font-size: 1em;
+  line-height: 1.25;
+  box-sizing: border-box;
+  box-shadow: none;
+  vertical-align: top;
+  background-color: #fff;
+  color: #2e8aca;
+  text-decoration: underline;
+}
+
+a.secondary-button:hover, button.secondary-button:hover,
+a.secondary-button:focus, button.secondary-button:focus {
+  padding: .526315em .789473em .263157em;
+}
+
+input[type=submit]:hover {
+  cursor: pointer;
+}
+
+.button {
+    margin-right: 0 !important;
+}
+
+// Remove right arrows on left hand navigation menu
+// They cause screen reader to read out the right arrow with not context and don't add anything to visual users
+
+.side-nav__link::after {
+  content: "";
+}
+
+// Show side navigation on mobile phone - discuss with Rory about a better solution to this, a sub navigation responsive menu
+.side-nav {
+  display: block;
+}
+
+// Remove sub navigation right border on a mobile phone
+.side-nav {
+  border-right: none;
+}
+
+// Add sub navigation right border back in for desktop application. uses breakpoint defined in GOV UK frontend toolkit.
+@media(min-width: 769px) {
+  .side-nav {
+    border-right: 1px solid #bfc1c3;
+  }
+}
+
+@media (min-width: 641px) {
+    .column-three-quarters {
+        float: left;
+        width: 75%;
+    }
+}
+
+.column-three-quarters {
+    padding: 0 15px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+form.subscription-toggle {
+    display: inline-block;
+}
+
+.toggle__button--active {
+    margin: 0 0 0 0;
+}
+
+form.inline-controls {
+    display: inline-block;
+}
+
+.credentials-section {
+    padding-top: 1em;
+    border-bottom: 1px solid #bfc1c3;
+}

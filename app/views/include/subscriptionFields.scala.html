@@ -1,0 +1,51 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import views.helper.IdFormatter
+
+@import controllers.SubscriptionRedirect._
+
+@(vm: SubscriptionFieldsViewModel, subscriptionRedirect: SubscriptionRedirect.Value = MANAGE_PAGE)(implicit request: Request[Any], messages: Messages)
+
+<div class="accordion__body__row accordion__body__row--no-border">
+    <div class="accordion__body__row__left">
+
+        @helper.form(action = routes.Subscriptions.saveSubscriptionFields(vm.applicationId, vm.apiContext, vm.apiVersion, subscriptionRedirect.toString), 'class -> "fields-subscription") {
+            <div class="form-field-group">
+                @helper.CSRF.formField
+                @helper.repeatWithIndex(vm.subFieldsForm("fields")) { (field, idx) =>
+                    <input type="hidden" name="fields[@idx].name" value="@field("name").value.getOrElse("")">
+                    <input type="hidden" name="fields[@idx].description" value="@field("description").value.getOrElse("")">
+                    <input type="hidden" name="fields[@idx].hint" value="@field("hint").value.getOrElse("")">
+                    <input type="hidden" name="fields[@idx].type" value="@field("type").value.getOrElse("")">
+
+                    <div class="form-field">
+                        <label class="label--full-length" for="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-@{field("name").value.getOrElse("")}">
+                            <strong class="bold">@{field("description").value.getOrElse("")}</strong>
+                            <p>@{field("hint").value.getOrElse("")}</p>
+                        </label>
+
+                        <input type="text" name="fields[@idx].value" value="@{field("value").value.getOrElse("")}" class="form-input input--medium" id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-@{field("name").value.getOrElse("")}">
+                    </div>
+                }
+
+                <div class="form-field form-field--submit">
+                    <button id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>

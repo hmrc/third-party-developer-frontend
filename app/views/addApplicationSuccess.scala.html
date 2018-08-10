@@ -1,0 +1,64 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.Developer
+@import domain.Environment
+@import include._
+@import model.Crumb
+
+@(applicationName: String, applicationId: String, environment: String)(
+        implicit request: Request[_], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "add-application")
+
+@devMain(
+    title = "Application added",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(None, Option(navSection)))
+) {
+    <div class="govuk-box-highlight">
+        <h1 class="heading-large" data-journey="application:added">Application added</h1>
+    </div>
+    <p>You have added <strong id="application-name" class="bold-small">@applicationName</strong>.</p>
+    <p>You have admin rights over the application.</p>
+        <div>
+            <h2 class="heading-medium">What happens next?</h2>
+    @if(environment == Environment.PRODUCTION.toString) {
+            <p>
+                To get your production credentials, you must submit your application for checking.
+                This takes up to 2 working days.
+            </p>
+        </div>
+
+        <a class="button" href="@routes.ApplicationCheck.requestCheckPage(applicationId).url" id="start">
+        Start
+        </a>
+    } else {
+        <p>You can now get your sandbox credentials for testing.</p>
+        <p>However, to start testing you must tell us:</p>
+        <ul class="list list-bullet">
+            <li>which APIs you want to subscribe to</li>
+            <li>your redirect URIs, if using <a href="/api-documentation/docs/authorisation/user-restricted-endpoints">user-restricted endpoints</a></li>
+        </ul>
+        <a class="button" href="@routes.Subscriptions.subscriptions(applicationId)" id="manage-api-subscriptions">
+             Manage API subscriptions
+        </a>
+
+}
+}

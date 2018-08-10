@@ -1,0 +1,112 @@
+# microservice specific routes
+
+GET         /registration                                                               controllers.Registration.registration
+POST        /registration                                                               controllers.Registration.register
+GET         /confirmation                                                               controllers.Registration.confirmation
+
+GET         /verification                                                               controllers.Registration.verify(code: String)
+GET         /resend-verification                                                        controllers.Registration.resendVerification
+GET         /resend-confirmation                                                        controllers.Registration.resendConfirmation
+
+GET         /login                                                                      controllers.UserLoginAccount.login
+POST        /login                                                                      controllers.UserLoginAccount.authenticate
+
+GET         /logout                                                                     controllers.UserLogoutAccount.logout
+
+GET         /logout/survey                                                              controllers.UserLogoutAccount.logoutSurvey
+POST        /logout/survey                                                              controllers.UserLogoutAccount.logoutSurveyAction
+
+GET         /support                                                                    controllers.Support.raiseSupportEnquiry
+POST        /support                                                                    controllers.Support.submitSupportEnquiry
+GET         /support/submitted                                                          controllers.Support.thankyou
+
+GET         /locked                                                                     controllers.UserLoginAccount.accountLocked
+
+GET         /profile                                                                    controllers.Profile.showProfile
+POST        /profile                                                                    controllers.Profile.updateProfile
+
+GET         /profile/password                                                           controllers.Profile.showPasswordPage
+POST        /profile/password                                                           controllers.Profile.updatePassword
+
+GET         /profile/delete                                                             controllers.Profile.requestDeletion
+POST        /profile/delete                                                             controllers.Profile.deleteAccount
+
+GET         /forgot-password                                                            controllers.Password.showForgotPassword
+POST        /forgot-password                                                            controllers.Password.requestReset
+
+GET         /:email/reset-password                                                      controllers.Password.validateReset(email:String, code: String)
+GET         /reset-password                                                             controllers.Password.resetPasswordChange
+POST        /reset-password                                                             controllers.Password.resetPassword
+GET         /reset-password/error                                                       controllers.Password.resetPasswordError
+
+GET         /applications                                                               controllers.ManageApplications.manageApps
+GET         /applications/add                                                           controllers.ManageApplications.addApplication
+POST        /applications/add                                                           controllers.ManageApplications.addApplicationAction
+GET         /applications/:id                                                           controllers.ManageApplications.editApplication(id: String, error: Option[String])
+
+GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])
+GET         /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMember(id: String)
+POST        /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMemberAction(id: String)
+POST        /applications/:id/team-members/remove-confirmation                          controllers.ManageTeam.removeTeamMember(id: String)
+POST        /applications/:id/team-members/remove                                       controllers.ManageTeam.removeTeamMemberAction(id: String)
+
+GET         /applications/:id/details                                                   controllers.Details.details(id: String)
+GET         /applications/:id/details/change                                            controllers.Details.changeDetails(id: String)
+POST        /applications/:id/details/change                                            controllers.Details.changeDetailsAction(id: String)
+GET         /applications/:id/details/terms-of-use                                      controllers.TermsOfUse.termsOfUse(id: String)
+POST        /applications/:id/details/terms-of-use                                      controllers.TermsOfUse.agreeTermsOfUse(id: String)
+
+GET         /application/:id/redirect-uris                                              controllers.Redirects.redirects(id: String)
+GET         /application/:id/redirect-uris/add                                          controllers.Redirects.addRedirect(id: String)
+POST        /application/:id/redirect-uris/add                                          controllers.Redirects.addRedirectAction(id: String)
+POST        /application/:id/redirect-uris/delete-confirmation                          controllers.Redirects.deleteRedirect(id: String)
+POST        /application/:id/redirect-uris/delete                                       controllers.Redirects.deleteRedirectAction(id: String)
+POST        /application/:id/redirect-uris/change                                       controllers.Redirects.changeRedirect(id: String)
+POST        /application/:id/redirect-uris/change-confirmation                          controllers.Redirects.changeRedirectAction(id: String)
+
+GET         /applications/:id/delete                                                    controllers.DeleteApplication.deleteApplication(id: String, error: Option[String])
+GET         /applications/:id/delete-confirm                                            controllers.DeleteApplication.deleteApplicationConfirm(id: String, error: Option[String])
+POST        /applications/:id/delete                                                    controllers.DeleteApplication.deleteApplicationAction(id: String)
+
+GET         /applications/:id/subscriptions                                             controllers.Subscriptions.subscriptions(id: String)
+
+GET         /applications/:id/subscribe                                                 controllers.Subscriptions.subscribeToApi(id: String, name: String, context: String, version: String)
+POST        /applications/:id/subscribe                                                 controllers.Subscriptions.subscribeToApiAction(id: String, name: String, context: String, version: String, subscriptionRedirect: String)
+GET         /applications/:id/unsubscribe                                               controllers.Subscriptions.unsubscribeFromApi(id: String, name: String, context: String, version: String, redirectTo: String)
+POST        /applications/:id/unsubscribe                                               controllers.Subscriptions.unsubscribeFromApiAction(id: String, name: String, context: String, version: String, redirectTo: String)
+
+GET         /applications/:id/credentials                                               controllers.Credentials.credentials(id: String, error: Option[String])
+
+POST        /applications/:id/client-secret-new                                         controllers.Credentials.addClientSecret(id: String)
+GET         /applications/:id/client-secret-new/:index                                  controllers.Credentials.getProductionClientSecret(id: String, index: Integer)
+
+POST        /applications/:id/delete-client-secrets/select                              controllers.Credentials.selectClientSecretsToDelete(id: String)
+POST        /applications/:id/delete-client-secrets/confirm                             controllers.Credentials.selectClientSecretsToDeleteAction(id: String)
+POST        /applications/:id/delete-client-secrets                                     controllers.Credentials.deleteClientSecretsAction(id: String)
+
+GET         /applications/:id/request-check                                             controllers.ApplicationCheck.requestCheckPage(id: String)
+POST        /applications/:id/request-check                                             controllers.ApplicationCheck.requestCheckAction(id: String)
+GET         /applications/:id/request-check/contact                                     controllers.ApplicationCheck.contactPage(id: String)
+POST        /applications/:id/request-check/contact                                     controllers.ApplicationCheck.contactAction(id: String)
+GET         /applications/:id/request-check/name                                        controllers.ApplicationCheck.namePage(id: String)
+POST        /applications/:id/request-check/name                                        controllers.ApplicationCheck.nameAction(id: String)
+GET         /applications/:id/request-check/details                                     controllers.ApplicationCheck.detailsPage(id: String)
+POST        /applications/:id/request-check/details                                     controllers.ApplicationCheck.detailsAction(id: String)
+GET         /applications/:id/request-check/subscriptions                               controllers.ApplicationCheck.apiSubscriptionsPage(id: String)
+POST        /applications/:id/request-check/subscriptions                               controllers.ApplicationCheck.apiSubscriptionsAction(id: String)
+GET         /applications/:id/request-check/privacy-policy                              controllers.ApplicationCheck.privacyPolicyPage(id: String)
+POST        /applications/:id/request-check/privacy-policy                              controllers.ApplicationCheck.privacyPolicyAction(id: String)
+GET         /applications/:id/request-check/terms-and-conditions                        controllers.ApplicationCheck.termsAndConditionsPage(id: String)
+POST        /applications/:id/request-check/terms-and-conditions                        controllers.ApplicationCheck.termsAndConditionsAction(id: String)
+GET         /applications/:id/request-check/terms-of-use                                controllers.ApplicationCheck.termsOfUsePage(id: String)
+POST        /applications/:id/request-check/terms-of-use                                controllers.ApplicationCheck.termsOfUseAction(id: String)
+
+POST        /applications/:id/context/:apiContext/version/:version/subscriptions        controllers.Subscriptions.subscribeApplicationToApi(id: String, apiContext: String, version: String, subscriptionRedirect: String)
+POST        /applications/:id/context/:apiContext/version/:version/subscriptionFields   controllers.Subscriptions.saveSubscriptionFields(id: String, apiContext: String, version: String, subscriptionRedirect: String)
+
+GET         /application-verification                                                   controllers.ApplicationVerification.verifyUplift(code: String)
+GET         /user-navlinks                                                              controllers.Navigation.navLinks
+
+GET         /partials/terms-of-use                                                      controllers.TermsOfUse.termsOfUsePartial
+
+GET         /assets/*file                                                               @controllers.Assets.versioned(path="/public", file: Asset)

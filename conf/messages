@@ -1,0 +1,146 @@
+fullname.error.required.field=Provide your full name
+fullname.error.maxLength.field=Provide a name with fewer than 100 characters
+
+details.error.required.field=Tell us about your application
+details.error.maxLength.field=Provide details with fewer than 3000 characters
+
+telephone.error.required.field=Provide your telephone number
+
+comments.error.required.field=Tell us what you need help with
+comments.error.maxLength.field=You entered too much text - keep it under 3,000 characters
+
+firstname.error.required.field=Provide your first name
+firstname.error.required.global=Provide your first name
+
+firstname.error.maxLength.field=Provide a first name with fewer than 30 letters
+firstname.error.maxLength.global=Provide a first name with fewer than 30 letters
+
+firstname.error.required.field.heading = Provide your first name
+firstname.error.maxLength.field.heading = Provide a first name with fewer than 30 letters
+
+lastname.error.required.field=Provide your last name
+lastname.error.required.global=Provide your last name
+
+lastname.error.maxLength.field=Provide a last name with fewer than 30 letters
+lastname.error.maxLength.global=Provide a last name with fewer than 30 letters
+
+lastname.error.required.field.heading = Provide your last name
+lastname.error.maxLength.field.heading = Provide a last name with fewer than 30 letters
+
+emailaddress.error.required.field=Provide your email address
+emailaddress.error.required.global=Provide your email address
+
+emailaddress.error.not.valid.field=Provide a valid email address
+emailaddress.error.not.valid.global=Provide a valid email address
+
+emailaddress.already.registered.global=Choose an email address that is not already registered
+emailaddress.already.registered.field=Choose an email address that is not already registered
+
+emailaddress.error.maxLength.field=Provide an email address with fewer than 320 characters
+emailaddress.error.maxLength.global=Provide an email address with fewer than 320 characters
+
+termsofuse.error.required.global=You must agree to our terms of use
+termsofuse.error.required.field=You must agree to our terms of use
+
+password.error.required.field=Create and confirm your password
+password.error.required.global=Create and confirm your password
+password.error.not.valid.field=Your password must have at least 12 characters and contain at least one number, lowercase letter, uppercase letter and special character
+password.error.not.valid.global=Choose a password that follows our rules
+password.error.no.match.field=Your passwords do not match
+password.error.no.match.global=Your passwords do not match
+
+loginpassword.error.required.field=Provide your password
+
+currentpassword.error.required.field=Provide your old password
+currentpassword.error.required.global=Provide your old password
+
+currentpassword.invalid.field = Your old password is incorrect
+currentpassword.invalid.global = Your old password is incorrect
+
+redirect.uri.invalid.field = Provide a valid redirect URI
+redirect.uri.invalid.global = Provide a valid redirect URI
+redirect.uri.duplicate = You already provided that redirect URI
+
+privacy.policy.url.no.choice.field = Tell us if your application has a privacy policy
+privacy.policy.url.required.field = Provide a privacy policy URL
+privacy.policy.url.invalid.field = Provide a valid privacy policy URL
+privacy.policy.url.invalid.global = Provide a valid privacy policy URL
+
+terms.conditions.url.no.choice.field = Tell us if your application has terms and conditions
+terms.conditions.url.required.field = Provide a terms and conditions URL
+terms.conditions.url.invalid.field = Provide a valid terms and conditions URL
+terms.conditions.url.invalid.global = The terms and conditions URL is invalid
+
+account.unverified.global = Verify your account
+account.unverified.field = Verify your account using the email we sent. Or get us to resend the verification email
+
+account.locked.global = You entered incorrect login details too many times you''ll now have to reset your password
+account.locked.field = You entered incorrect login details too many times you''ll now have to reset your password
+
+invalid.credentials.field = Provide a valid email or password
+invalid.credentials.global = Provide a valid email or password
+
+invalid.password.field = Provide a valid password
+invalid.password.global = Provide a valid password
+
+password.used.before.global =Choose a password you have no used before
+password.used.before.field =Choose a password you have no used before
+
+application.name.invalid.field=Choose an application name between 2 and 50 characters
+application.name.already.exists.field=Choose an application name that is not already registered on the Developer Hub
+
+environment.error.required.field=Choose an environment for your application
+
+
+client.secret.limit.exceeded=You exceeded the number of client secrets
+production.cannot.delete.only.client.secret=You cannot delete the only client secret for production
+sandbox.cannot.delete.only.client.secret=You cannot delete the only client secret for sandbox
+
+team.member.error.emailAddress.required.field = Provide an email address
+team.member.error.emailAddress.already.exists.field = This user is already a team member on this application
+
+roles.error.answer.required.field = Choose one or more roles
+roles.error.other.required.field = Provide a role
+roles.error.answer.required.field.heading = You must choose at least one role
+roles.error.other.required.field.heading = Tell us your role
+roles.error.answer.required.field.content = Choose a role
+roles.error.other.required.field.content = Provide a role
+services.error.answer.required.field = Choose one or more services
+services.error.other.required.field = Provide a service
+services.error.answer.required.field.heading = You must choose at least one service
+services.error.other.required.field.heading = Tell us which services you''re interested in
+services.error.answer.required.field.content = Choose a service
+services.error.other.required.field.content = Provide a service
+targets.error.answer.required.field = Choose one or more target audiences
+targets.error.other.required.field = Provide a target audience
+targets.error.answer.required.field.heading = You must choose a target audience
+targets.error.other.required.field.heading = Tell us who your software''s aimed at
+targets.error.answer.required.field.content = Choose a target audience
+targets.error.other.required.field.content = Provide a target audience
+
+confirm.name.required.field=Confirm your application’s name
+application.details.required.field=Tell us what your application does
+contact.details.required.field=Provide contact details
+api.subscriptions.required.field=Confirm the APIs your application uses
+privacy.links.required.field=Provide a link to your application’s privacy policy
+tnc.links.required.field=Provide a link to your application’s terms and conditions
+agree.terms.of.use.required.field=Agree to our terms of use
+
+
+delete.application.confirmation.no.choice.field = Tell us if you want us to delete this application
+delete.client.secrets.confirmation.no.choice.field = Tell us if you want us to delete your client secrets
+
+developer.delete.error.required.field=Tell us if you want us to delete your account
+
+remove.team.member.confirmation.no.choice.field = Tell us if you want to delete this team member
+
+verify.password.error.required.field=Invalid password
+verify.password.error.required.global=Invalid password
+
+select.client.secret.field=Choose one or more client secrets
+select.fewer.client.secrets.field=You must keep at least one client secret
+
+subscription.confirmation.no.choice.field = Tell us if you want to subscribe to this API
+unsubscribe.confirmation.no.choice.field = Tell us if you want to unsubscribe from this API
+
+delete.redirect.confirmation.no.choice.field = Tell us if you want to delete this redirect URI

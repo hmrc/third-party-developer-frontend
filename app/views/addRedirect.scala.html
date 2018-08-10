@@ -1,0 +1,57 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import model.Crumb
+@import uk.gov.hmrc.urls.Link
+@import controllers.AddRedirectForm
+
+@(application: Application, form: Form[AddRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+
+@devMain(
+    title = "Add a redirect URI",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Add a redirect URI"),
+        Crumb.application(application),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(application), Option(navSection)))
+) {
+    @errorSummary(form)
+
+    <h1 class="heading-large">Add a redirect URI</h1>
+
+    @appEnvironment(application)
+
+    @helper.form(action = controllers.routes.Redirects.addRedirectAction(application.id), 'class -> "form") {
+        @helper.CSRF.formField
+        <div class="form-group @if(form.errors("redirectUri").nonEmpty) {form-group-error}">
+            <label class="form-label-bold" for="redirectUri">Redirect URI</label>
+            <span class="form-hint">Must be a valid @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/reference-guide#redirect-uris", value = Some("redirect URI")).toHtml.</span>
+            @fieldError(form.errors, "redirectUri")
+            <input class="form-control @if(form.errors("redirectUri").nonEmpty) {form-control-error}" type="text" id="redirectUri" name="redirectUri">
+        </div>
+
+        <div class="form-group">
+            <button id="add" class="button" type="submit">Continue</button>
+            <a href="@routes.Redirects.redirects(application.id)" class="secondary-button">Cancel</a>
+        </div>
+    }
+}

@@ -1,0 +1,83 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import model.Crumb
+
+@(app: Application,form: Form[ContactForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+
+@devMain(
+    title = "Who is your application review contact?",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Manage credentials"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+) {
+
+    @errorSummary(form)
+
+    <heading>
+        <h1 class="heading-large">Who is your application review contact?</h1>
+    </heading>
+
+    @helper.form(action = controllers.routes.ApplicationCheck.contactAction(app.id), 'class -> "form") {
+        @helper.CSRF.formField
+        <div class="form-group @if(form.errors("fullname").nonEmpty){form-group-error}">
+            <label class="form-label-bold" for="fullname" id="fullname-label">Full name</label>
+            @fieldError(form.errors, "fullname", true)
+            <input type="text"
+                   id="fullname"
+                   name="fullname"
+                   value="@form.data.getOrElse("fullname", "")"
+                   class="form-control @if(form.errors("fullname").nonEmpty){form-control-error}"
+                   aria-labelledby="fullname-label"
+                   aria-required="true"/>
+        </div>
+        <div class="form-group @if(form.errors("email").nonEmpty){form-group-error}">
+            <label class="form-label-bold" for="email" id="email-label">Email address</label>
+            @fieldError(form.errors, "email", true)
+            <input type="text"
+                   id="email"
+                   name="email"
+                   value="@form.data.getOrElse("email", "")"
+                   class="form-control @if(form.errors("email").nonEmpty){form-control-error}"
+                   aria-labelledby="email-label"
+                   aria-required="true"/>
+        </div>
+        <div class="form-group @if(form.errors("telephone").nonEmpty){form-group-error}">
+            <label class="form-label-bold" for="telephone" id="telephone-label">Telephone number</label>
+            @fieldError(form.errors, "telephone", true)
+            <input type="text"
+                   id="telephone"
+                   name="telephone"
+                   value="@form.data.getOrElse("telephone", "")"
+                   class="form-control @if(form.errors("telephone").nonEmpty){form-control-error}"
+                   aria-labelledby="telephone-label"
+                   aria-required="true"/>
+        </div>
+
+        <div class="form-group">
+            <button id="submit" class="button" type="submit">Save and return</button>
+            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
+        </div>
+    }
+}

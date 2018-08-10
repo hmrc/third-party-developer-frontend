@@ -1,0 +1,91 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import model.Crumb
+
+@(app: Application, form: Form[TermsAndConditionsForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+
+@devMain(
+    title = "Where can we find your terms and conditions?",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Manage credentials"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+) {
+    @errorSummary(form)
+
+    @helper.form(action = controllers.routes.ApplicationCheck.termsAndConditionsAction(app.id), 'class -> "form") {
+        @helper.CSRF.formField
+
+        <div class="form-group">
+            <fieldset>
+                <legend>
+                    <h1 class="heading-large">
+                        Does your application have terms and conditions?
+                    </h1>
+                    <span class="body-text">
+                        If it does, we'll show this link to users. Adding this makes users more confident in your application and more likely to let you access their data.
+                    </span>
+                </legend>
+
+                <div id="hasUrl" class="form-group @if(form.errors("hasUrl").nonEmpty) {form-group-error}">
+                    @fieldError(form.errors, "hasUrl")
+                    <div class="multiple-choice" data-target="terms-and-conditions">
+                        <input type="radio" id="yes" name="hasUrl" value="true" data-journey-val="Yes" @if(form.data.get("hasUrl") == Some("true")) {checked}>
+                        <label for="yes">Yes</label>
+                    </div>
+                    <div id="terms-and-conditions" class="panel panel-border-narrow js-hidden">
+                        <div class="form-group @if(form.errors("termsAndConditionsURL").nonEmpty) {form-group-error}">
+                            <label class="form-label-bold" for="termsAndConditionsURL" id="termsAndConditionsURL-label">
+                                Terms & conditions URL
+                                @fieldError(form.errors, "termsAndConditionsURL")
+                            </label>
+                            <input type="text"
+                                   id="termsAndConditionsURL"
+                                   name="termsAndConditionsURL"
+                                   value="@form.data.getOrElse("termsAndConditionsURL", "")"
+                            class="form-control @if(form.errors("termsAndConditionsURL").nonEmpty) {form-control-error}"
+                            aria-labelledby="termsAndConditionsURL-label"/>
+                        </div>
+                    </div>
+                    <div class="multiple-choice">
+                        <input type="radio" id="no" name="hasUrl" value="false" data-journey-val="No" @if(form.data.get("hasUrl") == Some("false")) {checked}>
+                        <label for="no">No</label>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <details>
+            <summary aria-label="Why am I being asked for this?">Why am I being asked for this?</summary>
+            <div class="panel panel-border-narrow">
+                We’ll show this link to users when you request access to their data. Adding this makes them more likely to agree.
+            </div>
+        </details>
+
+        <div class="form-group">
+            <button id="submit" class="button" type="submit">Save and return</button>
+            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
+        </div>
+        }
+}

@@ -1,0 +1,178 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import model.Crumb
+
+@(app: Application, form: Form[CheckInformationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+
+
+@devMain(
+    title = "Submit your application for checking",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Manage credentials"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+) {
+
+    @errorSummary(form)
+    <heading>
+        <h1 class="heading-large">
+            Submit your application for checking
+        </h1>
+    </heading>
+
+    <p>You can submit your application when you've completed all the sections.</p>
+    @helper.form(action = controllers.routes.ApplicationCheck.requestCheckAction(app.id), 'class -> "form") {
+        @helper.CSRF.formField
+        <section class="section">
+            <div class="form-group">
+                <table class="task-list">
+                    <thead>
+                        <tr>
+                            <th scope="col"><span class="visuallyhidden">Step</span></th>
+                            <th class="numeric" scope="col"><span class="visuallyhidden">Status</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="@if(form.errors("confirmedName").nonEmpty){form-group-error}">
+                            <td id="confirmedName" scope="row" class="step-description">
+                                @include.fieldError(form.errors,"confirmedName")
+                                <a id="confirmedNameCompleted" href="@routes.ApplicationCheck.namePage(app.id)">
+                                    Confirm your application's name
+                                </a>
+                            </td>
+                            <td class="numeric">
+                            @if(form("confirmedNameCompleted").value.contains("true")) {
+                                <div id="app-name-status" class="step-status status-completed">Complete</div>
+                            } else {
+                                <div id="app-name-status" class="step-status status-incomplete">Required</div>
+                            }
+                            </td>
+                        </tr>
+                        <tr class="@if(form.errors("applicationDetails").nonEmpty){form-group-error}">
+                            <td id="applicationDetails" scope="row" class="step-description">
+                                @include.fieldError(form.errors,"applicationDetails")
+                                <a id="applicationDetailsCompleted" href="@routes.ApplicationCheck.detailsPage(app.id)">
+                                    Tell us what your application does
+                                </a>
+                            </td>
+                            <td class="numeric">
+                            @if(form("applicationDetailsCompleted").value.contains("true")) {
+                                <div id="app-details-status" class="step-status status-completed">Complete</div>
+                            } else {
+                                <div id="app-details-status" class="step-status status-incomplete">Required</div>
+                            }
+                            </td>
+                        </tr>
+                        <tr class="@if(form.errors("apiSubscriptionsConfirmed").nonEmpty) {form-group-error}">
+                        <td id="apiSubscriptions" scope="row" class="step-description">
+                            @include.fieldError(form.errors, "apiSubscriptions")
+                            <a id="apiSubscriptionsCompleted" href="@routes.ApplicationCheck.apiSubscriptionsPage(app.id)">
+                                Confirm the APIs your application uses
+                            </a>
+                        </td>
+                        <td class="numeric">
+                            @if(form("apiSubscriptionsCompleted").value.contains("true")) {
+                            <div id="api-subscriptions-status" class="step-status status-completed">Complete</div>
+                            } else {
+                            <div id="api-subscriptions-status" class="step-status status-incomplete">Required</div>
+                            }
+                        </td>
+                        </tr>
+                        <tr class="@if(form.errors("contactDetails").nonEmpty){form-group-error}">
+                            <td id="contactDetails" scope="row" class="step-description">
+                                @include.fieldError(form.errors,"contactDetails")
+                                <a id="contactDetailsCompleted" href="@routes.ApplicationCheck.contactPage(app.id)">
+                                    Provide contact details
+                                </a>
+                            </td>
+                            <td class="numeric">
+                            @if(form("contactDetailsCompleted").value.contains("true")) {
+                                <div id="contact-details-status" class="step-status status-completed">Complete</div>
+                            } else {
+                                <div id="contact-details-status" class="step-status status-incomplete">Required</div>
+                            }
+                            </td>
+                        </tr>
+
+                        <tr class="@if(form.errors("providedPolicyURL").nonEmpty){form-group-error}">
+
+                            <td id="providedPolicyURL" scope="row" class="step-description">
+                                @include.fieldError(form.errors,"providedPolicyURL")
+                                <a id="providedPolicyURLCompleted" href="@routes.ApplicationCheck.privacyPolicyPage(app.id)">
+                                    Provide a link to your application's privacy policy
+                                </a>
+                            </td>
+                            <td class="numeric">
+                            @if(form("providedPolicyURLCompleted").value.contains("true")) {
+                                <div id="urls-status" class="step-status status-completed">Complete</div>
+                            } else {
+                                <div id="urls-status" class="step-status status-incomplete">Required</div>
+                            }
+                            </td>
+                        </tr>
+                        <tr class="@if(form.errors("providedTermsAndConditionsURL").nonEmpty){form-group-error}">
+
+                        <td id="providedTermsAndConditionsURL" scope="row" class="step-description">
+                            @include.fieldError(form.errors,"providedTermsAndConditionsURL")
+                            <a id="providedTermsAndConditionsURLCompleted" href="@routes.ApplicationCheck.termsAndConditionsPage(app.id)">
+                                Provide a link to your application's terms and conditions
+                            </a>
+                        </td>
+                        <td class="numeric">
+                            @if(form("providedTermsAndConditionsURLCompleted").value.contains("true")) {
+                            <div id="urls-status" class="step-status status-completed">Complete</div>
+                            } else {
+                            <div id="urls-status" class="step-status status-incomplete">Required</div>
+                            }
+                        </td>
+                        </tr>
+
+                        <tr class="@if(form.errors("agreeTermsOfUse").nonEmpty){form-group-error}">
+
+                        <td id="agreeTermsOfUse" scope="row" class="step-description">
+                            @include.fieldError(form.errors,"agreeTermsOfUse")
+                            <a id="termsOfUseAgreementsCompleted" href="@routes.ApplicationCheck.termsOfUsePage(app.id)">
+                                Agree to our terms of use
+                            </a>
+                        </td>
+                        <td class="numeric">
+                            @if(form("termsOfUseAgreementsCompleted").value.contains("true")) {
+                            <div id="agree-terms-status" class="step-status status-completed">Complete</div>
+                            } else {
+                            <div id="agree-terms-status" class="step-status status-incomplete">Required</div>
+                            }
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-group">
+                <br>
+                <br>
+                <button id="submit" class="button" type="submit">Submit</button>
+                <a href="@routes.Credentials.credentials(app.id, None)" id="cancel" class="secondary-button">Cancel</a>
+            </div>
+        </section>
+    }
+}

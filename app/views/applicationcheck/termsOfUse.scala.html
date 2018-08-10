@@ -1,0 +1,87 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import model.Crumb
+@import org.joda.time.format.DateTimeFormat
+
+@(app: Application, form: Form[TermsOfUseForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+
+@devMain(
+    title = "Agree to our terms of use",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Manage credentials"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+) {
+
+    @errorSummary(form)
+
+    @helper.form(action = controllers.routes.ApplicationCheck.termsOfUseAction(app.id), 'class -> "form") {
+        @helper.CSRF.formField
+
+        <h1 class="heading-large">
+            Agree to our terms of use
+        </h1>
+        <div class="form-group">
+            <fieldset>
+                    @if(form("termsOfUseAgreed").value.contains("true")) {
+
+                    @defining(DateTimeFormat.forPattern("dd MMMM yyyy")) { dateFormatter =>
+
+                    <div class="panel panel-border-wide">
+                        <p>Terms of use agreed by @{app.checkInformation.get.termsOfUseAgreements.head.emailAddress} on @{dateFormatter.print(app.checkInformation.get.termsOfUseAgreements.head.timeStamp)}.</p>
+                    </div>
+                    }
+                    }
+            </fieldset>
+        </div>
+        @partials.termsOfUse()
+
+        <div class="form-group">
+            <fieldset>
+                @if(form("termsOfUseAgreed").value.contains("false")) {
+                    @defining(DateTimeFormat.longDate) { dateFormatter =>
+                    <div class="form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
+                        @fieldError(form.errors, "termsOfUseAgreed", true)
+                        <hr>
+                        <div class="multiple-choice">
+                            <input type="checkbox" id="termsOfUseAgreed" name="termsOfUseAgreed" value="true"/>
+                            <label for="termsOfUseAgreed">I agree to the terms of use</label>
+                    </div>
+                    }
+                }
+            </fieldset>
+        </div>
+
+        <div class="form-group">
+            @if(form("termsOfUseAgreed").value.contains("true")) {
+                <div>
+                    <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="button">Save and return</a>
+                </div>
+            } else {
+                <button id="submit" class="button" type="submit">Save and return</button>
+                <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
+            }
+        </div>
+    }
+}

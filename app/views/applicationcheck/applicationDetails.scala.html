@@ -1,0 +1,75 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import model.Crumb
+
+@(app: Application, form: Form[DetailsForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+
+@devMain(
+    title = "Confirm your application's name",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Manage credentials"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+) {
+
+    @errorSummary(form)
+
+    @helper.form(action = controllers.routes.ApplicationCheck.detailsAction(app.id), 'class -> "form") {
+        @helper.CSRF.formField
+        <div class="form-group">
+            <label for="applicationDetails" id="applicationDetails-label">
+                <h1 class="heading-large">
+                    What does your application do?
+                </h1>
+                <span class="body-text">
+                    <p>Make sure you tell us:</p>
+                    <ul class="list list-bullet">
+                        <li>what it’s used for</li>
+                        <li>who it's aimed at</li>
+                        <li>what kind of taxes it deals with, for example PAYE or VAT</li>
+                    </ul>
+                </span>
+            </label>
+            <div class="form-group @if(form.errors("applicationDetails").nonEmpty){form-group-error}">
+                @fieldError(form.errors, "applicationDetails")
+                <div class="char-counter" data-char-counter>
+                    <textarea id="applicationDetails"
+                              name="applicationDetails"
+                              cols="50"
+                              rows="10"
+                              maxlength="3000"
+                              class="form-control @if(form.errors("applicationDetails").nonEmpty){form-control-error}"
+                              aria-labelledby="applicationDetails-label"
+                              aria-required="true"
+                              data-char-field>@form.data.getOrElse("applicationDetails", "")</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <button id="submit" class="button" type="submit">Save and return</button>
+            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
+        </div>
+    }
+}
