@@ -142,11 +142,18 @@ def unitFilter(name: String): Boolean = name startsWith "unit"
 def componentTestFilter(name: String): Boolean = name startsWith "component.js"
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
-  tests map {
-    test =>
-      new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq(
-        "-Dtest.name=" + test.name,
-        "-Dbrowser=" + System.getProperty("browser", "chrome-local").toLowerCase))))
+  tests map { test =>
+    Group(
+      test.name,
+      Seq(test),
+      SubProcess(
+        ForkOptions(
+          runJVMOptions = Seq(
+            "-Dtest.name=" + test.name
+          )
+        )
+      )
+    )
   }
 
 // Coverage configuration
