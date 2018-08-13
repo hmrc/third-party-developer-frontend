@@ -61,7 +61,7 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
   val driver: WebDriver = createWebDriver
 
   lazy val createWebDriver: WebDriver = {
-    val targetBrowser = System.getProperty("browser", "chrome-local").toLowerCase
+    val targetBrowser = System.getProperty("browser", "firefox-local").toLowerCase
     targetBrowser match {
       case "chrome-local" => createChromeDriver()
       case "firefox-local" => createFirefoxDriver()
