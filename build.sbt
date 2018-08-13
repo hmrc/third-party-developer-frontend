@@ -146,7 +146,7 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
     test =>
       new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq(
         "-Dtest.name=" + test.name,
-        "-Dbrowser=" + System.getProperty("browser", "chrome-local").toLowerCase))))
+        "-Dbrowser=" + System.getProperty("test_driver", "firefox-local").toLowerCase))))
   }
 
 // Coverage configuration
