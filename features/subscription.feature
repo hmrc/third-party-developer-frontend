@@ -22,45 +22,6 @@ Feature: View/add/delete Subscriptions
     And I am successfully logged in with 'john.smith@example.com' and 'StrongPassword1!'
     Then I am on the 'View all applications' page
 
-  Scenario: TPSD is presented with all APIs and versions expanded when the application has no subscriptions
-    Given the APIs available for 'app-id-1' are:
-      | name        | version | status     | requiresTrust   | subscribed | access |
-      | api-1       | 0.5     | BETA       | false           | false      | PUBLIC |
-      | api-2       | 1.0     | STABLE     | false           | false      | PUBLIC |
-      | api-3       | 1.0     | BETA       | false           | false      | PUBLIC |
-
-    When I navigate to the Subscription page for application with id 'app-id-1'
-    And I see correct number of subscriptions for each 'API' api:
-      | name  | text            |
-      | api-1 | 0 subscriptions |
-      | api-2 | 0 subscriptions |
-      | api-3 | 0 subscriptions |
-
-    Then I am presented with links to subscribe to api versions:
-      | name  | version | visible |
-      | api-1 | 0.5     | true    |
-      | api-2 | 1.0     | true    |
-      | api-3 | 1.0     | true    |
-
-  Scenario: TPSD is presented with only the application's subscribed API versions expanded
-    Given the APIs available for 'app-id-1' are:
-      | name        | version | status  | requiresTrust   | subscribed | access  |
-      | api-1       | 0.5     | BETA    | false           | true       | PUBLIC  |
-      | api-2       | 1.0     | STABLE  | false           | false      | PUBLIC  |
-      | api-3       | 1.0     | BETA    | false           | false      | PRIVATE |
-
-    When I navigate to the Subscription page for application with id 'app-id-1'
-    And I see correct number of subscriptions for each 'API' api:
-      | name  | text            |
-      | api-1 | 1 subscription  |
-      | api-2 | 0 subscriptions |
-      | api-3 | 0 subscriptions |
-
-    Then I am presented with links to subscribe to api versions:
-      | name  | version | visible |
-      | api-2 | 1.0     | false   |
-      | api-3 | 1.0     | false   |
-
   Scenario: TPSD with Admin rights is provided with a link to unsubscribe from an API
     Given the APIs available for 'app-id-3' are:
       | name        | version | status     | requiresTrust   | subscribed | access |
