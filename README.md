@@ -59,4 +59,7 @@ Various security tests can be run within ZAP and the different types of attacks 
   * Sign out survey
 
 
+## Testing approach
 
+* Unit tests should make up the majority of tests so that test coverage should drop marginally when run against only unit tests.
+* Component tests should be a thin layer of coverage on happy paths only to ensure that journeys hang together.
