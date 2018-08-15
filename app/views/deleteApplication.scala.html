@@ -19,7 +19,7 @@
 @import include._
 @import model.Crumb
 
-@(app: Application, roleOfLoggedIn: Role.Role)(
+@(app: Application, roleOfLoggedIn: Role)(
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
 
 @devMain(

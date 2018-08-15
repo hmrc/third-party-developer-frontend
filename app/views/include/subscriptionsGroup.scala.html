@@ -21,7 +21,7 @@
 
 @import include._
 
-@(role: Role.Role, app: Application, apisSubscriptions: Seq[APISubscriptions], hasAnySubscriptions: Boolean, group: String, afterSubscriptionRedirectTo: SubscriptionRedirect)(
+@(role: Role, app: Application, apisSubscriptions: Seq[APISubscriptions], hasAnySubscriptions: Boolean, group: String, afterSubscriptionRedirectTo: SubscriptionRedirect)(
         implicit messages: Messages, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
 
 @renderLockedSubscribeButton(api: APISubscriptionStatus, apiContext: String, visible: Boolean) = {
@@ -125,7 +125,7 @@
     }
 }
 
-@renderProductionToggles(app: Application, api: APISubscriptionStatus, apiContext: String, role: Role.Value, visible: Boolean) = {
+@renderProductionToggles(app: Application, api: APISubscriptionStatus, apiContext: String, role: Role, visible: Boolean) = {
     @if(role == Role.ADMINISTRATOR) {
         @renderAdminProductionToggles(app, api, apiContext, visible)
     } else {

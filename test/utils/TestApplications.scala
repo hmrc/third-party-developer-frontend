@@ -90,7 +90,7 @@ trait TestApplications {
 
     final def withPrivacyPolicyUrl(url: Option[String]) = app.copy(access = standardAccess.copy(privacyPolicyUrl = url))
 
-    final def withTeamMember(email: String, userRole: Role.Value) = app.copy(collaborators = app.collaborators + Collaborator(email, userRole))
+    final def withTeamMember(email: String, userRole: Role) = app.copy(collaborators = app.collaborators + Collaborator(email, userRole))
 
     final def withTeamMembers(teamMembers: Set[Collaborator]) = app.copy(collaborators = teamMembers)
 

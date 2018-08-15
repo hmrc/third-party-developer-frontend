@@ -17,22 +17,10 @@
 package domain
 
 import controllers.{AddApplicationForm, EditApplicationForm, GroupedSubscriptions, _}
-import domain.Role.Role
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, JsError, _}
 import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.time.DateTimeUtils
-
-object Role extends Enumeration {
-  type Role = Value
-  val DEVELOPER, ADMINISTRATOR = Value
-
-  def from(role: Option[String]) = role match {
-    case Some (r) => Role.values.find(e => e.toString == r.toUpperCase)
-    case _ => Some(Role.DEVELOPER)}
-
-  implicit val format = EnumJson.enumFormat(Role)
-}
 
 case class UpliftRequest(applicationName: String, requestedByEmailAddress: String)
 
@@ -57,7 +45,7 @@ object ApplicationState {
     ApplicationState(State.PRODUCTION, Some(requestedBy), Some(verificationCode))
 }
 
-case class Collaborator(emailAddress: String, role: Role.Role)
+case class Collaborator(emailAddress: String, role: Role)
 
 object Collaborator {
   implicit val format = Json.format[Collaborator]
@@ -291,7 +279,7 @@ object CheckInformationForm {
   }
 }
 
-case class SubscriptionData (role: Role.Role, application: Application, subscriptions: Option[GroupedSubscriptions], hasSubscriptions: Boolean)
+case class SubscriptionData (role: Role, application: Application, subscriptions: Option[GroupedSubscriptions], hasSubscriptions: Boolean)
 
 case class Application(id: String,
                        clientId: String,

@@ -16,8 +16,7 @@
 
 package controllers
 
-import domain.Role.Role
-import domain.{Application, ApplicationNotFound}
+import domain.{Application, ApplicationNotFound, Role}
 import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier

@@ -78,7 +78,7 @@ class CredentialsSpec extends UnitSpec with MockitoSugar with WithFakeApplicatio
     val loggedInRequest = FakeRequest().withLoggedIn(underTest)(sessionId).withSession(sessionParams: _*)
 
     def givenTheApplicationExistWithUserRole(appId: String,
-                                             userRole: Role.Value,
+                                             userRole: Role,
                                              state: ApplicationState = ApplicationState.testing,
                                              access: Access = Standard(),
                                              environment: Environment = Environment.PRODUCTION) = {

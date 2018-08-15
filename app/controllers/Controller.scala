@@ -68,7 +68,7 @@ trait LoggedInController extends BaseController with AuthElement {
 
 }
 
-case class ApplicationRequest[A](application: Application, role: Role.Value, user: Developer, request: Request[A]) extends WrappedRequest[A](request)
+case class ApplicationRequest[A](application: Application, role: Role, user: Developer, request: Request[A]) extends WrappedRequest[A](request)
 
 trait ApplicationController extends LoggedInController with ActionBuilders {
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): User = request.user

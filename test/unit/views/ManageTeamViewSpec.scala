@@ -40,7 +40,7 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite {
 
   "manageTeam view" should {
 
-    def renderPage(role: Role.Role = Role.ADMINISTRATOR, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
+    def renderPage(role: Role = Role.ADMINISTRATOR, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
       views.html.manageTeam.render(application, role, form, loggedInUser, request, applicationMessages, ApplicationConfig, "nav-section")
     }

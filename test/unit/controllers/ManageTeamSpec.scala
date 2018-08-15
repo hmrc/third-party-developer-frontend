@@ -293,7 +293,7 @@ class ManageTeamSpec extends UnitSpec with MockitoSugar with WithFakeApplication
   }
 
   private def givenTheApplicationExistWithUserRole(applicationService: ApplicationService,
-                                                   appId: String, userRole: Role.Value,
+                                                   appId: String, userRole: Role,
                                                    state: ApplicationState = ApplicationState.testing,
                                                    additionalTeamMembers : Seq[Collaborator] = Seq()) = {
     val application = Application(appId, clientId, "app", DateTime.parse("2018-04-06T09:00"), Environment.PRODUCTION,
