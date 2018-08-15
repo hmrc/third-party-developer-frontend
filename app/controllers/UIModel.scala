@@ -19,7 +19,6 @@ package controllers
 import controllers.APISubscriptions.subscriptionNumberLabel
 import domain.APIGroup._
 import domain.Role.Role
-import domain.State.State
 import domain._
 import enumeratum.{EnumEntry, PlayEnum}
 import play.api.libs.json.Json

@@ -18,7 +18,6 @@ package domain
 
 import controllers.{AddApplicationForm, EditApplicationForm, GroupedSubscriptions, _}
 import domain.Role.Role
-import domain.State.State
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, JsError, _}
 import uk.gov.hmrc.play.json.Union
@@ -41,17 +40,9 @@ object UpliftRequest {
   implicit val format = Json.format[UpliftRequest]
 }
 
-object State extends Enumeration {
-  type State = Value
-  val TESTING, PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, PRODUCTION = Value
-
-  implicit val format = EnumJson.enumFormat(State)
-}
-
 case class ApplicationState(name: State, requestedByEmailAddress: Option[String], verificationCode: Option[String] = None, updatedOn: DateTime = DateTimeUtils.now)
 
 object ApplicationState {
-  implicit val format1 = EnumJson.enumFormat(State)
   implicit val format = Json.format[ApplicationState]
 
   val testing = ApplicationState(State.TESTING, None)

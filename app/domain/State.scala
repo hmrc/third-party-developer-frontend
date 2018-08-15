@@ -18,13 +18,13 @@ package domain
 
 import enumeratum.{EnumEntry, PlayEnum}
 
-sealed trait Environment extends EnumEntry
+sealed trait State extends EnumEntry
 
-object Environment extends PlayEnum[Environment] {
+object State extends PlayEnum[State] {
   val values = findValues
 
-  case object PRODUCTION  extends Environment
-  case object SANDBOX     extends Environment
-
-  def from(env: String) = values.find(e => e.toString == env.toUpperCase)
+  case object TESTING                         extends State
+  case object PENDING_GATEKEEPER_APPROVAL     extends State
+  case object PENDING_REQUESTER_VERIFICATION  extends State
+  case object PRODUCTION                      extends State
 }
