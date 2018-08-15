@@ -16,6 +16,7 @@
 
 package domain
 
+import enumeratum.{EnumEntry, PlayEnum}
 import play.api.i18n.Messages
 import play.api.libs.json.Json
 import play.api.i18n.Messages.Implicits._
@@ -33,10 +34,9 @@ class DeskproTicketCreationFailed(reason:String) extends RuntimeException(s"Fail
       |""".stripMargin
 }
 
-case class Error(code: ErrorCode.Value, message: String)
+case class Error(code: ErrorCode, message: String)
 
 object Error {
-  implicit val format1 = EnumJson.enumFormat(ErrorCode)
   implicit val format2 = Json.format[Error]
 }
 
@@ -46,15 +46,14 @@ object InvalidPasswordError extends Error(ErrorCode.INVALID_PASSWORD, "Invalid p
 object PasswordRequiredError extends Error(ErrorCode.PASSWORD_REQUIRED, "Password is required")
 object TeamMemberAlreadyExistsInApplication extends Error(ErrorCode.USER_ALREADY_EXISTS, Messages("team.member.error.emailAddress.already.exists.field"))
 
-object ErrorCode extends Enumeration {
+sealed trait ErrorCode extends EnumEntry
 
-  type ErrorCode = Value
+object ErrorCode extends PlayEnum[ErrorCode] {
+  val values = findValues
 
-  val LOCKED_ACCOUNT = Value("LOCKED_ACCOUNT")
-  val BAD_REQUEST = Value("BAD_REQUEST")
-  val INVALID_PASSWORD = Value("INVALID_PASSWORD")
-  val PASSWORD_REQUIRED = Value("PASSWORD_REQUIRED")
-  val USER_ALREADY_EXISTS = Value("USER_ALREADY_EXISTS")
-
-  implicit val format = EnumJson.enumFormat(ErrorCode)
+  final case object LOCKED_ACCOUNT        extends ErrorCode
+  final case object BAD_REQUEST           extends ErrorCode
+  final case object INVALID_PASSWORD      extends ErrorCode
+  final case object PASSWORD_REQUIRED     extends ErrorCode
+  final case object USER_ALREADY_EXISTS   extends ErrorCode
 }
