@@ -130,11 +130,6 @@ object OverrideFlag {
   implicit val format = Format(reads, writes)
 }
 
-object TermsOfUseStatus extends Enumeration {
-  type TermsOfUseStatus = Value
-  val NOT_APPLICABLE, AGREEMENT_REQUIRED, AGREED = Value
-}
-
 sealed trait Access {
   val accessType: AccessType
 }
@@ -334,7 +329,7 @@ case class Application(id: String,
 
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
-  def termsOfUseStatus = {
+  def termsOfUseStatus: TermsOfUseStatus = {
     if (deployedTo == Environment.SANDBOX || access.accessType != AccessType.STANDARD) {
       TermsOfUseStatus.NOT_APPLICABLE
     } else if (termsOfUseAgreements.isEmpty) {
