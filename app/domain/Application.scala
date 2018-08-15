@@ -135,15 +135,8 @@ object TermsOfUseStatus extends Enumeration {
   val NOT_APPLICABLE, AGREEMENT_REQUIRED, AGREED = Value
 }
 
-object AccessType extends Enumeration {
-  type Role = Value
-  val STANDARD, PRIVILEGED, ROPC = Value
-
-  implicit val format = EnumJson.enumFormat(AccessType)
-}
-
 sealed trait Access {
-  val accessType: AccessType.Value
+  val accessType: AccessType
 }
 
 object Access {
