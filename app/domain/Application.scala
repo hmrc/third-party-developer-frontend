@@ -17,7 +17,6 @@
 package domain
 
 import controllers.{AddApplicationForm, EditApplicationForm, GroupedSubscriptions, _}
-import domain.Environment.Environment
 import domain.Role.Role
 import domain.State.State
 import org.joda.time.DateTime
@@ -89,19 +88,9 @@ object EnvironmentToken {
   implicit val format2 = Json.format[EnvironmentToken]
 }
 
-object Environment extends Enumeration {
-  type Environment = Value
-  val PRODUCTION, SANDBOX = Value
-
-  def from(env: String) = Environment.values.find(e => e.toString == env.toUpperCase)
-
-  implicit val format = EnumJson.enumFormat(Environment)
-}
-
 case class ClientSecretRequest(name: String)
 
 object ClientSecretRequest {
-  implicit val format1 = EnumJson.enumFormat(Environment)
   implicit val format2 = Json.format[ClientSecretRequest]
 }
 

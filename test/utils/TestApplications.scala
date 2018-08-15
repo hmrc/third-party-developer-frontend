@@ -18,12 +18,8 @@ package utils
 
 import java.util.UUID
 
-import controllers.EditApplicationForm
-import domain.Environment.Environment
 import domain._
 import org.joda.time.DateTimeZone
-import play.api.libs.json.Json
-import play.api.mvc.Result
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.util.Random

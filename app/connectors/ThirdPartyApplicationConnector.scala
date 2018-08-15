@@ -20,7 +20,6 @@ import java.net.URLEncoder.encode
 
 import config.{ApplicationConfig, ProxiedApiPlatformWSHttp, WSHttp}
 import domain.DefinitionFormats._
-import domain.Environment.Environment
 import domain._
 import play.api.libs.json.Json
 import play.api.http.ContentTypes.JSON

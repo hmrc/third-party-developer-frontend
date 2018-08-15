@@ -36,7 +36,7 @@ class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite {
 
   "Add application success page" should {
 
-    def testPage(applicationName: String, environment: Environment.Value): Document = {
+    def testPage(applicationName: String, environment: Environment): Document = {
       val applicationId = "application-id"
       val loggedIn = Developer("", "", "", None)
       val request = FakeRequest().withCSRFToken

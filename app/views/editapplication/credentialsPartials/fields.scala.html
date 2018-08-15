@@ -17,9 +17,10 @@
 @import domain.EnvironmentToken
 @import uk.gov.hmrc.urls.Link
 @import config.ApplicationConfig
-@import domain.Environment.Environment
+@import domain.Environment
 @import domain.{Application, Environment}
 @import include._
+
 @(app: Application, token: EnvironmentToken, form: Form[VerifyPasswordForm])(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
