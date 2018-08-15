@@ -19,7 +19,7 @@
 @import model.Crumb
 @import include._
 
-@(app: Application, form: Form[SubscriptionConfirmationForm], id: String, name: String, context: String, version: String, afterSubscriptionRedirectTo: SubscriptionRedirect.Value)(
+@(app: Application, form: Form[SubscriptionConfirmationForm], id: String, name: String, context: String, version: String, afterSubscriptionRedirectTo: SubscriptionRedirect)(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: Developer,
     messages: Messages,

@@ -16,7 +16,6 @@
 
 package domain
 
-import domain.APIStatus.APIStatus
 import domain.ApiSubscriptionFields.{SubscriptionField, SubscriptionFieldsWrapper}
 import play.api.libs.json.Json
 
@@ -59,23 +58,9 @@ case class APIVersion(version: String, status: APIStatus, access: Option[APIAcce
   val accessType = access.map(_.`type`).getOrElse(APIAccessType.PUBLIC)
 }
 
+case class APIAccess(`type`: APIAccessType)
 
-object APIStatus extends Enumeration {
-  type APIStatus = Value
-  val ALPHA, BETA, STABLE, DEPRECATED, RETIRED = Value
-}
 
-case class APIAccess(`type`: APIAccessType.Value)
-
-object APIAccessType extends Enumeration {
-  type APIAccessType = Value
-  val PRIVATE, PUBLIC = Value
-}
-
-object APIGroup extends Enumeration {
-  type APIGroupType = Value
-  val API, TEST_API, EXAMPLE = Value
-}
 
 case class APIIdentifier(context: String, version: String)
 
@@ -88,8 +73,6 @@ case class APISubscriptionStatus(name: String, serviceName: String, context: Str
 }
 
 object DefinitionFormats {
-  implicit val formatAPIStatus = EnumJson.enumFormat(APIStatus)
-  implicit val formatAPIAccessType = EnumJson.enumFormat(APIAccessType)
   implicit val formatAPIAccess = Json.format[APIAccess]
   implicit val formatAPIVersion = Json.format[APIVersion]
   implicit val formatVersionSubscription = Json.format[VersionSubscription]

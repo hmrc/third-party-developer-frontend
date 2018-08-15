@@ -17,11 +17,12 @@
 package controllers
 
 import controllers.APISubscriptions.subscriptionNumberLabel
-import domain.APIGroup.{API, EXAMPLE, TEST_API}
+import domain.APIGroup._
 import domain.Role.Role
 import domain.State.State
 import domain.TermsOfUseStatus.TermsOfUseStatus
 import domain._
+import enumeratum.{EnumEntry, PlayEnum}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.NotFoundException
 
@@ -100,7 +101,12 @@ object AjaxSubscriptionResponse{
   }
 }
 
-object SubscriptionRedirect extends Enumeration {
-  type SubscriptionRedirectType = Value
-  val MANAGE_PAGE, APPLICATION_CHECK_PAGE, API_SUBSCRIPTIONS_PAGE = Value
+sealed trait SubscriptionRedirect extends EnumEntry
+
+object SubscriptionRedirect extends PlayEnum[SubscriptionRedirect] {
+  val values = findValues
+
+  case object MANAGE_PAGE               extends SubscriptionRedirect
+  case object APPLICATION_CHECK_PAGE    extends SubscriptionRedirect
+  case object API_SUBSCRIPTIONS_PAGE    extends SubscriptionRedirect
 }

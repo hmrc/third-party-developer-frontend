@@ -615,7 +615,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
   }
 
-  private def aVersionSubscription(version: String, apiStatus: APIStatus.Value, subscribed: Boolean, access: APIAccessType.Value) = {
+  private def aVersionSubscription(version: String, apiStatus: APIStatus, subscribed: Boolean, access: APIAccessType) = {
     VersionSubscription(APIVersion(version, apiStatus, Some(APIAccess(access))), subscribed)
   }
 

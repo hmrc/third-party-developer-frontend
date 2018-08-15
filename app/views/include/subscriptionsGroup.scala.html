@@ -21,7 +21,7 @@
 
 @import include._
 
-@(role: Role.Role, app: Application, apisSubscriptions: Seq[APISubscriptions], hasAnySubscriptions: Boolean, group: String, afterSubscriptionRedirectTo: SubscriptionRedirect.Value)(
+@(role: Role.Role, app: Application, apisSubscriptions: Seq[APISubscriptions], hasAnySubscriptions: Boolean, group: String, afterSubscriptionRedirectTo: SubscriptionRedirect)(
         implicit messages: Messages, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
 
 @renderLockedSubscribeButton(api: APISubscriptionStatus, apiContext: String, visible: Boolean) = {

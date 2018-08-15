@@ -22,6 +22,7 @@ lazy val appDependencies: Seq[ModuleID] = compile ++ test
 lazy val t2vVersion = "0.14.2"
 lazy val cucumberVersion = "1.2.5"
 lazy val seleniumVersion = "2.53.1"
+lazy val enumeratumVersion = "1.5.11"
 
 lazy val compile = Seq(
   ws,
@@ -34,7 +35,9 @@ lazy val compile = Seq(
   "uk.gov.hmrc" %% "json-encryption" % "3.2.0",
   "uk.gov.hmrc" %% "emailaddress" % "2.2.0",
   "uk.gov.hmrc" %% "play-conditional-form-mapping" % "0.2.0",
-  "io.dropwizard.metrics" % "metrics-graphite" % "3.2.1"
+  "io.dropwizard.metrics" % "metrics-graphite" % "3.2.1",
+  "com.beachape" %% "enumeratum" % enumeratumVersion,
+  "com.beachape" %% "enumeratum-play" % enumeratumVersion
 )
 
 lazy val test = Seq(
