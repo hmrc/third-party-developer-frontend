@@ -23,9 +23,9 @@ sealed trait APIStatus extends EnumEntry
 object APIStatus extends PlayEnum[APIStatus] {
   val values = findValues
 
-  case object ALPHA       extends APIStatus
-  case object BETA        extends APIStatus
-  case object STABLE      extends APIStatus
-  case object DEPRECATED  extends APIStatus
-  case object RETIRED     extends APIStatus
+  final case object ALPHA       extends APIStatus
+  final case object BETA        extends APIStatus
+  final case object STABLE      extends APIStatus
+  final case object DEPRECATED  extends APIStatus
+  final case object RETIRED     extends APIStatus
 }

@@ -23,7 +23,7 @@ sealed trait AccessType extends EnumEntry
 object AccessType extends PlayEnum[AccessType] {
   val values = findValues
 
-  case object STANDARD    extends AccessType
-  case object PRIVILEGED  extends AccessType
-  case object ROPC        extends AccessType
+  final case object STANDARD    extends AccessType
+  final case object PRIVILEGED  extends AccessType
+  final case object ROPC        extends AccessType
 }

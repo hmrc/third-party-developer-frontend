@@ -23,7 +23,7 @@ sealed trait TermsOfUseStatus extends EnumEntry
 object TermsOfUseStatus extends PlayEnum[TermsOfUseStatus] {
   val values = findValues
 
-  case object NOT_APPLICABLE      extends TermsOfUseStatus
-  case object AGREEMENT_REQUIRED  extends TermsOfUseStatus
-  case object AGREED              extends TermsOfUseStatus
+  final case object NOT_APPLICABLE      extends TermsOfUseStatus
+  final case object AGREEMENT_REQUIRED  extends TermsOfUseStatus
+  final case object AGREED              extends TermsOfUseStatus
 }
