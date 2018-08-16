@@ -89,7 +89,7 @@ class ApplicationCheckSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
     val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
-    def givenTheApplicationExists(appId: String = appId, clientId: String = clientId, userRole: Role.Value = ADMINISTRATOR,
+    def givenTheApplicationExists(appId: String = appId, clientId: String = clientId, userRole: Role = ADMINISTRATOR,
                                   state: ApplicationState = testing,
                                   checkInformation: Option[CheckInformation] = None,
                                   access: Access = Standard()) = {

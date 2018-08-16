@@ -18,7 +18,7 @@ package controllers
 
 import config.ApplicationGlobal
 import connectors.ThirdPartyDeveloperConnector
-import controllers.SubscriptionRedirect._
+import domain.SubscriptionRedirect._
 import domain._
 import play.api.Play.current
 import play.api.data.Form

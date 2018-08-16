@@ -20,7 +20,7 @@
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
 
-@(role: Role.Role, app: Application)(
+@(role: Role, app: Application)(
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 
 @devMain(

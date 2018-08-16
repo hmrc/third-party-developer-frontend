@@ -64,7 +64,7 @@ class TermsOfUseSpec extends UnitSpec with MockitoSugar with WithFakeApplication
 
     val appId = "1234"
 
-    def givenTheApplicationExists(userRole: Role.Value = ADMINISTRATOR,
+    def givenTheApplicationExists(userRole: Role = ADMINISTRATOR,
                                   environment: Environment = PRODUCTION,
                                   state: ApplicationState = ApplicationState.testing,
                                   checkInformation: Option[CheckInformation] = None,

@@ -14,13 +14,13 @@
  * limitations under the License.
  *@
 
+@import domain.SubscriptionRedirect._
 @import domain._
 @import include._
 @import config.ApplicationConfig
 @import model.Crumb
-@import controllers.SubscriptionRedirect._
 
-@(app: Application, role: Role.Role, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
 @devMain(
 title = "Confirm the APIs your application uses",
@@ -45,7 +45,7 @@ leftNav = Some(leftHandNav(Option(app), Option(navSection)))
     </div>
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            @subscriptionGroups(role: Role.Role, groupedSubscriptions, app, hasSubscriptions, APPLICATION_CHECK_PAGE)
+            @subscriptionGroups(role: Role, groupedSubscriptions, app, hasSubscriptions, APPLICATION_CHECK_PAGE)
             <br/>
             <br/>
             @helper.form(action = controllers.routes.ApplicationCheck.apiSubscriptionsAction(app.id), 'class -> "form") {

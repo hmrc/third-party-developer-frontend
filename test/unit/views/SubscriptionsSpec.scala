@@ -18,8 +18,6 @@ package unit.views
 
 import config.ApplicationConfig
 import controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
-import domain.Environment.Environment
-import domain.Role.Role
 import domain._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup

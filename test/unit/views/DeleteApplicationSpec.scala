@@ -17,7 +17,7 @@
 package unit.views
 
 import config.ApplicationConfig
-import domain.Role.{ADMINISTRATOR, DEVELOPER, Role}
+import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import org.jsoup.Jsoup
 import org.scalatestplus.play.OneServerPerSuite
@@ -25,8 +25,8 @@ import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers._
 import utils.CSRFTokenHelper._
+import utils.ViewHelpers._
 
 class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite {
   val appId = "1234"

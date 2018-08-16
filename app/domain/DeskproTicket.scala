@@ -17,8 +17,6 @@
 package domain
 
 import controllers.{SupportEnquiryForm, routes}
-import domain.Environment.Environment
-import domain.Role.Role
 import play.api.libs.json.Json
 import play.api.mvc.Request
 

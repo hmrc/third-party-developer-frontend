@@ -19,17 +19,17 @@ package unit.controllers
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
-import domain.Environment.{Environment, PRODUCTION, SANDBOX}
+import domain.Environment.SANDBOX
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, anyString, eq => mockEq}
+import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, AnyContentAsFormUrlEncoded, Result}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -78,7 +78,7 @@ class CredentialsSpec extends UnitSpec with MockitoSugar with WithFakeApplicatio
     val loggedInRequest = FakeRequest().withLoggedIn(underTest)(sessionId).withSession(sessionParams: _*)
 
     def givenTheApplicationExistWithUserRole(appId: String,
-                                             userRole: Role.Value,
+                                             userRole: Role,
                                              state: ApplicationState = ApplicationState.testing,
                                              access: Access = Standard(),
                                              environment: Environment = Environment.PRODUCTION) = {

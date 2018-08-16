@@ -17,7 +17,8 @@
 package unit.views.include
 
 import config.ApplicationConfig
-import controllers.{SubscriptionConfirmationForm, SubscriptionRedirect}
+import controllers.SubscriptionConfirmationForm
+import domain.SubscriptionRedirect
 import domain._
 import org.jsoup.Jsoup
 import org.scalatestplus.play.OneServerPerSuite

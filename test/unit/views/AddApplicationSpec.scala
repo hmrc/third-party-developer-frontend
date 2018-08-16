@@ -18,7 +18,7 @@ package unit.views
 
 import config.ApplicationConfig
 import controllers.AddApplicationForm
-import domain.{Developer, Role}
+import domain.Developer
 import org.jsoup.Jsoup
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form

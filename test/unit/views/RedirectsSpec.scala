@@ -40,7 +40,7 @@ class RedirectsSpec extends UnitSpec with OneServerPerSuite {
   "redirects page" should {
     val redirectLimit = 5
 
-    def renderPageWithRedirectUris(role: Role.Role, numberOfRedirectUris: Int) = {
+    def renderPageWithRedirectUris(role: Role, numberOfRedirectUris: Int) = {
       val request = FakeRequest().withCSRFToken
       val redirects = 1 to numberOfRedirectUris map(num => s"http://localhost:$num")
       val standardAccess = Standard(redirectUris = redirects, termsAndConditionsUrl = None)
