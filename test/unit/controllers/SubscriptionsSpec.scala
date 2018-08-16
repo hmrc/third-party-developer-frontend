@@ -18,7 +18,7 @@ package unit.controllers
 
 import config.ApplicationConfig
 import connectors.{DeskproConnector, ThirdPartyDeveloperConnector}
-import controllers.SubscriptionRedirect.{APPLICATION_CHECK_PAGE, MANAGE_PAGE}
+import domain.SubscriptionRedirect.{APPLICATION_CHECK_PAGE, MANAGE_PAGE}
 import controllers._
 import domain.ApiSubscriptionFields.Fields
 import domain._

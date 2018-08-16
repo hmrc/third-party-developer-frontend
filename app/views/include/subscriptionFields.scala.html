@@ -16,7 +16,8 @@
 
 @import views.helper.IdFormatter
 
-@import controllers.SubscriptionRedirect._
+@import domain.SubscriptionRedirect
+@import domain.SubscriptionRedirect._
 
 @(vm: SubscriptionFieldsViewModel, subscriptionRedirect: SubscriptionRedirect = MANAGE_PAGE)(implicit request: Request[Any], messages: Messages)
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
+@import domain.SubscriptionRedirect._
 @import domain._
 @import include._
 @import config.ApplicationConfig
 @import model.Crumb
-@import controllers.SubscriptionRedirect._
 
 @(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
