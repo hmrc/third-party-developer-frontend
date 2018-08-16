@@ -46,14 +46,4 @@ object InvalidPasswordError extends Error(ErrorCode.INVALID_PASSWORD, "Invalid p
 object PasswordRequiredError extends Error(ErrorCode.PASSWORD_REQUIRED, "Password is required")
 object TeamMemberAlreadyExistsInApplication extends Error(ErrorCode.USER_ALREADY_EXISTS, Messages("team.member.error.emailAddress.already.exists.field"))
 
-sealed trait ErrorCode extends EnumEntry
 
-object ErrorCode extends PlayEnum[ErrorCode] {
-  val values = findValues
-
-  final case object LOCKED_ACCOUNT        extends ErrorCode
-  final case object BAD_REQUEST           extends ErrorCode
-  final case object INVALID_PASSWORD      extends ErrorCode
-  final case object PASSWORD_REQUIRED     extends ErrorCode
-  final case object USER_ALREADY_EXISTS   extends ErrorCode
-}
