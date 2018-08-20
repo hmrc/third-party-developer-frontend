@@ -35,10 +35,10 @@ trait TermsOfUse extends ApplicationController with ApplicationHelper {
   }
 
   def termsOfUse(id: String) = adminIfStandardProductionApp(id) { implicit request =>
-    if (request.application.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {
-      Future.successful(Ok(views.html.termsOfUse(request.application, TermsOfUseForm.form)))
-    } else {
+    if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
       Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
+    } else {
+      Future.successful(Ok(views.html.termsOfUse(request.application, TermsOfUseForm.form)))
     }
   }
 

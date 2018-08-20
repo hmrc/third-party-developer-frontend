@@ -21,6 +21,7 @@ import controllers.TermsOfUse
 import domain.Environment._
 import domain.Role._
 import domain._
+import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
@@ -99,11 +100,27 @@ class TermsOfUseSpec extends UnitSpec with MockitoSugar with WithFakeApplication
 
   "termsOfUse" should {
 
-    "render the page for an administrator on a standard production app" in new Setup {
-      givenTheApplicationExists()
+    "render the page for an administrator on a standard production app when the ToU have not been agreed" in new Setup {
+      val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
+      givenTheApplicationExists(checkInformation = Some(checkInformation))
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
       status(result) shouldBe OK
       bodyOf(result) should include("Agree to our terms of use")
+      bodyOf(result) should not include("Terms of use accepted on")
+    }
+
+    "render the page for an administrator on a standard production app when the ToU have been agreed" in new Setup {
+      val email = "email@exmaple.com"
+      val timeStamp = DateTimeUtils.now
+      val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
+      val version = "1.0"
+
+      val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(email, timeStamp, version)))
+      givenTheApplicationExists(checkInformation = Some(checkInformation))
+      val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
+      status(result) shouldBe OK
+      bodyOf(result) should include("Terms of use")
+      bodyOf(result) should include(s"Terms of use accepted on $expectedTimeStamp by $email.")
     }
 
     "return a bad request for a sandbox app" in new Setup {

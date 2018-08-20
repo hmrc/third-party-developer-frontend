@@ -15,16 +15,19 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment, Developer, Role, State}
+@import domain.{Application, Environment, Developer, Role, State, TermsOfUseStatus}
+@import domain.TermsOfUseStatus._
 @import include._
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
+@import org.joda.time.format.DateTimeFormat
 
 @(app: Application, form: Form[controllers.TermsOfUseForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
+@title = { @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) { Agree to our terms of use } else { Terms of use } }
 
 @devMain(
-    title = "View application",
+    title = title.toString,
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Manage details"),
@@ -38,30 +41,42 @@
     @errorSummary(form)
 
     <header>
-        <h1 class="heading-large">Agree to our terms of use</h1>
+        <h1 class="heading-large">@title</h1>
     </header>
 
     @appEnvironment(app)
 
-    @partials.termsOfUse()
-    <hr>
+    @if(app.termsOfUseStatus == AGREED) {
+        <div id="termsOfUseAlert" class="alert alert--info">
+            Terms of use accepted on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(app.termsOfUseAgreements.head.timeStamp)} by @{app.termsOfUseAgreements.head.emailAddress}.
+        </div>
+    <br>
+    }
 
-    @helper.form(action = controllers.routes.TermsOfUse.agreeTermsOfUse(app.id), 'class -> "form") {
-        @helper.CSRF.formField
-        <div class="form-group">
-            <fieldset>
-                <div class="form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
-                    @fieldError(form.errors, "termsOfUseAgreed", true)
-                    <div class="multiple-choice">
-                        <input type="checkbox" id="termsOfUseAgreed" name="termsOfUseAgreed" value="true"/>
-                        <label for="termsOfUseAgreed">I agree to the terms of use</label>
+    <div id="termsOfUse">
+      @partials.termsOfUse()
+    </div>
+
+    @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) {
+        <hr>
+
+        @helper.form(action = controllers.routes.TermsOfUse.agreeTermsOfUse(app.id), 'class -> "form", 'id -> "termsOfUseForm") {
+            @helper.CSRF.formField
+            <div class="form-group">
+                <fieldset>
+                    <div class="form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
+                        @fieldError(form.errors, "termsOfUseAgreed", true)
+                        <div class="multiple-choice">
+                            <input type="checkbox" id="termsOfUseAgreed" name="termsOfUseAgreed" value="true"/>
+                            <label for="termsOfUseAgreed">I agree to the terms of use</label>
+                        </div>
                     </div>
-                </div>
-            </fieldset>
-        </div>
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Save</button>
-            <a href="@controllers.routes.Details.details(app.id)" class="secondary-button">Cancel</a>
-        </div>
+                </fieldset>
+            </div>
+            <div class="form-group">
+                <button id="submit" class="button" type="submit">Save</button>
+                <a href="@controllers.routes.Details.details(app.id)" class="secondary-button">Cancel</a>
+            </div>
+        }
     }
 }
