@@ -21,11 +21,7 @@
 
 @if(form.hasGlobalErrors) {
 <div class="error-summary" id="error-summary-display" role="alert" aria-labelledby="error-summary-heading" tabindex="-1">
-    @if(form.globalErrors.length == 1) {
-    <h2 id="error-summary-heading" class="heading-medium error-summary-heading">There is an error on the page</h2>
-    } else {
-    <h2 id="error-summary-heading" class="heading-medium error-summary-heading">There are errors on the page</h2>
-    }
+    <h2 id="error-summary-heading" class="heading-medium error-summary-heading">There is a problem</h2>
     <ul class="error-summary-list">
     @for(error <- form.globalErrors) {
         <li>
@@ -41,11 +37,7 @@
              role="alert"
              aria-labelledby="error-summary-heading"
              tabindex="-1">
-            @if(form.errors.length == 1) {
-            <h2 id="error-summary-heading" class="heading-medium error-summary-heading">There is an error on the page</h2>
-            } else {
-            <h2 id="error-summary-heading" class="heading-medium error-summary-heading">There are errors on the page</h2>
-            }
+            <h2 id="error-summary-heading" class="heading-medium error-summary-heading">There is a problem</h2>
             <ul class="error-summary-list">
                 @for(error <- form.errors) {
                 <li><a href="#@error.key">@Messages(s"${error.messages.head}")</a></li>
