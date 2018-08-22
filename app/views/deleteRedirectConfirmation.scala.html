@@ -22,9 +22,10 @@
 @import controllers.AddRedirectForm
 
 @(application: Application, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = "Delete a redirect URI",
+    title = titleError + "Delete a redirect URI",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Delete a redirect URI"),

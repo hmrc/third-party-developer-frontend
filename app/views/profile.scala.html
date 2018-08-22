@@ -19,9 +19,10 @@
 @import model.Crumb
 
 @(form: Form[controllers.ProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "manage-profile")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = "Manage profile",
+    title = titleError + "Manage profile",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Manage profile"),

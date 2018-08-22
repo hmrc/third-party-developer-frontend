@@ -20,8 +20,9 @@
 
 @(form: Form[controllers.RegisterForm])(implicit flash: Flash, request: play.api.mvc.Request[Any], messages: Messages, appConfig:config.ApplicationConfig)
 
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 @devMain(
-    title = "Register for a developer account",
+    title = titleError + "Register for a developer account",
     isRegistering = true,
     breadcrumbs = Seq(
         Crumb("Register"),
@@ -30,6 +31,7 @@
 ) {
 
     @errorSummary(form)
+
 
     <h1 class="heading-large">Register for a developer account</h1>
 

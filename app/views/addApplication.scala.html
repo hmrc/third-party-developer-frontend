@@ -19,9 +19,10 @@
 @import model.Crumb
 
 @(form: Form[controllers.AddApplicationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = "Add an application",
+    title = titleError + "Add an application",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-add-application")),

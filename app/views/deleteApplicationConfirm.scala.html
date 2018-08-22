@@ -21,9 +21,10 @@
 
 @(app: Application, form: Form[DeleteApplicationForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = "Delete application",
+    title = titleError + "Delete application",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Delete application"),

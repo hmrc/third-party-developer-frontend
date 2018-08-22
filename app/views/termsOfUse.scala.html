@@ -25,9 +25,10 @@
 @(app: Application, form: Form[controllers.TermsOfUseForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 @title = { @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) { Agree to our terms of use } else { Terms of use } }
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = title.toString,
+    title = titleError + title.toString,
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Manage details"),

@@ -20,9 +20,10 @@
 @import model.Crumb
 
 @(app: Application, form: Form[TermsAndConditionsForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = "Where can we find your terms and conditions?",
+    title = titleError + "Where can we find your terms and conditions?",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Manage credentials"),
