@@ -18,9 +18,9 @@
 @import model.Crumb
 
 @(heading: String, form: Form[controllers.LoginForm], endOfJourney: Boolean = false)(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, messages: Messages, appConfig: config.ApplicationConfig)
-
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 @devMain(
-    title = heading,
+    title = titleError + heading,
     breadcrumbs = Seq(
         Crumb("Sign in"),
         Crumb.home

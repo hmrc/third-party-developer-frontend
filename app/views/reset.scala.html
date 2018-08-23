@@ -19,7 +19,9 @@
 @(form: Form[controllers.PasswordResetForm])(implicit request: play.api.mvc.Request[Any],
         messages: Messages, applicationConfig: config.ApplicationConfig)
 
-@devMain(title = "Create a new password") {
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
+@devMain(title = titleError + "Create a new password") {
 
     @errorSummary(form)
 
