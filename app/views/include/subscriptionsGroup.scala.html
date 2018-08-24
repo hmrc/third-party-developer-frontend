@@ -156,7 +156,8 @@
             <div class="accordion__row">
                 <div class="accordion__row__left">
                     <a id="@apiSubscription.apiServiceName-@group" href="/developer/applications/@app.id?tab=subscriptions&serviceName=@apiSubscription.apiServiceName"
-                    class="accordion__button link--no-underline bold-small" data-accordion-button role="button">
+                    class="accordion__button link--no-underline bold-small" data-accordion-button role="button"
+                    @if(apiSubscription.isExpanded || !hasAnySubscriptions) {data-accordion-expanded="" aria-expanded="true"} else {aria-expanded="false"}>
                         <i class="arrow arrow--right accordion__indicator @if(apiSubscription.isExpanded || !hasAnySubscriptions) {arrow--expand}" data-accordion-arrow aria-hidden="true"></i>
                         @apiSubscription.apiHumanReadableAppName
                     </a>
