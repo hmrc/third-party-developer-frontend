@@ -20,7 +20,7 @@
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
 
-@(application: Application, redirectUris: Seq[String], role: Role.Role)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@(application: Application, redirectUris: Seq[String], role: Role)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
 @devMain(
     title = "Manage redirect URIs",

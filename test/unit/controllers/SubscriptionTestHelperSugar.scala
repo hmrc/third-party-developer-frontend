@@ -18,7 +18,7 @@ package unit.controllers
 
 import controllers.APISubscriptions
 import domain.APIStatus._
-import domain.{APIAccess, APISubscriptionStatus, APIVersion}
+import domain.{APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
 import uk.gov.hmrc.play.test.UnitSpec
 
 trait SubscriptionTestHelperSugar {

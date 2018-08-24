@@ -17,24 +17,10 @@
 package domain
 
 import controllers.{AddApplicationForm, EditApplicationForm, GroupedSubscriptions, _}
-import domain.Environment.Environment
-import domain.Role.Role
-import domain.State.State
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, JsError, _}
 import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.time.DateTimeUtils
-
-object Role extends Enumeration {
-  type Role = Value
-  val DEVELOPER, ADMINISTRATOR = Value
-
-  def from(role: Option[String]) = role match {
-    case Some (r) => Role.values.find(e => e.toString == r.toUpperCase)
-    case _ => Some(Role.DEVELOPER)}
-
-  implicit val format = EnumJson.enumFormat(Role)
-}
 
 case class UpliftRequest(applicationName: String, requestedByEmailAddress: String)
 
@@ -42,17 +28,9 @@ object UpliftRequest {
   implicit val format = Json.format[UpliftRequest]
 }
 
-object State extends Enumeration {
-  type State = Value
-  val TESTING, PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, PRODUCTION = Value
-
-  implicit val format = EnumJson.enumFormat(State)
-}
-
 case class ApplicationState(name: State, requestedByEmailAddress: Option[String], verificationCode: Option[String] = None, updatedOn: DateTime = DateTimeUtils.now)
 
 object ApplicationState {
-  implicit val format1 = EnumJson.enumFormat(State)
   implicit val format = Json.format[ApplicationState]
 
   val testing = ApplicationState(State.TESTING, None)
@@ -67,7 +45,7 @@ object ApplicationState {
     ApplicationState(State.PRODUCTION, Some(requestedBy), Some(verificationCode))
 }
 
-case class Collaborator(emailAddress: String, role: Role.Role)
+case class Collaborator(emailAddress: String, role: Role)
 
 object Collaborator {
   implicit val format = Json.format[Collaborator]
@@ -89,19 +67,9 @@ object EnvironmentToken {
   implicit val format2 = Json.format[EnvironmentToken]
 }
 
-object Environment extends Enumeration {
-  type Environment = Value
-  val PRODUCTION, SANDBOX = Value
-
-  def from(env: String) = Environment.values.find(e => e.toString == env.toUpperCase)
-
-  implicit val format = EnumJson.enumFormat(Environment)
-}
-
 case class ClientSecretRequest(name: String)
 
 object ClientSecretRequest {
-  implicit val format1 = EnumJson.enumFormat(Environment)
   implicit val format2 = Json.format[ClientSecretRequest]
 }
 
@@ -130,20 +98,8 @@ object OverrideFlag {
   implicit val format = Format(reads, writes)
 }
 
-object TermsOfUseStatus extends Enumeration {
-  type TermsOfUseStatus = Value
-  val NOT_APPLICABLE, AGREEMENT_REQUIRED, AGREED = Value
-}
-
-object AccessType extends Enumeration {
-  type Role = Value
-  val STANDARD, PRIVILEGED, ROPC = Value
-
-  implicit val format = EnumJson.enumFormat(AccessType)
-}
-
 sealed trait Access {
-  val accessType: AccessType.Value
+  val accessType: AccessType
 }
 
 object Access {
@@ -323,7 +279,7 @@ object CheckInformationForm {
   }
 }
 
-case class SubscriptionData (role: Role.Role, application: Application, subscriptions: Option[GroupedSubscriptions], hasSubscriptions: Boolean)
+case class SubscriptionData (role: Role, application: Application, subscriptions: Option[GroupedSubscriptions], hasSubscriptions: Boolean)
 
 case class Application(id: String,
                        clientId: String,
@@ -341,7 +297,7 @@ case class Application(id: String,
 
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
-  def termsOfUseStatus = {
+  def termsOfUseStatus: TermsOfUseStatus = {
     if (deployedTo == Environment.SANDBOX || access.accessType != AccessType.STANDARD) {
       TermsOfUseStatus.NOT_APPLICABLE
     } else if (termsOfUseAgreements.isEmpty) {

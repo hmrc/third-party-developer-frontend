@@ -15,12 +15,13 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment, Developer, Role, State}
+@import domain.{Application, Environment, Developer, Role, State, TermsOfUseStatus}
 @import include._
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
+@import org.joda.time.format.DateTimeFormat
 
-@(role: Role.Role, app: Application)(
+@(role: Role, app: Application)(
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 
 @devMain(
@@ -39,6 +40,14 @@
     </header>
 
     @appEnvironment(app)
+
+    @if(app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED && app.isPermittedToMakeChanges(role)) {
+        <div id="termsOfUseWarning" class="notice">
+            <i class="icon icon-important"><span class="visually-hidden">Warning</span></i>
+            <strong class="bold-small">You must agree to the terms of use on this application.</strong>
+        </div>
+        <br>
+    }
 
     <table>
         <colgroup>
@@ -78,15 +87,43 @@
             </tr>
         </tbody>
     </table>
+
+    @if(app.termsOfUseStatus != TermsOfUseStatus.NOT_APPLICABLE) {
+        <br>
+        <table id="termsOfUse">
+            <colgroup>
+                <col width="40%">
+                <col width="30%">
+                <col width="30%">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Terms of use</th>
+                    <th class="numeric"></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Terms of use</td>
+                    <td id="termsOfUseAagreementDetails">
+                        @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
+                            Agreed by @{app.termsOfUseAgreements.head.emailAddress} on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(app.termsOfUseAgreements.head.timeStamp)}
+                        } else {
+                            Not agreed
+                        }
+                    </td>
+                    <td class="numeric">
+                      @if(app.isPermittedToMakeChanges(role)) {
+                          @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
+                              <a id="termsOfUseReadLink" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a>
+                          } else {
+                              <a id="termsOfUseReadLink" class="button" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>
+                          }
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
 }
-
-
-
-
-
-
-
-
-
-
-

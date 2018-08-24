@@ -22,9 +22,10 @@
 @import controllers.AddRedirectForm
 
 @(application: Application, form: Form[AddRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = "Add a redirect URI",
+    title = titleError + "Add a redirect URI",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Add a redirect URI"),

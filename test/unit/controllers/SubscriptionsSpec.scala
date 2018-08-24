@@ -18,7 +18,7 @@ package unit.controllers
 
 import config.ApplicationConfig
 import connectors.{DeskproConnector, ThirdPartyDeveloperConnector}
-import controllers.SubscriptionRedirect.{APPLICATION_CHECK_PAGE, MANAGE_PAGE}
+import domain.SubscriptionRedirect.{APPLICATION_CHECK_PAGE, MANAGE_PAGE}
 import controllers._
 import domain.ApiSubscriptionFields.Fields
 import domain._
@@ -538,7 +538,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
     title.get
   }
 
-  private def givenTheApplicationExistWithUserRole(applicationService: ApplicationService, appId: String, userRole: Role.Value, state: ApplicationState = ApplicationState.testing) = {
+  private def givenTheApplicationExistWithUserRole(applicationService: ApplicationService, appId: String, userRole: Role, state: ApplicationState = ApplicationState.testing) = {
     val application = Application(appId, clientId, "app", DateTimeUtils.now, Environment.PRODUCTION,
       collaborators = Set(Collaborator(loggedInDeveloper.email, userRole)), state = state)
 

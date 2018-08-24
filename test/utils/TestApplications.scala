@@ -18,12 +18,8 @@ package utils
 
 import java.util.UUID
 
-import controllers.EditApplicationForm
-import domain.Environment.Environment
 import domain._
 import org.joda.time.DateTimeZone
-import play.api.libs.json.Json
-import play.api.mvc.Result
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.util.Random
@@ -94,7 +90,7 @@ trait TestApplications {
 
     final def withPrivacyPolicyUrl(url: Option[String]) = app.copy(access = standardAccess.copy(privacyPolicyUrl = url))
 
-    final def withTeamMember(email: String, userRole: Role.Value) = app.copy(collaborators = app.collaborators + Collaborator(email, userRole))
+    final def withTeamMember(email: String, userRole: Role) = app.copy(collaborators = app.collaborators + Collaborator(email, userRole))
 
     final def withTeamMembers(teamMembers: Set[Collaborator]) = app.copy(collaborators = teamMembers)
 

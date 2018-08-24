@@ -14,13 +14,13 @@
  * limitations under the License.
  *@
 
+@import domain.SubscriptionRedirect._
 @import domain.{Application, Developer, Environment, Role, State}
 @import model.Crumb
 @import include._
 @import uk.gov.hmrc.urls.Link
-@import controllers.SubscriptionRedirect._
 
-@(role: Role.Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean)(
+@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean)(
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
 
 @isPendingOrActiveProductionApplication(application: Application) = @{

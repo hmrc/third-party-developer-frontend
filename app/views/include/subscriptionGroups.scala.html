@@ -14,10 +14,10 @@
  * limitations under the License.
  *@
 
-@import domain.{Application, Developer, Role}
+@import domain.{Application, Developer, Role, SubscriptionRedirect}
 @import include._
 
-@(role: Role.Role, subscriptions: GroupedSubscriptions, app: Application, hasSubscriptions: Boolean, afterUnsubscribeRedirectTo: SubscriptionRedirect.Value)(
+@(role: Role, subscriptions: GroupedSubscriptions, app: Application, hasSubscriptions: Boolean, afterUnsubscribeRedirectTo: SubscriptionRedirect)(
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @if(subscriptions.exampleApi.nonEmpty) {

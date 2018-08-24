@@ -22,9 +22,10 @@
 
 @(form: Form[controllers.EditApplicationForm], app: Application)(
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = "Change application details",
+    title = titleError + "Change application details",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Change application details"),

@@ -20,9 +20,10 @@
 @import model.Crumb
 
 @(app: Application,form: Form[ContactForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = "Who is your application review contact?",
+    title = titleError + "Who is your application review contact?",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Manage credentials"),

@@ -16,9 +16,10 @@
 
 @import views.helper.IdFormatter
 
-@import controllers.SubscriptionRedirect._
+@import domain.SubscriptionRedirect
+@import domain.SubscriptionRedirect._
 
-@(vm: SubscriptionFieldsViewModel, subscriptionRedirect: SubscriptionRedirect.Value = MANAGE_PAGE)(implicit request: Request[Any], messages: Messages)
+@(vm: SubscriptionFieldsViewModel, subscriptionRedirect: SubscriptionRedirect = MANAGE_PAGE)(implicit request: Request[Any], messages: Messages)
 
 <div class="accordion__body__row accordion__body__row--no-border">
     <div class="accordion__body__row__left">

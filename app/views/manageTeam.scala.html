@@ -19,11 +19,12 @@
 @import include._
 @import model.Crumb
 
-@(app: Application, role: Role.Role, form: Form[controllers.AddTeamMemberForm], loggedIn: Developer)(
+@(app: Application, role: Role, form: Form[controllers.AddTeamMemberForm], loggedIn: Developer)(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = "Manage team members",
+    title = titleError + "Manage team members",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Manage team members"),

@@ -17,11 +17,9 @@
 package controllers
 
 import controllers.APISubscriptions.subscriptionNumberLabel
-import domain.APIGroup.{API, EXAMPLE, TEST_API}
-import domain.Role.Role
-import domain.State.State
-import domain.TermsOfUseStatus.TermsOfUseStatus
+import domain.APIGroup._
 import domain._
+import enumeratum.{EnumEntry, PlayEnum}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.NotFoundException
 
@@ -98,9 +96,4 @@ object AjaxSubscriptionResponse{
 
     AjaxSubscriptionResponse(context, group.toString, subscriptionNumberLabel(apiSubscriptions))
   }
-}
-
-object SubscriptionRedirect extends Enumeration {
-  type SubscriptionRedirectType = Value
-  val MANAGE_PAGE, APPLICATION_CHECK_PAGE, API_SUBSCRIPTIONS_PAGE = Value
 }

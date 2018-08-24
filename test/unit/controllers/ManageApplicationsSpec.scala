@@ -239,7 +239,7 @@ class ManageApplicationsSpec extends UnitSpec with MockitoSugar with WithFakeApp
     title.get
   }
 
-  private def givenTheApplicationExistWithUserRole(applicationService: ApplicationService, appId: String, userRole: Role.Value, state: ApplicationState = ApplicationState.testing) = {
+  private def givenTheApplicationExistWithUserRole(applicationService: ApplicationService, appId: String, userRole: Role, state: ApplicationState = ApplicationState.testing) = {
     val application = Application(appId, clientId, "app", DateTimeUtils.now, Environment.PRODUCTION,
       collaborators = Set(Collaborator(loggedInUser.email, userRole)), state = state)
 

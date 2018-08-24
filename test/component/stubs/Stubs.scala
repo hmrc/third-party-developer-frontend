@@ -20,10 +20,8 @@ import java.net.URLEncoder
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import component.steps.AppWorld
 import domain.ApiSubscriptionFields.{SubscriptionField, SubscriptionFields, SubscriptionFieldsPutRequest}
 import domain.DefinitionFormats._
-import domain.Environment.Environment
 import domain._
 import org.scalatest.Matchers
 import play.api.Logger

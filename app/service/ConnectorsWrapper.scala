@@ -18,9 +18,10 @@ package service
 
 import config.ApplicationConfig
 import connectors._
-import domain.{Application, ApplicationNotFound}
-import domain.Environment.{Environment, PRODUCTION}
+import domain.Environment.PRODUCTION
+import domain._
 import uk.gov.hmrc.http.HeaderCarrier
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
