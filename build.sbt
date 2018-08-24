@@ -15,6 +15,8 @@ import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
+import scala.util.Properties
+
 lazy val appName = "third-party-developer-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test
@@ -152,7 +154,8 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
       SubProcess(
         ForkOptions(
           runJVMOptions = Seq(
-            "-Dtest.name=" + test.name
+            "-Dtest.name=" + test.name,
+            s"-Dtest_driver=${Properties.propOrElse("test_driver", "firefox")}"
           )
         )
       )
