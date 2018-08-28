@@ -43,29 +43,29 @@ lazy val compile = Seq(
 )
 
 lazy val test = Seq(
-  "info.cukes" %% "cucumber-scala" % cucumberVersion % "test,it",
-  "info.cukes" % "cucumber-junit" % cucumberVersion % "test,it",
-  "uk.gov.hmrc" %% "hmrctest" % "3.0.0" % "test,it",
-  "junit" % "junit" % "4.12" % "test,it",
-  "org.jsoup" % "jsoup" % "1.10.2" % "test,it",
-  "org.pegdown" % "pegdown" % "1.6.0" % "test,it",
-  "com.typesafe.play" %% "play-test" % PlayVersion.current % "test,it",
-  "org.scalatest" %% "scalatest" % "2.2.6" % "test,it",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % "test,it",
-  "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % "test,it",
-  "com.github.tomakehurst" % "wiremock" % "1.58" % "test,it",
-  "org.mockito" % "mockito-all" % "1.10.19" % "test,it",
+  "info.cukes" %% "cucumber-scala" % cucumberVersion % "test",
+  "info.cukes" % "cucumber-junit" % cucumberVersion % "test",
+  "uk.gov.hmrc" %% "hmrctest" % "3.0.0" % "test",
+  "junit" % "junit" % "4.12" % "test",
+  "org.jsoup" % "jsoup" % "1.10.2" % "test",
+  "org.pegdown" % "pegdown" % "1.6.0" % "test",
+  "com.typesafe.play" %% "play-test" % PlayVersion.current % "test",
+  "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % "test",
+  "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % "test",
+  "com.github.tomakehurst" % "wiremock" % "1.58" % "test",
+  "org.mockito" % "mockito-all" % "1.10.19" % "test",
   "jp.t2v" %% "play2-auth-test" % t2vVersion % "test",
   "org.scalaj" %% "scalaj-http" % "2.3.0" % "test",
   "org.scalacheck" %% "scalacheck" % "1.13.5" % "test",
-  "com.github.mkolisnyk" % "cucumber-reports" % "1.0.7" % "test,it",
-  "net.masterthought" % "cucumber-reporting" % "3.3.0" % "test,it",
-  "net.masterthought" % "cucumber-sandwich" % "3.3.0" % "test,it",
-  "com.assertthat" % "selenium-shutterbug" % "0.2" % "test,it"
+  "com.github.mkolisnyk" % "cucumber-reports" % "1.0.7" % "test",
+  "net.masterthought" % "cucumber-reporting" % "3.3.0" % "test",
+  "net.masterthought" % "cucumber-sandwich" % "3.3.0" % "test",
+  "com.assertthat" % "selenium-shutterbug" % "0.2" % "test"
 )
 lazy val overrideDependencies = Set(
-  "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % "test,it",
-  "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % "test,it"
+  "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % "test",
+  "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % "test"
 )
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
@@ -107,16 +107,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
   .settings(testOptions in Test := Seq(Tests.Filter(unitFilter))
   )
-  .configs(IntegrationTest)
-  .settings(inConfig(TemplateItTest)(Defaults.itSettings): _*)
-  .settings(
-    Keys.fork in IntegrationTest := false,
-    unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "it")),
-    unmanagedResourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "it/resources")),
-    addTestReportOption(IntegrationTest, "int-test-reports"),
-    testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
-    parallelExecution in IntegrationTest := false)
-  .settings(resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo))
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
@@ -129,10 +119,8 @@ lazy val microservice = Project(appName, file("."))
     parallelExecution in ComponentTest := false
   )
 lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
-lazy val allItPhases = "tit->it;it->it;it->compile;compile->compile"
 lazy val ComponentTest = config("component") extend Test
 lazy val TemplateTest = config("tt") extend Test
-lazy val TemplateItTest = config("tit") extend IntegrationTest
 lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
 
   credentials += SbtCredentials,
