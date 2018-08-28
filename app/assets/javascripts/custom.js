@@ -109,6 +109,13 @@ $(document).ready(function () {
     $(".api-subscriber").each(function () {
         $(this).apiSubscriber();
     });
+
+    $(".accordion").click(function() {
+        var link = $(this);
+        setTimeout(function() {
+            link.find(".accordion__button").attr("aria-expanded", link.attr("aria-expanded"));
+        }, 0);
+    });
 });
 
 var showHide = function () {
