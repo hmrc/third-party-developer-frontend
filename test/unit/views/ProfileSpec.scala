@@ -49,7 +49,7 @@ class ProfileSpec extends UnitSpec with OneServerPerSuite {
         None
       )
 
-      val page = views.html.profile.render(ProfileForm.form, request, developer, ApplicationConfig, applicationMessages, "details")
+      val page = views.html.profile.render(developer,request, developer, ApplicationConfig, applicationMessages, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
