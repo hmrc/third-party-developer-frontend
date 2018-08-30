@@ -23,6 +23,7 @@ GET         /support/submitted                                                  
 GET         /locked                                                                     controllers.UserLoginAccount.accountLocked
 
 GET         /profile                                                                    controllers.Profile.showProfile
+GET         /profile/change                                                             controllers.Profile.changeProfile
 POST        /profile                                                                    controllers.Profile.updateProfile
 
 GET         /profile/password                                                           controllers.Profile.showPasswordPage
