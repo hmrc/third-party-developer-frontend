@@ -53,7 +53,7 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite {
       elementExistsByText(document, "p", "You need admin rights to add or remove team members.") shouldBe false
       elementExistsByText(document, "td", loggedInUser.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
-      inputExistsWithValue(document, "remove", "submit", "Remove") shouldBe true
+      elementExistsByText(document, "a","Remove") shouldBe true
     }
 
     "not show Add and Remove buttons for Developer" in {

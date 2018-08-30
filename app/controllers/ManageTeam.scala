@@ -19,6 +19,7 @@ package controllers
 import config.ApplicationGlobal
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import helpers.string._
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
@@ -63,11 +64,11 @@ trait ManageTeam extends ApplicationController {
     AddTeamMemberForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def removeTeamMember(applicationId: String, teamMemberHash: Integer, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) {
+  def removeTeamMember(applicationId: String, teamMemberHash: String) = teamMemberOnStandardApp(applicationId) {
     implicit request =>
       val application = request.application
 
-      application.collaborators.find(c => c.emailAddress.hashCode() == teamMemberHash) match {
+      application.collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash) match {
         case Some(collaborator) =>
           successful(Ok(views.html.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, collaborator.emailAddress)))
         case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))

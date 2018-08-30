@@ -21,6 +21,7 @@ import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
+import helpers.string._
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, anyString, eq => mockEq}
@@ -198,7 +199,7 @@ class ManageTeamSpec extends UnitSpec with MockitoSugar with WithFakeApplication
 
   "removeTeamMember" should {
     val teamMemberEmail = "teamMemberToDelete@example.com"
-    val teamMemberEmailHash = teamMemberEmail.hashCode()
+    val teamMemberEmailHash = teamMemberEmail.toSha256
     val additionalTeamMembers = Seq(
       Collaborator("email1@example.com", DEVELOPER),
       Collaborator("email2@example.com", DEVELOPER),
@@ -210,7 +211,7 @@ class ManageTeamSpec extends UnitSpec with MockitoSugar with WithFakeApplication
       givenTheApplicationExistWithUserRole(underTest.applicationService, appId, ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
 
       val result =
-        await(underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest))
+        await(underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
       bodyOf(result) should include(teamMemberEmail)
@@ -220,7 +221,7 @@ class ManageTeamSpec extends UnitSpec with MockitoSugar with WithFakeApplication
       givenTheApplicationExistWithUserRole(underTest.applicationService, appId, DEVELOPER, additionalTeamMembers = additionalTeamMembers)
 
       val result =
-        await(underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest))
+        await(underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
       bodyOf(result) should include(teamMemberEmail)
