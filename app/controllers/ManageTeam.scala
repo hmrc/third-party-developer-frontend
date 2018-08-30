@@ -67,15 +67,11 @@ trait ManageTeam extends ApplicationController {
     implicit request =>
       val application = request.application
 
-      def handleValidForm(form: RemoveTeamMemberForm) = {
-        successful(Ok(views.html.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, form.email)))
+      application.collaborators.find(c => c.emailAddress.hashCode() == teamMemberHash) match {
+        case Some(collaborator) =>
+          successful(Ok(views.html.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, collaborator.emailAddress)))
+        case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
-
-      def handleInvalidForm(formWithErrors: Form[RemoveTeamMemberForm]) = {
-        successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
-      }
-
-      RemoveTeamMemberForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
   def removeTeamMemberAction(applicationId: String) = adminOnStandardApp(applicationId) { implicit request =>

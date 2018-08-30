@@ -197,29 +197,37 @@ class ManageTeamSpec extends UnitSpec with MockitoSugar with WithFakeApplication
   }
 
   "removeTeamMember" should {
-    val teamMemberEmail = "teamMember@test.com"
+    val teamMemberEmail = "teamMemberToDelete@example.com"
     val teamMemberEmailHash = teamMemberEmail.hashCode()
+    val additionalTeamMembers = Seq(
+      Collaborator("email1@example.com", DEVELOPER),
+      Collaborator("email2@example.com", DEVELOPER),
+      Collaborator("email3@example.com", DEVELOPER),
+      Collaborator(teamMemberEmail, DEVELOPER)
+    )
 
     "show the remove team member page when logged in as an admin" in new Setup {
-      givenTheApplicationExistWithUserRole(underTest.applicationService, appId, ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(underTest.applicationService, appId, ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
 
       val result =
-        await(underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail)))
+        await(underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest))
 
       status(result) shouldBe OK
+      bodyOf(result) should include(teamMemberEmail)
     }
 
-    "show the remove team member page when logged in as an developer" in new Setup {
-      givenTheApplicationExistWithUserRole(underTest.applicationService, appId, DEVELOPER)
+    "show the remove team member page when logged in as a developer" in new Setup {
+      givenTheApplicationExistWithUserRole(underTest.applicationService, appId, DEVELOPER, additionalTeamMembers = additionalTeamMembers)
 
       val result =
-        await(underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail)))
+        await(underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest))
 
       status(result) shouldBe OK
+      bodyOf(result) should include(teamMemberEmail)
     }
 
     "redirect to login page when logged out" in new Setup {
-      givenTheApplicationExistWithUserRole(underTest.applicationService, appId, DEVELOPER)
+      givenTheApplicationExistWithUserRole(underTest.applicationService, appId, DEVELOPER, additionalTeamMembers = additionalTeamMembers)
 
       val result =
         await(underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail)))
@@ -230,7 +238,7 @@ class ManageTeamSpec extends UnitSpec with MockitoSugar with WithFakeApplication
 
     "reject invalid email address" in new Setup {
       val application = givenTheApplicationExistWithUserRole(
-        underTest.applicationService, appId, ADMINISTRATOR)
+        underTest.applicationService, appId, ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
       val result = await(underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress")))
 
       status(result) shouldBe BAD_REQUEST
@@ -309,7 +317,8 @@ class ManageTeamSpec extends UnitSpec with MockitoSugar with WithFakeApplication
   }
 
   private def givenTheApplicationExistWithUserRole(applicationService: ApplicationService,
-                                                   appId: String, userRole: Role,
+                                                   appId: String,
+                                                   userRole: Role,
                                                    state: ApplicationState = ApplicationState.testing,
                                                    additionalTeamMembers: Seq[Collaborator] = Seq()) = {
     val application = Application(appId, clientId, "app", DateTime.parse("2018-04-06T09:00"), Environment.PRODUCTION,
