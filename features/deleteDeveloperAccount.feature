@@ -8,9 +8,8 @@ Feature: Developer requests their account to be deleted
     And I am successfully logged in with 'john.smith@example.com' and 'StrongPassword1!'
     When I click on the 'John Smith' link
     Then I am on the 'Manage profile' page
-    And I see values in fields:
-      | firstname | John  |
-      | lastname  | Smith |
+    And I see text in fields:
+      | name | John Smith  |
     And I see a link to request account deletion
 
   @APIS-3430
