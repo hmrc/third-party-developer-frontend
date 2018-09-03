@@ -38,13 +38,30 @@ trait Profile extends LoggedInController with PasswordChange {
   val passwordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
-  private def profileView(user: Developer)(implicit req: RequestWithAttributes[_]) = {
-    views.html.profile(profileForm.fill(ProfileForm(user.firstName, user.lastName, user.organisation)))
+  private def changeProfileView(user: Developer)(implicit req: RequestWithAttributes[_]) = {
+    views.html.changeProfile(profileForm.fill(ProfileForm(user.firstName, user.lastName, user.organisation)))
   }
 
-
   def showProfile() = loggedInAction { implicit request =>
-    Future.successful(Ok(profileView(loggedIn)))
+    Future.successful(Ok(views.html.profile()))
+  }
+
+  def changeProfile() = loggedInAction { implicit request =>
+    Future.successful(Ok(changeProfileView(loggedIn)))
+  }
+
+  def updateProfile() = loggedInAction { implicit request =>
+    val requestForm = profileForm.bindFromRequest
+    requestForm.fold(
+      formWithErrors => {
+        Future.successful(BadRequest(views.html.changeProfile(formWithErrors.firstnameGlobal().lastnameGlobal())))
+      },
+      profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
+        _ =>
+          Ok(profileUpdated("profile updated", "Manage profile", "manage-profile")(request,
+            Developer(loggedIn.email, profile.firstName, profile.lastName, profile.organisation), applicationMessages, appConfig))
+      }
+    )
   }
 
   def showPasswordPage() = loggedInAction { implicit request =>
@@ -56,21 +73,6 @@ trait Profile extends LoggedInController with PasswordChange {
       Ok(passwordUpdated("password changed", "Password changed", "change-password")),
       changeProfilePassword(_))
   }
-
-  def updateProfile() = loggedInAction { implicit request =>
-    val requestForm = profileForm.bindFromRequest
-    requestForm.fold(
-      formWithErrors => {
-        Future.successful(BadRequest(views.html.profile(formWithErrors.firstnameGlobal().lastnameGlobal())))
-      },
-      profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
-        _ =>
-          Ok(profileUpdated("profile updated", "Manage profile", "manage-profile")(request,
-            Developer(loggedIn.email, profile.firstName, profile.lastName, profile.organisation), applicationMessages, appConfig))
-      }
-    )
-  }
-
   def requestDeletion() = loggedInAction { implicit request =>
     Future.successful(Ok(profileDeleteConfirmation(DeleteProfileForm.form)))
   }
@@ -87,7 +89,7 @@ trait Profile extends LoggedInController with PasswordChange {
           case Some("true") =>
             applicationService.requestDeveloperAccountDeletion(loggedIn.displayedName, loggedIn.email).map(_ => Ok(profileDeleteSubmitted()))
 
-          case _ => Future.successful(Ok(profileView(loggedIn)))
+          case _ => Future.successful(Ok(changeProfileView(loggedIn)))
         }
       }
     )
