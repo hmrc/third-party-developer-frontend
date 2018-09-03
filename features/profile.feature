@@ -24,13 +24,13 @@ Feature: Developer views/updates profile
     And the user-nav header contains a 'Joe Bloggs' link
     And The current page contains link 'Continue to your profile' to 'Manage profile'
 
-#  @API-141
-#  Scenario: TPSD edits password
-#    Given I want to successfully change my password
-#    When I click on the 'Change password' link
-#    When I enter all the fields:
-#      | currentpassword | StrongPassword1! |
-#      | password        | StrongNewPwd!2   |
-#      | confirmpassword | StrongNewPwd!2   |
-#    And I click on submit
-#    Then I am on the 'Edit password success' page
+  @API-141
+  Scenario: TPSD edits password
+    Given I want to successfully change my password
+    When I click on the 'Change password' link
+    When I enter all the fields:
+      | currentpassword | StrongPassword1! |
+      | password        | StrongNewPwd!2   |
+      | confirmpassword | StrongNewPwd!2   |
+    And I click on submit
+    Then I am on the 'Edit password success' page

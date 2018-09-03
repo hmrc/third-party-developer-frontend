@@ -41,33 +41,30 @@
         @helper.CSRF.formField
         <div class="form-group @if(form.errors("firstname").nonEmpty) {form-group-error form-field--error}">
             <label class="form-label-bold" for="firstname" id="firstname-label">First name</label>
-            @fieldError(form.errors, "firstname", true)
+            @fieldError(form.errors, "firstname")
             <input type="text"
-                   class="form-control-2-3"
                    id="firstname"
                    name="firstname"
                    aria-labelledby="firstname-label"
-                   value="@form.data.getOrElse("firstname", "")" class="input--medium @if(form.errors("firstname").nonEmpty) {error-field}"/>
+                   value="@form.data.getOrElse("firstname", "")" class="form-control-2-3 input--medium @if(form.errors("firstname").nonEmpty) {error-field}"/>
         </div>
         <div class="form-group @if(form.errors("lastname").nonEmpty) {form-group-error form-field--error}">
             <label class="form-label-bold" for="lastname" id="lastname-label">Last name</label>
-            @fieldError(form.errors, "lastname", true)
+            @fieldError(form.errors, "lastname")
             <input type="text"
-                   class="form-control-2-3"
                    id="lastname"
                    name="lastname"
                    aria-labelledby="lastname-label"
-                   value="@form.data.getOrElse("lastname", "")" class="input--medium @if(form.errors("lastname").nonEmpty) {error-field}"/>
+                   value="@form.data.getOrElse("lastname", "")" class="form-control-2-3 input--medium @if(form.errors("lastname").nonEmpty) {error-field}"/>
         </div>
         <div class="form-group @if(form.errors("organisation").nonEmpty) {form-group-error form-field--error}">
             <label class="form-label-bold" for="organisation" id="organisation-label">Organisation (optional)</label>
-            @fieldError(form.errors, "organisation", true)
+            @fieldError(form.errors, "organisation")
             <input type="text"
-                   class="form-control-2-3"
                    id="organisation"
                    name="organisation"
                    aria-labelledby="organisation-label"
-                   value="@form.data.getOrElse("organisation", "")" class="input--medium @if(form.errors("organisation").nonEmpty) {error-field}"/>
+                   value="@form.data.getOrElse("organisation", "")" class="form-control-2-3 input--medium @if(form.errors("organisation").nonEmpty) {error-field}"/>
         </div>
         <div class="form-group">
             <button id="submit" class="button" type="submit">Save changes</button>
