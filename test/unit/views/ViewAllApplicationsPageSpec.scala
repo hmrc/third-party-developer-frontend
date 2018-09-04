@@ -33,7 +33,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite {
   "veiw all applications page" should {
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
-      val request = FakeRequest() //.withCSRFToken
+      val request = FakeRequest()
       val loggedIn = Developer("developer@example.com", "firstName", "lastname")
       views.html.manageApplications.render(appSummaries, request, Flash(), loggedIn, applicationMessages, ApplicationConfig, "nav-section")
     }
