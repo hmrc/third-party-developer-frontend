@@ -53,13 +53,6 @@ class DeleteApplicationConfirmSpec extends UnitSpec with OneServerPerSuite {
       elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "no", "No") shouldBe true
     }
 
-    "include a back link to the delete application page" in {
-      val page = views.html.deleteApplicationConfirm.render(application, DeleteApplicationForm.form, request, loggedInUser, applicationMessages, ApplicationConfig, "details")
-
-      val document = Jsoup.parse(page.body)
-      elementIdentifiedByAttrWithValueContainsText(document, "a", "href", s"/developer/applications/$appId/delete", "Back") shouldBe true
-    }
-
     "render with error when no radio button has been selected" in {
 
       val formWithErrors = DeleteApplicationForm.form.withError("confirmation", "Confirmation error message")
