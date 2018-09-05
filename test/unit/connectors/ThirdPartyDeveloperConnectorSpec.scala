@@ -23,14 +23,15 @@ import domain._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import play.api.http.Status
 import play.api.libs.json.Json
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
 import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestPayloadEncryptor
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse }
+import scala.concurrent.Future
 
 class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with ScalaFutures with TestPayloadEncryptor {
 
@@ -306,6 +307,34 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
         thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(developer)))))
 
       connector.updateTargets(email, request).futureValue shouldBe developer
+    }
+  }
+
+  "change password" should {
+
+    val changePasswordRequest = ChangePassword("email@example.com", "oldPassword123", "newPassword321")
+    val encryptedBody = EncryptedJson.toSecretRequestJson(changePasswordRequest)
+
+    "throw Invalid Credentials if the response is Unauthorised" in new Setup {
+      when(connector.http.POST(endpoint("change-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).
+        thenReturn(Future.failed(Upstream4xxResponse("Unauthorised error", Status.UNAUTHORIZED, Status.UNAUTHORIZED)))
+
+      await(connector.changePassword(changePasswordRequest).failed) shouldBe a[InvalidCredentials]
+
+    }
+
+    "throw Unverified Account if the response is Forbidden" in new Setup {
+      when(connector.http.POST(endpoint("change-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).
+        thenReturn(Future.failed(Upstream4xxResponse("Forbidden error", Status.FORBIDDEN, Status.FORBIDDEN)))
+
+      await(connector.changePassword(changePasswordRequest).failed) shouldBe a[UnverifiedAccount]
+    }
+
+    "throw Locked Account if the response is Locked" in new Setup {
+      when(connector.http.POST(endpoint("change-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).
+        thenReturn(Future.failed(Upstream4xxResponse("Locked error", Status.LOCKED, Status.LOCKED)))
+
+      await(connector.changePassword(changePasswordRequest).failed) shouldBe a[LockedAccount]
     }
   }
 }
