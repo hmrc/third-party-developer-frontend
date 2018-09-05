@@ -17,10 +17,9 @@
 package unit.controllers
 
 import controllers._
+import org.scalatest.Matchers
 import play.api.data.FormError
 import uk.gov.hmrc.play.test.UnitSpec
-import org.scalatest.Matchers
-import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class FormValidationSpec extends UnitSpec with Matchers {
   "ForgotPasswordForm " should {
@@ -82,7 +81,9 @@ class FormValidationSpec extends UnitSpec with Matchers {
 
     "validate password and generate error if empty" in {
       val boundForm = ChangePasswordForm.form.bind(validChangePasswordForm + ("password" -> ""))
-      boundForm.errors shouldBe List(FormError("password", List("password.error.not.valid.field")), FormError("password", List("password.error.required.field")))
+      val invalidPasswordError = FormError("password", List("password.error.not.valid.field"))
+      val missingPasswordError = FormError("password", List("password.error.required.field"))
+      boundForm.errors shouldBe List(invalidPasswordError, missingPasswordError)
       boundForm.globalErrors shouldBe List()
     }
 
@@ -109,7 +110,9 @@ class FormValidationSpec extends UnitSpec with Matchers {
 
     "validate password and generate error if empty" in {
       val boundForm = PasswordResetForm.form.bind(validPasswordResetForm + ("password" -> ""))
-      boundForm.errors shouldBe List(FormError("password", List("password.error.not.valid.field")), FormError("password", List("password.error.required.field")))
+      val invalidPasswordError = FormError("password", List("password.error.not.valid.field"))
+      val missingPasswordError = FormError("password", List("password.error.required.field"))
+      boundForm.errors shouldBe List(invalidPasswordError, missingPasswordError)
       boundForm.globalErrors shouldBe List()
     }
 
@@ -172,7 +175,9 @@ class FormValidationSpec extends UnitSpec with Matchers {
 
     "validate password and generate error when empty" in {
       val boundForm = RegistrationForm.form.bind(validRegistrationForm + ("password" -> ""))
-      boundForm.errors shouldBe List(FormError("password", List("password.error.not.valid.field")), FormError("password", List("password.error.required.field")))
+      val invalidPasswordError = FormError("password", List("password.error.not.valid.field"))
+      val missingPasswordError = FormError("password", List("password.error.required.field"))
+      boundForm.errors shouldBe List(invalidPasswordError, missingPasswordError)
       boundForm.globalErrors shouldBe List()
     }
 
@@ -426,5 +431,59 @@ class FormValidationSpec extends UnitSpec with Matchers {
       err.key shouldBe "emailaddress"
       err.messages shouldBe List("emailaddress.error.maxLength.field")
     }
+  }
+
+  "ProfileForm" should {
+    def validateNoErrors(formData: Map[String, String]): Unit = {
+      val boundForm = ProfileForm.form.bind(formData)
+      boundForm.errors shouldBe List()
+      boundForm.globalErrors shouldBe List()
+    }
+
+    val VALID_FORM = Map(
+      "firstname" -> "Terry",
+      "lastname" -> "Jones",
+      "organisation" -> "HMRC")
+
+    "accept valid form" in {
+      validateNoErrors(VALID_FORM)
+    }
+
+    "accept valid form without organisation" in {
+      validateNoErrors(VALID_FORM + ("organisation" -> ""))
+    }
+
+    "reject a form when the first name is too long" in {
+      val formData = VALID_FORM + ("firstname" -> "a" * 31)
+      val boundForm = ProfileForm.form.bind(formData)
+      val err = boundForm.errors.head
+      err.key shouldBe "firstname"
+      err.messages shouldBe List("firstname.error.maxLength.field")
+    }
+
+    "reject a form when the first name is empty" in {
+      val formData = VALID_FORM + ("firstname" -> "")
+      val boundForm = ProfileForm.form.bind(formData)
+      val err = boundForm.errors.head
+      err.key shouldBe "firstname"
+      err.messages shouldBe List("firstname.error.required.field")
+    }
+
+    "reject a form when the last name is too long" in {
+      val formData = VALID_FORM + ("lastname" -> "a" * 31)
+      val boundForm = ProfileForm.form.bind(formData)
+      val err = boundForm.errors.head
+      err.key shouldBe "lastname"
+      err.messages shouldBe List("lastname.error.maxLength.field")
+    }
+
+    "reject a form when the last name is empty" in {
+      val formData = VALID_FORM + ("lastname" -> "")
+      val boundForm = ProfileForm.form.bind(formData)
+      val err = boundForm.errors.head
+      err.key shouldBe "lastname"
+      err.messages shouldBe List("lastname.error.required.field")
+    }
+
   }
 }

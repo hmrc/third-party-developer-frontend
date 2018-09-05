@@ -19,7 +19,6 @@ package unit.views
 import config.ApplicationConfig
 import controllers.ProfileForm
 import domain._
-import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
@@ -30,24 +29,12 @@ import utils.ViewHelpers._
 
 class ProfileSpec extends UnitSpec with OneServerPerSuite {
   "Profile page" should {
+
+    val request = FakeRequest().withCSRFToken
+
+    val developer = Developer("developer@example.com", "FirstName", "LastName", Some("TestOrganisation"))
+
     "render" in {
-      val request = FakeRequest().withCSRFToken
-
-      val developer = Developer("Test", "Test", "Test", None)
-
-      val application = Application(
-        "Test Application ID",
-        "Test Application Client ID",
-        "Test Application",
-        DateTime.now(),
-        Environment.PRODUCTION,
-        Some("Test Application"),
-        Set.empty,
-        Standard(),
-        false,
-        ApplicationState.testing,
-        None
-      )
 
       val page = views.html.profile.render(ProfileForm.form, request, developer, ApplicationConfig, applicationMessages, "details")
       page.contentType should include("text/html")
@@ -56,6 +43,21 @@ class ProfileSpec extends UnitSpec with OneServerPerSuite {
       elementExistsByText(document, "h1", "Manage profile") shouldBe true
       elementExistsByText(document, "h2", "Delete account") shouldBe true
       elementIdentifiedByIdContainsText(document, "account-deletion", "Request account deletion") shouldBe true
+    }
+
+    "error for invalid form" in {
+
+      val formWithErrors = ProfileForm.form
+        .withError("firstname", "First name error message")
+        .withError("lastname", "Last name error message")
+
+      val page = views.html.profile.render(formWithErrors, request, developer, ApplicationConfig, applicationMessages, "details")
+      page.contentType should include("text/html")
+
+      val document = Jsoup.parse(page.body)
+      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-firstname", "First name error message") shouldBe true
+      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-lastname", "Last name error message") shouldBe true
+
     }
   }
 }
