@@ -77,19 +77,18 @@
                     </div>
 
 
-                    <div class="form-group @if(form.errors("comments").nonEmpty){form-group-error}" data-char-counter>
+                    <div class="form-group @if(form.errors("comments").nonEmpty){form-group-error}">
                         <label class="label--full-length" for="comments" id="comment-label">What do you need help with?</label>
                         @fieldError(form.errors, "comments", true)
                         <p class="form-field--hint">Don't include any personal or financial information. For example, National Insurance or credit card numbers.</p>
-                        <textarea class="form-control @if(form.errors("comments").nonEmpty){form-control-error}"
+                        <textarea class="js-char-count form-control @if(form.errors("comments").nonEmpty){form-control-error}"
                                   id="comments"
                                   name="comments"
                                   cols="40"
                                   rows="4"
-                                  maxLength="3000"
+                                  maxlength="3000"
                                   aria-labelledby="comment-label"
-                                  aria-describedby="comment-note"
-                                  data-char-field>@form.data.getOrElse("comments", "")</textarea>
+                                  aria-describedby="comment-note">@form.data.getOrElse("comments", "")</textarea>
                     </div>
 
                     <div class="form-field form-field--submit">
