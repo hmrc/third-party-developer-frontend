@@ -27,6 +27,7 @@ import domain.Environment.PRODUCTION
 import domain._
 import org.openqa.selenium.By
 import org.scalatest.Matchers
+import play.api.http.Status._
 import play.api.libs.json.Json
 import steps.PageSugar
 import uk.gov.hmrc.time.DateTimeUtils
@@ -60,15 +61,15 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
   Given( """^application with name '(.*)' can be created$""") { (name: String) =>
     val app = defaultApp(name, "PRODUCTION")
-    Stubs.setupPostRequest("/application", 201, Json.toJson(app).toString())
-    ApplicationStub.setUpFetchApplication(applicationId, 200, Json.toJson(app).toString())
+    Stubs.setupPostRequest("/application", CREATED, Json.toJson(app).toString())
+    ApplicationStub.setUpFetchApplication(applicationId, OK, Json.toJson(app).toString())
   }
 
   Then( """^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) =>
     DeskproStub.verifyTicketCreationWithSubject(subject)
   }
 
-  Then( """^there is a link to submit your application for checking '(.*)', with the text '(.*)'$""") { (appName: String, linkText: String) =>
+  Then( """^there is a link to submit your application for checking with the text '(.*)'$""") { (linkText: String) =>
     val link = Env.driver.findElement(By.linkText(linkText))
     link.getAttribute("href") shouldBe s"${Env.host}/developer/applications/$applicationId/request-check"
   }
@@ -132,8 +133,8 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     ApplicationStub.configureUserApplications(email, applications)
     for (app <- applications) {
       // configure to be able to fetch apps and Subscriptions
-      ApplicationStub.setUpFetchApplication(app.id, 200, Json.toJson(app).toString())
-      ApplicationStub.setUpFetchEmptySubscriptions(app.id, 200)
+      ApplicationStub.setUpFetchApplication(app.id,OK, Json.toJson(app).toString())
+      ApplicationStub.setUpFetchEmptySubscriptions(app.id, OK)
     }
   }
 
@@ -145,7 +146,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         v.get("subscribed").toBoolean, APIAccessType.withName(v.getOrDefault("access", APIAccessType.PUBLIC.toString))))
       aApiSubscription(name, apiVersions, Some(versions.head.get("requiresTrust").toBoolean))
     }
-    ApplicationStub.setUpFetchSubscriptions(appId, 200, apiSubscriptions.toSeq)
+    ApplicationStub.setUpFetchSubscriptions(appId, OK, apiSubscriptions.toSeq)
   }
 
   Given( """^there are no subscription fields for '(.*)' version '(.*)'""") { (apiContext: String, version: String) =>
@@ -168,7 +169,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   When( """^I click on unsubscribe '(.*)' from API '(.*)' version '(.*)'$""") { (id: String, api: String, version: String) =>
-    ApplicationStub.setUpDeleteSubscription(id, api, version, 200)
+    ApplicationStub.setUpDeleteSubscription(id, api, version, OK)
     ApplicationStub.setUpUpdateApproval(id)
     ApiSubscriptionFieldsStub.setUpDeleteSubscriptionFields(id, api, version)
     DeskproStub.setupTicketCreation()
@@ -177,9 +178,9 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   When( """^I successfully subscribe '(.*)' to API '(.*)' version '(.*)'$""") { (id: String, api: String, version: String) =>
-    ApplicationStub.setUpExecuteSubscription(id, api, version, 200)
+    ApplicationStub.setUpExecuteSubscription(id, api, version, OK)
     ApplicationStub.setUpUpdateApproval(id)
-    ApplicationStub.setUpFetchSubscriptions(id, 200, Seq(aApiSubscription(api, Seq(aVersionSubscription(version, APIStatus.STABLE, subscribed = true, access = APIAccessType.PUBLIC)))))
+    ApplicationStub.setUpFetchSubscriptions(id, OK, Seq(aApiSubscription(api, Seq(aVersionSubscription(version, APIStatus.STABLE, subscribed = true, access = APIAccessType.PUBLIC)))))
     val button = waitForElement(By.id(s"toggle-${replaceNonAlpha(api)}-${replaceNonAlpha(version)}-on"))
     button.click()
   }
@@ -205,7 +206,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=MANAGE_PAGE"
   }
 
-  When( """^I am on the subscriptions page for application with id '(.*)' scrolled to the API with name '(.*)' and group type '(.*)'$""") { (id: String, name: String, accessType: String) =>
+  When( """^I am on the subscriptions page for application with id '(.*)'$""") { (id: String) =>
     webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/subscriptions"
   }
 

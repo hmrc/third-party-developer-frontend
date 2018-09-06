@@ -26,6 +26,7 @@ import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
+import play.api.http.Status
 
 import scala.collection.mutable
 
@@ -58,7 +59,7 @@ class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar 
 
   Given( """^I enter valid information for all fields:$""") { (registrationDetails: DataTable) =>
     val data: mutable.Map[String, String] = registrationDetails.asMap(classOf[String], classOf[String]).asScala
-    DeveloperStub.register(createPayload(data), 201)
+    DeveloperStub.register(createPayload(data), Status.CREATED)
     Form.populate(data)
   }
 
@@ -68,7 +69,7 @@ class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar 
 
   Given("""^I expect a resend call from '(.*)'$""") {
     email: String => {
-      DeveloperStub.setupResend(email, 204)
+      DeveloperStub.setupResend(email, Status.NO_CONTENT)
     }
   }
 

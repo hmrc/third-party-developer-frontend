@@ -24,6 +24,7 @@ import cucumber.api.scala.{EN, ScalaDsl}
 import domain.{Developer, LoginRequest, Session}
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
+import play.api.http.Status._
 import play.api.libs.json.Json
 import steps.PageSugar
 
@@ -46,20 +47,19 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   Given("""^I am registered with$""") { (data: DataTable) =>
     val result = data.asMaps(classOf[String], classOf[String]).get(0)
-    val incomplete = result.getOrDefault("incomplete account setup", "false").toBoolean
     val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
     val sessionId = "sessionId"
     val session = Session(sessionId, developer)
     val password = result.get("Password")
 
-    Stubs.setupPostRequest("/check-password", 204)
-    Stubs.setupPostRequest("/session", 401)
+    Stubs.setupPostRequest("/check-password", NO_CONTENT)
+    Stubs.setupPostRequest("/session", UNAUTHORIZED)
 
     Stubs.setupEncryptedPostRequest("/session", LoginRequest(developer.email, password),
-      200, Json.toJson(session).toString())
+      OK, Json.toJson(session).toString())
 
-    Stubs.setupRequest(s"/session/$sessionId", 200, Json.toJson(session).toString())
-    Stubs.setupDeleteRequest(s"/session/$sessionId", 200)
+    Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
+    Stubs.setupDeleteRequest(s"/session/$sessionId", OK)
   }
 
   Given("""^I fill in the login form with$""") { (data: DataTable) =>
@@ -80,12 +80,12 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   When("""^I attempt to Sign out when the session expires""") {
     val sessionId = "sessionId"
-    Stubs.setupDeleteRequest(s"/session/$sessionId", 404)
+    Stubs.setupDeleteRequest(s"/session/$sessionId", NOT_FOUND)
     try {
       val link = webDriver.findElement(By.linkText("Sign out"))
       link.click()
     } catch {
-      case ex: org.openqa.selenium.NoSuchElementException => {
+      case _: org.openqa.selenium.NoSuchElementException => {
         val menu = webDriver.findElement(By.linkText("Menu"))
         menu.click()
 

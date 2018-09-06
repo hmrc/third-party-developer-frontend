@@ -27,6 +27,8 @@ import org.scalatest.Matchers
 import play.api.Logger
 import play.api.libs.json.{Json, Writes}
 import utils.TestPayloadEncryptor
+import play.api.http.Status._
+
 
 object Stubs extends TestPayloadEncryptor {
 
@@ -111,12 +113,12 @@ object ApplicationStub {
   def setUpUpdateApproval(id: String) = {
     stubFor(
       post(urlEqualTo(s"/application/$id/check-information"))
-        .willReturn(aResponse().withStatus(200))
+        .willReturn(aResponse().withStatus(OK))
     )
   }
 
 
-  def configureUserApplications(email: String, applications: List[Application] = Nil, status: Int = 200) = {
+  def configureUserApplications(email: String, applications: List[Application] = Nil, status: Int = OK) = {
     val encodedEmail = URLEncoder.encode(email, "UTF-8")
 
     def stubResponse(environment: Environment, applications: List[Application]) = {
@@ -131,7 +133,7 @@ object ApplicationStub {
     stubResponse(Environment.SANDBOX, sandboxApps)
   }
 
-  def configureApplicationCredentials(tokens: Map[String, ApplicationTokens], status: Int = 200) = {
+  def configureApplicationCredentials(tokens: Map[String, ApplicationTokens], status: Int = OK) = {
     tokens.foreach { entry =>
       stubFor(get(urlEqualTo(s"/application/${entry._1}/credentials"))
         .willReturn(aResponse().withStatus(status).withBody(Json.toJson(entry._2).toString()).withHeader("content-type", "application/json")))
@@ -143,7 +145,7 @@ object DeskproStub extends Matchers {
   val deskproPath: String = "/deskpro/ticket"
   val deskproFeedbackPath: String =  "/deskpro/feedback"
 
-  def setupTicketCreation(status: Int = 200) = {
+  def setupTicketCreation(status: Int = OK) = {
     Stubs.setupPostRequest(deskproPath, status)
   }
 
@@ -156,7 +158,7 @@ object AuditStub extends Matchers {
   val auditPath: String = "/write/audit"
   val mergedAuditPath: String = "/write/audit/merged"
 
-  def setupAudit(status: Int = 204, data: Option[String] = None) = {
+  def setupAudit(status: Int = NO_CONTENT, data: Option[String] = None) = {
     if (data.isDefined) {
       Stubs.setupPostContaining(auditPath, data.get, status)
       Stubs.setupPostContaining(mergedAuditPath, data.get, status)
@@ -173,7 +175,7 @@ object ApiSubscriptionFieldsStub {
     stubFor(
       delete(
         urlEqualTo(fieldValuesUrl(clientId, apiContext, apiVersion)))
-        .willReturn(aResponse().withStatus(204)))
+        .willReturn(aResponse().withStatus(NO_CONTENT)))
   }
 
   private def fieldValuesUrl(clientId: String, apiContext: String, apiVersion: String) = {
@@ -181,7 +183,7 @@ object ApiSubscriptionFieldsStub {
   }
 
   def noSubscriptionFields(apiContext: String, version: String): Any = {
-    stubFor(get(urlEqualTo(fieldDefinitionsUrl(apiContext, version))).willReturn(aResponse().withStatus(404)))
+    stubFor(get(urlEqualTo(fieldDefinitionsUrl(apiContext, version))).willReturn(aResponse().withStatus(NOT_FOUND)))
   }
 
   private def fieldDefinitionsUrl(apiContext: String, version: String) = {

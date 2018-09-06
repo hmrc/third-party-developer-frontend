@@ -95,7 +95,7 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
     if (server != null) server.stop()
   }
 
-  Before { scenario =>
+  Before { _ =>
     if (!wireMockServer.isRunning) {
       wireMockServer.start()
     }
@@ -105,7 +105,7 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
   }
 
 
-  After(order = 1) { scenario =>
+  After(order = 1) { _ =>
     if (wireMockServer.isRunning) WireMock.reset()
   }
 

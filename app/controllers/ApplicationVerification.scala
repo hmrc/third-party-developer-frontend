@@ -35,6 +35,7 @@ trait ApplicationVerification extends LoggedOutController {
   }
 }
 
+//noinspection TypeAnnotation,TypeAnnotation
 object ApplicationVerification extends ApplicationVerification with WithAppConfig {
   override val service = ApplicationServiceImpl
   override val sessionService = SessionService
