@@ -28,11 +28,12 @@ import utils.CSRFTokenHelper._
 import utils.ViewHelpers._
 
 class ProfileSpec extends UnitSpec with OneServerPerSuite {
+
+  private val request = FakeRequest().withCSRFToken
+
+  val developer = Developer("developer@example.com", "FirstName", "LastName", Some("TestOrganisation"))
+
   "Profile page" should {
-
-    val request = FakeRequest().withCSRFToken
-
-    val developer = Developer("developer@example.com", "FirstName", "LastName", Some("TestOrganisation"))
 
     "render" in {
 
@@ -44,6 +45,9 @@ class ProfileSpec extends UnitSpec with OneServerPerSuite {
       elementExistsByText(document, "h2", "Delete account") shouldBe true
       elementIdentifiedByIdContainsText(document, "account-deletion", "Request account deletion") shouldBe true
     }
+  }
+
+  "Change profile page" should {
 
     "error for invalid form" in {
 
@@ -51,7 +55,7 @@ class ProfileSpec extends UnitSpec with OneServerPerSuite {
         .withError("firstname", "First name error message")
         .withError("lastname", "Last name error message")
 
-      val page = views.html.profile.render(formWithErrors, request, developer, ApplicationConfig, applicationMessages, "details")
+      val page = views.html.changeProfile.render(formWithErrors, request, developer, ApplicationConfig, applicationMessages, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

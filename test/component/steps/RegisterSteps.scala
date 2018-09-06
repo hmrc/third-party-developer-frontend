@@ -27,7 +27,6 @@ import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 object Form extends WebBrowser {
@@ -39,16 +38,6 @@ object Form extends WebBrowser {
     case (field, value) =>
       val f = field.replaceAll(" ", "")
       populateFormField(f, value)
-  }
-
-  def populateNameArray(name: String, values: Seq[String])(implicit driver: WebDriver) = {
-    val formElements = NameQuery(name).findAllElements.toSeq.filter(_.isDisplayed)
-    val elements = formElements.map(element => new TextField(element.underlying))
-    val elementsAndValues = elements.zip(values)
-
-    elementsAndValues.foreach { case (element, value) =>
-      element.value = value
-    }
   }
 
   private def populateFormField(fieldName: String, value: String)(implicit wd: WebDriver) = {
@@ -77,32 +66,6 @@ class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar 
     Registration(data("first name"), data("last name"), data("email address"), data("password"))
   }
 
-  Given( """^I enter valid information for all fields with an email already in use$""") { (registrationDetails: DataTable) =>
-    val data: mutable.Map[String, String] = registrationDetails.asMap(classOf[String], classOf[String]).asScala
-    DeveloperStub.register(createPayload(data), 409)
-    Form.populate(data)
-  }
-
-  Given( """^I enter valid information for all fields generating '(.*)' response$""") { (status: String, registrationDetails: DataTable) =>
-    val data: mutable.Map[String, String] = registrationDetails.asMap(classOf[String], classOf[String]).asScala
-
-    val code = status match {
-      case "Bad request" => 400
-      case "Not found" => 404
-      case "Internal server error" => 500
-      case "Ok" => 200
-    }
-
-    DeveloperStub.register(createPayload(data), code)
-    Form.populate(data)
-  }
-
-  Given( """^I enter all the fields with an email exceeding 320 characters:$""") { (data: DataTable) =>
-    val form: mutable.Map[String, String] = data.asMap(classOf[String], classOf[String]).asScala
-    val email = ("abc" * 105) + "@example.com"
-    Form.populate(form ++ mutable.Map("emailaddress" -> email))
-  }
-
   Given("""^I expect a resend call from '(.*)'$""") {
     email: String => {
       DeveloperStub.setupResend(email, 204)
@@ -115,83 +78,6 @@ class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar 
     actions.moveToElement(element)
     actions.click()
     actions.perform()
-  }
-
-  When( """^I click on cancel""") { () =>
-    val element = webDriver.findElement(By.id("cancel"))
-    val actions = new Actions(webDriver)
-    actions.moveToElement(element)
-    actions.click()
-    actions.perform()
-  }
-
-  Then( """^I see the global error '(.*)' for the '(.*)'$""") { (errorMessage: String, fieldName: String) =>
-    val fn = fieldName.toLowerCase.replace(" ", "")
-    withClue(s"The field '$fieldName' does not have global error: '$errorMessage'") {
-      val global = RegistrationPage.globalError(fn)
-      global.getText shouldBe errorMessage
-      global.getAttribute("href") should include(s"#$fn")
-      RegistrationPage.hasElementWithId(fn) shouldBe true
-    }
-  }
-
-  Then( """^I see all global errors:$""") { (errors: DataTable) =>
-    val e: mutable.Map[String, String] = errors.asMap(classOf[String], classOf[String]).asScala
-    val globalErrors = RegistrationPage.globalErrors
-    withClue(s"Errors expected:${e.size}  but real ones: ${globalErrors.size()}") {
-      e.size shouldBe globalErrors.size()
-    }
-
-    val zip = e zip globalErrors
-    zip.foreach {
-      case ((field, errorMessage), we) =>
-        withClue(s"The field '$field' does not have global error: '$errorMessage'") {
-          val fn = field.toLowerCase.replace(" ", "")
-          we.getText shouldBe errorMessage
-          we.getAttribute("href") should include(s"#$fn")
-          RegistrationPage.hasElementWithId(fn) shouldBe true
-        }
-    }
-  }
-
-  Given( """^A third party developer has completed the registration form with the email '(.*)'$""") { (emailAddress: String) => }
-
-  Then( """^I see error '(.*)' with a link to '(.*)' page with href '(.*)' for the field '(.*)'$""") {
-    (error: String, page: String, link: String, fieldName: String) =>
-      withClue(s"The field '$fieldName' does not have field error: '$error'") {
-        val tag = fieldName.toLowerCase.replace(" ", "")
-        val fieldError = CurrentPage.fieldError(tag)
-        fieldError.getText shouldBe s"$error"
-
-        val findElement = fieldError.findElement(By.cssSelector(s"[data-link-error-$tag]"))
-        findElement.getAttribute("href") should include(link)
-      }
-  }
-
-  Given( """^I am registered$""") {
-    DeveloperStub.setupVerification("verificationCode", 201)
-  }
-
-  When( """I click on the verification link""") {
-    go(VerificationLink("verificationCode"))
-  }
-
-  And( """I am verified""") {
-    DeveloperStub.verifyVerification("verificationCode")
-  }
-
-  When( """^I click on an invalid verification link$""") {
-    DeveloperStub.setupVerification("verificationCode", 400)
-    go(VerificationLink("verificationCode"))
-  }
-
-  Then("user is displayed message that '(.*)'$") { (actualText: String) =>
-    val expectedText: String = eventually {
-      webDriver.findElement(By.cssSelector("div.sandbox--visible.alert.alert--info > p")).getText
-    }
-    withClue(s"Register page does not contain Text --> This service should only be used for testing your applications. For production credentials, go to the Developer Hub") {
-      expectedText shouldBe actualText
-    }
   }
 }
 
