@@ -51,8 +51,6 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
     "Account deletion request submitted" -> AccountDeletionRequestSubmittedPage
   )
 
-  val links: Map[String, WebLink] = pages
-
   Given( """^I navigate to the '(.*)' page$""") { (pageName: String) =>
     withClue(s"Fail to load page: $pageName")(goOn(pages(pageName)))
   }
