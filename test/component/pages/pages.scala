@@ -102,6 +102,11 @@ object ManageProfilePage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile"
 }
 
+object ChangeProfileDetailsPage extends FormPage {
+  override val pageHeading = "Change profile details"
+  override val url: String = s"${Env.host}/developer/profile/change"
+}
+
 object EditPasswordPage extends FormPage {
   override val pageHeading = "Change password"
   override val url: String = s"${Env.host}/developer/profile/password"

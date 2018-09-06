@@ -19,6 +19,7 @@ package unit.views
 import config.ApplicationConfig
 import controllers.AddTeamMemberForm
 import domain._
+import helpers.string._
 import org.jsoup.Jsoup
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form
@@ -27,15 +28,16 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
-import utils.ViewHelpers.{elementExistsByText, inputExistsWithValue}
+import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 
 class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite {
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = Developer("admin@example.com", "firstName1", "lastName1")
   val collaborator = Developer("developer@example.com", "firstName2", "lastName2")
+  val collaborators = Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR), Collaborator(collaborator.email, Role.DEVELOPER))
   val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR), Collaborator(collaborator.email, Role.DEVELOPER)), state = ApplicationState.production(loggedInUser.email, ""),
+    collaborators, state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
   "manageTeam view" should {
@@ -53,7 +55,7 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite {
       elementExistsByText(document, "p", "You need admin rights to add or remove team members.") shouldBe false
       elementExistsByText(document, "td", loggedInUser.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
-      inputExistsWithValue(document, "remove", "submit", "Remove") shouldBe true
+      linkExistsWithHref(document, controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe true
     }
 
     "not show Add and Remove buttons for Developer" in {
@@ -64,8 +66,7 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite {
       elementExistsByText(document, "p", "You need admin rights to add or remove team members.") shouldBe true
       elementExistsByText(document, "td", loggedInUser.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
-      inputExistsWithValue(document, "remove", "submit", "Remove") shouldBe false
-
+      linkExistsWithHref(document, controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe false
     }
   }
 }

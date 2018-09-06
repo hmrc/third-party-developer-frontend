@@ -55,6 +55,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
     "Error" -> ErrorPage,
     "Bad Request" -> BadRequestPage,
     "Manage profile" -> ManageProfilePage,
+    "Change profile details" -> ChangeProfileDetailsPage,
     "Manage profile success" -> ManageProfileSuccessPage,
     "Edit password" -> EditPasswordPage,
     "Edit password success" -> ChangePasswordSuccessPage,

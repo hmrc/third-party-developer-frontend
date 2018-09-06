@@ -23,6 +23,7 @@ GET         /support/submitted                                                  
 GET         /locked                                                                     controllers.UserLoginAccount.accountLocked
 
 GET         /profile                                                                    controllers.Profile.showProfile
+GET         /profile/change                                                             controllers.Profile.changeProfile
 POST        /profile                                                                    controllers.Profile.updateProfile
 
 GET         /profile/password                                                           controllers.Profile.showPasswordPage
@@ -47,7 +48,7 @@ GET         /applications/:id                                                   
 GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMember(id: String)
 POST        /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMemberAction(id: String)
-POST        /applications/:id/team-members/remove-confirmation                          controllers.ManageTeam.removeTeamMember(id: String)
+GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation          controllers.ManageTeam.removeTeamMember(id: String, teamMemberHash: String)
 POST        /applications/:id/team-members/remove                                       controllers.ManageTeam.removeTeamMemberAction(id: String)
 
 GET         /applications/:id/details                                                   controllers.Details.details(id: String)

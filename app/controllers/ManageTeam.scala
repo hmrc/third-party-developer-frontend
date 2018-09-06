@@ -19,6 +19,7 @@ package controllers
 import config.ApplicationGlobal
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import helpers.string._
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
@@ -46,9 +47,13 @@ trait ManageTeam extends ApplicationController {
   def addTeamMemberAction(applicationId: String) = adminOnStandardApp(applicationId) { implicit request =>
     def handleValidForm(form: AddTeamMemberForm) = {
       applicationService.addTeamMember(request.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
-        .map(_ => Redirect(controllers.routes.ManageTeam.manageTeam(applicationId, None))) recover{
-          case _: ApplicationNotFound => NotFound(ApplicationGlobal.notFoundTemplate)
-          case _: TeamMemberAlreadyExists => BadRequest(views.html.addTeamMember(request.application, AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"), request.user))
+        .map(_ => Redirect(controllers.routes.ManageTeam.manageTeam(applicationId, None))) recover {
+        case _: ApplicationNotFound => NotFound(ApplicationGlobal.notFoundTemplate)
+        case _: TeamMemberAlreadyExists =>
+          BadRequest(views.html.addTeamMember(
+            request.application,
+            AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"),
+            request.user))
       }
     }
 
@@ -59,19 +64,15 @@ trait ManageTeam extends ApplicationController {
     AddTeamMemberForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
+  def removeTeamMember(applicationId: String, teamMemberHash: String) = teamMemberOnStandardApp(applicationId) {
+    implicit request =>
+      val application = request.application
 
-  def removeTeamMember(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
-    val application = request.application
-
-    def handleValidForm(form: RemoveTeamMemberForm) = {
-      successful(Ok(views.html.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, form.email)))
-    }
-
-    def handleInvalidForm(formWithErrors: Form[RemoveTeamMemberForm]) = {
-      successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
-    }
-
-    RemoveTeamMemberForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+      application.collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash) match {
+        case Some(collaborator) =>
+          successful(Ok(views.html.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, collaborator.emailAddress)))
+        case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
+      }
   }
 
   def removeTeamMemberAction(applicationId: String) = adminOnStandardApp(applicationId) { implicit request =>
@@ -79,7 +80,9 @@ trait ManageTeam extends ApplicationController {
 
     def handleValidForm(form: RemoveTeamMemberConfirmationForm) = {
       form.confirm match {
-        case Some("Yes") => applicationService.removeTeamMember(request.application, form.email, request.user.email).map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
+        case Some("Yes") => applicationService
+          .removeTeamMember(request.application, form.email, request.user.email)
+          .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
         case _ => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
     }

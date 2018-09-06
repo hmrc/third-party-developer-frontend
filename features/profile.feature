@@ -8,13 +8,14 @@ Feature: Developer views/updates profile
     And I am successfully logged in with 'john.smith@example.com' and 'StrongPassword1!'
     When I click on the 'John Smith' link
     Then I am on the 'Manage profile' page
-    And I see values in fields:
-      | firstname | John  |
-      | lastname  | Smith |
+    And I see text in fields:
+      | name | John Smith |
 
   @APIS-568
   Scenario: TPSD edits profile
     Given I want to successfully change my profile
+    When I click on the button with id 'change'
+    Then I am on the 'Change profile details' page
     When I enter all the fields:
       | firstname       | Joe      |
       | lastname        | Bloggs   |
