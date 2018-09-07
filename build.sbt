@@ -68,7 +68,7 @@ lazy val overrideDependencies = Set(
   "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % "test"
 )
 
-lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
+lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
@@ -78,7 +78,7 @@ lazy val microservice = Project(appName, file("."))
         (baseDirectory.value / "app" / "assets" / "javascripts") ** "*.js"
       )
     ),
-    UglifyKeys.compressOptions := Seq(
+    uglifyCompressOptions := Seq(
       "unused=true",
       "dead_code=true"
     ),
@@ -118,6 +118,7 @@ lazy val microservice = Project(appName, file("."))
     testGrouping in ComponentTest := oneForkedJvmPerTest((definedTests in ComponentTest).value),
     parallelExecution in ComponentTest := false
   )
+  .settings(majorVersion := 0)
 lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
 lazy val ComponentTest = config("component") extend Test
 lazy val TemplateTest = config("tt") extend Test
