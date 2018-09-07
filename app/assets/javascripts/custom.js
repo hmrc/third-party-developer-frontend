@@ -116,6 +116,9 @@ $(document).ready(function () {
             link.find(".accordion__button").attr("aria-expanded", link.attr("aria-expanded"));
         }, 0);
     });
+
+    var charCount = new GOVUK.CharCount()
+    charCount.init({ selector: '.js-char-count' });
 });
 
 var showHide = function () {

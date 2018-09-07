@@ -68,16 +68,13 @@
                 <span class="form-hint">We will not show this to users.</span>
                 @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
             </label>
-            <div class="char-counter" data-char-counter>
-                <textarea class="form-control @if(form.errors("description").nonEmpty) {form-control-error}"
-                id="description"
-                name="description"
-                cols="50"
-                rows="3"
-                maxLength="250"
-                aria-labelledby="description-label"
-                data-char-field>@form.data.get("description")</textarea>
-            </div>
+            <textarea class="js-char-count form-control @if(form.errors("description").nonEmpty) {form-control-error}"
+                      id="description"
+                      name="description"
+                      cols="50"
+                      rows="3"
+                      maxlength="250"
+                      aria-labelledby="description-label">@form.data.get("description")</textarea>
         </div>
 
         <div class="form-group @if(form.errors("privacyPolicyUrl").nonEmpty) {form-group-error}">
