@@ -47,8 +47,6 @@ trait FormPage extends WebPage {
   def globalErrors = webDriver.findElements(By.cssSelector("[data-global-error]"))
 
   def hasElementWithId(id: String) = webDriver.findElements(By.id(id)).size() == 1
-
-  def fieldLink = webDriver.findElements(By.cssSelector("[data-link-error-emailaddress]"))
 }
 
 object CurrentPage extends FormPage {
@@ -72,31 +70,6 @@ object EmailConfirmationPage extends FormPage {
 
 }
 
-object ErrorPage extends FormPage {
-  override val pageHeading = "Sorry, we’re experiencing technical difficulties"
-  override val url: String = s"${Env.host}/developer/registration"
-}
-
-object BadRequestPage extends FormPage {
-  override val pageHeading = "Invalid verification code"
-  override val url: String = s"${Env.host}/developer/verification?code=verificationCode"
-}
-
-object ForgotPasswordPage extends FormPage {
-  override val pageHeading = "Reset your password"
-  override val url: String = s"${Env.host}/developer/forgot-password"
-}
-
-object ResetPasswordPage extends FormPage {
-  override val pageHeading = "Create a new password"
-  override val url: String = s"${Env.host}/developer/reset-password"
-}
-
-object ChangePasswordPage extends FormPage {
-  override val pageHeading = "Your password has expired"
-  override val url: String = s"${Env.host}/developer/change-password"
-}
-
 object ManageProfilePage extends FormPage {
   override val pageHeading = "Manage profile"
   override val url: String = s"${Env.host}/developer/profile"
@@ -105,16 +78,6 @@ object ManageProfilePage extends FormPage {
 object ChangeProfileDetailsPage extends FormPage {
   override val pageHeading = "Change profile details"
   override val url: String = s"${Env.host}/developer/profile/change"
-}
-
-object EditPasswordPage extends FormPage {
-  override val pageHeading = "Change password"
-  override val url: String = s"${Env.host}/developer/profile/password"
-}
-
-object ManageProfileSuccessPage extends FormPage {
-  override val pageHeading = "You have updated your profile"
-  override val url: String = s"${Env.host}/developer/profile"
 }
 
 object ChangePasswordSuccessPage extends FormPage {
@@ -151,53 +114,8 @@ case object AccountDeletionRequestSubmittedPage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/delete"
 }
 
-case class EditApplicationPage(id: String) extends FormPage {
-  override val pageHeading = "Manage details"
-  override val url: String = s"${Env.host}/developer/applications/$id/details"
-}
-
-case class PrivilegedOrROPCApplicationPage(id: String, name: String = "App name") extends FormPage {
-  override val pageHeading = name
-  override val url: String = s"${Env.host}/developer/applications/$id/details"
-}
-
-case class UnsubscribeAPIConfirmationPage(appId: String) extends FormPage {
-  override val pageHeading = "Unsubscribe from an API"
-  override val url: String = s"${Env.host}/developer/applications/$appId/unsubscribe"
-}
-
-case class CheckEmailPage(email: String) extends FormPage {
-  override val pageHeading = "Password reset email sent"
-  override val url: String = s"${Env.host}/developer/"
-}
-
-case class SubmitApplicationForCheckPage(applicationId: String) extends FormPage {
-  override val pageHeading = "Submit your application for checking"
-  override val url: String = s"${Env.host}/developer/applications/$applicationId/request-check"
-}
-
-case class NameSubmittedForCheckPage(applicationId: String) extends FormPage {
-  override val pageHeading = "Name submitted for checking"
-  override val url: String = s"${Env.host}/developer/applications/$applicationId/request-check"
-}
-
-case class ResetPasswordCodeErrorPage(emailAddress: String, invalidCode: String) extends FormPage {
-  override val pageHeading = "Reset password link no longer valid"
-  override val url: String = s"${Env.host}/developer/$emailAddress/reset-password?code=$invalidCode"
-}
-
-case class InvalidVerificationCodeErrorPage(invalidCode: String) extends FormPage {
-  override val pageHeading = "Invalid verification code"
-  override val url: String = s"${Env.host}/developer/verification?code=$invalidCode"
-}
-
 case class SignInPage(override val pageHeading: String = "Sign in") extends FormPage {
   override val url: String = s"${Env.host}/developer/login"
-}
-
-object AccountLockedPage extends FormPage {
-  override val pageHeading = "Account locked"
-  override val url: String = s"${Env.host}/developer/locked"
 }
 
 case object SignOutSurveyPage extends FormPage {
@@ -218,10 +136,6 @@ case class ResetPasswordLink(email: String, code: String) extends WebLink {
   override val url: String = s"${Env.host}/developer/$email/reset-password?code=$code"
 }
 
-case class ApplicationVerificationLink(verificationCode: String) extends WebLink {
-  override val url: String = s"${Env.host}/developer/application-verification?code=$verificationCode"
-}
-
 case class ResendVerificationLink(email: String) extends WebLink {
   override val url: String = s"${Env.host}/developer/resend-verification"
 }
@@ -235,28 +149,6 @@ case class VerificationPage(verificationCode: String) extends FormPage {
   override val url: String = s"${Env.host}/developer/verification?code=$verificationCode"
 }
 
-case class EditApplicationLink(id: String) extends WebLink {
-  override val url: String = s"${Env.host}/developer/applications/$id"
-}
-
-case class CredentialsLink(id: String) extends WebLink {
-  override val url: String = s"${Env.host}/developer/applications/$id/credentials"
-}
-
-case class CredentialsPage(id: String) extends FormPage {
-  override val pageHeading = "Manage credentials"
-  override val url: String = s"${Env.host}/developer/applications/$id/credentials"
-}
-
-case class ManageTeamLink(id: String) extends WebLink {
-  override val url: String = s"${Env.host}/developer/applications/$id/team-members"
-}
-
-case class ManageTeamPage(id: String) extends FormPage {
-  override val pageHeading = "Manage team members"
-  override val url: String = s"${Env.host}/developer/applications/$id/team-members"
-}
-
 case class SubscriptionLink(id: String) extends WebLink {
   override val url: String = s"${Env.host}/developer/applications/$id/subscriptions"
 }
@@ -264,19 +156,6 @@ case class SubscriptionLink(id: String) extends WebLink {
 case class SubscriptionPage(id: String) extends FormPage {
   override val pageHeading = "Manage API subscriptions"
   override val url: String = s"${Env.host}/developer/applications/$id/subscriptions"
-}
-
-case class DetailsLink(id: String) extends WebLink {
-  override val url: String = s"${Env.host}/developer/applications/$id/details"
-}
-
-case class DetailsPage(id: String) extends FormPage {
-  override val pageHeading = "Manage details"
-  override val url: String = s"${Env.host}/developer/applications/$id/details"
-}
-
-case class DeleteApplicationLink(id: String) extends WebLink {
-  override val url: String = s"${Env.host}/developer/applications/$id/delete"
 }
 
 case class DeleteApplicationPage(id: String) extends FormPage {

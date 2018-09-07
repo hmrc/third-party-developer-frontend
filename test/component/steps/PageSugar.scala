@@ -16,11 +16,8 @@
 
 package steps
 
-import java.util.concurrent.TimeUnit
-
-import component.steps.Env
 import org.openqa.selenium._
-import org.openqa.selenium.support.ui.{ExpectedCondition, ExpectedConditions, FluentWait, WebDriverWait}
+import org.openqa.selenium.support.ui.{ExpectedCondition, WebDriverWait}
 
 trait PageSugar {
 
@@ -32,17 +29,4 @@ trait PageSugar {
       override def apply(d: WebDriver) = d.findElement(by)
     }
   )
-
-  def waitByWebElement(by: By): WebElement = {
-    val wait = new FluentWait[WebDriver](Env.driver).withTimeout(5, TimeUnit.SECONDS).pollingEvery(500, TimeUnit.MILLISECONDS)
-      .ignoring(classOf[NoSuchElementException],classOf[StaleElementReferenceException])
-    val element = wait.until(ExpectedConditions.visibilityOfElementLocated(by))
-    return element
-  }
-
-  def waitByWebElementUntilItsClickable(by: By) = {
-    val wait = new FluentWait[WebDriver](Env.driver).withTimeout(5, TimeUnit.SECONDS).pollingEvery(500, TimeUnit.MILLISECONDS)
-      .ignoring(classOf[NoSuchElementException],classOf[StaleElementReferenceException])
-    wait.until(ExpectedConditions.elementToBeClickable(by))
-  }
 }

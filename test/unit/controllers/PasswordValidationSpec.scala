@@ -48,7 +48,7 @@ class PasswordValidationSpec extends UnitSpec with Matchers{
       )
     }
 
-    "generate no error when vaid" in {
+    "generate no error when valid" in {
       val res = testForm.bind(Map("password" -> "A1@wwwwwwwww"))
       res.errors shouldBe List()
     }

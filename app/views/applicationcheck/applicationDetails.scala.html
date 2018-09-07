@@ -54,16 +54,14 @@
             </label>
             <div class="form-group @if(form.errors("applicationDetails").nonEmpty){form-group-error}">
                 @fieldError(form.errors, "applicationDetails")
-                <div class="char-counter" data-char-counter>
-                    <textarea id="applicationDetails"
-                              name="applicationDetails"
-                              cols="50"
-                              rows="10"
-                              maxlength="3000"
-                              class="form-control @if(form.errors("applicationDetails").nonEmpty){form-control-error}"
-                              aria-labelledby="applicationDetails-label"
-                              aria-required="true"
-                              data-char-field>@form.data.getOrElse("applicationDetails", "")</textarea>
+                <textarea id="applicationDetails"
+                          name="applicationDetails"
+                          cols="50"
+                          rows="10"
+                          maxlength="3000"
+                          class="js-char-count form-control @if(form.errors("applicationDetails").nonEmpty){form-control-error}"
+                          aria-labelledby="applicationDetails-label"
+                          aria-required="true">@form.data.getOrElse("applicationDetails", "")</textarea>
                 </div>
             </div>
         </div>

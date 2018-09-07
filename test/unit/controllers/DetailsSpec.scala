@@ -50,11 +50,11 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
 
     "details" should {
       "return the view for a developer on a standard production app with no change link" in new Setup {
-        detailsShouldRenderThePage(aStandardApplication(developerEmail = loggedInUser.email), hasChangeButton = false)
+        detailsShouldRenderThePage(anApplication(developerEmail = loggedInUser.email), hasChangeButton = false)
       }
 
       "return the view for an admin on a standard production app" in new Setup {
-        detailsShouldRenderThePage(aStandardApplication(adminEmail = loggedInUser.email))
+        detailsShouldRenderThePage(anApplication(adminEmail = loggedInUser.email))
       }
 
       "return the view for a developer on a sandbox app" in new Setup {
@@ -86,7 +86,7 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
 
     "changeDetails" should {
       "return the view for an admin on a standard production app" in new Setup {
-        changeDetailsShouldRenderThePage(aStandardApplication(adminEmail = loggedInUser.email))
+        changeDetailsShouldRenderThePage(anApplication(adminEmail = loggedInUser.email))
       }
 
       "return the view for a developer on a sandbox app" in new Setup {
@@ -98,7 +98,7 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
       }
 
       "return forbidden for a developer on a standard production app" in new Setup {
-        val application = aStandardApplication(developerEmail = loggedInUser.email)
+        val application = anApplication(developerEmail = loggedInUser.email)
         givenTheApplicationExists(application)
 
         val result = application.callChangeDetails
@@ -123,11 +123,29 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
 
         redirectsToLogin(result)
       }
+
+      "return not found for an ROPC application" in new Setup {
+        val application = anROPCApplication()
+        givenTheApplicationExists(application)
+
+        val result = await(underTest.details(application.id)(loggedInRequest))
+
+        status(result) shouldBe NOT_FOUND
+      }
+
+      "return not found for a privileged application" in new Setup {
+        val application = aPrivilegedApplication()
+        givenTheApplicationExists(application)
+
+        val result = await(underTest.details(application.id)(loggedInRequest))
+
+        status(result) shouldBe NOT_FOUND
+      }
     }
 
     "changeDetailsAction validation" should {
       "not pass when application is updated with empty name" in new Setup {
-        val application = aStandardApplication(adminEmail = loggedInUser.email)
+        val application = anApplication(adminEmail = loggedInUser.email)
         givenTheApplicationExists(application)
 
         val result = application.withName("").callChangeDetailsAction
@@ -136,7 +154,7 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
       }
 
       "not pass when application is updated with invalid name" in new Setup {
-        val application = aStandardApplication(adminEmail = loggedInUser.email)
+        val application = anApplication(adminEmail = loggedInUser.email)
         givenTheApplicationExists(application)
 
         val result = application.withName("a").callChangeDetailsAction
@@ -148,15 +166,15 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
     "changeDetailsAction for production app in testing state" should {
 
       "redirect to the details page on success for an admin" in new Setup {
-        changeDetailsShouldRedirectOnSuccess(aStandardApplication(adminEmail = loggedInUser.email))
+        changeDetailsShouldRedirectOnSuccess(anApplication(adminEmail = loggedInUser.email))
       }
 
       "update all fields for an admin" in new Setup {
-        changeDetailsShouldUpdateTheApplication(aStandardApplication(adminEmail = loggedInUser.email))
+        changeDetailsShouldUpdateTheApplication(anApplication(adminEmail = loggedInUser.email))
       }
 
       "update both the app and the check information" in new Setup {
-        val application = aStandardApplication(adminEmail = loggedInUser.email)
+        val application = anApplication(adminEmail = loggedInUser.email)
         givenTheApplicationExists(application)
 
         val result = application.withName(newName).callChangeDetailsAction
@@ -166,7 +184,7 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
       }
 
       "return forbidden for a developer" in new Setup {
-        val application = aStandardApplication(developerEmail = loggedInUser.email)
+        val application = anApplication(developerEmail = loggedInUser.email)
         givenTheApplicationExists(application)
 
         val result = application.withDescription(newDescription).callChangeDetailsAction
@@ -196,14 +214,14 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
     "changeDetailsAction for production app in uplifted state" should {
 
       "redirect to the details page on success for an admin" in new Setup {
-        val application = aStandardApplication(adminEmail = loggedInUser.email)
+        val application = anApplication(adminEmail = loggedInUser.email)
           .withState(ApplicationState.pendingGatekeeperApproval(loggedInUser.email))
 
         changeDetailsShouldRedirectOnSuccess(application)
       }
 
       "return forbidden for a developer" in new Setup {
-        val application = aStandardApplication(developerEmail = loggedInUser.email)
+        val application = anApplication(developerEmail = loggedInUser.email)
           .withState(ApplicationState.pendingGatekeeperApproval(loggedInUser.email))
 
         givenTheApplicationExists(application)
@@ -215,7 +233,7 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
 
 
       "keep original application name when administrator does an update" in new Setup {
-        val application = aStandardApplication(adminEmail = loggedInUser.email)
+        val application = anApplication(adminEmail = loggedInUser.email)
           .withState(ApplicationState.pendingGatekeeperApproval(loggedInUser.email))
 
         givenTheApplicationExists(application)

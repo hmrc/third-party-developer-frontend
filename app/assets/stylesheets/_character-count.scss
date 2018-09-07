@@ -1,0 +1,67 @@
+.backdrop-highlights.form-control-error{
+  border-width: 2px !important; // force this one as the validation overwrites it
+}
+
+textarea {
+  overflow: auto;
+}
+
+.js-character-counter {
+  width: 100%;
+  border-width: 2px;
+  position: relative;
+  background: transparent;
+  z-index: 2;
+  margin: 0;
+}
+
+.js-count-message {
+  margin-top: 0;
+  padding: 6px 0 0;
+  width: 100%;
+}
+
+.error-message-hidden {
+  visibility: hidden;
+}
+
+.form-control-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border-left: 4px solid transparent;
+  padding-left: 10px;
+  margin-left: -14px;
+}
+
+.form-control-wrapper-error {
+  border-color: #b10e1e;
+}
+
+.backdrop-highlights-input,.backdrop-highlights {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  white-space: pre-wrap;
+	word-wrap: break-word;
+	color: transparent;
+  overflow: auto;
+  display: block;
+  vertical-align: middle;
+  border-color: transparent;
+
+  mark {
+    color: transparent;
+    background-color: #b10e1e;
+    opacity: .2;
+  }
+}
+
+.backdrop-highlights-input {
+  white-space: nowrap;
+}
+
+.govuk-c-charcount__message {
+  margin-top: .5rem;
+}

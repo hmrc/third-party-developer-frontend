@@ -54,16 +54,14 @@
                 <span class="form-hint" id="description-note">This won't be shown to your application's users.</span>
             </label>
             @fieldError(form.errors, "description", form.error("submissionError").isEmpty)
-            <div class="char-counter" data-char-counter>
-                <textarea id="description"
-                          class="form-control form-control-3-4 @if(form.errors("description").nonEmpty) {form-control-error}"
-                          name="description"
-                          aria-labelledby="description-label"
-                          aria-describedby="description-note"
-                          data-char-field
-                          cols="50"
-                          maxLength="250">@form.data.get("description")</textarea>
-            </div>
+            <textarea id="description"
+                      class="js-char-count form-control form-control-3-4 @if(form.errors("description").nonEmpty) {form-control-error}"
+                      name="description"
+                      aria-labelledby="description-label"
+                      aria-describedby="description-note"
+                      cols="50"
+                      rows="5"
+                      maxlength="250">@form.data.get("description")</textarea>
         </div>
 
         @if(appConfig.isExternalTestEnvironment) {

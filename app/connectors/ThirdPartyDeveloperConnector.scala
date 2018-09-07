@@ -18,7 +18,7 @@ package connectors
 
 import config.{ApplicationConfig, WSHttp}
 import domain._
-import play.api.http.Status
+import play.api.http.Status._
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.libs.json.Json
@@ -41,11 +41,11 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
         http.POST(s"$serviceBaseUrl/developer", secretRequestJson, Seq(CONTENT_TYPE -> JSON)) map {
           r =>
             r.status match {
-              case Status.CREATED => RegistrationSuccessful
+              case CREATED => RegistrationSuccessful
               case _ => throw new InternalServerException("Unexpected 2xx code")
             }
         } recover {
-          case Upstream4xxResponse(_, Status.CONFLICT, _, _) => EmailAlreadyInUse
+          case Upstream4xxResponse(_, CONFLICT, _, _) => EmailAlreadyInUse
         }
       })
   }
@@ -69,13 +69,13 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
       .map(r => (r.json \ "email").as[String])
       .recover {
       case _ : BadRequestException => throw new InvalidResetCode
-      case Upstream4xxResponse(_, Status.FORBIDDEN, _, _) => throw new UnverifiedAccount
+      case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
     }
   }
 
   def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     http.POSTEmpty(s"$serviceBaseUrl/$email/password-reset-request").map(status).recover {
-      case Upstream4xxResponse(_, Status.FORBIDDEN, _, _) => throw new UnverifiedAccount
+      case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
     }
   }
 
@@ -84,7 +84,7 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
       Json.toJson(reset), { secretRequestJson =>
         http.POST(s"$serviceBaseUrl/reset-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
           .map(status).recover {
-          case Upstream4xxResponse(_, Status.FORBIDDEN, _, _) => throw new UnverifiedAccount
+          case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
         }
       })
   }
@@ -93,9 +93,9 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
     Json.toJson(change), { secretRequestJson =>
       http.POST(s"$serviceBaseUrl/change-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
         .map(status).recover {
-        case Upstream4xxResponse(_, Status.UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, Status.FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, Status.LOCKED, _, _) => throw new LockedAccount
+        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
+        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
+        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
       }
     })
   }
@@ -106,9 +106,9 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
       http.POST(s"$serviceBaseUrl/session", _, Seq(CONTENT_TYPE -> JSON)))
       .map(_.json.as[Session])
       .recover {
-        case Upstream4xxResponse(_, Status.UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, Status.FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, Status.LOCKED, _, _) => throw new LockedAccount
+        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
+        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
+        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
         case _: NotFoundException => throw new InvalidEmail
       }
   }
@@ -126,7 +126,7 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
       .map(status)
       .recover {
         // treat session not found as successfully destroyed
-        case _: NotFoundException => Status.NO_CONTENT
+        case _: NotFoundException => NO_CONTENT
       }
   }
 
@@ -136,9 +136,9 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
       http.POST(s"$serviceBaseUrl/check-password", _, Seq(CONTENT_TYPE -> JSON)))
       .map(_ => VerifyPasswordSuccessful)
       .recover {
-        case Upstream4xxResponse(_, Status.UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, Status.FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, Status.LOCKED, _, _) => throw new LockedAccount
+        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
+        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
+        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
       }
   }
 
