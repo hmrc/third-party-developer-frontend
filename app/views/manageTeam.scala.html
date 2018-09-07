@@ -16,6 +16,7 @@
 
 @import config.ApplicationConfig
 @import domain.{Developer, Application, Role}
+@import helpers.string._
 @import include._
 @import model.Crumb
 
@@ -75,11 +76,9 @@
                     </td>
                     @if(role == Role.ADMINISTRATOR && (teamMember.role == Role.DEVELOPER || teamMember.emailAddress != loggedIn.email)) {
                         <td class="text--right hard--right">
-                            @helper.form(action = controllers.routes.ManageTeam.removeTeamMember(app.id), 'class -> "form inline-controls") {
-                            @helper.CSRF.formField
-                            <input id="email" name="email" class="form-control" hidden aria-hidden="true" type="text" value="@{teamMember.emailAddress}">
-                            <input id="remove" class="secondary-button" type="submit" value="Remove"/>
-                            }
+                            <a href="@controllers.routes.ManageTeam.removeTeamMember(app.id, teamMember.emailAddress.toSha256).url">
+                                Remove<span class="visually-hidden">@teamMember.emailAddress</span>
+                            </a>
                         </td>
                     } else {
                         <td class="text--right hard--right" aria-hidden="true"></td>
