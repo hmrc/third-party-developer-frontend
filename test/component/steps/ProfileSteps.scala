@@ -22,16 +22,17 @@ import cucumber.api.scala.{EN, ScalaDsl}
 import domain.UpdateProfileRequest
 import org.openqa.selenium.WebDriver
 import org.scalatest.Matchers
+import play.api.http.Status._
 
 class ProfileSteps extends ScalaDsl with EN with Matchers with NavigationSugar {
 
   implicit val webDriver: WebDriver = Env.driver
 
   Given( """^I want to successfully change my profile$""") { () =>
-    DeveloperStub.update("john.smith@example.com", UpdateProfileRequest("Joe", "Bloggs", None), 200)
+    DeveloperStub.update("john.smith@example.com", UpdateProfileRequest("Joe", "Bloggs", None), OK)
   }
 
   Given( """^I want to successfully change my password""") { () =>
-    Stubs.setupPostRequest("/change-password", 204)
+    Stubs.setupPostRequest("/change-password", NO_CONTENT)
   }
 }

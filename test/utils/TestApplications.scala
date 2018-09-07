@@ -33,7 +33,7 @@ trait TestApplications {
                           adminEmail: String = "admin@example.com",
                           developerEmail: String = "developer@example.com") = {
 
-    aStandardApplication(appId,
+    anApplication(appId,
       clientId,
       environment = Environment.SANDBOX,
       state = ApplicationState(State.PRODUCTION, None),
@@ -41,12 +41,13 @@ trait TestApplications {
       developerEmail = developerEmail)
   }
 
-  def aStandardApplication(appId: String = UUID.randomUUID().toString,
-                           clientId: String = randomString(28),
-                           environment: Environment = Environment.PRODUCTION,
-                           state: ApplicationState = ApplicationState.testing,
-                           adminEmail: String = "admin@example.com",
-                           developerEmail: String = "developer@example.com") = {
+  def anApplication(appId: String = UUID.randomUUID().toString,
+                    clientId: String = randomString(28),
+                    environment: Environment = Environment.PRODUCTION,
+                    state: ApplicationState = ApplicationState.testing,
+                    adminEmail: String = "admin@example.com",
+                    developerEmail: String = "developer@example.com",
+                    access: Access = standardAccess()) = {
 
     Application(id = appId,
       clientId = clientId,
@@ -56,15 +57,25 @@ trait TestApplications {
       description = Some("Description 1"),
       collaborators = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER)),
       state = state,
-      access = standardAccess())
+      access = access)
   }
+
+  def aStandardApplication(): Application = anApplication()
 
   def standardAccess(redirectUris: Seq[String] = Seq("https://redirect1", "https://redirect2"),
                      termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),
-                     privacyPolicyUrl: Option[String] = Some("http://example.com/privacy")) = {
+                     privacyPolicyUrl: Option[String] = Some("http://example.com/privacy")): Standard = {
 
     Standard(redirectUris, termsAndConditionsUrl, privacyPolicyUrl)
   }
+
+  def anROPCApplication(): Application = anApplication(access = ropcAccess())
+
+  def ropcAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Access = ROPC(scopes)
+
+  def aPrivilegedApplication(): Application = anApplication(access = privilegedAccess())
+
+  def privilegedAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Privileged = Privileged(scopes)
 
   def tokens(clientId: String = randomString(28),
              clientSecret: String = randomString(28),

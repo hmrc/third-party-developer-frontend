@@ -198,7 +198,7 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
     }
 
     def changeRedirectUriActionShouldRenderError(originalRedirectUri: String, newRedirectUri: String, errorMessage: String) = {
-      val application = aStandardApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
+      val application = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
       givenTheApplicationExists(application)
 
       val result = application.callChangeRedirectUriActionController(originalRedirectUri, newRedirectUri)
@@ -240,25 +240,25 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
 
   "redirects" should {
     "return the redirects page with no redirect URIs for an application with no redirect URIs" in new Setup {
-      redirectsShouldRenderThePage(aStandardApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(Seq()), shouldShowDeleteButton = false)
+      redirectsShouldRenderThePage(anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(Seq()), shouldShowDeleteButton = false)
     }
 
     "return the redirects page with some redirect URIs for an admin and an application with some redirect URIs" in new Setup {
-      redirectsShouldRenderThePage(aStandardApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")), shouldShowDeleteButton = true)
+      redirectsShouldRenderThePage(anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")), shouldShowDeleteButton = true)
     }
 
     "return the redirects page with some redirect URIs for a developer and an application with some redirect URIs" in new Setup {
-      redirectsShouldRenderThePage(aStandardApplication(developerEmail = loggedInDeveloper.email).withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")), shouldShowDeleteButton = false)
+      redirectsShouldRenderThePage(anApplication(developerEmail = loggedInDeveloper.email).withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")), shouldShowDeleteButton = false)
     }
   }
 
   "addRedirect" should {
     "return the add redirect page for an admin on a production application" in new Setup {
-      addRedirectShouldRenderThePage(aStandardApplication(adminEmail = loggedInDeveloper.email), OK, shouldShowAmendControls = true)
+      addRedirectShouldRenderThePage(anApplication(adminEmail = loggedInDeveloper.email), OK, shouldShowAmendControls = true)
     }
 
     "return the add redirect page for a developer on a production application" in new Setup {
-      addRedirectShouldRenderThePage(aStandardApplication(developerEmail = loggedInDeveloper.email), FORBIDDEN, shouldShowAmendControls = false)
+      addRedirectShouldRenderThePage(anApplication(developerEmail = loggedInDeveloper.email), FORBIDDEN, shouldShowAmendControls = false)
     }
   }
 
@@ -267,19 +267,19 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
       val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
       addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(
-        aStandardApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris), "https://localhost:1234")
     }
 
     "re-render the add redirect page when submitted without a redirect uri" in new Setup {
-      addRedirectActionShouldRenderAddRedirectPageWithError(aStandardApplication(adminEmail = loggedInDeveloper.email))
+      addRedirectActionShouldRenderAddRedirectPageWithError(anApplication(adminEmail = loggedInDeveloper.email))
     }
 
     "re-render the add redirect page with an error message when trying to add a duplicate redirect uri" in new Setup {
       val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
       addRedirectActionShouldRenderAddRedirectPageWithDuplicateUriError(
-        aStandardApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris), "https://localhost:8080")
     }
   }
@@ -287,19 +287,19 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
   "deleteRedirect" should {
     "return the delete redirect page for an admin with a production application" in new Setup {
       deleteRedirectsShouldRenderThePage(
-        aStandardApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris), OK, shouldShowDeleteControls = true, redirectUris.head)
     }
 
     "return the delete redirect page for a developer with a sandbox application" in new Setup {
       deleteRedirectsShouldRenderThePage(
-        aStandardApplication(environment = Environment.SANDBOX, developerEmail = loggedInDeveloper.email)
+        anApplication(environment = Environment.SANDBOX, developerEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris), OK, shouldShowDeleteControls = true, redirectUriToDelete = redirectUris.head)
     }
 
     "return forbidden for a developer with a production application" in new Setup {
       deleteRedirectsShouldRenderThePage(
-        aStandardApplication(developerEmail = loggedInDeveloper.email)
+        anApplication(developerEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris), FORBIDDEN, shouldShowDeleteControls = false, redirectUris.head)
     }
   }
@@ -307,19 +307,19 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
   "deleteRedirectAction" should {
     "return the delete redirect confirmation page when page is submitted with no radio button selected" in new Setup {
       deleteRedirectsActionShouldRenderTheConfirmationPage(
-        aStandardApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris), BAD_REQUEST, shouldShowDeleteControls = true, redirectUris.head)
     }
 
     "return the redirects page having successfully deleted a redirect uri" in new Setup {
       deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(
-        aStandardApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris), SEE_OTHER, redirectUris.head)
     }
 
     "return the redirects page having not deleted a redirect uri" in new Setup {
       deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(
-        aStandardApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris), SEE_OTHER, redirectUris.head)
     }
   }
@@ -327,7 +327,7 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
   "changeRedirect" should {
     "return the change redirect page for an admin with a production application" in new Setup {
       changeRedirectUriShouldRenderThePage(
-        aStandardApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris), OK, redirectUris.head, "https://www.another.example.com")
     }
   }
@@ -335,7 +335,7 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
   "changeRedirectAction" should {
 
     "return the redirect page for an admin with a production application when submitted a changed uri" in new Setup {
-      val application = aStandardApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
+      val application = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
       val originalRedirectUri = redirectUris.head
       val newRedirectUri = "https://localhost:1111"
       givenTheApplicationExists(application)

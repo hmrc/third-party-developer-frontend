@@ -23,4 +23,4 @@ Feature: Add Application
       | What happens next?                                                                                         |
       | To get your production credentials, you must submit your application for checking. |
       | This takes up to 2 working days.                   |
-    And there is a link to submit your application for checking 'applicationId', with the text 'Start'
+    And there is a link to submit your application for checking with the text 'Start'

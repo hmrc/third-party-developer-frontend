@@ -59,7 +59,7 @@ Feature: View/add/delete Subscriptions
       | For security reasons we must approve any API subscription changes. This takes up to 2 working days. |
       | Are you sure you want to request to unsubscribe from api-2 1.0?|
     When I click on the 'Cancel' link
-    And I am on the subscriptions page for application with id 'app-id-3' scrolled to the API with name 'api-2' and group type 'API'
+    And I am on the subscriptions page for application with id 'app-id-3'
 
   Scenario: TPSD subscribes to an API which has no subscription fields
     Given the APIs available for 'app-id-1' are:
