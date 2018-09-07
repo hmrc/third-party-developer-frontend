@@ -30,14 +30,14 @@ import org.apache.commons.io.FileUtils
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxProfile}
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
-import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver}
+import org.openqa.selenium.{Dimension, OutputType, TakesScreenshot, WebDriver}
 import org.scalatest.Matchers
-import play.api.{Logger, Mode}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
+import play.api.{Logger, Mode}
 import utils.BrowserStackCaps
 
-import scala.util.Try
+import scala.util.{Properties, Try}
 
 
 trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
@@ -45,13 +45,14 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
   var failedTestCount: Int = 0
   // please do not change this port as it is used for acceptance tests
   // when the service is run with "service manager"
-  val port = 9685
+  val port = 6001
   val host = s"http://localhost:$port"
   val stubPort = sys.env.getOrElse("WIREMOCK_PORT", "11111").toInt
   val stubHost = "localhost"
   val wireMockUrl = s"http://$stubHost:$stubPort"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
   var server: TestServer = null
+  lazy val windowSize = new Dimension(1024, 800)
 
   Runtime.getRuntime addShutdownHook new Thread {
     override def run() {
@@ -61,12 +62,23 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
   val driver: WebDriver = createWebDriver
 
   lazy val createWebDriver: WebDriver = {
-    val targetBrowser = System.getProperty("test_driver", "firefox").toLowerCase
-    targetBrowser match {
+    Properties.propOrElse("test_driver", "chrome") match {
       case "chrome" => createChromeDriver()
       case "firefox" => createFirefoxDriver()
-      case _ => throw new IllegalArgumentException(s"target browser $targetBrowser not recognised")
+      case "remote-chrome" => createRemoteChromeDriver()
+      case "remote-firefox" => createRemoteFirefoxDriver()
+      case other => throw new IllegalArgumentException(s"target browser $other not recognised")
     }
+  }
+
+  def createRemoteChromeDriver() = {
+    val driver = new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), DesiredCapabilities.chrome)
+    driver.manage().window().setSize(windowSize)
+    driver
+  }
+
+  def createRemoteFirefoxDriver() = {
+    new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), DesiredCapabilities.firefox)
   }
 
   def createChromeDriver(): WebDriver = {
