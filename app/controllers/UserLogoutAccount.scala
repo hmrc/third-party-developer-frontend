@@ -31,7 +31,7 @@ trait UserLogoutAccount extends LoggedInController with LoginLogout {
   val deskproService: DeskproService
 
   def logoutSurvey = loggedInAction { implicit request =>
-    val page = signoutSurvey("Give feedback", SignOutSurveyForm.form)
+    val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)
 
     Future.successful(Ok(page))
   }
