@@ -119,7 +119,7 @@ case class SignInPage(override val pageHeading: String = "Sign in") extends Form
 }
 
 case object SignOutSurveyPage extends FormPage {
-  override val pageHeading = "Give feedback"
+  override val pageHeading = "Are you sure you want to sign out?"
   override val url: String = s"${Env.host}/developer/logout/survey"
 }
 

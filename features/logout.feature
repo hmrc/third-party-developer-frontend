@@ -18,7 +18,7 @@ Feature:
       And I am on the 'Manage applications empty nest' page
       When I attempt to Sign out when the session expires
       Then I am on the 'Logout survey' page
-      When I click on the 'No thanks, sign me out' link
+      When I click on the 'Yes, sign me out' link
       Then I see on current page:
         | You are now signed out |
       And I am not logged in

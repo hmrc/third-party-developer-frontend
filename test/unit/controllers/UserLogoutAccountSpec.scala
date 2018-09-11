@@ -108,7 +108,7 @@ class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppl
 
       status(result) shouldBe 200
 
-      bodyOf(result) should include("Give feedback")
+      bodyOf(result) should include("Are you sure you want to sign out?")
     }
   }
 
