@@ -101,7 +101,8 @@ lazy val microservice = Project(appName, file("."))
     fork in Test := false,
     retrieveManaged := true,
     routesGenerator := StaticRoutesGenerator,
-    scalaVersion := "2.11.11"
+    scalaVersion := "2.11.11",
+    resolvers += Resolver.jcenterRepo
   )
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
