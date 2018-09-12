@@ -145,7 +145,7 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
         ForkOptions(
           runJVMOptions = Seq(
             "-Dtest.name=" + test.name,
-            s"-Dtest_driver=${Properties.propOrElse("test_driver", "firefox")}"
+            s"-Dtest_driver=${Properties.propOrElse("test_driver", "chrome")}"
           )
         )
       )
