@@ -32,7 +32,7 @@ trait HeaderEnricher {
 
   def enrichHeaders(hc: HeaderCarrier, user: Option[Developer]) =
     user match {
-      case Some(dev) => hc.withExtraHeaders("X-email-address" -> dev.email, "X-name" -> dev.displayedName)
+      case Some(dev) => hc.withExtraHeaders("X-email-address" -> dev.email, "X-name" -> dev.displayedNameEncoded)
       case _ => hc
     }
 }

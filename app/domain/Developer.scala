@@ -16,12 +16,16 @@
 
 package domain
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 import play.api.libs.json.{Format, Json}
 
 import scala.concurrent.Future
 
 case class Developer(email: String, firstName: String, lastName: String, organisation: Option[String] = None) {
   val displayedName = s"$firstName $lastName"
+  val displayedNameEncoded = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 }
 
 object Developer {

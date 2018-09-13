@@ -82,7 +82,9 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
   }
 
   def createChromeDriver(): WebDriver = {
-    new ChromeDriver()
+    val driver = new ChromeDriver()
+    driver.manage().window().setSize(windowSize)
+    driver
   }
 
   def createFirefoxDriver(): WebDriver = {
