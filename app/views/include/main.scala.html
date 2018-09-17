@@ -83,6 +83,13 @@
 </ul>
 }
 
+@banner = {
+    <div class="banner">
+        @include.breadcrumbs(breadcrumbs: _*)
+        @serviceInfoContent
+    </div>
+}
+
 @betaBanner = {
 @uiLayouts.betaBanner(
     userLoggedIn = false,
@@ -94,10 +101,10 @@
 @serviceInfo = {
     @if(serviceInfoContent.isDefined) {
         @uiLayouts.serviceInfo(
-            betaBanner = betaBanner,
+            betaBanner = banner,
             includeGridWrapper = false,
             includeHMRCBranding = false,
-            serviceInfoContent = serviceInfoContent)
+            serviceInfoContent = None)
     }
 }
 
@@ -151,7 +158,6 @@
     <main id="wrapper" role="main">
         <div class="centered-content">
             @serviceInfo
-            @if(breadcrumbs.nonEmpty) {@include.breadcrumbs(breadcrumbs: _*)}
         </div>
         <div class="centered-content">
             <div class="grid-row">
