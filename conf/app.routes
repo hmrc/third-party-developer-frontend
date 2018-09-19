@@ -75,6 +75,9 @@ GET         /applications/:id/subscribe                                         
 POST        /applications/:id/subscribe                                                 controllers.Subscriptions.subscribeToApiAction(id: String, name: String, context: String, version: String, subscriptionRedirect: String)
 GET         /applications/:id/unsubscribe                                               controllers.Subscriptions.unsubscribeFromApi(id: String, name: String, context: String, version: String, redirectTo: String)
 POST        /applications/:id/unsubscribe                                               controllers.Subscriptions.unsubscribeFromApiAction(id: String, name: String, context: String, version: String, redirectTo: String)
+POST        /applications/:id/change-subscription                                       controllers.Subscriptions.changeApiSubscription(id: String, name: String, context: String, version: String, redirectTo: String)
+GET         /applications/:id/change-locked-subscription                                controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: String, version: String, redirectTo: String)
+POST        /applications/:id/change-locked-subscription                                controllers.Subscriptions.changeLockedApiSubscriptionAction(id: String, name: String, context: String, version: String, redirectTo: String)
 
 GET         /applications/:id/credentials                                               controllers.Credentials.credentials(id: String, error: Option[String])
 

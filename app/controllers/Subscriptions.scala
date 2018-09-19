@@ -27,7 +27,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
-import views.html.include.{subscribeConfirmation, subscriptionFields, unsubscribeConfirmation}
+import views.html.include.{subscribeConfirmation, subscriptionFields, unsubscribeConfirmation, changeSubscriptionConfirmation}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -157,6 +157,70 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
       formWithErrors => handleInvalidForm(request.application, name, version, formWithErrors),
       validForm => handleValidForm(request.application, name, version, validForm)
     )
+  }
+
+  private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
+    case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.subscriptions(applicationId))
+    case Some(APPLICATION_CHECK_PAGE) => Redirect(routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
+    case _ => Redirect(routes.ManageApplications.editApplication(applicationId, None))
+  }
+
+  def changeApiSubscription(applicationId: String, name: String, apiContext: String, apiVersion: String, redirectTo: String) = teamMemberOnApp(applicationId) { implicit request =>
+    def updateCheckInformation(app: Application) = applicationService.updateCheckInformation(app.id, app.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionsConfirmed = false))
+
+    def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
+      case Some(subscribe) => {
+        def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
+
+        service(applicationId, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.application) }
+      }
+      case _ => Future.successful(redirect(redirectTo, applicationId))
+    }
+
+    def handleValidForm(form: ChangeSubscriptionForm) =
+      if (request.application.hasLockedSubscriptions) {
+        Future.successful(Forbidden(ApplicationGlobal.badRequestTemplate))
+      } else {
+        updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
+      }
+
+    def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) =
+      Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate)) // TODO: render subscription page with form error?
+
+    ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
+  }
+
+  def changeLockedApiSubscription(applicationId: String, apiName: String, apiContext: String, apiVersion: String, redirectTo: String) = adminOnApp(applicationId) { implicit request =>
+    if (request.application.hasLockedSubscriptions) {
+      applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).map(subscribed =>
+        Ok(changeSubscriptionConfirmation(request.application, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, SubscriptionRedirect.API_SUBSCRIPTIONS_PAGE.toString)))
+    } else {
+      Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
+    }
+  }
+
+  def changeLockedApiSubscriptionAction(applicationId: String, apiName: String, apiContext: String, apiVersion: String, redirectTo: String) = adminOnApp(applicationId) { implicit request =>
+    def requestChangeSubscription(subscribed: Boolean) = {
+      if (subscribed)
+        subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
+      else
+        subscriptionsService.requestApiSubscription(request.user, request.application, apiName, apiVersion)
+    }
+
+    def handleValidForm(subscribed: Boolean)(form: ChangeSubscriptionConfirmationForm) = form.confirm match {
+      case Some(true) => requestChangeSubscription(subscribed).map(_ => redirect(redirectTo, applicationId))
+      case _ => Future.successful(redirect(redirectTo, applicationId))
+    }
+
+    def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
+      Future.successful(BadRequest(changeSubscriptionConfirmation(request.application, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
+
+    if (request.application.hasLockedSubscriptions) {
+      applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).flatMap(subscribed =>
+        ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
+    } else {
+      Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
+    }
   }
 
   private def createAjaxSubscriptionResponse(app: Application, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier) = {

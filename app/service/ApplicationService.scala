@@ -97,6 +97,15 @@ trait ApplicationService {
       }
     }
 
+  def isSubscribedToApi(application: Application, apiName: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
+
+    for {
+      subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
+      subscription = subscriptions.find(sub => sub.name == apiName && sub.context == apiContext && sub.versions.exists(v => v.version.version == apiVersion && v.subscribed))
+    } yield subscription.isDefined
+  }
+
   def addClientSecret(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = {
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.addClientSecrets(id, ClientSecretRequest("")))
   }

@@ -24,129 +24,6 @@
 @(role: Role, app: Application, apisSubscriptions: Seq[APISubscriptions], hasAnySubscriptions: Boolean, group: String, afterSubscriptionRedirectTo: SubscriptionRedirect)(
         implicit messages: Messages, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
 
-@renderLockedSubscribeButton(api: APISubscriptionStatus, apiContext: String, visible: Boolean) = {
-    @if(api.subscribed) {
-        @renderDummySubscribeButton(api, visible)
-    } else {
-        <a  data-api-subscribe="@IdFormatter.identifier(apiContext, api.apiVersion.version)"
-            href="@{routes.Subscriptions.subscribeToApi(app.id, api.name, apiContext, api.apiVersion.version)}"
-            class="toggle__button"
-            id="toggle-@IdFormatter.identifier(api.context, api.apiVersion.version)-on"
-            data-toggle-subscribe="on"
-            aria-label="Subscribe to @{api.name} version @{api.apiVersion.version} @{api.apiVersion.displayedStatus}">On</a>
-    }
-}
-
-@renderUnlockedSubscribeButton(api: APISubscriptionStatus, apiContext: String, visible: Boolean) = {
-    @if((api.subscribed && visible) || (!api.subscribed && !visible)) {
-        @renderDummySubscribeButton(api, visible)
-    } else {
-        @helper.form(action = routes.Subscriptions.subscribeApplicationToApi(app.id, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), 'class -> "no-fields-subscription subscription-toggle") {
-            @helper.CSRF.formField
-            <span id="error-@IdFormatter.identifier(api.context, api.apiVersion.version)" class="error-notification toggle__error float--left">Server error, please try again</span>
-            <input type="hidden" name="context" value="@apiContext"/>
-            <input type="hidden" name="version" value="@{api.apiVersion.version}"/>
-            <input type="submit"
-                   value="On"
-                   class="toggle__button"
-                   id="toggle-@IdFormatter.identifier(api.context, api.apiVersion.version)-on"
-                   aria-label="Subscribe to @{api.name} version @{api.apiVersion.version} @{api.apiVersion.displayedStatus}"/>
-        }
-    }
-}
-
-@renderUnlockedUnsubscribeButton(api: APISubscriptionStatus, apiContext: String, visible: Boolean) = {
-    @if((api.subscribed && visible) || (!api.subscribed && !visible)) {
-        @helper.form(action = routes.Subscriptions.unsubscribeFromApi(app.id, app.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), 'class -> "no-fields-unsubscribe subscription-toggle") {
-            @helper.CSRF.formField
-            <input type="hidden" name="unsubscribeConfirm" value="Yes"/>
-            <input type="submit"
-                   value="Off"
-                   class="toggle__button"
-                   data-api-unsubscribe="@IdFormatter.identifier(apiContext, api.apiVersion.version)"
-                   id="toggle-@IdFormatter.identifier(api.context, api.apiVersion.version)-off"
-                   aria-label="Unsubscribe from @{api.name} version @{api.apiVersion.version} @{api.apiVersion.displayedStatus}"/>
-        }
-    } else {
-        @renderDummyUnsubscribeButton(api, visible)
-    }
-}
-
-@renderLockedUnsubscribeButton(api: APISubscriptionStatus, apiContext: String, visible: Boolean) = {
-    @if((api.subscribed && visible) || (!api.subscribed && !visible)) {
-        <a  data-api-unsubscribe="@IdFormatter.identifier(apiContext, api.apiVersion.version)"
-            href="@{routes.Subscriptions.unsubscribeFromApi(app.id, api.name, apiContext, api.apiVersion.version, "")}"
-            class="toggle__button"
-            id="toggle-@IdFormatter.identifier(api.context, api.apiVersion.version)-off"
-            data-toggle-subscribe="off"
-            aria-label="Unsubscribe from @{api.name} version @{api.apiVersion.version} @{api.apiVersion.displayedStatus}">Off</a>
-    } else {
-        @renderDummyUnsubscribeButton(api, visible)
-    }
-}
-
-@renderDummySubscribeButton(api: APISubscriptionStatus, visible: Boolean) = {
-    @if((api.subscribed && visible) || (!api.subscribed && !visible)) {
-        <span class="toggle__button toggle__button--active"
-              data-toggle-subscribe="on"
-              aria-label="Subscribed to @{api.name} version @{api.apiVersion.version} @{api.apiVersion.displayedStatus}">On</span>
-    } else {
-        <span class="toggle__button toggle__button--disabled"
-              data-toggle-subscribe="on"
-              aria-label="Subscribed to @{api.name} version @{api.apiVersion.version} @{api.apiVersion.displayedStatus}">On</span>
-    }
-}
-
-@renderDummyUnsubscribeButton(api: APISubscriptionStatus, visible: Boolean) = {
-    @if((api.subscribed && visible) || (!api.subscribed && !visible)) {
-        <span class="toggle__button toggle__button--disabled">Off</span>
-    } else {
-        <span class="toggle__button toggle__button--inactive">Off</span>
-    }
-}
-
-@renderDeveloperProductionToggles(app: Application, api: APISubscriptionStatus, apiContext: String, visible: Boolean) = {
-    @if(app.state.name == State.PENDING_GATEKEEPER_APPROVAL || app.state.name == State.PENDING_REQUESTER_VERIFICATION || app.state.name == State.PRODUCTION) {
-        @renderDummySubscribeButton(api, visible)
-        @renderDummyUnsubscribeButton(api, visible)
-    } else {
-        @renderUnlockedSubscribeButton(api, apiContext, visible)
-        @renderUnlockedUnsubscribeButton(api, apiContext, visible)
-    }
-}
-
-@renderAdminProductionToggles(app: Application, api: APISubscriptionStatus, apiContext: String, visible: Boolean) = {
-    @if(app.state.name == State.PENDING_GATEKEEPER_APPROVAL || app.state.name == State.PENDING_REQUESTER_VERIFICATION || app.state.name == State.PRODUCTION) {
-        @renderLockedSubscribeButton(api, apiContext, visible)
-        @renderLockedUnsubscribeButton(api, apiContext, visible)
-    } else {
-        @renderUnlockedSubscribeButton(api, apiContext, visible)
-        @renderUnlockedUnsubscribeButton(api, apiContext, visible)
-    }
-}
-
-@renderProductionToggles(app: Application, api: APISubscriptionStatus, apiContext: String, role: Role, visible: Boolean) = {
-    @if(role == Role.ADMINISTRATOR) {
-        @renderAdminProductionToggles(app, api, apiContext, visible)
-    } else {
-        @renderDeveloperProductionToggles(app, api, apiContext, visible)
-    }
-}
-
-@renderSandboxToggles(api: APISubscriptionStatus, apiContext: String, visible: Boolean) = {
-    @if(api.subscribed) {
-        @renderUnlockedSubscribeButton(api, apiContext, visible)
-        @if(api.canUnsubscribe) {
-            @renderUnlockedUnsubscribeButton(api, apiContext, visible)
-        } else {
-            @subscriptionToggleOff(api)
-        }
-    } else {
-        @renderUnlockedSubscribeButton(api, apiContext, visible)
-        @renderUnlockedUnsubscribeButton(api, apiContext, visible)
-    }
-}
-
 <ul>
     @apisSubscriptions.map { case (apiSubscription) =>
         <li class="accordion accordion--stacked @if(apiSubscription.isExpanded) {accordion--expanded}"
@@ -188,24 +65,25 @@
                                         </label>
                                     }
                                 </div>
-                                <div class="accordion__body__row__right">
-                                    <div class="float--right">
-                                        <div id="toggle-@IdFormatter.identifier(api.context, api.apiVersion.version)-subscribed" class="toggle subscribed @{if(!api.subscribed) "hidden"}" >
-                                            @if(app.deployedTo == Environment.PRODUCTION) {
-                                                @renderProductionToggles(app, api, apiSubscription.apiContext, role, api.subscribed)
-                                            } else {
-                                                @renderSandboxToggles(api, apiSubscription.apiContext, api.subscribed)
-                                            }
-                                        </div>
-
-                                        <div id="toggle-@IdFormatter.identifier(api.context, api.apiVersion.version)-notsubscribed" class="toggle not-subscribed @{if(api.subscribed) "hidden"}" >
-                                            @if(app.deployedTo == Environment.PRODUCTION) {
-                                                @renderProductionToggles(app, api, apiSubscription.apiContext, role, !api.subscribed)
-                                            } else {
-                                                @renderSandboxToggles(api, apiSubscription.apiContext, !api.subscribed)
-                                            }
-                                        </div>
+                                @if(app.hasLockedSubscriptions &&  role == Role.ADMINISTRATOR) {
+                                    <div class="accordion__body__row__right accordion__body__row__right--link">
+                                      <a href="@routes.Subscriptions.changeLockedApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)">Request change</a>
                                     </div>
+                                }
+                                <div class="accordion__body__row__right">
+                                  <div class="toggle float--right">
+                                    @* TODO: change action based on locked subscriptions *@
+                                    @helper.form(action = routes.Subscriptions.changeApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), 'class -> "slider") {
+                                    @helper.CSRF.formField
+                                    <fieldset @if(app.hasLockedSubscriptions) { disabled }>
+                                      <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" class="slider__on" type="radio" name="subscribed" value="true" @if(api.subscribed) { checked }>
+                                      <label for="@IdFormatter.identifier(api.context, api.apiVersion.version)-on"><span>On</span></label>
+                                      <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-off" class="slider__off" type="radio" name="subscribed" value="false" @if(!api.subscribed) { checked }>
+                                      <label for="@IdFormatter.identifier(api.context, api.apiVersion.version)-off"><span>Off</span></label>
+                                      <input type="submit" value="Save" class="button">
+                                    </fieldset>
+                                    }
+                                  </div>
                                 </div>
                             </div>
 

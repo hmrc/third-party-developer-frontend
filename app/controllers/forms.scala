@@ -348,6 +348,25 @@ object UnsubscribeConfirmationForm {
   )
 }
 
+final case class ChangeSubscriptionForm(subscribed: Option[Boolean])
+
+object ChangeSubscriptionForm {
+  def form: Form[ChangeSubscriptionForm] = Form(
+    mapping(
+      "subscribed" -> optional(boolean).verifying(FormKeys.changeSubscriptionNoChoiceKey, _.isDefined)
+    )(ChangeSubscriptionForm.apply)(ChangeSubscriptionForm.unapply))
+}
+
+final case class ChangeSubscriptionConfirmationForm(subscribed: Boolean, confirm: Option[Boolean])
+
+object ChangeSubscriptionConfirmationForm {
+  def form: Form[ChangeSubscriptionConfirmationForm] = Form(
+    mapping(
+      "subscribed" -> boolean,
+      "confirm" -> optional(boolean).verifying(FormKeys.subscriptionConfirmationNoChoiceKey, _.isDefined)
+    )(ChangeSubscriptionConfirmationForm.apply)(ChangeSubscriptionConfirmationForm.unapply))
+}
+
 case class SubscriptionFieldsForm(fields: Seq[SubscriptionField])
 
 object SubscriptionFieldsForm {
