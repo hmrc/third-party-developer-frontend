@@ -132,171 +132,6 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
     }
   }
 
-  "subscribeToApi" should {
-    "successfully request subscribing to an API and be taken to the confirmation page" in new Setup {
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-      given(underTest.appConfig.title).willReturn("Test Title")
-
-      val request = FakeRequest("GET", s"developer/applications/$appId/subscribe?name=$apiName&context=$apiContext&version=$apiVersion&status=$displayStatus&accessType="
-      ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-
-      val result = await(underTest.subscribeToApi(appId, apiName, apiContext, apiVersion)(request))
-
-      status(result) shouldBe OK
-      titleOf(result) shouldBe "Confirm subscribe - HMRC Developer Hub - GOV.UK"
-    }
-
-    "successfully confirm subscribing to an API and redirect to the subscriptions page" in new Setup {
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-      given(underTest.appConfig.title).willReturn("Test Title")
-
-      val request = FakeRequest("POST", s"developer/applications/$appId/subscribe?name=$apiName&context=$apiContext&version=$apiVersion&status=$displayStatus&subscriptionRedirect="
-      ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-
-      val result = await(underTest.subscribeToApi(appId, apiName, apiContext, apiVersion)(request))
-
-      status(result) shouldBe OK
-      titleOf(result) shouldBe "Confirm subscribe - HMRC Developer Hub - GOV.UK"
-    }
-  }
-
-  "subscribeToApiAction" should {
-    val redirectTo = "MANAGE_PAGE"
-
-    "subscribe to an API and show confirmation page for an active production app" in {
-      val mockDeskproConnector = mock[DeskproConnector]
-      val mockSubscriptionsService = new SubscriptionsService {
-        override val auditService: AuditService = mock[AuditService]
-        override val deskproConnector: DeskproConnector = mockDeskproConnector
-      }
-
-      val underTest = new Subscriptions {
-        override val sessionService = mock[SessionService]
-        override val applicationService = mock[ApplicationService]
-        override val developerConnector = mock[ThirdPartyDeveloperConnector]
-        override val auditService = mock[AuditService]
-        override val appConfig = mock[ApplicationConfig]
-        override val subFieldsService = mock[SubscriptionFieldsService]
-        override val subscriptionsService = mockSubscriptionsService
-        override val apiSubscriptionsHelper = mock[ApiSubscriptionsHelper]
-      }
-
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-      given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(activeApplication))
-      given(underTest.apiSubscriptionsHelper.roleForApplication(activeApplication, loggedInDeveloper.email)).willReturn(Role.ADMINISTRATOR)
-      given(underTest.applicationService.subscribeToApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-      given(underTest.applicationService.updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-      given(mockSubscriptionsService.deskproConnector.createTicket(any[DeskproTicket])(any[HeaderCarrier])).willReturn(successful(TicketCreated))
-
-      val request = FakeRequest("POST",
-        s"developer/applications/$appId/subscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-      ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-        .withFormUrlEncodedBody("subscribeConfirm" -> "Yes")
-
-      val result = await(underTest.subscribeToApiAction(appId, apiName, apiContext, apiVersion, redirectTo)(request))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Request submitted")
-      bodyOf(result) should include("We will review your request and respond within 2 working days.")
-
-      verify(mockDeskproConnector).createTicket(any[DeskproTicket])(any[HeaderCarrier])
-    }
-  }
-
-  "unsubscribeFromApi" should {
-    "redirect to the confirmation page" in new Setup {
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-      given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(activeApplication))
-      given(underTest.appConfig.title).willReturn("Test Title")
-
-      val redirectTo = "MANAGE_PAGE"
-
-      val request = FakeRequest("GET",
-        s"developer/applications/$appId/unsubscribe?name=$apiName&context=$apiName&version=$apiVersion&redirectTo=$redirectTo"
-      ).withSession(sessionParams: _*).withLoggedIn(underTest)(sessionId)
-
-      val result = await(addToken(underTest.unsubscribeFromApi(appId, apiName, apiName, apiVersion, displayStatus))(request))
-
-      status(result) shouldBe OK
-      titleOf(result) shouldBe "Confirm unsubscribe - HMRC Developer Hub - GOV.UK"
-    }
-  }
-
-  "unsubscribeFromApiAction" should {
-    val redirectTo = "MANAGE_PAGE"
-
-    "unsubscribe from an API and show confirmation page for an active production app" in new Setup {
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-      given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(activeApplication))
-      given(underTest.apiSubscriptionsHelper.roleForApplication(activeApplication, loggedInDeveloper.email)).willReturn(Role.ADMINISTRATOR)
-      given(underTest.applicationService.unsubscribeFromApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-      given(underTest.applicationService.updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-      given(underTest.subscriptionsService.requestApiUnsubscribe(mockEq(loggedInDeveloper), mockEq(activeApplication), mockEq(apiName), mockEq(apiVersion))(any[HeaderCarrier]))
-        .willReturn(successful(TicketCreated))
-
-      val request = FakeRequest("POST",
-        s"developer/applications/$appId/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-      ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-        .withFormUrlEncodedBody("unsubscribeConfirm" -> "Yes")
-
-      val result = await(underTest.unsubscribeFromApiAction(appId, apiName, apiContext, apiVersion, redirectTo)(request))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Request submitted")
-      bodyOf(result) should include("We will review your request and respond within 2 working days.")
-    }
-
-    "unsubscribe from an API and redirect to the subscriptions page for sandbox app" in new Setup {
-
-      val sandboxApp = activeApplication.copy(deployedTo = Environment.SANDBOX)
-
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-      given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(sandboxApp))
-
-      given(underTest.applicationService.unsubscribeFromApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-
-      val request = FakeRequest("POST",
-        s"developer/applications/$appId/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=${SubscriptionRedirect.API_SUBSCRIPTIONS_PAGE.toString}"
-      ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-        .withFormUrlEncodedBody("unsubscribeConfirm" -> "Yes")
-
-      val result = await(underTest.unsubscribeFromApiAction(appId, apiName, apiContext, apiVersion, SubscriptionRedirect.API_SUBSCRIPTIONS_PAGE.toString)(request))
-
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/subscriptions")
-      status(result) shouldBe SEE_OTHER
-      verify(underTest.applicationService).unsubscribeFromApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
-      verify(underTest.applicationService, never()).updateCheckInformation(any[String], any[CheckInformation])(any[HeaderCarrier])
-    }
-
-    "unsubscribe from an API and redirect to the subscriptions page in application check journey" in new Setup {
-      val redirectTo = "APPLICATION_CHECK_PAGE"
-
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-      given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(newApplication))
-      given(underTest.apiSubscriptionsHelper.roleForApplication(newApplication, loggedInDeveloper.email)).willReturn(Role.ADMINISTRATOR)
-      given(underTest.applicationService.updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-
-      given(underTest.applicationService.unsubscribeFromApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-
-      val request = FakeRequest("POST",
-        s"developer/applications/$appId/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-      ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-        .withFormUrlEncodedBody("unsubscribeConfirm" -> "Yes")
-
-      val result = await(underTest.unsubscribeFromApiAction(appId, apiName, apiContext, apiVersion, redirectTo)(request))
-
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check/subscriptions")
-      status(result) shouldBe SEE_OTHER
-    }
-  }
-
   "changeApiSubscription" when {
     def forbiddenSubscriptionChange(app: => Application) = {
       "return 403 Forbidden" in new Setup {
@@ -314,6 +149,64 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
     }
 
     def allowedSubscriptionChange(app: => Application) = {
+      "successfully subscribe to an API and redirect to the subscriptions page" in new Setup {
+        val redirectTo = "MANAGE_PAGE"
+        val request = FakeRequest("POST",
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+
+        given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
+        given(underTest.applicationService.subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+
+        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
+
+        verify(underTest.applicationService).subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
+        verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
+      }
+
+      "successfully unsubscribe from an API and redirect to the subscriptions page" in new Setup {
+        val redirectTo = "MANAGE_PAGE"
+        val request = FakeRequest("POST",
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
+
+        given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
+        given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+
+        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
+
+        verify(underTest.applicationService).unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
+        verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
+      }
+
+      "return a Bad Request without changing the subscription when requesting a change to the subscription when the form is invalid" in new Setup {
+        val redirectTo = "APPLICATION_CHECK_PAGE"
+        val request = FakeRequest("POST",
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody()
+
+        given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
+        given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+
+        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+
+        status(result) shouldBe BAD_REQUEST
+
+        verify(underTest.applicationService, never).unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
+        verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
+      }
+    }
+
+    def allowedSubscriptionChangeWithCheckUpdate(app: => Application) = {
       "successfully subscribe to an API, update the check information and redirect to the subscriptions page" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
@@ -352,7 +245,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         verify(underTest.applicationService).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
       }
 
-      "return a Bad Request without changing the subscription of check information when requesting a change to the subscription when the form is invalid" in new Setup {
+      "return a Bad Request without changing the subscription or check information when requesting a change to the subscription when the form is invalid" in new Setup {
         val redirectTo = "APPLICATION_CHECK_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
@@ -372,11 +265,11 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
     }
 
     "an administrator attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(adminSubmittedProductionApplication) }
-    "an administrator attempts to change a created production application" should { behave like allowedSubscriptionChange(adminCreatedProductionApplication) }
+    "an administrator attempts to change a created production application" should { behave like allowedSubscriptionChangeWithCheckUpdate(adminCreatedProductionApplication) }
     "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like allowedSubscriptionChange(adminSubmittedSandboxApplication) }
     "an administrator attempts to change a created sandbox application" should { behave like allowedSubscriptionChange(adminCreatedSandboxApplication) }
     "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(developerSubmittedProductionrApplication) }
-    "a developer attempts to change a created production application" should { behave like allowedSubscriptionChange(developerCreatedProductionApplication) }
+    "a developer attempts to change a created production application" should { behave like allowedSubscriptionChangeWithCheckUpdate(developerCreatedProductionApplication) }
     "a developer attempts to change a submitted-for-checking sandbox application" should { behave like allowedSubscriptionChange(developerSubmittedSandboxApplication) }
     "a developer attempts to change a created sandbox application" should { behave like allowedSubscriptionChange(devloperCreatedSandboxApplication) }
   }
@@ -616,237 +509,13 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         s"developer/applications/$appId/subscribe?context=$apiContext&version=$apiVersion&accessType=$apiAccessType&tab=subscriptions"
       ).withLoggedIn(underTest)(sessionId)
 
-      val result = await(underTest.unsubscribeFromApiAction(appId, apiName, apiContext, apiVersion, apiAccessType)(request))
+      val result = await(underTest.changeApiSubscription(appId, apiName, apiContext, apiVersion, apiAccessType)(request))
       status(result) shouldBe 404
       verify(underTest.applicationService, never).updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier])
     }
   }
 
-  "subscribeApplicationToApi" should {
-    val subscriptionFields = ApiSubscriptionFields.fields("field1" -> "value1", "field2" -> "value2")
-
-    lazy val validForm = Seq(
-      "fields[0].name" -> "field1",
-      "fields[0].value" -> "value1",
-      "fields[0].description" -> "desc1",
-      "fields[0].hint" -> "hint1",
-      "fields[0].type" -> "STRING",
-      "fields[1].name" -> "field2",
-      "fields[1].value" -> "value2",
-      "fields[1].description" -> "desc0",
-      "fields[1].hint" -> "hint0",
-      "fields[1].type" -> "STRING"
-    )
-
-    def givenApplicationCanBeUpdatedUsingController(controller: Subscriptions, application: Application) = {
-      given(controller.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-      given(controller.subFieldsService.saveFieldValues(any[String], any[String], any[String], any[ApiSubscriptionFields.Fields])(any[HeaderCarrier]))
-        .willReturn(successful(HttpResponse(OK)))
-      given(controller.applicationService.subscribeToApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-      given(controller.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(application)
-      given(controller.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier]))
-        .willReturn(Seq(
-          APISubscriptionStatus("api1", "service1", apiContext + "1", APIVersion(apiVersion, APIStatus.STABLE), subscribed = true, requiresTrust = false, None),
-          APISubscriptionStatus("api1", "service1", apiContext, APIVersion(apiVersion, APIStatus.STABLE), subscribed = false, requiresTrust = false, None)
-        ))
-        .willReturn(Seq(APISubscriptionStatus("api1", "service1", apiContext, APIVersion(apiVersion, APIStatus.STABLE), subscribed = false, requiresTrust = false, None),
-          APISubscriptionStatus("api1", "service1", apiContext, APIVersion(apiVersion, APIStatus.STABLE), subscribed = false, requiresTrust = false, None)))
-      given(controller.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-    }
-
-    def stubSuccessfulFieldUpdate(controller: Subscriptions, application: Application) = {
-      given(controller.subFieldsService.saveFieldValues(any[String], any[String], any[String], any[ApiSubscriptionFields.Fields])(any[HeaderCarrier]))
-        .willReturn(successful(HttpResponse(200)))
-      given(controller.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(application)
-      given(controller.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier]))
-        .willReturn(Seq(APISubscriptionStatus("api1", "service1", apiContext, APIVersion(apiVersion, APIStatus.STABLE), subscribed = true, requiresTrust = false, None)))
-      given(controller.applicationService.updateCheckInformation(mockEq(application.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-
-    }
-
-    "redirect when user is not logged in" in new Setup {
-      val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, "fakeRedirect").apply(FakeRequest()))
-      status(result) shouldBe 303
-    }
-
-    "with a logged in user subscribing to an api with subscription fields" should {
-      "redirect to subscriptions section of application page" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=dodgyRedirect"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody(validForm: _*)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, "dodgyRedirect")(request))
-
-        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId")
-      }
-
-      "save subscription field values" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/saveSubscriptionFields?subscriptionRedirect=${MANAGE_PAGE.toString}"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody(validForm: _*)
-
-        val result = await(underTest.saveSubscriptionFields(appId, apiContext, apiVersion, MANAGE_PAGE.toString)(request))
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId")
-
-        verify(underTest.subFieldsService).saveFieldValues(mockEq(appId), mockEq(apiContext), mockEq(apiVersion), mockEq(subscriptionFields))(any[HeaderCarrier])
-      }
-
-      "subscribe to api in a production app" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=${MANAGE_PAGE.toString}"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody(validForm: _*)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, MANAGE_PAGE.toString)(request))
-
-        verify(underTest.applicationService).subscribeToApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
-        verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier])
-      }
-
-      "subscribe to api in a sandbox app" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, newSandboxApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=${MANAGE_PAGE.toString}"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody(validForm: _*)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, MANAGE_PAGE.toString)(request))
-
-        verify(underTest.applicationService).subscribeToApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
-        verify(underTest.applicationService, never()).updateCheckInformation(any[String], any[CheckInformation])(any[HeaderCarrier])
-      }
-
-      "redirect to subscriptions page as part of the application check journey" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=${APPLICATION_CHECK_PAGE.toString}"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody(validForm: _*)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, APPLICATION_CHECK_PAGE.toString)(request))
-
-        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check/subscriptions")
-      }
-    }
-
-    "with a logged in user subscribing to an api without subscription fields" should {
-      "redirect to subscriptions tab of application page" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=dodgyRedirect"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, "dodgyRedirect")(request))
-
-        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId")
-      }
-
-      "redirect to subscriptions page in application check journey" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=${APPLICATION_CHECK_PAGE.toString}"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, APPLICATION_CHECK_PAGE.toString)(request))
-
-        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check/subscriptions")
-      }
-
-      "not save subscription field values" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=${MANAGE_PAGE.toString}"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, MANAGE_PAGE.toString)(request))
-
-        verify(underTest.subFieldsService, never()).saveFieldValues(any[String], any[String], any[String], any[Fields])(any[HeaderCarrier])
-      }
-
-      "subscribe to api" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=${MANAGE_PAGE.toString}"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, MANAGE_PAGE.toString)(request))
-
-        verify(underTest.applicationService).subscribeToApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
-        verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier])
-      }
-    }
-
-    "with a logged in user making an AJAX request" should {
-      "return Ok" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=${MANAGE_PAGE.toString}"
-        )
-          .withCSRFToken
-          .withFormUrlEncodedBody(validForm: _*)
-          .withHeaders("X-Requested-With" -> "XMLHttpRequest")
-          .withLoggedIn(underTest)(sessionId)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, MANAGE_PAGE.toString)(request))
-
-        status(result) shouldBe 200
-        verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier])
-      }
-
-      "return number of subscriptions for api" in new Setup {
-        givenApplicationCanBeUpdatedUsingController(underTest, activeApplication)
-        stubSuccessfulFieldUpdate(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=${MANAGE_PAGE.toString}"
-        )
-          .withCSRFToken
-          .withFormUrlEncodedBody(validForm: _*)
-          .withHeaders("X-Requested-With" -> "XMLHttpRequest")
-          .withLoggedIn(underTest)(sessionId)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, MANAGE_PAGE.toString)(request))
-
-        jsonBodyOf(result).shouldBe(Json.toJson(AjaxSubscriptionResponse(apiContext, APIGroup.API.toString, "1 subscription")))
-        verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier])
-      }
-    }
-
-    "with a logged in user updating subscription fields" should {
-      "not subscribe to api" in new Setup {
-        stubSuccessfulFieldUpdate(underTest, activeApplication)
-
-        val request = FakeRequest(
-          "POST", s"developer/applications/$appId/context/$apiContext/version/$apiVersion/subscriptions?subscriptionRedirect=dodgyRedirect"
-        )
-          .withCSRFToken
-          .withFormUrlEncodedBody(validForm: _*)
-          .withHeaders("X-Requested-With" -> "XMLHttpRequest")
-          .withLoggedIn(underTest)(sessionId)
-
-        val result = await(underTest.subscribeApplicationToApi(appId, apiContext, apiVersion, "dodgyRedirect")(request))
-
-        verify(underTest.applicationService, never).subscribeToApi(mockEq(appId), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
-        verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier])
-      }
-    }
-  }
-
-  private def titleOf(result: Result) = {
+   private def titleOf(result: Result) = {
     val titleRegEx = """<title[^>]*>(.*)</title>""".r
     val title = titleRegEx.findFirstMatchIn(bodyOf(result)).map(_.group(1))
     title.isDefined shouldBe true

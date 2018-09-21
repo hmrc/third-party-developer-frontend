@@ -173,16 +173,24 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     ApplicationStub.setUpUpdateApproval(id)
     ApiSubscriptionFieldsStub.setUpDeleteSubscriptionFields(id, api, version)
     DeskproStub.setupTicketCreation()
-    val button = waitForElement(By.cssSelector(s"[data-api-unsubscribe='${replaceNonAlpha(api)}-${replaceNonAlpha(version)}']"))
-    button.click()
+
+    val radioId = s"${replaceNonAlpha(api)}-${replaceNonAlpha(version)}-off"
+    val radio = waitForElement(By.id(radioId))
+    val submit = waitForElement(By.cssSelector(s"#$radioId ~ input[type=submit]"))
+    radio.click()
+    submit.click()
   }
 
   When( """^I successfully subscribe '(.*)' to API '(.*)' version '(.*)'$""") { (id: String, api: String, version: String) =>
     ApplicationStub.setUpExecuteSubscription(id, api, version, OK)
     ApplicationStub.setUpUpdateApproval(id)
     ApplicationStub.setUpFetchSubscriptions(id, OK, Seq(aApiSubscription(api, Seq(aVersionSubscription(version, APIStatus.STABLE, subscribed = true, access = APIAccessType.PUBLIC)))))
-    val button = waitForElement(By.id(s"toggle-${replaceNonAlpha(api)}-${replaceNonAlpha(version)}-on"))
-    button.click()
+
+    val radioId = s"${replaceNonAlpha(api)}-${replaceNonAlpha(version)}-on"
+    val radio = waitForElement(By.id(radioId))
+    val submit = waitForElement(By.cssSelector(s"#$radioId ~ input[type=submit]"))
+    radio.click()
+    submit.click()
   }
 
   When( """^I see a link to request account deletion$""") { () =>
