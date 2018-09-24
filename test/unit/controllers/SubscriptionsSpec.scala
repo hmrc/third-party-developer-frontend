@@ -275,7 +275,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
   }
 
   "changeLockedApiSubscription" when {
-    def forbiddenLockedSubscriptionChange(app: => Application) = {
+    def forbiddenLockedSubscriptionChangeRequest(app: => Application) = {
       "return 403 Forbidden" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest(
@@ -311,7 +311,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
       }
     }
 
-    def allowedLockedSubscriptionChange(app: => Application) = {
+    def allowedLockedSubscriptionChangeRequest(app: => Application) = {
       "render the subscribe to locked subscription page when changing an unsubscribed api" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest(
@@ -347,18 +347,18 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
       }
     }
 
-    "an administrator attempts to change a submitted-for-checking production application" should { behave like allowedLockedSubscriptionChange(adminSubmittedProductionApplication) }
+    "an administrator attempts to change a submitted-for-checking production application" should { behave like allowedLockedSubscriptionChangeRequest(adminSubmittedProductionApplication) }
     "an administrator attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedProductionApplication) }
     "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminSubmittedSandboxApplication) }
     "an administrator attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedSandboxApplication) }
-    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedProductionApplication) }
-    "a developer attempts to change a created production application" should { behave like forbiddenLockedSubscriptionChange(developerCreatedProductionApplication) }
-    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedSandboxApplication) }
-    "a developer attempts to change a created sandbox application" should { behave like forbiddenLockedSubscriptionChange(devloperCreatedSandboxApplication) }
+    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedProductionApplication) }
+    "a developer attempts to change a created production application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerCreatedProductionApplication) }
+    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedSandboxApplication) }
+    "a developer attempts to change a created sandbox application" should { behave like forbiddenLockedSubscriptionChangeRequest(devloperCreatedSandboxApplication) }
   }
 
   "changeLockedApiSubscriptionAction" when {
-    def forbiddenLockedSubscriptionChange(app: => Application) = {
+    def forbiddenLockedSubscriptionChangeRequest(app: => Application) = {
       "return 403 Forbidden" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
@@ -394,7 +394,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
       }
     }
 
-    def allowedLockedSubscriptionChange(app: => Application) = {
+    def allowedLockedSubscriptionChangeRequest(app: => Application) = {
       "successfully request to subscribe to the api and redirect when confirming a change to an unsubscribed api" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
@@ -482,14 +482,14 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
       }
     }
 
-    "an administrator attempts to change a submitted-for-checking production application" should { behave like allowedLockedSubscriptionChange(adminSubmittedProductionApplication) }
+    "an administrator attempts to change a submitted-for-checking production application" should { behave like allowedLockedSubscriptionChangeRequest(adminSubmittedProductionApplication) }
     "an administrator attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedProductionApplication) }
     "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminSubmittedSandboxApplication) }
     "an administrator attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedSandboxApplication) }
-    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedProductionApplication) }
-    "a developer attempts to change a created production application" should { behave like forbiddenLockedSubscriptionChange(developerCreatedProductionApplication) }
-    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedSandboxApplication) }
-    "a developer attempts to change a created sandbox application" should { behave like forbiddenLockedSubscriptionChange(devloperCreatedSandboxApplication) }
+    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedProductionApplication) }
+    "a developer attempts to change a created production application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerCreatedProductionApplication) }
+    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedSandboxApplication) }
+    "a developer attempts to change a created sandbox application" should { behave like forbiddenLockedSubscriptionChangeRequest(devloperCreatedSandboxApplication) }
 
   }
 
