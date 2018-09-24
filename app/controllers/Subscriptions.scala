@@ -77,8 +77,7 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
         updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
       }
 
-    def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) =
-      Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate)) // TODO: render subscription page with form error?
+    def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
 
     ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
   }
