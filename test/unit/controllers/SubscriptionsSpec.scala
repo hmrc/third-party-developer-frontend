@@ -78,7 +78,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
   val adminCreatedProductionApplication = adminApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.testing)
   val adminSubmittedSandboxApplication = adminApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production(loggedInDeveloper.email, ""))
   val adminCreatedSandboxApplication = adminApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
-  val developerSubmittedProductionrApplication = developerApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production(loggedInDeveloper.email, ""))
+  val developerSubmittedProductionApplication = developerApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production(loggedInDeveloper.email, ""))
   val developerCreatedProductionApplication = developerApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.testing)
   val developerSubmittedSandboxApplication = developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production(loggedInDeveloper.email, ""))
   val devloperCreatedSandboxApplication = developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
@@ -142,14 +142,14 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
 
-        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+        val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe FORBIDDEN
       }
     }
 
     def allowedSubscriptionChange(app: => Application) = {
-      "successfully subscribe to an API and redirect to the subscriptions page" in new Setup {
+      "successfully subscribe to an API and redirect" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
@@ -159,7 +159,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         given(underTest.applicationService.subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
-        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+        val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
@@ -168,7 +168,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
       }
 
-      "successfully unsubscribe from an API and redirect to the subscriptions page" in new Setup {
+      "successfully unsubscribe from an API and redirect" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
@@ -178,7 +178,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
-        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+        val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
@@ -197,7 +197,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
-        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+        val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe BAD_REQUEST
 
@@ -207,7 +207,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
     }
 
     def allowedSubscriptionChangeWithCheckUpdate(app: => Application) = {
-      "successfully subscribe to an API, update the check information and redirect to the subscriptions page" in new Setup {
+      "successfully subscribe to an API, update the check information and redirect" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
@@ -217,7 +217,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         given(underTest.applicationService.subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
-        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+        val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
@@ -226,7 +226,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         verify(underTest.applicationService).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
       }
 
-      "successfully unsubscribe from an API, update the check information and redirect to the subscriptions page" in new Setup {
+      "successfully unsubscribe from an API, update the check information and redirect" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
@@ -236,7 +236,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
-        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+        val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
@@ -255,7 +255,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
-        val result = await(underTest.changeApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
+        val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe BAD_REQUEST
 
@@ -268,7 +268,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
     "an administrator attempts to change a created production application" should { behave like allowedSubscriptionChangeWithCheckUpdate(adminCreatedProductionApplication) }
     "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like allowedSubscriptionChange(adminSubmittedSandboxApplication) }
     "an administrator attempts to change a created sandbox application" should { behave like allowedSubscriptionChange(adminCreatedSandboxApplication) }
-    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(developerSubmittedProductionrApplication) }
+    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(developerSubmittedProductionApplication) }
     "a developer attempts to change a created production application" should { behave like allowedSubscriptionChangeWithCheckUpdate(developerCreatedProductionApplication) }
     "a developer attempts to change a submitted-for-checking sandbox application" should { behave like allowedSubscriptionChange(developerSubmittedSandboxApplication) }
     "a developer attempts to change a created sandbox application" should { behave like allowedSubscriptionChange(devloperCreatedSandboxApplication) }
@@ -351,7 +351,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
     "an administrator attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedProductionApplication) }
     "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminSubmittedSandboxApplication) }
     "an administrator attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedSandboxApplication) }
-    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedProductionrApplication) }
+    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedProductionApplication) }
     "a developer attempts to change a created production application" should { behave like forbiddenLockedSubscriptionChange(developerCreatedProductionApplication) }
     "a developer attempts to change a submitted-for-checking sandbox application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedSandboxApplication) }
     "a developer attempts to change a created sandbox application" should { behave like forbiddenLockedSubscriptionChange(devloperCreatedSandboxApplication) }
@@ -486,7 +486,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
     "an administrator attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedProductionApplication) }
     "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminSubmittedSandboxApplication) }
     "an administrator attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedSandboxApplication) }
-    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedProductionrApplication) }
+    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedProductionApplication) }
     "a developer attempts to change a created production application" should { behave like forbiddenLockedSubscriptionChange(developerCreatedProductionApplication) }
     "a developer attempts to change a submitted-for-checking sandbox application" should { behave like forbiddenLockedSubscriptionChange(developerSubmittedSandboxApplication) }
     "a developer attempts to change a created sandbox application" should { behave like forbiddenLockedSubscriptionChange(devloperCreatedSandboxApplication) }
@@ -509,7 +509,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
         s"developer/applications/$appId/subscribe?context=$apiContext&version=$apiVersion&accessType=$apiAccessType&tab=subscriptions"
       ).withLoggedIn(underTest)(sessionId)
 
-      val result = await(underTest.changeApiSubscription(appId, apiName, apiContext, apiVersion, apiAccessType)(request))
+      val result = await(underTest.changeApiSubscription(appId, apiContext, apiVersion, apiAccessType)(request))
       status(result) shouldBe 404
       verify(underTest.applicationService, never).updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier])
     }

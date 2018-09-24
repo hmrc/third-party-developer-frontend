@@ -60,8 +60,8 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
     case _ => Redirect(routes.ManageApplications.editApplication(applicationId, None))
   }
 
-  def changeApiSubscription(applicationId: String, name: String, apiContext: String, apiVersion: String, redirectTo: String) = teamMemberOnApp(applicationId) { implicit request =>
-        def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
+  def changeApiSubscription(applicationId: String, apiContext: String, apiVersion: String, redirectTo: String) = teamMemberOnApp(applicationId) { implicit request =>
+    def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
       case Some(subscribe) => {
         def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
 
@@ -85,7 +85,7 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
   def changeLockedApiSubscription(applicationId: String, apiName: String, apiContext: String, apiVersion: String, redirectTo: String) = adminOnApp(applicationId) { implicit request =>
     if (request.application.hasLockedSubscriptions) {
       applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).map(subscribed =>
-        Ok(changeSubscriptionConfirmation(request.application, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, SubscriptionRedirect.API_SUBSCRIPTIONS_PAGE.toString)))
+        Ok(changeSubscriptionConfirmation(request.application, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo)))
     } else {
       Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
     }
@@ -151,15 +151,7 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
 
   private def createResponse(app: Application, isAjaxRequest: Boolean, apiContext: String, apiVersion: String, subscriptionRedirect: String)(implicit hc: HeaderCarrier) = {
     if (isAjaxRequest) createAjaxUnsubscribeResponse(app, apiContext, apiVersion).map(r => Ok(r))
-    else createUnsubscribeResponse(app, subscriptionRedirect)
-  }
-
-  private def createUnsubscribeResponse(application: Application, subscriptionRedirect: String)(implicit hc: HeaderCarrier) = {
-    if (API_SUBSCRIPTIONS_PAGE.toString == subscriptionRedirect)
-      Future.successful(Redirect(routes.Subscriptions.subscriptions(application.id)))
-    else if (APPLICATION_CHECK_PAGE.toString == subscriptionRedirect)
-      Future.successful(Redirect(routes.ApplicationCheck.apiSubscriptionsPage(application.id)))
-    else Future.successful(Redirect(routes.ManageApplications.editApplication(application.id, None)))
+    else Future.successful(redirect(subscriptionRedirect, app.id))
   }
 
   private def createAjaxUnsubscribeResponse(app: Application, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier) = {
@@ -167,7 +159,6 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
       subs <- applicationService.apisWithSubscriptions(app)
     } yield Json.toJson(AjaxSubscriptionResponse.from(apiContext, apiVersion, subs))
   }
-
 
   private def updateCheckInformation(app: Application)(implicit hc: HeaderCarrier): Future[Any] = {
     app.deployedTo match {

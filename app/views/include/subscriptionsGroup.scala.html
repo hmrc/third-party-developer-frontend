@@ -72,7 +72,7 @@
                                 }
                                 <div class="accordion__body__row__right">
                                   <div class="toggle float--right">
-                                    @helper.form(action = routes.Subscriptions.changeApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), 'class -> "slider") {
+                                    @helper.form(action = routes.Subscriptions.changeApiSubscription(app.id, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), 'class -> "slider") {
                                     @helper.CSRF.formField
                                     <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.version)-toggle" @if(app.hasLockedSubscriptions) { disabled }>
                                       <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" class="slider__on" type="radio" name="subscribed" value="true" @if(api.subscribed) { checked }>
