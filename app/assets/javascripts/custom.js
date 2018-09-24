@@ -106,9 +106,43 @@ $(document).ready(function () {
         }
     });
 
-    $(".api-subscriber").each(function () {
-        $(this).apiSubscriber();
+  $('form.slider').click(function(e) {
+    var form = $(this);
+
+    if (form.find('fieldset[disabled]').length > 0) {
+      return;
+    }
+
+    e.preventDefault();
+    function toggle() {
+      form.find('input[type="radio"]').not(':checked').prop('checked', true);
+      form.find('input[type="radio"]').each(function() { $(this).attr('checked', !$(this).attr('checked')); });
+    }
+
+    form.parent().find('.subscription-error').remove();
+    toggle();
+
+    if (form.data('locked')) {
+      return form.submit();
+    }
+
+    $.ajax({
+      type: form.prop('method'),
+      url: form.prop('action'),
+      data: form.serialize(),
+      success: function() {
+        var counter = form.parents('[data-accordion]').find('.subscription-count');
+        var currentCount = parseInt(counter.text().trim().split(' ')[0], 10);
+        var count = form.find('input[type=radio][name=subscribed]:checked').val() === "true" ? currentCount + 1 : currentCount - 1;
+        var subscription = count === 1 ? 'subscription' : 'subscriptions';
+        counter.text(count + ' ' + subscription);
+      },
+      error: function(e) {
+        form.before($('<div class="subscription-error">Problem changing subscription - try again</div>'));
+        toggle();
+      }
     });
+  });
 
     $(".accordion").click(function() {
         var link = $(this);

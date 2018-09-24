@@ -71,10 +71,9 @@ POST        /applications/:id/delete                                            
 
 GET         /applications/:id/subscriptions                                             controllers.Subscriptions.subscriptions(id: String)
 
-GET         /applications/:id/subscribe                                                 controllers.Subscriptions.subscribeToApi(id: String, name: String, context: String, version: String)
-POST        /applications/:id/subscribe                                                 controllers.Subscriptions.subscribeToApiAction(id: String, name: String, context: String, version: String, subscriptionRedirect: String)
-GET         /applications/:id/unsubscribe                                               controllers.Subscriptions.unsubscribeFromApi(id: String, name: String, context: String, version: String, redirectTo: String)
-POST        /applications/:id/unsubscribe                                               controllers.Subscriptions.unsubscribeFromApiAction(id: String, name: String, context: String, version: String, redirectTo: String)
+POST        /applications/:id/change-subscription                                       controllers.Subscriptions.changeApiSubscription(id: String, context: String, version: String, redirectTo: String)
+GET         /applications/:id/change-locked-subscription                                controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: String, version: String, redirectTo: String)
+POST        /applications/:id/change-locked-subscription                                controllers.Subscriptions.changeLockedApiSubscriptionAction(id: String, name: String, context: String, version: String, redirectTo: String)
 
 GET         /applications/:id/credentials                                               controllers.Credentials.credentials(id: String, error: Option[String])
 
@@ -102,7 +101,6 @@ POST        /applications/:id/request-check/terms-and-conditions                
 GET         /applications/:id/request-check/terms-of-use                                controllers.ApplicationCheck.termsOfUsePage(id: String)
 POST        /applications/:id/request-check/terms-of-use                                controllers.ApplicationCheck.termsOfUseAction(id: String)
 
-POST        /applications/:id/context/:apiContext/version/:version/subscriptions        controllers.Subscriptions.subscribeApplicationToApi(id: String, apiContext: String, version: String, subscriptionRedirect: String)
 POST        /applications/:id/context/:apiContext/version/:version/subscriptionFields   controllers.Subscriptions.saveSubscriptionFields(id: String, apiContext: String, version: String, subscriptionRedirect: String)
 
 GET         /application-verification                                                   controllers.ApplicationVerification.verifyUplift(code: String)
