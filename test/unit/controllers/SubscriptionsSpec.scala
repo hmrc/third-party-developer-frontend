@@ -500,7 +500,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
     val apiStatus = "STABLE"
     val apiAccessType = "PUBLIC"
 
-    "unauthorized user should get 404 on unsubscribe to an API" in new Setup {
+    "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
       given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier]))
         .willReturn(successful(activeApplication.copy(collaborators = Set(Collaborator("randomEmail", Role.ADMINISTRATOR)))))
@@ -510,7 +510,7 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
       ).withLoggedIn(underTest)(sessionId)
 
       val result = await(underTest.changeApiSubscription(appId, apiContext, apiVersion, apiAccessType)(request))
-      status(result) shouldBe 404
+      status(result) shouldBe NOT_FOUND
       verify(underTest.applicationService, never).updateCheckInformation(mockEq(appId), mockEq(CheckInformation()))(any[HeaderCarrier])
     }
   }
