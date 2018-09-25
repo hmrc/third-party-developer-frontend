@@ -132,9 +132,9 @@ $(document).ready(function () {
       data: form.serialize(),
       success: function() {
         var counter = form.parents('[data-accordion]').find('.subscription-count');
-        var currentCount = parseInt(counter.text().trim().split(' ')[0], 10);
-        var count = form.find('input[type=radio][name=subscribed]:checked').val() === "true" ? currentCount + 1 : currentCount - 1;
+        var count = form.parents('li.accordion').find('input.slider__on:radio:checked').length;
         var subscription = count === 1 ? 'subscription' : 'subscriptions';
+
         counter.text(count + ' ' + subscription);
       },
       error: function(e) {
