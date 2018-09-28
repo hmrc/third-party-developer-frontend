@@ -69,6 +69,8 @@
                                     <div class="accordion__body__row__right accordion__body__row__right--link">
                                       <a href="@routes.Subscriptions.changeLockedApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)">Request change</a>
                                     </div>
+                                } else {
+                                    <div class="accordion__body__row__right subscription-error"></div>
                                 }
                                 <div class="accordion__body__row__right">
                                   <div class="toggle float--right">
