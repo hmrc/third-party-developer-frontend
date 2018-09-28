@@ -114,12 +114,15 @@ $(document).ready(function () {
     }
 
     e.preventDefault();
+
+    var errorContainer = form.parents('.accordion__body__row').find('.subscription-error');
+
     function toggle() {
       form.find('input[type="radio"]').not(':checked').prop('checked', true);
       form.find('input[type="radio"]').each(function() { $(this).attr('checked', !$(this).attr('checked')); });
     }
 
-    form.parent().find('.subscription-error').remove();
+    errorContainer.text('');
     toggle();
 
     if (form.data('locked')) {
@@ -138,7 +141,7 @@ $(document).ready(function () {
         counter.text(count + ' ' + subscription);
       },
       error: function(e) {
-        form.before($('<div class="subscription-error">Problem changing subscription - try again</div>'));
+        errorContainer.text('Problem changing subscription - try again');
         toggle();
       }
     });
