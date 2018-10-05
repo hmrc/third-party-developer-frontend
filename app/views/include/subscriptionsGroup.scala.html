@@ -40,7 +40,7 @@
                     </a>
                 </div>
                 <div class="accordion__row__right">
-                    <span id="subscriptions-@IdFormatter.identifier(apiSubscription.apiContext, group)" data-api-subscriptions="@IdFormatter.identifier(apiSubscription.apiContext, group)" class="text--right display-block bold-xsmall subscription-count flush--top">
+                    <span id="subscriptions-@IdFormatter.identifier(apiSubscription.apiContext, group)" data-api-subscriptions="@IdFormatter.identifier(apiSubscription.apiContext, group)" class="text--right display-block bold-xsmall subscription-count flush--top @if(!apiSubscription.hasSubscriptions){subscription-count--empty}">
                     @apiSubscription.subscriptionNumberText
                     </span>
                 </div>
@@ -70,7 +70,7 @@
                                       <a href="@routes.Subscriptions.changeLockedApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)">Request change</a>
                                     </div>
                                 } else {
-                                    <div class="accordion__body__row__right subscription-error"></div>
+                                    <div id="@IdFormatter.identifier(api.context, api.apiVersion.version)-state" class="accordion__body__row__right api-subscriber__state-container subscription-error"></div>
                                 }
                                 <div class="accordion__body__row__right">
                                   <div class="toggle float--right">
