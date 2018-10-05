@@ -7,6 +7,28 @@
 .js-enabled {
   $slider-height: 1.75rem;
   $slider-width: 50px;
+  $spinner-size: 3.5rem;
+
+  .api-subscriber {
+    .accordion-body-row {
+      table-layout: fixed;
+    }
+
+    &__state-container {
+      width: 100%;
+      text-align: right;
+
+      .govuk-c-loader {
+        height: $spinner-size;
+        width: 100%;
+
+        svg {
+          height: $spinner-size;
+          width: $spinner-size;
+        }
+      }
+    }
+  }
 
   .subscription-error {
     color: #b10e1e;
