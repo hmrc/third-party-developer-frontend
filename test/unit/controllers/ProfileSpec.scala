@@ -110,7 +110,7 @@ class ProfileSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
 
       status(result) shouldBe 200
       val dom = Jsoup.parse(bodyOf(result))
-      dom.getElementsByClass("heading-large").get(0).text shouldEqual "Password changed"
+      dom.getElementsByClass("heading-xlarge").get(0).text shouldEqual "Password changed"
 
     }
   }
