@@ -60,7 +60,7 @@
 
         <div class="form-group">
             <fieldset>
-                @if(form("termsOfUseAgreed").value.contains("false")) {
+                @if(form("termsOfUseAgreed").value.isEmpty || form("termsOfUseAgreed").value.contains("false")) {
                     @defining(DateTimeFormat.longDate) { dateFormatter =>
                     <div class="form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
                         @fieldError(form.errors, "termsOfUseAgreed", true)
