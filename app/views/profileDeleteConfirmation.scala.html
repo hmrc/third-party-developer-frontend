@@ -32,7 +32,7 @@
 
     @errorSummary(form)
 
-    <h1 class="heading-large">Delete account</h1>
+    <h1 class="heading-xlarge">Delete account</h1>
 
     @helper.form(action = controllers.routes.Profile.deleteAccount) {
         @helper.CSRF.formField
@@ -40,7 +40,7 @@
         <div class="form-group @if(form.errors("confirmation").nonEmpty) {form-group-error}">
             <fieldset class="inline">
                 <legend id="confirmation">
-                    <h2 class="heading-medium">Are you sure you want us to delete your account?</h2>
+                    <h2 class="heading-large">Are you sure you want us to delete your account?</h2>
                     @fieldError(form.errors, "confirmation", form.error("confirmation").isEmpty)
                 </legend>
                 <div class="multiple-choice">

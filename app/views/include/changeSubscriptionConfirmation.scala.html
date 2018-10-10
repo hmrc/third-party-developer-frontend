@@ -52,7 +52,7 @@
 ) {
 
     @errorSummary(form)
-    <h1 class="heading-large">Manage API subscriptions</h1>
+    <h1 class="heading-xlarge">Manage API subscriptions</h1>
 
     <div class="panel panel-border-wide"><p>For security reasons we must approve any API subscription changes. This takes up to 2 working days.</p></div>
 
@@ -60,9 +60,9 @@
         <fieldset class="inline @if(form.errors("confirm").nonEmpty) {form-group-error}">
           <div class="form-group">
                 @if(subscribed) {
-                    <h2 class="heading-medium">Are you sure you want to request to unsubscribe from @name @version?</h2>
+                    <h2 class="heading-large">Are you sure you want to request to unsubscribe from @name @version?</h2>
                 } else {
-                    <h2 class="heading-medium">Are you sure you want to request to subscribe to @name @version?</h2>
+                    <h2 class="heading-large">Are you sure you want to request to subscribe to @name @version?</h2>
                 }
                 <fieldset id="confirm" class="inline">
                     @helper.CSRF.formField
