@@ -332,6 +332,8 @@ case class Application(id: String,
     case s: Standard => s.redirectUris.contains(redirectUri)
     case _ => false
   }
+
+  def hasLockedSubscriptions = deployedTo == Environment.PRODUCTION && state.name != State.TESTING
 }
 
 object Application {

@@ -36,18 +36,18 @@
 ) {
     @errorSummary(form)
 
-    <h1 class="heading-large">Manage team members</h1>
+    <h1 class="heading-xlarge">Manage team members</h1>
 
     @appEnvironment(app)
 
-    <h2 class="heading-medium">Team member</h2>
+    <h2 class="heading-large">Team member</h2>
     <span>@email</span>
 
     @helper.form(action = controllers.routes.ManageTeam.removeTeamMemberAction(app.id)) {
         @helper.CSRF.formField
         <input type="hidden" name="email" value="@email">
         <div class="form-group @if(form.errors("confirm").nonEmpty) {form-group-error}">
-            <h2 class="heading-medium">Are you sure you want to remove this team member from this application?</h2>
+            <h2 class="heading-large">Are you sure you want to remove this team member from this application?</h2>
 
             @fieldError(form.errors, "confirm", form.error("submissionError").isEmpty)
             <fieldset id="confirm" class="inline">

@@ -36,12 +36,12 @@
 ) {
 
     @errorSummary(form)
-    <h1 class="heading-large">Delete application</h1>
+    <h1 class="heading-xlarge">Delete application</h1>
     @appEnvironment(app)
     @helper.form(action = controllers.routes.DeleteApplication.deleteApplicationAction(app.id), 'class -> "form") {
         <fieldset id="deleteConfirm" class="inline @if(form.errors("deleteConfirm").nonEmpty) {form-group-error}">
         <legend>
-            <h2 class="heading-medium">Are you sure you want us to delete this application?</h2>
+            <h2 class="heading-large">Are you sure you want us to delete this application?</h2>
         </legend>
         <div class="form-group">
             @helper.CSRF.formField

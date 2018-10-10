@@ -33,12 +33,12 @@
     leftNav = Some(leftHandNav(None, Option(navSection)))
 ) {
     <div class="govuk-box-highlight">
-        <h1 class="heading-large" data-journey="application:added">Application added</h1>
+        <h1 class="heading-xlarge" data-journey="application:added">Application added</h1>
     </div>
     <p>You have added <strong id="application-name" class="bold-small">@applicationName</strong>.</p>
     <p>You have admin rights over the application.</p>
         <div>
-            <h2 class="heading-medium">What happens next?</h2>
+            <h2 class="heading-large">What happens next?</h2>
     @if(environment == Environment.PRODUCTION.toString) {
             <p>
                 To get your production credentials, you must submit your application for checking.

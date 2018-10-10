@@ -106,9 +106,58 @@ $(document).ready(function () {
         }
     });
 
-    $(".api-subscriber").each(function () {
-        $(this).apiSubscriber();
+  $('form.slider').click(function(e) {
+    e.preventDefault();
+
+    var form = $(this);
+    var fieldContainer = form.find('fieldset');
+
+    if (fieldContainer.prop('disabled')) {
+      return;
+    }
+
+    var stateContainer = form.parents('.api-subscriber').find('.api-subscriber__state-container');
+
+    function toggle() {
+      form.find('input[type="radio"]').not(':checked').prop('checked', true);
+      form.find('input[type="radio"]').each(function() { $(this).attr('checked', !$(this).attr('checked')); });
+    }
+
+    stateContainer.text('');
+    toggle();
+
+    var containerId = stateContainer.attr('id');
+    var loadingSpinner = new GOVUK.Loader().init({ container: containerId, id: containerId + '-loader' });
+
+    $.ajax({
+      type: form.prop('method'),
+      url: form.prop('action'),
+      data: form.serialize(),
+      success: function() {
+        var counter = form.parents('[data-accordion]').find('.subscription-count');
+        var count = form.parents('li.accordion').find('input.slider__on:radio:checked').length;
+        var subscription = count === 1 ? 'subscription' : 'subscriptions';
+
+        if (count === 0) {
+          counter.addClass('subscription-count--empty');
+        } else {
+          counter.removeClass('subscription-count--empty');
+        }
+
+        counter.text(count + ' ' + subscription);
+        fieldContainer.prop('disabled', null);
+        loadingSpinner.stop();
+      },
+      error: function(e) {
+        fieldContainer.prop('disabled', null);
+        loadingSpinner.stop();
+        stateContainer.text('Problem changing subscription - try again');
+        toggle();
+      }
     });
+
+    fieldContainer.prop('disabled', 'disabled');
+  });
 
     $(".accordion").click(function() {
         var link = $(this);

@@ -19,7 +19,7 @@
 @import model.Crumb
 @import include._
 
-@(app: Application, form: Form[UnsubscribeConfirmationForm], name: String, context: String, version: String, redirectTo: String)(
+@(app: Application, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: Developer,
     messages: Messages,
@@ -35,8 +35,12 @@
     }
 }
 
+@title = @{
+  if (subscribed) "Confirm unsubscribe" else "Confirm subscribe"
+}
+
 @devMain(
-    title = "Confirm unsubscribe",
+    title = title,
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb(test(navSection).toString),
@@ -48,31 +52,28 @@
 ) {
 
     @errorSummary(form)
-    <h1 class="heading-large">Manage API subscriptions</h1>
+    <h1 class="heading-xlarge">Manage API subscriptions</h1>
 
-    @if(app.deployedTo == Environment.PRODUCTION && app.state.name != State.TESTING) {
-        <div class="panel panel-border-wide"><p>For security reasons we must approve any API subscription changes. This takes up to 2 working days.</p></div>
-    }
+    <div class="panel panel-border-wide"><p>For security reasons we must approve any API subscription changes. This takes up to 2 working days.</p></div>
 
-    @helper.form(action = routes.Subscriptions.unsubscribeFromApiAction(app.id, name, context, version, redirectTo.toString), 'class -> "no-fields-subscription") {
-        <fieldset class="inline @if(form.errors("unsubscribeConfirm").nonEmpty) {form-group-error}">
-            <div class="form-group">
-                @if(app.deployedTo == Environment.PRODUCTION && app.state.name != State.TESTING) {
-                    <h2 class="heading-medium">Are you sure you want to request to unsubscribe from @name @version?</h2>
+    @helper.form(action = routes.Subscriptions.changeLockedApiSubscriptionAction(app.id, name, context, version, redirectTo.toString), 'class -> "no-fields-subscription") {
+        <fieldset class="inline @if(form.errors("confirm").nonEmpty) {form-group-error}">
+          <div class="form-group">
+                @if(subscribed) {
+                    <h2 class="heading-large">Are you sure you want to request to unsubscribe from @name @version?</h2>
                 } else {
-                <h2 class="heading-medium">Are you sure you want to unsubscribe from @name @version?</h2>
+                    <h2 class="heading-large">Are you sure you want to request to subscribe to @name @version?</h2>
                 }
-
-                <fieldset id="unsubscribeConfirm" class="inline">
+                <fieldset id="confirm" class="inline">
                     @helper.CSRF.formField
-                    @fieldError(form.errors, "unsubscribeConfirm")
+                    @fieldError(form.errors, "confirm")
                     <div class="multiple-choice">
-                        <input id="confirm-unsubscribe-yes" type="radio" name="unsubscribeConfirm" value="Yes">
-                        <label for="confirm-unsubscribe-yes">Yes</label>
+                        <input id="confirm-yes" type="radio" name="confirm" value="true">
+                        <label for="confirm-yes">Yes</label>
                     </div>
                     <div class="multiple-choice">
-                        <input id="confirm-unsubscribe-no" type="radio" name="unsubscribeConfirm" value="No">
-                        <label for="confirm-unsubscribe-no">No</label>
+                        <input id="confirm-no" type="radio" name="confirm" value="false">
+                        <label for="confirm-no">No</label>
                     </div>
                 </fieldset>
             </div>

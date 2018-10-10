@@ -737,5 +737,44 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
   }
 
+  "isSubscribedToApi" should {
+    val subscriptions = Seq(
+      APISubscription("First API", "", "first context", Seq(VersionSubscription(APIVersion("1.0", APIStatus.STABLE), subscribed = true), VersionSubscription(APIVersion("2.0", APIStatus.BETA), subscribed = false)), None),
+      APISubscription("Second API", "", "second context", Seq(VersionSubscription(APIVersion("1.0", APIStatus.ALPHA), subscribed = true)), None))
+
+    "return false when the application has no subscriptions to the requested api version" in new Setup {
+      val apiName = "Third API"
+      val apiContext = "third context"
+      val apiVersion = "3.0"
+
+      given(mockProductionApplicationConnector.fetchSubscriptions(mockEq(productionApplication.id))(mockEq(hc))).willReturn(Future.successful(subscriptions))
+      val result = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
+
+      result shouldBe false
+    }
+
+    "return false when the application has unsubscribed to the requested api version" in new Setup {
+      val apiName = "First API"
+      val apiContext = "first context"
+      val apiVersion = "2.0"
+
+      given(mockProductionApplicationConnector.fetchSubscriptions(mockEq(productionApplication.id))(mockEq(hc))).willReturn(Future.successful(subscriptions))
+      val result = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
+
+      result shouldBe false
+    }
+
+    "return true when the application is subscribed to the requested api version" in new Setup {
+      val apiName = "First API"
+      val apiContext = "first context"
+      val apiVersion = "1.0"
+
+      given(mockProductionApplicationConnector.fetchSubscriptions(mockEq(productionApplication.id))(mockEq(hc))).willReturn(Future.successful(subscriptions))
+      val result = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
+
+      result shouldBe true
+    }
+  }
+
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now)
 }
