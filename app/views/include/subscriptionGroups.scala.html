@@ -21,16 +21,16 @@
         implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @if(subscriptions.exampleApi.nonEmpty) {
-    <h2 class="heading-medium">Example API</h2>
+    <h2 class="heading-large">Example API</h2>
     @subscriptionsGroup(role, app, Seq(subscriptions.exampleApi.get), hasSubscriptions, "EXAMPLE", afterUnsubscribeRedirectTo)
 }
 
 @if(subscriptions.apis.nonEmpty) {
-    <h2 class="heading-medium">APIs</h2>
+    <h2 class="heading-large">APIs</h2>
     @subscriptionsGroup(role, app, subscriptions.apis, hasSubscriptions, "API", afterUnsubscribeRedirectTo)
 }
 
 @if(subscriptions.testApis.nonEmpty) {
-    <h2 class="heading-medium">Test Support APIs</h2>
+    <h2 class="heading-large">Test Support APIs</h2>
     @subscriptionsGroup(role, app, subscriptions.testApis, hasSubscriptions, "TEST_API", afterUnsubscribeRedirectTo)
 }

@@ -34,7 +34,7 @@
 ) {
 
     @if(applications.isEmpty) {
-        <h1 class="heading-large">Welcome to your account</h1>
+        <h1 class="heading-xlarge flush--top">Welcome to your account</h1>
         <section>
             <p>You can now create applications and subscribe to APIs.</p>
             <p>
@@ -46,7 +46,7 @@
         </section>
     } else {
         <header>
-            <h1 class="heading-large">View all applications</h1>
+            <h1 class="heading-xlarge flush--top">View all applications</h1>
         </header>
         <p>After testing in the sandbox, you can create a production application to use live data.</p>
         @if(applications.exists(_.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED)) {

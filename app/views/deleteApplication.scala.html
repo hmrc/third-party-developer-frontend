@@ -34,7 +34,7 @@
     leftNav = Some(leftHandNav(Option(app), Option(navSection)))
 ) {
 
-    <h1 class="heading-large">Delete application</h1>
+    <h1 class="heading-xlarge flush--top">Delete application</h1>
     @appEnvironment(app)
 
     @if(app.deployedTo == Environment.SANDBOX || roleOfLoggedIn == Role.ADMINISTRATOR) {
