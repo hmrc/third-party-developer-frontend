@@ -5,8 +5,6 @@
 }
 
 .js-enabled {
-  $slider-height: 1.75rem;
-  $slider-width: 50px;
   $spinner-size: 3.5rem;
 
   .api-subscriber {
@@ -36,74 +34,58 @@
     font-weight: bold;
   }
 
-  .slider {
-    color: #fff;
-    display: inline-block;
-    height: $slider-height;
-    padding: .35rem;
-    position: relative;
-    width: $slider-width;
+  .slider input[type=submit] {
+    position: absolute;
+    visibility: hidden;
+  }
+}
 
-    fieldset {
+.slider {
+  $disabled-colour: #70777b;
+  $enabled-colour: #245ea0;
+
+  fieldset {
+    .slider__radios {
+      border: 4px solid $enabled-colour;
+      border-radius: 15px;
+      display: inline-block;
+      padding: .5rem;
+
       label {
-        border: 1px solid #bfc1c3;
-        border-radius: 60% / 100%;
+        color: $disabled-colour;
         font-weight: bold;
-        font-size: $slider-height * .75;
-        height: 100%;
-        left: 0;
-        line-height: $slider-height * 1.4;
-        padding: .35rem;
+        padding: .25rem .75rem;
+        user-select: none;
+        z-index: 1;
+      }
+
+      input[type=radio] {
+        opacity: 0;
         position: absolute;
-        top: 0;
-        width: 100%;
-      }
+        z-index: 0;
 
-      input {
-        visibility: hidden;
-
-        &.slider__on + label {
-          background-color: #005ea5;
-          text-indent: .75rem;
+        &:checked + label {
+          background-color: $enabled-colour;
+          border-radius: 5px;
+          color: #fff;
         }
 
-        &.slider__off + label {
-          box-shadow: inset 1px 0 2px #bfc1c3;
-          text-indent: 3.3rem;
-
-
-          &::after {
-            content: "";
-            border-radius: 100%;
-            background-color: #fff;
-            box-shadow: 0 0 5px 0 #000;
-            height: $slider-height * 1.75;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: $slider-height * 1.75;
-            z-index: 1;
-          }
-        }
-
-        &.slider__off:checked + label {
-          background-color: #fff;
-          color: #000;
-
-          &::after {
-            left: 0;
-          }
+        &:focus + label {
+          outline: 3px solid #ffbf47;
         }
       }
+    }
 
-      &[disabled] {
-        label {
-          cursor: no-drop;
-        }
+    &[disabled] {
+      label {
+        cursor: no-drop;
+      }
 
-        input:checked + label {
-          background-color: #bfc1c3 !important;
-          color: #fff !important;
+      .slider__radios {
+        border-color: $disabled-colour;
+
+        input[type=radio]:checked + label {
+          background-color: $disabled-colour;
         }
       }
     }
