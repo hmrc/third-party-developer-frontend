@@ -106,9 +106,12 @@ $(document).ready(function () {
         }
     });
 
-  $('form.slider').click(function(e) {
+  $('form.slider').submit(function(e) {
     e.preventDefault();
+    return false;
+  });
 
+  $('form.slider').change(function(e) {
     var form = $(this);
     var fieldContainer = form.find('fieldset');
 
@@ -117,17 +120,16 @@ $(document).ready(function () {
     }
 
     var stateContainer = form.parents('.api-subscriber').find('.api-subscriber__state-container');
-
-    function toggle() {
-      form.find('input[type="radio"]').not(':checked').prop('checked', true);
-      form.find('input[type="radio"]').each(function() { $(this).attr('checked', !$(this).attr('checked')); });
-    }
-
     stateContainer.text('');
-    toggle();
 
     var containerId = stateContainer.attr('id');
     var loadingSpinner = new GOVUK.Loader().init({ container: containerId, id: containerId + '-loader' });
+
+    function resetForm() {
+      fieldContainer.prop('disabled', null);
+      loadingSpinner.stop();
+      form.find('input[type=radio]:checked').focus();
+    }
 
     $.ajax({
       type: form.prop('method'),
@@ -145,14 +147,12 @@ $(document).ready(function () {
         }
 
         counter.text(count + ' ' + subscription);
-        fieldContainer.prop('disabled', null);
-        loadingSpinner.stop();
+        resetForm();
       },
       error: function(e) {
-        fieldContainer.prop('disabled', null);
-        loadingSpinner.stop();
         stateContainer.text('Problem changing subscription - try again');
-        toggle();
+        form.find('input[type="radio"]').not(':checked').prop('checked', true).trigger('click');
+        resetForm();
       }
     });
 
