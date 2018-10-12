@@ -63,8 +63,8 @@ class SupportSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
       val result = await(addToken(underTest.raiseSupportEnquiry())(request))
       status(result) shouldBe 200
       val dom = Jsoup.parse(bodyOf(result))
-      dom.getElementById("fullname").attr("value") shouldEqual "John Doe"
-      dom.getElementById("emailaddress").attr("value") shouldEqual "thirdpartydeveloper@example.com"
+      dom.getElementsByAttributeValue("name", "fullname").attr("value") shouldEqual "John Doe"
+      dom.getElementsByAttributeValue("name", "emailaddress").attr("value") shouldEqual "thirdpartydeveloper@example.com"
     }
 
     "support form fields are blank when not logged in" in new Setup {
