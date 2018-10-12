@@ -58,11 +58,11 @@ leftNav = Some(leftHandNav(Option(app), Option(navSection)))
         aria-labelledby="email-label"/>
     </div>
 
-    <h2 class="heading-large">What permissions do you want to give them?</h2>
     <div class="form-group @if(form.errors("role").nonEmpty) {form-group-error}">
         @fieldError(form.errors, "role", form.error("submissionError").isEmpty)
         <br>
         <fieldset id="role">
+            <legend><h2 class="heading-large flush--top">What permissions do you want to give them?</h2></legend>
             <div class="multiple-choice">
                 <input id="Developer" type="radio" name="role" value="Developer">
                 <label for="Developer"><strong class="bold">Developer</strong>
