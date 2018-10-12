@@ -28,7 +28,7 @@ lazy val enumeratumVersion = "1.5.11"
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "frontend-bootstrap" % "10.4.0",
+  "uk.gov.hmrc" %% "frontend-bootstrap" % "10.6.0",
   "uk.gov.hmrc" %% "url-builder" % "2.1.0",
   "uk.gov.hmrc" %% "play-json-union-formatter" % "1.3.0",
   "uk.gov.hmrc" %% "http-metrics" % "1.2.0",
