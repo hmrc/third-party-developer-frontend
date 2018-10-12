@@ -47,10 +47,10 @@
         @helper.CSRF.formField
         <input type="hidden" name="email" value="@email">
         <div class="form-group @if(form.errors("confirm").nonEmpty) {form-group-error}">
-            <h2 class="heading-large">Are you sure you want to remove this team member from this application?</h2>
 
             @fieldError(form.errors, "confirm", form.error("submissionError").isEmpty)
             <fieldset id="confirm" class="inline">
+                <legend><h2 class="heading-large">Are you sure you want to remove this team member from this application?</h2></legend>
                 <div class="multiple-choice">
                     <input id="yes" type="radio" name="confirm" value="Yes">
                     <label for="yes"><strong class="bold">Yes</strong></label>
