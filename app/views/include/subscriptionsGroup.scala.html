@@ -79,9 +79,9 @@
                                     <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.version)-toggle" @if(app.hasLockedSubscriptions) { disabled }>
                                       <div class="slider__radios">
                                         <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" class="slider__on" type="radio" name="subscribed" value="true" @if(api.subscribed) { checked }>
-                                        <label for="@IdFormatter.identifier(api.context, api.apiVersion.version)-on">On</label>
+                                        <label for="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" aria-label="Subscribed">On</label>
                                         <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-off" class="slider__off" type="radio" name="subscribed" value="false" @if(!api.subscribed) { checked }>
-                                        <label for="@IdFormatter.identifier(api.context, api.apiVersion.version)-off">Off</label>
+                                        <label for="@IdFormatter.identifier(api.context, api.apiVersion.version)-off" aria-label="Unsubscribed">Off</label>
                                       </div>
                                       <input type="submit" value="Save" class="button">
                                     </fieldset>
