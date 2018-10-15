@@ -54,10 +54,11 @@
                     @helper.CSRF.formField
 
                     <div id="fullname" class="form-group @if(form.errors("fullname").nonEmpty){form-group-error}">
-                        <label class="label--full-length" for="fullname">Full name</label>
+                        <label class="label--full-length" for="fullname-field" id="fullname-label">Full name</label>
 
                         @fieldError(form.errors, "fullname", true)
-                        <input type="text"
+                        <input id="fullname-field"
+                               type="text"
                                name="fullname"
                                class="form-control @if(form.errors("fullname").nonEmpty){form-control-error}"
                                value="@form.data.getOrElse("fullname", "")"
@@ -65,29 +66,28 @@
                     </div>
 
                     <div id="emailaddress" class="form-group @if(form.errors("emailaddress").nonEmpty){form-group-error}">
-                        <label class="label--full-length" for="emailaddress" id="emailaddress-label">Email address</label>
+                        <label class="label--full-length" for="emailaddress-field" id="emailaddress-label">Email address</label>
                             @fieldError(form.errors, "emailaddress", true)
-                            <input type="text"
+                            <input id="emailaddress-field"
+                                   type="text"
                                    name="emailaddress"
                                    class="form-control @if(form.errors("emailaddress").nonEmpty){form-control-error}"
                                    value="@form.data.getOrElse("emailaddress", "")"
-                                   aria-required="true"
-                                   aria-labelledby="emailaddress-label"/>
+                                   aria-required="true"/>
 
                         <p class="form-field--hint">We only use your email to respond to you</p>
                     </div>
 
-
                     <div id="comments" class="form-group @if(form.errors("comments").nonEmpty){form-group-error}">
-                        <label class="label--full-length" for="comments" id="comment-label">What do you need help with?</label>
+                        <label class="label--full-length" for="comments-field" id="comments-label">What do you need help with?</label>
                         @fieldError(form.errors, "comments", true)
                         <p class="form-field--hint">Don't include any personal or financial information. For example, National Insurance or credit card numbers.</p>
-                        <textarea class="js-char-count form-control @if(form.errors("comments").nonEmpty){form-control-error}"
+                        <textarea id="comments-field"
+                                  class="js-char-count form-control @if(form.errors("comments").nonEmpty){form-control-error}"
                                   name="comments"
                                   cols="40"
                                   rows="4"
                                   maxlength="3000"
-                                  aria-labelledby="comment-label"
                                   aria-describedby="comment-note">@form.data.getOrElse("comments", "")</textarea>
                     </div>
 
