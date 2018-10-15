@@ -77,7 +77,7 @@
                     @if(role == Role.ADMINISTRATOR && (teamMember.role == Role.DEVELOPER || teamMember.emailAddress != loggedIn.email)) {
                         <td class="text--right hard--right">
                             <a href="@controllers.routes.ManageTeam.removeTeamMember(app.id, teamMember.emailAddress.toSha256).url">
-                                Remove<span class="visually-hidden">@teamMember.emailAddress</span>
+                                Remove <span class="visually-hidden">@teamMember.emailAddress</span>
                             </a>
                         </td>
                     } else {
