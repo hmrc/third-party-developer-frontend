@@ -40,7 +40,7 @@
                 value = Some("OAuth 2.0")).toHtml journey.</p>
         </div>
     </details>
-    <div><p data-clientid>@token.clientId</p></div>
+    <div><input class="flat-text" readonly type="text" data-clientid value="@token.clientId"></div>
 </div>
 <div class="credentials-section">
     <span class="bold" id="clientSecretHeading">Client secret</span>
@@ -52,7 +52,7 @@
         </div>
     </details>
     @for( (secret, i) <- token.clientSecrets.zipWithIndex) {
-        @maskedContent(secret, accessibleText = "client secret", secure = app.deployedTo == Environment.PRODUCTION, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
+        @maskedContent(secret, accessibleText = s"client secret ${i+1}", secure = app.deployedTo == Environment.PRODUCTION, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
     }
     @if(token.clientSecrets.size < 5) {
         <div>
@@ -118,5 +118,5 @@
                 value = Some("authorise")).toHtml your application when making requests to any application-restricted endpoint.</p>
         </div>
     </details>
-    <div><p data-accesstoken>@token.accessToken</p></div>
+    <div><p class="flat-text" readonly type="text" data-accesstoken value="@token.accessToken"></div>
 </div>
