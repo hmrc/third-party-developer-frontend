@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.urls.Link
 @import config.ApplicationConfig
 @import domain.Environment
-@import domain.{Application, Environment}
+@import domain.Application
 @import include._
 
 @(app: Application, token: EnvironmentToken, form: Form[VerifyPasswordForm])(
@@ -40,7 +40,8 @@
                 value = Some("OAuth 2.0")).toHtml journey.</p>
         </div>
     </details>
-    <div><input class="flat-text" readonly type="text" data-clientid value="@token.clientId"></div>
+    <label for="clientId" class="visuallyhidden">Client ID</label>
+    <div><input id="clientId" class="flat-text" readonly type="text" data-clientid value="@token.clientId"></div>
 </div>
 <div class="credentials-section">
     <span class="bold" id="clientSecretHeading">Client secret</span>
@@ -81,7 +82,7 @@
                 @helper.form(action = controllers.routes.Credentials.selectClientSecretsToDelete(app.id), if(form.errors("password").nonEmpty) {'class -> "js-mask-form js-visible"} else {'class -> "js-mask-form js-hidden"}) {
                     @helper.CSRF.formField
                     <div class="form-group @if(form.errors("password").nonEmpty) {form-group-error}">
-                        <label class="form-label-bold" id="password-label">
+                        <label for="password" class="form-label-bold" id="password-label">
                             Enter your password
                             @fieldError(form.errors, "password")
                         </label>
@@ -118,5 +119,6 @@
                 value = Some("authorise")).toHtml your application when making requests to any application-restricted endpoint.</p>
         </div>
     </details>
-    <div><p class="flat-text" readonly type="text" data-accesstoken value="@token.accessToken"></div>
+    <label for="serverToken" class="visuallyhidden">Server token</label>
+    <div><input id="serverToken" class="flat-text" readonly type="text" data-accesstoken value="@token.accessToken"></div>
 </div>
