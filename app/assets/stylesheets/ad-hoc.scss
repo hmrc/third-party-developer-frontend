@@ -70,6 +70,14 @@ input.secondary-button {
     border: 0px;
 }
 
+input.flat-text {
+  border: 0;
+
+  &:focus {
+    outline: none;
+  }
+}
+
 a.secondary-button:hover, button.secondary-button:hover, input.secondary-button:hover,
 a.secondary-button:focus, button.secondary-button:focus, input.secondary-button:hover {
   position: relative;
