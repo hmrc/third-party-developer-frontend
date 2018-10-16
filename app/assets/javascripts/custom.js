@@ -168,6 +168,12 @@ $(document).ready(function () {
 
     var charCount = new GOVUK.CharCount()
     charCount.init({ selector: '.js-char-count' });
+
+  $('[data-clientsecret-toggle]').on('unmask', function(event, data) {
+    var target = $(this).closest('.js-mask-container').find('.js-mask-revealed');
+    target.text('');
+    target.val(data);
+  });
 });
 
 var showHide = function () {
