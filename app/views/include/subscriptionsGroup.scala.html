@@ -24,7 +24,7 @@
 @(role: Role, app: Application, apisSubscriptions: Seq[APISubscriptions], hasAnySubscriptions: Boolean, group: String, afterSubscriptionRedirectTo: SubscriptionRedirect)(
         implicit messages: Messages, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
 
-<ul>
+<ul class="subscriptions-group">
     @apisSubscriptions.map { case (apiSubscription) =>
         <li class="accordion accordion--stacked @if(apiSubscription.isExpanded) {accordion--expanded}"
             data-accordion
@@ -36,7 +36,7 @@
                     class="accordion__button link--no-underline bold-small" data-accordion-button role="button"
                     @if(apiSubscription.isExpanded || !hasAnySubscriptions) {data-accordion-expanded="" aria-expanded="true"} else {aria-expanded="false"}>
                         <i class="arrow arrow--right accordion__indicator @if(apiSubscription.isExpanded || !hasAnySubscriptions) {arrow--expand}" data-accordion-arrow aria-hidden="true"></i>
-                        @apiSubscription.apiHumanReadableAppName
+                        <span>@apiSubscription.apiHumanReadableAppName</span>
                     </a>
                 </div>
                 <div class="accordion__row__right">

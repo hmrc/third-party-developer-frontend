@@ -1,0 +1,37 @@
+.subscriptions-group {
+  .accordion__row {
+    display: flex;
+    justify-content: space-between;
+    vertical-align: middle;
+
+    .accordion__button {
+      align-items: center;
+      display: flex;
+
+      &:hover, &:focus {
+        text-decoration: none;
+
+        span {
+          text-decoration: underline;
+        }
+      }
+
+      .arrow {
+        font-size: 3rem;
+        height: auto;
+        margin: -1.4rem 1rem -1rem 0;
+        width: auto;
+
+        &--expand {
+          margin-top: -1.6rem;
+        }
+      }
+    }
+
+    &__left, &__right {
+      align-items: center;
+      display: flex;
+      width: auto;
+    }
+  }
+}
