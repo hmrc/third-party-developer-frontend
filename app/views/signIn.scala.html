@@ -33,8 +33,6 @@
 
     @helper.form(action = controllers.routes.UserLoginAccount.authenticate) {
 
-        @helper.CSRF.formField
-
         <div @if(form.errors("invalidCredentials").nonEmpty){class="form-group-error"}>
 
             @fieldError(form.errors, "invalidCredentials", form.error("submissionError").isEmpty)
