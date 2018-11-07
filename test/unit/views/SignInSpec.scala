@@ -36,7 +36,7 @@ class SignInSpec extends UnitSpec with OneServerPerSuite {
   "Sign in page" should {
 
     def renderPage(form: Form[LoginForm] = LoginForm.form) = {
-      val request = FakeRequest().withCSRFToken
+      val request = FakeRequest()
       views.html.signIn.render("heading", form, endOfJourney = true, request, Flash(), applicationMessages, ApplicationConfig)
     }
 
