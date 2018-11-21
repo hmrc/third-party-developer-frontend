@@ -26,6 +26,11 @@ GET         /profile                                                            
 GET         /profile/change                                                             controllers.Profile.changeProfile
 POST        /profile                                                                    controllers.Profile.updateProfile
 
+GET         /profile/secure-account                                                     controllers.Profile.show2SVPage
+GET         /profile/secure-account/setup                                               controllers.Profile.show2SVSetupPage
+GET         /profile/secure-account/access-code                                         controllers.Profile.show2SVAccessCodePage
+GET         /profile/secure-account/complete                                            controllers.Profile.show2SVCompletedPage
+
 GET         /profile/password                                                           controllers.Profile.showPasswordPage
 POST        /profile/password                                                           controllers.Profile.updatePassword
 

@@ -1,0 +1,51 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain._
+@import include._
+@import model.Crumb
+
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
+
+@devMain(
+    title = "Secure account",
+    userFullName = Some(loggedIn.displayedName),
+    breadcrumbs = Seq(
+        Crumb("Secure account"),
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(None, Option(navSection)))
+) {
+
+    <header>
+        <h1 class="heading-xlarge">Secure account</h1>
+    </header>
+
+    <div>
+        <p>Make your account more secure by adding a unique 6 digit access code to your email address and password.
+           You’ll need a new code every time you sign in to your Developer Hub account.</p>
+        <p>You can get an access code on your smartphone or tablet with an authenticator app, even with no mobile reception.</p>
+    </div>
+
+    <div class="form-field-group">
+        <h2 class="heading-large">Before you start</h2>
+        <p>Download and install an authenticator app, for example the free
+           <a href="https://www.gov.uk/government/publications/the-official-hmrc-app/the-free-hmrc-app" target="_blank">HMRC app</a>.</p>
+    </div>
+    <div>
+        <a id="submit" class="button" type="submit" href="@routes.Profile.show2SVSetupPage">Continue</a>
+    </div>
+}
