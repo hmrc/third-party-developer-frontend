@@ -55,7 +55,7 @@ case class QRCode(scale: Int = 1) {
     imageBytes
   }
 
-  def generateDataImageBase64(text: String, scale: Int = 1) = {
+  def generateDataImageBase64(text: String) = {
     val imageAsBase64 = Base64.getEncoder.encodeToString(generateImage(text))
     s"data:image/png;base64,$imageAsBase64"
   }

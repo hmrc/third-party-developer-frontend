@@ -19,6 +19,7 @@ package controllers
 import connectors.ThirdPartyDeveloperConnector
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
+import qr.QRCode
 import service.SessionService
 
 import scala.concurrent.Future
@@ -26,9 +27,13 @@ import scala.concurrent.Future
 trait MFA extends LoggedInController {
 
   val connector: ThirdPartyDeveloperConnector
+  //val qrCode: QRCode
 
   def start2SVSetup() = loggedInAction { implicit request =>
-      connector.createMfaSecret(loggedIn.email).map(secret => Ok(views.html.secureAccountSetup(secret.toLowerCase().grouped(4).mkString(" "))))
+    connector.createMfaSecret(loggedIn.email).map(secret => {
+      //val qrImg = qrCode.generateDataImageBase64(secret.toLowerCase)
+      Ok(views.html.secureAccountSetup(secret.toLowerCase().grouped(4).mkString(" ")))
+    })
   }
 
 
