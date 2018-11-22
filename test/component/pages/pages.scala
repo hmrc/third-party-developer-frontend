@@ -100,8 +100,14 @@ object AddApplicationPage extends FormPage {
 }
 
 object AddApplicationSuccessPage extends FormPage {
-  override val pageHeading = "Application added"
+  override val pageHeading = "You added"
   override val url: String = s"${Env.host}/developer/applications/add"
+
+  override def isCurrentPage: Boolean = find(tagName("h1")).fold(false)({
+    e =>
+      Logger.info(s"HEADING: ${e.text}")
+      e.text.startsWith(pageHeading)
+  })
 }
 
 case object AccountDeletionConfirmationPage extends FormPage {

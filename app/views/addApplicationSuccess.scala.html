@@ -31,34 +31,35 @@
         Crumb.home
     ),
     leftNav = Some(leftHandNav(None, Option(navSection)))
-) {
-    <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge" data-journey="application:added">Application added</h1>
-    </div>
-    <p>You have added <strong id="application-name" class="bold-small">@applicationName</strong>.</p>
-    <p>You have admin rights over the application.</p>
-        <div>
-            <h2 class="heading-large">What happens next?</h2>
+){
+    <h1 class="heading-large" data-journey="application:added">You added '@applicationName'.</h1>
     @if(environment == Environment.PRODUCTION.toString) {
-            <p>
-                To get your production credentials, you must submit your application for checking.
-                This takes up to 2 working days.
-            </p>
-        </div>
+
+        <p>You have admin rights over this production application.</p>
+
+        <h2 class="heading-medium">Before you can get production credentials</h2>
+
+        <p>You must complete the checklist for your application and submit it for checking.</p>
+        <p>We take up to 2 working days to check applications and issue production credentials.</p>
 
         <a class="button" href="@routes.ApplicationCheck.requestCheckPage(applicationId).url" id="start">
-        Start
+            Start the checklist
         </a>
     } else {
+        <p>You have admin rights over this sandbox application.</p>
+
+        <h2 class="heading-medium">What happens next?</h2>
+
         <p>You can now get your sandbox credentials for testing.</p>
         <p>However, to start testing you must tell us:</p>
+
         <ul class="list list-bullet">
-            <li>which APIs you want to subscribe to</li>
-            <li>your redirect URIs, if using <a href="/api-documentation/docs/authorisation/user-restricted-endpoints">user-restricted endpoints</a></li>
+            <li>Which APIs you want to subscribe to</li>
+            <li>Your redirect URIs, if using <a href="/api-documentation/docs/authorisation/user-restricted-endpoints">user-restricted endpoints</a></li>
         </ul>
+
         <a class="button" href="@routes.Subscriptions.subscriptions(applicationId)" id="manage-api-subscriptions">
              Manage API subscriptions
         </a>
-
-}
+    }
 }

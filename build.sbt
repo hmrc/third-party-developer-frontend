@@ -28,7 +28,7 @@ lazy val enumeratumVersion = "1.5.11"
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "frontend-bootstrap" % "10.6.0",
+  "uk.gov.hmrc" %% "frontend-bootstrap" % "10.9.0",
   "uk.gov.hmrc" %% "url-builder" % "2.1.0",
   "uk.gov.hmrc" %% "play-json-union-formatter" % "1.3.0",
   "uk.gov.hmrc" %% "http-metrics" % "1.2.0",
@@ -45,7 +45,7 @@ lazy val compile = Seq(
 lazy val test = Seq(
   "info.cukes" %% "cucumber-scala" % cucumberVersion % "test",
   "info.cukes" % "cucumber-junit" % cucumberVersion % "test",
-  "uk.gov.hmrc" %% "hmrctest" % "3.1.0" % "test",
+  "uk.gov.hmrc" %% "hmrctest" % "3.2.0" % "test",
   "junit" % "junit" % "4.12" % "test",
   "org.jsoup" % "jsoup" % "1.10.2" % "test",
   "org.pegdown" % "pegdown" % "1.6.0" % "test",
