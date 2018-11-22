@@ -27,12 +27,12 @@ import scala.concurrent.Future
 trait MFA extends LoggedInController {
 
   val connector: ThirdPartyDeveloperConnector
-  //val qrCode: QRCode
+  val qrCode: QRCode
 
   def start2SVSetup() = loggedInAction { implicit request =>
     connector.createMfaSecret(loggedIn.email).map(secret => {
-      //val qrImg = qrCode.generateDataImageBase64(secret.toLowerCase)
-      Ok(views.html.secureAccountSetup(secret.toLowerCase().grouped(4).mkString(" ")))
+      val qrImg = qrCode.generateDataImageBase64(secret.toLowerCase)
+      Ok(views.html.secureAccountSetup(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
     })
   }
 
@@ -54,6 +54,7 @@ trait MFA extends LoggedInController {
 object MFA extends MFA with WithAppConfig {
   override val sessionService = SessionService
   override val connector = ThirdPartyDeveloperConnector
+  override val qrCode = QRCode(7)
 }
 
 
