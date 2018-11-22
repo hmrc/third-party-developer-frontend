@@ -16,5 +16,4 @@ Feature: Add Application
       | description     | Valid description. |
     And I click on the radio button with id 'production'
     When I click on the 'Add' button
-    And I see:
-      | You added 'Parsley App'.       |
+    And I am on the 'Add application success' page
