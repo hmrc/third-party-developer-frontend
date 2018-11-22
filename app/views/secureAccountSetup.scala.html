@@ -18,23 +18,44 @@
 @import include._
 @import model.Crumb
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
+@(secret: String)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
 
 @devMain(
     title = "Set up your device",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
-        Crumb("Secure account"),
+        Crumb("Set up your device"),
+        Crumb.secureAccount,
         Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    )
 ) {
 
     <header>
         <h1 class="heading-xlarge">Set up your device</h1>
     </header>
+    <div>
+        <p>You need to:</p>
+        <ol class="list list-number">
+            <li>Using the app, scan this QR code
+            <p>
+                <details>
+                <summary aria-describedby="setupDevice" aria-label="I cannot scan the QR code" role="button" aria-expanded="false" aria-controls="details-content-0"><u>I cannot scan the QR code</u></summary>
+                <div class="panel panel-border-narrow" id="details-content-0">
+                    <p>Enter this key into your authentication app instead</p>
+                    <h1 class="heading-medium">@secret</h1>
+                </div>
+                </details>
+            </p>
+            </li>
+
+
+
+            <li>Check the app for your 6 digit access code - which refreshes every 30 seconds.</li>
+        </ul>
+    </div>
 
     <div>
-        <a id="submit" class="button" type="submit" href="@routes.Profile.show2SVAccessCodePage">Continue</a>
+        <a id="submit" class="button" type="submit" href="@routes.MFA.show2SVAccessCodePage">Continue</a>
     </div>
 }
+

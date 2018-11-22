@@ -24,10 +24,10 @@
     title = "Enter your access code",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
-        Crumb("Secure account"),
+        Crumb("Enter your access code"),
+        Crumb.secureAccount,
         Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    )
 ) {
 
     <header>

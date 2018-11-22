@@ -95,22 +95,6 @@ trait Profile extends LoggedInController with PasswordChange {
     )
   }
 
-  def show2SVPage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.secureAccount()))
-  }
-
-  def show2SVSetupPage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.secureAccountSetup()))
-  }
-
-  def show2SVAccessCodePage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.secureAccountAccessCode()))
-  }
-
-  def show2SVCompletedPage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.secureAccountCompleted()))
-  }
-
 }
 
 object Profile extends Profile with WithAppConfig {

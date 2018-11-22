@@ -24,14 +24,20 @@
     title = "Secure account complete",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
-        Crumb("Secure account"),
+        Crumb("2-step verification set up"),
+        Crumb.secureAccount,
         Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    )
 ) {
 
-    <header>
-        <h1 class="heading-xlarge">Enter your access code</h1>
-    </header>
+    <div class="govuk-box-highlight">
+        <h1 class="heading-xlarge">You have successfully set up extra security</h1>
+    </div>
+    <h2 class="heading-medium">Keep the app on your device</h2>
+    <p>You'll need a new access code every time you sign in.</p>
+
+    <div>
+        <a id="submit" class="button" type="submit" href="@routes.ManageApplications.manageApps">View all applications</a>
+    </div>
 
 }
