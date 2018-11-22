@@ -39,7 +39,8 @@ lazy val compile = Seq(
   "uk.gov.hmrc" %% "play-conditional-form-mapping" % "0.2.0",
   "io.dropwizard.metrics" % "metrics-graphite" % "3.2.1",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
-  "com.beachape" %% "enumeratum-play" % enumeratumVersion
+  "com.beachape" %% "enumeratum-play" % enumeratumVersion,
+  "com.google.zxing" % "core" % "3.2.1"
 )
 
 lazy val test = Seq(
