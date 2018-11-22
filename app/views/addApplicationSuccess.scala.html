@@ -32,7 +32,7 @@
     ),
     leftNav = Some(leftHandNav(None, Option(navSection)))
 ){
-    <h1 class="heading-large">You added '@applicationName'.</h1>
+    <h1 class="heading-large" data-journey="application:added">You added '@applicationName'.</h1>
     @if(environment == Environment.PRODUCTION.toString) {
 
         <p>You have admin rights over this production application.</p>

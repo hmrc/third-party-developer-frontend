@@ -29,8 +29,8 @@ import utils.ViewHelpers._
 
 class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite {
 
-  val productionMessage = "To get your production credentials, you must submit your application for checking. This takes up to 2 working days."
-  val productionButton = "Start"
+  val productionMessage = "We take up to 2 working days to check applications and issue production credentials."
+  val productionButton = "Start the checklist"
   val sandboxMessage = "You can now get your sandbox credentials for testing."
   val sandboxButton = "Manage API subscriptions"
 
@@ -42,8 +42,7 @@ class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite {
       val request = FakeRequest().withCSRFToken
       val page = views.html.addApplicationSuccess.render(applicationName, applicationId, environment.toString, request, loggedIn, applicationMessages, ApplicationConfig, navSection = "nav-section")
       val document = Jsoup.parse(page.body)
-      elementExistsByText(document, "h1", s"Application added") shouldBe true
-      elementExistsByText(document, "p", s"You have added $applicationName.") shouldBe true
+      elementExistsByText(document, "h1", s"You added '$applicationName'.") shouldBe true
       document
     }
 
