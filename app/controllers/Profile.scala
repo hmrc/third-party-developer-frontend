@@ -94,7 +94,6 @@ trait Profile extends LoggedInController with PasswordChange {
       }
     )
   }
-
 }
 
 object Profile extends Profile with WithAppConfig {

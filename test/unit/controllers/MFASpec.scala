@@ -16,6 +16,8 @@
 
 package unit.controllers
 
+import java.net.URI
+
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers.MFA
@@ -26,7 +28,7 @@ import org.mockito.Matchers
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
-import qr.QRCode
+import qr.{OTPAuthURI, QRCode}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -39,19 +41,23 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   trait Setup {
     val secret = "ABCDEFGH"
+    val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
     val loggedInUser = Developer("johnsmith@example.com", "John", "Doe")
     val qrImage = "qrImage"
+    val otpUri = new URI("OTPURI")
 
     val underTest = new MFA {
       override val connector = mock[ThirdPartyDeveloperConnector]
       override val appConfig = mock[ApplicationConfig]
       override val sessionService = mock[SessionService]
       override val qrCode = mock[QRCode]
+      override val otpAuthUri = mock[OTPAuthURI]
     }
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
-    given(underTest.qrCode.generateDataImageBase64(secret.toLowerCase)).willReturn(qrImage)
+    given(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).willReturn(otpUri)
+    given(underTest.qrCode.generateDataImageBase64(otpUri.toString)).willReturn(qrImage)
     given(underTest.connector.createMfaSecret(mockEq(loggedInUser.email))(any[HeaderCarrier])).willReturn(secret)
   }
 
