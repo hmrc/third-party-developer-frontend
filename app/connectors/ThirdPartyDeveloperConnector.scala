@@ -181,6 +181,13 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
   def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier) = {
     http.GET[Seq[User]](s"$serviceBaseUrl/developers", Seq("emails" -> emails.mkString(",")))
   }
+
+  def createMfaSecret(email: String)(implicit hc: HeaderCarrier): Future[String] =
+    metrics.record(api) {
+      http.POSTEmpty(s"$serviceBaseUrl/developer/$email/mfa")
+        .map(r => (r.json \ "secret").as[String])
+    }
+
 }
 
 object ThirdPartyDeveloperConnector extends ThirdPartyDeveloperConnector {
