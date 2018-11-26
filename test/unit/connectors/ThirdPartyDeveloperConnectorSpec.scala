@@ -25,7 +25,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestPayloadEncryptor
@@ -354,5 +354,43 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
 
     }
 
+  }
+
+  "verify MFA" should {
+    "return false if verification fails due to InvalidCode" in new Setup {
+      val email = "john.smith@example.com"
+      val code = "12341234"
+
+      when(connector.http.GET(endpoint(s"developer/$email/mfa/verification?code=$code"))).
+        thenReturn(Future.failed(Upstream4xxResponse("Bad request", Status.BAD_REQUEST, Status.BAD_REQUEST)))
+
+      val result = connector.verifyMfa(email, code)
+
+      result.futureValue shouldBe false
+    }
+
+    "return true if verification is successful" in new Setup {
+      val email = "john.smith@example.com"
+      val code = "12341234"
+
+      when(connector.http.GET(endpoint(s"developer/$email/mfa/verification?code=$code"))).
+        thenReturn(Future.successful(HttpResponse(Status.NO_CONTENT)))
+
+      val result = connector.verifyMfa(email, code)
+
+      result.futureValue shouldBe true
+    }
+
+    "throw if verification fails due to error" in new Setup {
+      val email = "john.smith@example.com"
+      val code = "12341234"
+
+      when(connector.http.GET(endpoint(s"developer/$email/mfa/verification?code=$code"))).
+        thenReturn(Future.failed(Upstream5xxResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
+
+      intercept[Upstream5xxResponse]{
+        await(connector.verifyMfa(email, code))
+      }
+    }
   }
 }
