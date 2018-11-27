@@ -198,6 +198,8 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
     }
   }
 
+  def enableMfa(email: String): Future[Int] = ???
+
 }
 
 object ThirdPartyDeveloperConnector extends ThirdPartyDeveloperConnector {

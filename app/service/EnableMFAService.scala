@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,29 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import domain._
-@import include._
-@import model.Crumb
+package service
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
+import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.http.HeaderCarrier
 
-@devMain(
-    title = "Enter your access code",
-    userFullName = Some(loggedIn.displayedName),
-    breadcrumbs = Seq(
-        Crumb("Enter your access code"),
-        Crumb.secureAccount,
-        Crumb.home
-    )
-) {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-    <header>
-        <h1 class="heading-xlarge">Enter your access code</h1>
-    </header>
-    <div>
+trait EnableMFAService {
+  val tpdConnector: ThirdPartyDeveloperConnector
 
-    </div>
+  def enableMfa(email: String, totpCode: String): Future[EnableMFAResponse] = {
+    tpdConnector.verifyMfa(email, totpCode)(new HeaderCarrier).map(totpSuccessful => {
+      if (totpSuccessful) tpdConnector.enableMfa(email)
+      EnableMFAResponse(totpSuccessful)
+    })
+  }
 
+  case class EnableMFAResponse(totpVerified: Boolean)
 }

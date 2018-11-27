@@ -56,9 +56,18 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication {
     }
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
+  }
+
+  trait SetupSuccessfulStart2SV extends Setup {
     given(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).willReturn(otpUri)
     given(underTest.qrCode.generateDataImageBase64(otpUri.toString)).willReturn(qrImage)
     given(underTest.connector.createMfaSecret(mockEq(loggedInUser.email))(any[HeaderCarrier])).willReturn(secret)
+  }
+
+  trait SetupFailedVerification extends Setup {
+    val totpCode = "12341234"
+    given(underTest.connector.verifyMfa(any[String], any[String])(any[HeaderCarrier])).
+      willReturn(Future.successful(false))
   }
 
   "start2SVSetup" should {
@@ -72,6 +81,12 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication {
       val dom = Jsoup.parse(bodyOf(result))
       dom.getElementById("secret").html() shouldBe "abcd efgh"
       dom.getElementById("qrCode").attr("src") shouldBe qrImage
+    }
+  }
+
+  "enable2SV" should {
+    "return error when verification fails" in new SetupFailedVerification {
+      
     }
   }
 }
