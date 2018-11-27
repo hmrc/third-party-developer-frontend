@@ -18,7 +18,7 @@
 @import include._
 @import model.Crumb
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
+@(form: Form[controllers.Enable2SVForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer)
 
 @devMain(
     title = "Enter your access code",
@@ -34,7 +34,11 @@
         <h1 class="heading-xlarge">Enter your access code</h1>
     </header>
     <div>
+        @errorSummary(form)
 
+        @helper.form(action = controllers.routes.MFA.enable2SV){
+
+        }
     </div>
 
 }

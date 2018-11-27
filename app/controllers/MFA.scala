@@ -18,6 +18,8 @@ package controllers
 
 import connectors.ThirdPartyDeveloperConnector
 import play.api.Play.current
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.i18n.Messages.Implicits._
 import qr.{OTPAuthURI, QRCode}
 import service.SessionService
@@ -53,7 +55,6 @@ trait MFA extends LoggedInController {
   def enable2SV() = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.secureAccountCompleted()))
   }
-
 }
 
 object MFA extends MFA with WithAppConfig {
@@ -64,4 +65,13 @@ object MFA extends MFA with WithAppConfig {
   override val otpAuthUri = OTPAuthURI
 }
 
+final case class Enable2SVForm(totpCode: String)
+
+object Enable2SVForm {
+  def form: Form[Enable2SVForm] = Form(
+    mapping(
+      "totp" -> text
+    )(Enable2SVForm.apply)(Enable2SVForm.unapply)
+  )
+}
 
