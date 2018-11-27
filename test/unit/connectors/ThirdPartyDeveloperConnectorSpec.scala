@@ -29,6 +29,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestPayloadEncryptor
+import play.api.http.Status.NO_CONTENT
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -391,6 +392,19 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
       intercept[Upstream5xxResponse]{
         await(connector.verifyMfa(email, code))
       }
+    }
+  }
+
+  "enableMFA" should {
+    "return no_content if successfully enabled" in new Setup {
+      val email = "john.smith@example.com"
+
+      when(connector.http.PUT(endpoint(s"developer/:$email/mfa/enable"), "")).
+        thenReturn(Future.successful(HttpResponse(NO_CONTENT)));
+
+      val result = await(connector.enableMfa(email))
+
+      result shouldBe NO_CONTENT
     }
   }
 }

@@ -17,7 +17,7 @@ class EnableMFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     val totpCode = "12345678"
     val connector = mock[ThirdPartyDeveloperConnector]
 
-    when(connector.enableMfa(email)).thenReturn(Status.NO_CONTENT)
+    when(connector.enableMfa(mockEq(email))(any[HeaderCarrier])).thenReturn(Status.NO_CONTENT)
 
     val service = new EnableMFAService {
       val tpdConnector = connector
@@ -26,12 +26,12 @@ class EnableMFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
 
   trait SetupFailedTotpVerification extends Setup {
     when(connector.verifyMfa(mockEq(email), mockEq(totpCode))(any[HeaderCarrier])).thenReturn(false)
-    val result = service.enableMfa(email, totpCode)
+    val result = service.enableMfa(email, totpCode)(new HeaderCarrier())
   }
 
   trait SetupSuccessfulTotpVerification extends Setup {
     when(connector.verifyMfa(mockEq(email), mockEq(totpCode))(any[HeaderCarrier])).thenReturn(true)
-    val result = service.enableMfa(email, totpCode)
+    val result = service.enableMfa(email, totpCode)(new HeaderCarrier())
   }
 
   "enableMfa" should {
@@ -40,7 +40,7 @@ class EnableMFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     }
 
     "does not call enable mfa when totp verification fails" in new SetupFailedTotpVerification {
-      verify(connector, never).enableMfa(email)
+      verify(connector, never).enableMfa(email)(any[HeaderCarrier])
     }
 
     "return successful totp when totp verification passes" in new SetupSuccessfulTotpVerification {
@@ -48,7 +48,7 @@ class EnableMFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     }
 
     "enable MFA totp when totp verification passes" in new SetupSuccessfulTotpVerification {
-      verify(connector, times(1)).enableMfa(email)
+      verify(connector, times(1)).enableMfa(mockEq(email))(any[HeaderCarrier])
     }
 
   }

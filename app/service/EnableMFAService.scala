@@ -25,8 +25,8 @@ import scala.concurrent.Future
 trait EnableMFAService {
   val tpdConnector: ThirdPartyDeveloperConnector
 
-  def enableMfa(email: String, totpCode: String): Future[EnableMFAResponse] = {
-    tpdConnector.verifyMfa(email, totpCode)(new HeaderCarrier).map(totpSuccessful => {
+  def enableMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[EnableMFAResponse] = {
+    tpdConnector.verifyMfa(email, totpCode).map(totpSuccessful => {
       if (totpSuccessful) tpdConnector.enableMfa(email)
       EnableMFAResponse(totpSuccessful)
     })
