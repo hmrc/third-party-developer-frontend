@@ -59,7 +59,8 @@ trait MFA extends LoggedInController {
 object MFA extends MFA with WithAppConfig {
   override val sessionService = SessionService
   override val connector = ThirdPartyDeveloperConnector
-  override val qrCode = QRCode(7)
+  private val scale = 7
+  override val qrCode = QRCode(scale)
   override val otpAuthUri = OTPAuthURI
 }
 
