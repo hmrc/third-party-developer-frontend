@@ -165,3 +165,13 @@ form.inline-controls {
         color: #FFF; }
 }
 
+// APIS-3807 - override hover style on left nav so it passes accessibility colour contrast tests
+.side-nav__link:hover {
+  background-color: #fff;
+  text-decoration: underline;
+}
+
+// APIS-3807 - this bit makes sure that the :hover style doesn't override the :focus style
+.side-nav__link:focus {
+  background-color: #ffbf47;
+}
