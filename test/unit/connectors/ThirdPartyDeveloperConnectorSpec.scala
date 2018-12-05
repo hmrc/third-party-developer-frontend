@@ -345,12 +345,12 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
       val email = "john.smith@example.com"
       val expectedSecret = "ABCDEF"
 
-      when(connector.http.POSTEmpty(endpoint(s"developer/$email/2sv"))).
+      when(connector.http.POSTEmpty(endpoint(s"developer/$email/mfa"))).
         thenReturn(Future.successful(HttpResponse(Status.CREATED, Some(Json.obj("secret" -> expectedSecret)))))
 
       connector.createMfaSecret(email).futureValue shouldBe expectedSecret
 
-      verify(connector.http).POSTEmpty(endpoint(s"developer/$email/2sv"))
+      verify(connector.http).POSTEmpty(endpoint(s"developer/$email/mfa"))
 
     }
 
