@@ -45,7 +45,7 @@ trait MFA extends LoggedInController {
   }
 
   def show2SVAccessCodePage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.secureAccountAccessCode()))
+    Future.successful(Ok(views.html.secureAccountAccessCode(Enable2SVForm.form)))
   }
 
   def show2SVCompletedPage() = loggedInAction { implicit request =>

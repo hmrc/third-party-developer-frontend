@@ -30,6 +30,8 @@ import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestPayloadEncryptor
 import play.api.http.Status.NO_CONTENT
+import play.api.http.ContentTypes.JSON
+import play.api.http.HeaderNames.CONTENT_TYPE
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -361,8 +363,9 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
     "return false if verification fails due to InvalidCode" in new Setup {
       val email = "john.smith@example.com"
       val code = "12341234"
+      val verifyMfaRequest = VerifyMfaRequest(code)
 
-      when(connector.http.GET(endpoint(s"developer/$email/mfa/verification?code=$code"))).
+      when(connector.http.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
         thenReturn(Future.failed(Upstream4xxResponse("Bad request", Status.BAD_REQUEST, Status.BAD_REQUEST)))
 
       val result = connector.verifyMfa(email, code)
@@ -373,8 +376,9 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
     "return true if verification is successful" in new Setup {
       val email = "john.smith@example.com"
       val code = "12341234"
+      val verifyMfaRequest = VerifyMfaRequest(code)
 
-      when(connector.http.GET(endpoint(s"developer/$email/mfa/verification?code=$code"))).
+      when(connector.http.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
         thenReturn(Future.successful(HttpResponse(Status.NO_CONTENT)))
 
       val result = connector.verifyMfa(email, code)
@@ -385,8 +389,9 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
     "throw if verification fails due to error" in new Setup {
       val email = "john.smith@example.com"
       val code = "12341234"
+      val verifyMfaRequest =  VerifyMfaRequest(code)
 
-      when(connector.http.GET(endpoint(s"developer/$email/mfa/verification?code=$code"))).
+      when(connector.http.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
         thenReturn(Future.failed(Upstream5xxResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
 
       intercept[Upstream5xxResponse]{

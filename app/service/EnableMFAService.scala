@@ -27,7 +27,7 @@ trait EnableMFAService {
 
   def enableMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[EnableMFAResponse] = {
     tpdConnector.verifyMfa(email, totpCode).map(totpSuccessful => {
-      if (totpSuccessful) tpdConnector.enableMfa  (email)
+      if (totpSuccessful) { tpdConnector.enableMfa(email) }
       EnableMFAResponse(totpSuccessful)
     })
   }

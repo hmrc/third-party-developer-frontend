@@ -71,7 +71,7 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication {
   }
 
   "start2SVSetup" should {
-    "return secureAccountSetupPage with secret from third party developer" in new Setup {
+    "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV {
       val request = FakeRequest()
         .withLoggedIn(underTest)(sessionId)
 

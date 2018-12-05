@@ -190,7 +190,7 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
 
   def verifyMfa(email: String, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
-      http.GET(s"$serviceBaseUrl/developer/$email/mfa/verification?code=$code").
+      http.POST(s"$serviceBaseUrl/developer/$email/mfa/verification", VerifyMfaRequest(code), Seq(CONTENT_TYPE -> JSON)).
         map(r => r.status == NO_CONTENT)
         .recover {
           case Upstream4xxResponse(_, BAD_REQUEST, _, _) => false

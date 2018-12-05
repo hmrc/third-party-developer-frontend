@@ -18,7 +18,8 @@
 @import include._
 @import model.Crumb
 
-@(form: Form[controllers.Enable2SVForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer)
+@import config.ApplicationConfig
+@(form: Form[controllers.Enable2SVForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: Developer, applicationConfig: ApplicationConfig)
 
 @devMain(
     title = "Enter your access code",
