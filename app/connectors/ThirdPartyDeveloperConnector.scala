@@ -184,7 +184,7 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
 
   def createMfaSecret(email: String)(implicit hc: HeaderCarrier): Future[String] =
     metrics.record(api) {
-      http.POSTEmpty(s"$serviceBaseUrl/developer/$email/2sv")
+      http.POSTEmpty(s"$serviceBaseUrl/developer/$email/mfa")
         .map(r => (r.json \ "secret").as[String])
     }
 
