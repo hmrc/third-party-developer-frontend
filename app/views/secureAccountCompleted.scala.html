@@ -21,7 +21,7 @@
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
 
 @devMain(
-    title = "Secure account complete",
+    title = "Protect account complete",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("2-step verification set up"),
