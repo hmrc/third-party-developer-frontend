@@ -21,7 +21,7 @@
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
 
 @devMain(
-    title = "Secure account",
+    title = "Protect account",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Secure account"),

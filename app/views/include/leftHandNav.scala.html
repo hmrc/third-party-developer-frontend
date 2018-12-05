@@ -55,8 +55,8 @@
                 <ul>
                     <li class="side-nav__list @if(section == "manage-profile") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.Profile.showProfile">Manage profile</a></li>
                     <li class="side-nav__list @if(section == "change-password") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.Profile.showPasswordPage">Change password</a></li>
-                    @*secure account commented out to hide the link due to dropping MFA work to prioritise suppress individuals - Leave this here / MFA code as will be picked back up
-                    <li class="side-nav__list @if(section == "secure-account") { side-nav__list&#45;&#45;selected }"><a class="side-nav__link" href="@routes.MFA.show2SVPage">Secure account</a></li>*@
+                    @*protect account commented out to hide the link due to dropping 2SV work to prioritise suppress individuals - Leave this here / MFA code as will be picked back up
+                    <li class="side-nav__list @if(section == "secure-account") { side-nav__list&#45;&#45;selected }"><a class="side-nav__link" href="@routes.MFA.show2SVPage">Protect account</a></li>*@
                 </ul>
             </div>
         }
