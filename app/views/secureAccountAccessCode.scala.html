@@ -38,6 +38,24 @@
         @errorSummary(form)
 
         @helper.form(action = controllers.routes.MFA.enable2SV){
+            @helper.CSRF.formField
+            @fieldError(form.errors, "invalidCredentials", true)
+            <div>
+                <div class="form-group @if(form.errors("totp").nonEmpty){form-group-error form-field--error}">
+                    <label class="form-label-bold" for="totp" id="totp-label">Access code</label>
+
+                    @fieldError(form.errors, "totp", true)
+                    <input type="text" autocomplete="off" id="totp"
+                    name="totp"
+                    value="@form.data.getOrElse("totp", "")"
+                    class="form-control @if(form.errors("totp").nonEmpty){form-control-error}"
+                    aria-required="true"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button id="submit" class="button" type="submit">Sign in</button>
+            </div>
 
         }
     </div>

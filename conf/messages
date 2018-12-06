@@ -145,3 +145,6 @@ unsubscribe.confirmation.no.choice.field = Tell us if you want to unsubscribe fr
 subscription.change.no.choice.field = Choose a subscription status
 
 delete.redirect.confirmation.no.choice.field = Tell us if you want to delete this redirect URI
+
+totp.invalid.name.field = Provide a valid access code
+totp.invalid.name.global = Provide a valid access code

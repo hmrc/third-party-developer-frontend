@@ -366,7 +366,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
       val verifyMfaRequest = VerifyMfaRequest(code)
 
       when(connector.http.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
-        thenReturn(Future.failed(Upstream4xxResponse("Bad request", Status.BAD_REQUEST, Status.BAD_REQUEST)))
+        thenReturn(Future.failed(new BadRequestException("Bad Request")))
 
       val result = connector.verifyMfa(email, code)
 

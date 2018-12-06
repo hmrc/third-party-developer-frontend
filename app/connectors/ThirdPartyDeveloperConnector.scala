@@ -193,7 +193,7 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
       http.POST(s"$serviceBaseUrl/developer/$email/mfa/verification", VerifyMfaRequest(code), Seq(CONTENT_TYPE -> JSON)).
         map(r => r.status == NO_CONTENT)
         .recover {
-          case Upstream4xxResponse(_, BAD_REQUEST, _, _) => false
+          case _: BadRequestException => false
         }
     }
   }

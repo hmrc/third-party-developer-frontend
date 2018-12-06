@@ -31,6 +31,10 @@ trait EnableMFAService {
       EnableMFAResponse(totpSuccessful)
     })
   }
+}
 
-  case class EnableMFAResponse(totpVerified: Boolean)
+case class EnableMFAResponse(totpVerified: Boolean)
+
+object EnableMFAService extends EnableMFAService {
+  override val tpdConnector = ThirdPartyDeveloperConnector
 }

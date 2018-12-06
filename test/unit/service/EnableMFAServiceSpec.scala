@@ -40,30 +40,30 @@ class EnableMFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     }
   }
 
-  trait SetupFailedTotpVerification extends Setup {
+  trait FailedTotpVerification extends Setup {
     when(connector.verifyMfa(mockEq(email), mockEq(totpCode))(any[HeaderCarrier])).thenReturn(false)
     val result = service.enableMfa(email, totpCode)(new HeaderCarrier())
   }
 
-  trait SetupSuccessfulTotpVerification extends Setup {
+  trait SuccessfulTotpVerification extends Setup {
     when(connector.verifyMfa(mockEq(email), mockEq(totpCode))(any[HeaderCarrier])).thenReturn(true)
     val result = service.enableMfa(email, totpCode)(new HeaderCarrier())
   }
 
   "enableMfa" should {
-    "return failed totp when totp verification fails" in new SetupFailedTotpVerification {
+    "return failed totp when totp verification fails" in new FailedTotpVerification {
       result.totpVerified shouldBe false
     }
 
-    "not call enable mfa when totp verification fails" in new SetupFailedTotpVerification {
+    "not call enable mfa when totp verification fails" in new FailedTotpVerification {
       verify(connector, never).enableMfa(mockEq(email))(any[HeaderCarrier])
     }
 
-    "return successful totp when totp verification passes" in new SetupSuccessfulTotpVerification {
+    "return successful totp when totp verification passes" in new SuccessfulTotpVerification {
       result.totpVerified shouldBe true
     }
 
-    "enable MFA totp when totp verification passes" in new SetupSuccessfulTotpVerification {
+    "enable MFA totp when totp verification passes" in new SuccessfulTotpVerification {
       verify(connector, times(1)).enableMfa(mockEq(email))(any[HeaderCarrier])
     }
 

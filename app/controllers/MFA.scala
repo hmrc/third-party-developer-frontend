@@ -22,7 +22,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages.Implicits._
 import qr.{OTPAuthURI, QRCode}
-import service.SessionService
+import service.{EnableMFAService, SessionService}
 
 import scala.concurrent.Future
 
@@ -31,6 +31,7 @@ trait MFA extends LoggedInController {
   val connector: ThirdPartyDeveloperConnector
   val qrCode: QRCode
   val otpAuthUri: OTPAuthURI
+  val enableMFAService: EnableMFAService
 
   def start2SVSetup() = loggedInAction { implicit request =>
     connector.createMfaSecret(loggedIn.email).map(secret => {
@@ -53,7 +54,18 @@ trait MFA extends LoggedInController {
   }
 
   def enable2SV() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.secureAccountCompleted()))
+    Enable2SVForm.form.bindFromRequest.fold(form => {
+      Future.successful(BadRequest(views.html.secureAccountAccessCode(form)))
+    },
+    form => {
+      enableMFAService.enableMfa(loggedIn.email, form.totpCode).map(r => {
+        r.totpVerified match{
+          case true => Redirect(routes.MFA.show2SVCompletedPage())
+          case _ => BadRequest(views.html.secureAccountAccessCode(Enable2SVForm.form.fill(form).withError("totp", "Access code incorrect")))
+        }
+      })
+
+    })
   }
 }
 
@@ -63,6 +75,7 @@ object MFA extends MFA with WithAppConfig {
   private val scale = 7
   override val qrCode = QRCode(scale)
   override val otpAuthUri = OTPAuthURI
+  override val enableMFAService = EnableMFAService
 }
 
 final case class Enable2SVForm(totpCode: String)
@@ -70,7 +83,7 @@ final case class Enable2SVForm(totpCode: String)
 object Enable2SVForm {
   def form: Form[Enable2SVForm] = Form(
     mapping(
-      "totp" -> text
+      "totp" -> text.verifying(FormKeys.totpInvalidKey, s => s.matches("^[0-9]{6}$"))
     )(Enable2SVForm.apply)(Enable2SVForm.unapply)
   )
 }
