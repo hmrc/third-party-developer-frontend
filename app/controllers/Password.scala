@@ -40,7 +40,8 @@ trait PasswordChange {
   val connector: ThirdPartyDeveloperConnector
   val auditService: AuditService
 
-  def processPasswordChange(email: String, success: Result, error: Form[ChangePasswordForm] => HtmlFormat.Appendable)(implicit request: Request[_], hc: HeaderCarrier) = {
+  def processPasswordChange(email: String, success: Result, error: Form[ChangePasswordForm] => HtmlFormat.Appendable)
+                           (implicit request: Request[_], hc: HeaderCarrier) = {
     ChangePasswordForm.form.bindFromRequest.fold(
       errors => Future.successful(BadRequest(error(errors.currentPasswordGlobal().passwordGlobal().passwordNoMatchField()))),
       data => {

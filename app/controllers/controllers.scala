@@ -133,6 +133,9 @@ package object controllers {
     val selectAClientSecretKey = "select.client.secret.field"
     val selectFewerClientSecretsKey = "select.fewer.client.secrets.field"
 
+    val totpInvalidKey = "totp.invalid.name.field"
+    val totpInvalidGlobalKey = "totp.invalid.name.global"
+
     val formKeysMap = Map(
       firstnameRequiredKey -> firstnameRequiredGlobalKey,
       firstnameMaxLengthKey -> firstnameMaxLengthGlobalKey,
@@ -154,7 +157,8 @@ package object controllers {
       redirectUriInvalidKey -> redirectUriInvalidGlobalKey,
       privacyPolicyUrlInvalidKey -> privacyPolicyUrlInvalidGlobalKey,
       tNcUrlInvalidKey -> tNcUrlInvalidGlobalKey,
-      termsOfUseAgreeKey -> termsOfUseAgreeGlobalKey
+      termsOfUseAgreeKey -> termsOfUseAgreeGlobalKey,
+      totpInvalidKey -> totpInvalidGlobalKey
     )
 
     val globalKeys = formKeysMap.values.toSeq
@@ -177,7 +181,8 @@ package object controllers {
       invalidPasswordGlobalKey -> passwordField,
       currentPasswordRequiredGlobalKey -> currentPasswordField,
       currentPasswordInvalidGlobalKey -> currentPasswordField,
-      emailMaxLengthGlobalKey -> emailaddressField
+      emailMaxLengthGlobalKey -> emailaddressField,
+      totpInvalidGlobalKey -> totpInvalidKey
     )
   }
 

@@ -20,16 +20,18 @@ import java.net.URI
 
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
-import controllers.MFA
+import controllers.{MFA, routes}
 import domain.{Developer, Session}
 import org.jsoup.Jsoup
 import org.mockito.BDDMockito._
-import org.mockito.Matchers
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.api.http.Status.{BAD_REQUEST, SEE_OTHER}
+import play.api.mvc.Result
 import qr.{OTPAuthURI, QRCode}
-import service.SessionService
+import service.{EnableMFAResponse, EnableMFAService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithLoggedInSession._
@@ -53,18 +55,35 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication {
       override val sessionService = mock[SessionService]
       override val qrCode = mock[QRCode]
       override val otpAuthUri = mock[OTPAuthURI]
+      override val enableMFAService = mock[EnableMFAService]
     }
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
+  }
+
+  trait SetupSuccessfulStart2SV extends Setup {
     given(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).willReturn(otpUri)
     given(underTest.qrCode.generateDataImageBase64(otpUri.toString)).willReturn(qrImage)
     given(underTest.connector.createMfaSecret(mockEq(loggedInUser.email))(any[HeaderCarrier])).willReturn(secret)
   }
 
+  trait SetupFailedVerification extends Setup {
+    val totpCode = "123123"
+    given(underTest.enableMFAService.enableMfa(any[String], any[String])(any[HeaderCarrier])).
+      willReturn(Future.successful(EnableMFAResponse(false)))
+  }
+
+  trait SetupSuccessfulVerification extends Setup {
+    val totpCode = "123123"
+    given(underTest.enableMFAService.enableMfa(mockEq(loggedInUser.email), mockEq(totpCode))(any[HeaderCarrier])).
+      willReturn(Future.successful(EnableMFAResponse(true)))
+  }
+
+
   "start2SVSetup" should {
-    "return secureAccountSetupPage with secret from third party developer" in new Setup {
-      val request = FakeRequest()
-        .withLoggedIn(underTest)(sessionId)
+    "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV {
+      val request = FakeRequest().
+        withLoggedIn(underTest)(sessionId)
 
       val result = await(underTest.start2SVSetup()(request))
 
@@ -73,5 +92,49 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication {
       dom.getElementById("secret").html() shouldBe "abcd efgh"
       dom.getElementById("qrCode").attr("src") shouldBe qrImage
     }
+  }
+
+  "enable2SV" should {
+    "return error when totpCode in invalid format" in new SetupSuccessfulStart2SV {
+      val request = FakeRequest().
+        withLoggedIn(underTest)(sessionId).
+        withFormUrlEncodedBody("totp" -> "abc")
+
+      val result = await(underTest.enable2SV()(request))
+
+      status(result) shouldBe BAD_REQUEST
+      assertIncludesOneError(result, "Provide a valid access code")
+    }
+
+    "return error when verification fails" in new SetupFailedVerification {
+      val request = FakeRequest().
+        withLoggedIn(underTest)(sessionId).
+        withFormUrlEncodedBody("totp" -> totpCode)
+
+      val result = await(underTest.enable2SV()(request))
+
+      status(result) shouldBe BAD_REQUEST
+      assertIncludesOneError(result, "Access code incorrect")
+    }
+
+    "redirect to 2SV completed action" in new SetupSuccessfulVerification {
+      val request = FakeRequest().
+        withLoggedIn(underTest)(sessionId).
+        withFormUrlEncodedBody("totp" -> totpCode)
+
+
+      val result = await(underTest.enable2SV()(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.MFA.show2SVCompletedPage().url)
+    }
+  }
+
+  def assertIncludesOneError(result: Result, message: String) = {
+
+    val body = bodyOf(result)
+
+    body should include(message)
+    assert(Jsoup.parse(body).getElementsByClass("form-field--error").size == 1)
   }
 }

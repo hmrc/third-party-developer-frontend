@@ -188,6 +188,21 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
         .map(r => (r.json \ "secret").as[String])
     }
 
+  def verifyMfa(email: String, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    metrics.record(api) {
+      http.POST(s"$serviceBaseUrl/developer/$email/mfa/verification", VerifyMfaRequest(code), Seq(CONTENT_TYPE -> JSON)).
+        map(r => r.status == NO_CONTENT)
+        .recover {
+          case _: BadRequestException => false
+        }
+    }
+  }
+
+  def enableMfa(email: String)(implicit hc: HeaderCarrier): Future[Int] = {
+    metrics.record(api) {
+      http.PUT(s"$serviceBaseUrl/developer/:$email/mfa/enable", "").map(status)
+    }
+  }
 }
 
 object ThirdPartyDeveloperConnector extends ThirdPartyDeveloperConnector {

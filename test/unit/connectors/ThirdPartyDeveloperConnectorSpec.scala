@@ -25,10 +25,13 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestPayloadEncryptor
+import play.api.http.Status.NO_CONTENT
+import play.api.http.ContentTypes.JSON
+import play.api.http.HeaderNames.CONTENT_TYPE
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -354,5 +357,59 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
 
     }
 
+  }
+
+  "verify MFA" should {
+    "return false if verification fails due to InvalidCode" in new Setup {
+      val email = "john.smith@example.com"
+      val code = "12341234"
+      val verifyMfaRequest = VerifyMfaRequest(code)
+
+      when(connector.http.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
+        thenReturn(Future.failed(new BadRequestException("Bad Request")))
+
+      val result = connector.verifyMfa(email, code)
+
+      result.futureValue shouldBe false
+    }
+
+    "return true if verification is successful" in new Setup {
+      val email = "john.smith@example.com"
+      val code = "12341234"
+      val verifyMfaRequest = VerifyMfaRequest(code)
+
+      when(connector.http.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
+        thenReturn(Future.successful(HttpResponse(Status.NO_CONTENT)))
+
+      val result = connector.verifyMfa(email, code)
+
+      result.futureValue shouldBe true
+    }
+
+    "throw if verification fails due to error" in new Setup {
+      val email = "john.smith@example.com"
+      val code = "12341234"
+      val verifyMfaRequest =  VerifyMfaRequest(code)
+
+      when(connector.http.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
+        thenReturn(Future.failed(Upstream5xxResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
+
+      intercept[Upstream5xxResponse]{
+        await(connector.verifyMfa(email, code))
+      }
+    }
+  }
+
+  "enableMFA" should {
+    "return no_content if successfully enabled" in new Setup {
+      val email = "john.smith@example.com"
+
+      when(connector.http.PUT(endpoint(s"developer/:$email/mfa/enable"), "")).
+        thenReturn(Future.successful(HttpResponse(NO_CONTENT)));
+
+      val result = await(connector.enableMfa(email))
+
+      result shouldBe NO_CONTENT
+    }
   }
 }
