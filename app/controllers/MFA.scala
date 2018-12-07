@@ -37,31 +37,31 @@ trait MFA extends LoggedInController {
     connector.createMfaSecret(loggedIn.email).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
-      Ok(views.html.secureAccountSetup(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
+      Ok(views.html.protectAccountSetup(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
     })
   }
 
   def show2SVPage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.secureAccount()))
+    Future.successful(Ok(views.html.protectAccount()))
   }
 
   def show2SVAccessCodePage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.secureAccountAccessCode(Enable2SVForm.form)))
+    Future.successful(Ok(views.html.protectAccountAccessCode(Enable2SVForm.form)))
   }
 
   def show2SVCompletedPage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.secureAccountCompleted()))
+    Future.successful(Ok(views.html.protectAccountCompleted()))
   }
 
   def enable2SV() = loggedInAction { implicit request =>
     Enable2SVForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(views.html.secureAccountAccessCode(form)))
+      Future.successful(BadRequest(views.html.protectAccountAccessCode(form)))
     },
     form => {
       enableMFAService.enableMfa(loggedIn.email, form.totpCode).map(r => {
         r.totpVerified match{
           case true => Redirect(routes.MFA.show2SVCompletedPage())
-          case _ => BadRequest(views.html.secureAccountAccessCode(Enable2SVForm.form.fill(form).withError("totp", "Access code incorrect")))
+          case _ => BadRequest(views.html.protectAccountAccessCode(Enable2SVForm.form.fill(form).withError("totp", "Access code incorrect")))
         }
       })
 
