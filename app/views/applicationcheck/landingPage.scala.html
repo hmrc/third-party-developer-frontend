@@ -41,7 +41,9 @@
         </h1>
     </heading>
 
-    <p>You can submit your application when you've completed all the sections.</p>
+    <p>You can submit your application when you have completed all the sections.
+        We’ll take up to 10 working days to check your application and issue production credentials.
+    </p>
     @helper.form(action = controllers.routes.ApplicationCheck.requestCheckAction(app.id), 'class -> "form") {
         @helper.CSRF.formField
         <section class="section">

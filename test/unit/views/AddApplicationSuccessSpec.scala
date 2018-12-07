@@ -29,7 +29,7 @@ import utils.ViewHelpers._
 
 class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite {
 
-  val productionMessage = "We take up to 2 working days to check applications and issue production credentials."
+  val productionMessage = "We take up to 10 working days to check applications and issue production credentials."
   val productionButton = "Start the checklist"
   val sandboxMessage = "You can now get your sandbox credentials for testing."
   val sandboxButton = "Manage API subscriptions"
