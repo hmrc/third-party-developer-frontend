@@ -41,6 +41,7 @@
             @helper.CSRF.formField
             @fieldError(form.errors, "invalidCredentials", true)
             <div>
+                <p>This is the 6 digit code from your authentication app.</p>
                 <div class="form-group @if(form.errors("totp").nonEmpty){form-group-error form-field--error}">
                     <label class="form-label-bold" for="totp" id="totp-label">Access code</label>
 
