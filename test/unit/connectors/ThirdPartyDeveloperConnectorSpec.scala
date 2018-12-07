@@ -29,7 +29,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestPayloadEncryptor
-import play.api.http.Status.NO_CONTENT
+import play.api.http.Status.{NO_CONTENT, NOT_FOUND}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 
@@ -404,7 +404,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with MockitoSugar with S
     "return no_content if successfully enabled" in new Setup {
       val email = "john.smith@example.com"
 
-      when(connector.http.PUT(endpoint(s"developer/:$email/mfa/enable"), "")).
+      when(connector.http.PUT(endpoint(s"developer/$email/mfa/enable"), "")).
         thenReturn(Future.successful(HttpResponse(NO_CONTENT)));
 
       val result = await(connector.enableMfa(email))

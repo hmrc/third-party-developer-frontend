@@ -200,7 +200,7 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
 
   def enableMfa(email: String)(implicit hc: HeaderCarrier): Future[Int] = {
     metrics.record(api) {
-      http.PUT(s"$serviceBaseUrl/developer/:$email/mfa/enable", "").map(status)
+      http.PUT(s"$serviceBaseUrl/developer/$email/mfa/enable", "").map(status)
     }
   }
 }
