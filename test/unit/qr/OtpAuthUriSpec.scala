@@ -16,14 +16,15 @@
 
 package unit.qr
 
-import qr.OTPAuthURI
+import qr.OtpAuthUri
 import uk.gov.hmrc.play.test.UnitSpec
 
-class OTPAuthURISpec extends UnitSpec {
+class OtpAuthUriSpec extends UnitSpec {
 
   "apply" should {
     "generate otpauth uri" in {
-      OTPAuthURI("ABC123", "Issuer", "User").toString shouldBe "otpauth://totp/Issuer:User?secret=ABC123&issuer=Issuer"
+      val underTest = new OtpAuthUri
+      underTest("ABC123", "Issuer", "User").toString shouldBe "otpauth://totp/Issuer:User?secret=ABC123&issuer=Issuer"
     }
   }
 }

@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import controllers.LoginForm
 import domain.Developer
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
@@ -29,15 +30,16 @@ import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers._
 
-class SignInSpec extends UnitSpec with OneServerPerSuite {
+class SignInSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
+  val appConfig = mock[ApplicationConfig]
   val loggedInUser = Developer("admin@example.com", "firstName1", "lastName1")
 
   "Sign in page" should {
 
     def renderPage(form: Form[LoginForm] = LoginForm.form) = {
-      val request = FakeRequest()
-      views.html.signIn.render("heading", form, endOfJourney = true, request, Flash(), applicationMessages, ApplicationConfig)
+      val request = FakeRequest().withCSRFToken
+      views.html.signIn.render("heading", form, endOfJourney = true, request, Flash(), applicationMessages, appConfig)
     }
 
     "show an error when email address is invalid" in {

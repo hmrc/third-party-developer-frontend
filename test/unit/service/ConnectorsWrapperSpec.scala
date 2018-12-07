@@ -17,11 +17,12 @@
 package unit.service
 
 import config.ApplicationConfig
-import connectors.{ApiSubscriptionFieldsConnector, ThirdPartyApplicationConnector}
+import connectors._
 import domain._
 import org.mockito.BDDMockito.given
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import play.api.http.Status
 import service.{Connectors, ConnectorsWrapper}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -34,16 +35,15 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
   val mockAppConfig = mock[ApplicationConfig]
 
   trait Setup {
-    implicit val hc = new HeaderCarrier()
+    implicit val hc = HeaderCarrier()
 
-    val connectors = new ConnectorsWrapper {
-      override val sandboxSubscriptionFieldsConnector: ApiSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsConnector]
-      override val sandboxApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
-      override val applicationConfig = mockAppConfig
-      override val productionApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
-      override val productionSubscriptionFieldsConnector: ApiSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsConnector]
-    }
-
+    val connectors = new ConnectorsWrapper (
+      mock[ThirdPartyApplicationSandboxConnector],
+      mock[ThirdPartyApplicationProductionConnector],
+      mock[ApiSubscriptionFieldsSandboxConnector],
+      mock[ApiSubscriptionFieldsProductionConnector],
+      mockAppConfig
+    )
 
     def theProductionConnectorWillReturnTheApplication(applicationId: String, application: Application) = {
       given(connectors.productionApplicationConnector.fetchApplicationById(applicationId)).willReturn(Future.successful(Some(application)))
@@ -72,8 +72,8 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
   val sandboxClientId = "Client ID"
   val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, Environment.SANDBOX, Some("description"))
 
-  "fetchByApplicationId" should {
-    "when strategic sandbox is enabled" should {
+  "fetchByApplicationId" when {
+    "strategic sandbox is enabled" should {
       "return the application fetched from the production connector when it exists there" in new Setup {
         given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
         theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
@@ -85,7 +85,7 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
         given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
 
         givenProductionSuccess()
-        givenSandboxFailure(400)
+        givenSandboxFailure(Status.BAD_REQUEST)
 
         val result = await(connectors.fetchApplicationById(productionApplicationId))
         result shouldBe productionApplication
@@ -95,7 +95,7 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
         given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
 
         givenProductionSuccess()
-        givenSandboxFailure(400)
+        givenSandboxFailure(Status.BAD_REQUEST)
 
         val result = await(connectors.fetchApplicationById(productionApplicationId))
         result shouldBe productionApplication
@@ -109,7 +109,7 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
       }
     }
 
-    "when strategic sandbox is not enabled" should {
+    "strategic sandbox is not enabled" should {
       "return the application fetched from the production connector when it exists there" in new Setup {
         given(mockAppConfig.strategicSandboxEnabled).willReturn(false)
         theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
@@ -119,8 +119,8 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
     }
   }
 
-  "connectorsForApplication" should {
-    "when strategic sandbox is enabled" should {
+  "connectorsForApplication" when {
+    "strategic sandbox is enabled" should {
       "return production connectors if defined" in new Setup {
         given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
         theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
@@ -136,7 +136,7 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
       }
     }
 
-    "when strategic sandbox is not enabled" should {
+    "strategic sandbox is not enabled" should {
       "return production connectors when they exist" in new Setup {
         given(mockAppConfig.strategicSandboxEnabled).willReturn(false)
         theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)

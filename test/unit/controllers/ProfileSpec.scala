@@ -16,7 +16,7 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Profile
 import domain._
@@ -26,6 +26,7 @@ import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.verify
 import org.mockito.{ArgumentCaptor, Matchers}
 import org.scalatest.mockito.MockitoSugar
+import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
@@ -41,13 +42,14 @@ class ProfileSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
   implicit val materializer = fakeApplication.materializer
 
   trait Setup {
-    val underTest = new Profile {
-      override val connector = mock[ThirdPartyDeveloperConnector]
-      override val sessionService = mock[SessionService]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-      override val applicationService = mock[ApplicationService]
-    }
+    val underTest = new Profile(
+      mock[ApplicationService],
+      mock[AuditService],
+      mock[SessionService],
+      mock[ThirdPartyDeveloperConnector],
+      mock[ErrorHandler],
+      mock[ApplicationConfig]
+    )
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
@@ -65,7 +67,7 @@ class ProfileSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
       val requestCaptor = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
 
       given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
-      given(underTest.connector.updateProfile(Matchers.eq(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier])).willReturn(Future.successful(200))
+      given(underTest.connector.updateProfile(Matchers.eq(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier])).willReturn(Future.successful(OK))
 
       val result = await(addToken(underTest.updateProfile())(request))
 
@@ -85,7 +87,8 @@ class ProfileSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
         )
 
       given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
-      given(underTest.connector.changePassword(Matchers.eq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier])).willReturn(Future.failed(new InvalidCredentials()))
+      given(underTest.connector.changePassword(Matchers.eq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
+        .willReturn(Future.failed(new InvalidCredentials()))
 
       val result = await(addToken(underTest.updatePassword())(request))
 
@@ -104,11 +107,12 @@ class ProfileSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
         )
 
       given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
-      given(underTest.connector.changePassword(Matchers.eq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier])).willReturn(Future.successful(200))
+      given(underTest.connector.changePassword(Matchers.eq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
+        .willReturn(Future.successful(OK))
 
       val result = await(addToken(underTest.updatePassword())(request))
 
-      status(result) shouldBe 200
+      status(result) shouldBe OK
       val dom = Jsoup.parse(bodyOf(result))
       dom.getElementsByClass("heading-xlarge").get(0).text shouldEqual "Password changed"
 

@@ -17,22 +17,34 @@
 package unit.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.WSHttp
-import connectors.DeskproConnector
+import config.ApplicationConfig
+import connectors.{ConnectorMetrics, DeskproConnector, NoopConnectorMetrics}
 import domain.{DeskproTicket, Feedback, TicketCreated, TicketId}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, Configuration, Mode}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
-import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, Upstream5xxResponse }
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.play.http.metrics.API
 
-class DeskproConnectorIntegrationTest extends BaseConnectorSpec {
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class DeskproConnectorIntegrationTest extends BaseConnectorSpec with GuiceOneAppPerSuite {
+  private val stubConfig = Configuration("Test.microservice.services.hmrc-deskpro.port" -> stubPort)
+
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure(stubConfig)
+      .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .in(Mode.Test)
+      .build()
 
   trait Setup {
     implicit val hc = HeaderCarrier()
-    val connector = new DeskproConnector {
-      val serviceBaseUrl = wireMockUrl
-      val http = WSHttp
-      val metrics = NoopMetrics
-    }
+
+    val connector = app.injector.instanceOf[DeskproConnector]
   }
 
   "api" should {

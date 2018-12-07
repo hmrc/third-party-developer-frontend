@@ -16,13 +16,14 @@
 
 package controllers
 
-import config.{ApplicationConfig, AuthConfigImpl}
+import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
 import domain._
 import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
 import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
 import play.api.mvc._
+import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
 
@@ -37,8 +38,8 @@ trait HeaderEnricher {
     }
 }
 
-trait LoggedInController extends BaseController with AuthElement {
-  override implicit def hc(implicit request: Request[_]): HeaderCarrier = {
+abstract class LoggedInController extends BaseController with AuthElement {
+  implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
     request match {
       case x: RequestWithAttributes[_] => enrichHeaders(carrier, Some(loggedIn(x)))
@@ -70,7 +71,13 @@ trait LoggedInController extends BaseController with AuthElement {
 
 case class ApplicationRequest[A](application: Application, role: Role, user: Developer, request: Request[A]) extends WrappedRequest[A](request)
 
-trait ApplicationController extends LoggedInController with ActionBuilders {
+abstract class ApplicationController()
+  extends LoggedInController with ActionBuilders {
+
+  val errorHandler: ErrorHandler
+  val applicationService: ApplicationService
+  implicit val appConfig: ApplicationConfig
+
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): User = request.user
 
   def adminOnStandardApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
@@ -82,7 +89,7 @@ trait ApplicationController extends LoggedInController with ActionBuilders {
     teamMemberOnApp(applicationId, Seq(notRopcOrPrivilegedAppFilter, adminIfProductionAppFilter) ++: furtherActionFunctions)(fun)
 
   def teamMemberOnStandardApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                               (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+                             (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     teamMemberOnApp(applicationId, notRopcOrPrivilegedAppFilter +: furtherActionFunctions)(fun)
 
   def adminOnApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
@@ -90,20 +97,25 @@ trait ApplicationController extends LoggedInController with ActionBuilders {
     teamMemberOnApp(applicationId, Seq(adminOnAppFilter) ++: furtherActionFunctions)(fun)
 
   def adminOnTestingApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+                       (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     teamMemberOnApp(applicationId, Seq(adminOnAppFilter, appInStateTestingFilter) ++: furtherActionFunctions)(fun)
 
   def teamMemberOnApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                               (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>
       val stackedActions = furtherActionFunctions.foldLeft(Action andThen applicationAction(applicationId, loggedIn))((a, af) => a.andThen(af))
       stackedActions.async(fun)(request)
     }
 }
 
-trait LoggedOutController extends BaseController with OptionalAuthElement {
+abstract class LoggedOutController()
+  extends BaseController() with OptionalAuthElement {
 
-  override implicit def hc(implicit request: Request[_]): HeaderCarrier = {
+  val errorHandler: ErrorHandler
+  val sessionService: SessionService
+  override implicit val appConfig: ApplicationConfig
+
+  implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
     request match {
       case x: RequestWithAttributes[_] => implicit val req = x
@@ -113,24 +125,24 @@ trait LoggedOutController extends BaseController with OptionalAuthElement {
   }
 
   def loggedOutAction(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack { implicit request =>
-      loggedIn match {
-        case Some(_) => loginSucceeded(request)
-        case None => f(request)
-      }
+    AsyncStack {
+      implicit request =>
+        loggedIn match {
+          case Some(_) => loginSucceeded(request)
+          case None => f(request)
+        }
     }
   }
 }
 
-trait BaseController extends FrontendController with HeaderEnricher with AuthConfigImpl {
-  implicit val appConfig: ApplicationConfig
+abstract class BaseController()
+  extends AuthConfigImpl with FrontendController with HeaderEnricher {
+
+  val errorHandler: ErrorHandler
+  val sessionService: SessionService
+  override implicit val appConfig: ApplicationConfig
 
   def ensureLoggedOut(implicit request: Request[_], hc: HeaderCarrier) = {
     tokenAccessor.extract(request).map(sessionService.destroy).getOrElse(Future.successful(()))
   }
-}
-
-trait WithAppConfig {
-  self: BaseController =>
-  override implicit val appConfig = ApplicationConfig
 }

@@ -16,20 +16,26 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.{Developer, UpdateProfileRequest}
+import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import service.{ApplicationService, ApplicationServiceImpl, AuditService, SessionService}
+import service.{ApplicationService, AuditService, SessionService}
 import views.html._
 
 import scala.concurrent.Future
 
-trait Profile extends LoggedInController with PasswordChange {
-
-  val connector: ThirdPartyDeveloperConnector
-  val applicationService: ApplicationService
+@Singleton
+class Profile @Inject()(applicationService: ApplicationService,
+                        val auditService: AuditService,
+                        val sessionService: SessionService,
+                        val connector: ThirdPartyDeveloperConnector,
+                        val errorHandler: ErrorHandler,
+                        implicit val appConfig: ApplicationConfig)
+  extends LoggedInController with PasswordChange {
 
   import ErrorFormBuilder.GlobalError
   import play.api.data._
@@ -73,6 +79,7 @@ trait Profile extends LoggedInController with PasswordChange {
       Ok(passwordUpdated("password changed", "Password changed", "change-password")),
       changeProfilePassword(_))
   }
+
   def requestDeletion() = loggedInAction { implicit request =>
     Future.successful(Ok(profileDeleteConfirmation(DeleteProfileForm.form)))
   }
@@ -94,11 +101,4 @@ trait Profile extends LoggedInController with PasswordChange {
       }
     )
   }
-}
-
-object Profile extends Profile with WithAppConfig {
-  override val sessionService = SessionService
-  override val connector = ThirdPartyDeveloperConnector
-  override val auditService = AuditService
-  override val applicationService = ApplicationServiceImpl
 }

@@ -21,7 +21,7 @@ import org.scalatest.Matchers
 import play.api.data.{Form, FormError}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class ApplicationDetailsValidationSpec extends UnitSpec with Matchers{
+class ApplicationDetailsValidationSpec extends UnitSpec with Matchers {
 
   "applicationNameValidator" should {
     val testForm = Form("name" -> applicationNameValidator)

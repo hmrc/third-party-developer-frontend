@@ -20,12 +20,11 @@ import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain._
+import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.Helpers._
@@ -33,16 +32,14 @@ import play.api.test.{FakeRequest, Helpers}
 import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.TestApplications._
+import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import utils.ViewHelpers._
-import org.jsoup.Jsoup
 
 import scala.concurrent.Future._
 
-class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures with WithCSRFAddToken {
+class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   implicit val materializer = fakeApplication.materializer
 
@@ -277,13 +274,14 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
   }
 
   trait Setup {
-    val underTest = new Details {
-      override val sessionService = mock[SessionService]
-      override val applicationService = mock[ApplicationService]
-      override val developerConnector = mock[ThirdPartyDeveloperConnector]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-    }
+    val underTest = new Details (
+      mock[ThirdPartyDeveloperConnector],
+      mock[AuditService],
+      mock[ApplicationService],
+      mock[SessionService],
+      mockErrorHandler,
+      mock[ApplicationConfig]
+    )
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
@@ -294,9 +292,12 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
     val newTermsUrl = Some("http://example.com/new-terms")
     val newPrivacyUrl = Some("http://example.com/new-privacy")
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-    given(underTest.applicationService.updateCheckInformation(any[String], any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+      .willReturn(Some(session))
+    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
+      .willReturn(successful(ApplicationUpdateSuccessful))
+    given(underTest.applicationService.updateCheckInformation(any[String], any[CheckInformation])(any[HeaderCarrier]))
+      .willReturn(successful(ApplicationUpdateSuccessful))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
@@ -366,7 +367,7 @@ class DetailsSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
     def changeDetailsShouldUpdateTheApplication(application: Application) = {
       givenTheApplicationExists(application)
 
-      val result = application
+      application
         .withName(newName)
         .withDescription(newDescription)
         .withTermsAndConditionsUrl(newTermsUrl)

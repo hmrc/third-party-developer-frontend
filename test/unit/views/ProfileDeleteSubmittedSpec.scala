@@ -19,6 +19,7 @@ package unit.views
 import config.ApplicationConfig
 import domain._
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
@@ -26,14 +27,17 @@ import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers._
 
-class ProfileDeleteSubmittedSpec extends UnitSpec with OneServerPerSuite {
+class ProfileDeleteSubmittedSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
+
   "Profile delete submitted page" should {
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
       val developer = Developer("Test", "Test", "Test", None)
 
-      val page = views.html.profileDeleteSubmitted.render(request, developer, ApplicationConfig, applicationMessages, "details")
+      val page = views.html.profileDeleteSubmitted.render(request, developer, appConfig, applicationMessages, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

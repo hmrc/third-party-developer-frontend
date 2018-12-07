@@ -16,19 +16,25 @@
 
 package controllers
 
-import config.ApplicationGlobal
+import config.{ApplicationConfig, ErrorHandler}
 import domain.{Application, CheckInformation, TermsOfUseAgreement, TermsOfUseStatus}
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Action
-import service.{ApplicationServiceImpl, SessionService}
+import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import views.html.partials
 
 import scala.concurrent.Future
 
-trait TermsOfUse extends ApplicationController with ApplicationHelper {
+@Singleton
+class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
+                           override val sessionService: SessionService,
+                           override val applicationService: ApplicationService,
+                           override implicit val appConfig: ApplicationConfig)
+  extends ApplicationController() with ApplicationHelper {
 
   def termsOfUsePartial() = Action {
     Ok(partials.termsOfUse())
@@ -36,7 +42,7 @@ trait TermsOfUse extends ApplicationController with ApplicationHelper {
 
   def termsOfUse(id: String) = adminIfStandardProductionApp(id) { implicit request =>
     if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
-      Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
+      Future.successful(BadRequest(errorHandler.badRequestTemplate))
     } else {
       Future.successful(Ok(views.html.termsOfUse(request.application, TermsOfUseForm.form)))
     }
@@ -47,12 +53,14 @@ trait TermsOfUse extends ApplicationController with ApplicationHelper {
     def handleValidForm(app: Application, form: TermsOfUseForm) = {
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {
         val information = app.checkInformation.getOrElse(CheckInformation())
-        val updatedInformation = information.copy(termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.user.email, DateTimeUtils.now, appConfig.currentTermsOfUseVersion))
+        val updatedInformation = information.copy(
+          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(
+            request.user.email, DateTimeUtils.now, appConfig.currentTermsOfUseVersion))
 
         applicationService.updateCheckInformation(app.id, updatedInformation)
           .map(_ => Redirect(routes.Details.details(app.id)))
       } else {
-        Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
+        Future.successful(BadRequest(errorHandler.badRequestTemplate))
       }
     }
 
@@ -64,9 +72,4 @@ trait TermsOfUse extends ApplicationController with ApplicationHelper {
       invalidForm => handleInvalidForm(request.application, invalidForm),
       validForm => handleValidForm(request.application, validForm))
   }
-}
-
-object TermsOfUse extends TermsOfUse with WithAppConfig {
-  override val sessionService = SessionService
-  override val applicationService = ApplicationServiceImpl
 }

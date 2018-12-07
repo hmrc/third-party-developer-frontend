@@ -21,6 +21,7 @@ import connectors._
 import domain.APIStatus._
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import domain._
+import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.time.DateTimeUtils
@@ -28,23 +29,20 @@ import uk.gov.hmrc.time.DateTimeUtils
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ApplicationService {
-
-  val connectorWrapper: ConnectorsWrapper
-
-  val subscriptionFieldsService: SubscriptionFieldsService
-
-  val deskproConnector: DeskproConnector
-  val applicationConfig: ApplicationConfig
-  val developerConnector: ThirdPartyDeveloperConnector
-
-  val auditService: AuditService
+@Singleton
+class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
+                                   subscriptionFieldsService: SubscriptionFieldsService,
+                                   deskproConnector: DeskproConnector,
+                                   applicationConfig: ApplicationConfig,
+                                   developerConnector: ThirdPartyDeveloperConnector,
+                                   auditService: AuditService) {
 
   def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier) =
     connectorWrapper.connectorsForEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
 
   def update(updateApplicationRequest: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    connectorWrapper.connectorsForEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
+    connectorWrapper.connectorsForEnvironment(updateApplicationRequest.environment)
+      .thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
 
   def fetchByApplicationId(id: String)(implicit hc: HeaderCarrier): Future[Application] = {
     connectorWrapper.fetchApplicationById(id)
@@ -102,7 +100,8 @@ trait ApplicationService {
 
     for {
       subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
-      subscription = subscriptions.find(sub => sub.name == apiName && sub.context == apiContext && sub.versions.exists(v => v.version.version == apiVersion && v.subscribed))
+      subscription = subscriptions
+        .find(sub => sub.name == apiName && sub.context == apiContext && sub.versions.exists(v => v.version.version == apiVersion && v.subscribed))
     } yield subscription.isDefined
   }
 
@@ -110,7 +109,7 @@ trait ApplicationService {
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.addClientSecrets(id, ClientSecretRequest("")))
   }
 
-  def deleteClientSecrets(appId: String, clientSecrets: Seq[String])(implicit hc: HeaderCarrier):Future[ApplicationUpdateSuccessful] = {
+  def deleteClientSecrets(appId: String, clientSecrets: Seq[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forApplication(appId).flatMap(_.thirdPartyApplicationConnector.deleteClientSecrets(appId, DeleteClientSecretsRequest(clientSecrets)))
   }
 
@@ -179,7 +178,9 @@ trait ApplicationService {
     } yield response
   }
 
-  def removeTeamMember(app: Application, teamMemberToRemove: String, requestingEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def removeTeamMember(app: Application,
+                       teamMemberToRemove: String,
+                       requestingEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
 
     val otherAdminEmails = app.collaborators
       .filter(_.role == Role.ADMINISTRATOR)
@@ -238,13 +239,4 @@ trait ApplicationService {
       _ <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email, "timestamp" -> DateTimeUtils.now.toString))
     } yield ticketResponse
   }
-}
-
-object ApplicationServiceImpl extends ApplicationService {
-  override val deskproConnector = DeskproConnector
-  override val applicationConfig = ApplicationConfig
-  override val developerConnector = ThirdPartyDeveloperConnector
-  override val subscriptionFieldsService: SubscriptionFieldsService = SubscriptionFieldsService
-  override val connectorWrapper: ConnectorsWrapper = ConnectorsWrapper
-  override val auditService: AuditService = AuditService
 }

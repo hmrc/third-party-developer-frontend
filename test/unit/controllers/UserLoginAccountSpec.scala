@@ -18,7 +18,7 @@ package unit.controllers
 
 import java.util.UUID
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import domain._
 import org.mockito.BDDMockito.given
@@ -49,11 +49,10 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
   val userPassword = "Password1!"
 
   trait Setup {
-    val underTest = new UserLoginAccount {
-      override val sessionService = mock[SessionService]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-    }
+    val underTest = new UserLoginAccount(mock[AuditService],
+      mock[ErrorHandler],
+      mock[SessionService],
+      mock[ApplicationConfig])
 
     def mockAuthenticate(email: String, password: String, result: Future[Session]) =
       given(underTest.sessionService.authenticate(Matchers.eq(email), Matchers.eq(password))(any[HeaderCarrier])).willReturn(result)

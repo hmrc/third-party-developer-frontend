@@ -20,31 +20,30 @@ import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Registration
 import domain.{Developer, RegistrationSuccessful}
-import org.jsoup.Jsoup
 import org.mockito.BDDMockito._
 import org.mockito.Matchers._
 import org.mockito.{ArgumentCaptor, Matchers}
-import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.SessionService
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.http.HeaderCarrier
 
 
-class RegistrationSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class RegistrationSpec extends BaseControllerSpec {
 
   implicit val materializer = fakeApplication.materializer
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   var userPassword = "Password1!"
 
   trait Setup {
-    val underTest = new Registration {
-      override val connector = mock[ThirdPartyDeveloperConnector]
-      override val sessionService = mock[SessionService]
-      override val appConfig = mock[ApplicationConfig]
-    }
+    val underTest = new Registration(
+      mock[SessionService],
+      mock[ThirdPartyDeveloperConnector],
+      mockErrorHandler,
+      mock[ApplicationConfig]
+    )
+
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
   }
 
