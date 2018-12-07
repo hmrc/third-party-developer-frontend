@@ -61,7 +61,7 @@ trait MFA extends LoggedInController {
       enableMFAService.enableMfa(loggedIn.email, form.totpCode).map(r => {
         r.totpVerified match{
           case true => Redirect(routes.MFA.show2SVCompletedPage())
-          case _ => BadRequest(views.html.protectAccountAccessCode(Enable2SVForm.form.fill(form).withError("totp", "Your access code is incorrect")))
+          case _ => BadRequest(views.html.protectAccountAccessCode(Enable2SVForm.form.fill(form).withError("totp", "You have entered an incorrect access code")))
         }
       })
 
