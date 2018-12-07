@@ -109,7 +109,7 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
       val result = await(addToken(underTest.enable2SV())(request))
 
       status(result) shouldBe BAD_REQUEST
-      assertIncludesOneError(result, "Provide a valid access code")
+      assertIncludesOneError(result, "Provide an access code")
     }
 
     "return error when verification fails" in new SetupFailedVerification {
@@ -118,7 +118,7 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
       val result = await(addToken(underTest.enable2SV())(request))
 
       status(result) shouldBe BAD_REQUEST
-      assertIncludesOneError(result, "Access code incorrect")
+      assertIncludesOneError(result, "Your access code is incorrect")
     }
 
     "redirect to 2SV completed action" in new SetupSuccessfulVerification {
