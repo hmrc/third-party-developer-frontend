@@ -71,6 +71,16 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
     }
   }
 
+  trait SetupUnprotectedAccount extends Setup {
+    given(underTest.connector.fetchDeveloper(mockEq(loggedInUser.email))(any[HeaderCarrier])).
+      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None)))
+  }
+
+  trait SetupProtectedAccount extends Setup {
+    given(underTest.connector.fetchDeveloper(mockEq(loggedInUser.email))(any[HeaderCarrier])).
+      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None, Some(true))))
+  }
+
   trait SetupSuccessfulStart2SV extends Setup {
     given(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).willReturn(otpUri)
     given(underTest.qrCode.generateDataImageBase64(otpUri.toString)).willReturn(qrImage)
@@ -99,6 +109,28 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
       val dom = Jsoup.parse(bodyOf(result))
       dom.getElementById("secret").html() shouldBe "abcd efgh"
       dom.getElementById("qrCode").attr("src") shouldBe qrImage
+    }
+  }
+
+  "show2SV" should {
+    "return protect account page for user without MFA enabled" in new SetupUnprotectedAccount {
+      val request = FakeRequest().
+        withLoggedIn(underTest)(sessionId)
+
+      val result = await(addToken(underTest.show2SVPage())(request))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Protect your Developer Hub account by adding 2-step verification")
+    }
+
+    "return protected account page for user with MFA enabled" in new SetupProtectedAccount {
+      val request = FakeRequest().
+        withLoggedIn(underTest)(sessionId)
+
+      val result = await(addToken(underTest.show2SVPage())(request))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Your Developer account is currently protected with 2-step verification")
     }
   }
 
