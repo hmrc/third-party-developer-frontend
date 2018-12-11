@@ -20,7 +20,7 @@ import java.net.URI
 
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
-import controllers.{MFA, routes}
+import controllers.{ProtectAccount, routes}
 import domain.{Developer, Session}
 import org.jsoup.Jsoup
 import org.mockito.BDDMockito._
@@ -40,7 +40,7 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
 
-class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
+class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
   implicit val materializer = fakeApplication.materializer
 
   trait Setup {
@@ -52,7 +52,7 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
     val otpUri = new URI("OTPURI")
     val correctCode = "123123"
 
-    val underTest = new MFA {
+    val underTest = new ProtectAccount {
       override val connector = mock[ThirdPartyDeveloperConnector]
       override val appConfig = mock[ApplicationConfig]
       override val sessionService = mock[SessionService]
@@ -67,7 +67,7 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
       FakeRequest().
         withLoggedIn(underTest)(sessionId).
         withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken).
-        withFormUrlEncodedBody("totp" -> code)
+        withFormUrlEncodedBody("accessCode" -> code)
     }
   }
 
@@ -98,12 +98,12 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
   }
 
 
-  "start2SVSetup" should {
+  "getQrCode" should {
     "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV {
       val request = FakeRequest().
         withLoggedIn(underTest)(sessionId)
 
-      val result = await(underTest.start2SVSetup()(request))
+      val result = await(underTest.getQrCode()(request))
 
       status(result) shouldBe 200
       val dom = Jsoup.parse(bodyOf(result))
@@ -112,12 +112,12 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
     }
   }
 
-  "show2SV" should {
+  "getProtectAccount" should {
     "return protect account page for user without MFA enabled" in new SetupUnprotectedAccount {
       val request = FakeRequest().
         withLoggedIn(underTest)(sessionId)
 
-      val result = await(addToken(underTest.show2SVPage())(request))
+      val result = await(addToken(underTest.getProtectAccount())(request))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Protect your Developer Hub account by adding 2-step verification")
@@ -127,18 +127,18 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
       val request = FakeRequest().
         withLoggedIn(underTest)(sessionId)
 
-      val result = await(addToken(underTest.show2SVPage())(request))
+      val result = await(addToken(underTest.getProtectAccount())(request))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Your Developer account is currently protected with 2-step verification")
     }
   }
 
-  "enable2SV" should {
-    "return error when totpCode in invalid format" in new SetupSuccessfulStart2SV {
+  "protectAccount" should {
+    "return error when access code in invalid format" in new SetupSuccessfulStart2SV {
       val request = enableMFARequest("abc")
 
-      val result = await(addToken(underTest.enable2SV())(request))
+      val result = await(addToken(underTest.protectAccount())(request))
 
       status(result) shouldBe BAD_REQUEST
       assertIncludesOneError(result, "You have entered an invalid access code")
@@ -147,16 +147,16 @@ class MFASpec extends UnitSpec with MockitoSugar with WithFakeApplication with W
     "return error when verification fails" in new SetupFailedVerification {
       val request = enableMFARequest(correctCode)
 
-      val result = await(addToken(underTest.enable2SV())(request))
+      val result = await(addToken(underTest.protectAccount())(request))
 
       status(result) shouldBe BAD_REQUEST
       assertIncludesOneError(result, "You have entered an incorrect access code")
     }
 
-    "redirect to 2SV completed action" in new SetupSuccessfulVerification {
+    "redirect to getProtectAccountCompltedAction" in new SetupSuccessfulVerification {
       val request = enableMFARequest(correctCode)
 
-      val result = await(addToken(underTest.enable2SV())(request))
+      val result = await(addToken(underTest.protectAccount())(request))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.MFA.show2SVCompletedPage().url)

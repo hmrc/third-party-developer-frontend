@@ -26,11 +26,11 @@ GET         /profile                                                            
 GET         /profile/change                                                             controllers.Profile.changeProfile
 POST        /profile                                                                    controllers.Profile.updateProfile
 
-GET         /profile/protect-account                                                    controllers.MFA.show2SVPage
-GET         /profile/protect-account/setup                                              controllers.MFA.start2SVSetup
-GET         /profile/protect-account/access-code                                        controllers.MFA.show2SVAccessCodePage
-GET         /profile/protect-account/complete                                           controllers.MFA.show2SVCompletedPage
-POST        /profile/protect-account/enable                                             controllers.MFA.enable2SV
+GET         /profile/protect-account                                                    controllers.ProtectAccount.getProtectAccount
+GET         /profile/protect-account/setup                                              controllers.ProtectAccount.getQrCode
+GET         /profile/protect-account/access-code                                        controllers.ProtectAccount.getAccessCodePage
+GET         /profile/protect-account/complete                                           controllers.ProtectAccount.getProtectAccountCompletedPage
+POST        /profile/protect-account/enable                                             controllers.ProtectAccount.protectAccount
 
 GET         /profile/password                                                           controllers.Profile.showPasswordPage
 POST        /profile/password                                                           controllers.Profile.updatePassword
