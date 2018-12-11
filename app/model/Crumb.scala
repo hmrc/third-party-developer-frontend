@@ -31,7 +31,7 @@ object Crumb {
     Crumb("View all applications",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-manage-app"))
 
   val secureAccount =
-    Crumb("Protect account",s"${routes.MFA.show2SVPage}", Some("data-breadcrumb-protect-account"))
+    Crumb("Protect account",s"${routes.ProtectAccount.getProtectAccount}", Some("data-breadcrumb-protect-account"))
 
   def application(application: Application) =
     Crumb(s"${application.name}", "", Some("data-breadcrumb-app-name"))

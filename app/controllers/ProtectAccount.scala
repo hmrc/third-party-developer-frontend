@@ -17,7 +17,6 @@
 package controllers
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.Developer
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
@@ -27,14 +26,14 @@ import service.{EnableMFAService, SessionService}
 
 import scala.concurrent.Future
 
-trait MFA extends LoggedInController {
+trait ProtectAccount extends LoggedInController {
 
   val connector: ThirdPartyDeveloperConnector
   val qrCode: QRCode
   val otpAuthUri: OTPAuthURI
   val enableMFAService: EnableMFAService
 
-  def start2SVSetup() = loggedInAction { implicit request =>
+  def getQrCode() = loggedInAction { implicit request =>
     connector.createMfaSecret(loggedIn.email).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
@@ -42,7 +41,7 @@ trait MFA extends LoggedInController {
     })
   }
 
-  def show2SVPage() = loggedInAction { implicit request =>
+  def getProtectAccount() = loggedInAction { implicit request =>
     connector.fetchDeveloper(loggedIn.email).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
         case true => Ok(views.html.protectedAccount())
@@ -51,23 +50,23 @@ trait MFA extends LoggedInController {
     })
   }
 
-  def show2SVAccessCodePage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccountAccessCode(Enable2SVForm.form)))
+  def getAccessCodePage() = loggedInAction { implicit request =>
+    Future.successful(Ok(views.html.protectAccountAccessCode(ProtectAccountForm.form)))
   }
 
-  def show2SVCompletedPage() = loggedInAction { implicit request =>
+  def getProtectAccountCompletedPage() = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.protectAccountCompleted()))
   }
 
-  def enable2SV() = loggedInAction { implicit request =>
-    Enable2SVForm.form.bindFromRequest.fold(form => {
+  def protectAccount() = loggedInAction { implicit request =>
+    ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(views.html.protectAccountAccessCode(form)))
     },
     form => {
-      enableMFAService.enableMfa(loggedIn.email, form.totpCode).map(r => {
+      enableMFAService.enableMfa(loggedIn.email, form.accessCode).map(r => {
         r.totpVerified match{
-          case true => Redirect(routes.MFA.show2SVCompletedPage())
-          case _ => BadRequest(views.html.protectAccountAccessCode(Enable2SVForm.form.fill(form).withError("totp", "You have entered an incorrect access code")))
+          case true => Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
+          case _ => BadRequest(views.html.protectAccountAccessCode(ProtectAccountForm.form.fill(form).withError("totp", "You have entered an incorrect access code")))
         }
       })
 
@@ -75,7 +74,7 @@ trait MFA extends LoggedInController {
   }
 }
 
-object MFA extends MFA with WithAppConfig {
+object ProtectAccount extends ProtectAccount with WithAppConfig {
   override val sessionService = SessionService
   override val connector = ThirdPartyDeveloperConnector
   private val scale = 7
@@ -84,13 +83,13 @@ object MFA extends MFA with WithAppConfig {
   override val enableMFAService = EnableMFAService
 }
 
-final case class Enable2SVForm(totpCode: String)
+final case class ProtectAccountForm(accessCode: String)
 
-object Enable2SVForm {
-  def form: Form[Enable2SVForm] = Form(
+object ProtectAccountForm {
+  def form: Form[ProtectAccountForm] = Form(
     mapping(
-      "totp" -> text.verifying(FormKeys.totpInvalidKey, s => s.matches("^[0-9]{6}$"))
-    )(Enable2SVForm.apply)(Enable2SVForm.unapply)
+      "accessCode" -> text.verifying(FormKeys.totpInvalidKey, s => s.matches("^[0-9]{6}$"))
+    )(ProtectAccountForm.apply)(ProtectAccountForm.unapply)
   )
 }
 

@@ -19,7 +19,7 @@
 @import model.Crumb
 
 @import config.ApplicationConfig
-@(form: Form[controllers.Enable2SVForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: Developer, applicationConfig: ApplicationConfig)
+@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: Developer, applicationConfig: ApplicationConfig)
 
 @devMain(
     title = "Enter your access code",
@@ -37,19 +37,19 @@
     <div>
         @errorSummary(form)
 
-        @helper.form(action = controllers.routes.MFA.enable2SV){
+        @helper.form(action = controllers.routes.ProtectAccount.protectAccount()){
             @helper.CSRF.formField
             @fieldError(form.errors, "invalidCredentials", true)
             <div>
                 <p>This is the 6 digit code from your authentication app.</p>
-                <div class="form-group @if(form.errors("totp").nonEmpty){form-group-error form-field--error}">
+                <div class="form-group @if(form.errors("accessCode").nonEmpty){form-group-error form-field--error}">
                     <label class="form-label-bold" for="totp" id="totp-label">Access code</label>
 
-                    @fieldError(form.errors, "totp", true)
-                    <input type="text" autocomplete="off" id="totp"
-                    name="totp"
-                    value="@form.data.getOrElse("totp", "")"
-                    class="form-control @if(form.errors("totp").nonEmpty){form-control-error}"
+                    @fieldError(form.errors, "accessCode", true)
+                    <input type="text" autocomplete="off" id="accessCode"
+                    name="accessCode"
+                    value="@form.data.getOrElse("accessCode", "")"
+                    class="form-control @if(form.errors("accessCode").nonEmpty){form-control-error}"
                     aria-required="true"/>
                 </div>
             </div>
