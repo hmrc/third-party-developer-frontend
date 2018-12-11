@@ -26,7 +26,7 @@
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Enter your access code"),
-        Crumb.secureAccount,
+        Crumb.protectAccount,
         Crumb.home
     )
 ) {
@@ -43,7 +43,7 @@
             <div>
                 <p>This is the 6 digit code from your authentication app.</p>
                 <div class="form-group @if(form.errors("accessCode").nonEmpty){form-group-error form-field--error}">
-                    <label class="form-label-bold" for="totp" id="totp-label">Access code</label>
+                    <label class="form-label-bold" for="accessCode" id="access-code-label">Access code</label>
 
                     @fieldError(form.errors, "accessCode", true)
                     <input type="text" autocomplete="off" id="accessCode"
