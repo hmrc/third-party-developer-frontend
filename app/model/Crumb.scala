@@ -30,7 +30,7 @@ object Crumb {
   val viewAllApplications =
     Crumb("View all applications",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-manage-app"))
 
-  val secureAccount =
+  val protectAccount =
     Crumb("Protect account",s"${routes.ProtectAccount.getProtectAccount}", Some("data-breadcrumb-protect-account"))
 
   def application(application: Application) =

@@ -66,7 +66,7 @@ trait ProtectAccount extends LoggedInController {
       enableMFAService.enableMfa(loggedIn.email, form.accessCode).map(r => {
         r.totpVerified match{
           case true => Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
-          case _ => BadRequest(views.html.protectAccountAccessCode(ProtectAccountForm.form.fill(form).withError("totp", "You have entered an incorrect access code")))
+          case _ => BadRequest(views.html.protectAccountAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
         }
       })
 
@@ -88,7 +88,7 @@ final case class ProtectAccountForm(accessCode: String)
 object ProtectAccountForm {
   def form: Form[ProtectAccountForm] = Form(
     mapping(
-      "accessCode" -> text.verifying(FormKeys.totpInvalidKey, s => s.matches("^[0-9]{6}$"))
+      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$"))
     )(ProtectAccountForm.apply)(ProtectAccountForm.unapply)
   )
 }

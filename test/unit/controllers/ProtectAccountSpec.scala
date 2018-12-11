@@ -63,7 +63,7 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
 
-    def enableMFARequest(code: String) = {
+    def protectAccountRequest(code: String) = {
       FakeRequest().
         withLoggedIn(underTest)(sessionId).
         withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken).
@@ -136,7 +136,7 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
 
   "protectAccount" should {
     "return error when access code in invalid format" in new SetupSuccessfulStart2SV {
-      val request = enableMFARequest("abc")
+      val request = protectAccountRequest("abc")
 
       val result = await(addToken(underTest.protectAccount())(request))
 
@@ -145,7 +145,7 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
     }
 
     "return error when verification fails" in new SetupFailedVerification {
-      val request = enableMFARequest(correctCode)
+      val request = protectAccountRequest(correctCode)
 
       val result = await(addToken(underTest.protectAccount())(request))
 
@@ -153,13 +153,13 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
       assertIncludesOneError(result, "You have entered an incorrect access code")
     }
 
-    "redirect to getProtectAccountCompltedAction" in new SetupSuccessfulVerification {
-      val request = enableMFARequest(correctCode)
+    "redirect to getProtectAccountCompletedAction" in new SetupSuccessfulVerification {
+      val request = protectAccountRequest(correctCode)
 
       val result = await(addToken(underTest.protectAccount())(request))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.MFA.show2SVCompletedPage().url)
+      redirectLocation(result) shouldBe Some(routes.ProtectAccount.getProtectAccountCompletedPage().url)
     }
   }
 
