@@ -17,6 +17,7 @@
 package controllers
 
 import connectors.ThirdPartyDeveloperConnector
+import domain.Developer
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
@@ -42,7 +43,12 @@ trait MFA extends LoggedInController {
   }
 
   def show2SVPage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccount()))
+    connector.fetchDeveloper(loggedIn.email).map(dev => {
+      dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
+        case true => Ok(views.html.protectedAccount())
+        case false => Ok(views.html.protectAccount())
+      }
+    })
   }
 
   def show2SVAccessCodePage() = loggedInAction { implicit request =>
