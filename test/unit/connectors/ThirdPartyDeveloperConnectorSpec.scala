@@ -23,15 +23,15 @@ import domain._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import play.api.http.ContentTypes.JSON
+import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status
+import play.api.http.Status.NO_CONTENT
 import play.api.libs.json.Json
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestPayloadEncryptor
-import play.api.http.Status.{NO_CONTENT, NOT_FOUND}
-import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.CONTENT_TYPE
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

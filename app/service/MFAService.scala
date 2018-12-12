@@ -21,20 +21,28 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.Future.successful
 
-trait EnableMFAService {
+trait MFAService {
   val tpdConnector: ThirdPartyDeveloperConnector
 
-  def enableMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[EnableMFAResponse] = {
+  def enableMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
     tpdConnector.verifyMfa(email, totpCode).map(totpSuccessful => {
       if (totpSuccessful) { tpdConnector.enableMfa(email) }
-      EnableMFAResponse(totpSuccessful)
+      MFAResponse(totpSuccessful)
     })
+  }
+
+  def removeMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
+    tpdConnector.verifyMfa(email, totpCode) flatMap {
+      case true => tpdConnector.removeMfa(email).map(_ => MFAResponse(true))
+      case _ => successful(MFAResponse(false))
+    }
   }
 }
 
-case class EnableMFAResponse(totpVerified: Boolean)
+case class MFAResponse(totpVerified: Boolean)
 
-object EnableMFAService extends EnableMFAService {
+object MFAService extends MFAService {
   override val tpdConnector = ThirdPartyDeveloperConnector
 }

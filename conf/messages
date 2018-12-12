@@ -134,6 +134,8 @@ developer.delete.error.required.field=Tell us if you want us to delete your acco
 
 remove.team.member.confirmation.no.choice.field = Tell us if you want to delete this team member
 
+remove.2SV.confirmation.no.choice.field = Tell us if you want us to remove 2SV
+
 verify.password.error.required.field=Invalid password
 verify.password.error.required.global=Invalid password
 

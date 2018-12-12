@@ -22,7 +22,8 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages.Implicits._
 import qr.{OTPAuthURI, QRCode}
-import service.{EnableMFAService, SessionService}
+import service.{MFAService, SessionService}
+import views.html.protectAccountRemovalAccessCode
 
 import scala.concurrent.Future
 
@@ -31,7 +32,7 @@ trait ProtectAccount extends LoggedInController {
   val connector: ThirdPartyDeveloperConnector
   val qrCode: QRCode
   val otpAuthUri: OTPAuthURI
-  val enableMFAService: EnableMFAService
+  val mfaService: MFAService
 
   def getQrCode() = loggedInAction { implicit request =>
     connector.createMfaSecret(loggedIn.email).map(secret => {
@@ -63,7 +64,7 @@ trait ProtectAccount extends LoggedInController {
       Future.successful(BadRequest(views.html.protectAccountAccessCode(form)))
     },
     form => {
-      enableMFAService.enableMfa(loggedIn.email, form.accessCode).map(r => {
+      mfaService.enableMfa(loggedIn.email, form.accessCode).map(r => {
         r.totpVerified match{
           case true => Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
           case _ => BadRequest(views.html.protectAccountAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
@@ -72,6 +73,45 @@ trait ProtectAccount extends LoggedInController {
 
     })
   }
+
+  def get2SVRemovalConfirmationPage() = loggedInAction { implicit request =>
+    Future.successful(Ok(views.html.protectAccountRemovalConfirmation(Remove2SVConfirmForm.form)))
+  }
+
+  def confirm2SVRemoval() = loggedInAction { implicit request =>
+    Remove2SVConfirmForm.form.bindFromRequest.fold(form => {
+      Future.successful(BadRequest(views.html.protectAccountRemovalConfirmation(form)))
+    },
+      form => {
+        form.removeConfirm match {
+          case Some("Yes") => Future.successful(Redirect(routes.ProtectAccount.get2SVRemovalAccessCodePage()))
+          case _ => Future.successful(Redirect(routes.ProtectAccount.getProtectAccount()))
+        }
+      })
+  }
+
+  def get2SVRemovalAccessCodePage() = loggedInAction { implicit request =>
+    Future.successful(Ok(protectAccountRemovalAccessCode(ProtectAccountForm.form)))
+  }
+
+  def remove2SV() = loggedInAction { implicit request =>
+    ProtectAccountForm.form.bindFromRequest.fold(form => {
+      Future.successful(BadRequest(protectAccountRemovalAccessCode(form)))
+    },
+      form => {
+        mfaService.removeMfa(loggedIn.email, form.accessCode).map(r =>
+          r.totpVerified match {
+            case true => Redirect(routes.ProtectAccount.get2SVRemovalCompletePage())
+            case _ => BadRequest(protectAccountRemovalAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
+          }
+        )
+    })
+  }
+
+  def get2SVRemovalCompletePage() = loggedInAction { implicit request =>
+    Future.successful(Ok(views.html.protectAccountRemovalComplete()))
+  }
+
 }
 
 object ProtectAccount extends ProtectAccount with WithAppConfig {
@@ -80,7 +120,7 @@ object ProtectAccount extends ProtectAccount with WithAppConfig {
   private val scale = 7
   override val qrCode = QRCode(scale)
   override val otpAuthUri = OTPAuthURI
-  override val enableMFAService = EnableMFAService
+  override val mfaService = MFAService
 }
 
 final case class ProtectAccountForm(accessCode: String)
