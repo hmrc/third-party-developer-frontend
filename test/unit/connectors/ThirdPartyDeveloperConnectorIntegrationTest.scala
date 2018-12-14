@@ -20,9 +20,10 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import config.WSHttp
 import connectors.{PayloadEncryption, ThirdPartyDeveloperConnector}
 import domain._
+import play.api.http.Status._
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
 import uk.gov.hmrc.play.http.metrics.NoopMetrics
 import utils.TestPayloadEncryptor
-import uk.gov.hmrc.http.{ HeaderCarrier, Upstream5xxResponse }
 
 class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with TestPayloadEncryptor {
 
@@ -51,7 +52,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
         .withRequestBody(equalToJson(encryptedLoginRequest))
         .willReturn(
           aResponse()
-            .withStatus(200)
+            .withStatus(OK)
             .withHeader("Content-Type", "application/json")
             .withBody(
               s"""
@@ -79,7 +80,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
         .withRequestBody(equalToJson(encryptedLoginRequest))
         .willReturn(
           aResponse()
-            .withStatus(401)
+            .withStatus(UNAUTHORIZED)
             .withHeader("Content-Type", "application/json")
         ))
 
@@ -92,7 +93,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
         .withRequestBody(equalToJson(encryptedLoginRequest))
         .willReturn(
           aResponse()
-            .withStatus(423)
+            .withStatus(LOCKED)
             .withHeader("Content-Type", "application/json")
         ))
 
@@ -105,7 +106,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
         .withRequestBody(equalToJson(encryptedLoginRequest))
         .willReturn(
           aResponse()
-            .withStatus(403)
+            .withStatus(FORBIDDEN)
             .withHeader("Content-Type", "application/json")
         ))
 
@@ -118,7 +119,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
         .withRequestBody(equalToJson(encryptedLoginRequest))
         .willReturn(
           aResponse()
-            .withStatus(500)
+            .withStatus(INTERNAL_SERVER_ERROR)
         ))
 
       intercept[Upstream5xxResponse]{await(underTest.createSession(LoginRequest(userEmail, userPassword)))}
@@ -132,7 +133,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
       stubFor(get(urlPathEqualTo(s"/session/$sessionId"))
         .willReturn(
           aResponse()
-            .withStatus(200)
+            .withStatus(OK)
             .withHeader("Content-Type", "application/json")
             .withBody(
               s"""{
@@ -155,7 +156,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
       stubFor(get(urlPathEqualTo(s"/session/$sessionId"))
         .willReturn(
           aResponse()
-            .withStatus(404)
+            .withStatus(NOT_FOUND)
         ))
 
 
@@ -166,11 +167,36 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
       stubFor(get(urlPathEqualTo(s"/session/$sessionId"))
         .willReturn(
           aResponse()
-            .withStatus(500)
+            .withStatus(INTERNAL_SERVER_ERROR)
         ))
 
       intercept[Upstream5xxResponse] {await(underTest.fetchSession(sessionId))}
     }
 
+  }
+
+  "removeMfa" should {
+    "return OK on successful removal" in new Setup {
+      val email = "test.user@example.com"
+      stubFor(delete(urlPathEqualTo(s"/developer/$email/mfa")).willReturn(aResponse().withStatus(OK)))
+
+      val result: Int = await(underTest.removeMfa(email))
+
+      result shouldBe OK
+    }
+
+    "throw NotFoundException if user not found" in new Setup {
+      val email = "invalid.user@example.com"
+      stubFor(delete(urlPathEqualTo(s"/developer/$email/mfa")).willReturn(aResponse().withStatus(NOT_FOUND)))
+
+      intercept[NotFoundException](await(underTest.removeMfa(email)))
+    }
+
+    "throw Upstream5xxResponse if it failed to remove MFA" in new Setup {
+      val email = "test.user@example.com"
+      stubFor(delete(urlPathEqualTo(s"/developer/$email/mfa")).willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
+
+      intercept[Upstream5xxResponse](await(underTest.removeMfa(email)))
+    }
   }
 }

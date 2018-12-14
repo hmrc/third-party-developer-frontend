@@ -31,6 +31,12 @@ GET         /profile/protect-account/setup                                      
 GET         /profile/protect-account/access-code                                        controllers.ProtectAccount.getAccessCodePage
 GET         /profile/protect-account/complete                                           controllers.ProtectAccount.getProtectAccountCompletedPage
 POST        /profile/protect-account/enable                                             controllers.ProtectAccount.protectAccount
+GET         /profile/protect-account/confirm-removal                                    controllers.ProtectAccount.get2SVRemovalConfirmationPage
+POST        /profile/protect-account/confirm-removal                                    controllers.ProtectAccount.confirm2SVRemoval
+GET         /profile/protect-account/remove                                             controllers.ProtectAccount.get2SVRemovalAccessCodePage
+POST        /profile/protect-account/remove                                             controllers.ProtectAccount.remove2SV
+GET         /profile/protect-account/remove/complete                                    controllers.ProtectAccount.get2SVRemovalCompletePage
+
 
 GET         /profile/password                                                           controllers.Profile.showPasswordPage
 POST        /profile/password                                                           controllers.Profile.updatePassword

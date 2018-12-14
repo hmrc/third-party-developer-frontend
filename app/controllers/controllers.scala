@@ -124,6 +124,7 @@ package object controllers {
     val unsubscribeConfirmationNoChoiceKey = "unsubscribe.confirmation.no.choice.field"
     val changeSubscriptionNoChoiceKey = "subscription.change.no.choice.field"
     val accountDeleteConfirmationRequiredKey = "developer.delete.error.required.field"
+    val remove2SVConfirmNoChoiceKey = "remove.2SV.confirmation.no.choice.field"
 
     val deleteRedirectConfirmationNoChoiceKey = "delete.redirect.confirmation.no.choice.field"
 

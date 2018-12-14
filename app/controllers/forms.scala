@@ -421,3 +421,14 @@ object ChangeRedirectForm {
     )(ChangeRedirectForm.apply)(ChangeRedirectForm.unapply)
   )
 }
+
+final case class Remove2SVConfirmForm(removeConfirm: Option[String] = Some(""))
+
+object Remove2SVConfirmForm {
+
+  def form: Form[Remove2SVConfirmForm] = Form(
+    mapping(
+      "removeConfirm" -> optional(text).verifying(FormKeys.remove2SVConfirmNoChoiceKey, s => s.isDefined)
+    )(Remove2SVConfirmForm.apply)(Remove2SVConfirmForm.unapply)
+  )
+}

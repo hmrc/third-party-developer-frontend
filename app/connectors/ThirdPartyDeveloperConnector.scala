@@ -203,6 +203,11 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
       http.PUT(s"$serviceBaseUrl/developer/$email/mfa/enable", "").map(status)
     }
   }
+
+  def removeMfa(email: String)(implicit hc: HeaderCarrier): Future[Int] =
+    metrics.record(api) {
+      http.DELETE(s"$serviceBaseUrl/developer/$email/mfa").map(status)
+    }
 }
 
 object ThirdPartyDeveloperConnector extends ThirdPartyDeveloperConnector {
