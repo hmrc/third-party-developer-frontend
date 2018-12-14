@@ -27,10 +27,10 @@ trait MFAService {
   val tpdConnector: ThirdPartyDeveloperConnector
 
   def enableMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
-    tpdConnector.verifyMfa(email, totpCode).map(totpSuccessful => {
-      if (totpSuccessful) { tpdConnector.enableMfa(email) }
-      MFAResponse(totpSuccessful)
-    })
+    tpdConnector.verifyMfa(email, totpCode) flatMap {
+      case true => tpdConnector.enableMfa(email).map(_ => MFAResponse(true))
+      case _ => successful(MFAResponse(false))
+    }
   }
 
   def removeMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
@@ -44,5 +44,5 @@ trait MFAService {
 case class MFAResponse(totpVerified: Boolean)
 
 object MFAService extends MFAService {
-  override val tpdConnector = ThirdPartyDeveloperConnector
+  override val tpdConnector: ThirdPartyDeveloperConnector = ThirdPartyDeveloperConnector
 }
