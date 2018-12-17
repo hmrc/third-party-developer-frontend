@@ -72,7 +72,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       requestForm.fold(
         errors => Future.successful(BadRequest(signIn("Sign in", errors))),
         login => sessionService.authenticate(login.emailaddress, login.password) flatMap { session => {
-          audit(LoginSucceeded, session.developer)
+          //audit(LoginSucceeded, session.developer)
           gotoLoginSucceeded(session.sessionId)
         }
         } recover {

@@ -59,7 +59,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
     def mockLogout() =
       given(underTest.sessionService.destroy(Matchers.eq(session.sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(204))
+        .willReturn(Future.successful(NO_CONTENT))
 
     def mockAudit(auditAction: AuditAction, result: Future[AuditResult]) =
       given(underTest.auditService.audit(Matchers.eq(auditAction), Matchers.eq(Map.empty))(any[HeaderCarrier])).willReturn(result)
@@ -80,7 +80,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
       val result = await(underTest.authenticate()(request))
 
-      status(result) shouldBe 303
+      status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginSucceeded), Matchers.eq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
@@ -93,7 +93,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, "wrongPassword1!"))
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 401
+      status(result) shouldBe UNAUTHORIZED
       bodyOf(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToInvalidPassword), Matchers.eq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
@@ -108,7 +108,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         .withFormUrlEncodedBody((emailFieldName, unregisteredEmail), (passwordFieldName, userPassword))
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 401
+      status(result) shouldBe UNAUTHORIZED
       bodyOf(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToInvalidEmail), Matchers.eq(Map("developerEmail" -> unregisteredEmail)))(any[HeaderCarrier])
@@ -122,7 +122,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 403
+      status(result) shouldBe FORBIDDEN
       bodyOf(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
       result.toString should include(user.email.replace("@", "%40"))
     }
@@ -136,7 +136,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 423
+      status(result) shouldBe LOCKED
       bodyOf(result) should include("You entered incorrect login details too many times you&#x27;ll now have to reset your password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToLockedAccount), Matchers.eq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])

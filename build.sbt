@@ -110,6 +110,17 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
   .settings(testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
+  .configs(IntegrationTest)
+  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
+  .settings(
+    testOptions in IntegrationTest := Seq(Tests.Filter(integrationTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test")),
+    unmanagedResourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test")),
+    // unmanagedResourceDirectories in IntegrationTest <+= baseDirectory(_ / "target/web/public/test"),
+    // testOptions in IntegrationTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
+    //testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
+    parallelExecution in IntegrationTest := false
+  )
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
@@ -123,6 +134,7 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
 lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
+lazy val IntegrationTest = config("it") extend Test
 lazy val ComponentTest = config("component") extend Test
 lazy val TemplateTest = config("tt") extend Test
 lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
@@ -135,7 +147,7 @@ lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
   publishAllArtefacts
 
 def unitFilter(name: String): Boolean = name startsWith "unit"
-
+def integrationTestFilter(name: String): Boolean = name startsWith "it"
 def componentTestFilter(name: String): Boolean = name startsWith "component.js"
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
