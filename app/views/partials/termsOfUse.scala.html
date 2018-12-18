@@ -21,10 +21,11 @@
 @defining(DateTimeFormat.forPattern("dd MMMM yyyy")) { dateFormatter =>
     <p>Version @{applicationConfig.currentTermsOfUseVersion} issued @{dateFormatter.print(applicationConfig.currentTermsOfUseDate)}</p>
 }
-<p>These terms of use explain what you can expect from us and what we expect from you when using the HMRC Developer Hub.
-    They do not create a legal obligation or a legal relationship between HMRC and any software developer.</p>
-<p>We reserve the right to remove your access to the Developer Hub and API Platform temporarily or permanently.</p>
-<p>If we change these terms we’ll let you know. If you have any questions <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support">ask for support</a>.</p>
+<p>These terms of use explain what you can expect from us and what we expect from you when creating and operating software services that consume HMRC Application Programming Interfaces (APIs) hosted on the HMRC Developer Hub.
+    They do not create a legal relationship between HMRC and any software developer.</p>
+<p>We reserve the right to remove your access to the Developer Hub and its APIs temporarily or permanently.</p>
+<p>These terms may change from time to time and we will let you know when this happens. For major changes you may need to re-accept these terms of use, but for minor changes we will assume you agree to the changes unless we hear from you.</p>
+<p>If you have any questions <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support">ask for support</a>.</p>
 
 <section>
     <h2 class="heading-large">Background checks</h2>
@@ -69,7 +70,10 @@
     </section>
     <section>
         <h3 class="heading-medium">Processing data</h3>
-        <p>You may need to <a href="https://ico.org.uk/for-organisations/register/" target="_blank">register with the Information Commissioner’s Office (opens in a new tab)</a> or pay a <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/accountability-and-governance/guide-to-the-data-protection-fee/" target="_blank">data protection fee (opens in a new tab)</a> if your software processes personal data.</p>
+        <p>You may need to pay a <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/accountability-and-governance/guide-to-the-data-protection-fee/" target="_blank">data protection fee (opens in a new tab)</a> if your software processes personal data.</p>
+        <p>You must help us protect our users’ confidential data by sending us particular types of user audit data which we will record. Our APIs provide HTTP headers that you can use to pass this audit data to us. See how to do this under <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/fraud-prevention">fraud prevention</a>.</p>
+        <p>Supplying header information for all our APIs will become mandatory - so we recommend designing it into your applications now.</p>
+        <p>To find out if header information is mandatory for an API that you use, read its <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/api">API documentation</a>.</p>
     </section>
     <section>
         <h3 class="heading-medium">Storing data</h3>
@@ -102,7 +106,7 @@
         <h3 class="heading-medium">Accessibility</h3>
         <p>You must:</p>
         <ul class="list list-bullet">
-            <li>meet <a href="https://www.w3.org/TR/WCAG20/" target="_blank">W3C’s Web Content Accessibility Guidelines (opens in a new tab)</a> at a minimum level of AA if your software’s web-based, or <a href="https://www.w3.org/TR/mobile-accessibility-mapping/" target="_blank">W3C’s guidelines for mobile software (opens in a new tab)</a></li>
+            <li>meet <a href="http://www.w3.org/TR/WCAG21/" target="_blank">W3C’s Web Content Accessibility Guidelines (opens in a new tab)</a> at a minimum level of AA if your software’s web-based, or <a href="https://www.w3.org/TR/mobile-accessibility-mapping/" target="_blank">W3C’s guidelines for mobile software (opens in a new tab)</a></li>
             <li>give us evidence that your software meets the guidelines, if we ask for it</li>
             <li><a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support">ask for support</a> if you have any concerns meeting these guidelines</li>
         </ul>
