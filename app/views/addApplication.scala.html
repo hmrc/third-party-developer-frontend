@@ -75,8 +75,8 @@
                         <br>
 
                         <div class="multiple-choice">
-                            <input id="sandbox" type="radio" name="environment" value="SANDBOX" @if(form.data.get("environment") == Some("SANDBOX")) {checked}/>
-                            <label for="sandbox" data-type="sandbox" aria-describedby="sandboxTypeHint">
+                            <input id="sandbox" type="radio" name="environment" value="SANDBOX" @if(form.data.get("environment") == Some("SANDBOX")) {checked} aria-describedby="sandboxTypeHint"/>
+                            <label for="sandbox" data-type="sandbox">
                                 <strong class="bold">Sandbox</strong>
                                 <span id="sandboxTypeHint" class="form-hint">
                                 Allows you to call sandbox APIs to test your application
@@ -85,8 +85,8 @@
                         </div>
 
                         <div class="multiple-choice">
-                            <input id="production" type="radio" name="environment" value="PRODUCTION" @if(form.data.get("environment") == Some("PRODUCTION")) {checked}/>
-                            <label for="production" data-type="production" aria-describedby="productionTypeHint">
+                            <input id="production" type="radio" name="environment" value="PRODUCTION" @if(form.data.get("environment") == Some("PRODUCTION")) {checked} aria-describedby="productionTypeHint"/>
+                            <label for="production" data-type="production">
                                 <strong class="bold">Production</strong>
                                 <span id="productionTypeHint" class="form-hint">
                                     Allows you to call production APIs to access live data
