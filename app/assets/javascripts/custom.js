@@ -126,8 +126,13 @@ $(document).ready(function () {
     var loadingSpinner = new GOVUK.Loader().init({ container: containerId, id: containerId + '-loader' });
 
     function resetForm() {
+      var subscribed = form.find('input.slider__on').prop('checked')
       fieldContainer.prop('disabled', null);
       loadingSpinner.stop();
+
+      form.find('.slider__on--label').attr('aria-label', subscribed ? 'Subscribed' : 'Select to subscribe');
+      form.find('.slider__off--label').attr('aria-label', subscribed ? 'Select to unsubscribe' : 'Unsubscribed');
+
       form.find('input[type=radio]:checked').focus();
     }
 
