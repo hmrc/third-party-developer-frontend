@@ -94,13 +94,13 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
   def changeLockedApiSubscriptionAction(applicationId: String, apiName: String, apiContext: String, apiVersion: String, redirectTo: String) = adminOnApp(applicationId) { implicit request =>
     def requestChangeSubscription(subscribed: Boolean) = {
       if (subscribed)
-        subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
+        subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion).map(_ => Ok(views.html.unsubscribeRequestSubmitted(request.application, apiName, apiVersion)))
       else
-        subscriptionsService.requestApiSubscription(request.user, request.application, apiName, apiVersion)
+        subscriptionsService.requestApiSubscription(request.user, request.application, apiName, apiVersion).map(_ => Ok(views.html.subscribeRequestSubmitted(request.application, apiName, apiVersion)))
     }
 
     def handleValidForm(subscribed: Boolean)(form: ChangeSubscriptionConfirmationForm) = form.confirm match {
-      case Some(true) => requestChangeSubscription(subscribed).map(_ => redirect(redirectTo, applicationId))
+      case Some(_) => requestChangeSubscription(subscribed)
       case _ => Future.successful(redirect(redirectTo, applicationId))
     }
 

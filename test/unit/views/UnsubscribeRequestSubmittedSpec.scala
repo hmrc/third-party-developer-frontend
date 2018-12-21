@@ -46,7 +46,7 @@ class UnsubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite {
 
       val document = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", "Request submitted") shouldBe true
-      elementExistsByText(document, "p", s"Unsubscribe from $apiName $apiVersion") shouldBe true
+      elementExistsByText(document, "p", s"You have requested to unsubscribe from $apiName $apiVersion") shouldBe true
     }
   }
 }
