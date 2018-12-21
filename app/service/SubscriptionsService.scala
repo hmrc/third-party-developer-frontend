@@ -17,14 +17,15 @@
 package service
 
 import connectors.DeskproConnector
-import domain._
+import domain.{Application, DeskproTicket, Developer, TicketResult}
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-trait SubscriptionsService {
-  val deskproConnector: DeskproConnector
-  val auditService: AuditService
+@Singleton
+class SubscriptionsService @Inject()(deskproConnector: DeskproConnector,
+                                     auditService: AuditService) {
 
   private def doRequest(requester: Developer, application: Application, apiName: String, apiVersion: String)
                        (f: (String, String, String, String, String, String) => DeskproTicket)
@@ -32,16 +33,17 @@ trait SubscriptionsService {
     f(requester.displayedName, requester.email, application.name, application.id, apiName, apiVersion)
   }
 
-  def requestApiSubscription(requester: Developer, application: Application, apiName: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestApiSubscription(requester: Developer,
+                             application: Application,
+                             apiName: String,
+                             apiVersion: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     deskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiSubscribe))
   }
 
-  def requestApiUnsubscribe(requester: Developer, application: Application, apiName: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestApiUnsubscribe(requester: Developer,
+                            application: Application,
+                            apiName: String,
+                            apiVersion: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     deskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiUnsubscribe))
   }
-}
-
-object SubscriptionsService extends SubscriptionsService {
-  override val deskproConnector: DeskproConnector.type = DeskproConnector
-  override val auditService: AuditService = AuditService
 }

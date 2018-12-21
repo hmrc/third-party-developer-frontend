@@ -16,26 +16,30 @@
 
 package controllers
 
-import config.ApplicationGlobal
-import config.ApplicationConfig.currentTermsOfUseVersion
+import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
 import domain._
+import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{AnyContent, Result}
-import service.{ApplicationServiceImpl, SessionService}
+import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.{applicationcheck, editapplication}
 
 import scala.concurrent.Future
 
-trait ApplicationCheck extends ApplicationController with ApplicationHelper {
-
-  def apiSubscriptionsHelper: ApiSubscriptionsHelper
+@Singleton
+class ApplicationCheck @Inject()(val applicationService: ApplicationService,
+                                 val apiSubscriptionsHelper: ApiSubscriptionsHelper,
+                                 val sessionService: SessionService,
+                                 val errorHandler: ErrorHandler,
+                                 implicit val appConfig: ApplicationConfig)
+  extends ApplicationController() with ApplicationHelper {
 
   def withAppInTestingState(appId: String)(f: Application => Future[Result])(implicit request: RequestWithAttributes[AnyContent]) = {
     applicationForRequest(appId) flatMap { app =>
@@ -181,7 +185,7 @@ trait ApplicationCheck extends ApplicationController with ApplicationHelper {
 
     apiSubscriptionsHelper.fetchAllSubscriptions(app, request.user)(hc).flatMap {
       case Some(subsData) => Future.successful(Ok(applicationcheck.apiSubscriptions(app, subsData.role, subsData.subscriptions, appId, subsData.hasSubscriptions)))
-      case None => Future.successful(NotFound(ApplicationGlobal.notFoundTemplate))
+      case None => Future.successful(NotFound(errorHandler.notFoundTemplate))
     }
   }
 
@@ -286,7 +290,7 @@ trait ApplicationCheck extends ApplicationController with ApplicationHelper {
 
   def termsOfUseAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
 
-    val version = currentTermsOfUseVersion
+    val version = appConfig.currentTermsOfUseVersion
     val app = request.application
 
     val requestForm = TermsOfUseForm.form.bindFromRequest
@@ -298,7 +302,7 @@ trait ApplicationCheck extends ApplicationController with ApplicationHelper {
     def withValidForm(form: TermsOfUseForm) = {
       val information = app.checkInformation.getOrElse(CheckInformation())
 
-      val updatedInformation = if(information.termsOfUseAgreements.exists(terms => terms.version == version)) {
+      val updatedInformation = if (information.termsOfUseAgreements.exists(terms => terms.version == version)) {
         information
       }
       else {
@@ -320,12 +324,6 @@ trait ApplicationCheck extends ApplicationController with ApplicationHelper {
       case _ => None
     }
   }
-}
-
-object ApplicationCheck extends ApplicationCheck with WithAppConfig {
-  override val sessionService = SessionService
-  override val applicationService = ApplicationServiceImpl
-  lazy val apiSubscriptionsHelper = ApiSubscriptionsHelper
 }
 
 object ApplicationInformationForm {

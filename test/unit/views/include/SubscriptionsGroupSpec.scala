@@ -19,20 +19,19 @@ package unit.views.include
 import config.ApplicationConfig
 import controllers.APISubscriptions
 import domain._
-import model.Crumb
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import play.twirl.api.HtmlFormat.Appendable
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 
 class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPerSuite {
   val request = FakeRequest().withCSRFToken
+  val appConfig = mock[ApplicationConfig]
   val loggedInUser = Developer("givenname.familyname@example.com", "Givenname", "Familyname")
   val applicationId = "1234"
   val clientId = "clientId123"
@@ -49,7 +48,7 @@ class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPe
         Set(Collaborator(loggedInUser.email, role)), state = state,
         access = Standard(redirectUris = Seq("https://red1.example.com", "https://red2.example.con"), termsAndConditionsUrl = Some("http://tnc-url.example.com")))
 
-      Jsoup.parse(views.html.include.subscriptionsGroup.render(role, application, apiSubscriptions, hasAnySubscriptions = true, group = "Example", afterSubscriptionRedirectTo = SubscriptionRedirect.MANAGE_PAGE, applicationMessages, ApplicationConfig, request).body)
+      Jsoup.parse(views.html.include.subscriptionsGroup.render(role, application, apiSubscriptions, hasAnySubscriptions = true, group = "Example", afterSubscriptionRedirectTo = SubscriptionRedirect.MANAGE_PAGE, applicationMessages, appConfig, request).body)
     }
 
     lazy val toggle = body.getElementById("test-1_0-toggle")

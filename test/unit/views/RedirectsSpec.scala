@@ -26,9 +26,12 @@ import utils.CSRFTokenHelper._
 import play.api.i18n.Messages.Implicits._
 import config.ApplicationConfig
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import utils.ViewHelpers._
 
-class RedirectsSpec extends UnitSpec with OneServerPerSuite {
+class RedirectsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = Developer("developer@example.com", "John", "Doe")
@@ -47,7 +50,7 @@ class RedirectsSpec extends UnitSpec with OneServerPerSuite {
 
       val applicationWithRedirects = application.copy(access = standardAccess)
 
-      views.html.redirects.render(applicationWithRedirects, redirects, role, request, loggedInUser, applicationMessages, ApplicationConfig, "redirects")
+      views.html.redirects.render(applicationWithRedirects, redirects, role, request, loggedInUser, applicationMessages, appConfig, "redirects")
     }
 
     def renderPageForStandardApplicationAsAdminWithRedirectUris(numberOfRedirectUris: Int) = {

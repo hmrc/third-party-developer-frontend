@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package qr
+package unit.controllers
 
-import java.net.URI
+import config.ErrorHandler
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
+import play.twirl.api.Html
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-trait OTPAuthURI {
-  def apply(secret: String, issuer: String, user: String) = {
-    val params = Map("secret" -> secret, "issuer" -> issuer)
-    val query = params.map(pair => pair._1 + "=" + pair._2).mkString("&")
-    new URI("otpauth", "totp", s"/$issuer:$user", query, null)
-  }
+class BaseControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures {
+  val mockErrorHandler = mock[ErrorHandler]
+
+  when(mockErrorHandler.notFoundTemplate(any())).thenReturn(Html(""))
+  when(mockErrorHandler.badRequestTemplate(any())).thenReturn(Html(""))
 }
-
-object OTPAuthURI extends OTPAuthURI

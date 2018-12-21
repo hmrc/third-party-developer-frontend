@@ -17,39 +17,51 @@
 package unit.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.WSHttp
-import connectors.{PayloadEncryption, ThirdPartyDeveloperConnector}
+import config.ApplicationConfig
+import connectors._
 import domain._
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, Configuration, Mode}
 import play.api.http.Status._
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.{JsString, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
-import uk.gov.hmrc.play.http.metrics.NoopMetrics
-import utils.TestPayloadEncryptor
+import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
 
-class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with TestPayloadEncryptor {
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with GuiceOneAppPerSuite {
+  private val stubConfig = Configuration(
+    "Test.microservice.services.third-party-developer.port" -> stubPort,
+    "json.encryption.key" -> "abcdefghijklmnopqrstuv=="
+  )
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure(stubConfig)
+      .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .in(Mode.Test)
+      .build()
 
   trait Setup {
     implicit val hc = HeaderCarrier()
 
-    val underTest = new ThirdPartyDeveloperConnector {
-      val http = WSHttp
-      val serviceBaseUrl = wireMockUrl
-      val payloadEncryption: PayloadEncryption = TestPayloadEncryption
-      val metrics = NoopMetrics
-    }
+    val userEmail = "thirdpartydeveloper@example.com"
+    val userPassword = "password1!"
+    val sessionId = "sessionId"
+    val loginRequest = LoginRequest(userEmail, userPassword)
+
+    val payloadEncryption = app.injector.instanceOf[PayloadEncryption]
+    val encryptedLoginRequest = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
+    val underTest = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
 
-  val userEmail = "thirdpartydeveloper@example.com"
-  val userPassword = "password1!"
-  val sessionId = "sessionId"
-
   "createSession" should {
-
-    val encryptedLoginRequest = EncryptedJson.toSecretRequestJson(LoginRequest(userEmail, userPassword)).toString()
 
     "return the session containing the user when the credentials are valid" in new Setup {
 
       stubFor(post(urlEqualTo("/session"))
-        .withRequestBody(equalToJson(encryptedLoginRequest))
+        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -66,18 +78,15 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
                  |}""".stripMargin)
         ))
 
-      val result = await(underTest.createSession(LoginRequest(userEmail, userPassword)))
+      val result = await(underTest.createSession(loginRequest))
 
-      verify(1, postRequestedFor(urlMatching("/session")).withRequestBody(equalToJson(encryptedLoginRequest)))
-
+      verify(1, postRequestedFor(urlMatching("/session")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
       result shouldBe  Session(sessionId, Developer(userEmail, "John", "Doe"))
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {
-      val encryptedBody = EncryptedJson.toSecretRequestJson(LoginRequest(userEmail, userPassword)).toString()
-
       stubFor(post(urlEqualTo("/session"))
-        .withRequestBody(equalToJson(encryptedLoginRequest))
+        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
         .willReturn(
           aResponse()
             .withStatus(UNAUTHORIZED)
@@ -90,7 +99,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
     "throw LockedAccount exception when the account is locked" in new Setup {
 
       stubFor(post(urlEqualTo("/session"))
-        .withRequestBody(equalToJson(encryptedLoginRequest))
+        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
         .willReturn(
           aResponse()
             .withStatus(LOCKED)
@@ -103,7 +112,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
     "throw UnverifiedAccount exception when the account is unverified" in new Setup {
 
       stubFor(post(urlEqualTo("/session"))
-        .withRequestBody(equalToJson(encryptedLoginRequest))
+        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
         .willReturn(
           aResponse()
             .withStatus(FORBIDDEN)
@@ -116,7 +125,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
 
       stubFor(post(urlEqualTo("/session"))
-        .withRequestBody(equalToJson(encryptedLoginRequest))
+        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
         .willReturn(
           aResponse()
             .withStatus(INTERNAL_SERVER_ERROR)

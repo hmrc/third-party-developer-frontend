@@ -16,14 +16,16 @@
 
 package controllers
 
-import config.ApplicationGlobal
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.SubscriptionRedirect._
 import domain._
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
 import play.api.libs.json.Json
+import play.api.mvc.Result
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.include.{changeSubscriptionConfirmation, subscriptionFields}
@@ -31,17 +33,17 @@ import views.html.include.{changeSubscriptionConfirmation, subscriptionFields}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait Subscriptions extends ApplicationController with ApplicationHelper {
-
-  def developerConnector: ThirdPartyDeveloperConnector
-
-  def auditService: AuditService
-
-  def subFieldsService: SubscriptionFieldsService
-
-  def subscriptionsService: SubscriptionsService
-
-  def apiSubscriptionsHelper: ApiSubscriptionsHelper
+@Singleton
+class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnector,
+                              val auditService: AuditService,
+                              val subFieldsService: SubscriptionFieldsService,
+                              val subscriptionsService: SubscriptionsService,
+                              val apiSubscriptionsHelper: ApiSubscriptionsHelper,
+                              val applicationService: ApplicationService,
+                              val sessionService: SessionService,
+                              val errorHandler: ErrorHandler,
+                              implicit val appConfig: ApplicationConfig)
+  extends ApplicationController with ApplicationHelper {
 
   def subscriptions(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
@@ -50,7 +52,7 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
       val view = views.html.subscriptions(role, data, form, request.application, data.subscriptions, data.app.id, data.hasSubscriptions)
       Ok(view)
     } recover {
-      case _: ApplicationNotFound => NotFound(ApplicationGlobal.notFoundTemplate)
+      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
     }
   }
 
@@ -60,38 +62,49 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
     case _ => Redirect(routes.ManageApplications.editApplication(applicationId, None))
   }
 
-  def changeApiSubscription(applicationId: String, apiContext: String, apiVersion: String, redirectTo: String) = teamMemberOnApp(applicationId) { implicit request =>
-    def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
-      case Some(subscribe) => {
-        def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
+  def changeApiSubscription(applicationId: String, apiContext: String, apiVersion: String, redirectTo: String) = teamMemberOnApp(applicationId) {
+    implicit request =>
+      def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
+        case Some(subscribe) =>
+          def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
 
-        service(applicationId, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.application) }
+          service(applicationId, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.application) }
+        case _ =>
+          Future.successful(redirect(redirectTo, applicationId))
       }
-      case _ => Future.successful(redirect(redirectTo, applicationId))
-    }
 
-    def handleValidForm(form: ChangeSubscriptionForm) =
+      def handleValidForm(form: ChangeSubscriptionForm) =
+        if (request.application.hasLockedSubscriptions) {
+          Future.successful(Forbidden(errorHandler.badRequestTemplate))
+        } else {
+          updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
+        }
+
+      def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = Future.successful(BadRequest(errorHandler.badRequestTemplate))
+
+      ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
+  }
+
+  def changeLockedApiSubscription(applicationId: String,
+                                  apiName: String,
+                                  apiContext: String,
+                                  apiVersion: String,
+                                  redirectTo: String) = adminOnApp(applicationId) {
+    implicit request =>
       if (request.application.hasLockedSubscriptions) {
-        Future.successful(Forbidden(ApplicationGlobal.badRequestTemplate))
+        applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).map(subscribed =>
+          Ok(changeSubscriptionConfirmation(
+            request.application, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo)))
       } else {
-        updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
+        Future.successful(BadRequest(errorHandler.badRequestTemplate))
       }
-
-    def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
-
-    ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
   }
 
-  def changeLockedApiSubscription(applicationId: String, apiName: String, apiContext: String, apiVersion: String, redirectTo: String) = adminOnApp(applicationId) { implicit request =>
-    if (request.application.hasLockedSubscriptions) {
-      applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).map(subscribed =>
-        Ok(changeSubscriptionConfirmation(request.application, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo)))
-    } else {
-      Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
-    }
-  }
-
-  def changeLockedApiSubscriptionAction(applicationId: String, apiName: String, apiContext: String, apiVersion: String, redirectTo: String) = adminOnApp(applicationId) { implicit request =>
+  def changeLockedApiSubscriptionAction(applicationId: String,
+                                        apiName: String,
+                                        apiContext: String,
+                                        apiVersion: String,
+                                        redirectTo: String) = adminOnApp(applicationId) { implicit request =>
     def requestChangeSubscription(subscribed: Boolean) = {
       if (subscribed)
         subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion).map(_ => Ok(views.html.unsubscribeRequestSubmitted(request.application, apiName, apiVersion)))
@@ -105,13 +118,14 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
     }
 
     def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
-      Future.successful(BadRequest(changeSubscriptionConfirmation(request.application, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
+      Future.successful(
+        BadRequest(changeSubscriptionConfirmation(request.application, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
 
     if (request.application.hasLockedSubscriptions) {
       applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).flatMap(subscribed =>
         ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     } else {
-      Future.successful(BadRequest(ApplicationGlobal.badRequestTemplate))
+      Future.successful(BadRequest(errorHandler.badRequestTemplate))
     }
   }
 
@@ -149,7 +163,11 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
     SubscriptionFieldsForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  private def createResponse(app: Application, isAjaxRequest: Boolean, apiContext: String, apiVersion: String, subscriptionRedirect: String)(implicit hc: HeaderCarrier) = {
+  private def createResponse(app: Application,
+                             isAjaxRequest: Boolean,
+                             apiContext: String,
+                             apiVersion: String,
+                             subscriptionRedirect: String)(implicit hc: HeaderCarrier): Future[Result] = {
     if (isAjaxRequest) createAjaxUnsubscribeResponse(app, apiContext, apiVersion).map(r => Ok(r))
     else Future.successful(redirect(subscriptionRedirect, app.id))
   }
@@ -169,20 +187,7 @@ trait Subscriptions extends ApplicationController with ApplicationHelper {
   }
 }
 
-object Subscriptions extends Subscriptions with WithAppConfig {
-  lazy val sessionService = SessionService
-  lazy val applicationService = ApplicationServiceImpl
-  lazy val developerConnector = ThirdPartyDeveloperConnector
-  lazy val auditService = AuditService
-  lazy val apiSubscriptionsHelper = ApiSubscriptionsHelper
-  lazy val subFieldsService = SubscriptionFieldsService
-
-  override def subscriptionsService = SubscriptionsService
-}
-
-trait ApiSubscriptionsHelper {
-
-  def applicationService: ApplicationService
+class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService) {
 
   def fetchPageDataFor(application: Application)(implicit hc: HeaderCarrier): Future[PageData] = {
     for {
@@ -204,10 +209,6 @@ trait ApiSubscriptionsHelper {
 
   def roleForApplication(application: Application, email: String) =
     application.role(email).getOrElse(throw new ApplicationNotFound)
-}
-
-object ApiSubscriptionsHelper extends ApiSubscriptionsHelper {
-  lazy val applicationService = ApplicationServiceImpl
 }
 
 case class SubscriptionFieldsViewModel(applicationId: String, apiContext: String, apiVersion: String, subFieldsForm: Form[SubscriptionFieldsForm])

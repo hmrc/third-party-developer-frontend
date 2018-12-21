@@ -16,6 +16,8 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
+import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.Logger
 import play.api.Play.current
@@ -26,9 +28,11 @@ import views.html.signoutSurvey
 
 import scala.concurrent.Future
 
-trait UserLogoutAccount extends LoggedInController with LoginLogout {
-
-  val deskproService: DeskproService
+@Singleton
+class UserLogoutAccount @Inject()(val deskproService: DeskproService,
+                                  val sessionService: SessionService,
+                                  val errorHandler: ErrorHandler,
+                                  implicit val appConfig: ApplicationConfig) extends LoggedInController with LoginLogout {
 
   def logoutSurvey = loggedInAction { implicit request =>
     val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)
@@ -42,10 +46,10 @@ trait UserLogoutAccount extends LoggedInController with LoginLogout {
       case None => Logger.error(s"Survey form invalid.")
     }
 
-    Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout))
+    Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
   }
 
-  def logout = Action.async { implicit request: Request[AnyContent]  =>
+  def logout = Action.async { implicit request: Request[AnyContent] =>
     gotoLogoutSucceeded {
       for {
         _ <- tokenAccessor.extract(request)
@@ -54,9 +58,4 @@ trait UserLogoutAccount extends LoggedInController with LoginLogout {
       } yield Ok(views.html.logoutConfirmation())
     }
   }
-}
-
-object UserLogoutAccount extends UserLogoutAccount with WithAppConfig {
-  override val sessionService = SessionService
-  override val deskproService = DeskproService
 }

@@ -17,25 +17,19 @@
 package unit.controllers
 
 import config.ApplicationConfig
-import connectors.{DeskproConnector, ThirdPartyDeveloperConnector}
-import domain.SubscriptionRedirect.{APPLICATION_CHECK_PAGE, MANAGE_PAGE}
+import connectors.ThirdPartyDeveloperConnector
 import controllers._
-import domain.ApiSubscriptionFields.Fields
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito._
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
@@ -43,7 +37,7 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.Future._
 
-class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
   implicit val materializer = fakeApplication.materializer
   val appId = "1234"
   val apiName = "api-1"
@@ -86,16 +80,16 @@ class SubscriptionsSpec extends UnitSpec with MockitoSugar with WithFakeApplicat
   val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
 
   trait Setup {
-    val underTest = new Subscriptions {
-      override val sessionService = mock[SessionService]
-      override val applicationService = mock[ApplicationService]
-      override val developerConnector = mock[ThirdPartyDeveloperConnector]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-      override val subFieldsService = mock[SubscriptionFieldsService]
-      override val subscriptionsService = mock[SubscriptionsService]
-      override val apiSubscriptionsHelper = mock[ApiSubscriptionsHelper]
-    }
+    val underTest = new Subscriptions(
+      mock[ThirdPartyDeveloperConnector],
+      mock[AuditService],
+      mock[SubscriptionFieldsService],
+      mock[SubscriptionsService],
+      mock[ApiSubscriptionsHelper],
+      mock[ApplicationService],
+      mock[SessionService],
+      mockErrorHandler,
+      mock[ApplicationConfig])
 
     val hc = HeaderCarrier()
 

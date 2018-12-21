@@ -20,22 +20,24 @@ import config.ApplicationConfig
 import controllers.ApplicationSummary
 import domain.{Developer, _}
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.ViewHelpers.{elementIdentifiedByAttrContainsText, elementExistsByText}
+import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 
-class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite {
+class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
+  val appConfig = mock[ApplicationConfig]
 
   "veiw all applications page" should {
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request = FakeRequest()
       val loggedIn = Developer("developer@example.com", "firstName", "lastname")
-      views.html.manageApplications.render(appSummaries, request, Flash(), loggedIn, applicationMessages, ApplicationConfig, "nav-section")
+      views.html.manageApplications.render(appSummaries, request, Flash(), loggedIn, applicationMessages, appConfig, "nav-section")
     }
 
     "show the empty nest page when there are no applications" in {

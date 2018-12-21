@@ -39,9 +39,7 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     when(connector.enableMfa(mockEq(email))(any[HeaderCarrier])).thenReturn(successful(NO_CONTENT))
     when(connector.removeMfa(mockEq(email))(any[HeaderCarrier])).thenReturn(successful(OK))
 
-    val service = new MFAService {
-      val tpdConnector = connector
-    }
+    val service = new MFAService(connector)
   }
 
   trait FailedTotpVerification extends Setup {

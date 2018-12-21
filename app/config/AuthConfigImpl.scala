@@ -24,22 +24,26 @@ import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc._
 import service.SessionService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect._
-import uk.gov.hmrc.http.HeaderCarrier
 
-trait AuthConfigImpl extends AuthConfig {
+trait AuthConfigImpl  extends AuthConfig {
+
+  val errorHandler: ErrorHandler
+  val sessionService: SessionService
+  implicit val appConfig: ApplicationConfig
 
   type Id = String
   type User = Developer
   type Authority = UserStatus
-  override def idTag = classTag[Id]
-  override def sessionTimeoutInSeconds = appConfig.sessionTimeoutInSeconds
-  val dummyHeader = HeaderCarrier()
 
-  val appConfig: ApplicationConfig
-  val sessionService: SessionService
+  override def idTag = classTag[Id]
+
+  override def sessionTimeoutInSeconds = appConfig.sessionTimeoutInSeconds
+
+  val dummyHeader = HeaderCarrier()
 
   def resolveUser(id: Id)(implicit ctx: ExecutionContext): Future[Option[User]] =
     sessionService.fetch(id)(dummyHeader).map(_.map(_.developer))
@@ -64,7 +68,7 @@ trait AuthConfigImpl extends AuthConfig {
 
   override def authorizationFailed(request: RequestHeader, user: Developer,
                                    authority: Option[Authority])(implicit context: ExecutionContext): Future[Result] = {
-    Future.successful(NotFound(ApplicationGlobal.notFoundTemplate(Request(request, user))))
+    Future.successful(NotFound(errorHandler.notFoundTemplate(Request(request, user))))
   }
 
   def authorize(user: User, authority: Authority)(implicit ctx: ExecutionContext): Future[Boolean] = {
@@ -87,5 +91,6 @@ trait AuthConfigImpl extends AuthConfig {
   implicit class RequestWithAjaxSupport(h: Headers) {
     def isAjaxRequest = h.get("X-Requested-With").contains("XMLHttpRequest")
   }
+
 }
 

@@ -16,10 +16,11 @@
 
 package controllers
 
-import config.ApplicationGlobal
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.FormKeys.clientSecretLimitExceeded
 import domain._
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.Play.current
 import play.api.data.Form
@@ -33,18 +34,21 @@ import views.html._
 
 import scala.concurrent.Future
 
-trait Credentials extends ApplicationController {
-
-  val applicationService: ApplicationService
-  val developerConnector: ThirdPartyDeveloperConnector
-  val auditService: AuditService
+@Singleton
+class Credentials @Inject()(val applicationService: ApplicationService,
+                            val developerConnector: ThirdPartyDeveloperConnector,
+                            val auditService: AuditService,
+                            val sessionService: SessionService,
+                            val errorHandler: ErrorHandler,
+                            implicit val appConfig: ApplicationConfig)
+  extends ApplicationController {
 
   def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
     applicationService.fetchCredentials(applicationId).map { tokens =>
       val view = views.html.credentials(request.role, request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
       error.map(_ => BadRequest(view)).getOrElse(Ok(view))
     } recover {
-      case _: ApplicationNotFound => NotFound(ApplicationGlobal.notFoundTemplate)
+      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
     }
   }
 
@@ -55,8 +59,8 @@ trait Credentials extends ApplicationController {
     applicationService.addClientSecret(applicationId).map { _ =>
       result()
     } recover {
-        case _: ApplicationNotFound => NotFound(ApplicationGlobal.notFoundTemplate)
-        case _: ForbiddenException => Forbidden(ApplicationGlobal.badRequestTemplate)
+        case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+        case _: ForbiddenException => Forbidden(errorHandler.badRequestTemplate)
         case _: ClientSecretLimitExceeded => result(Some(clientSecretLimitExceeded))
     }
   }
@@ -102,7 +106,7 @@ trait Credentials extends ApplicationController {
         val view = views.html.credentials(request.role, application, tokens, form)
         if (form.hasErrors) BadRequest(view) else Ok(view)
       } recover {
-        case _: ApplicationNotFound => NotFound(ApplicationGlobal.notFoundTemplate)
+        case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
       }
     }
 
@@ -111,7 +115,7 @@ trait Credentials extends ApplicationController {
         val clientSecrets = tokens.production.clientSecrets.map(_.secret)
         Ok(editapplication.selectClientSecretsToDelete(application, clientSecrets, SelectClientSecretsToDeleteForm.form))
       } recover {
-        case _: ApplicationNotFound => NotFound(ApplicationGlobal.notFoundTemplate)
+        case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
       }
     }
 
@@ -185,11 +189,4 @@ trait Credentials extends ApplicationController {
   private def audit(auditAction: AuditAction, developer: Developer)(implicit hc: HeaderCarrier) = {
     auditService.audit(auditAction, Map("developerEmail" -> developer.email, "developerFullName" -> developer.displayedName))
   }
-}
-
-object Credentials extends Credentials with WithAppConfig {
-  override val sessionService = SessionService
-  override val applicationService = ApplicationServiceImpl
-  override val developerConnector = ThirdPartyDeveloperConnector
-  override val auditService = AuditService
 }

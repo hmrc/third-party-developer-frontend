@@ -16,7 +16,7 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import controllers.Navigation
 import domain.{Developer, Session}
 import org.mockito.BDDMockito._
@@ -25,11 +25,11 @@ import org.mockito.Matchers._
 import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import service.SessionService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithLoggedInSession._
 
 import scala.concurrent.Future._
-import uk.gov.hmrc.http.HeaderCarrier
 
 class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
@@ -40,10 +40,11 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
   var userPassword = "Password1!"
 
   trait Setup {
-    val underTest = new Navigation {
-      override val sessionService = mock[SessionService]
-      override val appConfig = mock[ApplicationConfig]
-    }
+    val underTest = new Navigation(
+      mock[SessionService],
+      mock[ErrorHandler],
+      mock[ApplicationConfig]
+    )
 
     def mockSuccessfulAuthentication(loggedInUser: Developer) =
       given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(successful(Some(Session(sessionId, loggedInUser))))
@@ -55,7 +56,8 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
 
       status(result) shouldBe 200
 
-      bodyOf(result) shouldBe """[{"label":"Register","href":"/developer/registration","truncate":false},{"label":"Sign in","href":"/developer/login","truncate":false}]"""
+      bodyOf(result) shouldBe
+        """[{"label":"Register","href":"/developer/registration","truncate":false},{"label":"Sign in","href":"/developer/login","truncate":false}]"""
     }
 
     "return navigation links when user is logged in" in new Setup {
@@ -66,7 +68,8 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
 
       status(result) shouldBe 200
 
-      bodyOf(result) shouldBe """[{"label":"John Doe","href":"/developer/profile","truncate":false},{"label":"Sign out","href":"/developer/logout/survey","truncate":false}]"""
+      bodyOf(result) shouldBe
+        """[{"label":"John Doe","href":"/developer/profile","truncate":false},{"label":"Sign out","href":"/developer/logout/survey","truncate":false}]"""
     }
   }
 }

@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.{ApplicationConfig, ApplicationGlobal}
+import config.{ApplicationConfig, ErrorHandler}
 import domain.AccessType.{PRIVILEGED, ROPC}
 import domain.{BadRequestError, Developer, Role, State}
 import play.api.Play.current
@@ -33,8 +33,9 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ActionBuilders {
-  val applicationService: ApplicationService
 
+  val errorHandler: ErrorHandler
+  val applicationService: ApplicationService
   implicit val appConfig: ApplicationConfig
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
@@ -51,7 +52,7 @@ trait ActionBuilders {
         .map { application =>
           application.role(user.email)
             .map(role => ApplicationRequest(application, role, user, request))
-            .toRight(NotFound(ApplicationGlobal.notFoundTemplate(Request(request, user))))
+            .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, user))))
         }
     }
   }
@@ -89,7 +90,7 @@ trait ActionBuilders {
 
       request.role match {
         case Role.ADMINISTRATOR => None
-        case _ => Some(Forbidden(ApplicationGlobal.badRequestTemplate))
+        case _ => Some(Forbidden(errorHandler.badRequestTemplate))
       }
     }
   }
@@ -99,7 +100,7 @@ trait ActionBuilders {
       implicit val implicitRequest = request
 
       if (request.application.isPermittedToMakeChanges(request.role)) None
-      else Some(Forbidden(ApplicationGlobal.badRequestTemplate))
+      else Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
 }
