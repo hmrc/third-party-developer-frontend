@@ -30,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
-import service.{AuditAction, AuditService, SessionService}
+import service.{ApplicationService, AuditAction, AuditService, SessionService}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
@@ -53,6 +53,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       override val sessionService = mock[SessionService]
       override val auditService = mock[AuditService]
       override val appConfig = mock[ApplicationConfig]
+      override val applicationService = mock[ApplicationService]
     }
 
     def mockAuthenticate(email: String, password: String, result: Future[Session]) =

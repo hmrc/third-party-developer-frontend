@@ -33,6 +33,9 @@ object Crumb {
   val protectAccount =
     Crumb("Protect account",s"${routes.ProtectAccount.getProtectAccount}", Some("data-breadcrumb-protect-account"))
 
+  val signIn =
+    Crumb("Sign in",s"${routes.UserLoginAccount.login()}", Some("data-breadcrumb-sign-in"))
+
   def application(application: Application) =
     Crumb(s"${application.name}", "", Some("data-breadcrumb-app-name"))
 }

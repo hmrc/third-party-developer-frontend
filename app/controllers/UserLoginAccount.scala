@@ -22,7 +22,7 @@ import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
 import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
-import service.{AuditAction, AuditService, SessionService}
+import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
 
@@ -46,6 +46,7 @@ trait UserLoginAccount extends LoggedOutController with LoginLogout with Auditin
 
   val loginForm: Form[LoginForm] = LoginForm.form
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
+  val applicationService: ApplicationService
 
   def login = loggedOutAction { implicit request =>
     Future.successful(Ok(signIn("Sign in", loginForm)))
@@ -83,9 +84,34 @@ trait UserLoginAccount extends LoggedOutController with LoginLogout with Auditin
         }
       )
   }
+
+
+  def get2SVHelpConfirmationPage() = loggedOutAction { implicit request =>
+    Future.successful(Ok(views.html.protectAccountNoAccessCode(Help2SVConfirmForm.form)))
+  }
+
+  def get2SVHelpCompletionPage() = loggedOutAction { implicit request =>
+    Future.successful(Ok(views.html.protectAccountNoAccessCodeComplete()))
+  }
+
+  def confirm2SVHelp() = loggedOutAction { implicit request =>
+    Help2SVConfirmForm.form.bindFromRequest.fold(form => {
+      Future.successful(BadRequest(views.html.protectAccountNoAccessCode(form)))
+    },
+      form => {
+        form.helpRemoveConfirm match {
+          case Some("Yes") => applicationService.request2SVRemoval("", "").map(_ => Ok(protectAccountNoAccessCodeComplete()))
+
+          case _ => Future.successful(Ok(signIn("Sign in", loginForm)))
+        }
+      })
+  }
+
 }
 
 object UserLoginAccount extends UserLoginAccount with WithAppConfig {
   override val sessionService = SessionService
   override val auditService = AuditService
+  override val applicationService = ApplicationServiceImpl
+
 }

@@ -107,6 +107,14 @@ object DeskproTicket extends FieldTransformer {
 
     DeskproTicket(name, email, "Request for developer account to be deleted", message, routes.Profile.deleteAccount().url)
   }
+  def removeDeveloper2SV(name: String, email: String): DeskproTicket = {
+    val message =
+      s"""I '$email' want my 2SV to be removed"""
+
+    DeskproTicket(name, email, "Request for 2SV to be removed", message, routes.UserLoginAccount.confirm2SVHelp().url)
+  }
+
+
 }
 
 sealed trait TicketResult

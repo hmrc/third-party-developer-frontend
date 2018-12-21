@@ -90,6 +90,8 @@ trait ProtectAccount extends LoggedInController {
       })
   }
 
+
+
   def get2SVRemovalAccessCodePage() = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalAccessCode(ProtectAccountForm.form)))
   }
@@ -111,7 +113,6 @@ trait ProtectAccount extends LoggedInController {
   def get2SVRemovalCompletePage() = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.protectAccountRemovalComplete()))
   }
-
 }
 
 object ProtectAccount extends ProtectAccount with WithAppConfig {

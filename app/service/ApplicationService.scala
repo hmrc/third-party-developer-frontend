@@ -21,7 +21,7 @@ import connectors._
 import domain.APIStatus._
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import domain._
-import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested}
+import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.time.DateTimeUtils
 
@@ -238,6 +238,16 @@ trait ApplicationService {
       _ <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email, "timestamp" -> DateTimeUtils.now.toString))
     } yield ticketResponse
   }
+
+  def request2SVRemoval(name: String, email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+    val remove2SVTicket = DeskproTicket.removeDeveloper2SV(name, email)
+
+    for {
+      ticketResponse <- deskproConnector.createTicket(remove2SVTicket)
+      _ <- auditService.audit(Remove2SVRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email, "timestamp" -> DateTimeUtils.now.toString))
+    } yield ticketResponse
+  }
+
 }
 
 object ApplicationServiceImpl extends ApplicationService {

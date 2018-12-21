@@ -432,3 +432,14 @@ object Remove2SVConfirmForm {
     )(Remove2SVConfirmForm.apply)(Remove2SVConfirmForm.unapply)
   )
 }
+
+final case class Help2SVConfirmForm(helpRemoveConfirm: Option[String] = Some(""))
+
+object Help2SVConfirmForm {
+
+  def form: Form[Help2SVConfirmForm] = Form(
+    mapping(
+      "helpRemoveConfirm" -> optional(text).verifying(FormKeys.remove2SVConfirmNoChoiceKey, s => s.isDefined)
+    )(Help2SVConfirmForm.apply)(Help2SVConfirmForm.unapply)
+  )
+}

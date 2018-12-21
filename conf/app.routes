@@ -10,6 +10,9 @@ GET         /resend-confirmation                                                
 
 GET         /login                                                                      controllers.UserLoginAccount.login
 POST        /login                                                                      controllers.UserLoginAccount.authenticate
+GET         /login/2SV-help                                                             controllers.UserLoginAccount.get2SVHelpConfirmationPage
+POST        /login/2SV-help                                                             controllers.UserLoginAccount.confirm2SVHelp
+GET         /login/2SV-help/complete                                                    controllers.UserLoginAccount.get2SVHelpCompletionPage
 
 GET         /logout                                                                     controllers.UserLogoutAccount.logout
 
