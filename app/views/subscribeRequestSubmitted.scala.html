@@ -35,8 +35,9 @@ implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Mess
 ) {
     <div class="govuk-box-highlight">
         <h1 class="heading-xlarge">Request submitted</h1>
-        <p class="font-medium">Subscribe to @name @version</p>
     </div>
+
+    <p>You have requested to subscribe to @name @version</p>
 
     <h2 class="heading-large">What happens next</h2>
     <p>We will review your request and respond within 2 working days.</p>

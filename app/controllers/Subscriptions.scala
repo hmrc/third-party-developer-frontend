@@ -104,28 +104,29 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                         apiName: String,
                                         apiContext: String,
                                         apiVersion: String,
-                                        redirectTo: String) = adminOnApp(applicationId) {
-    implicit request =>
-      def requestChangeSubscription(subscribed: Boolean) = {
-        if (subscribed) subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
-        else subscriptionsService.requestApiSubscription(request.user, request.application, apiName, apiVersion)
-      }
+                                        redirectTo: String) = adminOnApp(applicationId) { implicit request =>
+    def requestChangeSubscription(subscribed: Boolean) = {
+      if (subscribed)
+        subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion).map(_ => Ok(views.html.unsubscribeRequestSubmitted(request.application, apiName, apiVersion)))
+      else
+        subscriptionsService.requestApiSubscription(request.user, request.application, apiName, apiVersion).map(_ => Ok(views.html.subscribeRequestSubmitted(request.application, apiName, apiVersion)))
+    }
 
-      def handleValidForm(subscribed: Boolean)(form: ChangeSubscriptionConfirmationForm) = form.confirm match {
-        case Some(true) => requestChangeSubscription(subscribed).map(_ => redirect(redirectTo, applicationId))
-        case _ => Future.successful(redirect(redirectTo, applicationId))
-      }
+    def handleValidForm(subscribed: Boolean)(form: ChangeSubscriptionConfirmationForm) = form.confirm match {
+      case Some(_) => requestChangeSubscription(subscribed)
+      case _ => Future.successful(redirect(redirectTo, applicationId))
+    }
 
-      def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
-        Future.successful(
-          BadRequest(changeSubscriptionConfirmation(request.application, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
+    def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
+      Future.successful(
+        BadRequest(changeSubscriptionConfirmation(request.application, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
 
-      if (request.application.hasLockedSubscriptions) {
-        applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).flatMap(subscribed =>
-          ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
-      } else {
-        Future.successful(BadRequest(errorHandler.badRequestTemplate))
-      }
+    if (request.application.hasLockedSubscriptions) {
+      applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).flatMap(subscribed =>
+        ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
+    } else {
+      Future.successful(BadRequest(errorHandler.badRequestTemplate))
+    }
   }
 
   def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String) = loggedInAction { implicit request =>
