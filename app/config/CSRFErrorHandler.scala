@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package unit.qr
+package config
 
-import qr.OTPAuthURI
-import uk.gov.hmrc.play.test.UnitSpec
+import javax.inject.Inject
+import play.api.http.Status.FORBIDDEN
+import play.api.mvc.{RequestHeader, Result}
+import play.api.mvc.Results.Redirect
+import play.filters.csrf.CSRF
 
-class OTPAuthURISpec extends UnitSpec {
+import scala.concurrent.Future
 
-  "apply" should {
-    "generate otpauth uri" in {
-      OTPAuthURI("ABC123", "Issuer", "User").toString shouldBe "otpauth://totp/Issuer:User?secret=ABC123&issuer=Issuer"
-    }
+class  CSRFErrorHandler @Inject()(errorHandler: ErrorHandler) extends CSRF.ErrorHandler {
+  override def handle(req: RequestHeader, msg: String): Future[Result] = {
+    val login = controllers.routes.UserLoginAccount.login()
+
+    if (req.path == login.url)
+      Future.successful(Redirect(login))
+    else
+      errorHandler.onClientError(req, FORBIDDEN, msg)
   }
 }

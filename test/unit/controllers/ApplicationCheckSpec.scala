@@ -17,10 +17,9 @@
 package unit.controllers
 
 import config.ApplicationConfig
-import controllers.{APISubscriptions, GroupedSubscriptions, ApiSubscriptionsHelper, ApplicationCheck}
+import controllers.{APISubscriptions, ApiSubscriptionsHelper, ApplicationCheck, GroupedSubscriptions}
 import domain.Role._
 import domain._
-import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.BDDMockito.given
@@ -28,15 +27,12 @@ import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import play.api.mvc.{AnyContent, Result}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
@@ -44,7 +40,8 @@ import utils.WithLoggedInSession._
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-class ApplicationCheckSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+
   implicit val materializer = fakeApplication.materializer
   val appId = "1234"
   val appName: String = "app"
@@ -59,29 +56,39 @@ class ApplicationCheckSpec extends UnitSpec with MockitoSugar with WithFakeAppli
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-  val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
+  val tokens = ApplicationTokens(EnvironmentToken(
+    "clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
 
   val groupedSubs = GroupedSubscriptions(Seq.empty,
     Seq(APISubscriptions("API1", "ServiceName", "apiContent",
-      Seq(APISubscriptionStatus("API1", "subscriptionServiceName", "context", APIVersion("version", APIStatus.STABLE), subscribed = false, requiresTrust = false)))))
+      Seq(APISubscriptionStatus(
+        "API1", "subscriptionServiceName", "context", APIVersion("version", APIStatus.STABLE), subscribed = false, requiresTrust = false)))))
 
   trait Setup {
-    val underTest = new ApplicationCheck {
-      override val sessionService = mock[SessionService]
-      override val applicationService = mock[ApplicationService]
-      override val appConfig = mock[ApplicationConfig]
-      val apiSubscriptionsHelper = mock[ApiSubscriptionsHelper]
-    }
+    val underTest = new ApplicationCheck(
+      mock[ApplicationService],
+      mock[ApiSubscriptionsHelper],
+      mock[SessionService],
+      mockErrorHandler,
+      mock[ApplicationConfig]
+    )
 
     val hc = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
-    given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
-    given(underTest.applicationService.removeTeamMember(any[Application], any[String], mockEq(loggedInUser.email))(any[HeaderCarrier])).willReturn(ApplicationUpdateSuccessful)
-    given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier])).willReturn(ApplicationUpdateSuccessful)
-    given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[Developer])(any[HeaderCarrier])).willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs), true))))
+    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+      .willReturn(Some(session))
+    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
+      .willReturn(successful(ApplicationUpdateSuccessful))
+    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
+      .willReturn(successful(application))
+    given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier]))
+      .willReturn(tokens)
+    given(underTest.applicationService.removeTeamMember(any[Application], any[String], mockEq(loggedInUser.email))(any[HeaderCarrier]))
+      .willReturn(ApplicationUpdateSuccessful)
+    given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
+      .willReturn(ApplicationUpdateSuccessful)
+    given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[Developer])(any[HeaderCarrier]))
+      .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs), hasSubscriptions = true))))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
@@ -274,12 +281,14 @@ class ApplicationCheckSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
       val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
 
-      given(underTest.applicationService.requestUplift(mockEq(appId), mockEq(application.name), mockEq(loggedInUser))(any[HeaderCarrier])).willAnswer(new Answer[Future[ApplicationUpliftSuccessful]]() {
+      given(underTest.applicationService.requestUplift(mockEq(appId), mockEq(application.name), mockEq(loggedInUser))(any[HeaderCarrier]))
+        .willAnswer(new Answer[Future[ApplicationUpliftSuccessful]]() {
         def answer(invocation: InvocationOnMock): Future[ApplicationUpliftSuccessful] = {
           Future.failed(new ApplicationAlreadyExists)
         }
       })
-      given(underTest.applicationService.updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])).willReturn(ApplicationUpdateSuccessful)
+      given(underTest.applicationService.updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier]))
+        .willReturn(ApplicationUpdateSuccessful)
 
       val result = await(addToken(underTest.requestCheckAction(appId))(requestWithFormBody))
 

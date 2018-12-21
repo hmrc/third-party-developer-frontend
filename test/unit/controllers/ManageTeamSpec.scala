@@ -26,14 +26,11 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, anyString, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
@@ -41,7 +38,7 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
 
-class ManageTeamSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
   implicit val materializer = fakeApplication.materializer
   val appId = "1234"
   val clientId = "clientId123"
@@ -51,13 +48,14 @@ class ManageTeamSpec extends UnitSpec with MockitoSugar with WithFakeApplication
   val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
 
   trait Setup {
-    val underTest = new ManageTeam {
-      override val sessionService = mock[SessionService]
-      override val applicationService = mock[ApplicationService]
-      override val developerConnector = mock[ThirdPartyDeveloperConnector]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-    }
+    val underTest = new ManageTeam(
+      mock[SessionService],
+      mock[AuditService],
+      mock[ThirdPartyDeveloperConnector],
+      mock[ApplicationService],
+      mockErrorHandler,
+      mock[ApplicationConfig]
+    )
 
     val hc = HeaderCarrier()
 

@@ -16,11 +16,13 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import domain._
+import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.Action
 import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
 import service.{AuditAction, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,7 +42,12 @@ trait Auditing {
   }
 }
 
-trait UserLoginAccount extends LoggedOutController with LoginLogout with Auditing {
+@Singleton
+class UserLoginAccount @Inject()(val auditService: AuditService,
+                                 val errorHandler: ErrorHandler,
+                                 val sessionService: SessionService,
+                                 implicit val appConfig: ApplicationConfig)
+  extends LoggedOutController with LoginLogout with Auditing {
 
   import play.api.data._
 
@@ -51,7 +58,7 @@ trait UserLoginAccount extends LoggedOutController with LoginLogout with Auditin
     Future.successful(Ok(signIn("Sign in", loginForm)))
   }
 
-  def accountLocked = Action.async  { implicit request =>
+  def accountLocked = Action.async { implicit request =>
     for {
       _ <- tokenAccessor.extract(request)
         .map(sessionService.destroy)
@@ -65,8 +72,8 @@ trait UserLoginAccount extends LoggedOutController with LoginLogout with Auditin
       requestForm.fold(
         errors => Future.successful(BadRequest(signIn("Sign in", errors))),
         login => sessionService.authenticate(login.emailaddress, login.password) flatMap { session => {
-          audit(LoginSucceeded, session.developer)
-            gotoLoginSucceeded(session.sessionId)
+          //audit(LoginSucceeded, session.developer)
+          gotoLoginSucceeded(session.sessionId)
         }
         } recover {
           case e: InvalidEmail =>
@@ -83,9 +90,4 @@ trait UserLoginAccount extends LoggedOutController with LoginLogout with Auditin
         }
       )
   }
-}
-
-object UserLoginAccount extends UserLoginAccount with WithAppConfig {
-  override val sessionService = SessionService
-  override val auditService = AuditService
 }

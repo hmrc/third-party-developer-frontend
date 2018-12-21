@@ -19,6 +19,7 @@ package unit.views
 import config.ApplicationConfig
 import domain._
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
@@ -28,7 +29,10 @@ import utils.CSRFTokenHelper._
 import utils.ViewHelpers.elementExistsByText
 
 
-class DeleteApplicationCompleteSpec extends UnitSpec with OneServerPerSuite {
+class DeleteApplicationCompleteSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
+
   "delete application complete page" should {
     "render with no errors" in {
 
@@ -42,7 +46,7 @@ class DeleteApplicationCompleteSpec extends UnitSpec with OneServerPerSuite {
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
 
-      val page = views.html.deleteApplicationComplete.render(application, request, loggedInUser, applicationMessages, ApplicationConfig, "details")
+      val page = views.html.deleteApplicationComplete.render(application, request, loggedInUser, applicationMessages, appConfig, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

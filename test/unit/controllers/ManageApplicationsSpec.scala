@@ -16,7 +16,7 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain._
@@ -27,7 +27,6 @@ import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -35,13 +34,15 @@ import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils
+import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import utils.ViewHelpers._
 
 import scala.concurrent.Future._
 
-class ManageApplicationsSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class ManageApplicationsSpec
+  extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures with SubscriptionTestHelperSugar with WithCSRFAddToken {
+
   implicit val materializer = fakeApplication.materializer
   val appId = "1234"
   val clientId = "clientId123"
@@ -55,13 +56,14 @@ class ManageApplicationsSpec extends UnitSpec with MockitoSugar with WithFakeApp
   val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
 
   trait Setup {
-    val underTest = new ManageApplications {
-      override val sessionService = mock[SessionService]
-      override val applicationService = mock[ApplicationService]
-      override val developerConnector = mock[ThirdPartyDeveloperConnector]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-    }
+    val underTest = new ManageApplications(
+      mock[ApplicationService],
+      mock[ThirdPartyDeveloperConnector],
+      mock[SessionService],
+      mock[AuditService],
+      mock[ErrorHandler],
+      mock[ApplicationConfig]
+    )
 
     val hc = HeaderCarrier()
 
@@ -102,7 +104,8 @@ class ManageApplicationsSpec extends UnitSpec with MockitoSugar with WithFakeApp
       val dom = Jsoup.parse(bodyOf(result))
       termsOfUseWarningExists(dom) shouldBe true
       termsOfUseColumnExists(dom) shouldBe true
-      elementIdentifiedByAttrWithValueContainsText(dom, "a", "href", s"/developer/applications/${application.id}/details/terms-of-use", "Read and agree") shouldBe true
+      elementIdentifiedByAttrWithValueContainsText(
+        dom, "a", "href", s"/developer/applications/${application.id}/details/terms-of-use", "Read and agree") shouldBe true
     }
 
     "show the needs admin rights indication for a developer on an app that has not has the terms of use agreed" in new Setup {
@@ -123,7 +126,9 @@ class ManageApplicationsSpec extends UnitSpec with MockitoSugar with WithFakeApp
 
     "show the terms of use agreed indication for an app that has has the terms of use agreed" in new Setup {
 
-      val appWithTermsOfUseAgreed = application.copy(id = "56768", checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))))
+      val appWithTermsOfUseAgreed =
+        application.copy(
+          id = "56768", checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))))
 
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application, appWithTermsOfUseAgreed)))
@@ -155,7 +160,8 @@ class ManageApplicationsSpec extends UnitSpec with MockitoSugar with WithFakeApp
 
     "not show the terms of use warning and column when there are no apps requiring terms of use agreement" in new Setup {
 
-      val appWithTermsOfUseAgreed = application.copy(id = "56768", checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))))
+      val appWithTermsOfUseAgreed = application.copy(
+        id = "56768", checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))))
 
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(appWithTermsOfUseAgreed)))
@@ -227,25 +233,10 @@ class ManageApplicationsSpec extends UnitSpec with MockitoSugar with WithFakeApp
       val result = await(underTest.addApplicationAction()(request))
       val dom = Jsoup.parse(bodyOf(result))
       val element = Option(dom.getElementById("manage-api-subscriptions"))
-      elementIdentifiedByAttrWithValueContainsText(dom, "a", "href", s"/developer/applications/${application.id}/subscriptions", "Manage API subscriptions") shouldBe true
+      elementIdentifiedByAttrWithValueContainsText(
+        dom, "a", "href", s"/developer/applications/${application.id}/subscriptions", "Manage API subscriptions") shouldBe true
       element shouldBe defined
     }
-  }
-
-  private def titleOf(result: Result) = {
-    val titleRegEx = """<title[^>]*>(.*)</title>""".r
-    val title = titleRegEx.findFirstMatchIn(bodyOf(result)).map(_.group(1))
-    title.isDefined shouldBe true
-    title.get
-  }
-
-  private def givenTheApplicationExistWithUserRole(applicationService: ApplicationService, appId: String, userRole: Role, state: ApplicationState = ApplicationState.testing) = {
-    val application = Application(appId, clientId, "app", DateTimeUtils.now, Environment.PRODUCTION,
-      collaborators = Set(Collaborator(loggedInUser.email, userRole)), state = state)
-
-    given(applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(application)
-    given(applicationService.fetchCredentials(mockEq(appId))(any[HeaderCarrier])).willReturn(tokens)
-    given(applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty)
   }
 
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))

@@ -33,9 +33,7 @@ class SessionServiceSpec extends UnitSpec with Matchers with MockitoSugar with S
   trait Setup {
     implicit val hc = HeaderCarrier()
 
-    val underTest = new SessionService {
-      override val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
-    }
+    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector])
 
     val email = "thirdpartydeveloper@example.com"
     val encodedEmail = "thirdpartydeveloper%40example.com"

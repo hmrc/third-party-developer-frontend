@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import domain.{Developer, Environment}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
@@ -27,12 +28,13 @@ import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers._
 
-class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite {
+class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
   val productionMessage = "We take up to 10 working days to check applications and issue production credentials."
   val productionButton = "Start the checklist"
   val sandboxMessage = "You can now get your sandbox credentials for testing."
   val sandboxButton = "Manage API subscriptions"
+  val appConfig = mock[ApplicationConfig]
 
   "Add application success page" should {
 
@@ -40,7 +42,7 @@ class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite {
       val applicationId = "application-id"
       val loggedIn = Developer("", "", "", None)
       val request = FakeRequest().withCSRFToken
-      val page = views.html.addApplicationSuccess.render(applicationName, applicationId, environment.toString, request, loggedIn, applicationMessages, ApplicationConfig, navSection = "nav-section")
+      val page = views.html.addApplicationSuccess.render(applicationName, applicationId, environment.toString, request, loggedIn, applicationMessages, appConfig, navSection = "nav-section")
       val document = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", s"You added $applicationName") shouldBe true
       document

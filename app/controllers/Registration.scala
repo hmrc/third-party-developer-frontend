@@ -16,21 +16,25 @@
 
 package controllers
 
-import config.ApplicationGlobal
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.{EmailAlreadyInUse, RegistrationSuccessful}
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Action, Flash}
+import play.api.mvc.Action
 import service.SessionService
+import uk.gov.hmrc.http.{BadRequestException, NotFoundException}
 import views.html.signIn
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, NotFoundException }
 
-trait Registration extends LoggedOutController {
-
-  val connector: ThirdPartyDeveloperConnector
+@Singleton
+class Registration @Inject()(override val sessionService: SessionService,
+                             val connector: ThirdPartyDeveloperConnector,
+                             val errorHandler: ErrorHandler,
+                             override implicit val appConfig: ApplicationConfig)
+  extends LoggedOutController {
 
   import ErrorFormBuilder.GlobalError
   import play.api.data._
@@ -51,7 +55,8 @@ trait Registration extends LoggedOutController {
           )))
         },
         userData => {
-          val registration = domain.Registration(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
+          val registration =
+            domain.Registration(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
           connector.register(registration).map {
             case RegistrationSuccessful => Redirect(controllers.routes.Registration.confirmation()).addingToSession("email" -> userData.emailaddress)
             case EmailAlreadyInUse => BadRequest(views.html.registration(requestForm.emailAddressAlreadyInUse))
@@ -65,9 +70,9 @@ trait Registration extends LoggedOutController {
       request.session.get("email").fold(Future.successful(BadRequest(signIn("Sign in", LoginForm.form)))) { email =>
         connector.resendVerificationEmail(email) map {
           case status if status >= 200 && status < 300 => Redirect(controllers.routes.Registration.confirmation())
-          case _ => NotFound(ApplicationGlobal.notFoundTemplate).removingFromSession("email")
+          case _ => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
         } recover {
-          case e: NotFoundException => NotFound(ApplicationGlobal.notFoundTemplate).removingFromSession("email")
+          case _: NotFoundException => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
         }
       }
   }
@@ -77,7 +82,7 @@ trait Registration extends LoggedOutController {
       _ <- ensureLoggedOut
       _ <- connector.verify(code)
     } yield Ok(views.html.accountVerified())) recover {
-      case e: BadRequestException => BadRequest(ApplicationGlobal.standardErrorTemplate(
+      case _: BadRequestException => BadRequest(errorHandler.standardErrorTemplate(
         "Invalid link", "Invalid verification code", "The verification link is invalid, please check your mail and enter valid link."))
     }
   }
@@ -91,9 +96,4 @@ trait Registration extends LoggedOutController {
     implicit request =>
       Future.successful(Ok(views.html.resendConfirmation()))
   }
-}
-
-object Registration extends Registration with WithAppConfig {
-  override val sessionService = SessionService
-  override val connector = ThirdPartyDeveloperConnector
 }

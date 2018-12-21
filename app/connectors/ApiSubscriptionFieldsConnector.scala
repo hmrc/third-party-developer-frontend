@@ -18,18 +18,24 @@ package connectors
 
 import java.net.URLEncoder.encode
 
-import config.{ApplicationConfig, ProxiedApiPlatformWSHttp, WSHttp}
+import config.ApplicationConfig
 import domain.ApiSubscriptionFields._
+import javax.inject.{Inject, Singleton}
 import play.api.http.Status.NO_CONTENT
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ApiSubscriptionFieldsConnector extends ServicesConfig {
+abstract class ApiSubscriptionFieldsConnector {
+  protected val httpClient: HttpClient
+  protected val proxiedHttpClient: ProxiedHttpClient
   val serviceBaseUrl: String
-  val http: WSHttp
+  val useProxy: Boolean
+  val bearerToken: String
+
+  def http: HttpClient = if (useProxy) proxiedHttpClient.withAuthorization(bearerToken) else httpClient
 
   def fetchFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Option[SubscriptionFields]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
@@ -65,30 +71,27 @@ trait ApiSubscriptionFieldsConnector extends ServicesConfig {
 
   private def urlSubscriptionFieldDefinition(apiContext: String, apiVersion: String) =
     s"$serviceBaseUrl/definition/context/${urlEncode(apiContext)}/version/${urlEncode(apiVersion)}"
-
-  private def maybeConfigField(field: String) = runModeConfiguration.getString(s"$services.$field")
-
-  protected def getContext(key: String): String = {
-    maybeConfigField(s"$key.context") match {
-      case None => ""
-      case Some(ctx) if ctx(0) == '/' => ctx
-      case Some(ctx) => s"/$ctx"
-    }
-  }
 }
 
-object ApiSubscriptionFieldsProductionConnector extends ApiSubscriptionFieldsConnector {
-  val serviceBaseUrl = ApplicationConfig.apiSubscriptionFieldsProductionUrl
+@Singleton
+class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient,
+                                                      val proxiedHttpClient: ProxiedHttpClient,
+                                                      appConfig: ApplicationConfig)
+  extends ApiSubscriptionFieldsConnector {
 
-  val http: WSHttp = if (ApplicationConfig.apiSubscriptionFieldsProductionUseProxy) {
-    ProxiedApiPlatformWSHttp(ApplicationConfig.apiSubscriptionFieldsProductionBearerToken)
-  } else WSHttp
+  val serviceBaseUrl = appConfig.apiSubscriptionFieldsSandboxUrl
+  val useProxy = appConfig.apiSubscriptionFieldsSandboxUseProxy
+  val bearerToken = appConfig.apiSubscriptionFieldsSandboxBearerToken
 }
 
-object ApiSubscriptionFieldsSandboxConnector extends ApiSubscriptionFieldsConnector {
-  val serviceBaseUrl = ApplicationConfig.apiSubscriptionFieldsSandboxUrl
+@Singleton
+class ApiSubscriptionFieldsProductionConnector @Inject()(val httpClient: HttpClient,
+                                                         val proxiedHttpClient: ProxiedHttpClient,
+                                                         appConfig: ApplicationConfig)
+  extends ApiSubscriptionFieldsConnector {
 
-  val http: WSHttp = if (ApplicationConfig.apiSubscriptionFieldsSandboxUseProxy) {
-    ProxiedApiPlatformWSHttp(ApplicationConfig.apiSubscriptionFieldsSandboxBearerToken)
-  } else WSHttp
+  val serviceBaseUrl = appConfig.apiSubscriptionFieldsProductionUrl
+  val useProxy = appConfig.apiSubscriptionFieldsProductionUseProxy
+  val bearerToken = appConfig.apiSubscriptionFieldsProductionBearerToken
 }
+

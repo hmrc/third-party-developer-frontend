@@ -16,22 +16,24 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
+import javax.inject.{Inject, Singleton}
+import jp.t2v.lab.play2.auth.OptionalAuthElement
+import play.api.Play.current
 import play.api.data.Form
-import service.DeskproService
+import play.api.i18n.Messages.Implicits._
+import service.{DeskproService, SessionService}
+import views.html.{supportEnquiry, supportThankyou}
 
 import scala.concurrent.Future
 
-import jp.t2v.lab.play2.auth.OptionalAuthElement
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+@Singleton
+class Support @Inject()(val deskproService: DeskproService,
+                        val sessionService: SessionService,
+                        val errorHandler: ErrorHandler,
+                        implicit val appConfig: ApplicationConfig)
+  extends BaseController with OptionalAuthElement {
 
-import service.SessionService
-import views.html.{supportEnquiry, supportThankyou}
-
-
-trait Support extends BaseController with OptionalAuthElement {
-
-  val deskproService: DeskproService
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
   def raiseSupportEnquiry = AsyncStack { implicit request =>
@@ -53,9 +55,4 @@ trait Support extends BaseController with OptionalAuthElement {
     val displayName = loggedIn.map(_.displayedName)
     Future.successful(Ok(supportThankyou("Thank you", displayName)))
   }
-}
-
-object Support extends Support with WithAppConfig {
-  override val sessionService = SessionService
-  override val deskproService = DeskproService
 }

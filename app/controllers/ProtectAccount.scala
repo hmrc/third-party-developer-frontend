@@ -16,24 +16,30 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages.Implicits._
-import qr.{OTPAuthURI, QRCode}
+import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, SessionService}
 import views.html.protectAccountRemovalAccessCode
 
 import scala.concurrent.Future
 
-trait ProtectAccount extends LoggedInController {
+@Singleton
+class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
+                               val otpAuthUri: OtpAuthUri,
+                               val mfaService: MFAService,
+                               val sessionService: SessionService,
+                               val errorHandler: ErrorHandler)(
+                               implicit val appConfig: ApplicationConfig) extends LoggedInController {
 
-  val connector: ThirdPartyDeveloperConnector
-  val qrCode: QRCode
-  val otpAuthUri: OTPAuthURI
-  val mfaService: MFAService
-
+  private val scale = 7
+  val qrCode = QRCode(scale)
+ 
   def getQrCode() = loggedInAction { implicit request =>
     connector.createMfaSecret(loggedIn.email).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
@@ -112,15 +118,6 @@ trait ProtectAccount extends LoggedInController {
     Future.successful(Ok(views.html.protectAccountRemovalComplete()))
   }
 
-}
-
-object ProtectAccount extends ProtectAccount with WithAppConfig {
-  override val sessionService = SessionService
-  override val connector = ThirdPartyDeveloperConnector
-  private val scale = 7
-  override val qrCode = QRCode(scale)
-  override val otpAuthUri = OTPAuthURI
-  override val mfaService = MFAService
 }
 
 final case class ProtectAccountForm(accessCode: String)

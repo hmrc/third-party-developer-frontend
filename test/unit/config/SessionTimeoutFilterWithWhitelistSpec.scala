@@ -16,6 +16,8 @@
 
 package unit.config
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import config.{SessionTimeoutFilterWithWhitelist, WhitelistedCall}
 import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.mockito.Matchers._
@@ -26,18 +28,24 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.mvc._
 import play.api.test.FakeRequest
+import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilterConfig
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
 
   trait Setup {
-    val filter = new SessionTimeoutFilterWithWhitelist(
-      timeoutDuration = Duration.standardSeconds(1),
-      whitelistedCalls = Set(WhitelistedCall("/login", "GET")),
-      onlyWipeAuthToken = false
-    )
+    implicit val sys = ActorSystem("SessionTimeoutFilterWithWhitelistSpec")
+    implicit val mat = ActorMaterializer()
+    val config = SessionTimeoutFilterConfig(
+        timeoutDuration = Duration.standardSeconds(1),
+        onlyWipeAuthToken = false)
+
+    val filter = new SessionTimeoutFilterWithWhitelist(config) {
+      override val whitelistedCalls = Set(WhitelistedCall("/login", "GET"))
+    }
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
 

@@ -20,33 +20,31 @@ import config.ApplicationConfig
 import connectors.DeskproConnector
 import controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import domain.{DeskproTicket, Feedback, TicketCreated, TicketId}
-import org.mockito
+import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import service.DeskproService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import mockito.Matchers.any
-
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class DeskproServiceSpec  extends UnitSpec with Matchers with MockitoSugar with ScalaFutures {
-  val underTest = new DeskproService {
-    override val deskproConnector: DeskproConnector = mock[DeskproConnector]
-    override val applicationConfig = mock[ApplicationConfig]
-  }
+class DeskproServiceSpec extends UnitSpec with Matchers with MockitoSugar with ScalaFutures {
+  val underTest = new DeskproService(
+    mock[DeskproConnector],
+    mock[ApplicationConfig]
+  )
 
   "DeskproService" when {
 
     "A valid Signout Survey is completed" should {
       "Convert the SignoutSurveyForm into a Feedback Ticket and sends it to Deskpro" in {
         val title = "Title"
-        when(underTest.applicationConfig.title).thenReturn(title)
+        when(underTest.appConfig.title).thenReturn(title)
         when(underTest.deskproConnector.createFeedback(any[Feedback])(any[HeaderCarrier])).thenReturn(Future(TicketId(123)))
 
         implicit val fakeRequest = FakeRequest()
@@ -62,7 +60,7 @@ class DeskproServiceSpec  extends UnitSpec with Matchers with MockitoSugar with 
 
       "Convert the SignoutSurveyForm with empty suggested improvements into a Feedback Ticket and sends it to Deskpro" in {
         val title = "Title"
-        when(underTest.applicationConfig.title).thenReturn(title)
+        when(underTest.appConfig.title).thenReturn(title)
         when(underTest.deskproConnector.createFeedback(any[Feedback])(any[HeaderCarrier])).thenReturn(Future(TicketId(123)))
 
         implicit val fakeRequest = FakeRequest()
@@ -81,7 +79,7 @@ class DeskproServiceSpec  extends UnitSpec with Matchers with MockitoSugar with 
     "A valid Support Enquiry is completed" should {
       "Convert the SupportEnquiryForm into a DeskproTicket and sends it to Deskpro" in {
         val title = "Title"
-        when(underTest.applicationConfig.title).thenReturn(title)
+        when(underTest.appConfig.title).thenReturn(title)
         when(underTest.deskproConnector.createTicket(any[DeskproTicket])(any[HeaderCarrier])).thenReturn(Future(TicketCreated))
 
         implicit val fakeRequest = FakeRequest()

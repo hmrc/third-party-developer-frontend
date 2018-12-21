@@ -17,16 +17,15 @@
 package service
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.{Session, SessionInvalid, LoginRequest}
-
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import scala.concurrent.Future
+import domain.{LoginRequest, Session, SessionInvalid}
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
-trait SessionService {
-  val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
+@Singleton
+class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector) {
   def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[Session] =
     thirdPartyDeveloperConnector.createSession(LoginRequest(emailAddress, password))
 
@@ -39,8 +38,4 @@ trait SessionService {
 
   def destroy(sessionId: String)(implicit hc: HeaderCarrier): Future[Int] =
     thirdPartyDeveloperConnector.deleteSession(sessionId)
-}
-
-object SessionService extends SessionService {
-  override val thirdPartyDeveloperConnector = ThirdPartyDeveloperConnector
 }

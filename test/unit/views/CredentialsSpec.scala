@@ -22,6 +22,7 @@ import domain._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
@@ -32,8 +33,10 @@ import views.html.credentials
 
 import scala.collection.JavaConversions._
 
-class CredentialsSpec extends UnitSpec with OneServerPerSuite {
+class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
   trait Setup {
+    val appConfig = mock[ApplicationConfig]
+
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
       doc.select(elementType).exists(node => node.text.trim == elementText)
     }
@@ -75,7 +78,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite {
 
     "render" in new Setup {
 
-      val page = credentials.render(Role.ADMINISTRATOR, application, emptyTokens, form, request, developer, applicationMessages, ApplicationConfig, "credentials")
+      val page = credentials.render(Role.ADMINISTRATOR, application, emptyTokens, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include("text/html")
 
@@ -88,7 +91,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite {
 
       val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1, clientSecret2), ""))
       val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"))
-      val page = credentials.render(Role.ADMINISTRATOR, productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, ApplicationConfig, "credentials")
+      val page = credentials.render(Role.ADMINISTRATOR, productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include ("text/html")
 
@@ -101,7 +104,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite {
 
       val tokensWithOneClientSecret = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
       val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"))
-      val page = credentials.render(Role.ADMINISTRATOR, productionApp, tokensWithOneClientSecret, form, request, developer, applicationMessages, ApplicationConfig, "credentials")
+      val page = credentials.render(Role.ADMINISTRATOR, productionApp, tokensWithOneClientSecret, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include("text/html")
 
@@ -114,7 +117,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite {
 
       val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1, clientSecret2), ""))
 
-      val page = credentials.render(Role.ADMINISTRATOR, sandboxApplication, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, ApplicationConfig, "credentials")
+      val page = credentials.render(Role.ADMINISTRATOR, sandboxApplication, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include ("text/html")
 
@@ -127,7 +130,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite {
 
       val tokensWithOneClientSecret = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
 
-      val page = credentials.render(Role.ADMINISTRATOR, sandboxApplication, tokensWithOneClientSecret, form, request, developer, applicationMessages, ApplicationConfig, "credentials")
+      val page = credentials.render(Role.ADMINISTRATOR, sandboxApplication, tokensWithOneClientSecret, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include("text/html")
 

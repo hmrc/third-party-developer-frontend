@@ -3,7 +3,6 @@ import com.typesafe.sbt.uglify.Import._
 import com.typesafe.sbt.web.Import._
 import net.ground5hark.sbt.concat.Import._
 import play.core.PlayVersion
-import play.routes.compiler.StaticRoutesGenerator
 import play.sbt.PlayImport._
 import play.sbt.routes.RoutesKeys.routesGenerator
 import sbt.Keys._
@@ -28,7 +27,9 @@ lazy val enumeratumVersion = "1.5.11"
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "frontend-bootstrap" % "10.9.0",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.3.0",
+  "uk.gov.hmrc" %% "govuk-template" % "5.26.0-play-25",
+  "uk.gov.hmrc" %% "play-ui" % "7.27.0-play-25",
   "uk.gov.hmrc" %% "url-builder" % "2.1.0",
   "uk.gov.hmrc" %% "play-json-union-formatter" % "1.3.0",
   "uk.gov.hmrc" %% "http-metrics" % "1.2.0",
@@ -46,7 +47,7 @@ lazy val compile = Seq(
 lazy val test = Seq(
   "info.cukes" %% "cucumber-scala" % cucumberVersion % "test",
   "info.cukes" % "cucumber-junit" % cucumberVersion % "test",
-  "uk.gov.hmrc" %% "hmrctest" % "3.2.0" % "test",
+  "uk.gov.hmrc" %% "hmrctest" % "3.3.0" % "test",
   "junit" % "junit" % "4.12" % "test",
   "org.jsoup" % "jsoup" % "1.10.2" % "test",
   "org.pegdown" % "pegdown" % "1.6.0" % "test",
@@ -101,18 +102,29 @@ lazy val microservice = Project(appName, file("."))
     parallelExecution in Test := false,
     fork in Test := false,
     retrieveManaged := true,
-    routesGenerator := StaticRoutesGenerator,
+    routesGenerator := InjectedRoutesGenerator,
     scalaVersion := "2.11.11",
     resolvers += Resolver.jcenterRepo
   )
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
-  .settings(testOptions in Test := Seq(Tests.Filter(unitFilter))
+  .settings(testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
+  )
+  .configs(IntegrationTest)
+  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
+  .settings(
+    testOptions in IntegrationTest := Seq(Tests.Filter(integrationTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test")),
+    unmanagedResourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test")),
+    // unmanagedResourceDirectories in IntegrationTest <+= baseDirectory(_ / "target/web/public/test"),
+    // testOptions in IntegrationTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
+    //testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
+    parallelExecution in IntegrationTest := false
   )
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
-    testOptions in ComponentTest := Seq(Tests.Filter(componentTestFilter)),
+    testOptions in ComponentTest := Seq(Tests.Filter(componentTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     unmanagedSourceDirectories in ComponentTest <<= (baseDirectory in ComponentTest) (base => Seq(base / "test")),
     unmanagedResourceDirectories in ComponentTest <<= (baseDirectory in ComponentTest) (base => Seq(base / "test")),
     unmanagedResourceDirectories in ComponentTest <+= baseDirectory(_ / "target/web/public/test"),
@@ -122,6 +134,7 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
 lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
+lazy val IntegrationTest = config("it") extend Test
 lazy val ComponentTest = config("component") extend Test
 lazy val TemplateTest = config("tt") extend Test
 lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
@@ -134,7 +147,7 @@ lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
   publishAllArtefacts
 
 def unitFilter(name: String): Boolean = name startsWith "unit"
-
+def integrationTestFilter(name: String): Boolean = name startsWith "it"
 def componentTestFilter(name: String): Boolean = name startsWith "component.js"
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
