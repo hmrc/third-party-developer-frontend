@@ -31,13 +31,13 @@ import play.api.http.Status.NO_CONTENT
 import play.api.libs.json.{JsString, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
+import uk.gov.hmrc.play.http.metrics.API
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ThirdPartyDeveloperConnectorSpec extends BaseConnectorSpec {
+class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
   trait Setup {
     implicit val hc = HeaderCarrier()
@@ -45,6 +45,7 @@ class ThirdPartyDeveloperConnectorSpec extends BaseConnectorSpec {
     val mockPayloadEncryption = mock[PayloadEncryption]
     val encryptedJson = new EncryptedJson(mockPayloadEncryption)
     val mockAppConfig = mock[ApplicationConfig]
+    val mockMetrics = new NoopConnectorMetrics()
     val encryptedString = JsString("someencryptedstringofdata")
     val encryptedBody =  Json.toJson(SecretRequest(encryptedString.as[String]))
 

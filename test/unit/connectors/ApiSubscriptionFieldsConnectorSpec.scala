@@ -22,14 +22,17 @@ import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
 import org.mockito.Matchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
 import uk.gov.hmrc.http.{HttpResponse, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
+class ApiSubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
   implicit val hc = HeaderCarrier()
 

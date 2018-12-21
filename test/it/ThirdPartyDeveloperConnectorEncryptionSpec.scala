@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package unit.connectors
+package it
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.{ApplicationConfig}
-import connectors.{ConnectorMetrics, EncryptedJson, NoopConnectorMetrics, ThirdPartyDeveloperConnector}
+import connectors.{ConnectorMetrics, NoopConnectorMetrics, ThirdPartyDeveloperConnector}
 import domain._
-import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Configuration, Mode}
 import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(

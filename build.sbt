@@ -116,9 +116,6 @@ lazy val microservice = Project(appName, file("."))
     testOptions in IntegrationTest := Seq(Tests.Filter(integrationTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test")),
     unmanagedResourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test")),
-    // unmanagedResourceDirectories in IntegrationTest <+= baseDirectory(_ / "target/web/public/test"),
-    // testOptions in IntegrationTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
-    //testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
     parallelExecution in IntegrationTest := false
   )
   .configs(ComponentTest)

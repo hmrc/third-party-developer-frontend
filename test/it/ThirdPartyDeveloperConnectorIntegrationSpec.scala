@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package unit.connectors
+package it
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.ApplicationConfig
 import connectors._
 import domain._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Configuration, Mode}
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.Json
+import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
-import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with GuiceOneAppPerSuite {
+class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
     "Test.microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "abcdefghijklmnopqrstuv=="

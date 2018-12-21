@@ -109,8 +109,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
         case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
         case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
         case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
-          //case _: NotFoundException => throw new InvalidEmail
-          case e: NotFoundException => throw e
+        case _: NotFoundException => throw new InvalidEmail
       }
   }
 
