@@ -404,7 +404,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         status(result) shouldBe OK
 
-        bodyOf(result) should include(s"You have requested to subscribe to $apiName $apiVersion")
+        bodyOf(result) should include(s"success-request-subscribe-text")
 
         verify(underTest.applicationService).isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.subscriptionsService).requestApiSubscription(mockEq(loggedInDeveloper), mockEq(app), mockEq(apiName), mockEq(apiVersion))(any[HeaderCarrier])
@@ -427,7 +427,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         status(result) shouldBe OK
 
-        bodyOf(result) should include(s"You have requested to unsubscribe from $apiName $apiVersion")
+        bodyOf(result) should include(s"success-request-unsubscribe-text")
 
         verify(underTest.applicationService).isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.subscriptionsService, never).requestApiSubscription(mockEq(loggedInDeveloper), mockEq(app), mockEq(apiName), mockEq(apiVersion))(any[HeaderCarrier])
