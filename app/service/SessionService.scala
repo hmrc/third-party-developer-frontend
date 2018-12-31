@@ -17,7 +17,7 @@
 package service
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.{LoginRequest, Session, SessionInvalid}
+import domain._
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -26,8 +26,12 @@ import scala.concurrent.Future
 
 @Singleton
 class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector) {
-  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[Session] =
-    thirdPartyDeveloperConnector.createSession(LoginRequest(emailAddress, password))
+  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] =
+    thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password))
+
+  def authenticateTotp(emailAddress: String, totp: String, nonce: String)(implicit hc: HeaderCarrier): Future[Session] = {
+    thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(emailAddress, totp, nonce))
+  }
 
   def fetch(sessionId: String)(implicit hc: HeaderCarrier): Future[Option[Session]] =
     thirdPartyDeveloperConnector.fetchSession(sessionId)

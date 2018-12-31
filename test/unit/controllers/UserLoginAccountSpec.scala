@@ -44,9 +44,12 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
   implicit val materializer = fakeApplication.materializer
   val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(UUID.randomUUID().toString, user)
+  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
   val emailFieldName: String = "emailaddress"
   val passwordFieldName: String = "password"
   val userPassword = "Password1!"
+  val totp = "123456"
+  val nonce = "ABC-123"
 
   trait Setup {
     val underTest = new UserLoginAccount(mock[AuditService],
@@ -54,8 +57,11 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       mock[SessionService],
       mock[ApplicationConfig])
 
-    def mockAuthenticate(email: String, password: String, result: Future[Session]) =
+    def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse]) =
       given(underTest.sessionService.authenticate(Matchers.eq(email), Matchers.eq(password))(any[HeaderCarrier])).willReturn(result)
+
+    def mockAuthenticateTotp(email: String, totp: String, nonce: String, result: Future[Session]) =
+      given(underTest.sessionService.authenticateTotp(Matchers.eq(email), Matchers.eq(totp), Matchers.eq(nonce))(any[HeaderCarrier])).willReturn(result)
 
     def mockLogout() =
       given(underTest.sessionService.destroy(Matchers.eq(session.sessionId))(any[HeaderCarrier]))
@@ -66,13 +72,14 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
     given(underTest.appConfig.isExternalTestEnvironment).willReturn(false)
     given(underTest.sessionService.authenticate(anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
+    given(underTest.sessionService.authenticateTotp(anyString(), anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
   }
 
   "authenticate" should {
 
     "return the manage Applications page when the credentials are correct" in new Setup {
-      mockAuthenticate(user.email, userPassword, successful(session))
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       val request = FakeRequest().withSession(sessionParams: _*)
@@ -140,6 +147,34 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       bodyOf(result) should include("You entered incorrect login details too many times you&#x27;ll now have to reset your password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToLockedAccount), Matchers.eq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
+    }
+  }
+
+  "authenticateTotp" should {
+
+    "return the manage Applications page when the credentials are correct" in new Setup {
+      mockAuthenticateTotp(user.email, totp, nonce, successful(session))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      val request = FakeRequest().withSession(sessionParams: _*)
+        .withFormUrlEncodedBody(("email", user.email), ("accessCode", totp), ("nonce", nonce))
+
+      val result = await(underTest.authenticateTotp()(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/applications")
+      verify(underTest.auditService, times(1)).audit(
+        Matchers.eq(LoginSucceeded), Matchers.eq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
+    }
+
+    "return the login page when the access code is incorrect" in new Setup {
+      val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody(("email", user.email), ("accessCode", "654321"), ("nonce", nonce))
+      val result = await(addToken(underTest.authenticateTotp())(request))
+
+      status(result) shouldBe UNAUTHORIZED
+      bodyOf(result) should include("You have entered an incorrect access code")
     }
   }
 

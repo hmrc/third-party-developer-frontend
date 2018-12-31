@@ -21,14 +21,16 @@ import domain._
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.Play.current
+import play.api.data.Form
+import play.api.data.Forms.{mapping, text}
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.Action
+import play.api.mvc.{Action, Call}
 import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
 import service.{AuditAction, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
 
-import scala.concurrent.Future
+import scala.concurrent.Future.successful
 
 trait Auditing {
   val auditService: AuditService
@@ -55,39 +57,68 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
   def login = loggedOutAction { implicit request =>
-    Future.successful(Ok(signIn("Sign in", loginForm)))
+    successful(Ok(signIn("Sign in", loginForm)))
   }
 
   def accountLocked = Action.async { implicit request =>
     for {
       _ <- tokenAccessor.extract(request)
         .map(sessionService.destroy)
-        .getOrElse(Future.successful(()))
+        .getOrElse(successful(()))
     } yield Locked(views.html.accountLocked())
   }
 
-  def authenticate = Action.async {
-    implicit request =>
-      val requestForm = loginForm.bindFromRequest
-      requestForm.fold(
-        errors => Future.successful(BadRequest(signIn("Sign in", errors))),
-        login => sessionService.authenticate(login.emailaddress, login.password) flatMap { session => {
-          audit(LoginSucceeded, session.developer)
-          gotoLoginSucceeded(session.sessionId)
+  def authenticate = Action.async { implicit request =>
+    val requestForm = loginForm.bindFromRequest
+    requestForm.fold(
+      errors => successful(BadRequest(signIn("Sign in", errors))),
+      login => sessionService.authenticate(login.emailaddress, login.password) flatMap { userAuthenticationResponse =>
+        userAuthenticationResponse.session match {
+          case Some(session) => audit(LoginSucceeded, session.developer)
+                                gotoLoginSucceeded(session.sessionId)
+          case None => successful(Ok(logInAccessCode(
+            LoginTotpForm.form, login.emailaddress, userAuthenticationResponse.nonce.get)))
         }
-        } recover {
-          case e: InvalidEmail =>
-            audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
-            Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
-          case e: InvalidCredentials =>
-            audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
-            Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
-          case e: LockedAccount =>
-            audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
-            Locked(signIn("Sign in", LoginForm.accountLocked(requestForm)))
-          case e: UnverifiedAccount => Forbidden(signIn("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
-            .withSession("email" -> login.emailaddress)
-        }
-      )
+      } recover {
+        case _: InvalidEmail =>
+          audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
+          Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+        case _: InvalidCredentials =>
+          audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
+          Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+        case _: LockedAccount =>
+          audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
+          Locked(signIn("Sign in", LoginForm.accountLocked(requestForm)))
+        case _: UnverifiedAccount => Forbidden(signIn("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
+          .withSession("email" -> login.emailaddress)
+      }
+    )
   }
+
+  def authenticateTotp = Action.async { implicit request =>
+    LoginTotpForm.form.bindFromRequest.fold(
+      errors => successful(BadRequest(logInAccessCode(errors, errors.data("email"), errors.data("nonce")))),
+      validForm => sessionService.authenticateTotp(validForm.email, validForm.accessCode, validForm.nonce) flatMap { session =>
+        audit(LoginSucceeded, session.developer)
+        gotoLoginSucceeded(session.sessionId)
+      } recover {
+        case _: InvalidCredentials =>
+          Unauthorized(logInAccessCode(
+            LoginTotpForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code"),
+            validForm.email, validForm.nonce))
+      }
+    )
+  }
+}
+
+final case class LoginTotpForm(accessCode: String, email: String, nonce: String)
+
+object LoginTotpForm {
+  def form: Form[LoginTotpForm] = Form(
+    mapping(
+      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
+      "email" -> text,
+      "nonce" -> text
+    )(LoginTotpForm.apply)(LoginTotpForm.unapply)
+  )
 }
