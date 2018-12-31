@@ -100,55 +100,6 @@ class ThirdPartyDeveloperConnectorSpec extends BaseConnectorSpec {
     }
   }
 
-  "createSession" should {
-    val email = "john.smith@example.com"
-    val password = "MyPassword1"
-
-    val loginRequest = LoginRequest(email, password)
-
-    "successfully request a session to be created with an encrypted payload" in new Setup {
-      val createdSession = Session("sessionId", Developer("John", "Smith", email))
-
-      when(mockHttp.POST(endpoint("session"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.successful(HttpResponse(201, Some(Json.toJson(createdSession)))))
-
-      val session = await(connector.createSession(loginRequest))
-      session shouldBe createdSession
-
-      verify(mockPayloadEncryption).encrypt(Json.toJson(loginRequest))
-    }
-
-    "should throw InvalidCredentials if the response is 401" in new Setup {
-      when(mockHttp.POST(endpoint("session"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.failed(Upstream4xxResponse("401 error", 401, 401)))
-
-      val error = await(connector.createSession(loginRequest).failed)
-      error shouldBe a[InvalidCredentials]
-
-      verify(mockPayloadEncryption).encrypt(Json.toJson(loginRequest))
-    }
-
-    "should throw UnverifiedAccount if the response is 403" in new Setup {
-      when(mockHttp.POST(endpoint("session"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.failed(Upstream4xxResponse("403 error", 403, 403)))
-
-      val error = await(connector.createSession(loginRequest).failed)
-      error shouldBe a[UnverifiedAccount]
-
-      verify(mockPayloadEncryption).encrypt(Json.toJson(loginRequest))
-    }
-
-    "should throw LockedAccount if the response is 423" in new Setup {
-      when(mockHttp.POST(endpoint("session"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.failed(Upstream4xxResponse("423 error", 423, 423)))
-
-      val error = await(connector.createSession(loginRequest).failed)
-      error shouldBe a[LockedAccount]
-
-      verify(mockPayloadEncryption).encrypt(Json.toJson(loginRequest))
-    }
-  }
-
   "fetchSession" should {
     val sessionId = "sessionId"
     val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"))

@@ -100,20 +100,6 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     })
   }
 
-  def createSession(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
-    encryptedJson.secretRequestJson(
-      Json.toJson(loginRequest),
-      http.POST(s"$serviceBaseUrl/session", _, Seq(CONTENT_TYPE -> JSON)))
-      .map(_.json.as[Session])
-      .recover {
-        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
-          //case _: NotFoundException => throw new InvalidEmail
-          case e: NotFoundException => throw e
-      }
-  }
-
   def fetchSession(sessionId: String)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
     http.GET(s"$serviceBaseUrl/session/$sessionId")
       .map(_.json.as[Session])
@@ -209,4 +195,28 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     metrics.record(api) {
       http.DELETE(s"$serviceBaseUrl/developer/$email/mfa").map(status)
     }
+
+  def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
+    encryptedJson.secretRequestJson(
+      Json.toJson(loginRequest),
+      http.POST(s"$serviceBaseUrl/authenticate", _, Seq(CONTENT_TYPE -> JSON)))
+      .map(_.json.as[UserAuthenticationResponse])
+      .recover {
+        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
+        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
+        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
+        case _: NotFoundException => throw new InvalidEmail
+      }
+  }
+
+  def authenticateTotp(totpAuthenticationRequest: TotpAuthenticationRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+    encryptedJson.secretRequestJson(
+      Json.toJson(totpAuthenticationRequest),
+      http.POST(s"$serviceBaseUrl/authenticate-totp", _, Seq(CONTENT_TYPE -> JSON)))
+      .map(_.json.as[Session])
+      .recover {
+        case e: BadRequestException => throw new InvalidCredentials
+        case e: NotFoundException => throw new InvalidEmail
+      }
+  }
 }
