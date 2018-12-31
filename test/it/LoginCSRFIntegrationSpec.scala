@@ -96,7 +96,7 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
     "there is a valid CSRF token" should {
       "redirect back to the applications page" in new Setup {
-        stubFor(post(urlEqualTo("/session"))
+        stubFor(post(urlEqualTo("/authenticate"))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -104,11 +104,14 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
               .withBody(
                 s"""
                    |{
-                   |  "sessionId": "$sessionId",
-                   |  "developer": {
-                   |    "email":"$userEmail",
-                   |    "firstName":"John",
-                   |    "lastName": "Doe"
+                   |  "accessCodeRequired": false,
+                   |  "session": {
+                   |    "sessionId": "$sessionId",
+                   |    "developer": {
+                   |      "email":"$userEmail",
+                   |      "firstName":"John",
+                   |      "lastName": "Doe"
+                   |    }
                    |  }
                    |}""".stripMargin)))
 
@@ -119,7 +122,7 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/applications")
-        verify(1, postRequestedFor(urlMatching("/session")))
+        verify(1, postRequestedFor(urlMatching("/authenticate")))
       }
     }
   }
