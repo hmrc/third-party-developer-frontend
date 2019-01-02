@@ -19,6 +19,7 @@ package unit.views
 import config.ApplicationConfig
 import domain._
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
@@ -27,9 +28,11 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers._
 
-class UnsubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite {
+class UnsubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
   "Unsubscribe request submitted page" should {
     "render with no errors" in {
+
+      val appConfig = mock[ApplicationConfig]
       val request = FakeRequest().withCSRFToken
 
       val appId = "1234"
@@ -41,12 +44,12 @@ class UnsubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite {
         Set(Collaborator(developer.email, Role.ADMINISTRATOR)), state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-      val page = views.html.unsubscribeRequestSubmitted.render(application, apiName, apiVersion, request, developer, applicationMessages, ApplicationConfig, "subscriptions")
+      val page = views.html.unsubscribeRequestSubmitted.render(application, apiName, apiVersion, request, developer, applicationMessages, appConfig, "subscriptions")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", "Request submitted") shouldBe true
-      elementExistsByText(document, "p", s"Unsubscribe from $apiName $apiVersion") shouldBe true
+      elementExistsById(document, "success-request-unsubscribe-text") shouldBe true
     }
   }
 }

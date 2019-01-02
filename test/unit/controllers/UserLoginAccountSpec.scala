@@ -18,7 +18,7 @@ package unit.controllers
 
 import java.util.UUID
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import domain._
 import org.mockito.BDDMockito.given
@@ -44,11 +44,15 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
   implicit val materializer = fakeApplication.materializer
   val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(UUID.randomUUID().toString, user)
+  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
   val emailFieldName: String = "emailaddress"
   val passwordFieldName: String = "password"
   val userPassword = "Password1!"
+  val totp = "123456"
+  val nonce = "ABC-123"
 
   trait Setup {
+
     val underTest = new UserLoginAccount {
       override val sessionService = mock[SessionService]
       override val auditService = mock[AuditService]
@@ -56,25 +60,35 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       override val applicationService = mock[ApplicationService]
     }
 
-    def mockAuthenticate(email: String, password: String, result: Future[Session]) =
+    val underTest = new UserLoginAccount(mock[AuditService],
+      mock[ErrorHandler],
+      mock[SessionService],
+      mock[ApplicationConfig])
+
+
+    def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse]) =
       given(underTest.sessionService.authenticate(Matchers.eq(email), Matchers.eq(password))(any[HeaderCarrier])).willReturn(result)
+
+    def mockAuthenticateTotp(email: String, totp: String, nonce: String, result: Future[Session]) =
+      given(underTest.sessionService.authenticateTotp(Matchers.eq(email), Matchers.eq(totp), Matchers.eq(nonce))(any[HeaderCarrier])).willReturn(result)
 
     def mockLogout() =
       given(underTest.sessionService.destroy(Matchers.eq(session.sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(204))
+        .willReturn(Future.successful(NO_CONTENT))
 
     def mockAudit(auditAction: AuditAction, result: Future[AuditResult]) =
       given(underTest.auditService.audit(Matchers.eq(auditAction), Matchers.eq(Map.empty))(any[HeaderCarrier])).willReturn(result)
 
     given(underTest.appConfig.isExternalTestEnvironment).willReturn(false)
     given(underTest.sessionService.authenticate(anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
+    given(underTest.sessionService.authenticateTotp(anyString(), anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
   }
 
   "authenticate" should {
 
     "return the manage Applications page when the credentials are correct" in new Setup {
-      mockAuthenticate(user.email, userPassword, successful(session))
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       val request = FakeRequest().withSession(sessionParams: _*)
@@ -82,7 +96,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
       val result = await(underTest.authenticate()(request))
 
-      status(result) shouldBe 303
+      status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginSucceeded), Matchers.eq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
@@ -95,7 +109,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, "wrongPassword1!"))
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 401
+      status(result) shouldBe UNAUTHORIZED
       bodyOf(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToInvalidPassword), Matchers.eq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
@@ -110,7 +124,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         .withFormUrlEncodedBody((emailFieldName, unregisteredEmail), (passwordFieldName, userPassword))
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 401
+      status(result) shouldBe UNAUTHORIZED
       bodyOf(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToInvalidEmail), Matchers.eq(Map("developerEmail" -> unregisteredEmail)))(any[HeaderCarrier])
@@ -124,7 +138,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 403
+      status(result) shouldBe FORBIDDEN
       bodyOf(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
       result.toString should include(user.email.replace("@", "%40"))
     }
@@ -138,10 +152,38 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 423
+      status(result) shouldBe LOCKED
       bodyOf(result) should include("You entered incorrect login details too many times you&#x27;ll now have to reset your password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToLockedAccount), Matchers.eq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
+    }
+  }
+
+  "authenticateTotp" should {
+
+    "return the manage Applications page when the credentials are correct" in new Setup {
+      mockAuthenticateTotp(user.email, totp, nonce, successful(session))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      val request = FakeRequest().withSession(sessionParams: _*)
+        .withFormUrlEncodedBody(("email", user.email), ("accessCode", totp), ("nonce", nonce))
+
+      val result = await(underTest.authenticateTotp()(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/applications")
+      verify(underTest.auditService, times(1)).audit(
+        Matchers.eq(LoginSucceeded), Matchers.eq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
+    }
+
+    "return the login page when the access code is incorrect" in new Setup {
+      val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody(("email", user.email), ("accessCode", "654321"), ("nonce", nonce))
+      val result = await(addToken(underTest.authenticateTotp())(request))
+
+      status(result) shouldBe UNAUTHORIZED
+      bodyOf(result) should include("You have entered an incorrect access code")
     }
   }
 

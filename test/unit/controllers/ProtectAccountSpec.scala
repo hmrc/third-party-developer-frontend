@@ -18,7 +18,7 @@ package unit.controllers
 
 import java.net.URI
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.{ProtectAccount, routes}
 import domain.{Developer, Session}
@@ -31,7 +31,7 @@ import play.api.test.Helpers._
 import play.api.http.Status.{BAD_REQUEST, SEE_OTHER}
 import play.api.mvc.Result
 import play.filters.csrf.CSRF.TokenProvider
-import qr.{OTPAuthURI, QRCode}
+import qr.{OtpAuthUri, QRCode}
 import service.{MFAResponse, MFAService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -52,13 +52,13 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
     val otpUri = new URI("OTPURI")
     val correctCode = "123123"
 
-    val underTest = new ProtectAccount {
-      override val connector = mock[ThirdPartyDeveloperConnector]
-      override val appConfig = mock[ApplicationConfig]
-      override val sessionService = mock[SessionService]
+    val underTest = new ProtectAccount(
+      mock[ThirdPartyDeveloperConnector],
+      mock[OtpAuthUri],
+      mock[MFAService],
+      mock[SessionService],
+      mock[ErrorHandler])(mock[ApplicationConfig]) {
       override val qrCode = mock[QRCode]
-      override val otpAuthUri = mock[OTPAuthURI]
-      override val mfaService = mock[MFAService]
     }
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))

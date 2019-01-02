@@ -16,11 +16,11 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.DeleteApplication
 import domain._
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.DateTime
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.verify
@@ -31,7 +31,6 @@ import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
@@ -43,13 +42,14 @@ class DeleteApplicationSpec extends UnitSpec with WithCSRFAddToken with MockitoS
   implicit val materializer = fakeApplication.materializer
 
   trait Setup {
-    val underTest = new DeleteApplication {
-      override val applicationService = mock[ApplicationService]
-      override val developerConnector = mock[ThirdPartyDeveloperConnector]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-      override val sessionService = mock[SessionService]
-    }
+    val underTest = new DeleteApplication(
+      mock[ThirdPartyDeveloperConnector],
+      mock[AuditService],
+      mock[ApplicationService],
+      mock[SessionService],
+      mock[ErrorHandler],
+      mock[ApplicationConfig]
+    )
 
     val appId = "1234"
     val clientId = "clientIdzzz"
@@ -125,5 +125,4 @@ class DeleteApplicationSpec extends UnitSpec with WithCSRFAddToken with MockitoS
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 }

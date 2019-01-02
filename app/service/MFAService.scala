@@ -17,14 +17,15 @@
 package service
 
 import connectors.ThirdPartyDeveloperConnector
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-trait MFAService {
-  val tpdConnector: ThirdPartyDeveloperConnector
+@Singleton
+class MFAService @Inject()(tpdConnector: ThirdPartyDeveloperConnector) {
 
   def enableMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
     tpdConnector.verifyMfa(email, totpCode) flatMap {
@@ -42,7 +43,3 @@ trait MFAService {
 }
 
 case class MFAResponse(totpVerified: Boolean)
-
-object MFAService extends MFAService {
-  override val tpdConnector: ThirdPartyDeveloperConnector = ThirdPartyDeveloperConnector
-}

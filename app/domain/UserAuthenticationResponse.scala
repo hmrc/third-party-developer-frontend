@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package unit.qr
+package domain
 
-import qr.OTPAuthURI
-import uk.gov.hmrc.play.test.UnitSpec
+import play.api.libs.json.Json
 
-class OTPAuthURISpec extends UnitSpec {
+case class UserAuthenticationResponse(accessCodeRequired: Boolean, nonce: Option[String] = None, session: Option[Session] = None)
 
-  "apply" should {
-    "generate otpauth uri" in {
-      OTPAuthURI("ABC123", "Issuer", "User").toString shouldBe "otpauth://totp/Issuer:User?secret=ABC123&issuer=Issuer"
-    }
-  }
+object UserAuthenticationResponse {
+  implicit val formatUserAuthenticationResponse = Json.format[UserAuthenticationResponse]
 }

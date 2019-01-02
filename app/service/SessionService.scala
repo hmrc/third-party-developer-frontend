@@ -17,18 +17,21 @@
 package service
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.{Session, SessionInvalid, LoginRequest}
-
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import scala.concurrent.Future
+import domain._
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
-trait SessionService {
-  val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[Session] =
-    thirdPartyDeveloperConnector.createSession(LoginRequest(emailAddress, password))
+@Singleton
+class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector) {
+  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] =
+    thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password))
+
+  def authenticateTotp(emailAddress: String, totp: String, nonce: String)(implicit hc: HeaderCarrier): Future[Session] = {
+    thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(emailAddress, totp, nonce))
+  }
 
   def fetch(sessionId: String)(implicit hc: HeaderCarrier): Future[Option[Session]] =
     thirdPartyDeveloperConnector.fetchSession(sessionId)
@@ -39,8 +42,4 @@ trait SessionService {
 
   def destroy(sessionId: String)(implicit hc: HeaderCarrier): Future[Int] =
     thirdPartyDeveloperConnector.deleteSession(sessionId)
-}
-
-object SessionService extends SessionService {
-  override val thirdPartyDeveloperConnector = ThirdPartyDeveloperConnector
 }

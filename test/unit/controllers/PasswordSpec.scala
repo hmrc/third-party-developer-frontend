@@ -23,20 +23,18 @@ import domain.{ChangePassword, InvalidResetCode, PasswordReset, UnverifiedAccoun
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers
 import org.mockito.Matchers._
-import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import play.twirl.api.HtmlFormat
 import service.{AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
 
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
 
-class PasswordSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
+class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   implicit val materializer = fakeApplication.materializer
 
@@ -47,16 +45,17 @@ class PasswordSpec extends UnitSpec with MockitoSugar with WithFakeApplication w
     val mockAuditService = mock[AuditService]
     val mockAppConfig = mock[ApplicationConfig]
 
-    val underTest = new Password {
-      override val connector = mockConnector
-      override val sessionService = mockSessionService
-      override val auditService = mockAuditService
-      override val appConfig = mockAppConfig
-    }
+    val underTest = new Password(
+      mock[AuditService],
+      mock[SessionService],
+      mockConnector,
+      mockErrorHandler,
+      mock[ApplicationConfig]
+    )
 
     def mockRequestResetFor(email: String) =
       given(mockConnector.requestReset(Matchers.eq(email))(any[HeaderCarrier]))
-        .willReturn(Future.successful(200))
+        .willReturn(Future.successful(OK))
 
     def mockConnectorUnverifiedForReset(email: String, password: String) =
       given(mockConnector.reset(Matchers.eq(PasswordReset(email, password)))(any[HeaderCarrier]))
@@ -114,7 +113,8 @@ class PasswordSpec extends UnitSpec with MockitoSugar with WithFakeApplication w
       val requestWithPassword = request.withFormUrlEncodedBody((currentPasswordFieldName, developerPassword),
         (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
         .withSession((emailSessionName, developerEmail))
-      val result = await(underTest.processPasswordChange(developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier))
+      val result = await(underTest.processPasswordChange(
+        developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier))
       status(result) shouldBe FORBIDDEN
       result.toString should include(developerEmail.replace("@", "%40"))
     }

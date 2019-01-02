@@ -21,7 +21,7 @@ import component.pages._
 import component.stubs.Stubs
 import cucumber.api.DataTable
 import cucumber.api.scala.{EN, ScalaDsl}
-import domain.{Developer, LoginRequest, Session}
+import domain.{Developer, LoginRequest, Session, UserAuthenticationResponse}
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
 import play.api.http.Status._
@@ -50,13 +50,14 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
     val sessionId = "sessionId"
     val session = Session(sessionId, developer)
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
     val password = result.get("Password")
 
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
-    Stubs.setupPostRequest("/session", UNAUTHORIZED)
+    Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
 
-    Stubs.setupEncryptedPostRequest("/session", LoginRequest(developer.email, password),
-      OK, Json.toJson(session).toString())
+    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password),
+      OK, Json.toJson(userAuthenticationResponse).toString())
 
     Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
     Stubs.setupDeleteRequest(s"/session/$sessionId", OK)

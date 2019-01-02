@@ -60,8 +60,6 @@ case class APIVersion(version: String, status: APIStatus, access: Option[APIAcce
 
 case class APIAccess(`type`: APIAccessType)
 
-
-
 case class APIIdentifier(context: String, version: String)
 
 case class APISubscriptionStatus(name: String, serviceName: String, context: String,

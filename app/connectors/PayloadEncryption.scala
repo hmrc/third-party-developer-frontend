@@ -17,15 +17,17 @@
 package connectors
 
 import config.ApplicationConfig
+import javax.inject.{Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.crypto._
 import uk.gov.hmrc.crypto.json.{JsonDecryptor, JsonEncryptor}
 
 import scala.concurrent.Future
 
-trait PayloadEncryption {
+@Singleton
+class PayloadEncryption @Inject()(localCrypto: LocalCrypto) {
 
-  implicit val crypto: CompositeSymmetricCrypto
+  implicit val crypto = localCrypto
 
   def encrypt[T](payload: T)(implicit writes: Writes[T]): JsValue = {
     val encryptor = new JsonEncryptor[T]()(crypto, writes)
@@ -40,17 +42,12 @@ trait PayloadEncryption {
   }
 }
 
-object PayloadEncryption extends PayloadEncryption {
-  override implicit val crypto = LocalCrypto
-}
-
-object LocalCrypto extends CompositeSymmetricCrypto {
+class LocalCrypto @Inject()(applicationConfig: ApplicationConfig) extends CompositeSymmetricCrypto {
   override protected val currentCrypto: Encrypter with Decrypter = new AesCrypto {
-    override protected val encryptionKey: String = ApplicationConfig.jsonEncryptionKey
+    override protected val encryptionKey: String = applicationConfig.jsonEncryptionKey
   }
   override protected val previousCryptos: Seq[Decrypter] = Seq.empty
 }
-
 
 case class SecretRequest(data: String)
 
@@ -58,10 +55,7 @@ object SecretRequest {
   implicit val format = Json.format[SecretRequest]
 }
 
-trait EncryptedJson {
-  val payloadEncryption: PayloadEncryption
-
-
+class EncryptedJson @Inject()(payloadEncryption: PayloadEncryption) {
   def secretRequestJson[R](payload: JsValue, block: JsValue => Future[R]) = {
     block(toSecretRequestJson(payload))
   }

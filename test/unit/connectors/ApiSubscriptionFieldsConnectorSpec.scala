@@ -18,43 +18,47 @@ package unit.connectors
 
 import java.util.UUID
 
-import com.github.tomakehurst.wiremock.client.WireMock._
-import config.WSHttp
-import connectors.ApiSubscriptionFieldsConnector
+import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
-import play.api.http.Status._
-import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier, JsValidationException, NotFoundException, Upstream5xxResponse}
+import org.mockito.Matchers.{any, eq => meq}
+import org.mockito.Mockito.{verify, when}
+import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
+import uk.gov.hmrc.http.{HttpResponse, _}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
   implicit val hc = HeaderCarrier()
+
   val clientId: String = UUID.randomUUID().toString
   val apiContext: String = "i-am-a-test"
   val apiVersion: String = "1.0"
   val fieldsId = UUID.randomUUID()
   val urlPrefix = "/field"
+  private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
 
   trait Setup {
+    val mockHttpClient = mock[HttpClient]
+    val mockProxiedHttpClient = mock[ProxiedHttpClient]
+
     val underTest = new ApiSubscriptionFieldsConnector {
-      override val serviceBaseUrl: String = wireMockUrl
-      override val http = WSHttp
+      val httpClient = mockHttpClient
+      val proxiedHttpClient = mockProxiedHttpClient
+      val useProxy = false
+      val bearerToken = ""
+      val serviceBaseUrl = ""
     }
   }
-
 
   "fetchFieldValues" should {
     val response = SubscriptionFields(clientId, apiContext, apiVersion, fieldsId, fields("field001" -> "field002"))
     val getUrl = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
 
     "return subscription fields for an API" in new Setup {
-
-      stubFor(get(urlPathMatching(getUrl))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader("Content-Type", "application/json")
-            .withBody(Json.toJson(response).toString())))
+      when(mockHttpClient.GET[SubscriptionFields](meq(getUrl))(any(), any(), any())).thenReturn(Future.successful(response))
 
       val result: Option[SubscriptionFields] = await(underTest.fetchFieldValues(clientId, apiContext, apiVersion))
 
@@ -63,11 +67,8 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
     "fail when api-subscription-fields returns a 500" in new Setup {
 
-      stubFor(get(urlPathMatching(getUrl))
-        .willReturn(
-          aResponse()
-            .withStatus(INTERNAL_SERVER_ERROR)
-            .withHeader("Content-Type", "application/json")))
+      when(mockHttpClient.GET[SubscriptionFields](meq(getUrl))(any(), any(), any()))
+        .thenReturn(Future.failed(upstream500Response))
 
       intercept[Upstream5xxResponse] {
         await(underTest.fetchFieldValues(clientId, apiContext, apiVersion))
@@ -76,10 +77,8 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
     "return None when api-subscription-fields returns a 404" in new Setup {
 
-      stubFor(get(urlPathMatching(getUrl))
-        .willReturn(
-          aResponse()
-            .withStatus(NOT_FOUND)))
+      when(mockHttpClient.GET[SubscriptionFields](meq(getUrl))(any(), any(), any()))
+        .thenReturn(Future.failed(new NotFoundException("")))
 
       val result: Option[SubscriptionFields] = await(underTest.fetchFieldValues(clientId, apiContext, apiVersion))
       result shouldBe None
@@ -90,18 +89,13 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
   "fetchFieldDefinitions" should {
 
     val fields = List(SubscriptionField("field1", "desc1", "hint1", "some type"), SubscriptionField("field2", "desc2", "hint2", "some other type"))
-    val invalidResponse = Map("whatever" -> fields)
-    val validResponse = Map("fieldDefinitions" -> fields)
+    val validResponse = FieldDefinitionsResponse(fields)
     val url = s"/definition/context/$apiContext/version/$apiVersion"
 
     "return subscription fields definition for an API" in new Setup {
 
-      stubFor(get(urlPathMatching(url))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader("Content-Type", "application/json")
-            .withBody(Json.toJson(validResponse).toString())))
+      when(mockHttpClient.GET[FieldDefinitionsResponse](meq(url))(any(), any(), any()))
+        .thenReturn(Future.successful(validResponse))
 
       val result: Seq[SubscriptionField] = await(underTest.fetchFieldDefinitions(apiContext, apiVersion))
 
@@ -110,11 +104,8 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
     "fail when api-subscription-fields returns a 500" in new Setup {
 
-      stubFor(get(urlPathMatching(url))
-        .willReturn(
-          aResponse()
-            .withStatus(INTERNAL_SERVER_ERROR)
-            .withHeader("Content-Type", "application/json")))
+      when(mockHttpClient.GET[FieldDefinitionsResponse](meq(url))(any(), any(), any()))
+        .thenReturn(Future.failed(upstream500Response))
 
       intercept[Upstream5xxResponse] {
         await(underTest.fetchFieldDefinitions(apiContext, apiVersion))
@@ -123,10 +114,8 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
     "return empty sequence when api-subscription-fields returns a 404" in new Setup {
 
-      stubFor(get(urlPathMatching(url))
-        .willReturn(
-          aResponse()
-            .withStatus(NOT_FOUND)))
+      when(mockHttpClient.GET[SubscriptionFields](meq(url))(any(), any(), any()))
+        .thenReturn(Future.failed(new NotFoundException("")))
 
       val result: Seq[SubscriptionField] = await(underTest.fetchFieldDefinitions(apiContext, apiVersion))
       result shouldBe Seq.empty[SubscriptionField]
@@ -134,12 +123,8 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
     "fail when api-subscription-fields returns unexpected response" in new Setup {
 
-      stubFor(get(urlPathMatching(url))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader("Content-Type", "application/json")
-            .withBody(Json.toJson(invalidResponse).toString())))
+      when(mockHttpClient.GET[FieldDefinitionsResponse](meq(url))(any(), any(), any()))
+        .thenReturn(Future.failed(new JsValidationException("", "", FieldDefinitionsResponse.getClass, "")))
 
       intercept[JsValidationException] {
         await(underTest.fetchFieldDefinitions(apiContext, apiVersion))
@@ -155,23 +140,19 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
     val putUrl = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
 
     "save the fields" in new Setup {
-      stubFor(put(urlPathMatching(putUrl))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)))
+
+      when(mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](putUrl, subFieldsPutRequest))
+        .thenReturn(Future.successful(HttpResponse(OK)))
 
       await(underTest.saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
 
-      verify(putRequestedFor(urlPathMatching(putUrl)).withRequestBody(equalToJson(Json.toJson(subFieldsPutRequest).toString())))
+      verify(mockHttpClient).PUT[SubscriptionFieldsPutRequest, HttpResponse](putUrl, subFieldsPutRequest)
     }
 
     "fail when api-subscription-fields returns a 500" in new Setup {
 
-      stubFor(put(urlPathMatching(putUrl))
-        .willReturn(
-          aResponse()
-            .withStatus(INTERNAL_SERVER_ERROR)
-            .withHeader("Content-Type", "application/json")))
+      when(mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](putUrl, subFieldsPutRequest))
+        .thenReturn(Future.failed(upstream500Response))
 
       intercept[Upstream5xxResponse] {
         await(underTest.saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
@@ -180,10 +161,8 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
     "fail when api-subscription-fields returns a 404" in new Setup {
 
-      stubFor(put(urlPathMatching(putUrl))
-        .willReturn(
-          aResponse()
-            .withStatus(NOT_FOUND)))
+      when(mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](putUrl, subFieldsPutRequest))
+        .thenReturn(Future.failed(new NotFoundException("")))
 
       intercept[NotFoundException] {
         await(underTest.saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
@@ -195,22 +174,20 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
     val url = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
 
-    "return true after delete call has returned 204" in new Setup {
-      stubFor(delete(urlPathMatching(url))
-        .willReturn(
-          aResponse()
-            .withStatus(NO_CONTENT)))
+    "return true after delete call has returned 204 NO CONTENT" in new Setup {
+
+      when(mockHttpClient.DELETE(url))
+        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
 
       result shouldBe true
     }
 
-    "return false api-subscription-fields returns unexpected status" in new Setup {
-      stubFor(delete(urlPathMatching(url))
-        .willReturn(
-          aResponse()
-            .withStatus(ACCEPTED)))
+    "return false if api-subscription-fields returns unexpected status" in new Setup {
+
+      when(mockHttpClient.DELETE(url))
+        .thenReturn(Future.successful(HttpResponse(ACCEPTED)))
 
       val result = await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
 
@@ -219,10 +196,8 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
     "fail when api-subscription-fields returns a 500" in new Setup {
 
-      stubFor(delete(urlPathMatching(url))
-        .willReturn(
-          aResponse()
-            .withStatus(INTERNAL_SERVER_ERROR)))
+      when(mockHttpClient.DELETE(url))
+        .thenReturn(Future.failed(upstream500Response))
 
       intercept[Upstream5xxResponse] {
         await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
@@ -231,10 +206,8 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
     "return true when api-subscription-fields returns a 404" in new Setup {
 
-      stubFor(delete(urlPathMatching(url))
-        .willReturn(
-          aResponse()
-            .withStatus(NOT_FOUND)))
+      when(mockHttpClient.DELETE(url))
+        .thenReturn(Future.failed(new NotFoundException("")))
 
       val result = await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
       result shouldBe true

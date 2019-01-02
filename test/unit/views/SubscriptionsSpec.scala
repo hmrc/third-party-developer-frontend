@@ -22,6 +22,7 @@ import domain._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.AnyContentAsEmpty
@@ -32,8 +33,12 @@ import views.html.subscriptions
 
 import scala.collection.JavaConversions._
 
-class SubscriptionsSpec extends UnitSpec with OneServerPerSuite {
+class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
+
   trait Setup {
+
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
       doc.select(elementType).exists(node => node.text.trim == elementText)
     }
@@ -77,7 +82,7 @@ class SubscriptionsSpec extends UnitSpec with OneServerPerSuite {
         request,
         developer,
         applicationMessages,
-        ApplicationConfig,
+        appConfig,
         "subscriptions"
       )
     }

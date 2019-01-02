@@ -16,7 +16,9 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
@@ -24,11 +26,14 @@ import service._
 
 import scala.concurrent.Future
 
-trait DeleteApplication extends ApplicationController {
-
-  val applicationService: ApplicationService
-  val developerConnector: ThirdPartyDeveloperConnector
-  val auditService: AuditService
+@Singleton
+class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnector,
+                                  auditService: AuditService,
+                                  val applicationService: ApplicationService,
+                                  val sessionService: SessionService,
+                                  val errorHandler: ErrorHandler,
+                                  implicit val appConfig: ApplicationConfig)
+  extends ApplicationController {
 
   def deleteApplication(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
     val view = views.html.deleteApplication(request.application, request.role)
@@ -48,18 +53,12 @@ trait DeleteApplication extends ApplicationController {
 
     def handleValidForm(validForm: DeleteApplicationForm) = {
       validForm.deleteConfirm match {
-        case Some("Yes") => applicationService.requestApplicationDeletion(request.user, application).map(_ => Ok(views.html.deleteApplicationComplete(application)))
+        case Some("Yes") => applicationService.requestApplicationDeletion(request.user, application)
+          .map(_ => Ok(views.html.deleteApplicationComplete(application)))
         case _ => Future(Redirect(routes.Details.details(applicationId)))
       }
     }
 
     DeleteApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
-}
-
-object DeleteApplication extends DeleteApplication with WithAppConfig {
-  override val sessionService = SessionService
-  override val applicationService = ApplicationServiceImpl
-  override val developerConnector = ThirdPartyDeveloperConnector
-  override val auditService = AuditService
 }
