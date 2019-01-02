@@ -36,7 +36,8 @@
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
 
 @headScripts = {
-@hotjar(applicationConfig, hotJarEnabledOnPage)
+    @googleTagManager()
+    @hotjar(applicationConfig, hotJarEnabledOnPage)
 }
 
 @head = {
@@ -149,6 +150,10 @@
 }
 
 @bodyContent = {
+
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TSFTCWZ"
+                      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
     @if(fullWidthBanner.isDefined) {
         <section class="full-width-banner">
             @fullWidthBanner
