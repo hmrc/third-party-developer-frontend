@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
 
+import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 trait Auditing {
@@ -48,6 +49,7 @@ trait Auditing {
 class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val errorHandler: ErrorHandler,
                                  val sessionService: SessionService,
+                                 val applicationService: ApplicationService,
                                  implicit val appConfig: ApplicationConfig)
   extends LoggedOutController with LoginLogout with Auditing {
 
@@ -55,7 +57,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   val loginForm: Form[LoginForm] = LoginForm.form
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
-  val applicationService: ApplicationService
 
   def login = loggedOutAction { implicit request =>
     successful(Ok(signIn("Sign in", loginForm)))
@@ -96,6 +97,21 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     )
   }
 
+  def authenticateTotp = Action.async { implicit request =>
+    LoginTotpForm.form.bindFromRequest.fold(
+      errors => successful(BadRequest(logInAccessCode(errors, errors.data("email"), errors.data("nonce")))),
+      validForm => sessionService.authenticateTotp(validForm.email, validForm.accessCode, validForm.nonce) flatMap { session =>
+        audit(LoginSucceeded, session.developer)
+        gotoLoginSucceeded(session.sessionId)
+      } recover {
+        case _: InvalidCredentials =>
+          Unauthorized(logInAccessCode(
+            LoginTotpForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code"),
+            validForm.email, validForm.nonce))
+      }
+    )
+  }
+
   def get2SVHelpConfirmationPage() = loggedOutAction { implicit request =>
     Future.successful(Ok(views.html.protectAccountNoAccessCode(Help2SVConfirmForm.form)))
   }
@@ -115,29 +131,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           case _ => Future.successful(Ok(signIn("Sign in", loginForm)))
         }
       })
-  }
-
-}
-
-object UserLoginAccount extends UserLoginAccount with WithAppConfig {
-  override val sessionService = SessionService
-  override val auditService = AuditService
-  override val applicationService = ApplicationServiceImpl
-
-
-  def authenticateTotp = Action.async { implicit request =>
-    LoginTotpForm.form.bindFromRequest.fold(
-      errors => successful(BadRequest(logInAccessCode(errors, errors.data("email"), errors.data("nonce")))),
-      validForm => sessionService.authenticateTotp(validForm.email, validForm.accessCode, validForm.nonce) flatMap { session =>
-        audit(LoginSucceeded, session.developer)
-        gotoLoginSucceeded(session.sessionId)
-      } recover {
-        case _: InvalidCredentials =>
-          Unauthorized(logInAccessCode(
-            LoginTotpForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code"),
-            validForm.email, validForm.nonce))
-      }
-    )
   }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,12 +241,12 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield ticketResponse
   }
 
-  def request2SVRemoval(name: String, email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
-    val remove2SVTicket = DeskproTicket.removeDeveloper2SV(name, email)
+  def request2SVRemoval(email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+    val remove2SVTicket = DeskproTicket.removeDeveloper2SV(email)
 
     for {
       ticketResponse <- deskproConnector.createTicket(remove2SVTicket)
-      _ <- auditService.audit(Remove2SVRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email, "timestamp" -> DateTimeUtils.now.toString))
+      _ <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email, "timestamp" -> DateTimeUtils.now.toString))
     } yield ticketResponse
   }
 
