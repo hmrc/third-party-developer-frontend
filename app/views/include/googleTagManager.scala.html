@@ -14,23 +14,15 @@
  * limitations under the License.
  *@
 
-@import include._
-@import model.Crumb
+@()
 
-@()(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
-
-@devMain(
-    title = "Email address verified",
-    breadcrumbs = Seq(
-        Crumb("Email address verified"),
-        Crumb.home
-    )
-) {
-
-    <div class="govuk-box-highlight" role="alert" data-journey="user:registered">
-        <h1>Email address verified</h1>
-    </div>
-
-    <h2 class="heading-large">What happens next?</h2>
-        <p>You can now <a id="sign-in" href="@controllers.routes.UserLoginAccount.login">sign in</a>.</p>
-}
+<script>
+    (function(w,d,s,l,i){
+        w[l]=w[l]||[];
+        w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+        var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+        j.async=true;
+        j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+        f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TSFTCWZ');
+</script>
