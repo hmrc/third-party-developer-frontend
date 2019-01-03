@@ -29,7 +29,7 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
+import service.AuditAction._
 import service.{AuditAction, AuditService, SessionService}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -175,6 +175,8 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
       status(result) shouldBe UNAUTHORIZED
       bodyOf(result) should include("You have entered an incorrect access code")
+      verify(underTest.auditService, times(1)).audit(
+        Matchers.eq(LoginFailedDueToInvalidAccessCode), Matchers.eq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
     }
   }
 
