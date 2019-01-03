@@ -41,8 +41,8 @@
             <fieldset class="inline">
                 <legend id="confirmation">
                     <h2 class="heading-large">Are you sure you want us to delete your account?</h2>
-                    @fieldError(form.errors, "confirmation", form.error("confirmation").isEmpty)
                 </legend>
+                    @fieldError(form.errors, "confirmation", form.error("confirmation").isEmpty)
                 <div class="multiple-choice">
                     <input type="radio" class="top-aligned-input" name="confirmation" id="deleteAccountYes" value="true"/>
                     <label for="deleteAccountYes">Yes</label>
