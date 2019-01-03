@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,17 +53,12 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
   trait Setup {
 
-    val underTest = new UserLoginAccount {
-      override val sessionService = mock[SessionService]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-      override val applicationService = mock[ApplicationService]
-    }
-
     val underTest = new UserLoginAccount(mock[AuditService],
       mock[ErrorHandler],
       mock[SessionService],
-      mock[ApplicationConfig])
+      mock[ApplicationService],
+      mock[ApplicationConfig]
+    )
 
 
     def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse]) =

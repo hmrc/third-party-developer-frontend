@@ -79,7 +79,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           case Some(session) => audit(LoginSucceeded, session.developer)
                                 gotoLoginSucceeded(session.sessionId)
           case None => successful(Ok(logInAccessCode(
-            LoginTotpForm.form, login.emailaddress, userAuthenticationResponse.nonce.get)))
+            LoginTotpForm.form, login.emailaddress, userAuthenticationResponse.nonce.get)).withSession(request.session + ("emailAddress" -> login.emailaddress)))
         }
       } recover {
         case _: InvalidEmail =>
@@ -126,8 +126,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     },
       form => {
         form.helpRemoveConfirm match {
-          case Some("Yes") => applicationService.request2SVRemoval("", "").map(_ => Ok(protectAccountNoAccessCodeComplete()))
-
+          case Some("Yes") => applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).
+            map(_ => Ok(protectAccountNoAccessCodeComplete()))
           case _ => Future.successful(Ok(signIn("Sign in", loginForm)))
         }
       })

@@ -49,6 +49,7 @@
                     value="@form.data.getOrElse("accessCode", "")"
                     class="form-control @if(form.errors("accessCode").nonEmpty){form-control-error}"
                     aria-required="true"/>
+                <p><a href="@controllers.routes.UserLoginAccount.get2SVHelpConfirmationPage">I do not have an access code</a></p>
                 </div>
             </div>
 
