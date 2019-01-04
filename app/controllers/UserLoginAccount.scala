@@ -24,8 +24,8 @@ import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Action, Call}
-import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
+import play.api.mvc.Action
+import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
@@ -105,6 +105,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         gotoLoginSucceeded(session.sessionId)
       } recover {
         case _: InvalidCredentials =>
+          audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> validForm.email))
           Unauthorized(logInAccessCode(
             LoginTotpForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code"),
             validForm.email, validForm.nonce))

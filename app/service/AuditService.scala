@@ -92,6 +92,11 @@ object AuditAction {
     val auditType = "LoginFailedDueToInvalidPassword"
   }
 
+  case object LoginFailedDueToInvalidAccessCode extends AuditAction {
+    val name = "Login failed due to invalid access code"
+    val auditType = "LoginFailedDueToInvalidAccessCode"
+  }
+
   case object LoginFailedDueToLockedAccount extends AuditAction {
     val name = "Login failed due to locked account"
     val auditType = "LoginFailedDueToLockedAccount"
