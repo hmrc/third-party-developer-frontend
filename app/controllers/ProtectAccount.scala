@@ -95,9 +95,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
         }
       })
   }
-
-
-
+  
   def get2SVRemovalAccessCodePage() = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalAccessCode(ProtectAccountForm.form)))
   }
