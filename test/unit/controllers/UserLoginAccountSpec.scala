@@ -30,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
-import service.{AuditAction, AuditService, SessionService}
+import service.{ApplicationService, AuditAction, AuditService, SessionService}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
@@ -52,10 +52,14 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
   val nonce = "ABC-123"
 
   trait Setup {
+
     val underTest = new UserLoginAccount(mock[AuditService],
       mock[ErrorHandler],
       mock[SessionService],
-      mock[ApplicationConfig])
+      mock[ApplicationService],
+      mock[ApplicationConfig]
+    )
+
 
     def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse]) =
       given(underTest.sessionService.authenticate(Matchers.eq(email), Matchers.eq(password))(any[HeaderCarrier])).willReturn(result)
@@ -175,6 +179,67 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
       status(result) shouldBe UNAUTHORIZED
       bodyOf(result) should include("You have entered an incorrect access code")
+    }
+  }
+
+  "2SVHelp" should {
+
+    "return the remove 2SV confirmation page when user does not have an access code" in new Setup {
+
+      val request = FakeRequest().withSession(sessionParams: _*)
+
+      val result = await(addToken(underTest.get2SVHelpConfirmationPage())(request))
+
+      status(result) shouldBe OK
+      val body = bodyOf(result)
+
+      body should include("You do not have an access code")
+      body should include("You can ask us to remove 2-step verification so you can sign into your account")
+
+    }
+
+    "return the remove 2SV complete page when user selects yes" in new Setup {
+
+      val request = FakeRequest().withSession(sessionParams: _*)
+
+      val result = await(addToken(underTest.get2SVHelpCompletionPage())(request))
+
+      status(result) shouldBe OK
+      val body = bodyOf(result)
+
+      body should include("Request submitted")
+      body should include("You have requested to remove 2-step verification from your account")
+
+    }
+
+      "redirect to the login page when user selects no" in new Setup {
+
+      val request = FakeRequest().withSession(sessionParams: _*).
+        withFormUrlEncodedBody(("helpRemoveConfirm", "No"))
+
+      val result = await(addToken(underTest.confirm2SVHelp())(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/login")
+    }
+
+    "return 2-step verification request completed page when yes selected" in new Setup {
+
+      val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> user.email :_*).
+        withFormUrlEncodedBody(("helpRemoveConfirm", "Yes"))
+
+      given(underTest.applicationService.request2SVRemoval(Matchers.eq(user.email))(any[HeaderCarrier]))
+        .willReturn(Future.successful(TicketCreated))
+
+      val result = await(addToken(underTest.confirm2SVHelp())(request))
+
+      status(result) shouldBe OK
+      val body = bodyOf(result)
+
+      body should include("You have requested to remove 2-step verification from your account")
+      body should include("Request submitted")
+      verify(underTest.applicationService).request2SVRemoval(Matchers.eq(user.email))(any[HeaderCarrier])
+
     }
   }
 
