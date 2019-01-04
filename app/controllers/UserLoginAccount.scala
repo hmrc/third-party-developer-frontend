@@ -29,6 +29,7 @@ import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
+import views.html.protectaccount._
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -114,16 +115,16 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def get2SVHelpConfirmationPage() = loggedOutAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccountNoAccessCode(Help2SVConfirmForm.form)))
+    Future.successful(Ok(protectAccountNoAccessCode(Help2SVConfirmForm.form)))
   }
 
   def get2SVHelpCompletionPage() = loggedOutAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccountNoAccessCodeComplete()))
+    Future.successful(Ok(protectAccountNoAccessCodeComplete()))
   }
 
   def confirm2SVHelp() = loggedOutAction { implicit request =>
     Help2SVConfirmForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(views.html.protectAccountNoAccessCode(form)))
+      Future.successful(BadRequest(protectAccountNoAccessCode(form)))
     },
       form => {
         form.helpRemoveConfirm match {
