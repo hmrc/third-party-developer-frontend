@@ -24,8 +24,8 @@ import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Action, Call}
-import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
+import play.api.mvc.Action
+import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html._

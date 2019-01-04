@@ -29,8 +29,9 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
+import service.AuditAction._
 import service.{ApplicationService, AuditAction, AuditService, SessionService}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
@@ -38,7 +39,6 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
 import scala.concurrent.Future._
-import uk.gov.hmrc.http.HeaderCarrier
 
 class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
   implicit val materializer = fakeApplication.materializer
