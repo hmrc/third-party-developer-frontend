@@ -128,7 +128,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         form.helpRemoveConfirm match {
           case Some("Yes") => applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).
             map(_ => Ok(protectAccountNoAccessCodeComplete()))
-          case _ => Future.successful(Ok(signIn("Sign in", loginForm)))
+          case _ => Future.successful(Redirect(controllers.routes.UserLoginAccount.login()))
         }
       })
   }

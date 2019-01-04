@@ -182,6 +182,38 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
     }
   }
 
+  "2SVHelp" should {
+    "redirect to the login page when user selects no" in new Setup {
+
+      val request = FakeRequest().withSession(sessionParams: _*).
+        withFormUrlEncodedBody(("helpRemoveConfirm", "No"))
+
+      val result = await(addToken(underTest.confirm2SVHelp())(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/login")
+    }
+
+    "return 2-step verification request completed page when yes selected" in new Setup {
+
+      val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> user.email :_*).
+        withFormUrlEncodedBody(("helpRemoveConfirm", "Yes"))
+
+      given(underTest.applicationService.request2SVRemoval(Matchers.eq(user.email))(any[HeaderCarrier]))
+        .willReturn(Future.successful(TicketCreated))
+
+      val result = await(addToken(underTest.confirm2SVHelp())(request))
+
+      status(result) shouldBe OK
+      val body = bodyOf(result)
+
+      body should include("You have requested to remove 2-step verification from your account")
+      body should include("Request submitted")
+      verify(underTest.applicationService).request2SVRemoval(Matchers.eq(user.email))(any[HeaderCarrier])
+
+    }
+  }
+
   "accountLocked" should {
     "destroy session when locked" in new Setup {
       mockLogout()
