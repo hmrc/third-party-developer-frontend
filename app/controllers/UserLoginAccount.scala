@@ -24,12 +24,13 @@ import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.Action
-import service.AuditAction._
-import service.{AuditAction, AuditService, SessionService}
+import play.api.mvc.{Action, Call}
+import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
+import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
 
+import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 trait Auditing {
@@ -48,6 +49,7 @@ trait Auditing {
 class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val errorHandler: ErrorHandler,
                                  val sessionService: SessionService,
+                                 val applicationService: ApplicationService,
                                  implicit val appConfig: ApplicationConfig)
   extends LoggedOutController with LoginLogout with Auditing {
 
@@ -77,7 +79,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           case Some(session) => audit(LoginSucceeded, session.developer)
                                 gotoLoginSucceeded(session.sessionId)
           case None => successful(Ok(logInAccessCode(
-            LoginTotpForm.form, login.emailaddress, userAuthenticationResponse.nonce.get)))
+            LoginTotpForm.form, login.emailaddress, userAuthenticationResponse.nonce.get)).withSession(request.session + ("emailAddress" -> login.emailaddress)))
         }
       } recover {
         case _: InvalidEmail =>
@@ -109,6 +111,27 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
             validForm.email, validForm.nonce))
       }
     )
+  }
+
+  def get2SVHelpConfirmationPage() = loggedOutAction { implicit request =>
+    Future.successful(Ok(views.html.protectAccountNoAccessCode(Help2SVConfirmForm.form)))
+  }
+
+  def get2SVHelpCompletionPage() = loggedOutAction { implicit request =>
+    Future.successful(Ok(views.html.protectAccountNoAccessCodeComplete()))
+  }
+
+  def confirm2SVHelp() = loggedOutAction { implicit request =>
+    Help2SVConfirmForm.form.bindFromRequest.fold(form => {
+      Future.successful(BadRequest(views.html.protectAccountNoAccessCode(form)))
+    },
+      form => {
+        form.helpRemoveConfirm match {
+          case Some("Yes") => applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).
+            map(_ => Ok(protectAccountNoAccessCodeComplete()))
+          case _ => Future.successful(Redirect(controllers.routes.UserLoginAccount.login()))
+        }
+      })
   }
 }
 

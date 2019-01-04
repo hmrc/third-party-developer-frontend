@@ -107,6 +107,11 @@ object AuditAction {
     val auditType = "AccountDeletionRequested"
   }
 
+  case object Remove2SVRequested extends AuditAction {
+    val name = "Developer has requested 2SV removal"
+    val auditType = "Remove2SVRequested"
+  }
+
   case object ApplicationDeletionRequested extends AuditAction {
     override val name: String = "Developer has requested application deletion"
     override val auditType: String = "ApplicationDeletionRequest"
