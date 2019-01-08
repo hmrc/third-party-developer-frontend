@@ -20,7 +20,7 @@
 @import model.Crumb
 @import play.api.mvc.Call
 
-@(form: Form[controllers.LoginTotpForm], email: String, nonce: String)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
     title = "Enter your access code",
@@ -56,9 +56,6 @@
             <div class="form-group">
                 <button id="submit" class="button" type="submit">Continue</button>
             </div>
-
-            <input type="hidden" id="email" name="email" value="@email">
-            <input type="hidden" id="nonce" name="nonce" value="@nonce">
         }
     </div>
 

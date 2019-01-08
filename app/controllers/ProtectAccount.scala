@@ -25,7 +25,8 @@ import play.api.data.Forms._
 import play.api.i18n.Messages.Implicits._
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, SessionService}
-import views.html.protectAccountRemovalAccessCode
+import views.html.protectaccount
+import views.html.protectaccount._
 
 import scala.concurrent.Future
 
@@ -44,36 +45,36 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
     connector.createMfaSecret(loggedIn.email).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
-      Ok(views.html.protectAccountSetup(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
+      Ok(protectAccountSetup(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
     })
   }
 
   def getProtectAccount() = loggedInAction { implicit request =>
     connector.fetchDeveloper(loggedIn.email).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
-        case true => Ok(views.html.protectedAccount())
-        case false => Ok(views.html.protectAccount())
+        case true => Ok(protectedAccount())
+        case false => Ok(protectaccount.protectAccount())
       }
     })
   }
 
   def getAccessCodePage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccountAccessCode(ProtectAccountForm.form)))
+    Future.successful(Ok(protectAccountAccessCode(ProtectAccountForm.form)))
   }
 
   def getProtectAccountCompletedPage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccountCompleted()))
+    Future.successful(Ok(protectAccountCompleted()))
   }
 
   def protectAccount() = loggedInAction { implicit request =>
     ProtectAccountForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(views.html.protectAccountAccessCode(form)))
+      Future.successful(BadRequest(protectAccountAccessCode(form)))
     },
     form => {
       mfaService.enableMfa(loggedIn.email, form.accessCode).map(r => {
         r.totpVerified match{
           case true => Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
-          case _ => BadRequest(views.html.protectAccountAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
+          case _ => BadRequest(protectAccountAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
         }
       })
 
@@ -81,12 +82,12 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
   }
 
   def get2SVRemovalConfirmationPage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccountRemovalConfirmation(Remove2SVConfirmForm.form)))
+    Future.successful(Ok(protectAccountRemovalConfirmation(Remove2SVConfirmForm.form)))
   }
 
   def confirm2SVRemoval() = loggedInAction { implicit request =>
     Remove2SVConfirmForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(views.html.protectAccountRemovalConfirmation(form)))
+      Future.successful(BadRequest(protectAccountRemovalConfirmation(form)))
     },
       form => {
         form.removeConfirm match {
@@ -115,7 +116,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
   }
 
   def get2SVRemovalCompletePage() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccountRemovalComplete()))
+    Future.successful(Ok(protectAccountRemovalComplete()))
   }
 }
 

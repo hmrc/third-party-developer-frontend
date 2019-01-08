@@ -21,14 +21,13 @@ import domain._
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.Play.current
-import play.api.data.Form
-import play.api.data.Forms.{mapping, text}
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Action
 import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
+import views.html.protectaccount._
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -78,8 +77,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         userAuthenticationResponse.session match {
           case Some(session) => audit(LoginSucceeded, session.developer)
                                 gotoLoginSucceeded(session.sessionId)
-          case None => successful(Ok(logInAccessCode(
-            LoginTotpForm.form, login.emailaddress, userAuthenticationResponse.nonce.get)).withSession(request.session + ("emailAddress" -> login.emailaddress)))
+          case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+            .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
         }
       } recover {
         case _: InvalidEmail =>
@@ -98,32 +97,33 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def authenticateTotp = Action.async { implicit request =>
-    LoginTotpForm.form.bindFromRequest.fold(
-      errors => successful(BadRequest(logInAccessCode(errors, errors.data("email"), errors.data("nonce")))),
-      validForm => sessionService.authenticateTotp(validForm.email, validForm.accessCode, validForm.nonce) flatMap { session =>
-        audit(LoginSucceeded, session.developer)
-        gotoLoginSucceeded(session.sessionId)
-      } recover {
-        case _: InvalidCredentials =>
-          audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> validForm.email))
-          Unauthorized(logInAccessCode(
-            LoginTotpForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code"),
-            validForm.email, validForm.nonce))
+    ProtectAccountForm.form.bindFromRequest.fold(
+      errors => successful(BadRequest(logInAccessCode(errors))),
+      validForm => {
+        val email = request.session.get("emailAddress").get
+        sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
+          audit(LoginSucceeded, session.developer)
+          gotoLoginSucceeded(session.sessionId)
+        } recover {
+          case _: InvalidCredentials =>
+            audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
+            Unauthorized(logInAccessCode(ProtectAccountForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code")))
+        }
       }
     )
   }
 
   def get2SVHelpConfirmationPage() = loggedOutAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccountNoAccessCode(Help2SVConfirmForm.form)))
+    Future.successful(Ok(protectAccountNoAccessCode(Help2SVConfirmForm.form)))
   }
 
   def get2SVHelpCompletionPage() = loggedOutAction { implicit request =>
-    Future.successful(Ok(views.html.protectAccountNoAccessCodeComplete()))
+    Future.successful(Ok(protectAccountNoAccessCodeComplete()))
   }
 
   def confirm2SVHelp() = loggedOutAction { implicit request =>
     Help2SVConfirmForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(views.html.protectAccountNoAccessCode(form)))
+      Future.successful(BadRequest(protectAccountNoAccessCode(form)))
     },
       form => {
         form.helpRemoveConfirm match {
@@ -133,16 +133,4 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         }
       })
   }
-}
-
-final case class LoginTotpForm(accessCode: String, email: String, nonce: String)
-
-object LoginTotpForm {
-  def form: Form[LoginTotpForm] = Form(
-    mapping(
-      "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
-      "email" -> text,
-      "nonce" -> text
-    )(LoginTotpForm.apply)(LoginTotpForm.unapply)
-  )
 }

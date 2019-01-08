@@ -160,8 +160,9 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       mockAuthenticateTotp(user.email, totp, nonce, successful(session))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
-      val request = FakeRequest().withSession(sessionParams: _*)
-        .withFormUrlEncodedBody(("email", user.email), ("accessCode", totp), ("nonce", nonce))
+      val request = FakeRequest()
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce :_*)
+        .withFormUrlEncodedBody(("accessCode", totp))
 
       val result = await(underTest.authenticateTotp()(request))
 
@@ -173,8 +174,9 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
     "return the login page when the access code is incorrect" in new Setup {
       val request = FakeRequest()
-        .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody(("email", user.email), ("accessCode", "654321"), ("nonce", nonce))
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce :_*)
+        .withFormUrlEncodedBody(("accessCode", "654321"))
+
       val result = await(addToken(underTest.authenticateTotp())(request))
 
       status(result) shouldBe UNAUTHORIZED
