@@ -46,7 +46,7 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   lazy val thirdPartyDeveloperFrontendUrl = buildUrl("platform.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
   lazy val productionApiBaseUrl = buildUrl("platform.api.production")
   lazy val sandboxApiBaseUrl = buildUrl("platform.api.sandbox")
-  lazy val sessionTimeoutInSeconds = getConfig("session-timeout-in-seconds", runModeConfiguration.getInt)
+  lazy val sessionTimeoutInSeconds = getConfig("session.timeoutSeconds", runModeConfiguration.getInt)
   lazy val analyticsToken = runModeConfiguration.getString(s"$env.google-analytics.token")
   lazy val analyticsHost = runModeConfiguration.getString(s"$env.google-analytics.host").getOrElse("auto")
   lazy val securedCookie = runModeConfiguration.getBoolean(s"$env.cookie.secure").getOrElse(true)
