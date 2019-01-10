@@ -40,7 +40,7 @@ import scala.concurrent.ExecutionContext
 object SessionTimeoutFilterWithWhitelistIntegrationSpec {
   val now = new DateTime(2019, 1, 1, 0, 0)
   val whitelistedUrl = "/developer/login"
-  val notWhitelistedUrl = "/developer/logout"
+  val notWhitelistedUrl = "/developer/registration"
 
   class StaticDateSessionTimeoutFilterWithWhitelist @Inject()(config: SessionTimeoutFilterConfig)(implicit ec: ExecutionContext, mat: Materializer)
     extends SessionTimeoutFilterWithWhitelist(config)(ec, mat) {
