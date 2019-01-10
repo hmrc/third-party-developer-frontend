@@ -108,7 +108,7 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
   "removeMfa" should {
     "return OK on successful removal" in new Setup {
       val email = "test.user@example.com"
-      stubFor(delete(urlPathEqualTo(s"/developer/$email/mfa")).willReturn(aResponse().withStatus(OK)))
+      stubFor(post(urlPathEqualTo(s"/developer/$email/mfa/remove")).willReturn(aResponse().withStatus(OK)))
 
       val result: Int = await(underTest.removeMfa(email))
 
@@ -117,14 +117,14 @@ class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with
 
     "throw NotFoundException if user not found" in new Setup {
       val email = "invalid.user@example.com"
-      stubFor(delete(urlPathEqualTo(s"/developer/$email/mfa")).willReturn(aResponse().withStatus(NOT_FOUND)))
+      stubFor(post(urlPathEqualTo(s"/developer/$email/mfa/remove")).willReturn(aResponse().withStatus(NOT_FOUND)))
 
       intercept[NotFoundException](await(underTest.removeMfa(email)))
     }
 
     "throw Upstream5xxResponse if it failed to remove MFA" in new Setup {
       val email = "test.user@example.com"
-      stubFor(delete(urlPathEqualTo(s"/developer/$email/mfa")).willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
+      stubFor(post(urlPathEqualTo(s"/developer/$email/mfa/remove")).willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
 
       intercept[Upstream5xxResponse](await(underTest.removeMfa(email)))
     }

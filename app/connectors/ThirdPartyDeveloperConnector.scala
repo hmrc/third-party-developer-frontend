@@ -193,7 +193,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
 
   def removeMfa(email: String)(implicit hc: HeaderCarrier): Future[Int] =
     metrics.record(api) {
-      http.DELETE(s"$serviceBaseUrl/developer/$email/mfa").map(status)
+      http.POST(s"$serviceBaseUrl/developer/$email/mfa/remove", Json.obj("removedBy" -> email)).map(status)
     }
 
   def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
