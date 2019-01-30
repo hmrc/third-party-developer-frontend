@@ -41,9 +41,9 @@
             @helper.CSRF.formField
             @fieldError(form.errors, "invalidCredentials", true)
             <div>
-                <p>This is the 6 digit code from your authentication app.</p>
                 <div class="form-group @if(form.errors("accessCode").nonEmpty){form-group-error form-field--error}">
                     <label class="form-label-bold" for="accessCode" id="access-code-label">Access code</label>
+                    <p>This is the 6 digit code from your authenticator app.</p>
 
                     @fieldError(form.errors, "accessCode", true)
                     <input type="text" autocomplete="off" id="accessCode"
