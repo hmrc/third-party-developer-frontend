@@ -20,43 +20,28 @@
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
 
-@(form: Form[Help2SVConfirmForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = titleError + "You do not have an access code",
+    title = "Get help accessing your account",
     breadcrumbs = Seq(
-        Crumb("No access code"),
+        Crumb("Get help accessing your account"),
         Crumb.signIn,
         Crumb.home
     )
 ) {
-    @errorSummary(form)
 
-    <h1 class="heading-xlarge">You do not have an access code</h1>
+    <h1 class="heading-xlarge">Get help accessing your account</h1>
 
-    <p>You can ask us to remove 2-step verification so you can sign into your account.</p>
+    <p>Ask us to remove 2-step verification so you can sign in to your account.</p>
     <p>We'll respond within 2 working days.</p>
 
     @helper.form(action = controllers.routes.UserLoginAccount.confirm2SVHelp(), 'class -> "form") {
-        <div class="form-group @if(form.errors("helpRemoveConfirm").nonEmpty) {form-group-error}">
-            <fieldset id="helpRemoveConfirm" class="inline">
-                <legend><h2 class="heading-large">Would you like us to remove 2-step verification?</h2></legend>
-                @helper.CSRF.formField
-                @fieldError(form.errors, "helpRemoveConfirm")
-                <div class="multiple-choice">
-                    <input id="help-confirm-remove-2sv-yes" type="radio" name="helpRemoveConfirm" value="Yes">
-                    <label for="help-confirm-remove-2sv-yes">Yes</label>
-                </div>
-                <div class="multiple-choice">
-                    <input id="help-confirm-remove-2sv-no" type="radio" name="helpRemoveConfirm" value="No">
-                    <label for="help-confirm-remove-2sv-no">No</label>
-                </div>
-
-            </fieldset>
-        </div>
+        @helper.CSRF.formField
         <div class="form-group">
             <button id="submit" class="button" type="submit">Continue</button>
+            <a id="cancel" class="secondary-button" href="@routes.UserLoginAccount.login()">Cancel</a>
         </div>
     }
+
 }

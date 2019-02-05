@@ -29,7 +29,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
 import views.html.protectaccount._
 
-import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 trait Auditing {
@@ -114,23 +113,14 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   def get2SVHelpConfirmationPage() = loggedOutAction { implicit request =>
-    Future.successful(Ok(protectAccountNoAccessCode(Help2SVConfirmForm.form)))
+    successful(Ok(protectAccountNoAccessCode()))
   }
 
   def get2SVHelpCompletionPage() = loggedOutAction { implicit request =>
-    Future.successful(Ok(protectAccountNoAccessCodeComplete()))
+    successful(Ok(protectAccountNoAccessCodeComplete()))
   }
 
   def confirm2SVHelp() = loggedOutAction { implicit request =>
-    Help2SVConfirmForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountNoAccessCode(form)))
-    },
-      form => {
-        form.helpRemoveConfirm match {
-          case Some("Yes") => applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).
-            map(_ => Ok(protectAccountNoAccessCodeComplete()))
-          case _ => Future.successful(Redirect(controllers.routes.UserLoginAccount.login()))
-        }
-      })
+    applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeComplete()))
   }
 }

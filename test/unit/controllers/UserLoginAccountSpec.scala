@@ -197,8 +197,8 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       status(result) shouldBe OK
       val body = bodyOf(result)
 
-      body should include("You do not have an access code")
-      body should include("You can ask us to remove 2-step verification so you can sign into your account")
+      body should include("Get help accessing your account")
+      body should include("Ask us to remove 2-step verification so you can sign in to your account.")
 
     }
 
@@ -216,21 +216,9 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
     }
 
-      "redirect to the login page when user selects no" in new Setup {
+    "return 2-step removal request completed page on submission" in new Setup {
 
-      val request = FakeRequest().withSession(sessionParams: _*).
-        withFormUrlEncodedBody(("helpRemoveConfirm", "No"))
-
-      val result = await(addToken(underTest.confirm2SVHelp())(request))
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/login")
-    }
-
-    "return 2-step verification request completed page when yes selected" in new Setup {
-
-      val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> user.email :_*).
-        withFormUrlEncodedBody(("helpRemoveConfirm", "Yes"))
+      val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> user.email :_*)
 
       given(underTest.applicationService.request2SVRemoval(Matchers.eq(user.email))(any[HeaderCarrier]))
         .willReturn(Future.successful(TicketCreated))
