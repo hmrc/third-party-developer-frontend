@@ -91,8 +91,8 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
       val result = await(underTest.authenticate()(request))
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications")
+      status(result) shouldBe OK
+      bodyOf(result) should include("Protect your Developer Hub account")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginSucceeded), Matchers.eq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
     }
