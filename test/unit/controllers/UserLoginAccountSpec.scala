@@ -82,7 +82,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
   "authenticate" should {
 
-    "return the manage Applications page when the credentials are correct" in new Setup {
+    "display the Protect Your Account suggestion page when successfully logging in without having 2sv configured" in new Setup {
       mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
