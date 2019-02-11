@@ -82,7 +82,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
   "authenticate" should {
 
-    "display the Protect Your Account suggestion page when successfully logging in without having 2sv configured" in new Setup {
+    "display the Add 2-step Verification suggestion page when successfully logging in without having 2SV configured" in new Setup {
       mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
@@ -92,7 +92,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       val result = await(underTest.authenticate()(request))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Protect your Developer Hub account")
+      bodyOf(result) should include("Add 2-step verification")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginSucceeded), Matchers.eq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
     }
