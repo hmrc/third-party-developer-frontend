@@ -75,7 +75,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       login => sessionService.authenticate(login.emailaddress, login.password) flatMap { userAuthenticationResponse =>
         userAuthenticationResponse.session match {
           case Some(session) => audit(LoginSucceeded, session.developer)
-                                gotoLoginSucceeded(session.sessionId, successful(Ok(setUp2SV()).withNewSession))
+                                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV()).withNewSession))
           case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
             .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
         }

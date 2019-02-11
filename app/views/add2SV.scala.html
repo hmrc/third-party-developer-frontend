@@ -21,25 +21,24 @@
 @()(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
-    title = "Protect your Developer hub account",
+    title = "Add 2-step verification",
     breadcrumbs = Seq(
-        Crumb("Protect your account"),
+        Crumb("Add 2-step verification"),
         Crumb.home
     )
 ) {
 
     <header>
-        <h1 class="heading-xlarge">Protect your Developer Hub account</h1>
+        <h1 class="heading-xlarge">Add 2-step verification</h1>
     </header>
     <div>
         <div>
-            <p>Protect your Developer Hub account by adding 2-step verification. You'll need a new access code every time you sign in.</p>
-            <p>You can get an access code on your smartphone or tablet with an authentication app, even with no mobile reception.</p>
+            <p>You can now use 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
         </div>
 
         <div class="form-group">
-            <a id="submit" class="button" href="@routes.ProtectAccount.getProtectAccount()">Protect my account</a>
-            <a class="secondary-button" href="@routes.ManageApplications.manageApps()">Continue to Developer Hub</a>
+            <a id="submit" class="button" href="@routes.ProtectAccount.getProtectAccount()">Continue</a>
+            <a class="secondary-button" href="@routes.ManageApplications.manageApps()">I can't do this right now</a>
         </div>
     </div>
 
