@@ -10,11 +10,7 @@ Feature:
     @APIS-1467
     Scenario: TPDF should respond properly if logout fails
       Given I navigate to the 'Sign in' page
-      And I fill in the login form with
-        | email address          | password         |
-        | john.smith@example.com | StrongPassword1! |
-      When I click on submit
-      Then I am logged in as 'John Smith'
+      And I am successfully logged in with 'john.smith@example.com' and 'StrongPassword1!'
       And I am on the 'Manage applications empty nest' page
       When I attempt to Sign out when the session expires
       Then I am on the 'Logout survey' page
