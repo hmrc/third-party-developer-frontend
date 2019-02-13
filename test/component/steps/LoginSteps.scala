@@ -43,6 +43,8 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     webDriver.navigate().refresh()
     Form.populate(mutable.Map("email address" -> email, "password" -> password))
     click on id("submit")
+    click on id("skip") // Skip the 2SV reminder screen
+    click on id("submit") // Continue past confirmation of skipping 2SV setup
   }
 
   Given("""^I am registered with$""") { (data: DataTable) =>

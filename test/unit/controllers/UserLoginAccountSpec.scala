@@ -44,12 +44,14 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
   implicit val materializer = fakeApplication.materializer
   val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(UUID.randomUUID().toString, user)
-  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
   val emailFieldName: String = "emailaddress"
   val passwordFieldName: String = "password"
   val userPassword = "Password1!"
   val totp = "123456"
   val nonce = "ABC-123"
+
+  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+  val userAuthenticationWith2SVResponse = UserAuthenticationResponse(accessCodeRequired = true, nonce = Some(nonce), session = None)
 
   trait Setup {
 
@@ -82,17 +84,32 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
   "authenticate" should {
 
-    "return the manage Applications page when the credentials are correct" in new Setup {
+    "display the 2-step verification code page when logging in with 2SV configured" in new Setup {
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationWith2SVResponse))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
+
+      val result = await(addToken(underTest.authenticate())(request))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Enter your access code")
+    }
+
+    "display the Add 2-step Verification suggestion page when successfully logging in without having 2SV configured" in new Setup {
       mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
-      val request = FakeRequest().withSession(sessionParams: _*)
+      val request = FakeRequest()
+        .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
 
       val result = await(underTest.authenticate()(request))
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications")
+      status(result) shouldBe OK
+      bodyOf(result) should include("Add 2-step verification")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginSucceeded), Matchers.eq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
     }

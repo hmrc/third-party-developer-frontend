@@ -1,0 +1,41 @@
+@*
+ * Copyright 2019 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import include._
+@import model.Crumb
+
+@()(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+
+@devMain(
+    title = "Add 2-step verification",
+    breadcrumbs = Seq(
+        Crumb("Add 2-step verification"),
+        Crumb.signIn,
+        Crumb.home
+    )
+) {
+
+    <header>
+        <h1 class="heading-xlarge">Add 2-step verification</h1>
+    </header>
+    <section>
+        <p>You can now use 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
+        <p><a id="submit" class="button" href="@routes.ProtectAccount.getProtectAccount()">Continue</a></p>
+        <p><a id="skip" href="@routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a></p>
+    </section>
+
+}

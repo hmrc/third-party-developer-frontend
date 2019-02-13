@@ -75,7 +75,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       login => sessionService.authenticate(login.emailaddress, login.password) flatMap { userAuthenticationResponse =>
         userAuthenticationResponse.session match {
           case Some(session) => audit(LoginSucceeded, session.developer)
-                                gotoLoginSucceeded(session.sessionId)
+                                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV()).withNewSession))
           case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
             .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
         }
@@ -122,5 +122,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   def confirm2SVHelp() = loggedOutAction { implicit request =>
     applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeComplete()))
+  }
+
+  def get2SVNotSetPage() = Action.async { implicit request =>
+    successful(Ok(userDidNotAdd2SV()))
   }
 }
