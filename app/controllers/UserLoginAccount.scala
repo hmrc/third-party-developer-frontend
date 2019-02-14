@@ -75,7 +75,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       login => sessionService.authenticate(login.emailaddress, login.password) flatMap { userAuthenticationResponse =>
         userAuthenticationResponse.session match {
           case Some(session) => audit(LoginSucceeded, session.developer)
-                                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV()).withNewSession))
+                                // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
+                                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV()).withSession(request.session)))
           case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
             .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
         }
