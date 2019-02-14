@@ -39,7 +39,7 @@
         </div>
 
         <div class="form-group">
-            <a id="submit" class="button" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps.url)">Continue</a>
+            <a id="submit" class="button" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps())">Continue</a>
         </div>
     </div>
 
