@@ -139,7 +139,8 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
       val result = await(addToken(underTest.getProtectAccount())(request))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Your Developer account is currently protected with 2-step verification")
+      bodyOf(result) should include("Your Developer Hub account is currently protected with 2-step verification. This is linked to your smartphone or tablet.")
+      bodyOf(result) should include("You must remove 2-step verification before you can add it to a new smartphone or tablet.")
     }
   }
 
