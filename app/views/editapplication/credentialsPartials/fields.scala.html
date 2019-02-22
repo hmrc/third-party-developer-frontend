@@ -77,8 +77,8 @@
                 @helper.form(action = controllers.routes.Credentials.selectClientSecretsToDelete(app.id), if(form.errors("password").nonEmpty) {'class -> "js-mask-form js-visible"} else {'class -> "js-mask-form js-hidden"}) {
                     @helper.CSRF.formField
                     <div class="form-group @if(form.errors("password").nonEmpty) {form-group-error}">
-                        <label for="password" class="form-label-bold" id="password-label">
-                            Enter your password
+                        <label for="password" class="form-label-bold" id="password-label" aria-live="polite">
+                            Enter your Developer Hub account password
                             @fieldError(form.errors, "password")
                         </label>
                         <input id="password"
