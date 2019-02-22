@@ -31,29 +31,24 @@
         <p>Use these credentials to test against sandbox APIs.</p>
     }
 </div>
-<div class="credentials-section">
-    <span class="bold" id="clientIdHeading">Client <abbr title="Identity">ID</abbr></span>
-    <details>
-        <summary aria-label="What is a client ID?" role="button" aria-expanded="false" aria-controls="details-content-0">What is this?</summary>
-        <div class="panel panel-border-narrow" id="details-content-0">
-            <p>It is used to identify your application during each step of an @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/user-restricted-endpoints",
-                value = Some("OAuth 2.0")).toHtml journey.</p>
-        </div>
-    </details>
+<div class="credentials-section" aria-describedby="client-id-info">
+    <h2 class="heading-large" id="clientIdHeading">Client <abbr title="Identity">ID</abbr></h2>
+    <p id="client-id-info" >
+        A client <abbr title="Identity">ID</abbr>
+        is used to identify your application during each step of an @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/user-restricted-endpoints",
+        value = Some("OAuth 2.0")).toHtml journey.
+    </p>
     <label for="clientId" class="visuallyhidden">Client ID</label>
     <div><input id="clientId" class="flat-text" readonly type="text" data-clientid value="@token.clientId"></div>
 </div>
-<div class="credentials-section">
-    <span class="bold" id="clientSecretHeading">Client secret</span>
-    <details>
-        <summary aria-label="What is a client secret?" role="button" aria-expanded="false" aria-controls="details-content-1">What is this?</summary>
-        <div class="panel panel-border-narrow" id="details-content-1">
-            <p>It is a secret passphrase used to authorise your application during each step of an @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/user-restricted-endpoints",
-                value = Some("OAuth 2.0")).toHtml journey. Keep it private.</p>
-        </div>
-    </details>
-    @for( (secret, i) <- token.clientSecrets.zipWithIndex) {
-        @maskedContent(secret, accessibleText = s"client secret ${i+1}", secure = app.deployedTo == Environment.PRODUCTION, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
+<div class="credentials-section" aria-describedby="client-secrets-info">
+    <h2 class="heading-large" id="clientSecretHeading">Client secrets</h2>
+    <p id="client-secrets-info">
+      Client secrets are secret passphrases used to authorise your application during each step of an @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/user-restricted-endpoints",
+        value = Some("OAuth 2.0")).toHtml journey. Keep them private.
+    </p>
+    @for((secret, i) <- token.clientSecrets.zipWithIndex) {
+        @maskedContent(secret, accessibleText = s"client secret ${i + 1}", secure = app.deployedTo == Environment.PRODUCTION, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
     }
     @if(token.clientSecrets.size < 5) {
         <div>
@@ -69,13 +64,13 @@
                 <div>
                     <p>
                         <a href="#"
-                           role="button"
-                           class="js-visible js-mask-control"
-                           data-clientsecretdelete-toggle
-                           data-mask-toggle-target="js-mask-form"
-                           data-text-hide="Delete a client secret"
-                           data-text-show="Delete a client secret">
-                            <span  data-toggle-text>Delete a client secret</span>
+                        role="button"
+                        class="js-visible js-mask-control"
+                        data-clientsecretdelete-toggle
+                        data-mask-toggle-target="js-mask-form"
+                        data-text-hide="Delete a client secret"
+                        data-text-show="Delete a client secret">
+                            <span data-toggle-text>Delete a client secret</span>
                         </a>
                     </p>
                 </div>
@@ -87,14 +82,14 @@
                             @fieldError(form.errors, "password")
                         </label>
                         <input id="password"
-                               class="form-control @if(form.errors("password").nonEmpty) {form-control-error}"
-                               data-ajax-header="true"
-                               name="password"
-                               type="password"
-                               aria-labelledby="password-label"/>
+                        class="form-control @if(form.errors("password").nonEmpty) {form-control-error}"
+                        data-ajax-header="true"
+                        name="password"
+                        type="password"
+                        aria-labelledby="password-label"/>
                         <button id="password-for-delete-client-secret"
-                                type="submit"
-                                class="button button--padded float--right">Submit</button>
+                        type="submit"
+                        class="button button--padded float--right">Submit</button>
                     </div>
                 }
             </div>
@@ -110,15 +105,12 @@
         <p>To delete a client secret, you must add one first.</p>
     }
 </div>
-<div class="credentials-section">
-    <span class="bold" id="serverTokenHeading">Server token</span>
-    <details>
-        <summary aria-label="What is a server token?" role="button" aria-expanded="false" aria-controls="details-content-2">What is this?</summary>
-        <div class="panel panel-border-narrow" id="details-content-2">
-            <p>It is a secret token used to @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints",
-                value = Some("authorise")).toHtml your application when making requests to any application-restricted endpoint.</p>
-        </div>
-    </details>
+<div class="credentials-section" aria-describedby="server-token-info">
+    <h2 class="heading-large" id="serverTokenHeading">Server token</h2>
+    <p id="server-token-info">
+        A server token is a secret token used to @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints",
+        value = Some("authorise")).toHtml your application when making requests to any application-restricted endpoint.
+    </p>
     <label for="serverToken" class="visuallyhidden">Server token</label>
     <div><input id="serverToken" class="flat-text" readonly type="text" data-accesstoken value="@token.accessToken"></div>
 </div>
