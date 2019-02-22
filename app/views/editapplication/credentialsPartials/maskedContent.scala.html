@@ -26,15 +26,15 @@
     <div class="inline-block">
         <span class="js-visible js-mask-secret" aria-label="@accessibleText is masked">@mask</span>
         <input class="js-hidden js-mask-revealed flat-text" aria-label="@accessibleText is revealed" data-clientsecret
-            readonly
-            type="text"
-            size="60"
+                readonly
+                type="text"
+                size="60"
             value="@if(!secure) @{secret.secret}" >
-    </div>
-    <div class="float--right">
+        </div>
+    <div>
         <a href="#"
            role="button"
-           class="js-visible js-mask-control"
+           class="js-visible js-mask-control action-link"
            data-clientsecret-toggle
            @if(secure) {
             data-mask-toggle-target="js-mask-form"
@@ -43,6 +43,13 @@
            data-text-hide="@buttonHideText"
            data-accessible-text="@accessibleText">
             <span data-toggle-text>@buttonShowText</span> <span class="visuallyhidden">@accessibleText</span>
+        </a>
+        <a href="#"
+           class="copy-to-clip"
+           title="Copies @accessibleText into the system clipboard."
+           data-clip-text="@{secret.secret}"
+           aria-label="Copy @accessibleText to clipboard">
+                    Copy
         </a>
     </div>
     @if(secure) {
