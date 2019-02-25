@@ -41,13 +41,18 @@
            }
            data-text-show="@buttonShowText"
            data-text-hide="@buttonHideText"
+           @if(secure){
+           data-secure="true"
+           }
            data-accessible-text="@accessibleText">
             <span data-toggle-text>@buttonShowText</span> <span class="visuallyhidden">@accessibleText</span>
         </a>
         <a href="#"
-           class="copy-to-clip"
+           class="copy-to-clip @if(secure){ hidden }"
            title="Copies @accessibleText into the system clipboard."
+           @if(!secure){
            data-clip-text="@{secret.secret}"
+           }
            aria-label="Copy @accessibleText to clipboard">
                     Copy
         </a>
