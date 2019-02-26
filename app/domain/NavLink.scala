@@ -19,7 +19,7 @@ package domain
 
 import play.api.libs.json.Json
 
-case class NavLink(label: String, href: String, truncate: Boolean = false)
+case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false)
 
 object NavLink {
   implicit val format = Json.format[NavLink]
@@ -30,7 +30,8 @@ case object StaticNavLinks {
     Seq(
       NavLink("Documentation", s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub"),
       NavLink("Applications", s"$thirdPartyDeveloperFrontendUrl/developer/applications"),
-      NavLink("Support", s"$thirdPartyDeveloperFrontendUrl/developer/support"))
+      NavLink("Support", s"$thirdPartyDeveloperFrontendUrl/developer/support"),
+      NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true))
   }
 }
 
