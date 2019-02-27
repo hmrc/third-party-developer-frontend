@@ -44,6 +44,7 @@
        class="copy-to-clip"
        title="Copies the client ID into the system clipboard."
        data-clip-text="@token.clientId"
+       aria-live="assertive"
        aria-label="Copy client ID to clipboard">
         Copy
     </a>
@@ -75,6 +76,7 @@
                         class="js-visible js-mask-control"
                         data-clientsecretdelete-toggle
                         data-mask-toggle-target="js-mask-form"
+                        aria-live="polite"
                         data-text-hide="Delete a client secret"
                         data-text-show="Delete a client secret">
                             <span data-toggle-text>Delete a client secret</span>
@@ -124,6 +126,7 @@
        class="copy-to-clip"
        title="Copies the server token into the system clipboard."
        data-clip-text="@token.accessToken"
+       aria-live="polite"
        aria-label="Copy server token to clipboard">
         Copy
     </a>

@@ -228,6 +228,8 @@ $(document).ready(function () {
           self.closest('.js-mask-container').find('.' + targetSelector + ' input[type=password]').focus();
         }, 0);
       }
+    } else {
+      self.parent().find('.copy-to-clip').focus();
     }
   }
 
