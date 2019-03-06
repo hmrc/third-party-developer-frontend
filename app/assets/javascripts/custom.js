@@ -175,9 +175,72 @@ $(document).ready(function () {
     charCount.init({ selector: '.js-char-count' });
 
   $('[data-clientsecret-toggle]').on('unmask', function(event, data) {
-    var target = $(this).closest('.js-mask-container').find('.js-mask-revealed');
+    var self = $(this);
+    var container = self.closest('.js-mask-container');
+    var target = container.find('.js-mask-revealed');
+    var copy = self.parent().find('.copy-to-clip');
+    var secondsToTimeout = container.data('mask-timer');
+
     target.text('');
     target.val(data);
+
+    copy.data('clip-text', data);
+    copy.removeClass('hidden');
+    copy.focus();
+
+    if (secondsToTimeout) {
+      setTimeout(function() {
+        if (!isVisible(self)) {
+          self.trigger('mask');
+        }
+      }, parseFloat(secondsToTimeout, 10) * 1000);
+    }
+  });
+
+  $('[data-clientsecret-toggle]').on('mask', function(event, data) {
+    if (!$(this).data('secure')) {
+      return;
+    }
+
+    var copy = $(this).parent().find('.copy-to-clip');
+    copy.data('clip-text', '');
+    copy.addClass('hidden');
+  });
+
+  function isVisible(el) {
+    return new RegExp('^' + el.data('text-hide')).test(el.text());
+  }
+
+  function toggleMask(e) {
+    e.preventDefault();
+
+    var self = $(this);
+
+    if (isVisible(self)) {
+      return self.trigger('mask');
+    }
+
+    if (self.data('secure')) {
+      var targetSelector = self.data('mask-toggle-target');
+
+      if (targetSelector) {
+        setTimeout(function() {
+          self.closest('.js-mask-container').find('.' + targetSelector + ' input[type=password]').focus();
+        }, 0);
+      }
+    } else {
+      self.parent().find('.copy-to-clip').focus();
+    }
+  }
+
+  $('[data-clientsecret-toggle]').each(function() {
+    $(this).on('click', toggleMask);
+
+    var currentBindings = $._data(this, 'events').click;
+
+    if ($.isArray(currentBindings)) {
+      currentBindings.unshift(currentBindings.pop());
+    }
   });
 });
 

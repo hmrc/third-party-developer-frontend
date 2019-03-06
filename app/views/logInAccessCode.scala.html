@@ -20,7 +20,7 @@
 @import model.Crumb
 @import play.api.mvc.Call
 
-@(form: Form[controllers.LoginTotpForm], email: String, nonce: String)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
     title = "Enter your access code",
@@ -49,15 +49,13 @@
                     value="@form.data.getOrElse("accessCode", "")"
                     class="form-control @if(form.errors("accessCode").nonEmpty){form-control-error}"
                     aria-required="true"/>
+                <p><a href="@controllers.routes.UserLoginAccount.get2SVHelpConfirmationPage">I do not have an access code</a></p>
                 </div>
             </div>
 
             <div class="form-group">
                 <button id="submit" class="button" type="submit">Continue</button>
             </div>
-
-            <input type="hidden" id="email" name="email" value="@email">
-            <input type="hidden" id="nonce" name="nonce" value="@nonce">
         }
     </div>
 

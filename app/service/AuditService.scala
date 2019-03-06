@@ -92,6 +92,11 @@ object AuditAction {
     val auditType = "LoginFailedDueToInvalidPassword"
   }
 
+  case object LoginFailedDueToInvalidAccessCode extends AuditAction {
+    val name = "Login failed due to invalid access code"
+    val auditType = "LoginFailedDueToInvalidAccessCode"
+  }
+
   case object LoginFailedDueToLockedAccount extends AuditAction {
     val name = "Login failed due to locked account"
     val auditType = "LoginFailedDueToLockedAccount"
@@ -100,6 +105,11 @@ object AuditAction {
   case object AccountDeletionRequested extends AuditAction {
     val name = "Developer has requested an account deletion"
     val auditType = "AccountDeletionRequested"
+  }
+
+  case object Remove2SVRequested extends AuditAction {
+    val name = "Developer has requested 2SV removal"
+    val auditType = "Remove2SVRequested"
   }
 
   case object ApplicationDeletionRequested extends AuditAction {

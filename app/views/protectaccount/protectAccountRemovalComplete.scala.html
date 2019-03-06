@@ -14,31 +14,29 @@
  * limitations under the License.
  *@
 
-@import domain._
+@import config.ApplicationConfig
+@import domain.{Application, Developer}
 @import include._
 @import model.Crumb
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Protected account",
+    title = "2-step verification removed",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
-        Crumb("Protect account"),
+        Crumb.protectAccount,
         Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    )
 ) {
 
-
-    <header>
-        <h1 class="heading-xlarge">Protect account</h1>
-    </header>
+    <div class="govuk-box-highlight">
+        <h1 class="heading-xlarge">2-step verification removed</h1>
+    </div>
+    <br>
+    <p>You can <a href="@routes.ProtectAccount.getQrCode()">add 2-step verification</a> back again at any time.</p>
 
     <div>
-        <p>Your Developer account is currently protected with 2-step verification. You'll need an access code to sign in.</p>
-        <p>You can remove 2-step verification from your account at any time.</p>
-        <a id="submit" class="button" type="submit" href="@routes.ProtectAccount.get2SVRemovalConfirmationPage()">Remove 2-step verification</a>
+        <a id="view-all-apps" class="button" type="submit" href="@routes.ManageApplications.manageApps">View all applications</a>
     </div>
-
 }

@@ -18,11 +18,12 @@ package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.Navigation
-import domain.{Developer, Session}
+import domain.{Developer, NavLink, Session}
 import org.mockito.BDDMockito._
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.scalatest.mockito.MockitoSugar
+import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -39,37 +40,49 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
   val session = Session(sessionId, loggedInUser)
   var userPassword = "Password1!"
 
-  trait Setup {
+  class Setup(loggedIn: Boolean) {
     val underTest = new Navigation(
       mock[SessionService],
       mock[ErrorHandler],
       mock[ApplicationConfig]
     )
 
-    def mockSuccessfulAuthentication(loggedInUser: Developer) =
-      given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(successful(Some(Session(sessionId, loggedInUser))))
+    given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(successful(Some(Session(sessionId, loggedInUser))))
+
+    val request = if (loggedIn) FakeRequest().withLoggedIn(underTest)(sessionId) else FakeRequest()
+    val result = await(underTest.navLinks()(request))
+    val links = jsonBodyOf(result).as[Seq[NavLink]]
   }
 
-  "navigation" should {
-    "return navigation links when user not logged in" in new Setup {
-      val result = await(underTest.navLinks()(FakeRequest()))
+  "navigation" when {
+    "user is not logged in" should {
+      "be successful" in new Setup(loggedIn = false) {
+        status(result) shouldBe OK
+        links.size shouldBe 2
+      }
 
-      status(result) shouldBe 200
+      "return a register link" in new Setup(loggedIn = false) {
+        links(0) shouldBe NavLink("Register", controllers.routes.Registration.register().url)
+      }
 
-      bodyOf(result) shouldBe
-        """[{"label":"Register","href":"/developer/registration","truncate":false},{"label":"Sign in","href":"/developer/login","truncate":false}]"""
+      "return a sign in link" in new Setup(loggedIn = false) {
+        links(1) shouldBe NavLink("Sign in", controllers.routes.UserLoginAccount.login().url)
+      }
     }
 
-    "return navigation links when user is logged in" in new Setup {
-      val request = FakeRequest().withLoggedIn(underTest)(sessionId)
-      mockSuccessfulAuthentication(loggedInUser)
+    "user is logged in" should {
+      "be successful" in new Setup(loggedIn = true) {
+        status(result) shouldBe OK
+        links.size shouldBe 2
+      }
 
-      val result = await(underTest.navLinks()(request))
+      "return the user's profile link" in new Setup(loggedIn = true) {
+        links(0) shouldBe NavLink("John Doe", controllers.routes.Profile.showProfile().url)
+      }
 
-      status(result) shouldBe 200
-
-      bodyOf(result) shouldBe
-        """[{"label":"John Doe","href":"/developer/profile","truncate":false},{"label":"Sign out","href":"/developer/logout/survey","truncate":false}]"""
+      "return a signout link" in new Setup(loggedIn = true) {
+        links(1) shouldBe NavLink("Sign out", controllers.routes.UserLogoutAccount.logoutSurvey().url)
+      }
     }
   }
 }

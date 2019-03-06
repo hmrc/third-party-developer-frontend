@@ -37,8 +37,6 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   val thirdPartyApplicationSandboxBearerToken = bearerToken("third-party-application-sandbox")
   val thirdPartyApplicationSandboxUseProxy = useProxy("third-party-application-sandbox")
   val deskproUrl = baseUrl("hmrc-deskpro")
-  lazy val hotjarId = runModeConfiguration.getInt(s"$env.hotjar.id").getOrElse(0)
-  lazy val hotjarEnabled = runModeConfiguration.getBoolean(s"$env.features.hotjar").getOrElse(false)
   lazy val contactPath = runModeConfiguration.getString(s"$env.contactPath").getOrElse("")
   lazy val reportAProblemPartialUrl = s"$contactPath/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   lazy val reportAProblemNonJSUrl = s"$contactPath/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
@@ -46,7 +44,7 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   lazy val thirdPartyDeveloperFrontendUrl = buildUrl("platform.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
   lazy val productionApiBaseUrl = buildUrl("platform.api.production")
   lazy val sandboxApiBaseUrl = buildUrl("platform.api.sandbox")
-  lazy val sessionTimeoutInSeconds = getConfig("session-timeout-in-seconds", runModeConfiguration.getInt)
+  lazy val sessionTimeoutInSeconds = getConfig("session.timeoutSeconds", runModeConfiguration.getInt)
   lazy val analyticsToken = runModeConfiguration.getString(s"$env.google-analytics.token")
   lazy val analyticsHost = runModeConfiguration.getString(s"$env.google-analytics.host").getOrElse("auto")
   lazy val securedCookie = runModeConfiguration.getBoolean(s"$env.cookie.secure").getOrElse(true)

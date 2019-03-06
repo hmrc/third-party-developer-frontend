@@ -19,7 +19,7 @@
 @import model.Crumb
 
 @(title: String, userFullName: Option[String] = None, isRegistering: Boolean = false, breadcrumbs: Seq[Crumb] = Seq.empty,
-    leftNav: Option[Html] = None, back: Option[String] = None, fullWidthContent: Boolean = false, useHotjar: Boolean = false)(mainContent: Html)(
+    leftNav: Option[Html] = None, back: Option[String] = None, fullWidthContent: Boolean = false)(mainContent: Html)(
     implicit request: Request[_], messages: Messages, applicationConfig: config.ApplicationConfig)
 
 
@@ -41,7 +41,6 @@
     breadcrumbs = breadcrumbs,
     leftNav = leftNav,
     back = back,
-    fullWidthContent = fullWidthContent,
-    hotJarEnabledOnPage = useHotjar) {
+    fullWidthContent = fullWidthContent) {
     @mainContent
 }

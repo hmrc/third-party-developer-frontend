@@ -83,10 +83,11 @@ class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppl
     }
 
     "destroy session on logout" in new Setup {
-      val request = requestWithCsrfToken
+      implicit val request = requestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
       val result = await(underTest.logout()(request))
 
       verify(underTest.sessionService, atLeastOnce()).destroy(Matchers.eq(session.sessionId))(Matchers.any[HeaderCarrier])
+      result.session.data shouldBe Map.empty
     }
   }
 

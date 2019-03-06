@@ -27,8 +27,7 @@
     leftNav: Option[Html] = None,
     breadcrumbs: Seq[Crumb] = Seq.empty,
     back: Option[String] = None,
-    fullWidthContent: Boolean = false,
-    hotJarEnabledOnPage: Boolean = false
+    fullWidthContent: Boolean = false
     )(mainContent: Html = HtmlFormat.empty)(implicit messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}

@@ -31,6 +31,7 @@ import org.mockito.Matchers.{any, anyString, eq => mockEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import service.AuditAction.Remove2SVRequested
 import service._
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
@@ -767,6 +768,21 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       val result = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
 
       result shouldBe true
+    }
+  }
+
+  "request 2SV removal" should {
+
+    val email = "testy@example.com"
+
+    "correctly create a deskpro ticket and audit record" in new Setup {
+      given(mockDeskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.successful(TicketCreated))
+      given(mockAuditService.audit(mockEq(Remove2SVRequested), any[Map[String, String]])(mockEq(hc))).willReturn(Future.successful(Success))
+
+      await(service.request2SVRemoval(email))
+
+      verify(mockDeskproConnector, times(1)).createTicket(any[DeskproTicket])(mockEq(hc))
+      verify(mockAuditService, times(1)).audit(mockEq(Remove2SVRequested), any[Map[String, String]])(mockEq(hc))
     }
   }
 

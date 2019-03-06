@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import connectors.{ConnectorMetrics, NoopConnectorMetrics}
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -31,7 +32,7 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
 
-class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
+class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with MockitoSugar {
   private val config = Configuration("play.filters.csrf.token.sign" -> false)
 
   override def fakeApplication(): Application =
@@ -95,7 +96,9 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
     }
 
     "there is a valid CSRF token" should {
-      "redirect back to the applications page" in new Setup {
+      "display 2SV sign-up reminder if user does not have it set up" in new Setup {
+        implicit val materializer = fakeApplication().materializer
+
         stubFor(post(urlEqualTo("/authenticate"))
           .willReturn(
             aResponse()
@@ -120,8 +123,33 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
         val result = await(route(app, request)).get
 
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/applications")
+        status(result) shouldBe OK
+        bodyOf(result) contains "Add 2-step verification"
+        verify(1, postRequestedFor(urlMatching("/authenticate")))
+      }
+
+      "display 2SV code entry page if user has it configured" in new Setup {
+        implicit val materializer = fakeApplication().materializer
+
+        stubFor(post(urlEqualTo("/authenticate"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(
+                s"""
+                   |{
+                   |  "accessCodeRequired": true,
+                   |  "nonce": "123456"
+                   |}""".stripMargin)))
+
+        val request = loginRequest.withCSRFToken
+          .withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
+
+        val result = await(route(app, request)).get
+
+        status(result) shouldBe OK
+        bodyOf(result) contains "Enter your access code"
         verify(1, postRequestedFor(urlMatching("/authenticate")))
       }
     }

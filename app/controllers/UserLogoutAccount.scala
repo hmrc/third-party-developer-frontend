@@ -55,7 +55,7 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
         _ <- tokenAccessor.extract(request)
           .map(sessionService.destroy)
           .getOrElse(Future.successful(()))
-      } yield Ok(views.html.logoutConfirmation())
+      } yield Ok(views.html.logoutConfirmation()).withNewSession
     }
   }
 }
