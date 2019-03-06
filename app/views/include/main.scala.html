@@ -36,8 +36,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
 
 @headScripts = {
-    @googleTagManager()
-    @hotjar(applicationConfig, hotJarEnabledOnPage)
+<script src='@routes.Assets.versioned("javascripts/googleTagManager.js")'></script>
 }
 
 @head = {
