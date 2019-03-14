@@ -304,4 +304,4 @@
 
   GOVUK.CharCount = CharCount
   global.GOVUK = GOVUK
-})(window)
+})(window);
