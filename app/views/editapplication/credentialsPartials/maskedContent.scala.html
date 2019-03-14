@@ -24,7 +24,7 @@
   mask: String = "•••••••••••••••••••••••••••••••")
 <div class="js-mask-container row" data-mask-timer="20">
     <div class="inline-block">
-        <span class="js-visible js-mask-secret" aria-label="@accessibleText is masked">@mask</span>
+        <span class="js-visible js-mask-secret" aria-label="@accessibleText is masked"><span aria-hidden="true">@mask</span></span>
         <input class="js-hidden js-mask-revealed flat-text" aria-label="@accessibleText is revealed" data-clientsecret
                readonly
                type="text"
