@@ -31,17 +31,17 @@ $.fn.apiSubscriber = function () {
     };
 
     var unsubscribe = function (event) { // subscribes user to api posting a serialized form
-            var $form = $(this),
-                url = $form.attr("action");
+        var $form = $(this),
+            url = $form.attr("action");
 
-            event.preventDefault();
-            $.post(url, $form.serialize(), function (response, textStatus, xhr) {
-                    unsubscribeResponseHandler(response, xhr);
-                })
-                .fail(function () {
-                    showError();
-                });
-        };
+        event.preventDefault();
+        $.post(url, $form.serialize(), function (response, textStatus, xhr) {
+                unsubscribeResponseHandler(response, xhr);
+            })
+            .fail(function () {
+                showError();
+            });
+    };
 
     var subscribeResponseHandler = function (response, xhr) {
         var updateSubscription = function () {
@@ -120,6 +120,7 @@ $(document).ready(function () {
     }
 
     var stateContainer = form.parents('.api-subscriber').find('.api-subscriber__state-container');
+    var apiLink = form.parents('.api-subscriber').find('a[data-api-link]');
     stateContainer.text('');
 
     var containerId = stateContainer.attr('id');
@@ -132,6 +133,8 @@ $(document).ready(function () {
 
       form.find('.slider__on--label').attr('aria-label', subscribed ? 'Subscribed' : 'Select to subscribe');
       form.find('.slider__off--label').attr('aria-label', subscribed ? 'Select to unsubscribe' : 'Unsubscribed');
+
+      apiLink.attr('aria-label', apiLink.attr('aria-label').replace(/(?:not )?subscribed$/, subscribed ? 'subscribed' : 'not subscribed'));
 
       form.find('input[type=radio]:checked').focus();
     }
