@@ -60,7 +60,7 @@
                                                 api.apiVersion.displayedStatus
                                             })</span>
                                         } else {
-                                            <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.version" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed">
+                                            <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.version" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
                                                 @api.apiVersion.version (@api.apiVersion.displayedStatus)
                                             </a>
                                         }
