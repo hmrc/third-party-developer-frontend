@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,17 @@ import config.ApplicationConfig
 import controllers.TermsOfUseForm
 import domain._
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import play.api.i18n.Messages.Implicits._
 import utils.CSRFTokenHelper._
 
-class TermsOfUseSpec extends PlaySpec with OneAppPerSuite {
+class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
+
   "Terms of use view" must {
     val thirdPartyAppplication =
       Application(
@@ -38,18 +42,20 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite {
         Some("APPLICATION DESCRIPTION"),
         Set(Collaborator("sample@example.com", Role.ADMINISTRATOR), Collaborator("someone@example.com", Role.DEVELOPER)),
         Standard(),
-        true,
+        trusted = true,
         ApplicationState(State.TESTING, None, None, DateTimeUtils.now)
       )
 
     "show terms of use agreement page that requires terms of use to be agreed" in {
       implicit val request = FakeRequest().withCSRFToken
 
-      val checkInformation = CheckInformation(false, None, false, None, false, false, Seq.empty)
+      val checkInformation = CheckInformation(
+        confirmedName = false, None, apiSubscriptionsConfirmed = false, None, providedPrivacyPolicyURL = false, providedTermsAndConditionsURL = false, Seq.empty)
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
       val developer = Developer("email@example.com", "First Name", "Last Name", None)
 
-      val page = views.html.applicationcheck.termsOfUse.render(thirdPartyAppplication, TermsOfUseForm.form.fill(termsOfUseForm), request, developer, applicationMessages, ApplicationConfig, "credentials")
+      val page = views.html.applicationcheck.termsOfUse.render(
+        thirdPartyAppplication, TermsOfUseForm.form.fill(termsOfUseForm), request, developer, applicationMessages, appConfig, "credentials")
       page.contentType must include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -60,12 +66,27 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite {
     "show terms of use agreement page that already has the correct terms of use agreed" in {
       implicit val request = FakeRequest().withCSRFToken
 
+      val appConfigMock = mock[ApplicationConfig]
       val termsOfUseAgreement = TermsOfUseAgreement("email@example.com", DateTimeUtils.now, "1.0")
-      val checkInformation = CheckInformation(false, None,false, None, false, false, Seq(termsOfUseAgreement))
+      val checkInformation = CheckInformation(
+        confirmedName = false,
+        None,
+        apiSubscriptionsConfirmed = false,
+        None,
+        providedPrivacyPolicyURL = false,
+        providedTermsAndConditionsURL = false,
+        Seq(termsOfUseAgreement))
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
       val developer = Developer("email@example.com", "First Name", "Last Name", None)
 
-      val page = views.html.applicationcheck.termsOfUse.render(thirdPartyAppplication.copy(checkInformation = Some(checkInformation)), TermsOfUseForm.form.fill(termsOfUseForm), request, developer, applicationMessages, ApplicationConfig, "credentials")
+      val page = views.html.applicationcheck.termsOfUse.render(
+        thirdPartyAppplication.copy(checkInformation = Some(checkInformation)),
+        TermsOfUseForm.form.fill(termsOfUseForm),
+        request,
+        developer,
+        applicationMessages,
+        appConfigMock,
+        navSection = "credentials")
       page.contentType must include("text/html")
 
       val document = Jsoup.parse(page.body)

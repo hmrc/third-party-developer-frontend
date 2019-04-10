@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,36 +33,46 @@ class SessionServiceSpec extends UnitSpec with Matchers with MockitoSugar with S
   trait Setup {
     implicit val hc = HeaderCarrier()
 
-    val underTest = new SessionService {
-      override val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
-    }
+    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector])
 
     val email = "thirdpartydeveloper@example.com"
     val encodedEmail = "thirdpartydeveloper%40example.com"
     val password = "Password1!"
+    val totp = "123456"
+    val nonce = "ABC-123"
     val developer = Developer(email, "firstName", "lastName")
     val sessionId = "sessionId"
     val session = Session(sessionId, developer)
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
   }
 
-  "createSession" should {
-    "return the new session when the authentication succeeds" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.createSession(LoginRequest(email, password))).willReturn(session)
+  "authenticate" should {
+    "return the user authentication response from the connector when the authentication succeeds" in new Setup {
+      given(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password))).willReturn(userAuthenticationResponse)
 
-      await(underTest.authenticate(email, password)) shouldBe session
-    }
-
-    "throw invalid credentials None when the authentication fails" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.createSession(LoginRequest(email, password))).willReturn(Future.failed(new InvalidCredentials))
-
-      intercept[InvalidCredentials](await(underTest.authenticate(email, password)))
+      await(underTest.authenticate(email, password)) shouldBe userAuthenticationResponse
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.createSession(LoginRequest(email, password)))
+      given(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password)))
         .willThrow(new RuntimeException)
 
       intercept[RuntimeException](await(underTest.authenticate(email, password)))
+    }
+  }
+
+  "authenticateTotp" should {
+    "return the new session from the connector when the authentication succeeds" in new Setup {
+      given(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce))).willReturn(session)
+
+      await(underTest.authenticateTotp(email, totp, nonce)) shouldBe session
+    }
+
+    "propagate the exception when the connector fails" in new Setup {
+      given(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce)))
+        .willThrow(new RuntimeException)
+
+      intercept[RuntimeException](await(underTest.authenticateTotp(email, totp, nonce)))
     }
   }
 

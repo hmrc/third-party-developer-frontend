@@ -1,5 +1,5 @@
 @*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,32 +24,32 @@
     title = "Set up your device",
     userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
-        Crumb("Set up your device"),
+        Crumb("Set up 2SV"),
         Crumb.protectAccount,
         Crumb.home
     )
 ) {
 
     <header>
-        <h1 class="heading-xlarge">Set up your device</h1>
+        <h1 class="heading-xlarge">Set up 2SV</h1>
     </header>
     <div>
-        <p>You need to:</p>
         <ol class="list list-number">
-            <li>Using the app, scan this QR code
+            <li>On your smartphone or tablet, download an authenticator app from your app store
+            <li>Using the app, scan this code
             <p><img id="qrCode" alt="QR Code" src="@qrImg"></p>
             <p>
                 <details>
                     <summary aria-describedby="setupDevice" aria-label="I cannot scan the QR code" role="button" aria-expanded="false" aria-controls="details-content-0"><u>I cannot scan the QR code</u></summary>
                     <div class="panel panel-border-narrow" id="details-content-0">
-                        Enter this key into your authentication app instead
+                        Enter this key into your authenticator app instead
                         <h1 class="heading-medium" id="secret">@secret</h1>
                     </div>
                 </details>
             </p>
             </li>
 
-            <li>Check the app for your 6 digit access code - which refreshes every 30 seconds.</li>
+            <li>Check the app for your 6 digit access code</li>
         </ol>
     </div>
 

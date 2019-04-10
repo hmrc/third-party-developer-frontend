@@ -1,5 +1,5 @@
 @*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,9 @@ implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Mess
 ) {
     <div class="govuk-box-highlight">
         <h1 class="heading-xlarge">Request submitted</h1>
-        <p class="font-medium">Unsubscribe from @name @version</p>
     </div>
+
+    <p id="success-request-unsubscribe-text">You have requested to unsubscribe your application from <span class="bold">@name @version</span>.</p>
 
     <h2 class="heading-large">What happens next</h2>
     <p>We will review your request and respond within 2 working days.</p>

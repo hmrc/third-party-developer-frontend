@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,39 +21,34 @@ import controllers.TermsOfUse
 import domain.Environment._
 import domain.Role._
 import domain._
+import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
-import org.scalatest.mockito.MockitoSugar
-import org.mockito.Mockito.{verify, when, never}
+import org.mockito.Mockito.{never, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import org.joda.time.DateTime
 
 import scala.concurrent.Future
 
-class TermsOfUseSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
+class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   implicit val materializer = fakeApplication.materializer
 
   trait Setup {
-    val mockAppConfig = mock[ApplicationConfig]
-    val mockSessionService = mock[SessionService]
-    val mockApplicationService = mock[ApplicationService]
 
-    val underTest = new TermsOfUse {
-      override val sessionService = mockSessionService
-      override val applicationService = mockApplicationService
-      override val appConfig = mockAppConfig
-    }
+    val underTest = new TermsOfUse(
+      mockErrorHandler,
+      mock[SessionService],
+      mock[ApplicationService],
+      mock[ApplicationConfig])
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
@@ -72,7 +67,7 @@ class TermsOfUseSpec extends UnitSpec with MockitoSugar with WithFakeApplication
                                   access: Access = Standard()) = {
       val application = Application(appId, "clientId", "appName", DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), access = access, state = state, checkInformation = checkInformation)
-      given(mockApplicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
+      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
       application
     }
 
@@ -85,9 +80,9 @@ class TermsOfUseSpec extends UnitSpec with MockitoSugar with WithFakeApplication
       val version = "1.1"
       val date = DateTime.parse("2018-06-25")
 
-      when(mockAppConfig.thirdPartyDeveloperFrontendUrl).thenReturn("http://tpdf")
-      when(mockAppConfig.currentTermsOfUseVersion).thenReturn(version)
-      when(mockAppConfig.currentTermsOfUseDate).thenReturn(date)
+      when(underTest.appConfig.thirdPartyDeveloperFrontendUrl).thenReturn("http://tpdf")
+      when(underTest.appConfig.currentTermsOfUseVersion).thenReturn(version)
+      when(underTest.appConfig.currentTermsOfUseDate).thenReturn(date)
 
       val request = FakeRequest()
       val result = await(underTest.termsOfUsePartial()(request))
@@ -150,11 +145,11 @@ class TermsOfUseSpec extends UnitSpec with MockitoSugar with WithFakeApplication
 
       val  version = "1.1"
 
-      when(mockAppConfig.currentTermsOfUseVersion).thenReturn(version)
+      when(underTest.appConfig.currentTermsOfUseVersion).thenReturn(version)
 
       givenTheApplicationExists()
       val captor = ArgumentCaptor.forClass(classOf[CheckInformation])
-      given(mockApplicationService.updateCheckInformation(mockEq(appId), captor.capture())(any())).willReturn(Future.successful(ApplicationUpdateSuccessful))
+      given(underTest.applicationService.updateCheckInformation(mockEq(appId), captor.capture())(any())).willReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(request))
@@ -170,7 +165,7 @@ class TermsOfUseSpec extends UnitSpec with MockitoSugar with WithFakeApplication
       givenTheApplicationExists()
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(loggedInRequest))
       status(result) shouldBe BAD_REQUEST
-      verify(mockApplicationService, never()).updateCheckInformation(any(), any())(any())
+      verify(underTest.applicationService, never()).updateCheckInformation(any(), any())(any())
     }
 
     "return a bad request if the app already has terms of use agreed" in new Setup {
@@ -180,7 +175,7 @@ class TermsOfUseSpec extends UnitSpec with MockitoSugar with WithFakeApplication
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(request))
       status(result) shouldBe BAD_REQUEST
-      verify(mockApplicationService, never()).updateCheckInformation(any(), any())(any())
+      verify(underTest.applicationService, never()).updateCheckInformation(any(), any())(any())
     }
 
     "return the ROPC page for a ROPC app" in new Setup {

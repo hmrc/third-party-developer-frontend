@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package unit.service
 import java.util.UUID
 
 import config.ApplicationConfig
-import connectors.{ApiSubscriptionFieldsConnector, DeskproConnector, ThirdPartyApplicationConnector, ThirdPartyDeveloperConnector}
+import connectors._
 import controllers.{AddApplicationForm, EditApplicationForm}
 import domain.APIStatus._
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
@@ -28,9 +28,10 @@ import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, anyString, eq => mockEq}
-import org.mockito.Mockito.{verify, verifyZeroInteractions, when, times}
+import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import service.AuditAction.Remove2SVRequested
 import service._
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
@@ -46,32 +47,26 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     implicit val hc = HeaderCarrier()
 
     val mockAppConfig = mock[ApplicationConfig]
-    val mockProductionApplicationConnector = mock[ThirdPartyApplicationConnector]
-    val mockSandboxApplicationConnector = mock[ThirdPartyApplicationConnector]
+    val mockProductionApplicationConnector = mock[ThirdPartyApplicationProductionConnector]
+    val mockSandboxApplicationConnector = mock[ThirdPartyApplicationSandboxConnector]
 
-    val mockProductionSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsConnector]
-    val mockSandboxSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsConnector]
+    val mockProductionSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsProductionConnector]
+    val mockSandboxSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsSandboxConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
     val mockAuditService: AuditService = mock[AuditService]
+    val connectorsWrapper = new ConnectorsWrapper(
+      mockSandboxApplicationConnector,
+      mockProductionApplicationConnector,
+      mockSandboxSubscriptionFieldsConnector,
+      mockProductionSubscriptionFieldsConnector,
+      mockAppConfig)
+    val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
+    val mockDeskproConnector = mock[DeskproConnector]
 
-
-    val connectorWrappers = new ConnectorsWrapper {
-      override val sandboxSubscriptionFieldsConnector: ApiSubscriptionFieldsConnector = mockSandboxSubscriptionFieldsConnector
-      override val sandboxApplicationConnector: ThirdPartyApplicationConnector = mockSandboxApplicationConnector
-      override val applicationConfig = mockAppConfig
-      override val productionApplicationConnector: ThirdPartyApplicationConnector = mockProductionApplicationConnector
-      override val productionSubscriptionFieldsConnector: ApiSubscriptionFieldsConnector = mockProductionSubscriptionFieldsConnector
-    }
-    val service = new ApplicationService {
-      override val deskproConnector = mock[DeskproConnector]
-      override val developerConnector = mockDeveloperConnector
-      override val applicationConfig = mockAppConfig
-      override val subscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-      override val connectorWrapper: ConnectorsWrapper = connectorWrappers
-      override val auditService: AuditService = mockAuditService
-    }
+   
+    val service = new ApplicationService(connectorsWrapper, mockSubscriptionFieldsService,  mockDeskproConnector, mockAppConfig, mockDeveloperConnector, mockAuditService)
 
     def theProductionConnectorWillReturnTheApplication(applicationId: String, application: Application) = {
       given(mockProductionApplicationConnector.fetchApplicationById(applicationId)).willReturn(Future.successful(Some(application)))
@@ -84,7 +79,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     def theSubscriptionFieldsServiceWillReturn(fields: Seq[ApiSubscriptionFields.SubscriptionField]) = {
-      given(service.subscriptionFieldsService.fetchFields(any[Application], anyString(), anyString())(any[HeaderCarrier])).willReturn(Future.successful(fields))
+      given(mockSubscriptionFieldsService.fetchFields(any[Application], anyString(), anyString())(any[HeaderCarrier])).willReturn(Future.successful(fields))
     }
   }
 
@@ -431,7 +426,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val user = Developer("Firstname", "Lastname", "email@example.com")
 
     "request uplift" in new Setup {
-      given(service.deskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(TicketCreated)
+      given(mockDeskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(TicketCreated)
       given(mockProductionApplicationConnector.requestUplift(applicationId,
         UpliftRequest(applicationName, user.email))).willReturn(ApplicationUpliftSuccessful)
       await(service.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
@@ -441,29 +436,29 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       val testError = new scala.RuntimeException("deskpro error")
       given(mockProductionApplicationConnector.requestUplift(applicationId,
         UpliftRequest(applicationName, user.email))).willReturn(ApplicationUpliftSuccessful)
-      given(service.deskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.failed(testError))
+      given(mockDeskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.failed(testError))
 
       await(service.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
     }
 
     "propagate ApplicationAlreadyExistsResponse from connector" in new Setup {
-      given(service.deskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.successful(TicketCreated))
+      given(mockDeskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.successful(TicketCreated))
       given(mockProductionApplicationConnector.requestUplift(applicationId,
         UpliftRequest(applicationName, user.email))).willReturn(Future.failed(new ApplicationAlreadyExists))
       intercept[ApplicationAlreadyExists] {
         await(service.requestUplift(applicationId, applicationName, user))
       }
-      verifyZeroInteractions(service.deskproConnector)
+      verifyZeroInteractions(mockDeskproConnector)
     }
 
     "propagate ApplicationNotFound from connector" in new Setup {
-      given(service.deskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.successful(TicketCreated))
+      given(mockDeskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.successful(TicketCreated))
       given(mockProductionApplicationConnector.requestUplift(applicationId,
         UpliftRequest(applicationName, user.email))).willReturn(Future.failed(new ApplicationNotFound))
       intercept[ApplicationNotFound] {
         await(service.requestUplift(applicationId, applicationName, user))
       }
-      verifyZeroInteractions(service.deskproConnector)
+      verifyZeroInteractions(mockDeskproConnector)
     }
   }
 
@@ -678,7 +673,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "create a deskpro ticket and audit record for an Admin in a Sandbox app" in new Setup {
 
-      given(service.deskproConnector.createTicket(captor.capture())(mockEq(hc)))
+      given(mockDeskproConnector.createTicket(captor.capture())(mockEq(hc)))
         .willReturn(Future.successful(TicketCreated))
       given(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(mockEq(hc)))
         .willReturn(Future.successful(Success))
@@ -690,7 +685,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
     "create a deskpro ticket and audit record for a Developer in a Sandbox app" in new Setup {
 
-      given(service.deskproConnector.createTicket(captor.capture())(mockEq(hc)))
+      given(mockDeskproConnector.createTicket(captor.capture())(mockEq(hc)))
         .willReturn(Future.successful(TicketCreated))
       given(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(mockEq(hc)))
         .willReturn(Future.successful(Success))
@@ -702,7 +697,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
     "create a deskpro ticket and audit record for an Admin in a Production app" in new Setup {
 
-      given(service.deskproConnector.createTicket(captor.capture())(mockEq(hc)))
+      given(mockDeskproConnector.createTicket(captor.capture())(mockEq(hc)))
         .willReturn(Future.successful(TicketCreated))
       given(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(mockEq(hc)))
         .willReturn(Future.successful(Success))
@@ -717,7 +712,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       intercept[ForbiddenException] {
         await(service.requestApplicationDeletion(developerRequester, productionApp))
       }
-      verifyZeroInteractions(service.deskproConnector)
+      verifyZeroInteractions(mockDeskproConnector)
       verifyZeroInteractions(mockAuditService)
     }
   }
@@ -727,12 +722,12 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val developerEmail = "testy@example.com"
 
     "correctly create a deskpro ticket and audit record" in new Setup {
-      given(service.deskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.successful(TicketCreated))
+      given(mockDeskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.successful(TicketCreated))
       given(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(mockEq(hc))).willReturn(Future.successful(Success))
 
       await(service.requestDeveloperAccountDeletion(developerName, developerEmail))
 
-      verify(service.deskproConnector, times(1)).createTicket(any[DeskproTicket])(mockEq(hc))
+      verify(mockDeskproConnector, times(1)).createTicket(any[DeskproTicket])(mockEq(hc))
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(mockEq(hc))
     }
   }
@@ -773,6 +768,21 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       val result = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
 
       result shouldBe true
+    }
+  }
+
+  "request 2SV removal" should {
+
+    val email = "testy@example.com"
+
+    "correctly create a deskpro ticket and audit record" in new Setup {
+      given(mockDeskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(Future.successful(TicketCreated))
+      given(mockAuditService.audit(mockEq(Remove2SVRequested), any[Map[String, String]])(mockEq(hc))).willReturn(Future.successful(Success))
+
+      await(service.request2SVRemoval(email))
+
+      verify(mockDeskproConnector, times(1)).createTicket(any[DeskproTicket])(mockEq(hc))
+      verify(mockAuditService, times(1)).audit(mockEq(Remove2SVRequested), any[Map[String, String]])(mockEq(hc))
     }
   }
 

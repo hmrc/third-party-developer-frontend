@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package unit.views
 import config.ApplicationConfig
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
@@ -27,13 +28,15 @@ import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers._
 
-class ApplicationVerificationSpec extends UnitSpec with OneServerPerSuite {
+class ApplicationVerificationSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
 
   "Application verification page" should {
 
     def renderPage(success: Boolean): Html = {
       val request = FakeRequest().withCSRFToken
-      views.html.applicationVerification.render(success, request, applicationMessages, ApplicationConfig)
+      views.html.applicationVerification.render(success, request, applicationMessages, appConfig)
     }
 
     "show email verified message when email was verified" in {

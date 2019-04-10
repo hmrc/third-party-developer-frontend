@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.scalatest.Matchers
 import play.api.data.{Form, FormError}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class ApplicationDetailsValidationSpec extends UnitSpec with Matchers{
+class ApplicationDetailsValidationSpec extends UnitSpec with Matchers {
 
   "applicationNameValidator" should {
     val testForm = Form("name" -> applicationNameValidator)

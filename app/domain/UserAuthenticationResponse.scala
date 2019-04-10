@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package qr
+package domain
 
-import java.net.URI
+import play.api.libs.json.Json
 
-trait OTPAuthURI {
-  def apply(secret: String, issuer: String, user: String) = {
-    val params = Map("secret" -> secret, "issuer" -> issuer)
-    val query = params.map(pair => pair._1 + "=" + pair._2).mkString("&")
-    new URI("otpauth", "totp", s"/$issuer:$user", query, null)
-  }
+case class UserAuthenticationResponse(accessCodeRequired: Boolean, nonce: Option[String] = None, session: Option[Session] = None)
+
+object UserAuthenticationResponse {
+  implicit val formatUserAuthenticationResponse = Json.format[UserAuthenticationResponse]
 }
-
-object OTPAuthURI extends OTPAuthURI

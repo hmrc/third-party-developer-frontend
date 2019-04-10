@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,13 @@ import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify, when}
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
-import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditAction.{LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount}
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithLoggedInSession._
@@ -44,7 +40,7 @@ import utils.WithLoggedInSession._
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
-class CredentialsSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures with SubscriptionTestHelperSugar {
+class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
   implicit val materializer = fakeApplication.materializer
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
@@ -58,13 +54,15 @@ class CredentialsSpec extends UnitSpec with MockitoSugar with WithFakeApplicatio
   val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
 
   trait Setup {
-    val underTest = new Credentials {
-      override val sessionService = mock[SessionService]
-      override val applicationService = mock[ApplicationService]
-      override val developerConnector = mock[ThirdPartyDeveloperConnector]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-    }
+    val underTest = new Credentials(
+      mock[ApplicationService],
+      mock[ThirdPartyDeveloperConnector],
+      mock[AuditService],
+      mock[SessionService],
+      mockErrorHandler,
+      mock[ApplicationConfig]
+    )
+
 
     val hc = HeaderCarrier()
 
@@ -414,7 +412,8 @@ class CredentialsSpec extends UnitSpec with MockitoSugar with WithFakeApplicatio
 
       val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("deleteConfirm" -> "Yes", "clientSecretsToDelete" -> secretsToDelete)
 
-      given(underTest.applicationService.deleteClientSecrets(mockEq(appId), mockEq(Seq(secretsToDelete)))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+      given(underTest.applicationService.deleteClientSecrets(mockEq(appId), mockEq(Seq(secretsToDelete)))(any[HeaderCarrier]))
+        .willReturn(successful(ApplicationUpdateSuccessful))
 
       val result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
 
@@ -446,13 +445,6 @@ class CredentialsSpec extends UnitSpec with MockitoSugar with WithFakeApplicatio
       bodyOf(result) should include("Tell us if you want us to delete your client secrets")
 
     }
-  }
-
-  private def titleOf(result: Result) = {
-    val titleRegEx = """<title[^>]*>(.*)</title>""".r
-    val title = titleRegEx.findFirstMatchIn(bodyOf(result)).map(_.group(1))
-    title.isDefined shouldBe true
-    title.get
   }
 
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))

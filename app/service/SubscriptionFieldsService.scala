@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@ package service
 
 import domain.ApiSubscriptionFields._
 import domain.{Application, ApplicationNotFound}
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait SubscriptionFieldsService {
-
-  protected val connectorsWrapper: ConnectorsWrapper
+@Singleton
+class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper) {
 
   def fetchFields(application: Application, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
 
@@ -54,8 +54,3 @@ trait SubscriptionFieldsService {
     } yield fields
   }
 }
-
-object SubscriptionFieldsService extends SubscriptionFieldsService {
-  override protected val connectorsWrapper: ConnectorsWrapper = ConnectorsWrapper
-}
-

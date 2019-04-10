@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,31 @@
 
 package connectors
 
-import java.net.URLEncoder.encode
-
-import config.{ApplicationConfig, ProxiedApiPlatformWSHttp, WSHttp}
+import config.ApplicationConfig
 import domain.DefinitionFormats._
 import domain._
-import play.api.libs.json.Json
+import java.net.URLEncoder.encode
+import javax.inject.{Inject, Singleton}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
+import play.api.libs.json.Json
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.http.metrics.{API, Metrics, PlayMetrics}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ThirdPartyApplicationConnector {
-
-  val serviceBaseUrl: String
-  val http: WSHttp
+abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) {
+  protected val httpClient: HttpClient
+  protected val proxiedHttpClient: ProxiedHttpClient
   val environment: Environment
+  val serviceBaseUrl: String
+  val useProxy: Boolean
+  val bearerToken: String
 
-  val metrics: Metrics
+  def http: HttpClient = if (useProxy) proxiedHttpClient.withAuthorization(bearerToken) else httpClient
+
   val api = API("third-party-application")
 
   def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] = metrics.record(api) {
@@ -46,7 +50,7 @@ trait ThirdPartyApplicationConnector {
   }
 
   def update(applicationId: String, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/$applicationId", Json.toJson(request), Seq(CONTENT_TYPE -> JSON)) map { result =>
+    http.POST(s"$serviceBaseUrl/application/$applicationId", Json.toJson(request), Seq(CONTENT_TYPE -> JSON)) map { _ =>
       ApplicationUpdateSuccessful
     }
   }
@@ -63,8 +67,13 @@ trait ThirdPartyApplicationConnector {
     } recover recovery
   }
 
-  def removeTeamMember(applicationId: String, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Seq[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.DELETE(s"$serviceBaseUrl/application/$applicationId/collaborator/${urlEncode(teamMemberToDelete)}?admin=${urlEncode(requestingEmail)}&adminsToEmail=${urlEncode(adminsToEmail.mkString(","))}") map { result =>
+  def removeTeamMember(applicationId: String,
+                       teamMemberToDelete: String,
+                       requestingEmail: String,
+                       adminsToEmail: Seq[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+    val url = s"$serviceBaseUrl/application/$applicationId/collaborator/${urlEncode(teamMemberToDelete)}" +
+      s"?admin=${urlEncode(requestingEmail)}&adminsToEmail=${urlEncode(adminsToEmail.mkString(","))}"
+    http.DELETE(url) map { _ =>
       ApplicationUpdateSuccessful
     } recover {
       case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => throw new ApplicationNeedsAdmin
@@ -86,14 +95,16 @@ trait ThirdPartyApplicationConnector {
     }
   }
 
-  def subscribeToApi(applicationId: String, apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/$applicationId/subscription", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { result =>
+  def subscribeToApi(applicationId: String,
+                     apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+    http.POST(s"$serviceBaseUrl/application/$applicationId/subscription", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
   }
 
-  def unsubscribeFromApi(applicationId: String, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.DELETE(s"$serviceBaseUrl/application/$applicationId/subscription?context=$context&version=$version") map { result =>
+  def unsubscribeFromApi(applicationId: String,
+                         context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+    http.DELETE(s"$serviceBaseUrl/application/$applicationId/subscription?context=$context&version=$version") map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
   }
@@ -102,7 +113,8 @@ trait ThirdPartyApplicationConnector {
     http.GET[ApplicationTokens](s"$serviceBaseUrl/application/$id/credentials") recover recovery
   }
 
-  def requestUplift(applicationId: String, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
+  def requestUplift(applicationId: String,
+                    upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
     http.POST(s"$serviceBaseUrl/application/$applicationId/request-uplift", upliftRequest, Seq(CONTENT_TYPE -> JSON)) map {
       _ => ApplicationUpliftSuccessful
     } recover {
@@ -118,19 +130,22 @@ trait ThirdPartyApplicationConnector {
     } recover recovery
   }
 
-  def updateApproval(id: String, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+  def updateApproval(id: String,
+                     approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST(s"$serviceBaseUrl/application/$id/check-information", Json.toJson(approvalInformation)) map {
       _ => ApplicationUpdateSuccessful
     } recover recovery
   }
 
-  def addClientSecrets(id: String, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = metrics.record(api) {
+  def addClientSecrets(id: String,
+                       clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = metrics.record(api) {
     http.POST[ClientSecretRequest, ApplicationTokens](s"$serviceBaseUrl/application/$id/client-secret", clientSecretRequest) recover {
       case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => throw new ClientSecretLimitExceeded
     } recover recovery
   }
 
-  def deleteClientSecrets(appId: String, deleteClientSecretsRequest: DeleteClientSecretsRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def deleteClientSecrets(appId: String,
+                          deleteClientSecretsRequest: DeleteClientSecretsRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     http.POST(s"$serviceBaseUrl/application/$appId/revoke-client-secrets", deleteClientSecretsRequest) map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
@@ -145,25 +160,28 @@ trait ThirdPartyApplicationConnector {
   }
 }
 
-object ThirdPartyApplicationProductionConnector extends ThirdPartyApplicationConnector {
-  val serviceBaseUrl = ApplicationConfig.thirdPartyApplicationProductionUrl
+@Singleton
+class ThirdPartyApplicationSandboxConnector @Inject()(val httpClient: HttpClient,
+                                                      val proxiedHttpClient: ProxiedHttpClient,
+                                                      appConfig: ApplicationConfig,
+                                                      metrics: ConnectorMetrics)
+  extends ThirdPartyApplicationConnector(appConfig, metrics) {
 
-  val http: WSHttp = if (ApplicationConfig.thirdPartyApplicationProductionUseProxy) {
-    ProxiedApiPlatformWSHttp(ApplicationConfig.thirdPartyApplicationProductionBearerToken)
-  } else WSHttp
-
-  val metrics = PlayMetrics
-  val environment = Environment.PRODUCTION
-}
-
-object ThirdPartyApplicationSandboxConnector extends ThirdPartyApplicationConnector {
-  val serviceBaseUrl = ApplicationConfig.thirdPartyApplicationSandboxUrl
-
-  val http: WSHttp = if (ApplicationConfig.thirdPartyApplicationSandboxUseProxy) {
-    ProxiedApiPlatformWSHttp(ApplicationConfig.thirdPartyApplicationSandboxBearerToken)
-  } else WSHttp
-
-  val metrics = PlayMetrics
   val environment = Environment.SANDBOX
+  val serviceBaseUrl = appConfig.thirdPartyApplicationSandboxUrl
+  val useProxy = appConfig.thirdPartyApplicationSandboxUseProxy
+  val bearerToken = appConfig.thirdPartyApplicationSandboxBearerToken
 }
 
+@Singleton
+class ThirdPartyApplicationProductionConnector @Inject()(val httpClient: HttpClient,
+                                                         val proxiedHttpClient: ProxiedHttpClient,
+                                                         appConfig: ApplicationConfig,
+                                                         metrics: ConnectorMetrics)
+  extends ThirdPartyApplicationConnector(appConfig, metrics) {
+
+  val environment = Environment.PRODUCTION
+  val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
+  val useProxy = appConfig.thirdPartyApplicationProductionUseProxy
+  val bearerToken = appConfig.thirdPartyApplicationProductionBearerToken
+}

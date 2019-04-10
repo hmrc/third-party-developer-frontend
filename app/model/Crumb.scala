@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ object Crumb {
 
   val protectAccount =
     Crumb("Protect account",s"${routes.ProtectAccount.getProtectAccount}", Some("data-breadcrumb-protect-account"))
+
+  val signIn =
+    Crumb("Sign in",s"${routes.UserLoginAccount.login()}", Some("data-breadcrumb-sign-in"))
 
   def application(application: Application) =
     Crumb(s"${application.name}", "", Some("data-breadcrumb-app-name"))

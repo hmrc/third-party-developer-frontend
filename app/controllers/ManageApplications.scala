@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
@@ -26,11 +28,13 @@ import views.html._
 
 import scala.concurrent.Future
 
-trait ManageApplications extends ApplicationController {
-
-  val applicationService: ApplicationService
-  val developerConnector: ThirdPartyDeveloperConnector
-  val auditService: AuditService
+@Singleton
+class ManageApplications @Inject()(val applicationService: ApplicationService,
+                                   val developerConnector: ThirdPartyDeveloperConnector,
+                                   val sessionService: SessionService,
+                                   val auditService: AuditService,
+                                   val errorHandler: ErrorHandler,
+                                   implicit val appConfig: ApplicationConfig) extends ApplicationController {
 
   val detailsTab = "details"
   val credentialsTab = "credentials"
@@ -59,17 +63,11 @@ trait ManageApplications extends ApplicationController {
       applicationService.createForUser(CreateApplicationRequest.from(loggedIn, validForm))
         .map(appCreated => Created(addApplicationSuccess(validForm.applicationName, appCreated.id, validForm.environment.getOrElse(Environment.SANDBOX.toString))))
     }
+
     requestForm.fold(addApplicationWithFormErrors, addApplicationWithValidForm)
   }
 
   def editApplication(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
     Future.successful(Redirect(routes.Details.details(applicationId)))
   }
-}
-
-object ManageApplications extends ManageApplications with WithAppConfig {
-  override val sessionService = SessionService
-  override val applicationService = ApplicationServiceImpl
-  override val developerConnector = ThirdPartyDeveloperConnector
-  override val auditService = AuditService
 }

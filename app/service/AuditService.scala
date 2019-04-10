@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,24 @@
 
 package service
 
-import config.{ApplicationAuditConnector, ApplicationConfig}
+import config.ApplicationConfig
+import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-trait AuditService {
-  val auditConnector: AuditConnector
-  val applicationConfig: ApplicationConfig
+@Singleton
+class AuditService @Inject()(auditConnector: AuditConnector, appConfig: ApplicationConfig) {
 
   def audit(action: AuditAction, data: Map[String, String] = Map.empty)(implicit hc: HeaderCarrier): Future[AuditResult] =
-    auditConnector.sendEvent(new DataEvent(
+    auditConnector.sendEvent(DataEvent(
       auditSource = "third-party-developer-frontend",
       auditType = action.auditType,
-      tags = Map("sandbox" -> s"{${applicationConfig.isExternalTestEnvironment}") ++
+      tags = Map("sandbox" -> s"{${appConfig.isExternalTestEnvironment}") ++
         hc.toAuditTags(action.name, "-") ++ userContext(hc) ++ action.tags.toSeq ++ data,
       detail = hc.toAuditDetails(action.details.toSeq: _*)
     ))
@@ -50,11 +50,6 @@ trait AuditService {
 
     Seq(developerEmail, developerFullName).flatten.toMap
   }
-}
-
-object AuditService extends AuditService {
-  override val auditConnector = ApplicationAuditConnector
-  override val applicationConfig = ApplicationConfig
 }
 
 sealed trait AuditAction {
@@ -97,6 +92,11 @@ object AuditAction {
     val auditType = "LoginFailedDueToInvalidPassword"
   }
 
+  case object LoginFailedDueToInvalidAccessCode extends AuditAction {
+    val name = "Login failed due to invalid access code"
+    val auditType = "LoginFailedDueToInvalidAccessCode"
+  }
+
   case object LoginFailedDueToLockedAccount extends AuditAction {
     val name = "Login failed due to locked account"
     val auditType = "LoginFailedDueToLockedAccount"
@@ -107,8 +107,14 @@ object AuditAction {
     val auditType = "AccountDeletionRequested"
   }
 
+  case object Remove2SVRequested extends AuditAction {
+    val name = "Developer has requested 2SV removal"
+    val auditType = "Remove2SVRequested"
+  }
+
   case object ApplicationDeletionRequested extends AuditAction {
     override val name: String = "Developer has requested application deletion"
     override val auditType: String = "ApplicationDeletionRequest"
   }
+
 }

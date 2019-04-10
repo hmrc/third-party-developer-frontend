@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import controllers.{Support, SupportEnquiryForm}
 import domain.{Developer, TicketCreated, _}
 import org.jsoup.Jsoup
@@ -40,11 +40,12 @@ class SupportSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
   implicit val materializer = fakeApplication.materializer
 
   trait Setup {
-    val underTest = new Support {
-      override val deskproService = mock[DeskproService]
-      override val sessionService = mock[SessionService]
-      override val appConfig = mock[ApplicationConfig]
-    }
+    val underTest = new Support(
+      mock[DeskproService],
+      mock[SessionService],
+      mock[ErrorHandler],
+      mock[ApplicationConfig])
+
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"

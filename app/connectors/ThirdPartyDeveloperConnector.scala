@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,27 @@
 
 package connectors
 
-import config.{ApplicationConfig, WSHttp}
+import config.ApplicationConfig
 import domain._
-import play.api.http.Status._
+import javax.inject.{Inject, Singleton}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
+import play.api.http.Status._
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.http.metrics.{API, Metrics, PlayMetrics}
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse, InternalServerException, NotFoundException, Upstream4xxResponse}
 
-trait ThirdPartyDeveloperConnector extends EncryptedJson {
-  val serviceBaseUrl: String
-  val http: WSHttp
-
-  val metrics: Metrics
+@Singleton
+class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics) {
+  lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api = API("third-party-developer")
 
   def register(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationDownstreamResponse] = metrics.record(api) {
-    secretRequestJson[RegistrationDownstreamResponse](
+    encryptedJson.secretRequestJson[RegistrationDownstreamResponse](
       Json.toJson(registration), { secretRequestJson =>
         http.POST(s"$serviceBaseUrl/developer", secretRequestJson, Seq(CONTENT_TYPE -> JSON)) map {
           r =>
@@ -80,7 +80,7 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
   }
 
   def reset(reset: PasswordReset)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    secretRequestJson[Int](
+    encryptedJson.secretRequestJson[Int](
       Json.toJson(reset), { secretRequestJson =>
         http.POST(s"$serviceBaseUrl/reset-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
           .map(status).recover {
@@ -89,7 +89,7 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
       })
   }
 
-  def changePassword(change: ChangePassword)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) { secretRequestJson[Int](
+  def changePassword(change: ChangePassword)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) { encryptedJson.secretRequestJson[Int](
     Json.toJson(change), { secretRequestJson =>
       http.POST(s"$serviceBaseUrl/change-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
         .map(status).recover {
@@ -98,19 +98,6 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
         case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
       }
     })
-  }
-
-  def createSession(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
-    secretRequestJson(
-      Json.toJson(loginRequest),
-      http.POST(s"$serviceBaseUrl/session", _, Seq(CONTENT_TYPE -> JSON)))
-      .map(_.json.as[Session])
-      .recover {
-        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
-        case _: NotFoundException => throw new InvalidEmail
-      }
   }
 
   def fetchSession(sessionId: String)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
@@ -131,7 +118,7 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
   }
 
   def checkPassword(checkRequest: PasswordCheckRequest)(implicit hc: HeaderCarrier): Future[VerifyPasswordSuccessful] = metrics.record(api) {
-    secretRequestJson(
+    encryptedJson.secretRequestJson(
       Json.toJson(checkRequest),
       http.POST(s"$serviceBaseUrl/check-password", _, Seq(CONTENT_TYPE -> JSON)))
       .map(_ => VerifyPasswordSuccessful)
@@ -203,11 +190,33 @@ trait ThirdPartyDeveloperConnector extends EncryptedJson {
       http.PUT(s"$serviceBaseUrl/developer/$email/mfa/enable", "").map(status)
     }
   }
-}
 
-object ThirdPartyDeveloperConnector extends ThirdPartyDeveloperConnector {
-  val serviceBaseUrl = ApplicationConfig.thirdPartyDeveloperUrl
-  val http = WSHttp
-  val payloadEncryption = PayloadEncryption
-  val metrics = PlayMetrics
+  def removeMfa(email: String)(implicit hc: HeaderCarrier): Future[Int] =
+    metrics.record(api) {
+      http.POST(s"$serviceBaseUrl/developer/$email/mfa/remove", Json.obj("removedBy" -> email)).map(status)
+    }
+
+  def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
+    encryptedJson.secretRequestJson(
+      Json.toJson(loginRequest),
+      http.POST(s"$serviceBaseUrl/authenticate", _, Seq(CONTENT_TYPE -> JSON)))
+      .map(_.json.as[UserAuthenticationResponse])
+      .recover {
+        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
+        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
+        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
+        case _: NotFoundException => throw new InvalidEmail
+      }
+  }
+
+  def authenticateTotp(totpAuthenticationRequest: TotpAuthenticationRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+    encryptedJson.secretRequestJson(
+      Json.toJson(totpAuthenticationRequest),
+      http.POST(s"$serviceBaseUrl/authenticate-totp", _, Seq(CONTENT_TYPE -> JSON)))
+      .map(_.json.as[Session])
+      .recover {
+        case e: BadRequestException => throw new InvalidCredentials
+        case e: NotFoundException => throw new InvalidEmail
+      }
+  }
 }

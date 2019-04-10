@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,35 @@
 package unit.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.WSHttp
-import connectors.{PayloadEncryption, ThirdPartyDeveloperConnector}
+import config.{ApplicationConfig}
+import connectors.{ConnectorMetrics, EncryptedJson, NoopConnectorMetrics, ThirdPartyDeveloperConnector}
 import domain._
+import org.mockito.Mockito.when
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, Configuration, Mode}
 import play.api.http.Status
-import uk.gov.hmrc.play.http.metrics.NoopMetrics
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorSpec {
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorSpec with GuiceOneAppPerSuite {
+  private val stubConfig = Configuration(
+    "Test.microservice.services.third-party-developer.port" -> stubPort,
+    "json.encryption.key" -> "abcdefghijklmnopqrstuv=="
+  )
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure(stubConfig)
+      .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .in(Mode.Test)
+      .build()
 
   trait Setup {
     implicit val hc = HeaderCarrier()
-
-    val underTest = new ThirdPartyDeveloperConnector {
-      val http = WSHttp
-      val serviceBaseUrl = wireMockUrl
-      val payloadEncryption: PayloadEncryption = PayloadEncryption
-      val metrics = NoopMetrics
-    }
+    val underTest = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
 
   "register" should {

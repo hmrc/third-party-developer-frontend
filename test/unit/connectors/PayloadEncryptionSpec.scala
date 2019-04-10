@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package unit.controllers
+package unit.connectors
 
-import connectors.PayloadEncryption
+import config.ApplicationConfig
+import connectors.{LocalCrypto, PayloadEncryption}
+import org.mockito.Mockito.when
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsString, JsValue, Json}
-import uk.gov.hmrc.crypto.{AesCrypto, CompositeSymmetricCrypto, Decrypter, Encrypter}
 import uk.gov.hmrc.play.test.UnitSpec
 
 
-class PayloadEncryptionSpec extends UnitSpec {
+class PayloadEncryptionSpec extends UnitSpec with MockitoSugar {
 
-
+  trait Setup {
+    val mockAppConfig = mock[ApplicationConfig]
+    when(mockAppConfig.jsonEncryptionKey).thenReturn("abcdefghijklmnopqrstuv==")
+    val payloadEncryption = new PayloadEncryption(new LocalCrypto(mockAppConfig))
+  }
 
   "payload encryption" should {
     val name: String = "firstname"
@@ -33,27 +39,16 @@ class PayloadEncryptionSpec extends UnitSpec {
     val form = TestForm(name, lastName)
     val encryptedForm = JsString("Vmc5z8wslOsGpRiY85wy04AYu1U2IoRRyviDrU+07egsjQll4TmeV/Xp99uFJ6wg")
 
-    "encrypt a payload" in {
-      val payload: JsValue = TestPayloadEncryption.encrypt(form)(Json.format[TestForm])
+    "encrypt a payload" in new Setup {
+      val payload: JsValue = payloadEncryption.encrypt(form)(Json.format[TestForm])
       payload shouldBe encryptedForm
     }
 
-    "decrypt a payload" in {
-      val result: TestForm = TestPayloadEncryption.decrypt(encryptedForm)(Json.format[TestForm])
+    "decrypt a payload" in new Setup {
+      val result: TestForm = payloadEncryption.decrypt(encryptedForm)(Json.format[TestForm])
       result shouldBe form
     }
   }
 
-  object TestPayloadEncryption extends PayloadEncryption {
-    override implicit val crypto: CompositeSymmetricCrypto = TestCrypto
-  }
-
   case class TestForm(name: String, lastname: String)
-
-  object TestCrypto extends CompositeSymmetricCrypto {
-    override protected val currentCrypto: Encrypter with Decrypter = new AesCrypto {
-      override protected val encryptionKey: String = "abcdefghijklmnopqrstuv=="
-    }
-    override protected val previousCryptos: Seq[Decrypter] = Seq.empty
-  }
 }

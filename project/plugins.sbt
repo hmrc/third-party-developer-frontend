@@ -5,7 +5,7 @@ resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "1.13.0")
 addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "1.2.0")
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.13")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.19")
 addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.4.12")
 addSbtPlugin("net.ground5hark.sbt" % "sbt-concat" % "0.1.9")
 addSbtPlugin("com.typesafe.sbt" % "sbt-uglify" % "2.0.0")

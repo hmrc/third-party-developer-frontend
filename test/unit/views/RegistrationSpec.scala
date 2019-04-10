@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,13 @@ import utils.ViewHelpers._
 
 class RegistrationSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite {
   "Registration page" should {
+
+    val appConfig = mock[ApplicationConfig]
     val flash = mock[Flash]
     val request = FakeRequest().withCSRFToken
 
     "render with no errors when the form is valid" in {
-      val page = views.html.registration.render(RegistrationForm.form, flash, request, applicationMessages, ApplicationConfig)
+      val page = views.html.registration.render(RegistrationForm.form, flash, request, applicationMessages, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -52,7 +54,7 @@ class RegistrationSpec extends UnitSpec with Matchers with MockitoSugar with One
         .withError("confirmpassword", "Confirm password error message")
         .withError("organisation", "Organisation error message")
 
-      val page = views.html.registration.render(formWithErrors, flash, request, applicationMessages, ApplicationConfig)
+      val page = views.html.registration.render(formWithErrors, flash, request, applicationMessages, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
+import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.Logger
 import play.api.Play.current
@@ -26,9 +28,11 @@ import views.html.signoutSurvey
 
 import scala.concurrent.Future
 
-trait UserLogoutAccount extends LoggedInController with LoginLogout {
-
-  val deskproService: DeskproService
+@Singleton
+class UserLogoutAccount @Inject()(val deskproService: DeskproService,
+                                  val sessionService: SessionService,
+                                  val errorHandler: ErrorHandler,
+                                  implicit val appConfig: ApplicationConfig) extends LoggedInController with LoginLogout {
 
   def logoutSurvey = loggedInAction { implicit request =>
     val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)
@@ -42,21 +46,16 @@ trait UserLogoutAccount extends LoggedInController with LoginLogout {
       case None => Logger.error(s"Survey form invalid.")
     }
 
-    Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout))
+    Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
   }
 
-  def logout = Action.async { implicit request: Request[AnyContent]  =>
+  def logout = Action.async { implicit request: Request[AnyContent] =>
     gotoLogoutSucceeded {
       for {
         _ <- tokenAccessor.extract(request)
           .map(sessionService.destroy)
           .getOrElse(Future.successful(()))
-      } yield Ok(views.html.logoutConfirmation())
+      } yield Ok(views.html.logoutConfirmation()).withNewSession
     }
   }
-}
-
-object UserLogoutAccount extends UserLogoutAccount with WithAppConfig {
-  override val sessionService = SessionService
-  override val deskproService = DeskproService
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package unit.config
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import config.{SessionTimeoutFilterWithWhitelist, WhitelistedCall}
 import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.mockito.Matchers._
@@ -26,25 +28,36 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.mvc._
 import play.api.test.FakeRequest
+import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilterConfig
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
 
   trait Setup {
-    val filter = new SessionTimeoutFilterWithWhitelist(
-      timeoutDuration = Duration.standardSeconds(1),
-      whitelistedCalls = Set(WhitelistedCall("/login", "GET")),
-      onlyWipeAuthToken = false
-    )
+    implicit val sys = ActorSystem("SessionTimeoutFilterWithWhitelistSpec")
+    implicit val mat = ActorMaterializer()
+    val config = SessionTimeoutFilterConfig(
+        timeoutDuration = Duration.standardSeconds(1),
+        onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
+    val whitelistedUrl = controllers.routes.UserLoginAccount.login().url
+    val otherUrl = "/applications"
+    val accessUri = "http://redirect.to/here"
+    val bearerToken = "Bearer Token"
+
+    val filter = new SessionTimeoutFilterWithWhitelist(config) {
+      override val whitelistedCalls = Set(WhitelistedCall(whitelistedUrl, "GET"))
+    }
+
 
     when(nextOperationFunction.apply(any())).thenAnswer(new Answer[Future[Result]] {
       override def answer(invocation: InvocationOnMock): Future[Result] = {
         val headers = invocation.getArguments.head.asInstanceOf[RequestHeader]
-        Future.successful(Results.Ok.withSession(headers.session+("authToken" -> "Bearer Token")))
+        Future.successful(Results.Ok.withSession(headers.session+("authToken" -> bearerToken)))
       }
     })
 
@@ -60,14 +73,14 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
   "when there is an active session, apply" should {
 
     "leave the access_uri intact when path in whitelist" in new Setup {
-      val request = FakeRequest(method = "POST", path = "/login")
-        .withSession("ts" -> now, "access_uri" -> "http://redirect.to/here" )
+      val request = FakeRequest(method = "POST", path = whitelistedUrl)
+        .withSession("ts" -> now, "access_uri" -> accessUri )
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
         sessionData.size shouldBe 3
-        sessionData("authToken") shouldBe "Bearer Token"
-        sessionData("access_uri") shouldBe "http://redirect.to/here"
+        sessionData("authToken") shouldBe bearerToken
+        sessionData("access_uri") shouldBe accessUri
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
@@ -76,13 +89,13 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
 
     "leave the access_uri intact when path not in whitelist" in new Setup {
       val request = FakeRequest(method = "GET", path = "/applications")
-        .withSession("ts" -> now, "access_uri" -> "http://redirect.to/here")
+        .withSession("ts" -> now, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
         sessionData.size shouldBe 3
-        sessionData("authToken") shouldBe "Bearer Token"
-        sessionData("access_uri") shouldBe "http://redirect.to/here"
+        sessionData("authToken") shouldBe bearerToken
+        sessionData("access_uri") shouldBe accessUri
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
@@ -90,14 +103,14 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
     }
 
     "leave the access_uri intact when path in whitelist with different method" in new Setup {
-      val request = FakeRequest(method = "POST", path = "/login")
-        .withSession("ts" -> now, "access_uri" -> "http://redirect.to/here")
+      val request = FakeRequest(method = "POST", path = whitelistedUrl)
+        .withSession("ts" -> now, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
         sessionData.size shouldBe 3
-        sessionData("authToken") shouldBe "Bearer Token"
-        sessionData("access_uri") shouldBe "http://redirect.to/here"
+        sessionData("authToken") shouldBe bearerToken
+        sessionData("access_uri") shouldBe accessUri
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
@@ -108,14 +121,14 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
   "when the session has expired, apply" should {
 
     "leave the access_uri intact when path in whitelist" in new Setup {
-      val request = FakeRequest(method = "GET", path = "/login")
-        .withSession("ts" -> twoSecondsAgo, "access_uri" -> "http://redirect.to/here")
+      val request = FakeRequest(method = "GET", path = whitelistedUrl)
+        .withSession("ts" -> twoSecondsAgo, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
         sessionData.size shouldBe 3
-        sessionData("authToken") shouldBe "Bearer Token"
-        sessionData("access_uri") shouldBe "http://redirect.to/here"
+        sessionData("authToken") shouldBe bearerToken
+        sessionData("access_uri") shouldBe accessUri
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
@@ -124,7 +137,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
 
     "remove the access_uri when path not in whitelist" in new Setup {
       val request = FakeRequest(method = "GET", path = "/applications")
-        .withSession("ts" -> twoSecondsAgo, "access_uri" -> "http://redirect.to/here")
+        .withSession("ts" -> twoSecondsAgo, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
@@ -136,8 +149,8 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
     }
 
     "remove the session keys when path in whitelist with different method" in new Setup {
-      val request = FakeRequest(method = "POST", path = "/login")
-        .withSession("ts" -> twoSecondsAgo, "access_uri" -> "http://redirect.to/here")
+      val request = FakeRequest(method = "POST", path = whitelistedUrl)
+        .withSession("ts" -> twoSecondsAgo, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
@@ -152,29 +165,28 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
   "when there is no active session, apply" should {
 
     "leave the access_uri intact when path in whitelist" in new Setup {
-      val request = FakeRequest(method = "POST", path = "/login")
-        .withSession("access_uri" -> "http://redirect.to/here" )
+      val request = FakeRequest(method = "GET", path = whitelistedUrl)
+        .withSession("access_uri" -> accessUri )
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
-        sessionData.size shouldBe 3
-        sessionData("authToken") shouldBe "Bearer Token"
-        sessionData("access_uri") shouldBe "http://redirect.to/here"
-        sessionData.isDefinedAt("ts") shouldBe true
+        sessionData.size shouldBe 2
+        sessionData("authToken") shouldBe bearerToken
+        sessionData("access_uri") shouldBe accessUri
       }
 
       verify(nextOperationFunction).apply(any())
     }
 
     "leave the access_uri intact when path not in whitelist" in new Setup {
-      val request = FakeRequest(method = "GET", path = "/applications")
-        .withSession("access_uri" -> "http://redirect.to/here")
+      val request = FakeRequest(method = "GET", path = otherUrl)
+        .withSession("access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
         sessionData.size shouldBe 3
-        sessionData("authToken") shouldBe "Bearer Token"
-        sessionData("access_uri") shouldBe "http://redirect.to/here"
+        sessionData("authToken") shouldBe bearerToken
+        sessionData("access_uri") shouldBe accessUri
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
@@ -182,14 +194,14 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
     }
 
     "leave the access_uri intact when path in whitelist with different method" in new Setup {
-      val request = FakeRequest(method = "POST", path = "/login")
-        .withSession("access_uri" -> "http://redirect.to/here")
+      val request = FakeRequest(method = "POST", path = whitelistedUrl)
+        .withSession("access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
         sessionData.size shouldBe 3
-        sessionData("authToken") shouldBe "Bearer Token"
-        sessionData("access_uri") shouldBe "http://redirect.to/here"
+        sessionData("authToken") shouldBe bearerToken
+        sessionData("access_uri") shouldBe accessUri
         sessionData.isDefinedAt("ts") shouldBe true
       }
 

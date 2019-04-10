@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package controllers
 
-import config.ApplicationGlobal
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain._
 import helpers.string._
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
@@ -28,11 +29,13 @@ import service._
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-trait ManageTeam extends ApplicationController {
-
-  val applicationService: ApplicationService
-  val developerConnector: ThirdPartyDeveloperConnector
-  val auditService: AuditService
+@Singleton
+class ManageTeam @Inject()(val sessionService: SessionService,
+                           val auditService: AuditService,
+                           developerConnector: ThirdPartyDeveloperConnector,
+                           val applicationService: ApplicationService,
+                           val errorHandler: ErrorHandler,
+                           implicit val appConfig: ApplicationConfig) extends ApplicationController {
 
   def manageTeam(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
     val application = request.application
@@ -48,7 +51,7 @@ trait ManageTeam extends ApplicationController {
     def handleValidForm(form: AddTeamMemberForm) = {
       applicationService.addTeamMember(request.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
         .map(_ => Redirect(controllers.routes.ManageTeam.manageTeam(applicationId, None))) recover {
-        case _: ApplicationNotFound => NotFound(ApplicationGlobal.notFoundTemplate)
+        case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
         case _: TeamMemberAlreadyExists =>
           BadRequest(views.html.addTeamMember(
             request.application,
@@ -92,11 +95,4 @@ trait ManageTeam extends ApplicationController {
 
     RemoveTeamMemberConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
-}
-
-object ManageTeam extends ManageTeam with WithAppConfig {
-  override val sessionService = SessionService
-  override val applicationService = ApplicationServiceImpl
-  override val developerConnector = ThirdPartyDeveloperConnector
-  override val auditService = AuditService
 }

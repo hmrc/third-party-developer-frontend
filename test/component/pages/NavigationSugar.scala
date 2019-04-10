@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,24 @@
 
 package component.pages
 
+import config.ApplicationConfig
+import connectors.{EncryptedJson, LocalCrypto, PayloadEncryption}
+import org.mockito.Mockito.when
 import org.openqa.selenium.support.ui.{ExpectedCondition, WebDriverWait}
 import org.openqa.selenium.{By, WebDriver, WebElement}
 import org.scalatest._
 import org.scalatest.concurrent.Eventually
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.selenium.WebBrowser.{go => goo}
 import org.scalatest.time.{Millis, Seconds, Span}
 
-trait NavigationSugar extends WebBrowser with Eventually with Assertions with Matchers {
+trait NavigationSugar extends WebBrowser with Eventually with Assertions with Matchers with MockitoSugar {
+  private val mockAppConfig = mock[ApplicationConfig]
+  when(mockAppConfig.jsonEncryptionKey).thenReturn("abcdefghijklmnopqrstuv==")
 
   implicit override val patienceConfig = PatienceConfig(timeout = scaled(Span(3, Seconds)), interval = scaled(Span(100, Millis)))
+  implicit val encryptedJson = new EncryptedJson(new PayloadEncryption(new LocalCrypto(mockAppConfig)))
 
   def goOn(page: WebPage)(implicit webDriver: WebDriver) = {
     go(page)

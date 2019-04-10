@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
@@ -28,7 +29,9 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers._
 
-class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite {
+class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = Developer("developer@example.com", "John", "Doe")
@@ -48,7 +51,7 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite {
 
         val request = FakeRequest().withCSRFToken
 
-        val page = views.html.deleteApplication.render(app, role, request, loggedInUser, applicationMessages, ApplicationConfig, "details")
+        val page = views.html.deleteApplication.render(app, role, request, loggedInUser, applicationMessages, appConfig, "details")
 
         page.contentType should include("text/html")
 
@@ -68,7 +71,7 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite {
 
       val request = FakeRequest().withCSRFToken
 
-      val page = views.html.deleteApplication.render(prodApp, DEVELOPER, request, loggedInUser, applicationMessages, ApplicationConfig, "details")
+      val page = views.html.deleteApplication.render(prodApp, DEVELOPER, request, loggedInUser, applicationMessages, appConfig, "details")
 
       page.contentType should include("text/html")
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package unit.controllers
 
 import java.util.UUID
 
-import config.{ApplicationConfig, AuthConfigImpl}
+import config.ApplicationConfig
 import controllers._
 import domain.{Developer, Session}
 import org.mockito.BDDMockito.given
@@ -31,12 +31,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF._
 import service.{DeskproService, SessionService}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.WithLoggedInSession._
 import utils.WithCSRFAddToken
+import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
   implicit val materializer = fakeApplication.materializer
@@ -45,11 +45,11 @@ class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppl
   val session = Session(sessionId, user)
 
   trait Setup {
-    val underTest = new UserLogoutAccount {
-      override val sessionService = mock[SessionService]
-      override val deskproService = mock[DeskproService]
-      override val appConfig = mock[ApplicationConfig]
-    }
+    val underTest = new UserLogoutAccount(
+      mock[DeskproService],
+      mock[SessionService],
+      mock[config.ErrorHandler],
+      mock[ApplicationConfig])
 
     given(underTest.sessionService.destroy(Matchers.eq(session.sessionId))(any[HeaderCarrier]))
         .willReturn(Future.successful(204))
@@ -83,10 +83,11 @@ class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppl
     }
 
     "destroy session on logout" in new Setup {
-      val request = requestWithCsrfToken
+      implicit val request = requestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
       val result = await(underTest.logout()(request))
 
       verify(underTest.sessionService, atLeastOnce()).destroy(Matchers.eq(session.sessionId))(Matchers.any[HeaderCarrier])
+      result.session.data shouldBe Map.empty
     }
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,8 @@ class NavLinkSpec extends UnitSpec {
         Seq(
           NavLink("Documentation", "http://localhost:9680/api-documentation/docs/using-the-hub"),
           NavLink("Applications", "http://localhost:9685/developer/applications"),
-          NavLink("Support", "http://localhost:9685/developer/support"))
+          NavLink("Support", "http://localhost:9685/developer/support"),
+          NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true))
     }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,17 @@ import java.net.URLEncoder
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import connectors.EncryptedJson
 import domain.ApiSubscriptionFields.SubscriptionFields
 import domain.DefinitionFormats._
 import domain._
 import org.scalatest.Matchers
 import play.api.Logger
 import play.api.libs.json.{Json, Writes}
-import utils.TestPayloadEncryptor
 import play.api.http.Status._
 
 
-object Stubs extends TestPayloadEncryptor {
+object Stubs {
 
   def setupRequest(path: String, status: Int, response: String) = {
     Logger.info(s"Stubbing $path with $response")
@@ -54,17 +54,17 @@ object Stubs extends TestPayloadEncryptor {
   def setupPutRequest(path: String, status: Int) =
     stubFor(put(urlEqualTo(path)).willReturn(aResponse().withStatus(status).withBody(Json.toJson(SubscriptionFields("id", "ctxt", "1.0", UUID.randomUUID(), Map("f1" -> "v1"))).toString())))
 
-  def setupEncryptedPostRequest[T](path: String, data: T, status: Int, response: String)(implicit writes: Writes[T]) =
+  def setupEncryptedPostRequest[T](path: String, data: T, status: Int, response: String)(implicit writes: Writes[T], encryptedJson: EncryptedJson) =
     stubFor(post(urlPathEqualTo(path))
-      .withRequestBody(equalToJson(EncryptedJson.toSecretRequestJson(data).toString()))
+      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(data).toString()))
       .willReturn(aResponse().withStatus(status).withBody(response)))
 }
 
-object DeveloperStub extends TestPayloadEncryptor {
+object DeveloperStub {
 
-  def register(registration: Registration, status: Int) =
+  def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
     stubFor(post(urlMatching(s"/developer"))
-      .withRequestBody(equalToJson(EncryptedJson.toSecretRequestJson(registration).toString()))
+      .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(registration).toString()))
       .willReturn(aResponse().withStatus(status)))
 
   def update(email: String, profile: UpdateProfileRequest, status: Int) =

@@ -1,5 +1,5 @@
 @*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,31 @@
  * limitations under the License.
  *@
 
+@import config.ApplicationConfig
 @import domain._
 @import include._
 @import model.Crumb
+@import uk.gov.hmrc.urls.Link
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "protect-account")
+@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Protect account complete",
-    userFullName = Some(loggedIn.displayedName),
+    title = "Request submitted",
     breadcrumbs = Seq(
-        Crumb("2-step verification set up"),
-        Crumb.protectAccount,
+        Crumb("Request submitted"),
+        Crumb.signIn,
         Crumb.home
     )
 ) {
 
     <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge">You have successfully set up 2-step verification</h1>
+        <h1 class="heading-xlarge">Request submitted</h1>
     </div>
-    <h2 class="heading-medium">Keep the app on your device</h2>
-    <p>You'll need a new access code every time you sign in.</p>
+    <p>You have requested to remove 2-step verification from your account.</p>
 
-    <div>
-        <a id="submit" class="button" type="submit" href="@routes.ManageApplications.manageApps">View all applications</a>
-    </div>
+    <h2 class="heading-medium">What happens next?</h2>
+    <p>We will email you within 2 working days.</p>
+    <p>In the meantime, you can still sign in to your account if you do have an access code.</p>
 
 }
+

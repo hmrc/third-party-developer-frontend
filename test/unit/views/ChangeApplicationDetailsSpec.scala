@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import controllers.EditApplicationForm
 import domain._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
@@ -29,7 +30,9 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
 
-class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite {
+class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
 
   "change application details page" should {
 
@@ -40,7 +43,7 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite {
       val form = EditApplicationForm.form.fill(EditApplicationForm(application.id, application.name, application.description,
         application.privacyPolicyUrl, application.termsAndConditionsUrl))
 
-      views.html.changeDetails.render(form, application, request, loggedIn, applicationMessages, ApplicationConfig, "nav-section")
+      views.html.changeDetails.render(form, application, request, loggedIn, applicationMessages, appConfig, "nav-section")
     }
 
     def formGroupWithLabelIsPrepopulated(doc: Document, labelText: String, inputValue: String) = {

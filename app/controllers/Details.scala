@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
@@ -26,11 +28,14 @@ import service._
 
 import scala.concurrent.Future
 
-trait Details extends ApplicationController {
-
-  val applicationService: ApplicationService
-  val developerConnector: ThirdPartyDeveloperConnector
-  val auditService: AuditService
+@Singleton
+class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
+                        auditService: AuditService,
+                        val applicationService: ApplicationService,
+                        val sessionService: SessionService,
+                        val errorHandler: ErrorHandler,
+                        implicit val appConfig: ApplicationConfig)
+  extends ApplicationController {
 
   def details(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
     Future.successful(Ok(views.html.details(request.role, request.application)))
@@ -100,11 +105,4 @@ trait Details extends ApplicationController {
                         form: Form[EditApplicationForm], application: Application)
                        (implicit request: ApplicationRequest[_]): Future[Result] =
     Future.successful(BadRequest(views.html.changeDetails(form, application)))
-}
-
-object Details extends Details with WithAppConfig {
-  override val sessionService = SessionService
-  override val applicationService = ApplicationServiceImpl
-  override val developerConnector = ThirdPartyDeveloperConnector
-  override val auditService = AuditService
 }

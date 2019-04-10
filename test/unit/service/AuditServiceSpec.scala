@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,9 @@ class AuditServiceSpec extends UnitSpec with Matchers with MockitoSugar with Sca
       "X-name" -> developer.displayedName
     )
 
-    val underTest = new AuditService {
-      override val auditConnector: AuditConnector = mock[AuditConnector]
-      override val applicationConfig: ApplicationConfig = mock[ApplicationConfig]
-    }
+    val mockAuditConnector = mock[AuditConnector]
+    val mockAppConfig = mock[ApplicationConfig]
+    val underTest = new AuditService(mockAuditConnector, mockAppConfig)
 
     def verifyPasswordChangeFailedAuditEventSent(tags: Map[String, String])(implicit hc: HeaderCarrier) = {
 
@@ -61,7 +60,7 @@ class AuditServiceSpec extends UnitSpec with Matchers with MockitoSugar with Sca
 
       underTest.audit(PasswordChangeFailedDueToInvalidCredentials(developer.email))
 
-      verify(underTest.auditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(any[HeaderCarrier], any[ExecutionContext])
     }
   }
 
@@ -86,7 +85,7 @@ class AuditServiceSpec extends UnitSpec with Matchers with MockitoSugar with Sca
 
       underTest.audit(event)
 
-      verify(underTest.auditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "send an event when the password change fails due to invalid credentials for a user who is logged in" in new Setup {

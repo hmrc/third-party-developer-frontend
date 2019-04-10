@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -419,5 +419,16 @@ object ChangeRedirectForm {
       "originalRedirectUri" -> text,
       "newRedirectUri" -> redirectUriValidator
     )(ChangeRedirectForm.apply)(ChangeRedirectForm.unapply)
+  )
+}
+
+final case class Remove2SVConfirmForm(removeConfirm: Option[String] = Some(""))
+
+object Remove2SVConfirmForm {
+
+  def form: Form[Remove2SVConfirmForm] = Form(
+    mapping(
+      "removeConfirm" -> optional(text).verifying(FormKeys.remove2SVConfirmNoChoiceKey, s => s.isDefined)
+    )(Remove2SVConfirmForm.apply)(Remove2SVConfirmForm.unapply)
   )
 }

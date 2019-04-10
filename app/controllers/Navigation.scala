@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,24 @@
 
 package controllers
 
-import config.{ApplicationConfig, AuthConfigImpl}
+import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
 import domain.UserNavLinks
+import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.OptionalAuthElement
 import play.api.libs.json._
 import service.SessionService
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
 
-trait Navigation extends FrontendController with HeaderEnricher with AuthConfigImpl with OptionalAuthElement {
+@Singleton
+class Navigation @Inject()(val sessionService: SessionService,
+                           val errorHandler: ErrorHandler,
+                           implicit val appConfig: ApplicationConfig)
+  extends FrontendController with AuthConfigImpl with HeaderEnricher with OptionalAuthElement {
 
   def navLinks() = AsyncStack { implicit request =>
     val username = loggedIn.map(_.displayedName)
     Future.successful(Ok(Json.toJson(UserNavLinks(username))))
   }
-}
-
-object Navigation extends Navigation {
-  override val sessionService = SessionService
-  override val appConfig = ApplicationConfig
 }

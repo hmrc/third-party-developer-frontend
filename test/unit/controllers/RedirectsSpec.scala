@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,20 +24,18 @@ import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.verify
-import org.scalatest.mockito.MockitoSugar
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.CSRFTokenHelper._
 import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithLoggedInSession._
 
-class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class RedirectsSpec extends BaseControllerSpec {
   implicit val materializer = fakeApplication.materializer
 
   val applicationId = "1234"
@@ -49,11 +47,12 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
   val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
   trait Setup {
-    val underTest = new Redirects {
-      override val appConfig = mock[ApplicationConfig]
-      override val sessionService = mock[SessionService]
-      override val applicationService = mock[ApplicationService]
-    }
+    val underTest = new Redirects(
+      mock[ApplicationService],
+      mock[SessionService],
+      mockErrorHandler,
+      mock[ApplicationConfig]
+    )
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
@@ -145,7 +144,10 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
       elementIdentifiedByIdContainsText(document, "submit", "Submit") shouldBe shouldShowDeleteControls
     }
 
-    def deleteRedirectsActionShouldRenderTheConfirmationPage(application: Application, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: String) = {
+    def deleteRedirectsActionShouldRenderTheConfirmationPage(application: Application,
+                                                             resultStatus: Int,
+                                                             shouldShowDeleteControls: Boolean,
+                                                             redirectUriToDelete: String) = {
       givenTheApplicationExists(application)
 
       val result = application.callDeleteRedirectActionController(redirectUriToDelete)
@@ -154,7 +156,8 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
 
       val document = Jsoup.parse(bodyOf(result))
 
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-deleteredirectconfirm", "Tell us if you want to delete this redirect URI") shouldBe true
+      elementIdentifiedByAttrContainsText(
+        document, "span", "data-field-error-deleteredirectconfirm", "Tell us if you want to delete this redirect URI") shouldBe true
       elementIdentifiedByIdContainsText(document, "redirectUriToDelete", redirectUriToDelete) shouldBe shouldShowDeleteControls
       elementIdentifiedByIdContainsText(document, "submit", "Submit") shouldBe shouldShowDeleteControls
     }
@@ -173,7 +176,9 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
       argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(redirectUriToDelete) shouldBe false
     }
 
-    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(application: Application, resultStatus: Int, redirectUriToDelete: String) = {
+    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(application: Application,
+                                                                                        resultStatus: Int,
+                                                                                        redirectUriToDelete: String) = {
       givenTheApplicationExists(application)
 
       val result = application.callDeleteRedirectActionControllerWithConfirmation(redirectUriToDelete, "No")
@@ -227,28 +232,34 @@ class RedirectsSpec extends UnitSpec with MockitoSugar with WithFakeApplication 
         await(underTest.deleteRedirectAction(app.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete)))
 
       final def callDeleteRedirectActionControllerWithConfirmation(redirectUriToDelete: String, confirmed: String): Result =
-        await(underTest.deleteRedirectAction(app.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete, "deleteRedirectConfirm" -> confirmed)))
+        await(underTest.deleteRedirectAction(app.id)(
+          loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete, "deleteRedirectConfirm" -> confirmed)))
 
       final def callChangeRedirectUriController(originalRedirectUri: String, newRedirectUri: String): Result =
-        await(underTest.changeRedirect(app.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)))
+        await(underTest.changeRedirect(app.id)(
+          loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)))
 
       final def callChangeRedirectUriActionController(originalRedirectUri: String, newRedirectUri: String): Result =
-        await(underTest.changeRedirectAction(app.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)))
+        await(underTest.changeRedirectAction(app.id)(
+          loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)))
     }
 
   }
 
   "redirects" should {
     "return the redirects page with no redirect URIs for an application with no redirect URIs" in new Setup {
-      redirectsShouldRenderThePage(anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(Seq()), shouldShowDeleteButton = false)
+      redirectsShouldRenderThePage(anApplication(adminEmail = loggedInDeveloper.email)
+        .withRedirectUris(Seq()), shouldShowDeleteButton = false)
     }
 
     "return the redirects page with some redirect URIs for an admin and an application with some redirect URIs" in new Setup {
-      redirectsShouldRenderThePage(anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")), shouldShowDeleteButton = true)
+      redirectsShouldRenderThePage(anApplication(adminEmail = loggedInDeveloper.email)
+        .withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")), shouldShowDeleteButton = true)
     }
 
     "return the redirects page with some redirect URIs for a developer and an application with some redirect URIs" in new Setup {
-      redirectsShouldRenderThePage(anApplication(developerEmail = loggedInDeveloper.email).withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")), shouldShowDeleteButton = false)
+      redirectsShouldRenderThePage(anApplication(developerEmail = loggedInDeveloper.email)
+        .withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")), shouldShowDeleteButton = false)
     }
   }
 

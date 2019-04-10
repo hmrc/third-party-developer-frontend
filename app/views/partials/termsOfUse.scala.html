@@ -1,5 +1,5 @@
 @*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,11 @@
 @defining(DateTimeFormat.forPattern("dd MMMM yyyy")) { dateFormatter =>
     <p>Version @{applicationConfig.currentTermsOfUseVersion} issued @{dateFormatter.print(applicationConfig.currentTermsOfUseDate)}</p>
 }
-<p>These terms of use explain what you can expect from us and what we expect from you when using the HMRC Developer Hub.
-    They do not create a legal obligation or a legal relationship between HMRC and any software developer.</p>
-<p>We reserve the right to remove your access to the Developer Hub and API Platform temporarily or permanently.</p>
-<p>If we change these terms we’ll let you know. If you have any questions <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support">ask for support</a>.</p>
+<p>These terms of use explain what you can expect from us and what we expect from you when creating and operating software services that consume HMRC Application Programming Interfaces (APIs) hosted on the HMRC Developer Hub.
+    They do not create a legal relationship between HMRC and any software developer.</p>
+<p>We reserve the right to remove your access to the Developer Hub and its APIs temporarily or permanently.</p>
+<p>These terms may change from time to time and we will let you know when this happens. For major changes you may need to re-accept these terms of use, but for minor changes we will assume you agree to the changes unless we hear from you.</p>
+<p>If you have any questions <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support">ask for support</a>.</p>
 
 <section>
     <h2 class="heading-large">Background checks</h2>
@@ -51,14 +52,14 @@
     <h2 class="heading-large">What we expect from you</h2>
     <p>We take the protection of customer data seriously. We expect you to do the same by following data protection law and protecting users in line with the:</p>
     <ul class="list list-bullet" style="margin-bottom: 20px">
-        <li><a href="https://www.ncsc.gov.uk/guidance/security-design-principles-digital-services-main" target="_blank">National Cyber Security Centre’s Security Design Principles (opens in a new tab)</a></li>
-        <li><a href="https://www.ncsc.gov.uk/blog-post/secure-development-and-deployment" target="_blank">National Cyber Security Centre’s Guidance for secure development and deployment (opens in a new tab)</a></li>
-        <li><a href="https://www.ncsc.gov.uk/guidance/tls-external-facing-services" target="_blank">Transport Layer Security principles for protecting data (opens in a new tab)</a></li>
-        <li><a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr" target="_blank">General Data Protection Regulation – GDPR (opens in a new tab)</a></li>
-        <li><a href="https://ico.org.uk/about-the-ico/what-we-do/legislation-we-cover/privacy-and-electronic-communications-regulations/" target="_blank">Privacy and Electronic Communications (EC Directive) Regulations 2003 – as amended (opens in a new tab)</a></li>
-        <li><a href="http://www.legislation.gov.uk/ukpga/2010/15/contents" target="_blank">Equality Act 2010 (opens in a new tab)</a></li>
-        <li><a href="https://ico.org.uk/for-organisations/" target="_blank">Information Commissioner’s Office (opens in a new tab)</a></li>
-        <li><a href="https://ico.org.uk/for-organisations/data-protection-act-2018/" target="_blank">Data Protection Act 2018 (opens in a new tab)</a></li>
+        <li><a href="https://www.ncsc.gov.uk/guidance/security-design-principles-digital-services-main" target="_blank" rel="noopener noreferrer">National Cyber Security Centre’s Security Design Principles (opens in a new tab)</a></li>
+        <li><a href="https://www.ncsc.gov.uk/blog-post/secure-development-and-deployment" target="_blank" rel="noopener noreferrer">National Cyber Security Centre’s Guidance for secure development and deployment (opens in a new tab)</a></li>
+        <li><a href="https://www.ncsc.gov.uk/guidance/tls-external-facing-services" target="_blank" rel="noopener noreferrer">Transport Layer Security principles for protecting data (opens in a new tab)</a></li>
+        <li><a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr" target="_blank" rel="noopener noreferrer">General Data Protection Regulation – GDPR (opens in a new tab)</a></li>
+        <li><a href="https://ico.org.uk/about-the-ico/what-we-do/legislation-we-cover/privacy-and-electronic-communications-regulations/" target="_blank" rel="noopener noreferrer">Privacy and Electronic Communications (EC Directive) Regulations 2003 – as amended (opens in a new tab)</a></li>
+        <li><a href="http://www.legislation.gov.uk/ukpga/2010/15/contents" target="_blank" rel="noopener noreferrer">Equality Act 2010 (opens in a new tab)</a></li>
+        <li><a href="https://ico.org.uk/for-organisations/" target="_blank" rel="noopener noreferrer">Information Commissioner’s Office (opens in a new tab)</a></li>
+        <li><a href="https://ico.org.uk/for-organisations/data-protection-act-2018/" target="_blank" rel="noopener noreferrer">Data Protection Act 2018 (opens in a new tab)</a></li>
     </ul>
     <p>You must also follow these acts and regulations if they’re changed or replaced.</p>
     <section>
@@ -69,7 +70,10 @@
     </section>
     <section>
         <h3 class="heading-medium">Processing data</h3>
-        <p>You may need to <a href="https://ico.org.uk/for-organisations/register/" target="_blank">register with the Information Commissioner’s Office (opens in a new tab)</a> or pay a <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/accountability-and-governance/guide-to-the-data-protection-fee/" target="_blank">data protection fee (opens in a new tab)</a> if your software processes personal data.</p>
+        <p>You may need to pay a <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/accountability-and-governance/guide-to-the-data-protection-fee/" target="_blank" rel="noopener noreferrer">data protection fee (opens in a new tab)</a> if your software processes personal data.</p>
+        <p>You must help us protect our users’ confidential data by sending us particular types of user audit data which we will record. Our APIs provide HTTP headers that you can use to pass this audit data to us. See how to do this under <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/fraud-prevention">fraud prevention</a>.</p>
+        <p>Supplying header information for all our APIs will become mandatory - so we recommend designing it into your applications now.</p>
+        <p>To find out if header information is mandatory for an API that you use, read its <a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/api">API documentation</a>.</p>
     </section>
     <section>
         <h3 class="heading-medium">Storing data</h3>
@@ -78,7 +82,7 @@
             <li>what personal data you’ll be processing and what you’ll use it for</li>
             <li>that you’re responsible for protecting their data</li>
             <li>if you intend to store their data outside the European Economic Area</li>
-            <li>your <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/lawful-basis-for-processing/" target="_blank">lawful basis (opens in a new tab)</a> for processing their personal data
+            <li>your <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/lawful-basis-for-processing/" target="_blank" rel="noopener noreferrer">lawful basis (opens in a new tab)</a> for processing their personal data
             </li>
         </ul>
         <p>If you need users’ consent to store and process their personal data you’ll need to follow <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/lawful-basis-for-processing/consent/" target="_blank">GDPR rules on obtaining consent (opens in a new tab)</a>.</p>
@@ -88,7 +92,7 @@
     <section>
         <h3 class="heading-medium">Data breaches</h3>
         <p>If there’s a data breach or any other issue concerning customer data you must tell us immediately by emailing <a href="mailto:SDSTeam@@hmrc.gsi.gov.uk">SDSTeam@@hmrc.gsi.gov.uk</a>.</p>
-        <p>Under GDPR rules, you must also <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/personal-data-breaches/" target="_blank">notify ICO about certain types of personal data breach (opens in a new tab)</a>            within 72 hours of becoming aware of it.</p>
+        <p>Under GDPR rules, you must also <a href="https://ico.org.uk/for-organisations/guide-to-the-general-data-protection-regulation-gdpr/personal-data-breaches/" target="_blank" rel="noopener noreferrer">notify ICO about certain types of personal data breach (opens in a new tab)</a>            within 72 hours of becoming aware of it.</p>
     </section>
     <section>
         <h3 class="heading-medium">Service standard</h3>
@@ -98,7 +102,7 @@
         <h3 class="heading-medium">Accessibility</h3>
         <p>You must:</p>
         <ul class="list list-bullet">
-            <li>meet <a href="https://www.w3.org/TR/WCAG20/" target="_blank">W3C’s Web Content Accessibility Guidelines (opens in a new tab)</a> at a minimum level of AA if your software’s web-based, or <a href="https://www.w3.org/TR/mobile-accessibility-mapping/" target="_blank">W3C’s guidelines for mobile software (opens in a new tab)</a></li>
+            <li>meet <a href="http://www.w3.org/TR/WCAG21/" target="_blank" rel="noopener noreferrer">W3C’s Web Content Accessibility Guidelines (opens in a new tab)</a> at a minimum level of AA if your software’s web-based, or <a href="https://www.w3.org/TR/mobile-accessibility-mapping/" target="_blank" rel="noopener noreferrer">W3C’s guidelines for mobile software (opens in a new tab)</a></li>
             <li>give us evidence that your software meets the guidelines, if we ask for it</li>
             <li><a href="@{applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support">ask for support</a> if you have any concerns meeting these guidelines</li>
         </ul>
@@ -107,8 +111,8 @@
         <h3 class="heading-medium">Advertising and marketing</h3>
         <p>Any advertising that appears in your software must follow both:</p>
         <ul class="list list-bullet" style="margin-bottom: 20px">
-            <li><a href="https://www.asa.org.uk/codes-and-rulings/advertising-codes.html" target="_blank">Advertising Standards Authority Codes (opens in a new tab)</a></li>
-            <li><a href="https://www.gov.uk/marketing-advertising-law/regulations-that-affect-advertising" target="_blank">UK marketing and advertising laws (opens in a new tab)</a></li>
+            <li><a href="https://www.asa.org.uk/codes-and-rulings/advertising-codes.html" target="_blank" rel="noopener noreferrer">Advertising Standards Authority Codes (opens in a new tab)</a></li>
+            <li><a href="https://www.gov.uk/marketing-advertising-law/regulations-that-affect-advertising" target="_blank" rel="noopener noreferrer">UK marketing and advertising laws (opens in a new tab)</a></li>
         </ul>
         <p>You must not use advertising that promotes:</p>
         <ul class="list list-bullet" style="margin-bottom: 20px">
@@ -116,7 +120,7 @@
             <li>dating</li>
             <li>gaming</li>
         </ul>
-        <p>You cannot share personal data for marketing without users’ consent, as defined in the Direct Marketing Guidance PDF from the <a href="https://ico.org.uk/for-organisations/marketing/" target="_blank">Information Commissioner’s Office (opens in a new tab)</a>.</p>
+        <p>You cannot share personal data for marketing without users’ consent, as defined in the Direct Marketing Guidance PDF from the <a href="https://ico.org.uk/for-organisations/marketing/" target="_blank" rel="noopener noreferrer">Information Commissioner’s Office (opens in a new tab)</a>.</p>
         <p>You cannot advertise your software as ‘HMRC accredited’, ‘HMRC endorsed’, ‘HMRC certified’ or similar.</p>
         <p>You cannot use our HMRC brand in any way including logo placement on your website.</p>
     </section>
@@ -129,17 +133,17 @@
         <p></p>You must:<p></p>
         <ul class="list list-bullet">
             <li>check software for vulnerabilities through secure development and pre-release testing</li>
-            <li>check open source or reused proprietary code using resources like the <a href="https://cve.mitre.org/" target="_blank">Common Vulnerabilities and Exposures (opens in a new tab)</a> database</li>
+            <li>check open source or reused proprietary code using resources like the <a href="https://cve.mitre.org/" target="_blank" rel="noopener noreferrer">Common Vulnerabilities and Exposures (opens in a new tab)</a> database</li>
             <li>react quickly if you find vulnerabilities in your code</li>
             <li>have a patching policy in place</li>
         </ul>
         <p></p>Your re-releases and upgrades should also follow secure development practices and pre-release testing.<p></p>
         <p></p>We recommend following the security principles of:<p></p>
         <ul class="list list-bullet">
-            <li>the <a href="https://www.ncsc.gov.uk" target="_blank">National Cyber Security Centre (opens in a new tab)</a></li>
-            <li><a href="https://www.ncsc.gov.uk/blog-post/secure-development-and-deployment" target="_blank">National Cyber Security Centre’s Guidance for secure development and deployment (opens in a new tab)</a></li>
-            <li>the <a href="https://www.owasp.org/index.php/Main_Page" target="_blank">Open Web Application Security Project (opens in a new tab)</a></li>
-            <li><a href="https://www.cyberessentials.ncsc.gov.uk/" target="_blank">Cyber Essentials or Cyber Essentials Plus certification (opens in a new tab)</a></li>
+            <li>the <a href="https://www.ncsc.gov.uk" target="_blank" rel="noopener noreferrer">National Cyber Security Centre (opens in a new tab)</a></li>
+            <li><a href="https://www.ncsc.gov.uk/blog-post/secure-development-and-deployment" target="_blank" rel="noopener noreferrer">National Cyber Security Centre’s Guidance for secure development and deployment (opens in a new tab)</a></li>
+            <li>the <a href="https://www.owasp.org/index.php/Main_Page" target="_blank" rel="noopener noreferrer">Open Web Application Security Project (opens in a new tab)</a></li>
+            <li><a href="https://www.cyberessentials.ncsc.gov.uk/" target="_blank" rel="noopener noreferrer">Cyber Essentials or Cyber Essentials Plus certification (opens in a new tab)</a></li>
         </ul>
     </section>
     <section>

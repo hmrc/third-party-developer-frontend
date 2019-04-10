@@ -1,5 +1,5 @@
 @*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@
 
 @for(link <- navLinks) {
    <li>
-      <a class="@anchorClass.getOrElse("")" href="@{link.href}">@{link.label}</a>
+      <a class="@anchorClass.getOrElse("")" href="@{link.href}" @if(link.openInNewWindow){target="_blank"}>@{link.label}</a>
    </li>
 }
 
 @for(link <- mobileNavLinks) {
     <li class="desktop-only">
-        <a class="@anchorClass.getOrElse("")" href="@{link.href}">@{link.label}</a>
+        <a class="@anchorClass.getOrElse("")" href="@{link.href}" @if(link.openInNewWindow){target="_blank"}>@{link.label}</a>
     </li>
 }

@@ -31,17 +31,17 @@ $.fn.apiSubscriber = function () {
     };
 
     var unsubscribe = function (event) { // subscribes user to api posting a serialized form
-            var $form = $(this),
-                url = $form.attr("action");
+        var $form = $(this),
+            url = $form.attr("action");
 
-            event.preventDefault();
-            $.post(url, $form.serialize(), function (response, textStatus, xhr) {
-                    unsubscribeResponseHandler(response, xhr);
-                })
-                .fail(function () {
-                    showError();
-                });
-        };
+        event.preventDefault();
+        $.post(url, $form.serialize(), function (response, textStatus, xhr) {
+                unsubscribeResponseHandler(response, xhr);
+            })
+            .fail(function () {
+                showError();
+            });
+    };
 
     var subscribeResponseHandler = function (response, xhr) {
         var updateSubscription = function () {
@@ -120,14 +120,22 @@ $(document).ready(function () {
     }
 
     var stateContainer = form.parents('.api-subscriber').find('.api-subscriber__state-container');
+    var apiLink = form.parents('.api-subscriber').find('a[data-api-link]');
     stateContainer.text('');
 
     var containerId = stateContainer.attr('id');
     var loadingSpinner = new GOVUK.Loader().init({ container: containerId, id: containerId + '-loader' });
 
     function resetForm() {
+      var subscribed = form.find('input.slider__on').prop('checked')
       fieldContainer.prop('disabled', null);
       loadingSpinner.stop();
+
+      form.find('.slider__on--label').attr('aria-label', subscribed ? 'Subscribed' : 'Select to subscribe');
+      form.find('.slider__off--label').attr('aria-label', subscribed ? 'Select to unsubscribe' : 'Unsubscribed');
+
+      apiLink.attr('aria-label', apiLink.attr('aria-label').replace(/(?:not )?subscribed$/, subscribed ? 'subscribed' : 'not subscribed'));
+
       form.find('input[type=radio]:checked').focus();
     }
 
@@ -170,9 +178,72 @@ $(document).ready(function () {
     charCount.init({ selector: '.js-char-count' });
 
   $('[data-clientsecret-toggle]').on('unmask', function(event, data) {
-    var target = $(this).closest('.js-mask-container').find('.js-mask-revealed');
+    var self = $(this);
+    var container = self.closest('.js-mask-container');
+    var target = container.find('.js-mask-revealed');
+    var copy = self.parent().find('.copy-to-clip');
+    var secondsToTimeout = container.data('mask-timer');
+
     target.text('');
     target.val(data);
+
+    copy.data('clip-text', data);
+    copy.removeClass('hidden');
+    copy.focus();
+
+    if (secondsToTimeout) {
+      setTimeout(function() {
+        if (!isVisible(self)) {
+          self.trigger('mask');
+        }
+      }, parseFloat(secondsToTimeout, 10) * 1000);
+    }
+  });
+
+  $('[data-clientsecret-toggle]').on('mask', function(event, data) {
+    if (!$(this).data('secure')) {
+      return;
+    }
+
+    var copy = $(this).parent().find('.copy-to-clip');
+    copy.data('clip-text', '');
+    copy.addClass('hidden');
+  });
+
+  function isVisible(el) {
+    return new RegExp('^' + el.data('text-hide')).test(el.text());
+  }
+
+  function toggleMask(e) {
+    e.preventDefault();
+
+    var self = $(this);
+
+    if (isVisible(self)) {
+      return self.trigger('mask');
+    }
+
+    if (self.data('secure')) {
+      var targetSelector = self.data('mask-toggle-target');
+
+      if (targetSelector) {
+        setTimeout(function() {
+          self.closest('.js-mask-container').find('.' + targetSelector + ' input[type=password]').focus();
+        }, 0);
+      }
+    } else {
+      self.parent().find('.copy-to-clip').focus();
+    }
+  }
+
+  $('[data-clientsecret-toggle]').each(function() {
+    $(this).on('click', toggleMask);
+
+    var currentBindings = $._data(this, 'events').click;
+
+    if ($.isArray(currentBindings)) {
+      currentBindings.unshift(currentBindings.pop());
+    }
   });
 });
 

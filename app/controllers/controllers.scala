@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,7 @@ package object controllers {
     val unsubscribeConfirmationNoChoiceKey = "unsubscribe.confirmation.no.choice.field"
     val changeSubscriptionNoChoiceKey = "subscription.change.no.choice.field"
     val accountDeleteConfirmationRequiredKey = "developer.delete.error.required.field"
+    val remove2SVConfirmNoChoiceKey = "remove.2SV.confirmation.no.choice.field"
 
     val deleteRedirectConfirmationNoChoiceKey = "delete.redirect.confirmation.no.choice.field"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import controllers.AddTeamMemberForm
 import domain._
 import helpers.string._
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits.applicationMessages
@@ -30,7 +31,9 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 
-class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite {
+class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = Developer("admin@example.com", "firstName1", "lastName1")
@@ -44,7 +47,7 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite {
 
     def renderPage(role: Role = Role.ADMINISTRATOR, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
-      views.html.manageTeam.render(application, role, form, loggedInUser, request, applicationMessages, ApplicationConfig, "nav-section")
+      views.html.manageTeam.render(application, role, form, loggedInUser, request, applicationMessages, appConfig, "nav-section")
     }
 
     "show Add and Remove buttons for Admin" in {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,20 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import domain._
+import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Action, AnyContent}
-import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
-import service.{AuditAction, AuditService, SessionService}
+import play.api.mvc.Action
+import service.AuditAction._
+import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
+import views.html.protectaccount._
 
-import scala.concurrent.Future
+import scala.concurrent.Future.successful
 
 trait Auditing {
   val auditService: AuditService
@@ -40,7 +43,13 @@ trait Auditing {
   }
 }
 
-trait UserLoginAccount extends LoggedOutController with LoginLogout with Auditing {
+@Singleton
+class UserLoginAccount @Inject()(val auditService: AuditService,
+                                 val errorHandler: ErrorHandler,
+                                 val sessionService: SessionService,
+                                 val applicationService: ApplicationService,
+                                 implicit val appConfig: ApplicationConfig)
+  extends LoggedOutController with LoginLogout with Auditing {
 
   import play.api.data._
 
@@ -48,44 +57,75 @@ trait UserLoginAccount extends LoggedOutController with LoginLogout with Auditin
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
   def login = loggedOutAction { implicit request =>
-    Future.successful(Ok(signIn("Sign in", loginForm)))
+    successful(Ok(signIn("Sign in", loginForm)))
   }
 
-  def accountLocked = Action.async  { implicit request =>
+  def accountLocked = Action.async { implicit request =>
     for {
       _ <- tokenAccessor.extract(request)
         .map(sessionService.destroy)
-        .getOrElse(Future.successful(()))
+        .getOrElse(successful(()))
     } yield Locked(views.html.accountLocked())
   }
 
-  def authenticate = Action.async {
-    implicit request =>
-      val requestForm = loginForm.bindFromRequest
-      requestForm.fold(
-        errors => Future.successful(BadRequest(signIn("Sign in", errors))),
-        login => sessionService.authenticate(login.emailaddress, login.password) flatMap { session => {
-          audit(LoginSucceeded, session.developer)
-            gotoLoginSucceeded(session.sessionId)
+  def authenticate = Action.async { implicit request =>
+    val requestForm = loginForm.bindFromRequest
+    requestForm.fold(
+      errors => successful(BadRequest(signIn("Sign in", errors))),
+      login => sessionService.authenticate(login.emailaddress, login.password) flatMap { userAuthenticationResponse =>
+        userAuthenticationResponse.session match {
+          case Some(session) => audit(LoginSucceeded, session.developer)
+                                // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
+                                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV()).withSession(request.session)))
+          case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+            .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
         }
-        } recover {
-          case e: InvalidEmail =>
-            audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
-            Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
-          case e: InvalidCredentials =>
-            audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
-            Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
-          case e: LockedAccount =>
-            audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
-            Locked(signIn("Sign in", LoginForm.accountLocked(requestForm)))
-          case e: UnverifiedAccount => Forbidden(signIn("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
-            .withSession("email" -> login.emailaddress)
-        }
-      )
+      } recover {
+        case _: InvalidEmail =>
+          audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
+          Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+        case _: InvalidCredentials =>
+          audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
+          Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+        case _: LockedAccount =>
+          audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
+          Locked(signIn("Sign in", LoginForm.accountLocked(requestForm)))
+        case _: UnverifiedAccount => Forbidden(signIn("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
+          .withSession("email" -> login.emailaddress)
+      }
+    )
   }
-}
 
-object UserLoginAccount extends UserLoginAccount with WithAppConfig {
-  override val sessionService = SessionService
-  override val auditService = AuditService
+  def authenticateTotp = Action.async { implicit request =>
+    ProtectAccountForm.form.bindFromRequest.fold(
+      errors => successful(BadRequest(logInAccessCode(errors))),
+      validForm => {
+        val email = request.session.get("emailAddress").get
+        sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
+          audit(LoginSucceeded, session.developer)
+          gotoLoginSucceeded(session.sessionId)
+        } recover {
+          case _: InvalidCredentials =>
+            audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
+            Unauthorized(logInAccessCode(ProtectAccountForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code")))
+        }
+      }
+    )
+  }
+
+  def get2SVHelpConfirmationPage() = loggedOutAction { implicit request =>
+    successful(Ok(protectAccountNoAccessCode()))
+  }
+
+  def get2SVHelpCompletionPage() = loggedOutAction { implicit request =>
+    successful(Ok(protectAccountNoAccessCodeComplete()))
+  }
+
+  def confirm2SVHelp() = loggedOutAction { implicit request =>
+    applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeComplete()))
+  }
+
+  def get2SVNotSetPage() = Action.async { implicit request =>
+    successful(Ok(userDidNotAdd2SV()))
+  }
 }

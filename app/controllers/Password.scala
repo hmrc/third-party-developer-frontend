@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import javax.inject.Inject
 import play.api.Logger
 import play.api.Play.current
 import play.api.data.Form
@@ -49,19 +51,24 @@ trait PasswordChange {
         connector.changePassword(payload) map {
           _ => success
         } recover {
-          case e: UnverifiedAccount => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email)))
+          case _: UnverifiedAccount => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email)))
             .withSession("email" -> email)
-          case e: InvalidCredentials =>
+          case _: InvalidCredentials =>
             auditService.audit(PasswordChangeFailedDueToInvalidCredentials(email))
             Unauthorized(error(ChangePasswordForm.invalidCredentials(ChangePasswordForm.form)))
-          case e: LockedAccount => Redirect(controllers.routes.UserLoginAccount.accountLocked)
+          case _: LockedAccount => Redirect(controllers.routes.UserLoginAccount.accountLocked())
         }
       }
     )
   }
 }
 
-trait Password extends LoggedOutController with PasswordChange {
+class Password @Inject()(val auditService: AuditService,
+                         val sessionService: SessionService,
+                         val connector: ThirdPartyDeveloperConnector,
+                         val errorHandler: ErrorHandler,
+                         implicit val appConfig: ApplicationConfig)
+  extends LoggedOutController with PasswordChange {
 
   import ErrorFormBuilder.GlobalError
 
@@ -78,9 +85,9 @@ trait Password extends LoggedOutController with PasswordChange {
       data => connector.requestReset(data.emailaddress) map {
         _ => Ok(checkEmail(data.emailaddress))
       } recover {
-        case e: UnverifiedAccount => Forbidden(forgotPassword(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
+        case _: UnverifiedAccount => Forbidden(forgotPassword(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
           .withSession("email" -> data.emailaddress)
-        case e: NotFoundException => Ok(checkEmail(data.emailaddress))
+        case _: NotFoundException => Ok(checkEmail(data.emailaddress))
       }
     )
   }
@@ -89,9 +96,9 @@ trait Password extends LoggedOutController with PasswordChange {
     connector.fetchEmailForResetCode(code) map {
       email => Redirect(routes.Password.resetPasswordChange()).addingToSession("email" -> email)
     } recover {
-      case e: InvalidResetCode => Redirect(routes.Password.resetPasswordError()).flashing(
+      case _: InvalidResetCode => Redirect(routes.Password.resetPasswordError()).flashing(
         "error" -> "InvalidResetCode")
-      case e: UnverifiedAccount => Redirect(routes.Password.resetPasswordError()).flashing(
+      case _: UnverifiedAccount => Redirect(routes.Password.resetPasswordError()).flashing(
         "error" -> "UnverifiedAccount",
         "email" -> email
       )
@@ -102,7 +109,7 @@ trait Password extends LoggedOutController with PasswordChange {
     request.session.get("email") match {
       case None => Logger.warn("email not found in session")
         Future.successful(Redirect(routes.Password.resetPasswordError()).flashing("error" -> "Error"))
-      case Some(email) => Future.successful(Ok(reset(PasswordResetForm.form)))
+      case Some(_) => Future.successful(Ok(reset(PasswordResetForm.form)))
     }
   }
 
@@ -127,16 +134,10 @@ trait Password extends LoggedOutController with PasswordChange {
         connector.reset(PasswordReset(email, data.password)) map {
           _ => Ok(signIn("You have reset your password", LoginForm.form, endOfJourney = true))
         } recover {
-          case e: UnverifiedAccount => Forbidden(reset(PasswordResetForm.accountUnverified(PasswordResetForm.form, email)))
+          case _: UnverifiedAccount => Forbidden(reset(PasswordResetForm.accountUnverified(PasswordResetForm.form, email)))
             .withSession("email" -> email)
         }
       }
     )
   }
-}
-
-object Password extends Password with WithAppConfig {
-  override val connector = ThirdPartyDeveloperConnector
-  override val sessionService = SessionService
-  override val auditService = AuditService
 }

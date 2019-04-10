@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,28 +20,22 @@ import config.ApplicationConfig
 import connectors.DeskproConnector
 import controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import domain.{DeskproTicket, Feedback, TicketId, TicketResult}
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.Request
 
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
-trait DeskproService {
-
-  val applicationConfig: ApplicationConfig
-  val deskproConnector: DeskproConnector
-
+@Singleton
+class DeskproService @Inject()(val deskproConnector: DeskproConnector, val appConfig: ApplicationConfig) {
   def submitSurvey(survey: SignOutSurveyForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketId] = {
-    val feedback = Feedback.createFromSurvey(survey, Option(applicationConfig.title))
+    val feedback = Feedback.createFromSurvey(survey, Option(appConfig.title))
     deskproConnector.createFeedback(feedback)
   }
 
   def submitSupportEnquiry(supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
-    val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, applicationConfig.title)
+    val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, appConfig.title)
     deskproConnector.createTicket(ticket)
   }
 }
 
-object DeskproService extends DeskproService{
-  val deskproConnector = DeskproConnector
-  val applicationConfig = ApplicationConfig
-}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package unit.controllers
 
 import java.net.URI
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.{ProtectAccount, routes}
 import domain.{Developer, Session}
@@ -31,8 +31,8 @@ import play.api.test.Helpers._
 import play.api.http.Status.{BAD_REQUEST, SEE_OTHER}
 import play.api.mvc.Result
 import play.filters.csrf.CSRF.TokenProvider
-import qr.{OTPAuthURI, QRCode}
-import service.{EnableMFAResponse, EnableMFAService, SessionService}
+import qr.{OtpAuthUri, QRCode}
+import service.{MFAResponse, MFAService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
@@ -52,13 +52,13 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
     val otpUri = new URI("OTPURI")
     val correctCode = "123123"
 
-    val underTest = new ProtectAccount {
-      override val connector = mock[ThirdPartyDeveloperConnector]
-      override val appConfig = mock[ApplicationConfig]
-      override val sessionService = mock[SessionService]
+    val underTest = new ProtectAccount(
+      mock[ThirdPartyDeveloperConnector],
+      mock[OtpAuthUri],
+      mock[MFAService],
+      mock[SessionService],
+      mock[ErrorHandler])(mock[ApplicationConfig]) {
       override val qrCode = mock[QRCode]
-      override val otpAuthUri = mock[OTPAuthURI]
-      override val enableMFAService = mock[EnableMFAService]
     }
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
@@ -88,15 +88,24 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
   }
 
   trait SetupFailedVerification extends Setup {
-    given(underTest.enableMFAService.enableMfa(any[String], any[String])(any[HeaderCarrier])).
-      willReturn(Future.successful(EnableMFAResponse(false)))
+    given(underTest.mfaService.enableMfa(any[String], any[String])(any[HeaderCarrier])).
+      willReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    given(underTest.enableMFAService.enableMfa(mockEq(loggedInUser.email), mockEq(correctCode))(any[HeaderCarrier])).
-      willReturn(Future.successful(EnableMFAResponse(true)))
+    given(underTest.mfaService.enableMfa(mockEq(loggedInUser.email), mockEq(correctCode))(any[HeaderCarrier])).
+      willReturn(Future.successful(MFAResponse(true)))
   }
 
+  trait SetupFailedRemoval extends Setup {
+    given(underTest.mfaService.removeMfa(any[String], any[String])(any[HeaderCarrier])).
+      willReturn(Future.successful(MFAResponse(false)))
+  }
+
+  trait SetupSuccessfulRemoval extends Setup {
+    given(underTest.mfaService.removeMfa(mockEq(loggedInUser.email), mockEq(correctCode))(any[HeaderCarrier])).
+      willReturn(Future.successful(MFAResponse(true)))
+  }
 
   "getQrCode" should {
     "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV {
@@ -130,7 +139,8 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
       val result = await(addToken(underTest.getProtectAccount())(request))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Your Developer account is currently protected with 2-step verification")
+      bodyOf(result) should include("Your Developer Hub account is currently protected with 2-step verification. This is linked to your smartphone or tablet.")
+      bodyOf(result) should include("You must remove 2-step verification before you can add it to a new smartphone or tablet.")
     }
   }
 
@@ -160,6 +170,34 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ProtectAccount.getProtectAccountCompletedPage().url)
+    }
+  }
+
+  "removeMfa" should {
+    "return error when totpCode in invalid format" in new SetupSuccessfulRemoval {
+      val request = protectAccountRequest("abc")
+
+      val result = await(addToken(underTest.remove2SV())(request))
+
+      status(result) shouldBe BAD_REQUEST
+      assertIncludesOneError(result, "You have entered an invalid access code")
+    }
+
+    "return error when verification fails" in new SetupFailedRemoval {
+      val request = protectAccountRequest(correctCode)
+
+      val result = await(addToken(underTest.remove2SV())(request))
+
+      assertIncludesOneError(result, "You have entered an incorrect access code")
+    }
+
+    "redirect to 2SV removal completed action" in new SetupSuccessfulRemoval {
+      val request = protectAccountRequest(correctCode)
+
+      val result = await(addToken(underTest.remove2SV())(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2SVRemovalCompletePage().url)
     }
   }
 

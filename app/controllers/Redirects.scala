@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,22 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import domain.{Standard, UpdateApplicationRequest}
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
-import service.{ApplicationService, ApplicationServiceImpl, SessionService}
+import service.{ApplicationService, SessionService}
 
 import scala.concurrent.Future.successful
 
-trait Redirects extends ApplicationController {
-  val applicationService: ApplicationService
+@Singleton
+class Redirects @Inject()(val applicationService: ApplicationService,
+                          val sessionService: SessionService,
+                          val errorHandler: ErrorHandler,
+                          implicit val appConfig: ApplicationConfig)
+  extends ApplicationController {
 
   def redirects(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
     val appAccess = request.application.access.asInstanceOf[Standard]
@@ -40,10 +46,13 @@ trait Redirects extends ApplicationController {
     val application = request.application
 
     def handleValidForm(form: AddRedirectForm) = {
-      if(application.hasRedirectUri(form.redirectUri))
-        successful(BadRequest(views.html.addRedirect(application, AddRedirectForm.form.fill(form).withError("redirectUri", "redirect.uri.duplicate"))))
-      else
+      if (application.hasRedirectUri(form.redirectUri)) {
+        successful(BadRequest(
+          views.html.addRedirect(application, AddRedirectForm.form.fill(form).withError("redirectUri", "redirect.uri.duplicate"))))
+      }
+      else {
         applicationService.update(UpdateApplicationRequest.from(application, form)).map(_ => Redirect(routes.Redirects.redirects(applicationId)))
+      }
     }
 
     def handleInvalidForm(formWithErrors: Form[AddRedirectForm]) = {
@@ -72,7 +81,8 @@ trait Redirects extends ApplicationController {
 
     def handleValidForm(form: DeleteRedirectConfirmationForm) = {
       form.deleteRedirectConfirm match {
-        case Some("Yes") => applicationService.update(UpdateApplicationRequest.from(application, form)).map(_ => Redirect(routes.Redirects.redirects(application.id)))
+        case Some("Yes") => applicationService.update(UpdateApplicationRequest.from(application, form))
+          .map(_ => Redirect(routes.Redirects.redirects(application.id)))
         case _ => successful(Redirect(routes.Redirects.redirects(application.id)))
       }
     }
@@ -94,11 +104,12 @@ trait Redirects extends ApplicationController {
         applicationService.update(UpdateApplicationRequest.from(request.application, form)).map(_ => Redirect(routes.Redirects.redirects(applicationId)))
       }
 
-      if(form.originalRedirectUri == form.newRedirectUri) successful(Redirect(routes.Redirects.redirects(applicationId)))
+      if (form.originalRedirectUri == form.newRedirectUri) successful(Redirect(routes.Redirects.redirects(applicationId)))
       else {
         request.application.access match {
-          case app: Standard => if (app.redirectUris.contains(form.newRedirectUri)) handleInvalidForm(ChangeRedirectForm.form.fill(form).withError("newRedirectUri", "redirect.uri.duplicate"))
-                                else updateUris()
+          case app: Standard => if (app.redirectUris.contains(form.newRedirectUri)) handleInvalidForm(ChangeRedirectForm.form.fill(form)
+            .withError("newRedirectUri", "redirect.uri.duplicate"))
+          else updateUris()
           case _ => successful(Redirect(routes.Details.details(applicationId)))
         }
       }
@@ -110,9 +121,4 @@ trait Redirects extends ApplicationController {
 
     ChangeRedirectForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
-}
-
-object Redirects extends Redirects with WithAppConfig {
-  override val sessionService = SessionService
-  override val applicationService = ApplicationServiceImpl
 }

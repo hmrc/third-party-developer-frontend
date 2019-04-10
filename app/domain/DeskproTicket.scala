@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,14 @@ object DeskproTicket extends FieldTransformer {
 
     DeskproTicket(name, email, "Request for developer account to be deleted", message, routes.Profile.deleteAccount().url)
   }
+  def removeDeveloper2SV(email: String): DeskproTicket = {
+    val message =
+      s"""I '$email' want my 2SV to be removed"""
+
+    DeskproTicket("", email, "Request for 2SV to be removed", message, routes.UserLoginAccount.confirm2SVHelp().url)
+  }
+
+
 }
 
 sealed trait TicketResult

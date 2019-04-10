@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package unit.controllers
 
 import java.util.UUID
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import domain._
 import org.mockito.BDDMockito.given
@@ -29,8 +29,9 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditAction.{LoginFailedDueToInvalidEmail, LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount, LoginSucceeded}
-import service.{AuditAction, AuditService, SessionService}
+import service.AuditAction._
+import service.{ApplicationService, AuditAction, AuditService, SessionService}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
@@ -38,7 +39,6 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
 import scala.concurrent.Future._
-import uk.gov.hmrc.http.HeaderCarrier
 
 class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
   implicit val materializer = fakeApplication.materializer
@@ -47,42 +47,69 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
   val emailFieldName: String = "emailaddress"
   val passwordFieldName: String = "password"
   val userPassword = "Password1!"
+  val totp = "123456"
+  val nonce = "ABC-123"
+
+  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+  val userAuthenticationWith2SVResponse = UserAuthenticationResponse(accessCodeRequired = true, nonce = Some(nonce), session = None)
 
   trait Setup {
-    val underTest = new UserLoginAccount {
-      override val sessionService = mock[SessionService]
-      override val auditService = mock[AuditService]
-      override val appConfig = mock[ApplicationConfig]
-    }
 
-    def mockAuthenticate(email: String, password: String, result: Future[Session]) =
+    val underTest = new UserLoginAccount(mock[AuditService],
+      mock[ErrorHandler],
+      mock[SessionService],
+      mock[ApplicationService],
+      mock[ApplicationConfig]
+    )
+
+
+    def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse]) =
       given(underTest.sessionService.authenticate(Matchers.eq(email), Matchers.eq(password))(any[HeaderCarrier])).willReturn(result)
+
+    def mockAuthenticateTotp(email: String, totp: String, nonce: String, result: Future[Session]) =
+      given(underTest.sessionService.authenticateTotp(Matchers.eq(email), Matchers.eq(totp), Matchers.eq(nonce))(any[HeaderCarrier])).willReturn(result)
 
     def mockLogout() =
       given(underTest.sessionService.destroy(Matchers.eq(session.sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(204))
+        .willReturn(Future.successful(NO_CONTENT))
 
     def mockAudit(auditAction: AuditAction, result: Future[AuditResult]) =
       given(underTest.auditService.audit(Matchers.eq(auditAction), Matchers.eq(Map.empty))(any[HeaderCarrier])).willReturn(result)
 
     given(underTest.appConfig.isExternalTestEnvironment).willReturn(false)
     given(underTest.sessionService.authenticate(anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
+    given(underTest.sessionService.authenticateTotp(anyString(), anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
   }
 
   "authenticate" should {
 
-    "return the manage Applications page when the credentials are correct" in new Setup {
-      mockAuthenticate(user.email, userPassword, successful(session))
+    "display the 2-step verification code page when logging in with 2SV configured" in new Setup {
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationWith2SVResponse))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
-      val request = FakeRequest().withSession(sessionParams: _*)
+      val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
+
+      val result = await(addToken(underTest.authenticate())(request))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Enter your access code")
+    }
+
+    "display the Add 2-step Verification suggestion page when successfully logging in without having 2SV configured" in new Setup {
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      val request = FakeRequest()
+        .withSession(sessionParams: _*)
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
 
       val result = await(underTest.authenticate()(request))
 
-      status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some("/developer/applications")
+      status(result) shouldBe OK
+      bodyOf(result) should include("Add 2-step verification")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginSucceeded), Matchers.eq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
     }
@@ -94,7 +121,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, "wrongPassword1!"))
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 401
+      status(result) shouldBe UNAUTHORIZED
       bodyOf(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToInvalidPassword), Matchers.eq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
@@ -109,7 +136,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         .withFormUrlEncodedBody((emailFieldName, unregisteredEmail), (passwordFieldName, userPassword))
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 401
+      status(result) shouldBe UNAUTHORIZED
       bodyOf(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToInvalidEmail), Matchers.eq(Map("developerEmail" -> unregisteredEmail)))(any[HeaderCarrier])
@@ -123,7 +150,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 403
+      status(result) shouldBe FORBIDDEN
       bodyOf(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
       result.toString should include(user.email.replace("@", "%40"))
     }
@@ -137,10 +164,91 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
       val result = await(addToken(underTest.authenticate())(request))
 
-      status(result) shouldBe 423
+      status(result) shouldBe LOCKED
       bodyOf(result) should include("You entered incorrect login details too many times you&#x27;ll now have to reset your password")
       verify(underTest.auditService, times(1)).audit(
         Matchers.eq(LoginFailedDueToLockedAccount), Matchers.eq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
+    }
+  }
+
+  "authenticateTotp" should {
+
+    "return the manage Applications page when the credentials are correct" in new Setup {
+      mockAuthenticateTotp(user.email, totp, nonce, successful(session))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      val request = FakeRequest()
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce :_*)
+        .withFormUrlEncodedBody(("accessCode", totp))
+
+      val result = await(underTest.authenticateTotp()(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/applications")
+      verify(underTest.auditService, times(1)).audit(
+        Matchers.eq(LoginSucceeded), Matchers.eq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
+    }
+
+    "return the login page when the access code is incorrect" in new Setup {
+      val request = FakeRequest()
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce :_*)
+        .withFormUrlEncodedBody(("accessCode", "654321"))
+
+      val result = await(addToken(underTest.authenticateTotp())(request))
+
+      status(result) shouldBe UNAUTHORIZED
+      bodyOf(result) should include("You have entered an incorrect access code")
+      verify(underTest.auditService, times(1)).audit(
+        Matchers.eq(LoginFailedDueToInvalidAccessCode), Matchers.eq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
+    }
+  }
+
+  "2SVHelp" should {
+
+    "return the remove 2SV confirmation page when user does not have an access code" in new Setup {
+
+      val request = FakeRequest().withSession(sessionParams: _*)
+
+      val result = await(addToken(underTest.get2SVHelpConfirmationPage())(request))
+
+      status(result) shouldBe OK
+      val body = bodyOf(result)
+
+      body should include("Get help accessing your account")
+      body should include("Ask us to remove 2-step verification so you can sign in to your account.")
+
+    }
+
+    "return the remove 2SV complete page when user selects yes" in new Setup {
+
+      val request = FakeRequest().withSession(sessionParams: _*)
+
+      val result = await(addToken(underTest.get2SVHelpCompletionPage())(request))
+
+      status(result) shouldBe OK
+      val body = bodyOf(result)
+
+      body should include("Request submitted")
+      body should include("You have requested to remove 2-step verification from your account")
+
+    }
+
+    "return 2-step removal request completed page on submission" in new Setup {
+
+      val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> user.email :_*)
+
+      given(underTest.applicationService.request2SVRemoval(Matchers.eq(user.email))(any[HeaderCarrier]))
+        .willReturn(Future.successful(TicketCreated))
+
+      val result = await(addToken(underTest.confirm2SVHelp())(request))
+
+      status(result) shouldBe OK
+      val body = bodyOf(result)
+
+      body should include("You have requested to remove 2-step verification from your account")
+      body should include("Request submitted")
+      verify(underTest.applicationService).request2SVRemoval(Matchers.eq(user.email))(any[HeaderCarrier])
+
     }
   }
 

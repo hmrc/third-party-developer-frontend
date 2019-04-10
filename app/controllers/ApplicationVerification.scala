@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,25 @@
 
 package controllers
 
+import config.{ApplicationConfig, ErrorHandler}
 import domain.ApplicationVerificationFailed
+import javax.inject.{Inject, Singleton}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Action
-import service.{ApplicationService, ApplicationServiceImpl, SessionService}
+import service.{ApplicationService, SessionService}
 
-trait ApplicationVerification extends LoggedOutController {
+@Singleton
+class ApplicationVerification @Inject()(val service: ApplicationService,
+                                        val sessionService: SessionService,
+                                        val errorHandler: ErrorHandler,
+                                        implicit val appConfig: ApplicationConfig) extends LoggedOutController {
 
-  val service: ApplicationService
-
-  def verifyUplift(code: String) = Action.async  { implicit request =>
-    service.verify(code) map {_ => Ok(views.html.applicationVerification(success = true))
+  def verifyUplift(code: String) = Action.async { implicit request =>
+    service.verify(code) map { _ => Ok(views.html.applicationVerification(success = true))
     } recover {
       case _: ApplicationVerificationFailed =>
         Ok(views.html.applicationVerification(success = false))
     }
   }
 }
-
-object ApplicationVerification extends ApplicationVerification with WithAppConfig {
-  override val service = ApplicationServiceImpl
-  override val sessionService = SessionService
-}
-

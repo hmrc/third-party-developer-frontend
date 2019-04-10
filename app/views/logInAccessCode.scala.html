@@ -1,5 +1,5 @@
 @*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,18 @@
  * limitations under the License.
  *@
 
+@import config.ApplicationConfig
 @import domain._
 @import include._
 @import model.Crumb
+@import play.api.mvc.Call
 
-@import config.ApplicationConfig
-@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: Developer, applicationConfig: ApplicationConfig)
+@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
     title = "Enter your access code",
-    userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Enter your access code"),
-        Crumb.protectAccount,
         Crumb.home
     )
 ) {
@@ -37,9 +36,8 @@
     <div>
         @errorSummary(form)
 
-        @helper.form(action = controllers.routes.ProtectAccount.protectAccount()){
+        @helper.form(action = controllers.routes.UserLoginAccount.authenticateTotp()){
             @helper.CSRF.formField
-            @fieldError(form.errors, "invalidCredentials", true)
             <div>
                 <p>This is the 6 digit code from your authentication app.</p>
                 <div class="form-group @if(form.errors("accessCode").nonEmpty){form-group-error form-field--error}">
@@ -51,13 +49,13 @@
                     value="@form.data.getOrElse("accessCode", "")"
                     class="form-control @if(form.errors("accessCode").nonEmpty){form-control-error}"
                     aria-required="true"/>
+                <p><a href="@controllers.routes.UserLoginAccount.get2SVHelpConfirmationPage">I do not have an access code</a></p>
                 </div>
             </div>
 
             <div class="form-group">
                 <button id="submit" class="button" type="submit">Continue</button>
             </div>
-
         }
     </div>
 

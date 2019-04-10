@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import controllers.AddApplicationForm
 import domain.Developer
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
@@ -28,15 +29,16 @@ import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers._
 
-class AddApplicationSpec extends UnitSpec with OneServerPerSuite {
+class AddApplicationSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
   val loggedInUser = Developer("admin@example.com", "firstName1", "lastName1")
+  val appConfig = mock[ApplicationConfig]
 
   "Add application page" should {
 
     def renderPage(form: Form[AddApplicationForm]) = {
       val request = FakeRequest().withCSRFToken
-      views.html.addApplication.render(form, request, loggedInUser, applicationMessages, ApplicationConfig, "nav-section")
+      views.html.addApplication.render(form, request, loggedInUser, applicationMessages, appConfig, "nav-section")
     }
 
     "show an error when application name is invalid" in {

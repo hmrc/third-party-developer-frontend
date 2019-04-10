@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import controllers.{ChangeSubscriptionConfirmationForm, SubscriptionConfirmation
 import domain.SubscriptionRedirect
 import domain._
 import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
@@ -30,7 +31,9 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers.elementExistsByText
 
-class ChangeSubscriptionConfirmationSpec extends UnitSpec with OneServerPerSuite {
+class ChangeSubscriptionConfirmationSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+
+  val appConfig = mock[ApplicationConfig]
   val request = FakeRequest().withCSRFToken
 
   val applicationId = "1234"
@@ -59,7 +62,7 @@ class ChangeSubscriptionConfirmationSpec extends UnitSpec with OneServerPerSuite
       request,
       loggedInUser,
       applicationMessages,
-      ApplicationConfig,
+      appConfig,
       "details"
     )
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,25 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{eq => mockEq, _}
-import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import play.api.libs.json.Json
-import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers, Writeables}
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditAction.ApplicationUpliftRequestDeniedDueToInvalidCredentials
 import service.{ApplicationService, AuditService, SessionService}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
-import scala.concurrent.Future._
-import uk.gov.hmrc.http.HeaderCarrier
 
 class ManageApplicationUpliftSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures with Writeables with WithCSRFAddToken {
   implicit val materializer = fakeApplication.materializer
@@ -59,13 +54,14 @@ class ManageApplicationUpliftSpec extends UnitSpec with MockitoSugar with WithFa
 
     trait Setup {
 
-      val underTest = new ManageApplications {
-        override val sessionService = mock[SessionService]
-        override val applicationService = mock[ApplicationService]
-        override val developerConnector = mock[ThirdPartyDeveloperConnector]
-        override val auditService = mock[AuditService]
-        override val appConfig = mock[ApplicationConfig]
-      }
+      val underTest = new ManageApplications(
+        mock[ApplicationService],
+        mock[ThirdPartyDeveloperConnector],
+        mock[SessionService],
+        mock[AuditService],
+        mock[ErrorHandler],
+        mock[ApplicationConfig]
+      )
 
       given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
       val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
