@@ -20,7 +20,9 @@ import config.ApplicationConfig
 import domain.DefinitionFormats._
 import domain._
 import java.net.URLEncoder.encode
+
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.libs.json.Json
@@ -30,6 +32,7 @@ import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Success
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) {
   protected val httpClient: HttpClient
@@ -56,7 +59,20 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] = metrics.record(api) {
-    http.GET[Seq[Application]](s"$serviceBaseUrl/developer/applications", Seq("emailAddress" -> email, "environment" -> environment.toString))
+
+    val url = s"$serviceBaseUrl/developer/applications"
+
+    Logger.debug(s"fetchByTeamMemberEmail() - About to call $url for $email in ${environment.toString}")
+
+    http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
+      .andThen {
+        case Success(_) => {
+          Logger.debug(s"fetchByTeamMemberEmail() - done call to $url for $email in ${environment.toString}")
+        }
+        case _ => {
+          Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
+        }
+      }
   }
 
   def addTeamMember(applicationId: String, teamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse] = metrics.record(api) {
