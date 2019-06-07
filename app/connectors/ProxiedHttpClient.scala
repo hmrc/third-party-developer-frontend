@@ -16,6 +16,7 @@
 
 package connectors
 
+import akka.actor.ActorSystem
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HeaderNames.ACCEPT
@@ -31,13 +32,14 @@ import uk.gov.hmrc.play.http.ws.{WSProxy, WSProxyConfiguration}
 class ProxiedHttpClient @Inject()(config: Configuration,
                                   auditConnector: AuditConnector,
                                   wsClient: WSClient,
-                                  environment: play.api.Environment)
-  extends DefaultHttpClient(config, auditConnector, wsClient) with WSProxy {
+                                  environment: play.api.Environment,
+                                  actorSystem: ActorSystem)
+  extends DefaultHttpClient(config, auditConnector, wsClient, actorSystem) with WSProxy {
 
   val authorization: Option[Authorization] = None
   private val env = RunMode(environment.mode, config).env
 
-  def withAuthorization(bearerToken: String) = new ProxiedHttpClient(config, auditConnector, wsClient, environment) {
+  def withAuthorization(bearerToken: String) = new ProxiedHttpClient(config, auditConnector, wsClient, environment, actorSystem) {
     override val authorization = Some(Authorization(s"Bearer $bearerToken"))
   }
 
