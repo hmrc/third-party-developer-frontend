@@ -24,13 +24,6 @@
 @(app: Application, token: EnvironmentToken, form: Form[VerifyPasswordForm])(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
-<div class="credentials-section">
-    @if(app.deployedTo == Environment.PRODUCTION) {
-        <p>Use these credentials to access production APIs.</p>
-    } else {
-        <p>Use these credentials to test against sandbox APIs.</p>
-    }
-</div>
 <div class="credentials-section" aria-describedby="client-id-info">
     <h2 class="heading-large" id="clientIdHeading">Client <abbr title="Identity">ID</abbr></h2>
     <p id="client-id-info" >
