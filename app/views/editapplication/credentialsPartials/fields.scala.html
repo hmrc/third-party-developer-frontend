@@ -99,8 +99,9 @@
             <div>
             @helper.form(action = controllers.routes.Credentials.selectClientSecretsToDelete(app.id), 'class -> "form") {
                 @helper.CSRF.formField
-                <button id="delete-client-secret" class="secondary-button button--small button--flush flush hard">Delete a client secret</button>
-            }
+                <p>
+                    <button id="delete-client-secret" class="secondary-button button--small button--flush flush hard">Delete a client secret</button>
+                </p>            }
             </div>
         }
     } else {
