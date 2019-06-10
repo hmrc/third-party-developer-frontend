@@ -33,14 +33,14 @@
     </p>
     <label for="clientId" class="visuallyhidden">Client ID</label>
     <div><input id="clientId" class="flat-text" readonly type="text" data-clientid value="@token.clientId"></div>
-    <a href="#"
+    <p><a href="#"
        class="copy-to-clip"
        title="Copies the client ID into the system clipboard."
        data-clip-text="@token.clientId"
        aria-live="assertive"
        aria-label="Copy client ID to clipboard">
         Copy
-    </a>
+    </a></p>
 </div>
 <div class="credentials-section" aria-describedby="client-secrets-info">
     <h2 class="heading-large" id="clientSecretHeading">Client secrets</h2>
@@ -115,12 +115,12 @@
     </p>
     <label for="serverToken" class="visuallyhidden">Server token</label>
     <div><input id="serverToken" class="flat-text" readonly type="text" data-accesstoken value="@token.accessToken"></div>
-    <a href="#"
+    <p><a href="#"
        class="copy-to-clip"
        title="Copies the server token into the system clipboard."
        data-clip-text="@token.accessToken"
        aria-live="polite"
        aria-label="Copy server token to clipboard">
         Copy
-    </a>
+    </a></p>
 </div>
