@@ -45,6 +45,7 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
     val mockProxiedHttpClient = mock[ProxiedHttpClient]
 
     val underTest = new ApiSubscriptionFieldsConnector {
+      val ec = global
       val httpClient = mockHttpClient
       val proxiedHttpClient = mockProxiedHttpClient
       val useProxy = false

@@ -23,12 +23,10 @@ import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import domain._
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested}
 import javax.inject.{Inject, Singleton}
-
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.time.DateTimeUtils
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
@@ -36,7 +34,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
                                    deskproConnector: DeskproConnector,
                                    applicationConfig: ApplicationConfig,
                                    developerConnector: ThirdPartyDeveloperConnector,
-                                   auditService: AuditService) {
+                                   auditService: AuditService)(implicit val ec: ExecutionContext) {
 
   def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier) =
     connectorWrapper.connectorsForEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)

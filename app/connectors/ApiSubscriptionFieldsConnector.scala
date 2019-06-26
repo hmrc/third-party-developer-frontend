@@ -25,12 +25,12 @@ import play.api.http.Status.NO_CONTENT
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 abstract class ApiSubscriptionFieldsConnector {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
+  implicit val ec: ExecutionContext
   val serviceBaseUrl: String
   val useProxy: Boolean
   val bearerToken: String
@@ -76,7 +76,7 @@ abstract class ApiSubscriptionFieldsConnector {
 @Singleton
 class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient,
                                                       val proxiedHttpClient: ProxiedHttpClient,
-                                                      appConfig: ApplicationConfig)
+                                                      appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends ApiSubscriptionFieldsConnector {
 
   val serviceBaseUrl = appConfig.apiSubscriptionFieldsSandboxUrl
@@ -87,7 +87,7 @@ class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient
 @Singleton
 class ApiSubscriptionFieldsProductionConnector @Inject()(val httpClient: HttpClient,
                                                          val proxiedHttpClient: ProxiedHttpClient,
-                                                         appConfig: ApplicationConfig)
+                                                         appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends ApiSubscriptionFieldsConnector {
 
   val serviceBaseUrl = appConfig.apiSubscriptionFieldsProductionUrl

@@ -28,15 +28,16 @@ import service.{MFAService, SessionService}
 import views.html.protectaccount
 import views.html.protectaccount._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
                                val otpAuthUri: OtpAuthUri,
                                val mfaService: MFAService,
                                val sessionService: SessionService,
-                               val errorHandler: ErrorHandler)(
-                               implicit val appConfig: ApplicationConfig) extends LoggedInController {
+                               val errorHandler: ErrorHandler)
+                              (implicit val appConfig: ApplicationConfig,
+                               val ec: ExecutionContext) extends LoggedInController {
 
   private val scale = 4
   val qrCode = QRCode(scale)

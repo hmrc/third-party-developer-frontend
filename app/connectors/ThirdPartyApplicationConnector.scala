@@ -30,13 +30,13 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
+  implicit val ec: ExecutionContext
   val environment: Environment
   val serviceBaseUrl: String
   val useProxy: Boolean
@@ -66,12 +66,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
     http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
       .andThen {
-        case Success(_) => {
+        case Success(_) =>
           Logger.debug(s"fetchByTeamMemberEmail() - done call to $url for $email in ${environment.toString}")
-        }
-        case _ => {
+        case _ =>
           Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
-        }
       }
   }
 
@@ -180,7 +178,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 class ThirdPartyApplicationSandboxConnector @Inject()(val httpClient: HttpClient,
                                                       val proxiedHttpClient: ProxiedHttpClient,
                                                       appConfig: ApplicationConfig,
-                                                      metrics: ConnectorMetrics)
+                                                      metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
   extends ThirdPartyApplicationConnector(appConfig, metrics) {
 
   val environment = Environment.SANDBOX
@@ -193,7 +191,7 @@ class ThirdPartyApplicationSandboxConnector @Inject()(val httpClient: HttpClient
 class ThirdPartyApplicationProductionConnector @Inject()(val httpClient: HttpClient,
                                                          val proxiedHttpClient: ProxiedHttpClient,
                                                          appConfig: ApplicationConfig,
-                                                         metrics: ConnectorMetrics)
+                                                         metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
   extends ThirdPartyApplicationConnector(appConfig, metrics) {
 
   val environment = Environment.PRODUCTION

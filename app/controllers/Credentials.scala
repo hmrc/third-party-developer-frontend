@@ -32,7 +32,7 @@ import service._
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import views.html._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Credentials @Inject()(val applicationService: ApplicationService,
@@ -41,6 +41,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
                             val sessionService: SessionService,
                             val errorHandler: ErrorHandler,
                             implicit val appConfig: ApplicationConfig)
+                           (implicit val ec: ExecutionContext)
   extends ApplicationController {
 
   def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>

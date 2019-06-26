@@ -26,13 +26,14 @@ import play.api.mvc.{Action, AnyContent, Request}
 import service.{DeskproService, SessionService}
 import views.html.signoutSurvey
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val sessionService: SessionService,
                                   val errorHandler: ErrorHandler,
-                                  implicit val appConfig: ApplicationConfig) extends LoggedInController with LoginLogout {
+                                  implicit val appConfig: ApplicationConfig)
+                                 (implicit val ec: ExecutionContext) extends LoggedInController with LoginLogout {
 
   def logoutSurvey = loggedInAction { implicit request =>
     val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)

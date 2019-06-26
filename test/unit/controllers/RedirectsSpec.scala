@@ -35,6 +35,8 @@ import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithLoggedInSession._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class RedirectsSpec extends BaseControllerSpec {
   implicit val materializer = fakeApplication.materializer
 

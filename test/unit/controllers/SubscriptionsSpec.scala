@@ -35,6 +35,7 @@ import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future._
 
 class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {

@@ -21,11 +21,10 @@ import domain._
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector) {
+class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector)(implicit val ec: ExecutionContext) {
   def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] =
     thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password))
 

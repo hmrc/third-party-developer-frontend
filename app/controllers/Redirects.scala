@@ -24,6 +24,7 @@ import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
 import service.{ApplicationService, SessionService}
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
 
 @Singleton
@@ -31,6 +32,7 @@ class Redirects @Inject()(val applicationService: ApplicationService,
                           val sessionService: SessionService,
                           val errorHandler: ErrorHandler,
                           implicit val appConfig: ApplicationConfig)
+                         (implicit val ec: ExecutionContext)
   extends ApplicationController {
 
   def redirects(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>

@@ -24,11 +24,14 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Action
 import service.{ApplicationService, SessionService}
 
+import scala.concurrent.ExecutionContext
+
 @Singleton
 class ApplicationVerification @Inject()(val service: ApplicationService,
                                         val sessionService: SessionService,
                                         val errorHandler: ErrorHandler,
-                                        implicit val appConfig: ApplicationConfig) extends LoggedOutController {
+                                        implicit val appConfig: ApplicationConfig)
+                                       (implicit val ec: ExecutionContext) extends LoggedOutController {
 
   def verifyUplift(code: String) = Action.async { implicit request =>
     service.verify(code) map { _ => Ok(views.html.applicationVerification(success = true))

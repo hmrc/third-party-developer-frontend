@@ -24,7 +24,7 @@ import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
 import service._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnector,
@@ -33,6 +33,7 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
                                   val sessionService: SessionService,
                                   val errorHandler: ErrorHandler,
                                   implicit val appConfig: ApplicationConfig)
+                                 (implicit val ec: ExecutionContext)
   extends ApplicationController {
 
   def deleteApplication(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>

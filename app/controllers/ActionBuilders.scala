@@ -26,9 +26,7 @@ import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, ActionRefiner, Request}
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.LoggingDetails
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,12 +35,10 @@ trait ActionBuilders {
   val errorHandler: ErrorHandler
   val applicationService: ApplicationService
   implicit val appConfig: ApplicationConfig
+  implicit val ec: ExecutionContext
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
-
-  private implicit def mdcExecutionContext(implicit loggingDetails: LoggingDetails): ExecutionContext =
-    MdcLoggingExecutionContext.fromLoggingDetails
 
   def applicationAction(applicationId: String, user: Developer) = new ActionRefiner[Request, ApplicationRequest] {
     override def refine[A](request: Request[A]) = {

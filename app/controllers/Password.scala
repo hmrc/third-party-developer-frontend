@@ -31,8 +31,7 @@ import service.{AuditService, SessionService}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import views.html._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait PasswordChange {
 
@@ -41,6 +40,7 @@ trait PasswordChange {
 
   val connector: ThirdPartyDeveloperConnector
   val auditService: AuditService
+  implicit val ec: ExecutionContext
 
   def processPasswordChange(email: String, success: Result, error: Form[ChangePasswordForm] => HtmlFormat.Appendable)
                            (implicit request: Request[_], hc: HeaderCarrier) = {
@@ -67,7 +67,7 @@ class Password @Inject()(val auditService: AuditService,
                          val sessionService: SessionService,
                          val connector: ThirdPartyDeveloperConnector,
                          val errorHandler: ErrorHandler,
-                         implicit val appConfig: ApplicationConfig)
+                         implicit val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends LoggedOutController with PasswordChange {
 
   import ErrorFormBuilder.GlobalError

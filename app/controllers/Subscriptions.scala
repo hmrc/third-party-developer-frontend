@@ -30,8 +30,7 @@ import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.include.{changeSubscriptionConfirmation, subscriptionFields}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnector,
@@ -43,6 +42,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                               val sessionService: SessionService,
                               val errorHandler: ErrorHandler,
                               implicit val appConfig: ApplicationConfig)
+                             (implicit val ec: ExecutionContext)
   extends ApplicationController with ApplicationHelper {
 
   def subscriptions(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
@@ -187,7 +187,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   }
 }
 
-class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService) {
+class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(implicit ec: ExecutionContext) {
 
   def fetchPageDataFor(application: Application)(implicit hc: HeaderCarrier): Future[PageData] = {
     for {
