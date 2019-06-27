@@ -26,7 +26,7 @@ import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
 import service._
 
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.Future.successful
 
 @Singleton
@@ -35,7 +35,8 @@ class ManageTeam @Inject()(val sessionService: SessionService,
                            developerConnector: ThirdPartyDeveloperConnector,
                            val applicationService: ApplicationService,
                            val errorHandler: ErrorHandler,
-                           implicit val appConfig: ApplicationConfig) extends ApplicationController {
+                           implicit val appConfig: ApplicationConfig)
+                          (implicit val ec: ExecutionContext) extends ApplicationController {
 
   def manageTeam(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
     val application = request.application

@@ -31,7 +31,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.{applicationcheck, editapplication}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ApplicationCheck @Inject()(val applicationService: ApplicationService,
@@ -39,6 +39,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
                                  implicit val appConfig: ApplicationConfig)
+                                (implicit val ec: ExecutionContext)
   extends ApplicationController() with ApplicationHelper {
 
   def withAppInTestingState(appId: String)(f: Application => Future[Result])(implicit request: RequestWithAttributes[AnyContent]) = {

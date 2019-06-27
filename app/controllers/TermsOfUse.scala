@@ -27,13 +27,14 @@ import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import views.html.partials
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
-                           override val sessionService: SessionService,
-                           override val applicationService: ApplicationService,
-                           override implicit val appConfig: ApplicationConfig)
+                           val sessionService: SessionService,
+                           val applicationService: ApplicationService,
+                           implicit val appConfig: ApplicationConfig)
+                          (implicit val ec: ExecutionContext)
   extends ApplicationController() with ApplicationHelper {
 
   def termsOfUsePartial() = Action {

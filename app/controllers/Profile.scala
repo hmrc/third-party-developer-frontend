@@ -26,7 +26,7 @@ import play.api.i18n.Messages.Implicits._
 import service.{ApplicationService, AuditService, SessionService}
 import views.html._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Profile @Inject()(applicationService: ApplicationService,
@@ -35,6 +35,7 @@ class Profile @Inject()(applicationService: ApplicationService,
                         val connector: ThirdPartyDeveloperConnector,
                         val errorHandler: ErrorHandler,
                         implicit val appConfig: ApplicationConfig)
+                       (implicit val ec: ExecutionContext)
   extends LoggedInController with PasswordChange {
 
   import ErrorFormBuilder.GlobalError

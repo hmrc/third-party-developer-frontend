@@ -29,6 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
 import views.html.protectaccount._
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
 
 trait Auditing {
@@ -49,6 +50,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val sessionService: SessionService,
                                  val applicationService: ApplicationService,
                                  implicit val appConfig: ApplicationConfig)
+                                (implicit val ec: ExecutionContext)
   extends LoggedOutController with LoginLogout with Auditing {
 
   import play.api.data._

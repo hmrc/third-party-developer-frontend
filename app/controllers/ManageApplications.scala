@@ -26,7 +26,7 @@ import play.api.i18n.Messages.Implicits._
 import service._
 import views.html._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ManageApplications @Inject()(val applicationService: ApplicationService,
@@ -34,7 +34,8 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
                                    val sessionService: SessionService,
                                    val auditService: AuditService,
                                    val errorHandler: ErrorHandler,
-                                   implicit val appConfig: ApplicationConfig) extends ApplicationController {
+                                   implicit val appConfig: ApplicationConfig)
+                                  (implicit val ec: ExecutionContext) extends ApplicationController {
 
   val detailsTab = "details"
   val credentialsTab = "credentials"

@@ -27,13 +27,14 @@ import service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, NotFoundException}
 import views.html.signIn
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Registration @Inject()(override val sessionService: SessionService,
                              val connector: ThirdPartyDeveloperConnector,
                              val errorHandler: ErrorHandler,
-                             override implicit val appConfig: ApplicationConfig)
+                             implicit val appConfig: ApplicationConfig)
+                            (implicit val ec: ExecutionContext)
   extends LoggedOutController {
 
   import ErrorFormBuilder.GlobalError

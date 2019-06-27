@@ -25,13 +25,14 @@ import play.api.i18n.Messages.Implicits._
 import service.{DeskproService, SessionService}
 import views.html.{supportEnquiry, supportThankyou}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Support @Inject()(val deskproService: DeskproService,
                         val sessionService: SessionService,
                         val errorHandler: ErrorHandler,
                         implicit val appConfig: ApplicationConfig)
+                       (implicit val ec: ExecutionContext)
   extends BaseController with OptionalAuthElement {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form

@@ -26,7 +26,7 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
 import service._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
@@ -35,6 +35,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                         val sessionService: SessionService,
                         val errorHandler: ErrorHandler,
                         implicit val appConfig: ApplicationConfig)
+                       (implicit val ec: ExecutionContext)
   extends ApplicationController {
 
   def details(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>

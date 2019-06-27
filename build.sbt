@@ -27,17 +27,17 @@ lazy val enumeratumVersion = "1.5.11"
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.12.0",
-  "uk.gov.hmrc" %% "govuk-template" % "5.32.0-play-25",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.13.0",
+  "uk.gov.hmrc" %% "govuk-template" % "5.36.0-play-25",
   "uk.gov.hmrc" %% "play-ui" % "7.40.0-play-25",
-  "uk.gov.hmrc" %% "url-builder" % "2.1.0",
-  "uk.gov.hmrc" %% "play-json-union-formatter" % "1.3.0",
-  "uk.gov.hmrc" %% "http-metrics" % "1.2.0",
+  "uk.gov.hmrc" %% "url-builder" % "3.3.0-play-25",
+  "uk.gov.hmrc" %% "play-json-union-formatter" % "1.5.0",
+  "uk.gov.hmrc" %% "http-metrics" % "1.4.0",
   "de.threedimensions" %% "metrics-play" % "2.5.13",
   "jp.t2v" %% "play2-auth" % t2vVersion,
-  "uk.gov.hmrc" %% "json-encryption" % "3.2.0",
-  "uk.gov.hmrc" %% "emailaddress" % "2.2.0",
-  "uk.gov.hmrc" %% "play-conditional-form-mapping" % "0.2.0",
+  "uk.gov.hmrc" %% "json-encryption" % "4.4.0-play-25",
+  "uk.gov.hmrc" %% "emailaddress" % "3.2.0",
+  "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.1.0-play-25",
   "io.dropwizard.metrics" % "metrics-graphite" % "3.2.1",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
@@ -114,20 +114,17 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
     testOptions in IntegrationTest := Seq(Tests.Filter(integrationTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test")),
-    unmanagedResourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test")),
-    // unmanagedResourceDirectories in IntegrationTest <+= baseDirectory(_ / "target/web/public/test"),
-    // testOptions in IntegrationTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
-    //testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
+    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
+    unmanagedResourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
     parallelExecution in IntegrationTest := false
   )
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
     testOptions in ComponentTest := Seq(Tests.Filter(componentTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in ComponentTest <<= (baseDirectory in ComponentTest) (base => Seq(base / "test")),
-    unmanagedResourceDirectories in ComponentTest <<= (baseDirectory in ComponentTest) (base => Seq(base / "test")),
-    unmanagedResourceDirectories in ComponentTest <+= baseDirectory(_ / "target/web/public/test"),
+    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
+    unmanagedResourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
+    unmanagedResourceDirectories in ComponentTest += baseDirectory(_ / "target/web/public/test").value,
     testOptions in ComponentTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
     testGrouping in ComponentTest := oneForkedJvmPerTest((definedTests in ComponentTest).value),
     parallelExecution in ComponentTest := false

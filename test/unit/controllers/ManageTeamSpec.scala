@@ -36,6 +36,7 @@ import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {

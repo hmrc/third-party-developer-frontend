@@ -16,6 +16,8 @@
 
 package unit.connectors
 
+import java.net.URLEncoder.encode
+
 import config.ApplicationConfig
 import connectors.{ProxiedHttpClient, ThirdPartyApplicationConnector}
 import domain._
@@ -28,12 +30,11 @@ import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
+import uk.gov.hmrc.play.http.metrics.API
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import java.net.URLEncoder.encode
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorSpec {
 
@@ -49,6 +50,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorSpec {
     protected val mockEnvironment = mock[Environment]
 
     val connector = new ThirdPartyApplicationConnector(mockAppConfig, mockMetrics) {
+      val ec = global
       val httpClient = mockHttpClient
       val proxiedHttpClient = mockProxiedHttpClient
       val serviceBaseUrl = baseUrl
@@ -475,7 +477,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorSpec {
       EnvironmentToken("prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken"))
     val clientSecretRequest = ClientSecretRequest("")
     val url = s"$baseUrl/application/$applicationId/client-secret"
-    val environment = "production"
 
     "generate the client secret" in new Setup {
       when(mockHttpClient
@@ -510,8 +511,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorSpec {
 
   "deleteClientSecrets" should {
     val applicationId = "applicationId"
-    val applicationTokens = ApplicationTokens(
-      EnvironmentToken("", Seq(aClientSecret("secret1"), aClientSecret("secret2")), ""))
     val deleteClientSecretsRequest = DeleteClientSecretsRequest(Seq("secret1"))
     val url = s"$baseUrl/application/$applicationId/revoke-client-secrets"
 

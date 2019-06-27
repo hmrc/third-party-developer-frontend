@@ -29,6 +29,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class RegistrationSpec extends BaseControllerSpec {
 

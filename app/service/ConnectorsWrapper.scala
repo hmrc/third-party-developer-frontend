@@ -23,15 +23,14 @@ import domain._
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
                                   val productionApplicationConnector: ThirdPartyApplicationProductionConnector,
                                   val sandboxSubscriptionFieldsConnector: ApiSubscriptionFieldsSandboxConnector,
                                   val productionSubscriptionFieldsConnector: ApiSubscriptionFieldsProductionConnector,
-                                  applicationConfig: ApplicationConfig) {
+                                  applicationConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
 
   def forApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Connectors] = {
     fetchApplicationById(applicationId).map(application => connectorsForEnvironment(application.deployedTo))
