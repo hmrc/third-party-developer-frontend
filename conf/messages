@@ -145,6 +145,7 @@ select.fewer.client.secrets.field=You must keep at least one client secret
 subscription.confirmation.no.choice.field = Tell us if you want to subscribe to this API
 unsubscribe.confirmation.no.choice.field = Tell us if you want to unsubscribe from this API
 subscription.change.no.choice.field = Choose a subscription status
+error.must.subscribe = You must subscribe to at least one API, in addition to optionally subscribing to Hello World
 
 delete.redirect.confirmation.no.choice.field = Tell us if you want to delete this redirect URI
 
