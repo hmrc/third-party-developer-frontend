@@ -25,7 +25,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -42,7 +41,6 @@ import scala.concurrent.Future._
 class ManageApplicationsSpec
   extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  implicit val materializer = fakeApplication.materializer
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
@@ -61,7 +59,7 @@ class ManageApplicationsSpec
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig]
     )
 

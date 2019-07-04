@@ -25,23 +25,20 @@ import org.mockito.BDDMockito.given
 import org.mockito.Matchers
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import play.api.i18n.MessagesApi
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF._
 import service.{DeskproService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
+class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
+
   val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = UUID.randomUUID().toString
   val session = Session(sessionId, user)
@@ -51,11 +48,11 @@ class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppl
       mock[DeskproService],
       mock[SessionService],
       mock[config.ErrorHandler],
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig])
 
     given(underTest.sessionService.destroy(Matchers.eq(session.sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(204))
+        .willReturn(Future.successful(NO_CONTENT))
 
     def givenUserLoggedIn() =
       given(underTest.sessionService.fetch(Matchers.eq(session.sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(session)))
@@ -119,7 +116,7 @@ class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppl
   "logoutSurveyAction" should {
     "redirect to the login page if the user is not logged in" in new Setup {
       val request = requestWithCsrfToken.withFormUrlEncodedBody(
-        ("blah" -> "thing")
+        "blah" -> "thing"
       )
       val result = await(underTest.logoutSurveyAction()(request))
 
@@ -130,10 +127,10 @@ class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppl
     "submit the survey and redirect to the logout confirmation page if the user is logged in" in new Setup {
       givenUserLoggedIn()
 
-      val form = SignOutSurveyForm(Some(2), "no suggestions", s"${user.firstName} ${user.lastName}", user.email, true)
+      val form = SignOutSurveyForm(Some(2), "no suggestions", s"${user.firstName} ${user.lastName}", user.email, isJavascript = true)
       val request = requestWithCsrfToken.withFormUrlEncodedBody(
-        ("rating" -> form.rating.get.toString), ("email" -> form.email), ("name" -> form.name),
-        ("isJavascript" -> form.isJavascript.toString), ("improvementSuggestions" -> form.improvementSuggestions)
+        "rating" -> form.rating.get.toString, "email" -> form.email, "name" -> form.name,
+        "isJavascript" -> form.isJavascript.toString, "improvementSuggestions" -> form.improvementSuggestions
       )
 
       val result = await(underTest.logoutSurveyAction()(request))

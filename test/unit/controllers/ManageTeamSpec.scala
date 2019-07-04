@@ -26,7 +26,6 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, anyString, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -41,7 +40,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
+
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
@@ -56,7 +55,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       mock[ThirdPartyDeveloperConnector],
       mock[ApplicationService],
       mockErrorHandler,
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig]
     )
 

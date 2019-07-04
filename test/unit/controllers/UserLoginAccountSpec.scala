@@ -25,8 +25,6 @@ import org.mockito.BDDMockito.given
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -34,7 +32,6 @@ import service.AuditAction._
 import service.{ApplicationService, AuditAction, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
@@ -42,8 +39,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
-class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
+class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
+
   val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(UUID.randomUUID().toString, user)
   val emailFieldName: String = "emailaddress"
@@ -61,7 +58,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       mock[ErrorHandler],
       mock[SessionService],
       mock[ApplicationService],
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig]
     )
 

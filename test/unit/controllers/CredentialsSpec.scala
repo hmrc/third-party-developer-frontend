@@ -26,7 +26,6 @@ import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify, when}
-import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -43,7 +42,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 
 class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
-  implicit val materializer = fakeApplication.materializer
+
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session = Session(sessionId, loggedInUser)
@@ -62,7 +61,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       mock[AuditService],
       mock[SessionService],
       mockErrorHandler,
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig]
     )
 

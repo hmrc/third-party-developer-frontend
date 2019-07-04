@@ -23,9 +23,8 @@ import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{eq => mockEq, _}
-import play.api.i18n.MessagesApi
-import play.api.test.{FakeRequest, Helpers, Writeables}
 import play.api.http.Status._
+import play.api.test.{FakeRequest, Helpers, Writeables}
 import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,7 +36,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ManageApplicationUpliftSpec extends BaseControllerSpec with Writeables with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
+
   val appId = "1234"
   val clientId = "clientId456"
   val appName = "app Name!"
@@ -60,7 +59,7 @@ class ManageApplicationUpliftSpec extends BaseControllerSpec with Writeables wit
         mock[SessionService],
         mock[AuditService],
         mock[ErrorHandler],
-        fakeApplication.injector.instanceOf[MessagesApi],
+        messagesApi,
         mock[ApplicationConfig]
       )
 

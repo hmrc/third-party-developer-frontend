@@ -23,30 +23,26 @@ import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito._
 import org.mockito.Matchers.{any, eq => mockEq}
-import org.scalatest.mockito.MockitoSugar
-import play.api.i18n.MessagesApi
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.{DeskproService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SupportSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
+class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup {
     val underTest = new Support(
       mock[DeskproService],
       mock[SessionService],
       mock[ErrorHandler],
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig])
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)

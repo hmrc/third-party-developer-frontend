@@ -21,12 +21,16 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import play.api.i18n.MessagesApi
 import play.twirl.api.Html
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class BaseControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures {
-  val mockErrorHandler = mock[ErrorHandler]
 
+  implicit lazy val materializer = fakeApplication.materializer
+  lazy val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+
+  val mockErrorHandler = mock[ErrorHandler]
   when(mockErrorHandler.notFoundTemplate(any())).thenReturn(Html(""))
   when(mockErrorHandler.badRequestTemplate(any())).thenReturn(Html(""))
 }

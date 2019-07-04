@@ -27,7 +27,6 @@ import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
-import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
@@ -44,7 +43,6 @@ import scala.concurrent.Future.successful
 
 class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  implicit val materializer = fakeApplication.materializer
   val appId = "1234"
   val appName: String = "app"
   val clientId = "clientIdzzz"
@@ -86,7 +84,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       mock[ApiSubscriptionsHelper],
       mock[SessionService],
       mockErrorHandler,
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig]
     )
 

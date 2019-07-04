@@ -27,7 +27,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify, when}
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -42,15 +41,13 @@ import scala.concurrent.Future
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  implicit val materializer = fakeApplication.materializer
-
   trait Setup {
 
     val underTest = new TermsOfUse(
       mockErrorHandler,
       mock[SessionService],
       mock[ApplicationService],
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig])
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")

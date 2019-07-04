@@ -24,7 +24,6 @@ import org.joda.time.DateTime
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.verify
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -39,7 +38,6 @@ import scala.concurrent.Future.successful
 
 
 class DeleteApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
 
   trait Setup {
     val underTest = new DeleteApplication(
@@ -48,7 +46,7 @@ class DeleteApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationService],
       mock[SessionService],
       mock[ErrorHandler],
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig]
     )
 

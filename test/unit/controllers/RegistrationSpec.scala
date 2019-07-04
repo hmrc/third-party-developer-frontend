@@ -23,7 +23,6 @@ import domain.{Developer, RegistrationSuccessful}
 import org.mockito.BDDMockito._
 import org.mockito.Matchers._
 import org.mockito.{ArgumentCaptor, Matchers}
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -34,7 +33,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class RegistrationSpec extends BaseControllerSpec {
 
-  implicit val materializer = fakeApplication.materializer
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   var userPassword = "Password1!"
 
@@ -43,7 +41,7 @@ class RegistrationSpec extends BaseControllerSpec {
       mock[SessionService],
       mock[ThirdPartyDeveloperConnector],
       mockErrorHandler,
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig]
     )
 

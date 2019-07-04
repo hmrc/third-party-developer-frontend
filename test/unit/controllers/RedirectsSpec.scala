@@ -24,7 +24,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.verify
-import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -39,7 +38,6 @@ import utils.WithLoggedInSession._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class RedirectsSpec extends BaseControllerSpec {
-  implicit val materializer = fakeApplication.materializer
 
   val applicationId = "1234"
   val clientId = "clientId123"
@@ -54,7 +52,7 @@ class RedirectsSpec extends BaseControllerSpec {
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig]
     )
 

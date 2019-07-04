@@ -24,7 +24,6 @@ import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito._
-import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -40,7 +39,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future._
 
 class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
+
   val appId = "1234"
   val apiName = "api-1"
   val apiVersion = "1.0"
@@ -91,7 +90,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
-      fakeApplication.injector.instanceOf[MessagesApi],
+      messagesApi,
       mock[ApplicationConfig])
 
     val hc = HeaderCarrier()
