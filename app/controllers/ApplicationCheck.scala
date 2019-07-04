@@ -185,8 +185,10 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     val app = request.application
 
     apiSubscriptionsHelper.fetchAllSubscriptions(app, request.user)(hc).flatMap {
-      case Some(subsData) => Future.successful(Ok(applicationcheck.apiSubscriptions(app, subsData.role, subsData.subscriptions, appId, subsData.hasSubscriptions)))
-      case None => Future.successful(NotFound(errorHandler.notFoundTemplate))
+      case Some(subsData) =>
+        Future.successful(Ok(apiSubscriptionsView(app, subsData)))
+      case None =>
+        Future.successful(NotFound(errorHandler.notFoundTemplate))
     }
   }
 
@@ -194,9 +196,25 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     val app = request.application
     val information = app.checkInformation.getOrElse(CheckInformation())
 
-    for {
-      _ <- applicationService.updateCheckInformation(app.id, information.copy(apiSubscriptionsConfirmed = true))
-    } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
+    def hasNonExampleSubscription(subscriptionData: SubscriptionData) =
+      subscriptionData.subscriptions.fold(false)(subs => subs.apis.exists(_.hasSubscriptions))
+
+    apiSubscriptionsHelper.fetchAllSubscriptions(app, request.user)(hc) flatMap {
+      case None =>
+        Future.successful(NotFound(errorHandler.notFoundTemplate))
+      case Some(subscriptionData) if !hasNonExampleSubscription(subscriptionData) =>
+        val form = DummySubscriptionsForm.form.bind(Map("hasNonExampleSubscription" -> "false"))
+        Future.successful(BadRequest(apiSubscriptionsView(app, subscriptionData, Some(form))))
+      case _ =>
+        for {
+          _ <- applicationService.updateCheckInformation(app.id, information.copy(apiSubscriptionsConfirmed = true))
+        } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
+    }
+  }
+
+  private def apiSubscriptionsView(app: Application, subscriptionData: SubscriptionData, form: Option[Form[DummySubscriptionsForm]] = None
+                                  )(implicit request: ApplicationRequest[AnyContent]) = {
+    views.html.applicationcheck.apiSubscriptions(app, subscriptionData.role, subscriptionData.subscriptions, app.id, subscriptionData.hasSubscriptions, form)
   }
 
   def privacyPolicyPage(appId: String) = adminOnTestingApp(appId) { implicit request =>
@@ -413,5 +431,16 @@ object ContactForm {
       "email" -> emailValidator(),
       "telephone" -> telephoneValidator
     )(ContactForm.apply)(ContactForm.unapply)
+  )
+}
+
+case class DummySubscriptionsForm(hasNonExampleSubscription: Boolean)
+
+object DummySubscriptionsForm {
+  def form: Form[DummySubscriptionsForm] = Form(
+    mapping(
+      "hasNonExampleSubscription" -> boolean
+    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+      .verifying("error.must.subscribe", x => x.hasNonExampleSubscription)
   )
 }

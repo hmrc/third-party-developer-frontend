@@ -20,7 +20,7 @@
 @import config.ApplicationConfig
 @import model.Crumb
 
-@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
 @devMain(
 title = "Confirm the APIs your application uses",
@@ -33,6 +33,9 @@ Crumb.home
 ),
 leftNav = Some(leftHandNav(Option(app), Option(navSection)))
 ) {
+
+    @if(errorForm.isDefined) { @errorSummary(errorForm.get) }
+
     <h1 class="heading-xlarge">Confirm the APIs your application uses</h1>
     <p>You must subscribe to an API so your application can access it. You’ll receive notifications about its lifecycle events, such as new version introductions and old version retirements.</p>
     <div class="notice">
