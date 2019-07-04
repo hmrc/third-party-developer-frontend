@@ -19,9 +19,8 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.{Application, CheckInformation, TermsOfUseAgreement, TermsOfUseStatus}
 import javax.inject.{Inject, Singleton}
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import play.api.mvc.Action
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
@@ -33,6 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
                            val sessionService: SessionService,
                            val applicationService: ApplicationService,
+                           val messagesApi: MessagesApi,
                            implicit val appConfig: ApplicationConfig)
                           (implicit val ec: ExecutionContext)
   extends ApplicationController() with ApplicationHelper {

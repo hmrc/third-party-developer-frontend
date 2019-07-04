@@ -25,6 +25,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
+import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.Helpers._
@@ -281,6 +282,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig]
     )
 

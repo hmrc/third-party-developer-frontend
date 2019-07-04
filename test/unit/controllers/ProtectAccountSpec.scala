@@ -27,6 +27,7 @@ import org.mockito.BDDMockito._
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.{BAD_REQUEST, SEE_OTHER}
+import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -58,6 +59,7 @@ class ProtectAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplica
       mock[OtpAuthUri],
       mock[MFAService],
       mock[SessionService],
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ErrorHandler])(mock[ApplicationConfig], global) {
       override val qrCode = mock[QRCode]
     }

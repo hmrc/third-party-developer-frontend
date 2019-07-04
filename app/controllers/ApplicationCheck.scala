@@ -21,10 +21,9 @@ import controllers.FormKeys._
 import domain._
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.stackc.RequestWithAttributes
-import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import play.api.mvc.{AnyContent, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
@@ -38,6 +37,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                  val apiSubscriptionsHelper: ApiSubscriptionsHelper,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
+                                 val messagesApi: MessagesApi,
                                  implicit val appConfig: ApplicationConfig)
                                 (implicit val ec: ExecutionContext)
   extends ApplicationController() with ApplicationHelper {

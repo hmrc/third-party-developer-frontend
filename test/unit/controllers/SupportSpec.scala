@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito._
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.scalatest.mockito.MockitoSugar
+import play.api.i18n.MessagesApi
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -45,6 +46,7 @@ class SupportSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
       mock[DeskproService],
       mock[SessionService],
       mock[ErrorHandler],
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig])
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)

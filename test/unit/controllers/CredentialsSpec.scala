@@ -26,6 +26,7 @@ import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify, when}
+import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -61,6 +62,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       mock[AuditService],
       mock[SessionService],
       mockErrorHandler,
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig]
     )
 

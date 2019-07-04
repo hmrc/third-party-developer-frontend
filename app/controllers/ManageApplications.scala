@@ -20,9 +20,8 @@ import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain._
 import javax.inject.{Inject, Singleton}
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import service._
 import views.html._
 
@@ -34,6 +33,7 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
                                    val sessionService: SessionService,
                                    val auditService: AuditService,
                                    val errorHandler: ErrorHandler,
+                                   val messagesApi: MessagesApi,
                                    implicit val appConfig: ApplicationConfig)
                                   (implicit val ec: ExecutionContext) extends ApplicationController {
 

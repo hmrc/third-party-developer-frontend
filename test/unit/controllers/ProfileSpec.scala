@@ -27,6 +27,7 @@ import org.mockito.Mockito.verify
 import org.mockito.{ArgumentCaptor, Matchers}
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.OK
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
@@ -34,8 +35,8 @@ import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -49,6 +50,7 @@ class ProfileSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
       mock[SessionService],
       mock[ThirdPartyDeveloperConnector],
       mock[ErrorHandler],
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig]
     )
 

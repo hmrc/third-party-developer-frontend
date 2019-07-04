@@ -21,9 +21,8 @@ import connectors.ThirdPartyDeveloperConnector
 import domain._
 import javax.inject.Inject
 import play.api.Logger
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.twirl.api.HtmlFormat
 import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
@@ -67,6 +66,7 @@ class Password @Inject()(val auditService: AuditService,
                          val sessionService: SessionService,
                          val connector: ThirdPartyDeveloperConnector,
                          val errorHandler: ErrorHandler,
+                         val messagesApi: MessagesApi,
                          implicit val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends LoggedOutController with PasswordChange {
 

@@ -19,9 +19,8 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.OptionalAuthElement
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import service.{DeskproService, SessionService}
 import views.html.{supportEnquiry, supportThankyou}
 
@@ -31,6 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class Support @Inject()(val deskproService: DeskproService,
                         val sessionService: SessionService,
                         val errorHandler: ErrorHandler,
+                        val messagesApi: MessagesApi,
                         implicit val appConfig: ApplicationConfig)
                        (implicit val ec: ExecutionContext)
   extends BaseController with OptionalAuthElement {

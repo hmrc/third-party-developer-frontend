@@ -21,8 +21,7 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.{Developer, UpdateProfileRequest}
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.stackc.RequestWithAttributes
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import service.{ApplicationService, AuditService, SessionService}
 import views.html._
 
@@ -34,6 +33,7 @@ class Profile @Inject()(applicationService: ApplicationService,
                         val sessionService: SessionService,
                         val connector: ThirdPartyDeveloperConnector,
                         val errorHandler: ErrorHandler,
+                        val messagesApi: MessagesApi,
                         implicit val appConfig: ApplicationConfig)
                        (implicit val ec: ExecutionContext)
   extends LoggedInController with PasswordChange {
@@ -65,8 +65,8 @@ class Profile @Inject()(applicationService: ApplicationService,
       },
       profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ =>
-          Ok(profileUpdated("profile updated", "Manage profile", "manage-profile")(request,
-            Developer(loggedIn.email, profile.firstName, profile.lastName, profile.organisation), applicationMessages, appConfig))
+          Ok(profileUpdated("profile updated", "Manage profile", "manage-profile",
+            Developer(loggedIn.email, profile.firstName, profile.lastName, profile.organisation)))
       }
     )
   }

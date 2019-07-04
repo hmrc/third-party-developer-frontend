@@ -26,6 +26,7 @@ import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -60,6 +61,7 @@ class UserLoginAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       mock[ErrorHandler],
       mock[SessionService],
       mock[ApplicationService],
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig]
     )
 

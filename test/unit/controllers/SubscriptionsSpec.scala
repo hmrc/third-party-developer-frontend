@@ -24,6 +24,7 @@ import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito._
+import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -90,6 +91,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig])
 
     val hc = HeaderCarrier()

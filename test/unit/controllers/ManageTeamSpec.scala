@@ -26,6 +26,7 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, anyString, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -55,6 +56,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       mock[ThirdPartyDeveloperConnector],
       mock[ApplicationService],
       mockErrorHandler,
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig]
     )
 

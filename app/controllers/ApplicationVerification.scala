@@ -19,8 +19,7 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.ApplicationVerificationFailed
 import javax.inject.{Inject, Singleton}
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import play.api.mvc.Action
 import service.{ApplicationService, SessionService}
 
@@ -30,6 +29,7 @@ import scala.concurrent.ExecutionContext
 class ApplicationVerification @Inject()(val service: ApplicationService,
                                         val sessionService: SessionService,
                                         val errorHandler: ErrorHandler,
+                                        val messagesApi: MessagesApi,
                                         implicit val appConfig: ApplicationConfig)
                                        (implicit val ec: ExecutionContext) extends LoggedOutController {
 

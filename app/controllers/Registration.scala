@@ -20,8 +20,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.{EmailAlreadyInUse, RegistrationSuccessful}
 import javax.inject.{Inject, Singleton}
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import play.api.mvc.Action
 import service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, NotFoundException}
@@ -33,6 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class Registration @Inject()(override val sessionService: SessionService,
                              val connector: ThirdPartyDeveloperConnector,
                              val errorHandler: ErrorHandler,
+                             val messagesApi: MessagesApi,
                              implicit val appConfig: ApplicationConfig)
                             (implicit val ec: ExecutionContext)
   extends LoggedOutController {

@@ -23,6 +23,7 @@ import domain.{ChangePassword, InvalidResetCode, PasswordReset, UnverifiedAccoun
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers
 import org.mockito.Matchers._
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -51,6 +52,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mockConnector,
       mockErrorHandler,
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig]
     )
 

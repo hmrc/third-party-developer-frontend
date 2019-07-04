@@ -26,6 +26,7 @@ import org.mockito.Matchers
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
+import play.api.i18n.MessagesApi
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -35,8 +36,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
@@ -50,6 +51,7 @@ class UserLogoutAccountSpec extends UnitSpec with MockitoSugar with WithFakeAppl
       mock[DeskproService],
       mock[SessionService],
       mock[config.ErrorHandler],
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig])
 
     given(underTest.sessionService.destroy(Matchers.eq(session.sessionId))(any[HeaderCarrier]))

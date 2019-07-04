@@ -20,8 +20,9 @@ import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
 import domain._
 import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
 import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
+import play.api.i18n.I18nSupport
 import play.api.mvc._
-import service.{ApplicationService, SessionService}
+import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -74,10 +75,6 @@ case class ApplicationRequest[A](application: Application, role: Role, user: Dev
 abstract class ApplicationController()
   extends LoggedInController with ActionBuilders {
 
-  val errorHandler: ErrorHandler
-  val applicationService: ApplicationService
-  implicit val appConfig: ApplicationConfig
-
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): User = request.user
 
   def adminOnStandardApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
@@ -111,10 +108,6 @@ abstract class ApplicationController()
 abstract class LoggedOutController()
   extends BaseController() with OptionalAuthElement {
 
-  val errorHandler: ErrorHandler
-  val sessionService: SessionService
-  override implicit val appConfig: ApplicationConfig
-
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
     request match {
@@ -136,7 +129,7 @@ abstract class LoggedOutController()
 }
 
 abstract class BaseController()
-  extends AuthConfigImpl with FrontendController with HeaderEnricher {
+  extends AuthConfigImpl with I18nSupport with FrontendController with HeaderEnricher {
 
   val errorHandler: ErrorHandler
   val sessionService: SessionService

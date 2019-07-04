@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify, when}
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -49,6 +50,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       mockErrorHandler,
       mock[SessionService],
       mock[ApplicationService],
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig])
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
@@ -102,7 +104,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
       status(result) shouldBe OK
       bodyOf(result) should include("Agree to our terms of use")
-      bodyOf(result) should not include("Terms of use accepted on")
+      bodyOf(result) should not include "Terms of use accepted on"
     }
 
     "render the page for an administrator on a standard production app when the ToU have been agreed" in new Setup {

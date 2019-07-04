@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.verify
+import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -53,6 +54,7 @@ class RedirectsSpec extends BaseControllerSpec {
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
+      fakeApplication.injector.instanceOf[MessagesApi],
       mock[ApplicationConfig]
     )
 
