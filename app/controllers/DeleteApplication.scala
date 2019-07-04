@@ -19,9 +19,8 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import javax.inject.{Inject, Singleton}
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import service._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,6 +31,7 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
                                   val applicationService: ApplicationService,
                                   val sessionService: SessionService,
                                   val errorHandler: ErrorHandler,
+                                  val messagesApi: MessagesApi,
                                   implicit val appConfig: ApplicationConfig)
                                  (implicit val ec: ExecutionContext)
   extends ApplicationController {

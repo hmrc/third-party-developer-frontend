@@ -22,9 +22,8 @@ import controllers.FormKeys.clientSecretLimitExceeded
 import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Result}
 import service.AuditAction.{LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount}
@@ -40,6 +39,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
                             val auditService: AuditService,
                             val sessionService: SessionService,
                             val errorHandler: ErrorHandler,
+                            val messagesApi: MessagesApi,
                             implicit val appConfig: ApplicationConfig)
                            (implicit val ec: ExecutionContext)
   extends ApplicationController {

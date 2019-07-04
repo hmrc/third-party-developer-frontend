@@ -20,8 +20,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import play.api.mvc.Action
 import service.AuditAction._
 import service._
@@ -49,6 +48,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val errorHandler: ErrorHandler,
                                  val sessionService: SessionService,
                                  val applicationService: ApplicationService,
+                                 val messagesApi: MessagesApi,
                                  implicit val appConfig: ApplicationConfig)
                                 (implicit val ec: ExecutionContext)
   extends LoggedOutController with LoginLogout with Auditing {

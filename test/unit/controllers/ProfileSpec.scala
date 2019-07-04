@@ -25,22 +25,19 @@ import org.mockito.BDDMockito._
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.verify
 import org.mockito.{ArgumentCaptor, Matchers}
-import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import service.{ApplicationService, AuditService, SessionService}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class ProfileSpec extends UnitSpec with MockitoSugar with WithFakeApplication with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
+class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup {
     val underTest = new Profile(
@@ -49,6 +46,7 @@ class ProfileSpec extends UnitSpec with MockitoSugar with WithFakeApplication wi
       mock[SessionService],
       mock[ThirdPartyDeveloperConnector],
       mock[ErrorHandler],
+      messagesApi,
       mock[ApplicationConfig]
     )
 

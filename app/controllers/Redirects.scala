@@ -19,9 +19,8 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.{Standard, UpdateApplicationRequest}
 import javax.inject.{Inject, Singleton}
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import service.{ApplicationService, SessionService}
 
 import scala.concurrent.ExecutionContext
@@ -31,6 +30,7 @@ import scala.concurrent.Future.successful
 class Redirects @Inject()(val applicationService: ApplicationService,
                           val sessionService: SessionService,
                           val errorHandler: ErrorHandler,
+                          val messagesApi: MessagesApi,
                           implicit val appConfig: ApplicationConfig)
                          (implicit val ec: ExecutionContext)
   extends ApplicationController {

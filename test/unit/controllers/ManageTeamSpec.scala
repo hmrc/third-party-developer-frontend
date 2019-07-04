@@ -40,7 +40,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
+
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
@@ -55,6 +55,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       mock[ThirdPartyDeveloperConnector],
       mock[ApplicationService],
       mockErrorHandler,
+      messagesApi,
       mock[ApplicationConfig]
     )
 

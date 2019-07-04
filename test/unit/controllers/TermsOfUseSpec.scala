@@ -41,14 +41,13 @@ import scala.concurrent.Future
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  implicit val materializer = fakeApplication.materializer
-
   trait Setup {
 
     val underTest = new TermsOfUse(
       mockErrorHandler,
       mock[SessionService],
       mock[ApplicationService],
+      messagesApi,
       mock[ApplicationConfig])
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
@@ -102,7 +101,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
       status(result) shouldBe OK
       bodyOf(result) should include("Agree to our terms of use")
-      bodyOf(result) should not include("Terms of use accepted on")
+      bodyOf(result) should not include "Terms of use accepted on"
     }
 
     "render the page for an administrator on a standard production app when the ToU have been agreed" in new Setup {

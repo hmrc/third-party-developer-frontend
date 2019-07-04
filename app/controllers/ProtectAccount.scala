@@ -19,10 +19,9 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import javax.inject.{Inject, Singleton}
-import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, SessionService}
 import views.html.protectaccount
@@ -35,6 +34,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
                                val otpAuthUri: OtpAuthUri,
                                val mfaService: MFAService,
                                val sessionService: SessionService,
+                               val messagesApi: MessagesApi,
                                val errorHandler: ErrorHandler)
                               (implicit val appConfig: ApplicationConfig,
                                val ec: ExecutionContext) extends LoggedInController {

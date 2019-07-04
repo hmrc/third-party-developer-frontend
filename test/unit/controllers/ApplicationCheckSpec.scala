@@ -43,7 +43,6 @@ import scala.concurrent.Future.successful
 
 class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  implicit val materializer = fakeApplication.materializer
   val appId = "1234"
   val appName: String = "app"
   val clientId = "clientIdzzz"
@@ -85,6 +84,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       mock[ApiSubscriptionsHelper],
       mock[SessionService],
       mockErrorHandler,
+      messagesApi,
       mock[ApplicationConfig]
     )
 

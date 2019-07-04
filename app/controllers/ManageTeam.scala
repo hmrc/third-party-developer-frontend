@@ -21,13 +21,12 @@ import connectors.ThirdPartyDeveloperConnector
 import domain._
 import helpers.string._
 import javax.inject.{Inject, Singleton}
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import service._
 
-import scala.concurrent.{Future, ExecutionContext}
 import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ManageTeam @Inject()(val sessionService: SessionService,
@@ -35,6 +34,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
                            developerConnector: ThirdPartyDeveloperConnector,
                            val applicationService: ApplicationService,
                            val errorHandler: ErrorHandler,
+                           val messagesApi: MessagesApi,
                            implicit val appConfig: ApplicationConfig)
                           (implicit val ec: ExecutionContext) extends ApplicationController {
 

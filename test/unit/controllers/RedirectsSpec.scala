@@ -38,7 +38,6 @@ import utils.WithLoggedInSession._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class RedirectsSpec extends BaseControllerSpec {
-  implicit val materializer = fakeApplication.materializer
 
   val applicationId = "1234"
   val clientId = "clientId123"
@@ -53,6 +52,7 @@ class RedirectsSpec extends BaseControllerSpec {
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
+      messagesApi,
       mock[ApplicationConfig]
     )
 

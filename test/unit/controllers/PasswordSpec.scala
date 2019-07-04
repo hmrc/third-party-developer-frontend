@@ -37,8 +37,6 @@ import scala.concurrent.Future.failed
 
 class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  implicit val materializer = fakeApplication.materializer
-
   trait Setup {
 
     val mockConnector = mock[ThirdPartyDeveloperConnector]
@@ -51,6 +49,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mockConnector,
       mockErrorHandler,
+      messagesApi,
       mock[ApplicationConfig]
     )
 

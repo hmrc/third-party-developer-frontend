@@ -33,7 +33,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class RegistrationSpec extends BaseControllerSpec {
 
-  implicit val materializer = fakeApplication.materializer
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   var userPassword = "Password1!"
 
@@ -42,6 +41,7 @@ class RegistrationSpec extends BaseControllerSpec {
       mock[SessionService],
       mock[ThirdPartyDeveloperConnector],
       mockErrorHandler,
+      messagesApi,
       mock[ApplicationConfig]
     )
 

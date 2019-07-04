@@ -39,7 +39,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future._
 
 class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
-  implicit val materializer = fakeApplication.materializer
+
   val appId = "1234"
   val apiName = "api-1"
   val apiVersion = "1.0"
@@ -90,6 +90,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
+      messagesApi,
       mock[ApplicationConfig])
 
     val hc = HeaderCarrier()

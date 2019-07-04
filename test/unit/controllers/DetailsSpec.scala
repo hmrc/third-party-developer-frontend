@@ -42,8 +42,6 @@ import scala.concurrent.Future._
 
 class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  implicit val materializer = fakeApplication.materializer
-
   Helpers.running(fakeApplication) {
 
     "details" should {
@@ -281,6 +279,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
+      messagesApi,
       mock[ApplicationConfig]
     )
 

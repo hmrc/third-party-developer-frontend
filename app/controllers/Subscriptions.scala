@@ -21,9 +21,8 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.SubscriptionRedirect._
 import domain._
 import javax.inject.{Inject, Singleton}
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import service._
@@ -41,6 +40,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                               val applicationService: ApplicationService,
                               val sessionService: SessionService,
                               val errorHandler: ErrorHandler,
+                              val messagesApi: MessagesApi,
                               implicit val appConfig: ApplicationConfig)
                              (implicit val ec: ExecutionContext)
   extends ApplicationController with ApplicationHelper {

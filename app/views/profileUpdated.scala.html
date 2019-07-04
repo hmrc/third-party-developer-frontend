@@ -18,8 +18,8 @@
 @import include._
 @import model.Crumb
 
-@(title:String, heading: String, navSection: String)(implicit request: play.api.mvc.Request[Any],
-        loggedIn: Developer, messages: Messages, appConfig: config.ApplicationConfig)
+@(title:String, heading: String, navSection: String, loggedIn: Developer
+)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
 
 @devMain(
     title = "Profile updated",

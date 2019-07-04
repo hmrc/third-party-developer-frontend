@@ -20,8 +20,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.Logger
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request}
 import service.{DeskproService, SessionService}
 import views.html.signoutSurvey
@@ -32,6 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val sessionService: SessionService,
                                   val errorHandler: ErrorHandler,
+                                  val messagesApi: MessagesApi,
                                   implicit val appConfig: ApplicationConfig)
                                  (implicit val ec: ExecutionContext) extends LoggedInController with LoginLogout {
 

@@ -42,7 +42,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 
 class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
-  implicit val materializer = fakeApplication.materializer
+
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session = Session(sessionId, loggedInUser)
@@ -61,6 +61,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       mock[AuditService],
       mock[SessionService],
       mockErrorHandler,
+      messagesApi,
       mock[ApplicationConfig]
     )
 
