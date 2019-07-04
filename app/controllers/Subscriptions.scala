@@ -42,7 +42,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                               val errorHandler: ErrorHandler,
                               val messagesApi: MessagesApi,
                               implicit val appConfig: ApplicationConfig)
-                             (implicit val ec: ExecutionContext)
+                             (implicit ec: ExecutionContext)
   extends ApplicationController with ApplicationHelper {
 
   def subscriptions(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>

@@ -114,7 +114,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
         (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
         .withSession((emailSessionName, developerEmail))
       val result = await(underTest.processPasswordChange(
-        developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier))
+        developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, global))
       status(result) shouldBe FORBIDDEN
       result.toString should include(developerEmail.replace("@", "%40"))
     }

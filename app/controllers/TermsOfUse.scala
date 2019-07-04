@@ -34,7 +34,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
                            val applicationService: ApplicationService,
                            val messagesApi: MessagesApi,
                            implicit val appConfig: ApplicationConfig)
-                          (implicit val ec: ExecutionContext)
+                          (implicit ec: ExecutionContext)
   extends ApplicationController() with ApplicationHelper {
 
   def termsOfUsePartial() = Action {

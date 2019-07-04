@@ -37,7 +37,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
                                val messagesApi: MessagesApi,
                                val errorHandler: ErrorHandler)
                               (implicit val appConfig: ApplicationConfig,
-                               val ec: ExecutionContext) extends LoggedInController {
+                               ec: ExecutionContext) extends LoggedInController {
 
   private val scale = 4
   val qrCode = QRCode(scale)

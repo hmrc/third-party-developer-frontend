@@ -35,7 +35,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                         val errorHandler: ErrorHandler,
                         val messagesApi: MessagesApi,
                         implicit val appConfig: ApplicationConfig)
-                       (implicit val ec: ExecutionContext)
+                       (implicit ec: ExecutionContext)
   extends ApplicationController {
 
   def details(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
