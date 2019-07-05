@@ -34,7 +34,7 @@ class Registration @Inject()(override val sessionService: SessionService,
                              val errorHandler: ErrorHandler,
                              val messagesApi: MessagesApi,
                              implicit val appConfig: ApplicationConfig)
-                            (implicit val ec: ExecutionContext)
+                            (implicit ec: ExecutionContext)
   extends LoggedOutController {
 
   import ErrorFormBuilder.GlobalError

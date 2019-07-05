@@ -39,10 +39,9 @@ trait PasswordChange {
 
   val connector: ThirdPartyDeveloperConnector
   val auditService: AuditService
-  implicit val ec: ExecutionContext
 
   def processPasswordChange(email: String, success: Result, error: Form[ChangePasswordForm] => HtmlFormat.Appendable)
-                           (implicit request: Request[_], hc: HeaderCarrier) = {
+                           (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext) = {
     ChangePasswordForm.form.bindFromRequest.fold(
       errors => Future.successful(BadRequest(error(errors.currentPasswordGlobal().passwordGlobal().passwordNoMatchField()))),
       data => {
@@ -67,7 +66,7 @@ class Password @Inject()(val auditService: AuditService,
                          val connector: ThirdPartyDeveloperConnector,
                          val errorHandler: ErrorHandler,
                          val messagesApi: MessagesApi,
-                         implicit val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
+                         implicit val appConfig: ApplicationConfig)(implicit ec: ExecutionContext)
   extends LoggedOutController with PasswordChange {
 
   import ErrorFormBuilder.GlobalError

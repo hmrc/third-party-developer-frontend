@@ -35,12 +35,11 @@ trait ActionBuilders {
   val errorHandler: ErrorHandler
   val applicationService: ApplicationService
   implicit val appConfig: ApplicationConfig
-  implicit val ec: ExecutionContext
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-  def applicationAction(applicationId: String, user: Developer) = new ActionRefiner[Request, ApplicationRequest] {
+  def applicationAction(applicationId: String, user: Developer)(implicit ec: ExecutionContext) = new ActionRefiner[Request, ApplicationRequest] {
     override def refine[A](request: Request[A]) = {
       implicit val implicitRequest = request
 

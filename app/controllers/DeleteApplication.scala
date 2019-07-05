@@ -33,7 +33,7 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
                                   val errorHandler: ErrorHandler,
                                   val messagesApi: MessagesApi,
                                   implicit val appConfig: ApplicationConfig)
-                                 (implicit val ec: ExecutionContext)
+                                 (implicit ec: ExecutionContext)
   extends ApplicationController {
 
   def deleteApplication(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>

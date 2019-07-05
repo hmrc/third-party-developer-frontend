@@ -32,7 +32,7 @@ class Support @Inject()(val deskproService: DeskproService,
                         val errorHandler: ErrorHandler,
                         val messagesApi: MessagesApi,
                         implicit val appConfig: ApplicationConfig)
-                       (implicit val ec: ExecutionContext)
+                       (implicit ec: ExecutionContext)
   extends BaseController with OptionalAuthElement {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form

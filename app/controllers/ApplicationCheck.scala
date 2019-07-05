@@ -39,7 +39,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                  val errorHandler: ErrorHandler,
                                  val messagesApi: MessagesApi,
                                  implicit val appConfig: ApplicationConfig)
-                                (implicit val ec: ExecutionContext)
+                                (implicit ec: ExecutionContext)
   extends ApplicationController() with ApplicationHelper {
 
   def withAppInTestingState(appId: String)(f: Application => Future[Result])(implicit request: RequestWithAttributes[AnyContent]) = {

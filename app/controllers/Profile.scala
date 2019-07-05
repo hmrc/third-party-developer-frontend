@@ -35,7 +35,7 @@ class Profile @Inject()(applicationService: ApplicationService,
                         val errorHandler: ErrorHandler,
                         val messagesApi: MessagesApi,
                         implicit val appConfig: ApplicationConfig)
-                       (implicit val ec: ExecutionContext)
+                       (implicit ec: ExecutionContext)
   extends LoggedInController with PasswordChange {
 
   import ErrorFormBuilder.GlobalError

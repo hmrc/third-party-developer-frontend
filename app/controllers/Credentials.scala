@@ -41,7 +41,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
                             val errorHandler: ErrorHandler,
                             val messagesApi: MessagesApi,
                             implicit val appConfig: ApplicationConfig)
-                           (implicit val ec: ExecutionContext)
+                           (implicit ec: ExecutionContext)
   extends ApplicationController {
 
   def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>

@@ -36,7 +36,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
                            val errorHandler: ErrorHandler,
                            val messagesApi: MessagesApi,
                            implicit val appConfig: ApplicationConfig)
-                          (implicit val ec: ExecutionContext) extends ApplicationController {
+                          (implicit ec: ExecutionContext) extends ApplicationController {
 
   def manageTeam(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
     val application = request.application

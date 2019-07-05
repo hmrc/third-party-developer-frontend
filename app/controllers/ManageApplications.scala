@@ -35,7 +35,7 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
                                    val errorHandler: ErrorHandler,
                                    val messagesApi: MessagesApi,
                                    implicit val appConfig: ApplicationConfig)
-                                  (implicit val ec: ExecutionContext) extends ApplicationController {
+                                  (implicit ec: ExecutionContext) extends ApplicationController {
 
   val detailsTab = "details"
   val credentialsTab = "credentials"
