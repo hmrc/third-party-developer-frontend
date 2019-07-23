@@ -20,10 +20,12 @@ import java.net.URLEncoder.encode
 
 import config.ApplicationConfig
 import domain.ApiSubscriptionFields._
+import domain.Environment
 import javax.inject.{Inject, Singleton}
 import play.api.http.Status.NO_CONTENT
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import play.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,19 +33,31 @@ abstract class ApiSubscriptionFieldsConnector {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
   implicit val ec: ExecutionContext
+  val environment: Environment
   val serviceBaseUrl: String
   val useProxy: Boolean
   val bearerToken: String
 
-  def http: HttpClient = if (useProxy) proxiedHttpClient.withAuthorization(bearerToken) else httpClient
+  def http: HttpClient = {
+    if (useProxy) {
+      proxiedHttpClient.wsProxyServer.map(
+        proxyServer =>
+          Logger.debug(s"Using Proxy Server with username '${proxyServer.principal.getOrElse("")}' and host ${proxyServer.host}")
+      )
+      proxiedHttpClient.withAuthorization(bearerToken)
+    }
+    else httpClient
+  }
 
   def fetchFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Option[SubscriptionFields]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
+    Logger.debug(s"fetchFieldValues() - About to call $url in ${environment.toString}")
     http.GET[SubscriptionFields](url).map(Some(_)) recover recovery(None)
   }
 
   def fetchFieldDefinitions(apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
+    Logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
     http.GET[FieldDefinitionsResponse](url).map(response => response.fieldDefinitions) recover recovery(Seq.empty[SubscriptionField])
   }
 
@@ -55,7 +69,9 @@ abstract class ApiSubscriptionFieldsConnector {
   def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
     val eventualResponse = http.DELETE(url)
-    eventualResponse map { _.status == NO_CONTENT } recover recovery(true)
+    eventualResponse map {
+      _.status == NO_CONTENT
+    } recover recovery(true)
   }
 
   private def recovery[T](value: T): PartialFunction[Throwable, T] = {
@@ -79,6 +95,7 @@ class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient
                                                       appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends ApiSubscriptionFieldsConnector {
 
+  val environment = Environment.SANDBOX
   val serviceBaseUrl = appConfig.apiSubscriptionFieldsSandboxUrl
   val useProxy = appConfig.apiSubscriptionFieldsSandboxUseProxy
   val bearerToken = appConfig.apiSubscriptionFieldsSandboxBearerToken
@@ -90,6 +107,7 @@ class ApiSubscriptionFieldsProductionConnector @Inject()(val httpClient: HttpCli
                                                          appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends ApiSubscriptionFieldsConnector {
 
+  val environment = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.apiSubscriptionFieldsProductionUrl
   val useProxy = appConfig.apiSubscriptionFieldsProductionUseProxy
   val bearerToken = appConfig.apiSubscriptionFieldsProductionBearerToken

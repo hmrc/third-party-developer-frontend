@@ -20,6 +20,7 @@ import java.util.UUID
 
 import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
+import domain.Environment
 import org.mockito.Matchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
 import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
@@ -48,6 +49,7 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
       val ec = global
       val httpClient = mockHttpClient
       val proxiedHttpClient = mockProxiedHttpClient
+      val environment = Environment.SANDBOX
       val useProxy = false
       val bearerToken = ""
       val serviceBaseUrl = ""
