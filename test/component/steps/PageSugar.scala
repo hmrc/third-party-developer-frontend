@@ -22,9 +22,9 @@ import org.openqa.selenium.support.ui.{ExpectedCondition, WebDriverWait}
 trait PageSugar {
 
   implicit val webDriver: WebDriver
-  val milliseconds = 250
+  val seconds = 5
 
-  def waitForElement(by: By) = new WebDriverWait(webDriver, milliseconds).until(
+  def waitForElement(by: By) = new WebDriverWait(webDriver, seconds).until(
     new ExpectedCondition[WebElement] {
       override def apply(d: WebDriver) = d.findElement(by)
     }

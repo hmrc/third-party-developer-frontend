@@ -36,15 +36,14 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   implicit val webDriver: WebDriver = Env.driver
 
-
   Given("""^I am successfully logged in with '(.*)' and '(.*)'$""") { (email: String, password: String) =>
     goOn(SignInPage.default)
     webDriver.manage().deleteAllCookies()
     webDriver.navigate().refresh()
     Form.populate(mutable.Map("email address" -> email, "password" -> password))
     click on id("submit")
-    click on id("skip") // Skip the 2SV reminder screen
-    click on id("submit") // Continue past confirmation of skipping 2SV setup
+    click on waitForElement(By.id("skip")) // Skip the 2SV reminder screen
+    click on waitForElement(By.id("submit")) // Continue past confirmation of skipping 2SV setup
   }
 
   Given("""^I am registered with$""") { (data: DataTable) =>
