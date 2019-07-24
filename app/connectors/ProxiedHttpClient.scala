@@ -39,7 +39,7 @@ class ProxiedHttpClient @Inject()(config: Configuration,
   val authorization: Option[Authorization] = None
   private val env = RunMode(environment.mode, config).env
 
-  def withAuthorization(bearerToken: String) = new ProxiedHttpClient(config, auditConnector, wsClient, environment, actorSystem) {
+  def withAuthorization(bearerToken: String): ProxiedHttpClient = new ProxiedHttpClient(config, auditConnector, wsClient, environment, actorSystem) {
     override val authorization = Some(Authorization(s"Bearer $bearerToken"))
   }
 

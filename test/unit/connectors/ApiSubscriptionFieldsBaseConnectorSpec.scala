@@ -21,7 +21,6 @@ import java.util.UUID
 import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
 import domain.Environment
-import javax.inject.Singleton
 import org.mockito.Matchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
 import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
@@ -31,7 +30,7 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
+class ApiSubscriptionFieldsBaseConnectorSpec extends BaseConnectorSpec {
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -42,21 +41,16 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
   private val urlPrefix = "/field"
   private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
 
-  @Singleton
-  class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
-                                           val proxiedHttpClient: ProxiedHttpClient)(implicit val ec: ExecutionContext)
-    extends ApiSubscriptionFieldsConnector {
-    val environment: Environment = Environment.SANDBOX
-    val useProxy = false
-    val bearerToken = ""
-    val serviceBaseUrl = ""
-  }
-
   trait Setup {
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
 
     val underTest = new ApiSubscriptionFieldsTestConnector(mockHttpClient, mockProxiedHttpClient)
+  }
+
+  class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
+                                           val proxiedHttpClient: ProxiedHttpClient)(implicit val ec: ExecutionContext)
+    extends ApiSubscriptionFieldsConnector(Environment.SANDBOX, useProxy = false, bearerToken = "", serviceBaseUrl = "") {
   }
 
   "fetchFieldValues" should {
