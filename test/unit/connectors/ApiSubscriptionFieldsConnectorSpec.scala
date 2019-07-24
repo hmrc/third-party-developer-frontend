@@ -21,6 +21,7 @@ import java.util.UUID
 import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
 import domain.Environment
+import javax.inject.Singleton
 import org.mockito.Matchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
 import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
@@ -28,32 +29,34 @@ import uk.gov.hmrc.http.{HttpResponse, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
 
-  implicit val hc = HeaderCarrier()
+  private implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val clientId: String = UUID.randomUUID().toString
-  val apiContext: String = "i-am-a-test"
-  val apiVersion: String = "1.0"
-  val fieldsId = UUID.randomUUID()
-  val urlPrefix = "/field"
+  private val clientId = UUID.randomUUID().toString
+  private val apiContext = "i-am-a-test"
+  private val apiVersion = "1.0"
+  private val fieldsId = UUID.randomUUID()
+  private val urlPrefix = "/field"
   private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
 
-  trait Setup {
-    val mockHttpClient = mock[HttpClient]
-    val mockProxiedHttpClient = mock[ProxiedHttpClient]
+  @Singleton
+  class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
+                                           val proxiedHttpClient: ProxiedHttpClient)(implicit val ec: ExecutionContext)
+    extends ApiSubscriptionFieldsConnector {
+    val environment: Environment = Environment.SANDBOX
+    val useProxy = false
+    val bearerToken = ""
+    val serviceBaseUrl = ""
+  }
 
-    val underTest = new ApiSubscriptionFieldsConnector {
-      val ec = global
-      val httpClient = mockHttpClient
-      val proxiedHttpClient = mockProxiedHttpClient
-      val environment = Environment.SANDBOX
-      val useProxy = false
-      val bearerToken = ""
-      val serviceBaseUrl = ""
-    }
+  trait Setup {
+    val mockHttpClient: HttpClient = mock[HttpClient]
+    val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
+
+    val underTest = new ApiSubscriptionFieldsTestConnector(mockHttpClient, mockProxiedHttpClient)
   }
 
   "fetchFieldValues" should {
@@ -182,7 +185,7 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
       when(mockHttpClient.DELETE(url))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
-      val result = await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
+      private val result = await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
 
       result shouldBe true
     }
@@ -192,7 +195,7 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
       when(mockHttpClient.DELETE(url))
         .thenReturn(Future.successful(HttpResponse(ACCEPTED)))
 
-      val result = await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
+      private val result = await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
 
       result shouldBe false
     }
@@ -212,7 +215,7 @@ class ApiSubscriptionFieldsConnectorSpec extends BaseConnectorSpec {
       when(mockHttpClient.DELETE(url))
         .thenReturn(Future.failed(new NotFoundException("")))
 
-      val result = await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
+      private val result = await(underTest.deleteFieldValues(clientId, apiContext, apiVersion))
       result shouldBe true
     }
 
