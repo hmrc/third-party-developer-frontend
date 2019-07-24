@@ -38,7 +38,7 @@ abstract class ApiSubscriptionFieldsConnector {
   val useProxy: Boolean
   val bearerToken: String
 
-  def http: HttpClient = {
+  val http: HttpClient = {
     if (useProxy) {
       proxiedHttpClient.wsProxyServer.map(
         proxyServer =>
