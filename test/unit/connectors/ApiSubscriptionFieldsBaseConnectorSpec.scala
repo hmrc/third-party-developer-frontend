@@ -50,7 +50,13 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends BaseConnectorSpec {
 
   class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
                                            val proxiedHttpClient: ProxiedHttpClient)(implicit val ec: ExecutionContext)
-    extends ApiSubscriptionFieldsConnector(Environment.SANDBOX, useProxy = false, bearerToken = "", serviceBaseUrl = "") {
+    extends ApiSubscriptionFieldsConnector(
+      Environment.SANDBOX,
+      useProxy = false,
+      bearerToken = "",
+      serviceBaseUrl = "",
+      httpClient = httpClient,
+      proxiedHttpClient = proxiedHttpClient) {
   }
 
   "fetchFieldValues" should {
