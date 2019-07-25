@@ -41,10 +41,6 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
   val http: HttpClient = {
     if (useProxy) {
       Logger.debug(s"Using Proxy Server ($environment)")
-      proxiedHttpClient.wsProxyServer.map(
-        proxyServer =>
-          Logger.debug(s"Proxy Server username '${proxyServer.principal.getOrElse("")}' and host ${proxyServer.host}")
-      )
       proxiedHttpClient.withAuthorization(bearerToken)
     } else {
         Logger.debug(s"Not using Proxy Server ($environment)")
