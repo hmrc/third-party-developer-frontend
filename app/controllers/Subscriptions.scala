@@ -61,8 +61,9 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   // TODO: For diagnostic purposes. Remove this function
   def subscriptionsTestAll(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
 
-    applicationService.apisWithSubscriptions(request.application).map { data =>
-      Ok(s"Retrieved OK: $data")
+    val count = request.queryString.get("count").map(p => p.head.toInt)
+    applicationService.apisWithSubscriptions2(request.application, count).map { data =>
+      Ok(s"Retrieved OK: \n $data")
     } recover {
       case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
     }
