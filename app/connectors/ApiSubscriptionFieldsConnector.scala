@@ -32,22 +32,21 @@ import scala.concurrent.{ExecutionContext, Future}
 abstract class ApiSubscriptionFieldsConnector(private val environment: Environment,
                                               private val serviceBaseUrl: String,
                                               private val useProxy: Boolean,
-                                              private val bearerToken: String) {
+                                              private val bearerToken: String,
+                                              private val httpClient: HttpClient,
+                                              private val proxiedHttpClient: ProxiedHttpClient) {
+
+  implicit val ec: ExecutionContext
+
   val http: HttpClient = {
     if (useProxy) {
-      proxiedHttpClient.wsProxyServer.map(
-        proxyServer =>
-          Logger.debug(s"Using Proxy Server ($environment) with username '${proxyServer.principal.getOrElse("")}' and host ${proxyServer.host}")
-      )
+      Logger.debug(s"Using Proxy Server ($environment)")
       proxiedHttpClient.withAuthorization(bearerToken)
     } else {
         Logger.debug(s"Not using Proxy Server ($environment)")
         httpClient
       }
   }
-  protected val httpClient: HttpClient
-  implicit val ec: ExecutionContext
-  protected val proxiedHttpClient: ProxiedHttpClient
 
   def fetchFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Option[SubscriptionFields]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
@@ -97,7 +96,9 @@ class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient
     Environment.SANDBOX,
     appConfig.apiSubscriptionFieldsSandboxUrl,
     appConfig.apiSubscriptionFieldsSandboxUseProxy,
-    appConfig.apiSubscriptionFieldsSandboxBearerToken) {
+    appConfig.apiSubscriptionFieldsSandboxBearerToken,
+    httpClient,
+    proxiedHttpClient) {
 }
 
 @Singleton
@@ -108,6 +109,8 @@ class ApiSubscriptionFieldsProductionConnector @Inject()(val httpClient: HttpCli
     Environment.PRODUCTION,
     appConfig.apiSubscriptionFieldsProductionUrl,
     appConfig.apiSubscriptionFieldsProductionUseProxy,
-    appConfig.apiSubscriptionFieldsProductionBearerToken) {
+    appConfig.apiSubscriptionFieldsProductionBearerToken,
+    httpClient,
+    proxiedHttpClient) {
 }
 
