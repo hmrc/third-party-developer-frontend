@@ -51,6 +51,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.fetchCredentials(id))
 
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
+
     def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription): Future[APISubscriptionStatus] = {
       subscriptionFieldsService.fetchFields(application, api.context, version.version.version).map { fields =>
         APISubscriptionStatus(

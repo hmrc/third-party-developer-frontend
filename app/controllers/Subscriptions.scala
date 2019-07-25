@@ -56,6 +56,33 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     }
   }
 
+
+
+  // TODO: For diagnostic purposes. Remove this function
+  def subscriptionsTestAll(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
+
+    applicationService.apisWithSubscriptions(request.application).map { data =>
+      Ok(s"Retrieved OK: $data")
+    } recover {
+      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+    }
+
+  }
+
+  // TODO: For diagnostic purposes. Remove this function
+  def subscriptionsTestOne(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
+
+    subFieldsService.fetchFields(request.application, "customs/declarations", "1.0").map { data =>
+      Ok(s"Retrieved OK: $data")
+    } recover {
+      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+    }
+
+  }
+
+
+
+
   private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
     case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.subscriptions(applicationId))
     case Some(APPLICATION_CHECK_PAGE) => Redirect(routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
