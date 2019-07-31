@@ -18,9 +18,11 @@ package connectors
 
 import java.net.URLEncoder.encode
 
+import akka.actor.ActorSystem
 import config.ApplicationConfig
 import domain.ApiSubscriptionFields._
 import domain.Environment
+import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status.NO_CONTENT
@@ -34,7 +36,7 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
                                               private val useProxy: Boolean,
                                               private val bearerToken: String,
                                               private val httpClient: HttpClient,
-                                              private val proxiedHttpClient: ProxiedHttpClient) {
+                                              private val proxiedHttpClient: ProxiedHttpClient) extends Retries {
 
   implicit val ec: ExecutionContext
 
@@ -43,21 +45,26 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
       Logger.debug(s"Using Proxy Server ($environment)")
       proxiedHttpClient.withAuthorization(bearerToken)
     } else {
-        Logger.debug(s"Not using Proxy Server ($environment)")
-        httpClient
-      }
+      Logger.debug(s"Not using Proxy Server ($environment)")
+      httpClient
+    }
   }
 
   def fetchFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Option[SubscriptionFields]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
     Logger.debug(s"fetchFieldValues() - About to call $url in ${environment.toString}")
-    http.GET[SubscriptionFields](url).map(Some(_)) recover recovery(None)
+    retry {
+      http.GET[SubscriptionFields](url).map(Some(_))
+    } recover recovery(None)
+
   }
 
   def fetchFieldDefinitions(apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
     Logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
-    http.GET[FieldDefinitionsResponse](url).map(response => response.fieldDefinitions) recover recovery(Seq.empty[SubscriptionField])
+    retry {
+      http.GET[FieldDefinitionsResponse](url).map(response => response.fieldDefinitions)
+    } recover recovery(Seq.empty[SubscriptionField])
   }
 
   private def urlSubscriptionFieldDefinition(apiContext: String, apiVersion: String) =
@@ -91,6 +98,7 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
 @Singleton
 class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient,
                                                       val proxiedHttpClient: ProxiedHttpClient,
+                                                      val actorSystem: ActorSystem,
                                                       appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends ApiSubscriptionFieldsConnector(
     Environment.SANDBOX,
@@ -104,6 +112,7 @@ class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient
 @Singleton
 class ApiSubscriptionFieldsProductionConnector @Inject()(val httpClient: HttpClient,
                                                          val proxiedHttpClient: ProxiedHttpClient,
+                                                         val actorSystem: ActorSystem,
                                                          appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends ApiSubscriptionFieldsConnector(
     Environment.PRODUCTION,

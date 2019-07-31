@@ -18,6 +18,7 @@ package unit.connectors
 
 import java.util.UUID
 
+import akka.actor.ActorSystem
 import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
 import domain.Environment
@@ -33,6 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApiSubscriptionFieldsBaseConnectorSpec extends BaseConnectorSpec {
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
+  private val actorSystem = ActorSystem("test-actor-system")
 
   private val clientId = UUID.randomUUID().toString
   private val apiContext = "i-am-a-test"
@@ -45,11 +47,12 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends BaseConnectorSpec {
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
 
-    val underTest = new ApiSubscriptionFieldsTestConnector(mockHttpClient, mockProxiedHttpClient)
+    val underTest = new ApiSubscriptionFieldsTestConnector(mockHttpClient, mockProxiedHttpClient, actorSystem)
   }
 
   class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
-                                           val proxiedHttpClient: ProxiedHttpClient)(implicit val ec: ExecutionContext)
+                                           val proxiedHttpClient: ProxiedHttpClient,
+                                           val actorSystem: ActorSystem)(implicit val ec: ExecutionContext)
     extends ApiSubscriptionFieldsConnector(
       Environment.SANDBOX,
       useProxy = false,
@@ -57,6 +60,14 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends BaseConnectorSpec {
       serviceBaseUrl = "",
       httpClient = httpClient,
       proxiedHttpClient = proxiedHttpClient) {
+  }
+
+  def squidProxyRelatedBadRequest[T]: Future[T] = {
+    Future.failed(new BadRequestException(
+      "GET of 'https://api.development.tax.service.gov.uk:443/testing/api-subscription-fields/field/application/" +
+        "xxxyyyzzz/context/api-platform-test/version/7.0' returned 400 (Bad Request). Response body " +
+        "'<html>\n<head><title>400 Bad Request</title></head>\n<body bgcolor=\"white\">\n" +
+        "<center><h1>400 Bad Request</h1></center>\n<hr><center>nginx</center>\n</body>\n</html>\n'"))
   }
 
   "fetchFieldValues" should {
@@ -90,6 +101,16 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends BaseConnectorSpec {
       result shouldBe None
     }
 
+    "when retry logic is enabled should retry if call returns 400 Bad Request" in new Setup {
+      when(mockHttpClient.GET[SubscriptionFields](meq(getUrl))(any(), any(), any()))
+        .thenReturn(
+          Future.failed(new BadRequestException("")),
+          Future.successful(response)
+        )
+      val result: Option[SubscriptionFields] = await(underTest.fetchFieldValues(clientId, apiContext, apiVersion))
+
+      result shouldBe Some(response)
+    }
   }
 
   "fetchFieldDefinitions" should {
@@ -135,6 +156,17 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends BaseConnectorSpec {
       intercept[JsValidationException] {
         await(underTest.fetchFieldDefinitions(apiContext, apiVersion))
       }
+    }
+
+    "when retry logic is enabled should retry if call returns 400 Bad Request" in new Setup {
+      when(mockHttpClient.GET[FieldDefinitionsResponse](meq(url))(any(), any(), any()))
+        .thenReturn(
+          Future.failed(new BadRequestException("")),
+          Future.successful(validResponse)
+        )
+      val result: Seq[SubscriptionField] = await(underTest.fetchFieldDefinitions(apiContext, apiVersion))
+
+      result shouldBe fields
     }
   }
 

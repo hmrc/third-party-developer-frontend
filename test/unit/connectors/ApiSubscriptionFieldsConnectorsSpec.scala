@@ -16,6 +16,7 @@
 
 package unit.connectors
 
+import akka.actor.ActorSystem
 import config.ApplicationConfig
 import connectors.{ApiSubscriptionFieldsProductionConnector, ApiSubscriptionFieldsSandboxConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionField}
@@ -31,6 +32,7 @@ import scala.concurrent.Future
 class ApiSubscriptionFieldsConnectorsSpec extends BaseConnectorSpec {
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
+  private val actorSystem = ActorSystem("test-actor-system")
 
   trait Setup {
     val sandboxBearerToken = "sandbox-bearer-token"
@@ -64,28 +66,30 @@ class ApiSubscriptionFieldsConnectorsSpec extends BaseConnectorSpec {
   "SandboxApiSubscriptionsFieldConnector" should {
 
     "use proxied http client" in new Setup {
-      val connector = new ApiSubscriptionFieldsSandboxConnector(mockHttpClient, mockProxiedHttpClient, mockApplicationConfig)
+      val connector = new ApiSubscriptionFieldsSandboxConnector(
+        mockHttpClient, mockProxiedHttpClient, actorSystem, mockApplicationConfig)
 
-      when(mockProxiedHttpClient.GET[FieldDefinitionsResponse](any())(any(),any(),any())).thenReturn(Future.successful(validResponse))
+      when(mockProxiedHttpClient.GET[FieldDefinitionsResponse](any())(any(), any(), any())).thenReturn(Future.successful(validResponse))
 
       await(connector.fetchFieldDefinitions("my-context", "my-version"))
 
       verify(mockProxiedHttpClient).withAuthorization(sandboxBearerToken)
       verify(mockProxiedHttpClient).GET[FieldDefinitionsResponse](
-        meq("https://api-subs-sandbox/definition/context/my-context/version/my-version"))(any(),any(),any())
+        meq("https://api-subs-sandbox/definition/context/my-context/version/my-version"))(any(), any(), any())
     }
   }
 
   "ProductionApiSubscriptionsFieldConnector" should {
     "use non-proxied http client" in new Setup {
-      val connector = new ApiSubscriptionFieldsProductionConnector(mockHttpClient, mockProxiedHttpClient, mockApplicationConfig)
+      val connector = new ApiSubscriptionFieldsProductionConnector(
+        mockHttpClient, mockProxiedHttpClient, actorSystem, mockApplicationConfig)
 
-      when(mockHttpClient.GET[FieldDefinitionsResponse](any())(any(),any(),any())).thenReturn(Future.successful(validResponse))
+      when(mockHttpClient.GET[FieldDefinitionsResponse](any())(any(), any(), any())).thenReturn(Future.successful(validResponse))
 
       await(connector.fetchFieldDefinitions("my-context", "my-version"))
 
       verify(mockHttpClient).GET[FieldDefinitionsResponse](
-        meq("https://api-subs-production/definition/context/my-context/version/my-version"))(any(),any(),any())
+        meq("https://api-subs-production/definition/context/my-context/version/my-version"))(any(), any(), any())
     }
   }
 }
