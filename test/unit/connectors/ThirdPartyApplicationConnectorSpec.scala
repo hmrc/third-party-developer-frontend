@@ -19,11 +19,13 @@ package unit.connectors
 import java.net.URLEncoder.encode
 
 import config.ApplicationConfig
-import connectors.{ProxiedHttpClient, ThirdPartyApplicationConnector}
+import connectors.{NoopConnectorMetrics, ProxiedHttpClient, ThirdPartyApplicationConnector}
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.Matchers.{any, eq => meq}
 import org.mockito.Mockito.when
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status._
@@ -31,12 +33,13 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ThirdPartyApplicationConnectorSpec extends BaseConnectorSpec {
+class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
   private val applicationId = "applicationId"
   private val baseUrl = "https://example.com"
@@ -48,6 +51,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorSpec {
     protected val mockProxiedHttpClient = mock[ProxiedHttpClient]
     protected val mockAppConfig = mock[ApplicationConfig]
     protected val mockEnvironment = mock[Environment]
+    protected val mockMetrics = new NoopConnectorMetrics()
 
     val connector = new ThirdPartyApplicationConnector(mockAppConfig, mockMetrics) {
       val ec = global
