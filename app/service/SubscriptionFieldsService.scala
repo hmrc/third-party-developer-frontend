@@ -34,11 +34,14 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
       defs.map(field => field.withValue(fieldValues.get(field.name)))
     }
 
-    def fetchFieldsValues(defs: Seq[SubscriptionField])(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
-      for {
-        maybeValues <- connector.fetchFieldValues(application.clientId, apiContext, apiVersion)
-      } yield maybeValues.fold(defs) { response =>
-        addValuesToDefinitions(defs, response.fields)
+    def fetchFieldsValues(fieldDefinitions: Seq[SubscriptionField])(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
+      if (fieldDefinitions.isEmpty) Future.successful(Seq.empty)
+      else {
+        for {
+          maybeValues <- connector.fetchFieldValues(application.clientId, apiContext, apiVersion)
+        } yield maybeValues.fold(fieldDefinitions) { response =>
+          addValuesToDefinitions(fieldDefinitions, response.fields)
+        }
       }
     }
 

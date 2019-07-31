@@ -24,19 +24,19 @@ import domain.{Application, Environment}
 import org.joda.time.DateTime
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, anyString, eq => meq}
+import org.mockito.Mockito
 import org.mockito.Mockito.verify
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import play.api.libs.ws.WSResponse
 import service.{Connectors, ConnectorsWrapper, SubscriptionFieldsService}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
+import play.api.http.Status.CREATED
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar with BeforeAndAfterEach{
+class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
   val apiContext: String = "sub-ser-test"
   val apiVersion: String = "1.0"
@@ -44,33 +44,44 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
   val applicationId: String = "application-id"
   val clientId = "clientId"
   val application = Application(applicationId, clientId, applicationName, DateTime.now(), Environment.PRODUCTION)
-  val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
-  val mockSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsConnector]
-  val mockThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
 
   trait Setup {
 
     lazy val locked = false
-    val response = mock[WSResponse]
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+
+    val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
+    val mockSubscriptionFieldsConnector: ApiSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsConnector]
+    val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
 
     val underTest = new SubscriptionFieldsService(mockConnectorsWrapper)
-  }
 
-  override protected def beforeEach(): Unit = {
-    given(mockConnectorsWrapper.forApplication(anyString())(any[HeaderCarrier])).willReturn(Future.successful(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector)))
-    given(mockConnectorsWrapper.connectorsForEnvironment(application.deployedTo)).willReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector))
-    given(mockThirdPartyApplicationConnector.fetchApplicationById(meq(applicationId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Application(applicationId, clientId, "name", DateTime.now(), Environment.PRODUCTION))))
+    given(mockConnectorsWrapper.forApplication(anyString())(any[HeaderCarrier]))
+      .willReturn(Future.successful(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector)))
+
+    given(mockConnectorsWrapper.connectorsForEnvironment(application.deployedTo))
+      .willReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector))
+
+    given(mockThirdPartyApplicationConnector.fetchApplicationById(meq(applicationId))(any[HeaderCarrier]))
+      .willReturn(Future.successful(Some(Application(applicationId, clientId, "name", DateTime.now(), Environment.PRODUCTION))))
   }
 
   "fetchFields" should {
 
     "return custom fields for a given application (fields populated)" in new Setup {
-      val fieldsId = UUID.randomUUID()
-      val fieldValuesResponse: SubscriptionFields = SubscriptionFields(clientId, apiContext, apiVersion, fieldsId, fields("field1" -> "val001", "field2" -> "val002"))
-      val fieldDefinitions = List(SubscriptionField("field1", "desc1", "hint1", "some type"), SubscriptionField("field2", "desc2", "hint2", "some other type"))
-      val mergedDefValues = List(SubscriptionField("field1", "desc1", "hint1", "some type", Some("val001")), SubscriptionField("field2", "desc2", "hint2", "some other type", Some("val002")))
+      private val fieldsId = UUID.randomUUID()
+      val fieldValuesResponse: SubscriptionFields =
+        SubscriptionFields(clientId, apiContext, apiVersion, fieldsId,
+          fields("field1" -> "val001", "field2" -> "val002"))
+
+      val fieldDefinitions =
+        List(SubscriptionField("field1", "desc1", "hint1", "some type"),
+          SubscriptionField("field2", "desc2", "hint2", "some other type"))
+
+      val mergedDefValues =
+        List(SubscriptionField("field1", "desc1", "hint1", "some type", Some("val001")),
+          SubscriptionField("field2", "desc2", "hint2", "some other type", Some("val002")))
 
       given(mockSubscriptionFieldsConnector.fetchFieldValues(clientId, apiContext, apiVersion)).willReturn(Future.successful(Some(fieldValuesResponse)))
       given(mockSubscriptionFieldsConnector.fetchFieldDefinitions(apiContext, apiVersion)).willReturn(Future.successful(fieldDefinitions))
@@ -99,19 +110,28 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
 
       val result: Seq[SubscriptionField] = await(underTest.fetchFields(application, apiContext, apiVersion))
       result shouldBe Seq.empty[SubscriptionField]
+    }
 
+    "not try and get field values if no definitions have been found" in new Setup {
+      given(mockSubscriptionFieldsConnector.fetchFieldDefinitions(apiContext, apiVersion)).willReturn(Future.successful(Seq.empty))
+
+      val result: Seq[SubscriptionField] = await(underTest.fetchFields(application, apiContext, apiVersion))
+      result shouldBe Seq.empty[SubscriptionField]
+
+      verify(mockSubscriptionFieldsConnector, Mockito.times(0)).fetchFieldValues(any(), any(), any())(any())
     }
   }
 
   "saveFields" should {
     "save the fields" in new Setup {
-      val fieldsId = UUID.randomUUID()
-      val fieldsValues = fields("field1" -> "val001", "field2" -> "val002")
+      private val fieldsId = UUID.randomUUID()
+      private val fieldsValues = fields("field1" -> "val001", "field2" -> "val002")
       val fieldValuesResponse: SubscriptionFields = SubscriptionFields(clientId, apiContext, apiVersion, fieldsId, fieldsValues)
 
-      given(mockSubscriptionFieldsConnector.saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)).willReturn(Future.successful(HttpResponse(201)))
+      given(mockSubscriptionFieldsConnector.saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
+        .willReturn(Future.successful(HttpResponse(CREATED)))
 
-      val result = await(underTest.saveFieldValues(applicationId, apiContext, apiVersion, fieldsValues))
+      await(underTest.saveFieldValues(applicationId, apiContext, apiVersion, fieldsValues))
 
       verify(mockSubscriptionFieldsConnector).saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
     }
