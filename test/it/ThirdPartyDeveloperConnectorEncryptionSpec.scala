@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-package unit.connectors
+package it
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.{ApplicationConfig}
-import connectors.{ConnectorMetrics, EncryptedJson, NoopConnectorMetrics, ThirdPartyDeveloperConnector}
+import connectors.{ConnectorMetrics, NoopConnectorMetrics, ThirdPartyDeveloperConnector}
 import domain._
-import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Configuration, Mode}
 import play.api.http.Status
+import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorSpec with GuiceOneAppPerSuite {
+class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
     "Test.microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "abcdefghijklmnopqrstuv=="
   )
+
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(stubConfig)
@@ -53,12 +50,13 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorSpec with 
       stubFor(post(urlEqualTo("/developer"))
         .willReturn(
           aResponse()
-            .withStatus(201)
+            .withStatus(CREATED)
             .withHeader("Content-Type", "application/json")
         ))
       val result = await(underTest.register(new Registration("first", "last", "email@example.com", "password")))
       verify(1, postRequestedFor(urlMatching("/developer"))
-        .withRequestBody(equalTo("""{"data":"Zw/sYw13nx6BrF3uAK8Qssm3sNZrI5pcJIVgTd8CdGY/o0GzlHwXqUVXKmx7QQ1avPtuPt45IYrVojwrPSGL9A13AqF0PAL6obBTOpqpGFzrgSkMl6uIAcdsBeop+gby"}""")))
+        .withRequestBody(equalTo(
+          """{"data":"Zw/sYw13nx6BrF3uAK8Qssm3sNZrI5pcJIVgTd8CdGY/o0GzlHwXqUVXKmx7QQ1avPtuPt45IYrVojwrPSGL9A13AqF0PAL6obBTOpqpGFzrgSkMl6uIAcdsBeop+gby"}""")))
     }
   }
 
@@ -67,10 +65,10 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorSpec with 
       stubFor(post(urlEqualTo("/reset-password"))
         .willReturn(
           aResponse()
-            .withStatus(200)
+            .withStatus(OK)
             .withHeader("Content-Type", "application/json")
         ))
-      val result = await(underTest.reset(new PasswordReset("email@example.com","newPassword")))
+      val result = await(underTest.reset(new PasswordReset("email@example.com", "newPassword")))
       verify(1, postRequestedFor(urlMatching("/reset-password"))
         .withRequestBody(equalTo("""{"data":"k7hutBek3t8KfWDBIKTCQ0l+TimQW7kD9CjSsGHSaAQbeQeXeipY+TaP5PL7E7Td64EpDJeriAHHbAXqKfoG8g=="}""")))
     }
@@ -81,12 +79,13 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorSpec with 
       stubFor(post(urlEqualTo("/change-password"))
         .willReturn(
           aResponse()
-            .withStatus(200)
+            .withStatus(OK)
             .withHeader("Content-Type", "application/json")
         ))
-      val result = await(underTest.changePassword(new ChangePassword("email@example.com","oldPassword","newPassword")))
+      val result = await(underTest.changePassword(new ChangePassword("email@example.com", "oldPassword", "newPassword")))
       verify(1, postRequestedFor(urlMatching("/change-password"))
-        .withRequestBody(equalTo("""{"data":"k7hutBek3t8KfWDBIKTCQ55JG4p9+fMdvQ0VkN8bpmd90WmD+EXjWAYekKvTLLYUNsoQzP0MXHS23JgkFZItsxfqZsCc76lJQmpWm/p0te4+5+KbrSWmSBVuTBFkPkrD"}""")))
+        .withRequestBody(equalTo(
+          """{"data":"k7hutBek3t8KfWDBIKTCQ55JG4p9+fMdvQ0VkN8bpmd90WmD+EXjWAYekKvTLLYUNsoQzP0MXHS23JgkFZItsxfqZsCc76lJQmpWm/p0te4+5+KbrSWmSBVuTBFkPkrD"}""")))
     }
 
     "return a locked response when the account is locked" in new Setup {
@@ -131,10 +130,10 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorSpec with 
       stubFor(post(urlEqualTo("/check-password"))
         .willReturn(
           aResponse()
-            .withStatus(200)
+            .withStatus(OK)
             .withHeader("Content-Type", "application/json")
         ))
-      val result = await(underTest.checkPassword(new PasswordCheckRequest("email@example.com","password")))
+      val result = await(underTest.checkPassword(new PasswordCheckRequest("email@example.com", "password")))
       verify(1, postRequestedFor(urlMatching("/check-password"))
         .withRequestBody(equalTo("""{"data":"k7hutBek3t8KfWDBIKTCQ9BO8Louz2xXjyXu2ERSQ9l7E5dh1C0hI7iuNNT7kfgfFZOK/NlNGY89EBB/xaaxiA=="}""")))
     }
