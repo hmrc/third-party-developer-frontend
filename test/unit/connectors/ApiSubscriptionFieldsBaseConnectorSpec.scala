@@ -25,7 +25,7 @@ import domain.Environment
 import org.mockito.Matchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
 import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
-import uk.gov.hmrc.http.{HttpResponse, _}
+import uk.gov.hmrc.http.{BadRequestException, HttpResponse, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -62,7 +62,7 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends BaseConnectorSpec {
       proxiedHttpClient = proxiedHttpClient) {
   }
 
-  def squidProxyRelatedBadRequest[T]: Future[T] = {
+  def squidProxyRelatedBadRequest: Future[BadRequestException] = {
     Future.failed(new BadRequestException(
       "GET of 'https://api.development.tax.service.gov.uk:443/testing/api-subscription-fields/field/application/" +
         "xxxyyyzzz/context/api-platform-test/version/7.0' returned 400 (Bad Request). Response body " +
@@ -104,7 +104,7 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends BaseConnectorSpec {
     "when retry logic is enabled should retry if call returns 400 Bad Request" in new Setup {
       when(mockHttpClient.GET[SubscriptionFields](meq(getUrl))(any(), any(), any()))
         .thenReturn(
-          Future.failed(new BadRequestException("")),
+          Future.failed(squidProxyRelatedBadRequest),
           Future.successful(response)
         )
       val result: Option[SubscriptionFields] = await(underTest.fetchFieldValues(clientId, apiContext, apiVersion))
