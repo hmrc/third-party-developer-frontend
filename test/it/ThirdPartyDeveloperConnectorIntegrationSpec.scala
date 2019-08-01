@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unit.connectors
+package it
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors._
@@ -27,7 +27,7 @@ import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
 
-class ThirdPartyDeveloperConnectorIntegrationTest extends BaseConnectorSpec with GuiceOneAppPerSuite {
+class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
     "Test.microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "abcdefghijklmnopqrstuv=="

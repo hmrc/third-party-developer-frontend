@@ -31,13 +31,13 @@ import play.api.http.Status.NO_CONTENT
 import play.api.libs.json.{JsString, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.http.metrics.{API, NoopMetrics}
+import uk.gov.hmrc.play.http.metrics.API
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ThirdPartyDeveloperConnectorSpec extends BaseConnectorSpec {
+class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
   trait Setup {
     implicit val hc = HeaderCarrier()
@@ -45,13 +45,15 @@ class ThirdPartyDeveloperConnectorSpec extends BaseConnectorSpec {
     val mockPayloadEncryption = mock[PayloadEncryption]
     val encryptedJson = new EncryptedJson(mockPayloadEncryption)
     val mockAppConfig = mock[ApplicationConfig]
+    val mockMetrics = new NoopConnectorMetrics()
     val encryptedString = JsString("someencryptedstringofdata")
-    val encryptedBody =  Json.toJson(SecretRequest(encryptedString.as[String]))
+    val encryptedBody = Json.toJson(SecretRequest(encryptedString.as[String]))
 
     when(mockAppConfig.thirdPartyDeveloperUrl).thenReturn("http://THIRD_PARTY_DEVELOPER:9000")
     when(mockPayloadEncryption.encrypt(any[String])(any())).thenReturn(encryptedString)
 
     val connector = new ThirdPartyDeveloperConnector(mockHttp, encryptedJson, mockAppConfig, mockMetrics)
+
     def endpoint(path: String) = s"${connector.serviceBaseUrl}/$path"
   }
 
@@ -248,7 +250,7 @@ class ThirdPartyDeveloperConnectorSpec extends BaseConnectorSpec {
 
     "successfully complete a developer account setup" in new Setup {
       when(mockHttp.POSTEmpty(endpoint(s"developer/account-setup/$email/complete"))).
-       thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(developer)))))
+        thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(developer)))))
 
       connector.completeAccountSetup(email).futureValue shouldBe developer
     }
@@ -358,12 +360,12 @@ class ThirdPartyDeveloperConnectorSpec extends BaseConnectorSpec {
     "throw if verification fails due to error" in new Setup {
       val email = "john.smith@example.com"
       val code = "12341234"
-      val verifyMfaRequest =  VerifyMfaRequest(code)
+      val verifyMfaRequest = VerifyMfaRequest(code)
 
       when(mockHttp.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
         thenReturn(Future.failed(Upstream5xxResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
 
-      intercept[Upstream5xxResponse]{
+      intercept[Upstream5xxResponse] {
         await(connector.verifyMfa(email, code))
       }
     }
@@ -374,7 +376,7 @@ class ThirdPartyDeveloperConnectorSpec extends BaseConnectorSpec {
       val email = "john.smith@example.com"
 
       when(mockHttp.PUT(endpoint(s"developer/$email/mfa/enable"), "")).
-        thenReturn(Future.successful(HttpResponse(NO_CONTENT)));
+        thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.enableMfa(email))
 
