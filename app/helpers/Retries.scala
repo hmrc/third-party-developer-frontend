@@ -39,6 +39,8 @@ trait Retries {
         case ex: BadRequestException if (retries > 0) => {
           val delay = 500.millis
           val attempt = appConfig.retryCount - retries + 1
+          //TODO: get rid of following
+          println(s"Retry attempt $attempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
           Logger.warn(s"Retry attempt $attempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
           after(delay, actorSystem.scheduler)(loop(retries - 1)(block))
         }
