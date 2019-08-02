@@ -24,7 +24,7 @@ import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest

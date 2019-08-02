@@ -22,7 +22,7 @@ import domain._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito.verify
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -124,7 +124,7 @@ class RedirectsSpec extends BaseControllerSpec {
 
       val result = application.callAddRedirectActionControllerWithUri(redirectUriToAdd)
 
-      val argument = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
+      val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
 
       status(result) shouldBe SEE_OTHER
       result.header.headers(LOCATION) shouldBe s"/developer/application/${application.id}/redirect-uris"
@@ -169,7 +169,7 @@ class RedirectsSpec extends BaseControllerSpec {
 
       val result = application.callDeleteRedirectActionControllerWithConfirmation(redirectUriToDelete, "Yes")
 
-      val argument = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
+      val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
 
       status(result) shouldBe resultStatus
       result.header.headers(LOCATION) shouldBe s"/developer/application/${application.id}/redirect-uris"
@@ -354,7 +354,7 @@ class RedirectsSpec extends BaseControllerSpec {
       givenTheApplicationExists(application)
 
       val result = application.callChangeRedirectUriActionController(originalRedirectUri, newRedirectUri)
-      val argument = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
+      val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
 
       status(result) shouldBe SEE_OTHER
       result.header.headers(LOCATION) shouldBe s"/developer/application/${application.id}/redirect-uris"

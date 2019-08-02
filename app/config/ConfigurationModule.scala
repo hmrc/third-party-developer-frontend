@@ -16,14 +16,16 @@
 
 package config
 
+import akka.pattern.FutureTimeoutSupport
 import com.google.inject.AbstractModule
 import connectors.{ConnectorMetrics, ConnectorMetricsImpl}
-import config.SessionTimeoutFilterWithWhitelist
+import helpers.FutureTimeoutSupportImpl
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
 
 class ConfigurationModule extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
     bind(classOf[SessionTimeoutFilter]).to(classOf[SessionTimeoutFilterWithWhitelist])
+    bind(classOf[FutureTimeoutSupport]).to(classOf[FutureTimeoutSupportImpl])
   }
 }

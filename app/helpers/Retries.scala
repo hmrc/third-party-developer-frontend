@@ -16,12 +16,15 @@
 
 package helpers
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.ActorSystem
-import akka.pattern.after
-import com.typesafe.config.Config
+import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import uk.gov.hmrc.http.BadRequestException
+import javax.inject.Inject
 import play.api.Logger
+import uk.gov.hmrc.http.BadRequestException
+
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,22 +34,28 @@ trait Retries {
 
   protected def appConfig: ApplicationConfig
 
+  protected def futureTimeout: FutureTimeoutSupport
+
   implicit val ec: ExecutionContext
 
   def retry[A](block: => Future[A]): Future[A] = {
-    def loop(retries: Int)(block: => Future[A]): Future[A] = {
+    def loop(previousRetryAttempts: Int = 0)(block: => Future[A]): Future[A] = {
       block.recoverWith {
-        case ex: BadRequestException if (retries > 0) => {
-          val delay = 500.millis
-          val attempt = appConfig.retryCount - retries + 1
+        case ex: BadRequestException if (previousRetryAttempts < appConfig.retryCount) => {
+          val retryAttempt = previousRetryAttempts + 1
+          val delay = FiniteDuration(appConfig.retryDelayMilliseconds, TimeUnit.MILLISECONDS)
+          println("Delay is: " + delay)
+
           //TODO: get rid of following
-          println(s"Retry attempt $attempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
-          Logger.warn(s"Retry attempt $attempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
-          after(delay, actorSystem.scheduler)(loop(retries - 1)(block))
+          println(s"Retry attempt $retryAttempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
+          Logger.warn(s"Retry attempt $retryAttempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
+          futureTimeout.after(delay, actorSystem.scheduler)(loop(retryAttempt)(block))
         }
       }
     }
-    loop(appConfig.retryCount)(block)
-  }
 
+    loop()(block)
+  }
 }
+
+class FutureTimeoutSupportImpl @Inject() extends FutureTimeoutSupport {}

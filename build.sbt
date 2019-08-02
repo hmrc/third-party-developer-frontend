@@ -56,7 +56,7 @@ lazy val test = Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % "test",
   "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % "test",
   "com.github.tomakehurst" % "wiremock" % "1.58" % "test",
-  "org.mockito" % "mockito-all" % "1.10.19" % "test",
+  "org.mockito" % "mockito-core" % "2.23.0" % "test",
   "jp.t2v" %% "play2-auth-test" % t2vVersion % "test",
   "org.scalaj" %% "scalaj-http" % "2.3.0" % "test",
   "org.scalacheck" %% "scalacheck" % "1.13.5" % "test",

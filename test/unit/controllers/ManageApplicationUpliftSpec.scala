@@ -22,7 +22,7 @@ import controllers._
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{eq => mockEq, _}
+import org.mockito.ArgumentMatchers.{eq => mockEq, _}
 import play.api.http.Status._
 import play.api.test.{FakeRequest, Helpers, Writeables}
 import play.filters.csrf.CSRF.TokenProvider

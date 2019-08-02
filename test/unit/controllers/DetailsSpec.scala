@@ -23,7 +23,7 @@ import domain._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
 import play.api.libs.json.Json
 import play.api.mvc.Result

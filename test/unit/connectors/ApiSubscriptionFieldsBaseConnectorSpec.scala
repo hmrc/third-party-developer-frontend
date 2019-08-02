@@ -19,11 +19,12 @@ package unit.connectors
 import java.util.UUID
 
 import akka.actor.ActorSystem
+import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
 import domain.Environment
-import org.mockito.Matchers.{any, eq => meq}
+import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -51,14 +52,17 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
     val mockAppConfig : ApplicationConfig = mock[ApplicationConfig]
+    val mockFutureTimeoutSupport: FutureTimeoutSupport = mock[FutureTimeoutSupport]
     when(mockAppConfig.retryCount).thenReturn(1)
 
-    val underTest = new ApiSubscriptionFieldsTestConnector(mockHttpClient, mockProxiedHttpClient, actorSystem, mockAppConfig)
+    val underTest = new ApiSubscriptionFieldsTestConnector(
+      mockHttpClient, mockProxiedHttpClient, actorSystem, mockFutureTimeoutSupport, mockAppConfig)
   }
 
   class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
                                            val proxiedHttpClient: ProxiedHttpClient,
                                            val actorSystem: ActorSystem,
+                                           val futureTimeout: FutureTimeoutSupport,
                                            val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
     extends ApiSubscriptionFieldsConnector(
       Environment.SANDBOX,

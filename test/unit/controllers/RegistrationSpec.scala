@@ -20,9 +20,9 @@ import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Registration
 import domain.{Developer, RegistrationSuccessful}
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.BDDMockito._
-import org.mockito.Matchers._
-import org.mockito.{ArgumentCaptor, Matchers}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -60,7 +60,7 @@ class RegistrationSpec extends BaseControllerSpec {
         ("organisation", "org")
       )
 
-      val requestCaptor = ArgumentCaptor.forClass(classOf[domain.Registration])
+      val requestCaptor: ArgumentCaptor[domain.Registration] = ArgumentCaptor.forClass(classOf[domain.Registration])
       given(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).willReturn(RegistrationSuccessful)
 
       val result = await(underTest.register()(request))
@@ -83,7 +83,7 @@ class RegistrationSpec extends BaseControllerSpec {
         ("confirmpassword", "VALID@1q2w3e")
       )
 
-      val requestCaptor = ArgumentCaptor.forClass(classOf[domain.Registration])
+      val requestCaptor: ArgumentCaptor[domain.Registration] = ArgumentCaptor.forClass(classOf[domain.Registration])
       given(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).willReturn(RegistrationSuccessful)
 
       await(underTest.register()(request))
@@ -96,7 +96,7 @@ class RegistrationSpec extends BaseControllerSpec {
     val code = "verificationCode"
 
     "redirect the user to login if their verification link matches an account" in new Setup {
-      given(underTest.connector.verify(Matchers.eq(code))(any[HeaderCarrier])).willReturn(OK)
+      given(underTest.connector.verify(meq(code))(any[HeaderCarrier])).willReturn(OK)
       val result = await(underTest.verify(code)(FakeRequest()))
 
       status(result) shouldBe OK
@@ -107,7 +107,7 @@ class RegistrationSpec extends BaseControllerSpec {
       val email = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
       val request = FakeRequest().withSession(newSessionParams: _*)
-      given(underTest.connector.resendVerificationEmail(Matchers.eq(email))(any[HeaderCarrier])).willReturn(NO_CONTENT)
+      given(underTest.connector.resendVerificationEmail(meq(email))(any[HeaderCarrier])).willReturn(NO_CONTENT)
       val result = await(underTest.resendVerification()(request))
 
       status(result) shouldBe SEE_OTHER
@@ -117,7 +117,7 @@ class RegistrationSpec extends BaseControllerSpec {
       val email = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
       val request = FakeRequest().withSession(newSessionParams: _*)
-      given(underTest.connector.resendVerificationEmail(Matchers.eq(email))(any[HeaderCarrier])).willReturn(NOT_FOUND)
+      given(underTest.connector.resendVerificationEmail(meq(email))(any[HeaderCarrier])).willReturn(NOT_FOUND)
       val result = await(underTest.resendVerification()(request))
 
       status(result) shouldBe NOT_FOUND

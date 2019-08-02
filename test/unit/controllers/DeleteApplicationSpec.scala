@@ -22,7 +22,7 @@ import controllers.DeleteApplication
 import domain._
 import org.joda.time.DateTime
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito.verify
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

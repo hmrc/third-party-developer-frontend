@@ -22,7 +22,7 @@ import domain.{Developer, TicketCreated, _}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito._
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -89,7 +89,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
           "emailaddress" -> "peter@example.com",
           "comments" -> "A+++, good seller, would buy again")
 
-      val captor = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])
+      val captor: ArgumentCaptor[SupportEnquiryForm] = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])
       given(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], any[HeaderCarrier])).willReturn(TicketCreated)
 
       val result = await(addToken(underTest.submitSupportEnquiry())(request))

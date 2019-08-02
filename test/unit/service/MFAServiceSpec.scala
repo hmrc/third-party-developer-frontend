@@ -17,7 +17,7 @@
 package unit.service
 
 import connectors.ThirdPartyDeveloperConnector
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito._
 import org.scalatest.Matchers
 import org.scalatest.mockito.MockitoSugar

@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import connectors.DeskproConnector
 import controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import domain.{DeskproTicket, Feedback, TicketCreated, TicketId}
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures

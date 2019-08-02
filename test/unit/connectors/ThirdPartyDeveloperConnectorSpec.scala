@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import connectors._
 import domain.Session._
 import domain._
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar

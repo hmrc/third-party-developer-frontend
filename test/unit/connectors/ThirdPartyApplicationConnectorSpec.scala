@@ -22,7 +22,7 @@ import config.ApplicationConfig
 import connectors.{NoopConnectorMetrics, ProxiedHttpClient, ThirdPartyApplicationConnector}
 import domain._
 import org.joda.time.DateTimeZone
-import org.mockito.Matchers.{any, eq => meq}
+import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar

@@ -20,7 +20,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import config.{SessionTimeoutFilterWithWhitelist, WhitelistedCall}
 import org.joda.time.{DateTime, DateTimeZone, Duration}
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
@@ -40,8 +40,8 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
     implicit val sys = ActorSystem("SessionTimeoutFilterWithWhitelistSpec")
     implicit val mat = ActorMaterializer()
     val config = SessionTimeoutFilterConfig(
-        timeoutDuration = Duration.standardSeconds(1),
-        onlyWipeAuthToken = false)
+      timeoutDuration = Duration.standardSeconds(1),
+      onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
     val whitelistedUrl = controllers.routes.UserLoginAccount.login().url
@@ -57,7 +57,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
     when(nextOperationFunction.apply(any())).thenAnswer(new Answer[Future[Result]] {
       override def answer(invocation: InvocationOnMock): Future[Result] = {
         val headers = invocation.getArguments.head.asInstanceOf[RequestHeader]
-        Future.successful(Results.Ok.withSession(headers.session+("authToken" -> bearerToken)))
+        Future.successful(Results.Ok.withSession(headers.session + ("authToken" -> bearerToken)))
       }
     })
 
@@ -74,7 +74,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
 
     "leave the access_uri intact when path in whitelist" in new Setup {
       val request = FakeRequest(method = "POST", path = whitelistedUrl)
-        .withSession("ts" -> now, "access_uri" -> accessUri )
+        .withSession("ts" -> now, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
@@ -166,7 +166,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
 
     "leave the access_uri intact when path in whitelist" in new Setup {
       val request = FakeRequest(method = "GET", path = whitelistedUrl)
-        .withSession("access_uri" -> accessUri )
+        .withSession("access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data

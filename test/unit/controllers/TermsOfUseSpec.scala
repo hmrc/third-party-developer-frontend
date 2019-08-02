@@ -24,8 +24,8 @@ import domain._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -148,7 +148,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       when(underTest.appConfig.currentTermsOfUseVersion).thenReturn(version)
 
       givenTheApplicationExists()
-      val captor = ArgumentCaptor.forClass(classOf[CheckInformation])
+      val captor: ArgumentCaptor[CheckInformation] = ArgumentCaptor.forClass(classOf[CheckInformation])
       given(underTest.applicationService.updateCheckInformation(mockEq(appId), captor.capture())(any())).willReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")

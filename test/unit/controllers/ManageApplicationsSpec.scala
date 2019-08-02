@@ -24,7 +24,7 @@ import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider

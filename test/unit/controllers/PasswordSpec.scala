@@ -20,9 +20,8 @@ import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers.{Password, routes}
 import domain.{ChangePassword, InvalidResetCode, PasswordReset, UnverifiedAccount}
+import org.mockito.ArgumentMatchers.{eq => meq, any}
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers
-import org.mockito.Matchers._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -54,27 +53,27 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
 
     def mockRequestResetFor(email: String) =
-      given(mockConnector.requestReset(Matchers.eq(email))(any[HeaderCarrier]))
+      given(mockConnector.requestReset(meq(email))(any[HeaderCarrier]))
         .willReturn(Future.successful(OK))
 
     def mockConnectorUnverifiedForReset(email: String, password: String) =
-      given(mockConnector.reset(Matchers.eq(PasswordReset(email, password)))(any[HeaderCarrier]))
+      given(mockConnector.reset(meq(PasswordReset(email, password)))(any[HeaderCarrier]))
         .willReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForRequestReset(email: String) =
-      given(mockConnector.requestReset(Matchers.eq(email))(any[HeaderCarrier]))
+      given(mockConnector.requestReset(meq(email))(any[HeaderCarrier]))
         .willReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForChangePassword(email: String, oldPassword: String, newPassword: String) =
-      given(mockConnector.changePassword(Matchers.eq(ChangePassword(email, oldPassword, newPassword)))(any[HeaderCarrier]))
+      given(mockConnector.changePassword(meq(ChangePassword(email, oldPassword, newPassword)))(any[HeaderCarrier]))
         .willReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForValidateReset(code: String) =
-      given(mockConnector.fetchEmailForResetCode(Matchers.eq(code))(any[HeaderCarrier]))
+      given(mockConnector.fetchEmailForResetCode(meq(code))(any[HeaderCarrier]))
         .willReturn(failed(new UnverifiedAccount))
 
     def mockConnectorInvalidResetCodeForValidateReset(code: String) =
-      given(mockConnector.fetchEmailForResetCode(Matchers.eq(code))(any[HeaderCarrier]))
+      given(mockConnector.fetchEmailForResetCode(meq(code))(any[HeaderCarrier]))
         .willReturn(failed(new InvalidResetCode))
 
     val emailFieldName = "emailaddress"

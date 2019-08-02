@@ -27,7 +27,7 @@ import domain._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, anyString, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, anyString, eq => mockEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -670,7 +670,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val productionApp = productionApplication.copy(collaborators = teamMembers)
     val subject = "Request to delete an application"
-    val captor = ArgumentCaptor.forClass(classOf[DeskproTicket])
+    val captor: ArgumentCaptor[DeskproTicket] = ArgumentCaptor.forClass(classOf[DeskproTicket])
 
     "create a deskpro ticket and audit record for an Admin in a Sandbox app" in new Setup {
 

@@ -22,7 +22,7 @@ import controllers._
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito._
 import play.api.mvc.Result
 import play.api.test.FakeRequest

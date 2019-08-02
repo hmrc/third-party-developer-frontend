@@ -19,6 +19,7 @@ package connectors
 import java.net.URLEncoder.encode
 
 import akka.actor.ActorSystem
+import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import domain.ApiSubscriptionFields._
 import domain.Environment
@@ -99,6 +100,7 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
 class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient,
                                                       val proxiedHttpClient: ProxiedHttpClient,
                                                       val actorSystem: ActorSystem,
+                                                      val futureTimeout: FutureTimeoutSupport,
                                                       val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends ApiSubscriptionFieldsConnector(
     Environment.SANDBOX,
@@ -113,6 +115,7 @@ class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient
 class ApiSubscriptionFieldsProductionConnector @Inject()(val httpClient: HttpClient,
                                                          val proxiedHttpClient: ProxiedHttpClient,
                                                          val actorSystem: ActorSystem,
+                                                         val futureTimeout: FutureTimeoutSupport,
                                                          val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
   extends ApiSubscriptionFieldsConnector(
     Environment.PRODUCTION,
