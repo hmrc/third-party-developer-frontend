@@ -19,6 +19,7 @@ package unit.connectors
 import java.util.UUID
 
 import akka.actor.ActorSystem
+import config.ApplicationConfig
 import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
 import domain.Environment
@@ -49,13 +50,16 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
   trait Setup {
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
+    val mockAppConfig : ApplicationConfig = mock[ApplicationConfig]
+    when(mockAppConfig.retryCount).thenReturn(1)
 
-    val underTest = new ApiSubscriptionFieldsTestConnector(mockHttpClient, mockProxiedHttpClient, actorSystem)
+    val underTest = new ApiSubscriptionFieldsTestConnector(mockHttpClient, mockProxiedHttpClient, actorSystem, mockAppConfig)
   }
 
   class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
                                            val proxiedHttpClient: ProxiedHttpClient,
-                                           val actorSystem: ActorSystem)(implicit val ec: ExecutionContext)
+                                           val actorSystem: ActorSystem,
+                                           val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
     extends ApiSubscriptionFieldsConnector(
       Environment.SANDBOX,
       useProxy = false,
@@ -65,12 +69,12 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
       proxiedHttpClient = proxiedHttpClient) {
   }
 
-  def squidProxyRelatedBadRequest: Future[BadRequestException] = {
-    Future.failed(new BadRequestException(
+  private def squidProxyRelatedBadRequest = {
+    new BadRequestException(
       "GET of 'https://api.development.tax.service.gov.uk:443/testing/api-subscription-fields/field/application/" +
         "xxxyyyzzz/context/api-platform-test/version/7.0' returned 400 (Bad Request). Response body " +
         "'<html>\n<head><title>400 Bad Request</title></head>\n<body bgcolor=\"white\">\n" +
-        "<center><h1>400 Bad Request</h1></center>\n<hr><center>nginx</center>\n</body>\n</html>\n'"))
+        "<center><h1>400 Bad Request</h1></center>\n<hr><center>nginx</center>\n</body>\n</html>\n'")
   }
 
   "fetchFieldValues" should {
