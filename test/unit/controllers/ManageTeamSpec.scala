@@ -24,7 +24,7 @@ import domain._
 import helpers.string._
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, anyString, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, anyString, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

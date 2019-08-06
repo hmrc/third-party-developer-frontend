@@ -17,10 +17,11 @@
 package unit.connectors
 
 import akka.actor.ActorSystem
+import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import connectors.{ApiSubscriptionFieldsProductionConnector, ApiSubscriptionFieldsSandboxConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionField}
-import org.mockito.Matchers.{any, eq => meq}
+import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -49,6 +50,7 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
     val mockApplicationConfig: ApplicationConfig = mock[ApplicationConfig]
+    val mockFutureTimeoutSupport: FutureTimeoutSupport = mock[FutureTimeoutSupport]
     private val mockWSProxyServer = mock[WSProxyServer]
 
     when(mockWSProxyServer.principal).thenReturn(None)
@@ -70,7 +72,7 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
 
     "use proxied http client" in new Setup {
       val connector = new ApiSubscriptionFieldsSandboxConnector(
-        mockHttpClient, mockProxiedHttpClient, actorSystem, mockApplicationConfig)
+        mockHttpClient, mockProxiedHttpClient, actorSystem, mockFutureTimeoutSupport, mockApplicationConfig)
 
       when(mockProxiedHttpClient.GET[FieldDefinitionsResponse](any())(any(), any(), any())).thenReturn(Future.successful(validResponse))
 
@@ -85,7 +87,7 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
   "ProductionApiSubscriptionsFieldConnector" should {
     "use non-proxied http client" in new Setup {
       val connector = new ApiSubscriptionFieldsProductionConnector(
-        mockHttpClient, mockProxiedHttpClient, actorSystem, mockApplicationConfig)
+        mockHttpClient, mockProxiedHttpClient, actorSystem, mockFutureTimeoutSupport, mockApplicationConfig)
 
       when(mockHttpClient.GET[FieldDefinitionsResponse](any())(any(), any(), any())).thenReturn(Future.successful(validResponse))
 

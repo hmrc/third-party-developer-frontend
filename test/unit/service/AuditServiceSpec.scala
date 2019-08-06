@@ -18,8 +18,8 @@ package unit.service
 
 import config.ApplicationConfig
 import domain.Developer
-import org.mockito.ArgumentMatcher
-import org.mockito.Matchers._
+import org.mockito.{ArgumentMatcher, ArgumentMatchers}
+import org.mockito.ArgumentMatchers.{any, argThat}
 import org.mockito.Mockito._
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
@@ -104,7 +104,7 @@ class AuditServiceSpec extends UnitSpec with Matchers with MockitoSugar with Sca
 
   private def isSameDataEvent(expected: DataEvent) =
     new ArgumentMatcher[DataEvent] {
-      override def matches(actual: Object) = actual match {
+      override def matches(actual: DataEvent) = actual match {
         case de: DataEvent =>
           de.auditSource == expected.auditSource &&
             de.auditType == expected.auditType &&

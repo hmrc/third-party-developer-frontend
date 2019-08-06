@@ -21,9 +21,8 @@ import java.util.UUID
 import config.ApplicationConfig
 import controllers._
 import domain.{Developer, Session}
+import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers
-import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito._
 import play.api.mvc.Request
 import play.api.test.FakeRequest
@@ -51,11 +50,11 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       messagesApi,
       mock[ApplicationConfig])
 
-    given(underTest.sessionService.destroy(Matchers.eq(session.sessionId))(any[HeaderCarrier]))
+    given(underTest.sessionService.destroy(meq(session.sessionId))(any[HeaderCarrier]))
         .willReturn(Future.successful(NO_CONTENT))
 
     def givenUserLoggedIn() =
-      given(underTest.sessionService.fetch(Matchers.eq(session.sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(session)))
+      given(underTest.sessionService.fetch(meq(session.sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(session)))
 
     val sessionParams = Seq("csrfToken" ->  fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val requestWithCsrfToken = FakeRequest().withLoggedIn(underTest)(sessionId).withSession(sessionParams: _*)
@@ -86,7 +85,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       implicit val request = requestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
       val result = await(underTest.logout()(request))
 
-      verify(underTest.sessionService, atLeastOnce()).destroy(Matchers.eq(session.sessionId))(Matchers.any[HeaderCarrier])
+      verify(underTest.sessionService, atLeastOnce()).destroy(meq(session.sessionId))(any[HeaderCarrier])
       result.session.data shouldBe Map.empty
     }
   }
@@ -138,7 +137,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/developer/logout")
 
-      verify(underTest.deskproService).submitSurvey(mockEq(form))(any[Request[AnyRef]], any[HeaderCarrier])
+      verify(underTest.deskproService).submitSurvey(meq(form))(any[Request[AnyRef]], any[HeaderCarrier])
     }
   }
 }

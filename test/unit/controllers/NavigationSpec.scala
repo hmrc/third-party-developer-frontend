@@ -19,9 +19,9 @@ package unit.controllers
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.Navigation
 import domain.{Developer, NavLink, Session}
+import org.mockito.ArgumentMatchers
 import org.mockito.BDDMockito._
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
@@ -47,7 +47,7 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
       mock[ApplicationConfig]
     )
 
-    given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(successful(Some(Session(sessionId, loggedInUser))))
+    given(underTest.sessionService.fetch(ArgumentMatchers.eq(sessionId))(any[HeaderCarrier])).willReturn(successful(Some(Session(sessionId, loggedInUser))))
 
     val request = if (loggedIn) FakeRequest().withLoggedIn(underTest)(sessionId) else FakeRequest()
     val result = await(underTest.navLinks()(request))

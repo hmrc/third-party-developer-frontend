@@ -23,7 +23,7 @@ import domain._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito.{never, verify}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer

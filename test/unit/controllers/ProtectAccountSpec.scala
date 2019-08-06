@@ -24,7 +24,7 @@ import controllers.{ProtectAccount, routes}
 import domain.{Developer, Session}
 import org.jsoup.Jsoup
 import org.mockito.BDDMockito._
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import play.api.http.Status.{BAD_REQUEST, SEE_OTHER}
 import play.api.mvc.Result
 import play.api.test.FakeRequest

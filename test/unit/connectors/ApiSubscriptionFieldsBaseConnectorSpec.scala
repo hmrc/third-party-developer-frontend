@@ -19,15 +19,18 @@ package unit.connectors
 import java.util.UUID
 
 import akka.actor.ActorSystem
+import akka.pattern.FutureTimeoutSupport
+import config.ApplicationConfig
 import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
 import domain.Environment
-import org.mockito.Matchers.{any, eq => meq}
+import helpers.FutureTimeoutSupportImpl
+import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
-import uk.gov.hmrc.http.{HttpResponse, _}
+import uk.gov.hmrc.http.{BadRequestException, HttpResponse, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -39,6 +42,7 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
   private val actorSystem = ActorSystem("test-actor-system")
 
+  private val futureTimeoutSupport = new FutureTimeoutSupportImpl
   private val clientId = UUID.randomUUID().toString
   private val apiContext = "i-am-a-test"
   private val apiVersion = "1.0"
@@ -49,13 +53,19 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
   trait Setup {
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
+    val mockAppConfig : ApplicationConfig = mock[ApplicationConfig]
+    when(mockAppConfig.retryCount).thenReturn(1)
+    when(mockAppConfig.retryDelayMilliseconds).thenReturn(0)
 
-    val underTest = new ApiSubscriptionFieldsTestConnector(mockHttpClient, mockProxiedHttpClient, actorSystem)
+    val underTest = new ApiSubscriptionFieldsTestConnector(
+      mockHttpClient, mockProxiedHttpClient, actorSystem, futureTimeoutSupport, mockAppConfig)
   }
 
   class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
                                            val proxiedHttpClient: ProxiedHttpClient,
-                                           val actorSystem: ActorSystem)(implicit val ec: ExecutionContext)
+                                           val actorSystem: ActorSystem,
+                                           val futureTimeout: FutureTimeoutSupport,
+                                           val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
     extends ApiSubscriptionFieldsConnector(
       Environment.SANDBOX,
       useProxy = false,
@@ -65,12 +75,12 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
       proxiedHttpClient = proxiedHttpClient) {
   }
 
-  def squidProxyRelatedBadRequest[T]: Future[T] = {
-    Future.failed(new BadRequestException(
+  private def squidProxyRelatedBadRequest = {
+    new BadRequestException(
       "GET of 'https://api.development.tax.service.gov.uk:443/testing/api-subscription-fields/field/application/" +
         "xxxyyyzzz/context/api-platform-test/version/7.0' returned 400 (Bad Request). Response body " +
         "'<html>\n<head><title>400 Bad Request</title></head>\n<body bgcolor=\"white\">\n" +
-        "<center><h1>400 Bad Request</h1></center>\n<hr><center>nginx</center>\n</body>\n</html>\n'"))
+        "<center><h1>400 Bad Request</h1></center>\n<hr><center>nginx</center>\n</body>\n</html>\n'")
   }
 
   "fetchFieldValues" should {
@@ -105,9 +115,10 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
     }
 
     "when retry logic is enabled should retry if call returns 400 Bad Request" in new Setup {
+
       when(mockHttpClient.GET[SubscriptionFields](meq(getUrl))(any(), any(), any()))
         .thenReturn(
-          Future.failed(new BadRequestException("")),
+          Future.failed(squidProxyRelatedBadRequest),
           Future.successful(response)
         )
       val result: Option[SubscriptionFields] = await(underTest.fetchFieldValues(clientId, apiContext, apiVersion))

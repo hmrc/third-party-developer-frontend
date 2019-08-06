@@ -22,7 +22,7 @@ import controllers.Profile
 import domain._
 import org.jsoup.Jsoup
 import org.mockito.BDDMockito._
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito.verify
 import org.mockito.{ArgumentCaptor, Matchers}
 import play.api.http.Status.OK
@@ -63,10 +63,10 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
           ("lastname", "  last  ") // with whitespaces before and after
         )
 
-      val requestCaptor = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
+      val requestCaptor: ArgumentCaptor[UpdateProfileRequest] = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
 
-      given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
-      given(underTest.connector.updateProfile(Matchers.eq(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier])).willReturn(Future.successful(OK))
+      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
+      given(underTest.connector.updateProfile(meq(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier])).willReturn(Future.successful(OK))
 
       val result = await(addToken(underTest.updateProfile())(request))
 
@@ -85,14 +85,14 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
           ("confirmpassword", "StrongNewPwd!2")
         )
 
-      given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
-      given(underTest.connector.changePassword(Matchers.eq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
+      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
+      given(underTest.connector.changePassword(meq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
         .willReturn(Future.failed(new InvalidCredentials()))
 
       val result = await(addToken(underTest.updatePassword())(request))
 
       status(result) shouldBe 401
-      verify(underTest.auditService).audit(mockEq(PasswordChangeFailedDueToInvalidCredentials(loggedInUser.email)), mockEq(null))(any[HeaderCarrier])
+      verify(underTest.auditService).audit(meq(PasswordChangeFailedDueToInvalidCredentials(loggedInUser.email)), meq(null))(any[HeaderCarrier])
     }
 
     "Password updated should have correct page title" in new Setup {
@@ -105,8 +105,8 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
           ("confirmpassword", "StrongNewPwd!2")
         )
 
-      given(underTest.sessionService.fetch(Matchers.eq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
-      given(underTest.connector.changePassword(Matchers.eq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
+      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
+      given(underTest.connector.changePassword(meq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
         .willReturn(Future.successful(OK))
 
       val result = await(addToken(underTest.updatePassword())(request))

@@ -23,7 +23,7 @@ import domain.ApiSubscriptionFields.{SubscriptionField, SubscriptionFields, fiel
 import domain.{Application, Environment}
 import org.joda.time.DateTime
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, anyString, eq => meq}
+import org.mockito.ArgumentMatchers.{any, anyString, eq => meq}
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.scalatest.concurrent.ScalaFutures
