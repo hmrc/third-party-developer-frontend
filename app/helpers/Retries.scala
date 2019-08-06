@@ -41,13 +41,9 @@ trait Retries {
   def retry[A](block: => Future[A]): Future[A] = {
     def loop(previousRetryAttempts: Int = 0)(block: => Future[A]): Future[A] = {
       block.recoverWith {
-        case ex: BadRequestException if (previousRetryAttempts < appConfig.retryCount) => {
+        case ex: BadRequestException if previousRetryAttempts < appConfig.retryCount => {
           val retryAttempt = previousRetryAttempts + 1
           val delay = FiniteDuration(appConfig.retryDelayMilliseconds, TimeUnit.MILLISECONDS)
-          println("Delay is: " + delay)
-
-          //TODO: get rid of following
-          println(s"Retry attempt $retryAttempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
           Logger.warn(s"Retry attempt $retryAttempt of ${appConfig.retryCount} in $delay due to '${ex.getMessage}'")
           futureTimeout.after(delay, actorSystem.scheduler)(loop(retryAttempt)(block))
         }

@@ -16,19 +16,15 @@
 
 package unit.helpers
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.{ActorSystem, Scheduler}
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import helpers.Retries
-import org.mockito.ArgumentMatchers.{any, eq => meq}
-import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito.when
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import play.api.mvc.{RequestHeader, Result, Results}
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -41,7 +37,14 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
   trait Setup {
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
-    val mockFutureTimeoutSupport: FutureTimeoutSupport = mock[FutureTimeoutSupport]
+
+    var actualDelay: Option[FiniteDuration] = None
+    val mockFutureTimeoutSupport: FutureTimeoutSupport = new FutureTimeoutSupport {
+      override def after[T](duration: FiniteDuration, using: Scheduler)(value: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
+        actualDelay = Some(duration)
+        value
+      }
+    }
 
     def underTest = new RetryTestConnector(mockFutureTimeoutSupport, mockAppConfig)
   }
@@ -55,33 +58,28 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
   "Retries" should {
 
+    "wait for the configured delay before retrying" in new Setup {
+      when(mockAppConfig.retryCount).thenReturn(1)
+      private val expectedDelayMilliseconds = Random.nextInt
+      private val expectedDelay = FiniteDuration(expectedDelayMilliseconds, TimeUnit.MILLISECONDS)
+      when(mockAppConfig.retryDelayMilliseconds).thenReturn(expectedDelayMilliseconds)
+
+      intercept[BadRequestException] {
+        await(underTest.retry {
+          Future.failed(new BadRequestException(""))
+        })
+      }
+      actualDelay shouldBe Some(expectedDelay)
+    }
+
     "Retry the configured number of times on Bad Request" in new Setup {
 
       private val expectedRetries = Random.nextInt(3) + 1
       when(mockAppConfig.retryCount).thenReturn(expectedRetries)
-      when(mockFutureTimeoutSupport.after[Unit](any(),any())(any())(any())).thenReturn(???)
-//        .thenAnswer(new Answer[Unit] {
-//        override def answer(invocationOnMock: InvocationOnMock): Unit = {
-//          val block = invocationOnMock.getArguments.apply(2).asInstanceOf[() => Future[Unit]]
-//          block()
-//        }
-//      }
-//      )
-
-
-
-
-//      when(nextOperationFunction.apply(any())).thenAnswer(new Answer[Future[Result]] {
-//        override def answer(invocation: InvocationOnMock): Future[Result] = {
-//          val headers = invocation.getArguments.head.asInstanceOf[RequestHeader]
-//          Future.successful(Results.Ok.withSession(headers.session+("authToken" -> bearerToken)))
-//        }
-//      })
 
       var actualRetries = 0
 
       private val response: Unit = await(underTest.retry {
-
         if (actualRetries < expectedRetries) {
           actualRetries += 1
           Future.failed(new BadRequestException(""))
@@ -93,7 +91,7 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
       actualRetries shouldBe expectedRetries
     }
 
-    "Do not retry when retryCount is configured to zero" in new Setup {
+    "Not retry when retryCount is configured to zero" in new Setup {
 
       private val expectedRetries = 0
       when(mockAppConfig.retryCount).thenReturn(expectedRetries)
@@ -108,7 +106,7 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
       actualCalls shouldBe 1
     }
 
-    "Do not retry on exceptions other than BadRequestException" in new Setup {
+    "Not retry on exceptions other than BadRequestException" in new Setup {
 
       private val expectedRetries = Random.nextInt(3) + 1
       when(mockAppConfig.retryCount).thenReturn(expectedRetries)

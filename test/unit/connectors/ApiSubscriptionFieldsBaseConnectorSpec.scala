@@ -24,6 +24,7 @@ import config.ApplicationConfig
 import connectors.{ApiSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.ApiSubscriptionFields._
 import domain.Environment
+import helpers.FutureTimeoutSupportImpl
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -41,6 +42,7 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
   private val actorSystem = ActorSystem("test-actor-system")
 
+  private val futureTimeoutSupport = new FutureTimeoutSupportImpl
   private val clientId = UUID.randomUUID().toString
   private val apiContext = "i-am-a-test"
   private val apiVersion = "1.0"
@@ -52,11 +54,11 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
     val mockAppConfig : ApplicationConfig = mock[ApplicationConfig]
-    val mockFutureTimeoutSupport: FutureTimeoutSupport = mock[FutureTimeoutSupport]
     when(mockAppConfig.retryCount).thenReturn(1)
+    when(mockAppConfig.retryDelayMilliseconds).thenReturn(0)
 
     val underTest = new ApiSubscriptionFieldsTestConnector(
-      mockHttpClient, mockProxiedHttpClient, actorSystem, mockFutureTimeoutSupport, mockAppConfig)
+      mockHttpClient, mockProxiedHttpClient, actorSystem, futureTimeoutSupport, mockAppConfig)
   }
 
   class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
@@ -113,6 +115,7 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
     }
 
     "when retry logic is enabled should retry if call returns 400 Bad Request" in new Setup {
+
       when(mockHttpClient.GET[SubscriptionFields](meq(getUrl))(any(), any(), any()))
         .thenReturn(
           Future.failed(squidProxyRelatedBadRequest),
