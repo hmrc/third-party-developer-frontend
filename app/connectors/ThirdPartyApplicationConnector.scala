@@ -42,7 +42,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   val useProxy: Boolean
   val bearerToken: String
 
-  def http: HttpClient = if (useProxy) proxiedHttpClient.withAuthorization(bearerToken) else httpClient
+  def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(bearerToken) else httpClient
 
   val api = API("third-party-application")
 

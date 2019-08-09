@@ -16,6 +16,8 @@
 
 package unit.connectors
 
+import java.util.UUID
+
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
@@ -46,7 +48,7 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
       SubscriptionField("field2", "desc2", "hint2", "some other type"))
 
     val validResponse = FieldDefinitionsResponse(fields)
-
+    val apiKey: String = UUID.randomUUID().toString
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
     val mockApplicationConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -59,13 +61,14 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
     when(mockApplicationConfig.apiSubscriptionFieldsSandboxUrl).thenReturn("https://api-subs-sandbox")
     when(mockApplicationConfig.apiSubscriptionFieldsSandboxUseProxy).thenReturn(true)
     when(mockApplicationConfig.apiSubscriptionFieldsSandboxBearerToken).thenReturn(sandboxBearerToken)
+    when(mockApplicationConfig.apiSubscriptionFieldsSandboxApiKey).thenReturn(apiKey)
 
     when(mockApplicationConfig.apiSubscriptionFieldsProductionUrl).thenReturn("https://api-subs-production")
     when(mockApplicationConfig.apiSubscriptionFieldsProductionUseProxy).thenReturn(false)
     when(mockApplicationConfig.apiSubscriptionFieldsProductionBearerToken).thenReturn("")
 
     when(mockProxiedHttpClient.wsProxyServer).thenReturn(Some(mockWSProxyServer))
-    when(mockProxiedHttpClient.withAuthorization(any())).thenReturn(mockProxiedHttpClient)
+    when(mockProxiedHttpClient.withHeaders(any(), any())).thenReturn(mockProxiedHttpClient)
   }
 
   "SandboxApiSubscriptionsFieldConnector" should {
@@ -78,7 +81,7 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
 
       await(connector.fetchFieldDefinitions("my-context", "my-version"))
 
-      verify(mockProxiedHttpClient).withAuthorization(sandboxBearerToken)
+      verify(mockProxiedHttpClient).withHeaders(sandboxBearerToken, apiKey)
       verify(mockProxiedHttpClient).GET[FieldDefinitionsResponse](
         meq("https://api-subs-sandbox/definition/context/my-context/version/my-version"))(any(), any(), any())
     }

@@ -36,6 +36,7 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
                                               private val serviceBaseUrl: String,
                                               private val useProxy: Boolean,
                                               private val bearerToken: String,
+                                              private val apiKey: String,
                                               private val httpClient: HttpClient,
                                               private val proxiedHttpClient: ProxiedHttpClient) extends Retries {
 
@@ -44,7 +45,7 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
   val http: HttpClient = {
     if (useProxy) {
       Logger.debug(s"Using Proxy Server ($environment)")
-      proxiedHttpClient.withAuthorization(bearerToken)
+      proxiedHttpClient.withHeaders(bearerToken, apiKey)
     } else {
       Logger.debug(s"Not using Proxy Server ($environment)")
       httpClient
@@ -107,6 +108,7 @@ class ApiSubscriptionFieldsSandboxConnector @Inject()(val httpClient: HttpClient
     appConfig.apiSubscriptionFieldsSandboxUrl,
     appConfig.apiSubscriptionFieldsSandboxUseProxy,
     appConfig.apiSubscriptionFieldsSandboxBearerToken,
+    appConfig.apiSubscriptionFieldsSandboxApiKey,
     httpClient,
     proxiedHttpClient) {
 }
@@ -122,6 +124,7 @@ class ApiSubscriptionFieldsProductionConnector @Inject()(val httpClient: HttpCli
     appConfig.apiSubscriptionFieldsProductionUrl,
     appConfig.apiSubscriptionFieldsProductionUseProxy,
     appConfig.apiSubscriptionFieldsProductionBearerToken,
+    appConfig.apiSubscriptionFieldsProductionApiKey,
     httpClient,
     proxiedHttpClient) {
 }
