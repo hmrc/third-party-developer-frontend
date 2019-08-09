@@ -51,25 +51,39 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
   private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
 
   trait Setup {
+    val apiKey: String = UUID.randomUUID().toString
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
-    val mockAppConfig : ApplicationConfig = mock[ApplicationConfig]
+    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     when(mockAppConfig.retryCount).thenReturn(1)
     when(mockAppConfig.retryDelayMilliseconds).thenReturn(0)
+    when(mockAppConfig.apiSubscriptionFieldsSandboxApiKey).thenReturn(apiKey)
 
     val underTest = new ApiSubscriptionFieldsTestConnector(
-      mockHttpClient, mockProxiedHttpClient, actorSystem, futureTimeoutSupport, mockAppConfig)
+      useProxy = false, apiKey = "", mockHttpClient, mockProxiedHttpClient, actorSystem, futureTimeoutSupport, mockAppConfig)
   }
 
-  class ApiSubscriptionFieldsTestConnector(val httpClient: HttpClient,
+  trait ProxiedSetup extends Setup {
+
+    when(mockProxiedHttpClient.withHeaders(any(), any())).thenReturn(mockProxiedHttpClient)
+
+    override val underTest = new ApiSubscriptionFieldsTestConnector(
+      useProxy = true, apiKey, mockHttpClient, mockProxiedHttpClient, actorSystem, futureTimeoutSupport, mockAppConfig)
+
+  }
+
+  class ApiSubscriptionFieldsTestConnector(useProxy: Boolean,
+                                           apiKey: String,
+                                           val httpClient: HttpClient,
                                            val proxiedHttpClient: ProxiedHttpClient,
                                            val actorSystem: ActorSystem,
                                            val futureTimeout: FutureTimeoutSupport,
                                            val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
     extends ApiSubscriptionFieldsConnector(
       Environment.SANDBOX,
-      useProxy = false,
+      useProxy = useProxy,
       bearerToken = "",
+      apiKey = apiKey,
       serviceBaseUrl = "",
       httpClient = httpClient,
       proxiedHttpClient = proxiedHttpClient) {
@@ -124,6 +138,15 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
       val result: Option[SubscriptionFields] = await(underTest.fetchFieldValues(clientId, apiContext, apiVersion))
 
       result shouldBe Some(response)
+    }
+
+    "send the x-api-header key when retrieving subscription fields for an API" in new ProxiedSetup {
+
+      when(mockProxiedHttpClient.GET[SubscriptionFields](any())(any(), any(), any())).thenReturn(Future.successful(response))
+
+      await(underTest.fetchFieldValues(clientId, apiContext, apiVersion))
+
+      verify(mockProxiedHttpClient).withHeaders(any(), meq(apiKey))
     }
   }
 

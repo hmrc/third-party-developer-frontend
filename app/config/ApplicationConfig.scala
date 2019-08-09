@@ -37,6 +37,7 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   val thirdPartyApplicationSandboxBearerToken = bearerToken("third-party-application-sandbox")
   val thirdPartyApplicationSandboxUseProxy = useProxy("third-party-application-sandbox")
   val deskproUrl = baseUrl("hmrc-deskpro")
+
   lazy val contactPath = runModeConfiguration.getString(s"$env.contactPath").getOrElse("")
   lazy val reportAProblemPartialUrl = s"$contactPath/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   lazy val reportAProblemNonJSUrl = s"$contactPath/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
@@ -60,10 +61,12 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl = apiSubscriptionFieldsUrl("api-subscription-fields-production")
   val apiSubscriptionFieldsProductionBearerToken = bearerToken("api-subscription-fields-production")
+  val apiSubscriptionFieldsProductionApiKey = apiKey("api-subscription-fields-production")
   val apiSubscriptionFieldsProductionUseProxy = useProxy("api-subscription-fields-production")
   val apiSubscriptionFieldsSandboxUrl = apiSubscriptionFieldsUrl("api-subscription-fields-sandbox")
   val apiSubscriptionFieldsSandboxBearerToken = bearerToken("api-subscription-fields-sandbox")
   val apiSubscriptionFieldsSandboxUseProxy = useProxy("api-subscription-fields-sandbox")
+  val apiSubscriptionFieldsSandboxApiKey = apiKey("api-subscription-fields-sandbox")
 
   private def getConfig(key: String) =
     runModeConfiguration.getString(key).getOrElse {
@@ -95,4 +98,6 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   private def useProxy(serviceName: String) = getConfBool(s"$serviceName.use-proxy", false)
 
   private def bearerToken(serviceName: String) = getConfString(s"$serviceName.bearer-token", "")
+
+  private def apiKey(serviceName: String) = getConfString(s"$serviceName.api-key", "")
 }

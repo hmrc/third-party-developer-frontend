@@ -20,7 +20,7 @@ import akka.actor.ActorSystem
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HeaderNames.ACCEPT
-import play.api.libs.ws.{WSClient, WSProxyServer}
+import play.api.libs.ws.{WSClient, WSProxyServer, WSRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -37,17 +37,25 @@ class ProxiedHttpClient @Inject()(config: Configuration,
   extends DefaultHttpClient(config, auditConnector, wsClient, actorSystem) with WSProxy {
 
   val authorization: Option[Authorization] = None
+  val apiKeyHeader: Option[(String, String)] = None
   private val env = RunMode(environment.mode, config).env
 
-  def withAuthorization(bearerToken: String): ProxiedHttpClient = new ProxiedHttpClient(config, auditConnector, wsClient, environment, actorSystem) {
-    override val authorization = Some(Authorization(s"Bearer $bearerToken"))
+  def withHeaders(bearerToken: String, apiKey: String = ""): ProxiedHttpClient = {
+    new ProxiedHttpClient(config, auditConnector, wsClient, environment, actorSystem) {
+      override val authorization = Some(Authorization(s"Bearer $bearerToken"))
+      override val apiKeyHeader: Option[(String, String)] = if ("" == apiKey) None else Some("x-api-key" -> apiKey)
+    }
   }
 
-  override def wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration(s"$env.proxy")
+  override def wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration(s"$env.proxy", config)
 
-  override def buildRequest[A](url: String)(implicit hc: HeaderCarrier) = {
-    val hcWithBearerAndAccept = hc.copy(authorization = authorization,
-      extraHeaders = hc.extraHeaders :+ (ACCEPT -> "application/hmrc.vnd.1.0+json"))
+  override def buildRequest[A](url: String)(implicit hc: HeaderCarrier): WSRequest = {
+    val extraHeaders = hc.extraHeaders :+ (ACCEPT -> "application/hmrc.vnd.1.0+json")
+    val extraHeadersWithMaybeApiKeyHeader =
+      if (apiKeyHeader.isDefined) extraHeaders :+ apiKeyHeader.get
+      else extraHeaders
+
+    val hcWithBearerAndAccept = hc.copy(authorization = authorization, extraHeaders = extraHeadersWithMaybeApiKeyHeader)
 
     super.buildRequest(url)(hcWithBearerAndAccept)
   }
