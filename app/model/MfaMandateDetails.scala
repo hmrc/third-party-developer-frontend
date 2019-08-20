@@ -16,4 +16,4 @@
 
 package model
 
-case class MfaMandateDetails(showAdminMfaMandatedMessage: Boolean, daysTillAdminMfaMandate: Option[Int])
+case class MfaMandateDetails(showAdminMfaMandatedMessage: Boolean, daysTillAdminMfaMandate: Int, dateOfAdminMfaMandate: String)

@@ -62,7 +62,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   val loginForm: Form[LoginForm] = LoginForm.form
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
-  def mfaMandateDetails = MfaMandateDetails(mfaMandateService.showAdminMfaMandatedMessage, mfaMandateService.daysTillAdminMfaMandate)
+  // TODO - This needs a test
+  def mfaMandateDetails = MfaMandateDetails(mfaMandateService.showAdminMfaMandatedMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0), appConfig.dateOfAdminMfaMandate.toString)
 
   def login = loggedOutAction { implicit request =>
     successful(Ok(signIn("Sign in", loginForm)))
