@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditAction._
-import service.{ApplicationService, AuditAction, AuditService, SessionService}
+import service.{ApplicationService, AuditAction, AuditService, MfaMandateService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import utils.WithCSRFAddToken
@@ -58,6 +58,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mock[ApplicationService],
       messagesApi,
+      mock[MfaMandateService],
       mock[ApplicationConfig]
     )
 

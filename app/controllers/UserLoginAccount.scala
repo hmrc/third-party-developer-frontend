@@ -20,6 +20,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
+import model.MfaMandateDetails
 import play.api.i18n.MessagesApi
 import play.api.mvc.Action
 import service.AuditAction._
@@ -43,12 +44,15 @@ trait Auditing {
   }
 }
 
+// TODO: Test the view renders the new 'section' depending on the mfaMandateService
+
 @Singleton
 class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val errorHandler: ErrorHandler,
                                  val sessionService: SessionService,
                                  val applicationService: ApplicationService,
                                  val messagesApi: MessagesApi,
+                                 val mfaMandateService: MfaMandateService,
                                  implicit val appConfig: ApplicationConfig)
                                 (implicit ec: ExecutionContext)
   extends LoggedOutController with LoginLogout with Auditing {
@@ -57,6 +61,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   val loginForm: Form[LoginForm] = LoginForm.form
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
+
+  def mfaMandateDetails = MfaMandateDetails(mfaMandateService.showAdminMfaMandatedMessage, mfaMandateService.daysTillAdminMfaMandate)
 
   def login = loggedOutAction { implicit request =>
     successful(Ok(signIn("Sign in", loginForm)))
@@ -78,7 +84,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         userAuthenticationResponse.session match {
           case Some(session) => audit(LoginSucceeded, session.developer)
                                 // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
-                                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV()).withSession(request.session)))
+
+                                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails)).withSession(request.session)))
           case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
             .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
         }

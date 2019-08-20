@@ -16,11 +16,10 @@
 
 package config
 
-import helpers.DateTimeHelpers
 import javax.inject.{Inject, Singleton}
 import org.joda.time._
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.api.{Configuration, Environment}
+import service.MfaMandateService
 import uk.gov.hmrc.play.config.ServicesConfig
 
 @Singleton
@@ -60,7 +59,7 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   lazy val retryCount = runModeConfiguration.getInt("retryCount").getOrElse(0)
   lazy val retryDelayMilliseconds = runModeConfiguration.getInt("retryDelayMilliseconds").getOrElse(500)
   lazy val dateOfAdminMfaMandate: Option[LocalDate] = {
-    DateTimeHelpers.parseLocalDate(runModeConfiguration.getString("dateOfAdminMfaMandate"))
+    MfaMandateService.parseLocalDate(runModeConfiguration.getString("dateOfAdminMfaMandate"))
   }
 
   // API Subscription Fields
@@ -72,20 +71,6 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   val apiSubscriptionFieldsSandboxBearerToken = bearerToken("api-subscription-fields-sandbox")
   val apiSubscriptionFieldsSandboxUseProxy = useProxy("api-subscription-fields-sandbox")
   val apiSubscriptionFieldsSandboxApiKey = apiKey("api-subscription-fields-sandbox")
-
-  def showAdminMfaMandatedMessage = {
-    false
-    // TODO
-    //dateOfAdminMfaMandate.fold(false)(mandatedDate => mandatedDate.isBefore(new DateTime()))
-  }
-
-  def daysTillAdminMfaMandate = {
-    0
-    // TODO
-//    (dateOfAdminMfaMandate) match {
-//      case date => Days.daysBetween(new LocalDateTime, date).getDays
-//    }
-  }
 
   private def getConfig(key: String) =
     runModeConfiguration.getString(key).getOrElse {
