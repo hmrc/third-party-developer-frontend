@@ -41,21 +41,32 @@ class Add2SVSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
   "MFA Admin warning" should {
     "not be displayed" in {
-        val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = false, daysTillAdminMfaMandate = 0, dateOfAdminMfaMandate = "1 January 2001"))
+        val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = false, daysTillAdminMfaMandate = 0))
 
         page.contentType should include("text/html")
         page.body should not include "days remaining until 2SV will be mandated for Admins"
       }
 
-    "is displayed with days to go and date" in {
+    "is displayed with plural 'days remaining'" in {
       given(appConfig.dateOfAdminMfaMandate).willReturn(Some(new LocalDate().plusDays(1)))
 
-      val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = 10, dateOfAdminMfaMandate = "2 February 2019"))
+      val daysRemaining = 10
+      val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = daysRemaining))
 
       page.contentType should include("text/html")
 
-      // TODO : Fix pluralization for '2 days' and '1 day'.
-      page.body should include("10 day(s) remaining until 2SV will be mandated for Admins.")
+      page.body should include(s"$daysRemaining days remaining until 2SV will be mandated for Admins.")
+    }
+
+    "is displayed with singular 'day remaining'" in {
+      given(appConfig.dateOfAdminMfaMandate).willReturn(Some(new LocalDate().plusDays(1)))
+
+      val daysRemaining = 1
+      val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = daysRemaining))
+
+      page.contentType should include("text/html")
+
+      page.body should include(s"$daysRemaining day remaining until 2SV will be mandated for Admins.")
     }
   }
 }

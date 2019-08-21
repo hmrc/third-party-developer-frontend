@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
-package model
+package unit.helpers
 
-case class MfaMandateDetails(showAdminMfaMandatedMessage: Boolean, daysTillAdminMfaMandate: Int)
+import helpers.PluralizeHelper
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
+import uk.gov.hmrc.play.test.UnitSpec
+
+class PluralizeHelperSpec extends UnitSpec with ScalaFutures with MockitoSugar {
+  "1" should {
+    "be singular" in {
+        PluralizeHelper.pluralize(1, "cat" , "cats") shouldBe "cat"
+    }
+  }
+
+  "2" should {
+    "be plural" in {
+      PluralizeHelper.pluralize(2, "cat" , "cats") shouldBe "cats"
+    }
+  }
+}

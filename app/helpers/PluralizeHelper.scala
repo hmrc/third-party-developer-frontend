@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
-package model
+package helpers
 
-case class MfaMandateDetails(showAdminMfaMandatedMessage: Boolean, daysTillAdminMfaMandate: Int)
+object PluralizeHelper {
+  def pluralize(count: Int, singular: String, plural: String): String ={
+    if (count == 1) singular
+    else plural
+  }
+}
