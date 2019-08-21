@@ -17,8 +17,9 @@
 package config
 
 import javax.inject.{Inject, Singleton}
-import org.joda.time.DateTime
+import org.joda.time._
 import play.api.{Configuration, Environment}
+import service.MfaMandateService
 import uk.gov.hmrc.play.config.ServicesConfig
 
 @Singleton
@@ -57,6 +58,9 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   lazy val currentTermsOfUseDate = DateTime.parse(runModeConfiguration.getString("currentTermsOfUseDate").getOrElse(""))
   lazy val retryCount = runModeConfiguration.getInt("retryCount").getOrElse(0)
   lazy val retryDelayMilliseconds = runModeConfiguration.getInt("retryDelayMilliseconds").getOrElse(500)
+  lazy val dateOfAdminMfaMandate: Option[LocalDate] = {
+    MfaMandateService.parseLocalDate(runModeConfiguration.getString("dateOfAdminMfaMandate"))
+  }
 
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl = apiSubscriptionFieldsUrl("api-subscription-fields-production")

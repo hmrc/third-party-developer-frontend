@@ -26,6 +26,7 @@ import scala.concurrent.Future
 case class Developer(email: String, firstName: String, lastName: String, organisation: Option[String] = None, mfaEnabled: Option[Boolean] = None) {
   val displayedName = s"$firstName $lastName"
   val displayedNameEncoded = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
+  def isMfaEnabled = mfaEnabled.getOrElse(false)
 }
 
 object Developer {

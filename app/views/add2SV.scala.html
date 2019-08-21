@@ -17,8 +17,9 @@
 @import config.ApplicationConfig
 @import include._
 @import model.Crumb
+@import model.MfaMandateDetails
 
-@()(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(mfaMandateDetails: MfaMandateDetails)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
     title = "Add 2-step verification",
@@ -34,6 +35,9 @@
     </header>
     <section>
         <p>You can now use 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
+        @{
+        if(mfaMandateDetails.showAdminMfaMandatedMessage) <p class="bold">{mfaMandateDetails.daysTillAdminMfaMandate} {helpers.PluralizeHelper.pluralize(mfaMandateDetails.daysTillAdminMfaMandate, "day", "days")} remaining until 2SV will be mandated for Admins. </p>
+        }
         <p><a id="submit" class="button" href="@routes.ProtectAccount.getProtectAccount()">Continue</a></p>
         <p><a id="skip" href="@routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a></p>
     </section>

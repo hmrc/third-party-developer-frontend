@@ -50,7 +50,6 @@ class DeleteApplicationConfirmSpec extends UnitSpec with OneServerPerSuite with 
 
       val document = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", "Delete application") shouldBe true
-      //TODO - should this include the application name env and base url?
       elementExistsByText(document, "h2", "Are you sure you want us to delete this application?") shouldBe true
       elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "yes", "Yes") shouldBe true
       elementIdentifiedByAttrWithValueContainsText(document, "label", "for", "no", "No") shouldBe true
