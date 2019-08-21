@@ -53,6 +53,8 @@ class Add2SVSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
       val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = 10, dateOfAdminMfaMandate = "2 February 2019"))
 
       page.contentType should include("text/html")
+
+      // TODO : Fix pluralization for '2 days' and '1 day'.
       page.body should include("10 day(s) remaining until 2SV will be mandated for Admins.")
     }
   }
