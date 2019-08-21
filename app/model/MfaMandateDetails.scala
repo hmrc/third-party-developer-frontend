@@ -16,4 +16,5 @@
 
 package model
 
+// TODO: Remove dateOfAdminMfaMandate from here (it's not used)
 case class MfaMandateDetails(showAdminMfaMandatedMessage: Boolean, daysTillAdminMfaMandate: Int, dateOfAdminMfaMandate: String)

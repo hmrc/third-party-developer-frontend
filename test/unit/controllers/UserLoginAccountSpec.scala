@@ -21,6 +21,7 @@ import java.util.UUID
 import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import domain._
+import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers.{any, eq => meq, _}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
@@ -52,16 +53,21 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   val userAuthenticationWith2SVResponse = UserAuthenticationResponse(accessCodeRequired = true, nonce = Some(nonce), session = None)
 
   trait Setup {
+    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+    val mfaMandateService: MfaMandateService = mock[MfaMandateService]
+
+    when(mfaMandateService.daysTillAdminMfaMandate).thenReturn(Some(10))
+    when(mfaMandateService.showAdminMfaMandatedMessage).thenReturn(true)
+    when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(new LocalDate().plusDays(10)))
 
     val underTest = new UserLoginAccount(mock[AuditService],
       mock[ErrorHandler],
       mock[SessionService],
       mock[ApplicationService],
       messagesApi,
-      mock[MfaMandateService],
-      mock[ApplicationConfig]
+      mfaMandateService,
+      mockAppConfig
     )
-
 
     def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse]) =
       given(underTest.sessionService.authenticate(meq(email), meq(password))(any[HeaderCarrier])).willReturn(result)
@@ -110,6 +116,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       status(result) shouldBe OK
       bodyOf(result) should include("Add 2-step verification")
+      // TODO : Fix pluralization for '2 days' and '1 day'.
+      bodyOf(result) should include("10 day(s) remaining until 2SV will be mandated for Admins")
+
       verify(underTest.auditService, times(1)).audit(
         meq(LoginSucceeded), meq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
     }
