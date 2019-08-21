@@ -30,11 +30,11 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
   val dateInTheFuture: LocalDate = Instant.now().plus(Duration.standardDays(1L)).toDateTime().toLocalDate
   val now: LocalDate = Instant.now().toDateTime().toLocalDate
 
+  private val mockAppConfig = mock[ApplicationConfig]
+
   "showAdminMfaMandateMessage" when {
     "Mfa mandate date has passed" should {
       "be false" in {
-        val mockAppConfig = mock[ApplicationConfig]
-
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
 
         val service = new MfaMandateService(mockAppConfig)
@@ -45,7 +45,6 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
 
     "Mfa mandate date has not passed" should {
       "be true" in {
-        val mockAppConfig = mock[ApplicationConfig]
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
 
         val service = new MfaMandateService(mockAppConfig)
@@ -56,7 +55,6 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
 
     "Mfa mandate date is not set" should {
       "be false" in {
-        val mockAppConfig = mock[ApplicationConfig]
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(None)
 
         val service = new MfaMandateService(mockAppConfig)
@@ -67,9 +65,8 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
   }
 
   "daysTillAdminMfaMandate" when {
-    "mfaAdminMandateDate is one day in the future" should {
+    "mfaAdminMandateDate is 1 day in the future" should {
       "be 1" in {
-        val mockAppConfig = mock[ApplicationConfig]
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
 
         val service = new MfaMandateService(mockAppConfig)
@@ -77,12 +74,9 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
         service.daysTillAdminMfaMandate shouldBe Some(1)
       }
     }
-  }
 
-  "daysTillAdminMfaMandate" when {
     "mfaAdminMandateDate is now" should {
       "be 0" in {
-        val mockAppConfig = mock[ApplicationConfig]
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(now))
 
         val service = new MfaMandateService(mockAppConfig)
@@ -90,12 +84,9 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
         service.daysTillAdminMfaMandate shouldBe Some(0)
       }
     }
-  }
 
-  "daysTillAdminMfaMandate" when {
     "mfaAdminMandateDate is in the past" should {
       "be none" in {
-        val mockAppConfig = mock[ApplicationConfig]
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
 
         val service = new MfaMandateService(mockAppConfig)
@@ -108,7 +99,6 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
   "daysTillAdminMfaMandate" when {
     "mfaAdminMandateDate is not set" should {
       "be none" in {
-        val mockAppConfig = mock[ApplicationConfig]
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
 
         val service = new MfaMandateService(mockAppConfig)
@@ -119,26 +109,26 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
   }
 
   "parseLocalDate" when {
-    "an empty date value" should {
+    "an empty date value is used" should {
       "parse to None" in {
         MfaMandateService.parseLocalDate(Some("")) shouldBe None
       }
     }
 
-    "an whitespace date value" should {
+    "an whitespace date value is used" should {
       "parse to None" in {
         MfaMandateService.parseLocalDate(Some(" ")) shouldBe None
       }
     }
 
-    "an None date value" should {
+    "an None date value is used" should {
       "parse to None" in {
         MfaMandateService.parseLocalDate(None) shouldBe None
       }
     }
 
-    "the date 2001-02-03" should {
-      "parse to a local date" in {
+    "the date 2001-02-03 is used" should {
+      "parse to a 2001-02-03" in {
         val year = 2001
         val month = 2
         val day = 3
@@ -146,8 +136,4 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
       }
     }
   }
-
-
-
-
 }
