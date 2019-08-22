@@ -22,24 +22,25 @@ import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import model.MfaMandateDetails
 import play.api.i18n.MessagesApi
-import play.api.mvc.Action
+import play.api.mvc.{Action, AnyContent}
 import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import views.html._
 import views.html.protectaccount._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 
 trait Auditing {
   val auditService: AuditService
 
-  def audit(auditAction: AuditAction, data: Map[String, String])(implicit hc: HeaderCarrier) = {
+  def audit(auditAction: AuditAction, data: Map[String, String])(implicit hc: HeaderCarrier): Future[AuditResult] = {
     auditService.audit(auditAction, data)
   }
 
-  def audit(auditAction: AuditAction, developer: Developer)(implicit hc: HeaderCarrier) = {
+  def audit(auditAction: AuditAction, developer: Developer)(implicit hc: HeaderCarrier): Future[AuditResult] = {
     auditService.audit(auditAction, Map("developerEmail" -> developer.email, "developerFullName" -> developer.displayedName))
   }
 }
@@ -50,9 +51,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val sessionService: SessionService,
                                  val applicationService: ApplicationService,
                                  val messagesApi: MessagesApi,
-                                 val mfaMandateService: MfaMandateService,
-                                 implicit val appConfig: ApplicationConfig)
-                                (implicit ec: ExecutionContext)
+                                 val mfaMandateService: MfaMandateService)
+                                (implicit ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedOutController with LoginLogout with Auditing {
 
   import play.api.data._
@@ -61,11 +61,11 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
 
-  def login = loggedOutAction { implicit request =>
+  def login: Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(signIn("Sign in", loginForm)))
   }
 
-  def accountLocked = Action.async { implicit request =>
+  def accountLocked: Action[AnyContent] = Action.async { implicit request =>
     for {
       _ <- tokenAccessor.extract(request)
         .map(sessionService.destroy)
@@ -73,25 +73,27 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     } yield Locked(views.html.accountLocked())
   }
 
-
-  def authenticate = Action.async { implicit request =>
+  def authenticate: Action[AnyContent] = Action.async { implicit request =>
     val requestForm = loginForm.bindFromRequest
+
+    def routeToLoginOr2SV(login: LoginForm, userAuthenticationResponse: UserAuthenticationResponse, showAdminMfaMandateMessage: Boolean) = {
+      def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
+
+      userAuthenticationResponse.session match {
+        case Some(session) => audit(LoginSucceeded, session.developer)
+          // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
+          gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails)).withSession(request.session)))
+        case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+          .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+      }
+    }
+
     requestForm.fold(
       errors => successful(BadRequest(signIn("Sign in", errors))),
       login => sessionService.authenticate(login.emailaddress, login.password) flatMap {
         userAuthenticationResponse => {
-          // TODO - A bit ugly
           mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress).flatMap(showAdminMfaMandateMessage => {
-            def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
-
-            userAuthenticationResponse.session match {
-              case Some(session) => audit(LoginSucceeded, session.developer)
-                // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
-
-                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails)).withSession(request.session)))
-              case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
-                .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
-            }
+            routeToLoginOr2SV(login, userAuthenticationResponse, showAdminMfaMandateMessage)
           })
         }
       } recover {
@@ -110,7 +112,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     )
   }
 
-  def authenticateTotp = Action.async { implicit request =>
+  def authenticateTotp: Action[AnyContent] = Action.async { implicit request =>
     ProtectAccountForm.form.bindFromRequest.fold(
       errors => successful(BadRequest(logInAccessCode(errors))),
       validForm => {
@@ -127,19 +129,19 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     )
   }
 
-  def get2SVHelpConfirmationPage() = loggedOutAction { implicit request =>
+  def get2SVHelpConfirmationPage(): Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(protectAccountNoAccessCode()))
   }
 
-  def get2SVHelpCompletionPage() = loggedOutAction { implicit request =>
+  def get2SVHelpCompletionPage(): Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(protectAccountNoAccessCodeComplete()))
   }
 
-  def confirm2SVHelp() = loggedOutAction { implicit request =>
+  def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
     applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeComplete()))
   }
 
-  def get2SVNotSetPage() = Action.async { implicit request =>
+  def get2SVNotSetPage(): Action[AnyContent] = Action.async { implicit request =>
     successful(Ok(userDidNotAdd2SV()))
   }
 }
