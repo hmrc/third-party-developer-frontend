@@ -76,22 +76,25 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   def authenticate = Action.async { implicit request =>
     val requestForm = loginForm.bindFromRequest
+
+    def routeToLoginOr2SV(login: LoginForm, userAuthenticationResponse: UserAuthenticationResponse, showAdminMfaMandateMessage: Boolean) = {
+      def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
+
+      userAuthenticationResponse.session match {
+        case Some(session) => audit(LoginSucceeded, session.developer)
+          // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
+          gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails)).withSession(request.session)))
+        case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+          .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+      }
+    }
+
     requestForm.fold(
       errors => successful(BadRequest(signIn("Sign in", errors))),
       login => sessionService.authenticate(login.emailaddress, login.password) flatMap {
         userAuthenticationResponse => {
-          // TODO - A bit ugly
           mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress).flatMap(showAdminMfaMandateMessage => {
-            def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
-
-            userAuthenticationResponse.session match {
-              case Some(session) => audit(LoginSucceeded, session.developer)
-                // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
-
-                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails)).withSession(request.session)))
-              case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
-                .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
-            }
+            routeToLoginOr2SV(login, userAuthenticationResponse, showAdminMfaMandateMessage)
           })
         }
       } recover {
