@@ -31,9 +31,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val sessionService: SessionService,
                                   val errorHandler: ErrorHandler,
-                                  val messagesApi: MessagesApi,
-                                  implicit val appConfig: ApplicationConfig)
-                                 (implicit ec: ExecutionContext) extends LoggedInController with LoginLogout {
+                                  val messagesApi: MessagesApi)
+                                 (implicit ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController with LoginLogout {
 
   def logoutSurvey = loggedInAction { implicit request =>
     val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)

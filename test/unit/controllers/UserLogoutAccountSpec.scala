@@ -42,13 +42,14 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   val sessionId = UUID.randomUUID().toString
   val session = Session(sessionId, user)
 
+
   trait Setup {
+    implicit val mockAppConfig = mock[ApplicationConfig]
     val underTest = new UserLogoutAccount(
       mock[DeskproService],
       mock[SessionService],
       mock[config.ErrorHandler],
-      messagesApi,
-      mock[ApplicationConfig])
+      messagesApi)
 
     given(underTest.sessionService.destroy(meq(session.sessionId))(any[HeaderCarrier]))
         .willReturn(Future.successful(NO_CONTENT))

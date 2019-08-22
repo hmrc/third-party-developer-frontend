@@ -53,7 +53,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   val userAuthenticationWith2SVResponse = UserAuthenticationResponse(accessCodeRequired = true, nonce = Some(nonce), session = None)
 
   trait Setup {
-    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+    implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     val mfaMandateService: MfaMandateService = mock[MfaMandateService]
 
     private val daysRemaining = 10
@@ -66,8 +66,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mock[ApplicationService],
       messagesApi,
-      mfaMandateService,
-      mockAppConfig
+      mfaMandateService
     )
 
     def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse]) : Unit =
