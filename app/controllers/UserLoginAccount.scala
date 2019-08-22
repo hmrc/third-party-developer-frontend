@@ -60,7 +60,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   val loginForm: Form[LoginForm] = LoginForm.form
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
-  def mfaMandateDetails = MfaMandateDetails(mfaMandateService.showAdminMfaMandatedMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
 
   def login = loggedOutAction { implicit request =>
     successful(Ok(signIn("Sign in", loginForm)))
@@ -74,18 +73,26 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     } yield Locked(views.html.accountLocked())
   }
 
+
   def authenticate = Action.async { implicit request =>
     val requestForm = loginForm.bindFromRequest
     requestForm.fold(
       errors => successful(BadRequest(signIn("Sign in", errors))),
-      login => sessionService.authenticate(login.emailaddress, login.password) flatMap { userAuthenticationResponse =>
-        userAuthenticationResponse.session match {
-          case Some(session) => audit(LoginSucceeded, session.developer)
-                                // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
+      login => sessionService.authenticate(login.emailaddress, login.password) flatMap {
+        userAuthenticationResponse => {
+          // TODO - A bit ugly
+          mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress).flatMap(showAdminMfaMandateMessage => {
+            def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
 
-                                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails)).withSession(request.session)))
-          case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
-            .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+            userAuthenticationResponse.session match {
+              case Some(session) => audit(LoginSucceeded, session.developer)
+                // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
+
+                gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails)).withSession(request.session)))
+              case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+                .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+            }
+          })
         }
       } recover {
         case _: InvalidEmail =>

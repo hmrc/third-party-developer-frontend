@@ -16,6 +16,7 @@
 
 package it
 
+import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -42,11 +43,14 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
       .in(Mode.Test)
       .build()
 
-  val stubPort = sys.env.getOrElse("WIREMOCK", "11111").toInt
+  private val stubPort = sys.env.getOrElse("WIREMOCK", "11111").toInt
   val stubHost = "localhost"
   val wireMockUrl = s"http://$stubHost:$stubPort"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
   val sessionId = "1234567890"
+
+  private val contentType = "Content-Type"
+  private val contentTypeApplicationJson = "application/json"
 
   override def beforeEach() {
     wireMockServer.start()
@@ -67,8 +71,8 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
   "CSRF handling for login" when {
     "there is no CSRF token" should {
       "redirect back to the login page" in new Setup {
-        val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
-        val result = await(route(app, request)).get
+        private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
+        private val result = await(route(app, request)).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -77,8 +81,8 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
     "there is no CSRF token in the request body but it is present in the headers" should {
       "redirect back to the login page" in new Setup {
-        val request = loginRequest.withCSRFToken.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
-        val result = await(route(app, request)).get
+        private val request = loginRequest.withCSRFToken.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
+        private val result = await(route(app, request)).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -87,8 +91,8 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
     "there is a CSRF token in the request body but not in the headers" should {
       "redirect back to the login page" in new Setup {
-        val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
-        val result = await(route(app, request)).get
+        private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
+        private val result = await(route(app, request)).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -97,13 +101,13 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
     "there is a valid CSRF token" should {
       "display 2SV sign-up reminder if user does not have it set up" in new Setup {
-        implicit val materializer = fakeApplication().materializer
+        implicit val materializer: Materializer = fakeApplication().materializer
 
         stubFor(post(urlEqualTo("/authenticate"))
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(contentType, contentTypeApplicationJson)
               .withBody(
                 s"""
                    |{
@@ -118,10 +122,12 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
                    |  }
                    |}""".stripMargin)))
 
-        val request = loginRequest.withCSRFToken
+        setupThirdPartyApplicationSearchApplicationByEmailStub()
+
+        private val request = loginRequest.withCSRFToken
           .withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
 
-        val result = await(route(app, request)).get
+        private val result = await(route(app, request)).get
 
         status(result) shouldBe OK
         bodyOf(result) contains "Add 2-step verification"
@@ -129,13 +135,13 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
       }
 
       "display 2SV code entry page if user has it configured" in new Setup {
-        implicit val materializer = fakeApplication().materializer
+        implicit val materializer: Materializer = fakeApplication().materializer
 
         stubFor(post(urlEqualTo("/authenticate"))
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(contentType, contentTypeApplicationJson)
               .withBody(
                 s"""
                    |{
@@ -143,15 +149,25 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
                    |  "nonce": "123456"
                    |}""".stripMargin)))
 
-        val request = loginRequest.withCSRFToken
+        setupThirdPartyApplicationSearchApplicationByEmailStub()
+
+        private val request = loginRequest.withCSRFToken
           .withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
 
-        val result = await(route(app, request)).get
+        private val result = await(route(app, request)).get
 
         status(result) shouldBe OK
         bodyOf(result) contains "Enter your access code"
         verify(1, postRequestedFor(urlMatching("/authenticate")))
       }
     }
+  }
+
+  private def setupThirdPartyApplicationSearchApplicationByEmailStub(): Unit = {
+    stubFor(get(urlEqualTo("/developer/applications?emailAddress=thirdpartydeveloper%40example.com&environment=PRODUCTION"))
+      .willReturn(
+        aResponse()
+          .withStatus(OK)
+          .withHeader(contentType, contentTypeApplicationJson).withBody("[]")))
   }
 }
