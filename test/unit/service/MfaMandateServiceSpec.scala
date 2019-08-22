@@ -17,79 +17,156 @@
 package unit.service
 
 import config.ApplicationConfig
-import org.joda.time.{Duration, Instant, LocalDate}
+import domain.{Application, Collaborator, Environment, Role}
+import org.joda.time.{DateTime, Duration, Instant, LocalDate}
+import org.mockito.ArgumentMatchers.{any, anyString, eq => mockEq}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Matchers, WordSpec}
-import service.MfaMandateService
+import service.{ApplicationService, MfaMandateService}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
 
-class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar with ScalaFutures {
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-  val dateInThePast: LocalDate = Instant.now().minus(Duration.standardDays(1L)).toDateTime().toLocalDate
-  val dateInTheFuture: LocalDate = Instant.now().plus(Duration.standardDays(1L)).toDateTime().toLocalDate
-  val now: LocalDate = Instant.now().toDateTime().toLocalDate
+class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar with ScalaFutures with UnitSpec {
 
-  private val mockAppConfig = mock[ApplicationConfig]
+  trait Setup {
+    val dateInThePast: LocalDate = Instant.now().minus(Duration.standardDays(1L)).toDateTime().toLocalDate
+    val dateInTheFuture: LocalDate = Instant.now().plus(Duration.standardDays(1L)).toDateTime().toLocalDate
+    val now: LocalDate = Instant.now().toDateTime().toLocalDate
+
+    val email = "test@example.com"
+
+    implicit val mockHeaderCarrier = mock[HeaderCarrier]
+
+    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+    val mockApplicationService: ApplicationService = mock[ApplicationService]
+
+    val service = new MfaMandateService(mockAppConfig, mockApplicationService)
+
+    val applicationsWhereUserIsAdminInProduction = Future.successful(Seq(Application(
+      "myId",
+      "myClientId",
+      "myName",
+      new DateTime(),
+      Environment.PRODUCTION,
+      collaborators = Set(Collaborator(email, Role.ADMINISTRATOR))
+    )))
+
+    val applicationsWhereUserIsDeveloperInProduction = Future.successful(Seq(Application(
+      "myId",
+      "myClientId",
+      "myName",
+      new DateTime(),
+      Environment.PRODUCTION,
+      collaborators = Set(Collaborator(email, Role.DEVELOPER))
+    )))
+
+    val applicationsWhereUserIsNotACollaboratorInProduction = Future.successful(Seq(Application(
+      "myId",
+      "myClientId",
+      "myName",
+      new DateTime(),
+      Environment.PRODUCTION
+    )))
+
+    val applicationsWhereUserIsAdminInSandbox = Future.successful(Seq(Application(
+      "myId",
+      "myClientId",
+      "myName",
+      new DateTime(),
+      Environment.SANDBOX,
+      collaborators = Set(Collaborator(email, Role.ADMINISTRATOR))
+    )))
+  }
 
   "showAdminMfaMandateMessage" when {
     "Mfa mandate date has passed" should {
-      "be false" in {
+      "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
 
-        val service = new MfaMandateService(mockAppConfig)
-
-        service.showAdminMfaMandatedMessage shouldBe false
+        await(service.showAdminMfaMandatedMessage(email)) shouldBe false
       }
     }
 
-    "Mfa mandate date has not passed" should {
-      "be true" in {
+    "Mfa mandate date has not passed and they are an admin on a principal application" should {
+      "be true" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
 
-        val service = new MfaMandateService(mockAppConfig)
+        await(service.showAdminMfaMandatedMessage(email)) shouldBe true
 
-        service.showAdminMfaMandatedMessage shouldBe true
+        verify(mockApplicationService).fetchByTeamMemberEmail(mockEq(email))(any())
+      }
+    }
+
+    "Mfa mandate date has not passed and they are not an admin on a principle application" should {
+      "be false" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInSandbox)
+
+        await(service.showAdminMfaMandatedMessage(email)) shouldBe false
+
+        verify(mockApplicationService).fetchByTeamMemberEmail(mockEq(email))(any())
+      }
+    }
+
+    "Mfa mandate date has not passed and they are a developer on a principle application" should {
+      "be false" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsDeveloperInProduction)
+
+        await(service.showAdminMfaMandatedMessage(email)) shouldBe false
+
+        verify(mockApplicationService).fetchByTeamMemberEmail(mockEq(email))(any())
+      }
+    }
+
+    "Mfa mandate date has not passed and they are are not a collaborator on a principle application" should {
+      "be false" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsNotACollaboratorInProduction)
+
+        await(service.showAdminMfaMandatedMessage(email)) shouldBe false
+
+        verify(mockApplicationService).fetchByTeamMemberEmail(mockEq(email))(any())
       }
     }
 
     "Mfa mandate date is not set" should {
-      "be false" in {
+      "be false" in new Setup {
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(None)
 
-        val service = new MfaMandateService(mockAppConfig)
-
-        service.showAdminMfaMandatedMessage shouldBe false
+        await(service.showAdminMfaMandatedMessage(email)) shouldBe false
       }
     }
   }
 
   "daysTillAdminMfaMandate" when {
     "mfaAdminMandateDate is 1 day in the future" should {
-      "be 1" in {
+      "be 1" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
-
-        val service = new MfaMandateService(mockAppConfig)
 
         service.daysTillAdminMfaMandate shouldBe Some(1)
       }
     }
 
     "mfaAdminMandateDate is now" should {
-      "be 0" in {
+      "be 0" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(now))
-
-        val service = new MfaMandateService(mockAppConfig)
 
         service.daysTillAdminMfaMandate shouldBe Some(0)
       }
     }
 
     "mfaAdminMandateDate is in the past" should {
-      "be none" in {
+      "be none" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
-
-        val service = new MfaMandateService(mockAppConfig)
 
         service.daysTillAdminMfaMandate shouldBe None
       }
@@ -98,10 +175,8 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
 
   "daysTillAdminMfaMandate" when {
     "mfaAdminMandateDate is not set" should {
-      "be none" in {
+      "be none" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
-
-        val service = new MfaMandateService(mockAppConfig)
 
         service.daysTillAdminMfaMandate shouldBe None
       }

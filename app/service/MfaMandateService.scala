@@ -17,13 +17,30 @@
 package service
 
 import config.ApplicationConfig
-import org.joda.time.{Days, LocalDate}
+import domain.{Application, Environment, Role}
 import javax.inject.{Inject, Singleton}
+import org.joda.time.{Days, LocalDate}
+import uk.gov.hmrc.http.HeaderCarrier
+
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MfaMandateService @Inject()(val appConfig: ApplicationConfig) {
-  def showAdminMfaMandatedMessage: Boolean = {
-    appConfig.dateOfAdminMfaMandate.fold(false)((mandatedDate: LocalDate) => mandatedDate.isAfter(new LocalDate()))
+class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicationService: ApplicationService)(implicit val ec: ExecutionContext) {
+  def showAdminMfaMandatedMessage(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    applicationService.fetchByTeamMemberEmail(email).map(applications => {
+      if (isAdminOnProductionApplication(email, applications)) {
+        appConfig.dateOfAdminMfaMandate.fold(false)((mandatedDate: LocalDate) => mandatedDate.isAfter(new LocalDate()))
+      }
+      else false
+    })
+  }
+
+  def isAdminOnProductionApplication(email: String, applications: Seq[Application]) = {
+    applications
+      .filter(app => app.deployedTo == Environment.PRODUCTION)
+      .flatMap(app => app.collaborators)
+      .filter(collaborators => collaborators.emailAddress == email)
+      .exists(collaborator => collaborator.role == Role.ADMINISTRATOR)
   }
 
   def daysTillAdminMfaMandate: Option[Int] = {

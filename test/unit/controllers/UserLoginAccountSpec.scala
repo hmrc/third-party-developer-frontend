@@ -58,7 +58,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     private val daysRemaining = 10
     when(mfaMandateService.daysTillAdminMfaMandate).thenReturn(Some(daysRemaining))
-    when(mfaMandateService.showAdminMfaMandatedMessage).thenReturn(true)
+    when(mfaMandateService.showAdminMfaMandatedMessage(any())(any[HeaderCarrier])).thenReturn(true)
     when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(new LocalDate().plusDays(daysRemaining)))
 
     val underTest = new UserLoginAccount(mock[AuditService],
