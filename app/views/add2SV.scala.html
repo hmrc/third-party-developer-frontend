@@ -34,11 +34,23 @@
         <h1 class="heading-xlarge">Add 2-step verification</h1>
     </header>
     <section>
-        <p>You can now use 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
-        @{
-        if(mfaMandateDetails.showAdminMfaMandatedMessage) <p class="bold">{mfaMandateDetails.daysTillAdminMfaMandate} {helpers.PluralizeHelper.pluralize(mfaMandateDetails.daysTillAdminMfaMandate, "day", "days")} remaining until 2SV will be mandated for Admins. </p>
-        }
+
+        <p>Use 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
+
         <p><a id="submit" class="button" href="@routes.ProtectAccount.getProtectAccount()">Continue</a></p>
+
+        @{if(mfaMandateDetails.showAdminMfaMandatedMessage)
+        <div class="notice">
+            <i class="icon icon-important">
+                <span class="visually-hidden">Warning</span>
+            </i>
+            <strong class="bold-small">
+                If you are the Administrator of an application you have {mfaMandateDetails.daysTillAdminMfaMandate} {helpers.PluralizeHelper.pluralize(mfaMandateDetails.daysTillAdminMfaMandate, "day", "days")} until 2-step verification is mandatory
+            </strong>
+        </div>
+        }
+        <br/>
+
         <p><a id="skip" href="@routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a></p>
     </section>
 

@@ -116,7 +116,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       status(result) shouldBe OK
       bodyOf(result) should include("Add 2-step verification")
-      bodyOf(result) should include("10 days remaining until 2SV will be mandated for Admins")
+      bodyOf(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
 
       verify(underTest.auditService, times(1)).audit(
         meq(LoginSucceeded), meq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])

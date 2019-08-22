@@ -44,7 +44,7 @@ class Add2SVSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
         val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = false, daysTillAdminMfaMandate = 0))
 
         page.contentType should include("text/html")
-        page.body should not include "days remaining until 2SV will be mandated for Admins"
+        page.body should not include "If you are the Administrator of an application you have"
       }
 
     "is displayed with plural 'days remaining'" in {
@@ -55,7 +55,7 @@ class Add2SVSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
       page.contentType should include("text/html")
 
-      page.body should include(s"$daysRemaining days remaining until 2SV will be mandated for Admins.")
+      page.body should include(s"If you are the Administrator of an application you have $daysRemaining days until 2-step verification is mandatory")
     }
 
     "is displayed with singular 'day remaining'" in {
@@ -66,7 +66,7 @@ class Add2SVSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
       page.contentType should include("text/html")
 
-      page.body should include(s"$daysRemaining day remaining until 2SV will be mandated for Admins.")
+      page.body should include(s"If you are the Administrator of an application you have $daysRemaining day until 2-step verification is mandatory")
     }
   }
 }
