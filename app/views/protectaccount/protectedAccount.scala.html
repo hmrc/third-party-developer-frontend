@@ -18,11 +18,11 @@
 @import include._
 @import model.Crumb
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
+@()(implicit request: play.api.mvc.Request[Any], appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
 
 @devMain(
     title = "Protected account",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = Some("bob"),
     breadcrumbs = Seq(
         Crumb("Protect account"),
         Crumb.home
