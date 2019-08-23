@@ -25,8 +25,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector)(implicit val ec: ExecutionContext) {
-  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] =
-    thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password))
+  def authenticate(emailAddress: String, password: String, mfaMandatedForUser: Boolean)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] =
+    thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, true))
 
   def authenticateTotp(emailAddress: String, totp: String, nonce: String)(implicit hc: HeaderCarrier): Future[Session] = {
     thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(emailAddress, totp, nonce))

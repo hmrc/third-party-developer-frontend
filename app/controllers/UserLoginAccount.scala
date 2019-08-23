@@ -79,18 +79,26 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     def routeToLoginOr2SV(login: LoginForm, userAuthenticationResponse: UserAuthenticationResponse, showAdminMfaMandateMessage: Boolean) = {
       def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
 
-      userAuthenticationResponse.session match {
-        case Some(session) => audit(LoginSucceeded, session.developer)
+      println(s"In UserLoginAccount.authenticate nonce is: ${userAuthenticationResponse.nonce}")
+
+
+      (userAuthenticationResponse.session,userAuthenticationResponse.mfaEnablementRequired) match {
+        case (Some(session),_) => audit(LoginSucceeded, session.developer)
           // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
           gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails)).withSession(request.session)))
-        case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+        case (None, false) => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+          .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+
+       // TODO: Test me
+          // TODO: Need login at end of the MFA enablement journey (in some other controller)
+        case (None, true) => successful(Ok(protectAccount())
           .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
       }
     }
 
     requestForm.fold(
       errors => successful(BadRequest(signIn("Sign in", errors))),
-      login => sessionService.authenticate(login.emailaddress, login.password) flatMap {
+      login => sessionService.authenticate(login.emailaddress, login.password, true) flatMap {
         userAuthenticationResponse => {
           mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress).flatMap(showAdminMfaMandateMessage => {
             routeToLoginOr2SV(login, userAuthenticationResponse, showAdminMfaMandateMessage)

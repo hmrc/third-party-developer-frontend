@@ -18,7 +18,7 @@ package domain
 
 import play.api.libs.json.Json
 
-case class LoginRequest(email: String, password: String)
+case class LoginRequest(email: String, password: String, mfaMandatedForUser: Boolean)
 
 object LoginRequest {
   implicit val format = Json.format[LoginRequest]

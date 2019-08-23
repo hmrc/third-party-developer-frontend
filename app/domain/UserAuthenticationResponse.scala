@@ -18,7 +18,10 @@ package domain
 
 import play.api.libs.json.Json
 
-case class UserAuthenticationResponse(accessCodeRequired: Boolean, nonce: Option[String] = None, session: Option[Session] = None)
+case class UserAuthenticationResponse(accessCodeRequired: Boolean,
+                                      nonce: Option[String] = None,
+                                      session: Option[Session] = None,
+                                      mfaEnablementRequired: Boolean)
 
 object UserAuthenticationResponse {
   implicit val formatUserAuthenticationResponse = Json.format[UserAuthenticationResponse]
