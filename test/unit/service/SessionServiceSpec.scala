@@ -32,7 +32,7 @@ import scala.concurrent.Future
 class SessionServiceSpec extends UnitSpec with Matchers with MockitoSugar with ScalaFutures {
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(mock[ThirdPartyDeveloperConnector])
 
@@ -44,21 +44,23 @@ class SessionServiceSpec extends UnitSpec with Matchers with MockitoSugar with S
     val developer = Developer(email, "firstName", "lastName")
     val sessionId = "sessionId"
     val session = Session(sessionId, developer)
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session), mfaEnablementRequired = false)
   }
 
   "authenticate" should {
     "return the user authentication response from the connector when the authentication succeeds" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password))).willReturn(userAuthenticationResponse)
+      given(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password, mfaMandatedForUser = false)))
+        .willReturn(userAuthenticationResponse)
 
-      await(underTest.authenticate(email, password)) shouldBe userAuthenticationResponse
+      await(underTest.authenticate(email, password, mfaMandatedForUser = false)) shouldBe userAuthenticationResponse
     }
 
+
     "propagate the exception when the connector fails" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password)))
+      given(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password, mfaMandatedForUser = false)))
         .willThrow(new RuntimeException)
 
-      intercept[RuntimeException](await(underTest.authenticate(email, password)))
+      intercept[RuntimeException](await(underTest.authenticate(email, password, mfaMandatedForUser = false)))
     }
   }
 
@@ -89,7 +91,7 @@ class SessionServiceSpec extends UnitSpec with Matchers with MockitoSugar with S
       given(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
         .willReturn(Future.failed(new SessionInvalid))
 
-      val result = await(underTest.fetch(sessionId))
+      private val result = await(underTest.fetch(sessionId))
 
       result shouldBe None
     }

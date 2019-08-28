@@ -42,6 +42,12 @@ case object LoggedInUser extends UserStatus {
   override val app: Future[Application] = Future.failed(new IllegalStateException("Unsupported"))
 }
 
+// TODO: Introduce a trait of 'at least part authenticated'? For PartAuthenticatedUser and LoggedInUser
+// Covers fully logged on and part authenticated - has just an email
+// Can we used when enabling MFA when logged on, or part logged on during sign-in
+abstract class PartAuthenticatedUser(val email: String)
+case class PartAuthenticatedUserEnablingMfa(override val email: String) extends PartAuthenticatedUser(email)
+
 case class AppAdmin(override val app: Future[Application]) extends UserStatus
 case class AppTeamMember(override val app: Future[Application]) extends UserStatus
 

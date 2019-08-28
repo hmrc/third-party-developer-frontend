@@ -23,7 +23,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
 
@@ -40,20 +40,20 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       .build()
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val userEmail = "thirdpartydeveloper@example.com"
     val userPassword = "password1!"
     val sessionId = "sessionId"
-    val loginRequest = LoginRequest(userEmail, userPassword)
+    val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)
     val totp = "123456"
     val nonce = "ABC-123"
     val totpAuthenticationRequest = TotpAuthenticationRequest(userEmail, totp, nonce)
 
-    val payloadEncryption = app.injector.instanceOf[PayloadEncryption]
-    val encryptedLoginRequest = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
-    val encryptedTotpAuthenticationRequest = Json.toJson(SecretRequest(payloadEncryption.encrypt(totpAuthenticationRequest).as[String]))
-    val underTest = app.injector.instanceOf[ThirdPartyDeveloperConnector]
+    val payloadEncryption: PayloadEncryption = app.injector.instanceOf[PayloadEncryption]
+    val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
+    val encryptedTotpAuthenticationRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(totpAuthenticationRequest).as[String]))
+    val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
 
   "fetchSession" should {
@@ -76,7 +76,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                  |}""".stripMargin)
         ))
 
-      val result = await(underTest.fetchSession(sessionId))
+      private val result = await(underTest.fetchSession(sessionId))
 
       result shouldBe Session(sessionId, Developer(userEmail, "John", "Doe"))
     }
@@ -158,7 +158,10 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
-      result shouldBe UserAuthenticationResponse(accessCodeRequired = false, session = Some(Session(sessionId, Developer(userEmail, "John", "Doe"))))
+      result shouldBe UserAuthenticationResponse(
+        accessCodeRequired = false,
+        session = Some(Session(sessionId, Developer(userEmail, "John", "Doe"))),
+        mfaEnablementRequired = false)
     }
 
     "return the nonce when the credentials are valid and MFA is enabled" in new Setup {
@@ -180,7 +183,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
-      result shouldBe UserAuthenticationResponse(accessCodeRequired = true, Some(nonce))
+      result shouldBe UserAuthenticationResponse(accessCodeRequired = true, Some(nonce), mfaEnablementRequired = false)
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {
@@ -192,7 +195,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
             .withHeader("Content-Type", "application/json")
         ))
 
-      intercept[InvalidCredentials](await(underTest.authenticate(LoginRequest(userEmail, userPassword))))
+      intercept[InvalidCredentials](await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false))))
     }
 
     "throw LockedAccount exception when the account is locked" in new Setup {
@@ -205,7 +208,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
             .withHeader("Content-Type", "application/json")
         ))
 
-      intercept[LockedAccount]{await(underTest.authenticate(LoginRequest(userEmail, userPassword)))}
+      intercept[LockedAccount]{await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))}
     }
 
     "throw UnverifiedAccount exception when the account is unverified" in new Setup {
@@ -218,7 +221,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
             .withHeader("Content-Type", "application/json")
         ))
 
-      intercept[UnverifiedAccount]{await(underTest.authenticate(LoginRequest(userEmail, userPassword)))}
+      intercept[UnverifiedAccount]{await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))}
     }
 
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
@@ -230,7 +233,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
             .withStatus(INTERNAL_SERVER_ERROR)
         ))
 
-      intercept[Upstream5xxResponse]{await(underTest.authenticate(LoginRequest(userEmail, userPassword)))}
+      intercept[Upstream5xxResponse]{await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))}
     }
   }
 

@@ -18,11 +18,12 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import domain.{PartAuthenticatedUser, PartAuthenticatedUserEnablingMfa}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Request}
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, SessionService}
 import views.html.protectaccount
@@ -44,20 +45,31 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
   val qrCode = QRCode(scale)
  
   def getQrCode: Action[AnyContent] = Action.async { implicit request =>
-    connector.createMfaSecret("anjum.abbas@digital.hmrc.gov.uk").map(secret => {
-      val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", "anjum.abbas@digital.hmrc.gov.uk")
+    val email = request.session.get("emailAddress").get // TODO : Naked get
+    val partAuthenticatedUser: PartAuthenticatedUser = PartAuthenticatedUserEnablingMfa(email)
+
+    connector.createMfaSecret(partAuthenticatedUser.email).map(secret => {
+      val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       val chunkSize = 4
       Ok(protectAccountSetup(secret.toLowerCase().grouped(chunkSize).mkString(" "), qrImg))
     })
   }
 
+
   def getProtectAccount: Action[AnyContent] = Action.async { implicit request =>
-    connector.fetchDeveloper("anjum.abbas@digital.hmrc.gov.uk").map(dev => {
+    // TODO: Fix to work when logged in
+    val email = request.session.get("emailAddress").get // TODO : Naked get
+    val partAuthenticatedUser: PartAuthenticatedUser = PartAuthenticatedUserEnablingMfa(email)
+
+    connector.fetchDeveloper(partAuthenticatedUser.email).map(dev => {
       if (dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false)) {
         Ok(protectedAccount())
+          // TODO: Do we need to do this? Is it already in the session?
+          .withSession(request.session + "emailAddress" -> partAuthenticatedUser.email)
       } else {
         Ok(protectaccount.protectAccount())
+
       }
     })
   }
@@ -76,9 +88,11 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
       Future.successful(BadRequest(protectAccountAccessCode(form)))
     },
     form => {
-      mfaService.enableMfa("anjum.abbas@digital.hmrc.gov.uk", form.accessCode).map(r => {
+      val partAuthenticatedUserEnablingMfa = PartAuthenticatedUserEnablingMfa(request.session.get("emailAddress").get)
+
+      mfaService.enableMfa(partAuthenticatedUserEnablingMfa.email, form.accessCode).map(r => {
         if (r.totpVerified) {
-          // TODO - Sort the session
+          // TODO - Sort the session (actually login. Check session nonce and call auth - all in TPD?)
           Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
         } else {
           BadRequest(protectAccountAccessCode(ProtectAccountForm.form.fill(form)

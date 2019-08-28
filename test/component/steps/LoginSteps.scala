@@ -51,13 +51,13 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
     val sessionId = "sessionId"
     val session = Session(sessionId, developer)
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session), mfaEnablementRequired = false)
     val password = result.get("Password")
 
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
     Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
 
-    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password),
+    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser = false),
       OK, Json.toJson(userAuthenticationResponse).toString())
 
     Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())

@@ -49,8 +49,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   val totp = "123456"
   val nonce = "ABC-123"
 
-  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
-  val userAuthenticationWith2SVResponse = UserAuthenticationResponse(accessCodeRequired = true, nonce = Some(nonce), session = None)
+  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session), mfaEnablementRequired = false)
+  val userAuthenticationWith2SVResponse = UserAuthenticationResponse(
+    accessCodeRequired = true,
+    nonce = Some(nonce),
+    session = None,
+    mfaEnablementRequired = false)
 
   trait Setup {
     implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -70,10 +74,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
 
     def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse]) : Unit =
-      given(underTest.sessionService.authenticate(meq(email), meq(password))(any[HeaderCarrier])).willReturn(result)
+      given(underTest.sessionService.authenticate(meq(email), meq(password), mfaMandatedForUser = meq(false))(any[HeaderCarrier]))
+        .willReturn(result)
 
     def mockAuthenticateTotp(email: String, totp: String, nonce: String, result: Future[Session]) : Unit =
-      given(underTest.sessionService.authenticateTotp(meq(email), meq(totp), meq(nonce))(any[HeaderCarrier])).willReturn(result)
+      given(underTest.sessionService.authenticateTotp(meq(email), meq(totp), meq(nonce))(any[HeaderCarrier]))
+        .willReturn(result)
 
     def mockLogout(): Unit =
       given(underTest.sessionService.destroy(meq(session.sessionId))(any[HeaderCarrier]))
@@ -83,7 +89,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       given(underTest.auditService.audit(meq(auditAction), meq(Map.empty))(any[HeaderCarrier])).willReturn(result)
 
     given(underTest.appConfig.isExternalTestEnvironment).willReturn(false)
-    given(underTest.sessionService.authenticate(anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
+    given(underTest.sessionService.authenticate(anyString(), anyString(), anyBoolean())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
     given(underTest.sessionService.authenticateTotp(anyString(), anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
     val sessionParams : Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
   }
