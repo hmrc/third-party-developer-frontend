@@ -24,10 +24,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector)(implicit val ec: ExecutionContext) {
-  def authenticate(emailAddress: String, password: String, mfaMandatedForUser: Boolean)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] =
-    // TODO - Test me
-    thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser))
+class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+                               val mfaMandateService: MfaMandateService)(implicit val ec: ExecutionContext) {
+  def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = {
+    for {
+      mfaMandatedForUser <- mfaMandateService.isMfaMandatedForUser(emailAddress)
+      response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser))
+    } yield response
+  }
 
   def authenticateTotp(emailAddress: String, totp: String, nonce: String)(implicit hc: HeaderCarrier): Future[Session] = {
     thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(emailAddress, totp, nonce))

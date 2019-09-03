@@ -19,7 +19,7 @@ package unit.service
 import config.ApplicationConfig
 import domain.{Application, Collaborator, Environment, Role}
 import org.joda.time.{DateTime, Duration, Instant, LocalDate}
-import org.mockito.ArgumentMatchers.{any, anyString, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -28,8 +28,8 @@ import service.{ApplicationService, MfaMandateService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar with ScalaFutures with UnitSpec {
 
@@ -143,6 +143,71 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(None)
 
         await(service.showAdminMfaMandatedMessage(email)) shouldBe false
+      }
+    }
+  }
+
+  // TODO
+  "isMfaMandatedForUser" when {
+    "Mfa mandate date has passed" should {
+      "be false" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
+
+        await(service.isMfaMandatedForUser(email)) shouldBe true
+      }
+    }
+
+    "Mfa mandate date has not passed and they are an admin on a principal application" should {
+      "be true" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
+
+        await(service.isMfaMandatedForUser(email)) shouldBe false
+
+        verify(mockApplicationService).fetchByTeamMemberEmail(mockEq(email))(any())
+      }
+    }
+
+    "Mfa mandate date has passed and they are not an admin on a principle application" should {
+      "be false" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInSandbox)
+
+        await(service.isMfaMandatedForUser(email)) shouldBe false
+
+        verify(mockApplicationService).fetchByTeamMemberEmail(mockEq(email))(any())
+      }
+    }
+
+    "Mfa mandate date has passed and they are a developer on a principle application" should {
+      "be false" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsDeveloperInProduction)
+
+        await(service.isMfaMandatedForUser(email)) shouldBe false
+
+        verify(mockApplicationService).fetchByTeamMemberEmail(mockEq(email))(any())
+      }
+    }
+
+    "Mfa mandate date has passed and they are are not a collaborator on a principle application" should {
+      "be false" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsNotACollaboratorInProduction)
+
+        await(service.isMfaMandatedForUser(email)) shouldBe false
+
+        verify(mockApplicationService).fetchByTeamMemberEmail(mockEq(email))(any())
+      }
+    }
+
+    "Mfa mandate date is not set" should {
+      "be false" in new Setup {
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(None)
+
+        await(service.isMfaMandatedForUser(email)) shouldBe false
       }
     }
   }

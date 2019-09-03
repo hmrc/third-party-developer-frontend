@@ -18,23 +18,25 @@ package unit.service
 
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
+import org.mockito.Mockito._
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import service.SessionService
+import service.{MfaMandateService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SessionServiceSpec extends UnitSpec with Matchers with MockitoSugar with ScalaFutures {
+class SessionServiceSpec extends UnitSpec with Matchers  with MockitoSugar with ScalaFutures {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector])
+    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], mock[MfaMandateService])
 
     val email = "thirdpartydeveloper@example.com"
     val encodedEmail = "thirdpartydeveloper%40example.com"
@@ -48,19 +50,34 @@ class SessionServiceSpec extends UnitSpec with Matchers with MockitoSugar with S
   }
 
   "authenticate" should {
-    "return the user authentication response from the connector when the authentication succeeds" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password, mfaMandatedForUser = false)))
+    "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is false" in new Setup {
+
+      given(underTest.mfaMandateService.isMfaMandatedForUser(any())(any())).willReturn(false)
+      given(underTest.thirdPartyDeveloperConnector.authenticate(any())(any()))
         .willReturn(userAuthenticationResponse)
 
-      await(underTest.authenticate(email, password, mfaMandatedForUser = false)) shouldBe userAuthenticationResponse
+      await(underTest.authenticate(email, password)) shouldBe userAuthenticationResponse
+
+      verify(underTest.mfaMandateService).isMfaMandatedForUser(email)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = false))
     }
 
+    "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is true" in new Setup {
+      given(underTest.mfaMandateService.isMfaMandatedForUser(any())(any())).willReturn(true)
+      given(underTest.thirdPartyDeveloperConnector.authenticate(any())(any()))
+        .willReturn(userAuthenticationResponse)
+
+      await(underTest.authenticate(email, password)) shouldBe userAuthenticationResponse
+
+      verify(underTest.mfaMandateService).isMfaMandatedForUser(email)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = true))
+    }
 
     "propagate the exception when the connector fails" in new Setup {
       given(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password, mfaMandatedForUser = false)))
         .willThrow(new RuntimeException)
 
-      intercept[RuntimeException](await(underTest.authenticate(email, password, mfaMandatedForUser = false)))
+      intercept[RuntimeException](await(underTest.authenticate(email, password)))
     }
   }
 

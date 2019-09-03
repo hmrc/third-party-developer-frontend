@@ -26,21 +26,31 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicationService: ApplicationService)(implicit val ec: ExecutionContext) {
+
   def showAdminMfaMandatedMessage(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    applicationService.fetchByTeamMemberEmail(email).map(applications => {
-      if (isAdminOnProductionApplication(email, applications)) {
-        appConfig.dateOfAdminMfaMandate.fold(false)((mandatedDate: LocalDate) => mandatedDate.isAfter(new LocalDate()))
-      }
-      else false
-    })
+    mfaMandateCheck(email, mandatedDate => mandatedDate.isAfter(new LocalDate()))
   }
 
-  def isAdminOnProductionApplication(email: String, applications: Seq[Application]) = {
-    applications
-      .filter(app => app.deployedTo == Environment.PRODUCTION)
-      .flatMap(app => app.collaborators)
-      .filter(collaborators => collaborators.emailAddress == email)
-      .exists(collaborator => collaborator.role == Role.ADMINISTRATOR)
+  def isMfaMandatedForUser(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    mfaMandateCheck(email, mandatedDate => mandatedDate.isBefore(new LocalDate()))
+  }
+
+  private def mfaMandateCheck(email: String, dateCheck : LocalDate => Boolean)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    isAdminOnProductionApplication(email).map(isAdminOnProductionApplication =>
+      if (isAdminOnProductionApplication) {
+        appConfig.dateOfAdminMfaMandate.fold(false)((mandatedDate: LocalDate) => dateCheck(mandatedDate))
+      } else false
+    )
+  }
+
+  private def isAdminOnProductionApplication(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    applicationService.fetchByTeamMemberEmail(email).map(applications =>
+      applications
+        .filter(app => app.deployedTo == Environment.PRODUCTION)
+        .flatMap(app => app.collaborators)
+        .filter(collaborators => collaborators.emailAddress == email)
+        .exists(collaborator => collaborator.role == Role.ADMINISTRATOR)
+    )
   }
 
   def daysTillAdminMfaMandate: Option[Int] = {

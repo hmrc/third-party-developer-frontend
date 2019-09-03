@@ -79,7 +79,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                 playSession: play.api.mvc.Session)(implicit request: Request[AnyContent]): Future[Result] = {
     def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
 
-    //println(s"In UserLoginAccount.authenticate nonce is: ${userAuthenticationResponse.nonce}")
+//    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.session is: ${userAuthenticationResponse.session}")
+//    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.mfaEnablementRequired is: ${userAuthenticationResponse.mfaEnablementRequired}")
+
 
     (userAuthenticationResponse.session,userAuthenticationResponse.mfaEnablementRequired) match {
       case (Some(session),_) => audit(LoginSucceeded, session.developer)
@@ -103,9 +105,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       errors => successful(BadRequest(signIn("Sign in", errors))),
       login => {
 
-        val mfaMandatedForUser = false // TODO: Need to get this from the mfaMandateService for this user
         for {
-          userAuthenticationResponse <- sessionService.authenticate(login.emailaddress, login.password, mfaMandatedForUser)
+          // TODO don't call TPA admin check twice
+          userAuthenticationResponse <- sessionService.authenticate(login.emailaddress, login.password)
           showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress)
           response <- routeToLoginOr2SV(login, userAuthenticationResponse, showAdminMfaMandateMessage, request.session)
         } yield response
