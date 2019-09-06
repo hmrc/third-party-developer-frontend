@@ -18,12 +18,10 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import domain.{PartAuthenticatedUser, PartAuthenticatedUserEnablingMfa}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request}
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, SessionService}
 import views.html.protectaccount
@@ -44,69 +42,51 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
   private val scale = 4
   val qrCode = QRCode(scale)
  
-  def getQrCode: Action[AnyContent] = Action.async { implicit request =>
-    val email = request.session.get("emailAddress").get // TODO : Naked get
-    val partAuthenticatedUser: PartAuthenticatedUser = PartAuthenticatedUserEnablingMfa(email)
-
-    connector.createMfaSecret(partAuthenticatedUser.email).map(secret => {
-      val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", email)
+  def getQrCode() = loggedInAction { implicit request =>
+    connector.createMfaSecret(loggedIn.email).map(secret => {
+      val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
-      val chunkSize = 4
-      Ok(protectAccountSetup(secret.toLowerCase().grouped(chunkSize).mkString(" "), qrImg))
+      Ok(protectAccountSetup(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
     })
   }
 
-
-  def getProtectAccount: Action[AnyContent] = Action.async { implicit request =>
-    // TODO: Fix to work when logged in
-    val email = request.session.get("emailAddress").get // TODO : Naked get
-    val partAuthenticatedUser: PartAuthenticatedUser = PartAuthenticatedUserEnablingMfa(email)
-
-    connector.fetchDeveloper(partAuthenticatedUser.email).map(dev => {
-      if (dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false)) {
-        Ok(protectedAccount())
-          // TODO: Do we need to do this? Is it already in the session?
-          .withSession(request.session + "emailAddress" -> partAuthenticatedUser.email)
-      } else {
-        Ok(protectaccount.protectAccount())
-
+  def getProtectAccount() = loggedInAction { implicit request =>
+    connector.fetchDeveloper(loggedIn.email).map(dev => {
+      dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
+        case true => Ok(protectedAccount())
+        case false => Ok(protectaccount.protectAccount())
       }
     })
   }
 
-  def getAccessCodePage: Action[AnyContent] = Action.async { implicit request =>
+  def getAccessCodePage() = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountAccessCode(ProtectAccountForm.form)))
   }
 
-  def getProtectAccountCompletedPage: Action[AnyContent] = loggedInAction { implicit request =>
+  def getProtectAccountCompletedPage() = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountCompleted()))
   }
 
-  //TODO if enabling mfa during login it should log you in at this point
-  def protectAccount(): Action[AnyContent] = Action.async { implicit request =>
+  def protectAccount() = loggedInAction { implicit request =>
     ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountAccessCode(form)))
     },
     form => {
-      val partAuthenticatedUserEnablingMfa = PartAuthenticatedUserEnablingMfa(request.session.get("emailAddress").get)
-
-      mfaService.enableMfa(partAuthenticatedUserEnablingMfa.email, form.accessCode).map(r => {
-        if (r.totpVerified) {
-          // TODO - Sort the session (actually login. Check session nonce and call auth - all in TPD?)
-          Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
-        } else {
-          BadRequest(protectAccountAccessCode(ProtectAccountForm.form.fill(form)
-            .withError("accessCode", "You have entered an incorrect access code")))
+      mfaService.enableMfa(loggedIn.email, form.accessCode).map(r => {
+        r.totpVerified match{
+          case true => Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
+          case _ => BadRequest(protectAccountAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
         }
       })
+
     })
   }
 
-  def get2SVRemovalConfirmationPage(): Action[AnyContent] = loggedInAction { implicit request =>
+  def get2SVRemovalConfirmationPage() = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalConfirmation(Remove2SVConfirmForm.form)))
   }
 
-  def confirm2SVRemoval(): Action[AnyContent] = loggedInAction { implicit request =>
+  def confirm2SVRemoval() = loggedInAction { implicit request =>
     Remove2SVConfirmForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountRemovalConfirmation(form)))
     },
@@ -118,26 +98,25 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
       })
   }
   
-  def get2SVRemovalAccessCodePage(): Action[AnyContent] = loggedInAction { implicit request =>
+  def get2SVRemovalAccessCodePage() = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalAccessCode(ProtectAccountForm.form)))
   }
 
-  def remove2SV(): Action[AnyContent] = loggedInAction { implicit request =>
+  def remove2SV() = loggedInAction { implicit request =>
     ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountRemovalAccessCode(form)))
     },
       form => {
         mfaService.removeMfa(loggedIn.email, form.accessCode).map(r =>
-          if (r.totpVerified) {
-            Redirect(routes.ProtectAccount.get2SVRemovalCompletePage())
-          } else {
-            BadRequest(protectAccountRemovalAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
+          r.totpVerified match {
+            case true => Redirect(routes.ProtectAccount.get2SVRemovalCompletePage())
+            case _ => BadRequest(protectAccountRemovalAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
           }
         )
     })
   }
 
-  def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
+  def get2SVRemovalCompletePage() = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalComplete()))
   }
 }

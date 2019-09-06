@@ -45,7 +45,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
-  val session = Session(sessionId, loggedInUser)
+  val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
   val appId = "1234"
   val clientId = "clientId123"
   val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),

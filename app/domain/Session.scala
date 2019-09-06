@@ -18,7 +18,7 @@ package domain
 
 import play.api.libs.json.Json
 
-case class Session(sessionId: String, developer: Developer)
+case class Session(sessionId: String, developer: Developer, loggedInState: LoggedInState)
 
 object Session {
   implicit val formatSession = Json.format[Session]

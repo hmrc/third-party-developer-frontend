@@ -48,7 +48,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val clientId = "clientIdzzz"
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
-  val session = Session(sessionId, loggedInUser)
+  val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
   val testing = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
   val production = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")

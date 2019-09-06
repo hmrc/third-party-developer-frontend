@@ -45,7 +45,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
   val clientId = "clientId123"
   val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
-  val session = Session(sessionId, loggedInUser)
+  val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
   val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
 
   trait Setup {

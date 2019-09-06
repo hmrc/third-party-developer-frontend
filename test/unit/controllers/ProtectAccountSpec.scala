@@ -21,7 +21,7 @@ import java.net.URI
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.{ProtectAccount, routes}
-import domain.{Developer, Session}
+import domain.{Developer, LoggedInState, Session}
 import org.jsoup.Jsoup
 import org.mockito.BDDMockito._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
@@ -60,7 +60,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       override val qrCode = mock[QRCode]
     }
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
+    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
 
     def protectAccountRequest(code: String) = {
       FakeRequest().

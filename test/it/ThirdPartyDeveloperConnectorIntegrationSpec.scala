@@ -32,6 +32,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     "Test.microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "abcdefghijklmnopqrstuv=="
   )
+
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(stubConfig)
@@ -68,6 +69,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
             .withBody(
               s"""{
                  |  "sessionId": "$sessionId",
+                 |  "loggedInState": "LOGGED_IN",
                  |  "developer": {
                  |    "email":"$userEmail",
                  |    "firstName":"John",
@@ -78,7 +80,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       private val result = await(underTest.fetchSession(sessionId))
 
-      result shouldBe Session(sessionId, Developer(userEmail, "John", "Doe"))
+      result shouldBe Session(sessionId, Developer(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)
     }
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
@@ -100,7 +102,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
             .withStatus(INTERNAL_SERVER_ERROR)
         ))
 
-      intercept[Upstream5xxResponse] {await(underTest.fetchSession(sessionId))}
+      intercept[Upstream5xxResponse] {
+        await(underTest.fetchSession(sessionId))
+      }
     }
 
   }
@@ -146,6 +150,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                  |  "accessCodeRequired": false,
                  |  "session": {
                  |    "sessionId": "$sessionId",
+                 |    "loggedInState": "LOGGED_IN",
                  |    "developer": {
                  |      "email":"$userEmail",
                  |      "firstName":"John",
@@ -160,8 +165,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
       result shouldBe UserAuthenticationResponse(
         accessCodeRequired = false,
-        session = Some(Session(sessionId, Developer(userEmail, "John", "Doe"))),
-        mfaEnablementRequired = false)
+        session = Some(Session(sessionId, Developer(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)))
     }
 
     "return the nonce when the credentials are valid and MFA is enabled" in new Setup {
@@ -183,7 +187,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
-      result shouldBe UserAuthenticationResponse(accessCodeRequired = true, Some(nonce), mfaEnablementRequired = false)
+      result shouldBe UserAuthenticationResponse(accessCodeRequired = true, Some(nonce))
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {
@@ -208,7 +212,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
             .withHeader("Content-Type", "application/json")
         ))
 
-      intercept[LockedAccount]{await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))}
+      intercept[LockedAccount] {
+        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
+      }
     }
 
     "throw UnverifiedAccount exception when the account is unverified" in new Setup {
@@ -221,7 +227,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
             .withHeader("Content-Type", "application/json")
         ))
 
-      intercept[UnverifiedAccount]{await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))}
+      intercept[UnverifiedAccount] {
+        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
+      }
     }
 
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
@@ -233,7 +241,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
             .withStatus(INTERNAL_SERVER_ERROR)
         ))
 
-      intercept[Upstream5xxResponse]{await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))}
+      intercept[Upstream5xxResponse] {
+        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
+      }
     }
   }
 
@@ -251,6 +261,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               s"""
                  |{
                  |  "sessionId": "$sessionId",
+                 |  "loggedInState": "LOGGED_IN",
                  |  "developer": {
                  |    "email":"$userEmail",
                  |    "firstName":"John",
@@ -262,7 +273,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: Session = await(underTest.authenticateTotp(totpAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-totp")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
-      result shouldBe Session(sessionId, Developer(userEmail, "John", "Doe"))
+      result shouldBe Session(sessionId, Developer(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {

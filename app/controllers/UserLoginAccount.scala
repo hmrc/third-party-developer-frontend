@@ -74,27 +74,26 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   private def routeToLoginOr2SV(login: LoginForm,
-                        userAuthenticationResponse: UserAuthenticationResponse,
-                        showAdminMfaMandateMessage: Boolean,
+                                userAuthenticationResponse: UserAuthenticationResponse,
+                                showAdminMfaMandateMessage: Boolean,
                                 playSession: play.api.mvc.Session)(implicit request: Request[AnyContent]): Future[Result] = {
     def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
 
-//    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.session is: ${userAuthenticationResponse.session}")
-//    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.mfaEnablementRequired is: ${userAuthenticationResponse.mfaEnablementRequired}")
+    //    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.session is: ${userAuthenticationResponse.session}")
+    //    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.mfaEnablementRequired is: ${userAuthenticationResponse.mfaEnablementRequired}")
 
-
-    (userAuthenticationResponse.session,userAuthenticationResponse.mfaEnablementRequired) match {
-      case (Some(session),_) => audit(LoginSucceeded, session.developer)
+    userAuthenticationResponse.session match {
+      case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => audit(LoginSucceeded, session.developer)
         // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
         gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails))
           .withSession(playSession)))
-      case (None, false) => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+
+      case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
         .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
 
-      // TODO: Test me
-      // TODO: Need login at end of the MFA enablement journey (in some other controller)
-      case (None, true) => successful(Ok(protectAccount())
-        .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+      case Some(session) if session.loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA =>
+        gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.getProtectAccount().url)
+          .withSession(playSession)))
     }
   }
 

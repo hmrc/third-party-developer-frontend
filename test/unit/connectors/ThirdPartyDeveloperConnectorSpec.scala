@@ -104,7 +104,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
   "fetchSession" should {
     val sessionId = "sessionId"
-    val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"))
+    val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
 
     "return session" in new Setup {
       when(mockHttp.GET(endpoint(s"session/$sessionId"))).

@@ -20,7 +20,7 @@ import java.util.UUID
 
 import config.ApplicationConfig
 import controllers._
-import domain.{Developer, Session}
+import domain.{Developer, LoggedInState, Session}
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
@@ -40,7 +40,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = UUID.randomUUID().toString
-  val session = Session(sessionId, user)
+  val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
 
 
   trait Setup {

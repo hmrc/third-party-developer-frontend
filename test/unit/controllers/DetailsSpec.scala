@@ -285,7 +285,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
-    val session = Session(sessionId, loggedInUser)
+    val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
 
     val newName = "new name"
     val newDescription = Some("new description")

@@ -21,7 +21,6 @@ import java.util.UUID
 import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import domain._
-import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers.{any, eq => meq, _}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
@@ -42,24 +41,23 @@ import scala.concurrent.Future._
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
-  val session = Session(UUID.randomUUID().toString, user)
+  val session = Session(UUID.randomUUID().toString, user, LoggedInState.LOGGED_IN)
+  val sessionPartLoggedInEnablingMfa = Session(UUID.randomUUID().toString, user, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
   val emailFieldName: String = "emailaddress"
   val passwordFieldName: String = "password"
   val userPassword = "Password1!"
   val totp = "123456"
   val nonce = "ABC-123"
 
-  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session), mfaEnablementRequired = false)
+  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
   val userAuthenticationResponseWithMfaEnablementRequired = UserAuthenticationResponse(
     accessCodeRequired = false,
     nonce = Some(nonce), //TODO need to handle case with nonce
-    session = None,
-    mfaEnablementRequired = true)
+    session = Some(sessionPartLoggedInEnablingMfa))
   val userAuthenticationWith2SVResponse = UserAuthenticationResponse(
     accessCodeRequired = true,
     nonce = Some(nonce),
-    session = None,
-    mfaEnablementRequired = false)
+    session = None)
 
   trait Setup {
     private val daysRemaining = 10
@@ -166,9 +164,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       private val result = await(underTest.authenticate()(request))
 
-      status(result) shouldBe OK
-      bodyOf(result) should include("Protect account")
-      bodyOf(result) should include("Protect your Developer Hub account by adding 2-step verification")
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some("/developer/profile/protect-account")
     }
 
     "return the login page when the password is incorrect" in new Setup {
