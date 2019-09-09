@@ -32,6 +32,15 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
                                             )(implicit val ec: ExecutionContext) {
+
+  def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+    http.PUT(s"$serviceBaseUrl/session/$sessionId/loggedInState", request.loggedInState)
+      .map(_.json.as[Session])
+      .recover {
+        case _: NotFoundException => throw new SessionInvalid
+      }
+  }
+
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api = API("third-party-developer")
 

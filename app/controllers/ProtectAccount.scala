@@ -41,7 +41,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
 
   private val scale = 4
   val qrCode = QRCode(scale)
- 
+
   def getQrCode() = loggedInAction { implicit request =>
     connector.createMfaSecret(loggedIn.email).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
@@ -71,15 +71,18 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
     ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountAccessCode(form)))
     },
-    form => {
-      mfaService.enableMfa(loggedIn.email, form.accessCode).map(r => {
-        r.totpVerified match{
-          case true => Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
-          case _ => BadRequest(protectAccountAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
-        }
-      })
+      form => {
+        mfaService.enableMfa(loggedIn.email, form.accessCode).map(r => {
+          r.totpVerified match {
+            case true => {
+              // TODO: call connector.updateSessionLoggedInState()
+              Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
+            }
+            case _ => BadRequest(protectAccountAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
+          }
+        })
 
-    })
+      })
   }
 
   def get2SVRemovalConfirmationPage() = loggedInAction { implicit request =>
@@ -97,7 +100,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
         }
       })
   }
-  
+
   def get2SVRemovalAccessCodePage() = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalAccessCode(ProtectAccountForm.form)))
   }
@@ -113,7 +116,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
             case _ => BadRequest(protectAccountRemovalAccessCode(ProtectAccountForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code")))
           }
         )
-    })
+      })
   }
 
   def get2SVRemovalCompletePage() = loggedInAction { implicit request =>

@@ -19,7 +19,7 @@ package unit.connectors
 import config.ApplicationConfig
 import connectors._
 import domain.Session._
-import domain._
+import domain.{UpdateLoggedInStateRequest, _}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -138,6 +138,28 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
         thenReturn(Future.failed(new NotFoundException("")))
 
       await(connector.deleteSession(sessionId)) shouldBe 204
+    }
+  }
+  // TODO fix Null pointer
+  "updateSessionLoggedInState" should {
+    val sessionId = "sessionId"
+    val updateLoggedInStateRequest = UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN))
+    val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
+
+    "update session logged in state" in new Setup {
+      when(mockHttp.PUT(endpoint(s"session/$sessionId/loggedInState"), updateLoggedInStateRequest.loggedInState)).
+        thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(session)))))
+
+      val updatedSession = await(connector.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
+      updatedSession shouldBe session
+    }
+
+    "error with SessionInvalid if we get a 404 response" in new Setup {
+      when(mockHttp.PUT(endpoint(s"session/$sessionId/loggedInState"), updateLoggedInStateRequest.loggedInState)).
+        thenReturn(Future.failed(new NotFoundException("")))
+
+      val error = await(connector.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest).failed)
+      error shouldBe a[SessionInvalid]
     }
   }
 
