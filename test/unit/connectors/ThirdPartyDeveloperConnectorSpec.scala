@@ -28,7 +28,7 @@ import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status
 import play.api.http.Status.NO_CONTENT
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{JsString, JsValue, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
@@ -40,14 +40,15 @@ import scala.concurrent.Future
 class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
-    val mockHttp = mock[HttpClient]
-    val mockPayloadEncryption = mock[PayloadEncryption]
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+
+    val mockHttp: HttpClient = mock[HttpClient]
+    val mockPayloadEncryption: PayloadEncryption = mock[PayloadEncryption]
     val encryptedJson = new EncryptedJson(mockPayloadEncryption)
-    val mockAppConfig = mock[ApplicationConfig]
+    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     val mockMetrics = new NoopConnectorMetrics()
-    val encryptedString = JsString("someencryptedstringofdata")
-    val encryptedBody = Json.toJson(SecretRequest(encryptedString.as[String]))
+    val encryptedString = JsString("someEncryptedStringOfData")
+    val encryptedBody: JsValue = Json.toJson(SecretRequest(encryptedString.as[String]))
 
     when(mockAppConfig.thirdPartyDeveloperUrl).thenReturn("http://THIRD_PARTY_DEVELOPER:9000")
     when(mockPayloadEncryption.encrypt(any[String])(any())).thenReturn(encryptedString)
@@ -56,7 +57,6 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
     def endpoint(path: String) = s"${connector.serviceBaseUrl}/$path"
   }
-
 
   "api" should {
     "be deskpro" in new Setup {
@@ -69,7 +69,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
 
       when(mockHttp.POST(endpoint("developer"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.successful(HttpResponse(201)))
+        thenReturn(Future.successful(HttpResponse(Status.CREATED)))
 
       connector.register(registrationToTest).futureValue shouldBe RegistrationSuccessful
 
@@ -81,7 +81,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
 
       when(mockHttp.POST(endpoint("developer"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.failed(Upstream4xxResponse("409 exception", 409, 409)))
+        thenReturn(Future.failed(Upstream4xxResponse("409 exception", Status.CONFLICT, Status.CONFLICT)))
 
       connector.register(registrationToTest).futureValue shouldBe EmailAlreadyInUse
 
@@ -94,9 +94,9 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       val code = "A1234"
 
       when(mockHttp.GET(endpoint(s"verification?code=$code"))).
-        thenReturn(Future.successful(HttpResponse(200)))
+        thenReturn(Future.successful(HttpResponse(Status.OK)))
 
-      connector.verify(code).futureValue shouldBe 200
+      connector.verify(code).futureValue shouldBe Status.OK
 
       verify(mockHttp).GET(endpoint(s"verification?code=$code"))
     }
@@ -108,9 +108,9 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
     "return session" in new Setup {
       when(mockHttp.GET(endpoint(s"session/$sessionId"))).
-        thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(session)))))
+        thenReturn(Future.successful(HttpResponse(Status.OK, Some(Json.toJson(session)))))
 
-      val fetchedSession = await(connector.fetchSession(sessionId))
+      private val fetchedSession = await(connector.fetchSession(sessionId))
       fetchedSession shouldBe session
     }
 
@@ -118,7 +118,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       when(mockHttp.GET(endpoint(s"session/$sessionId"))).
         thenReturn(Future.failed(new NotFoundException("")))
 
-      val error = await(connector.fetchSession(sessionId).failed)
+      private val error = await(connector.fetchSession(sessionId).failed)
       error shouldBe a[SessionInvalid]
     }
   }
@@ -128,37 +128,39 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
     "delete the session" in new Setup {
       when(mockHttp.DELETE(endpoint(s"session/$sessionId"))).
-        thenReturn(Future.successful(HttpResponse(204)))
+        thenReturn(Future.successful(HttpResponse(Status.NO_CONTENT)))
 
-      await(connector.deleteSession(sessionId)) shouldBe 204
+      await(connector.deleteSession(sessionId)) shouldBe Status.NO_CONTENT
     }
 
     "be successful when not found" in new Setup {
       when(mockHttp.DELETE(endpoint(s"session/$sessionId"))).
         thenReturn(Future.failed(new NotFoundException("")))
 
-      await(connector.deleteSession(sessionId)) shouldBe 204
+      await(connector.deleteSession(sessionId)) shouldBe Status.NO_CONTENT
     }
   }
-  // TODO fix Null pointer
+
   "updateSessionLoggedInState" should {
     val sessionId = "sessionId"
     val updateLoggedInStateRequest = UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN))
     val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
 
     "update session logged in state" in new Setup {
-      when(mockHttp.PUT(endpoint(s"session/$sessionId/loggedInState"), updateLoggedInStateRequest.loggedInState)).
-        thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(session)))))
 
-      val updatedSession = await(connector.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
+      when(mockHttp.PUT(endpoint(s"session/$sessionId/loggedInState/LOGGED_IN"), ""))
+        .thenReturn(Future.successful(HttpResponse(Status.OK, Some(Json.toJson(session)))))
+
+      private val updatedSession = await(connector.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
       updatedSession shouldBe session
+
     }
 
     "error with SessionInvalid if we get a 404 response" in new Setup {
-      when(mockHttp.PUT(endpoint(s"session/$sessionId/loggedInState"), updateLoggedInStateRequest.loggedInState)).
-        thenReturn(Future.failed(new NotFoundException("")))
+      when(mockHttp.PUT(endpoint(s"session/$sessionId/loggedInState/LOGGED_IN"), ""))
+        .thenReturn(Future.failed(new NotFoundException("")))
 
-      val error = await(connector.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest).failed)
+      private val error = await(connector.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest).failed)
       error shouldBe a[SessionInvalid]
     }
   }
@@ -169,9 +171,9 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       val updated = UpdateProfileRequest("First", "Last")
 
       when(mockHttp.POST(endpoint(s"developer/$email"), updated)).
-        thenReturn(Future.successful(HttpResponse(200)))
+        thenReturn(Future.successful(HttpResponse(Status.OK)))
 
-      connector.updateProfile(email, updated).futureValue shouldBe 200
+      connector.updateProfile(email, updated).futureValue shouldBe Status.OK
     }
   }
 
@@ -181,9 +183,9 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       val email = "john.smith@example.com"
 
       when(mockHttp.POSTEmpty(endpoint(s"$email/resend-verification"))).
-        thenReturn(Future.successful(HttpResponse(200)))
+        thenReturn(Future.successful(HttpResponse(Status.OK)))
 
-      connector.resendVerificationEmail(email).futureValue shouldBe 200
+      connector.resendVerificationEmail(email).futureValue shouldBe Status.OK
 
       verify(mockHttp).POSTEmpty(endpoint(s"$email/resend-verification"))
     }
@@ -192,7 +194,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
   "Reset password" should {
     "successfully request reset" in new Setup {
       val email = "user@example.com"
-      when(mockHttp.POSTEmpty(endpoint(s"$email/password-reset-request"))).thenReturn(Future.successful(HttpResponse(200)))
+      when(mockHttp.POSTEmpty(endpoint(s"$email/password-reset-request"))).thenReturn(Future.successful(HttpResponse(Status.OK)))
 
       connector.requestReset(email).futureValue
 
@@ -203,7 +205,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       val email = "user@example.com"
       val code = "ABC123"
       when(mockHttp.GET(endpoint(s"reset-password?code=$code"))).thenReturn(
-        Future.successful(HttpResponse(200, responseJson = Some(Json.obj("email" -> email)))))
+        Future.successful(HttpResponse(Status.OK, responseJson = Some(Json.obj("email" -> email)))))
 
       connector.fetchEmailForResetCode(code).futureValue shouldBe email
 
@@ -214,7 +216,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       val passwordReset = PasswordReset("user@example.com", "newPassword")
 
       when(mockHttp.POST(endpoint("reset-password"), encryptedBody, Seq("Content-Type" -> "application/json")))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(HttpResponse(Status.OK)))
 
       connector.reset(passwordReset).futureValue
 
@@ -234,7 +236,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       val checkPassword = PasswordCheckRequest(email, password)
 
       when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.successful(HttpResponse(204)))
+        thenReturn(Future.successful(HttpResponse(Status.NO_CONTENT)))
 
       await(connector.checkPassword(checkPasswordRequest)) shouldBe VerifyPasswordSuccessful
       verify(mockPayloadEncryption).encrypt(Json.toJson(checkPasswordRequest))
@@ -242,7 +244,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
     "should throw InvalidCredentials if the response is 401" in new Setup {
       when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.failed(Upstream4xxResponse("401 error", 401, 401)))
+        thenReturn(Future.failed(Upstream4xxResponse("401 error", Status.UNAUTHORIZED, Status.UNAUTHORIZED)))
 
       await(connector.checkPassword(checkPasswordRequest).failed) shouldBe a[InvalidCredentials]
       verify(mockPayloadEncryption).encrypt(Json.toJson(checkPasswordRequest))
@@ -250,7 +252,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
     "should throw UnverifiedAccount if the response is 403" in new Setup {
       when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.failed(Upstream4xxResponse("403 error", 403, 403)))
+        thenReturn(Future.failed(Upstream4xxResponse("403 error", Status.FORBIDDEN, Status.FORBIDDEN)))
 
       await(connector.checkPassword(checkPasswordRequest).failed) shouldBe a[UnverifiedAccount]
       verify(mockPayloadEncryption).encrypt(Json.toJson(checkPasswordRequest))
@@ -258,7 +260,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
     "should throw LockedAccount if the response is 423" in new Setup {
       when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).
-        thenReturn(Future.failed(Upstream4xxResponse("423 error", 423, 423)))
+        thenReturn(Future.failed(Upstream4xxResponse("423 error", Status.LOCKED, Status.LOCKED)))
 
       await(connector.checkPassword(checkPasswordRequest).failed) shouldBe a[LockedAccount]
       verify(mockPayloadEncryption).encrypt(Json.toJson(checkPasswordRequest))
@@ -272,7 +274,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
     "successfully complete a developer account setup" in new Setup {
       when(mockHttp.POSTEmpty(endpoint(s"developer/account-setup/$email/complete"))).
-        thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(developer)))))
+        thenReturn(Future.successful(HttpResponse(Status.OK, Some(Json.toJson(developer)))))
 
       connector.completeAccountSetup(email).futureValue shouldBe developer
     }
@@ -280,7 +282,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
     "successfully update roles" in new Setup {
       private val request = AccountSetupRequest(roles = Some(Seq("aRole")), rolesOther = Some("otherRole"))
       when(mockHttp.PUT(endpoint(s"developer/account-setup/$email/roles"), request)).
-        thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(developer)))))
+        thenReturn(Future.successful(HttpResponse(Status.OK, Some(Json.toJson(developer)))))
 
       connector.updateRoles(email, request).futureValue shouldBe developer
     }
@@ -288,7 +290,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
     "successfully update services" in new Setup {
       private val request = AccountSetupRequest(services = Some(Seq("aService")), servicesOther = Some("otherService"))
       when(mockHttp.PUT(endpoint(s"developer/account-setup/$email/services"), request)).
-        thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(developer)))))
+        thenReturn(Future.successful(HttpResponse(Status.OK, Some(Json.toJson(developer)))))
 
       connector.updateServices(email, request).futureValue shouldBe developer
     }
@@ -296,7 +298,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
     "successfully update targets" in new Setup {
       private val request = AccountSetupRequest(targets = Some(Seq("aTarget")), targetsOther = Some("otherTargets"))
       when(mockHttp.PUT(endpoint(s"developer/account-setup/$email/targets"), request)).
-        thenReturn(Future.successful(HttpResponse(200, Some(Json.toJson(developer)))))
+        thenReturn(Future.successful(HttpResponse(Status.OK, Some(Json.toJson(developer)))))
 
       connector.updateTargets(email, request).futureValue shouldBe developer
     }
@@ -361,7 +363,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       when(mockHttp.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
         thenReturn(Future.failed(new BadRequestException("Bad Request")))
 
-      val result = connector.verifyMfa(email, code)
+      private val result = connector.verifyMfa(email, code)
 
       result.futureValue shouldBe false
     }
@@ -374,7 +376,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       when(mockHttp.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON))).
         thenReturn(Future.successful(HttpResponse(Status.NO_CONTENT)))
 
-      val result = connector.verifyMfa(email, code)
+      private val result = connector.verifyMfa(email, code)
 
       result.futureValue shouldBe true
     }
@@ -400,7 +402,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       when(mockHttp.PUT(endpoint(s"developer/$email/mfa/enable"), "")).
         thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
-      val result = await(connector.enableMfa(email))
+      private val result = await(connector.enableMfa(email))
 
       result shouldBe NO_CONTENT
     }

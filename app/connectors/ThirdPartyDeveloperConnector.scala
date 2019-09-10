@@ -34,7 +34,9 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
                                             )(implicit val ec: ExecutionContext) {
 
   def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
-    http.PUT(s"$serviceBaseUrl/session/$sessionId/loggedInState", request.loggedInState)
+    val loggedInStateString = request.loggedInState.getOrElse(throw new Exception("Invalid loggedInState:" + request.loggedInState)).toString
+
+    http.PUT(s"$serviceBaseUrl/session/$sessionId/loggedInState/${loggedInStateString}", "")
       .map(_.json.as[Session])
       .recover {
         case _: NotFoundException => throw new SessionInvalid
@@ -71,7 +73,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     http.GET(s"$serviceBaseUrl/verification?code=$code") map status
   }
 
-  private def status: (HttpResponse) => Int = _.status
+  private def status: HttpResponse => Int = _.status
 
   def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[String] = metrics.record(api) {
     http.GET(s"$serviceBaseUrl/reset-password?code=$code")
@@ -174,7 +176,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     }
   }
 
-  def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier) = {
+  def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
     http.GET[Seq[User]](s"$serviceBaseUrl/developers", Seq("emails" -> emails.mkString(",")))
   }
 
@@ -224,8 +226,8 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       http.POST(s"$serviceBaseUrl/authenticate-totp", _, Seq(CONTENT_TYPE -> JSON)))
       .map(_.json.as[Session])
       .recover {
-        case e: BadRequestException => throw new InvalidCredentials
-        case e: NotFoundException => throw new InvalidEmail
+        case _: BadRequestException => throw new InvalidCredentials
+        case _: NotFoundException => throw new InvalidEmail
       }
   }
 }
