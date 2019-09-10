@@ -144,16 +144,15 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
   "updateSessionLoggedInState" should {
     val sessionId = "sessionId"
     val updateLoggedInStateRequest = UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN))
+    val invalidLoggedInStateRequest = UpdateLoggedInStateRequest(None)
     val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
 
     "update session logged in state" in new Setup {
-
       when(mockHttp.PUT(endpoint(s"session/$sessionId/loggedInState/LOGGED_IN"), ""))
         .thenReturn(Future.successful(HttpResponse(Status.OK, Some(Json.toJson(session)))))
 
       private val updatedSession = await(connector.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
       updatedSession shouldBe session
-
     }
 
     "error with SessionInvalid if we get a 404 response" in new Setup {
@@ -161,7 +160,14 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
         .thenReturn(Future.failed(new NotFoundException("")))
 
       private val error = await(connector.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest).failed)
+
       error shouldBe a[SessionInvalid]
+    }
+
+    "error with exception if no loggedInState on session" in new Setup {
+      private val error = await(connector.updateSessionLoggedInState(sessionId, invalidLoggedInStateRequest).failed)
+      error shouldBe a[SessionInvalid]
+      error.getMessage shouldBe "Missing loggedInState"
     }
   }
 
@@ -176,7 +182,6 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       connector.updateProfile(email, updated).futureValue shouldBe Status.OK
     }
   }
-
 
   "Resend verification" should {
     "send verification mail" in new Setup {

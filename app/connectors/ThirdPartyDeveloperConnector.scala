@@ -34,13 +34,17 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
                                             )(implicit val ec: ExecutionContext) {
 
   def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
-    val loggedInStateString = request.loggedInState.getOrElse(throw new Exception("Invalid loggedInState:" + request.loggedInState)).toString
 
-    http.PUT(s"$serviceBaseUrl/session/$sessionId/loggedInState/${loggedInStateString}", "")
-      .map(_.json.as[Session])
-      .recover {
-        case _: NotFoundException => throw new SessionInvalid
+    request.loggedInState match {
+      case None => Future.failed(new SessionInvalid(Some("Missing loggedInState")))
+      case Some(loggedInState) => {
+        http.PUT(s"$serviceBaseUrl/session/$sessionId/loggedInState/$loggedInState", "")
+          .map(_.json.as[Session])
+          .recover {
+            case _: NotFoundException => throw new SessionInvalid
+          }
       }
+    }
   }
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl

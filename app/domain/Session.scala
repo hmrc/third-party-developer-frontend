@@ -24,4 +24,4 @@ object Session {
   implicit val formatSession = Json.format[Session]
 }
 
-class SessionInvalid extends Throwable
+class SessionInvalid(message: Option[String] = None) extends Throwable(message.orNull)
