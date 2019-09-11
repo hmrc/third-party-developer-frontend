@@ -38,7 +38,7 @@ import scala.concurrent.Future
 
 class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val user = Developer("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   val sessionId = UUID.randomUUID().toString
   val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
 

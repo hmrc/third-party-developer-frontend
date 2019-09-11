@@ -23,10 +23,16 @@ import play.api.libs.json.{Format, Json}
 
 import scala.concurrent.Future
 
-case class Developer(email: String, firstName: String, lastName: String, organisation: Option[String] = None, mfaEnabled: Option[Boolean] = None) {
+case class Developer(email: String,
+                     firstName: String,
+                     lastName: String,
+                     organisation: Option[String] = None,
+                     mfaEnabled: Option[Boolean] = None,
+                     loggedInState: LoggedInState) { // TODO: Make optional, or move to session only.
   val displayedName = s"$firstName $lastName"
-  val displayedNameEncoded = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
-  def isMfaEnabled = mfaEnabled.getOrElse(false)
+  val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
+
+  def isMfaEnabled: Boolean = mfaEnabled.getOrElse(false)
 }
 
 object Developer {
@@ -42,13 +48,12 @@ case object LoggedInUser extends UserStatus {
   override val app: Future[Application] = Future.failed(new IllegalStateException("Unsupported"))
 }
 
-// TODO: Introduce a trait of 'at least part authenticated'? For PartAuthenticatedUser and LoggedInUser
-// Covers fully logged on and part authenticated - has just an email
-// Can we used when enabling MFA when logged on, or part logged on during sign-in
-abstract class PartAuthenticatedUser(val email: String)
-case class PartAuthenticatedUserEnablingMfa(override val email: String) extends PartAuthenticatedUser(email)
+case object PartLoggedInEnablingMfa extends UserStatus{
+  override val app: Future[Application] = Future.failed(new IllegalStateException("Unsupported"))
+}
 
 case class AppAdmin(override val app: Future[Application]) extends UserStatus
+
 case class AppTeamMember(override val app: Future[Application]) extends UserStatus
 
 case class User(email: String, verified: Option[Boolean])

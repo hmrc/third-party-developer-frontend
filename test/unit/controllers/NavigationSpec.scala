@@ -35,7 +35,7 @@ import scala.concurrent.Future._
 class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   implicit val materializer = fakeApplication.materializer
-  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   val sessionId = "sessionId"
   val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
   var userPassword = "Password1!"

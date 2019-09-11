@@ -48,7 +48,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   Given("""^I am registered with$""") { (data: DataTable) =>
     val result = data.asMaps(classOf[String], classOf[String]).get(0)
-    val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
+    val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None, loggedInState = LoggedInState.LOGGED_IN)
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))

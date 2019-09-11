@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect._
 
-trait AuthConfigImpl  extends AuthConfig {
+trait AuthConfigImpl extends AuthConfig {
 
   val errorHandler: ErrorHandler
   val sessionService: SessionService
@@ -39,9 +39,9 @@ trait AuthConfigImpl  extends AuthConfig {
   type User = Developer
   type Authority = UserStatus
 
-  override def idTag = classTag[Id]
+  override def idTag: ClassTag[String] = classTag[Id]
 
-  override def sessionTimeoutInSeconds = appConfig.sessionTimeoutInSeconds
+  override def sessionTimeoutInSeconds: Int = appConfig.sessionTimeoutInSeconds
 
   val dummyHeader = HeaderCarrier()
 
@@ -50,7 +50,7 @@ trait AuthConfigImpl  extends AuthConfig {
 
   def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
     Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
-    val uri = request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps.url)
+    val uri = request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps().url)
     Future.successful(Redirect(uri).withNewSession)
   }
 
@@ -62,8 +62,18 @@ trait AuthConfigImpl  extends AuthConfig {
 
   def authenticationFailed(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
     Logger.info(s"authenticationFailed - request_uri: ${request.uri} access_uri: ${request.session.get("access_uri")}")
-    if (request.headers.isAjaxRequest) Future.successful(Forbidden(Json.toJson(Map("code" -> "FORBIDDEN", "message" -> "Your session may have timed-out or you are not authorised to make this request"))))
-    else Future.successful(Redirect(routes.UserLoginAccount.login).withSession("access_uri" -> request.uri))
+    val result: Result =
+      if (request.headers.isAjaxRequest) {
+        Forbidden(Json.toJson(Map(
+          "code" -> "FORBIDDEN",
+          "message" -> "Your session may have timed-out or you are not authorised to make this request")))
+      } else {
+        Redirect(
+          routes.UserLoginAccount.login())
+          .withSession("access_uri" -> request.uri)
+      }
+
+    Future.successful(result)
   }
 
   override def authorizationFailed(request: RequestHeader, user: Developer,
@@ -71,14 +81,17 @@ trait AuthConfigImpl  extends AuthConfig {
     Future.successful(NotFound(errorHandler.notFoundTemplate(Request(request, user))))
   }
 
-  def authorize(user: User, authority: Authority)(implicit ctx: ExecutionContext): Future[Boolean] = {
-    def getRole(app: Future[Application], user: Developer) = app.map(_.collaborators.find(_.emailAddress == user.email))
+  def authorize(user: User, requiredAuthority: Authority)(implicit ctx: ExecutionContext): Future[Boolean] = {
+    def isAuthorized =
+      (user.loggedInState, requiredAuthority) match {
+        case (LoggedInState.LOGGED_IN, LoggedInUser) => true
+        case (LoggedInState.PART_LOGGED_IN_ENABLING_MFA, LoggedInUser) => false
+        case (LoggedInState.LOGGED_IN, PartLoggedInEnablingMfa) => true
+        case (LoggedInState.PART_LOGGED_IN_ENABLING_MFA, PartLoggedInEnablingMfa) => true
+        case _ => false
+      }
 
-    authority match {
-      case AppAdmin(app) => getRole(app, user).map(_.exists(_.role == Role.ADMINISTRATOR))
-      case AppTeamMember(app) => getRole(app, user).map(_.isDefined)
-      case _ => Future.successful(true)
-    }
+    Future.successful(isAuthorized)
   }
 
   override lazy val idContainer = AsyncIdContainer(new TransparentIdContainer[Id])
@@ -89,7 +102,7 @@ trait AuthConfigImpl  extends AuthConfig {
   )
 
   implicit class RequestWithAjaxSupport(h: Headers) {
-    def isAjaxRequest = h.get("X-Requested-With").contains("XMLHttpRequest")
+    def isAjaxRequest: Boolean = h.get("X-Requested-With").contains("XMLHttpRequest")
   }
 
 }

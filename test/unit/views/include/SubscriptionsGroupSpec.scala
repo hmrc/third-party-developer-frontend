@@ -32,7 +32,7 @@ import utils.CSRFTokenHelper._
 class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPerSuite {
   val request = FakeRequest().withCSRFToken
   val appConfig = mock[ApplicationConfig]
-  val loggedInUser = Developer("givenname.familyname@example.com", "Givenname", "Familyname")
+  val loggedInUser = Developer("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
   val applicationId = "1234"
   val clientId = "clientId123"
   val applicationName = "Test Application"

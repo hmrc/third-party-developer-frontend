@@ -43,7 +43,7 @@ class SessionServiceSpec extends UnitSpec with Matchers  with MockitoSugar with 
     val password = "Password1!"
     val totp = "123456"
     val nonce = "ABC-123"
-    val developer = Developer(email, "firstName", "lastName")
+    val developer = Developer(email, "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))

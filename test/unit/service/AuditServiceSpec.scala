@@ -17,7 +17,7 @@
 package unit.service
 
 import config.ApplicationConfig
-import domain.Developer
+import domain.{Developer, LoggedInState}
 import org.mockito.{ArgumentMatcher, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.{any, argThat}
 import org.mockito.Mockito._
@@ -36,7 +36,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuditServiceSpec extends UnitSpec with Matchers with MockitoSugar with ScalaFutures {
 
-  val developer = Developer("email@example.com", "Paul", "Smith")
+  val developer = Developer("email@example.com", "Paul", "Smith", loggedInState = LoggedInState.LOGGED_IN)
 
   trait Setup {
     implicit val hc = HeaderCarrier().withExtraHeaders(

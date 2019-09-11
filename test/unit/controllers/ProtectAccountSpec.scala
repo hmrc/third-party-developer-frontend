@@ -47,7 +47,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
-    val loggedInUser = Developer("johnsmith@example.com", "John", "Doe")
+    val loggedInUser = Developer("johnsmith@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
     val qrImage = "qrImage"
     val otpUri = new URI("OTPURI")
     val correctCode = "123123"
@@ -77,12 +77,12 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait SetupUnprotectedAccount extends Setup {
     given(underTest.connector.fetchDeveloper(mockEq(loggedInUser.email))(any[HeaderCarrier])).
-      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None)))
+      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None, loggedInState = LoggedInState.LOGGED_IN)))
   }
 
   trait SetupProtectedAccount extends Setup {
     given(underTest.connector.fetchDeveloper(mockEq(loggedInUser.email))(any[HeaderCarrier])).
-      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None, Some(true))))
+      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None, Some(true), loggedInState = LoggedInState.LOGGED_IN)))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {

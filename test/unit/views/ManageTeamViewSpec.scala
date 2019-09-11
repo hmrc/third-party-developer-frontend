@@ -36,8 +36,8 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with MockitoSug
   val appConfig = mock[ApplicationConfig]
   val appId = "1234"
   val clientId = "clientId123"
-  val loggedInUser = Developer("admin@example.com", "firstName1", "lastName1")
-  val collaborator = Developer("developer@example.com", "firstName2", "lastName2")
+  val loggedInUser = Developer("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val collaborator = Developer("developer@example.com", "firstName2", "lastName2", loggedInState = LoggedInState.LOGGED_IN)
   val collaborators = Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR), Collaborator(collaborator.email, Role.DEVELOPER))
   val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     collaborators, state = ApplicationState.production(loggedInUser.email, ""),

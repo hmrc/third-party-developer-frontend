@@ -17,6 +17,7 @@
 package unit.config
 
 import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
+import domain.{Developer, LoggedInState, LoggedInUser, PartLoggedInEnablingMfa}
 import org.mockito.BDDMockito.given
 import org.scalatest.mockito.MockitoSugar
 import play.api.mvc.AnyContentAsEmpty
@@ -29,12 +30,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class AuthConfigImplSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   object TestAuthConfigImpl extends AuthConfigImpl {
-    val sessionService = mock[SessionService]
-    val appConfig = mock[ApplicationConfig]
-    val errorHandler = mock[ErrorHandler]
+    val sessionService: SessionService = mock[SessionService]
+    val appConfig: ApplicationConfig = mock[ApplicationConfig]
+    val errorHandler: ErrorHandler = mock[ErrorHandler]
   }
 
-  "Auth Implementation" should {
+  "logoutSucceeded action" should {
     given(TestAuthConfigImpl.appConfig.apiDocumentationFrontendUrl).willReturn("http://a.test.url")
 
     "respond with an http url if the request was http" in {
@@ -47,6 +48,44 @@ class AuthConfigImplSpec extends UnitSpec with MockitoSugar with WithFakeApplica
       val request = FakeRequest("GET", "/", FakeHeaders(), AnyContentAsEmpty, secure = true)
       val out = await(TestAuthConfigImpl.logoutSucceeded(request))
       out.header.headers.getOrElse("Location", "") should startWith("https:")
+    }
+  }
+
+  "authorize" when {
+    "the user is logged in and" when {
+      val user = Developer("Email", "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
+
+      "authority of LoggedInUser is requested" should {
+        "return true" in {
+          val result = await(TestAuthConfigImpl.authorize(user, LoggedInUser))
+          result shouldBe true
+        }
+      }
+
+      "authority of PartLoggedInEnablingMfa is requested" should {
+        "return true" in {
+          val result = await(TestAuthConfigImpl.authorize(user, PartLoggedInEnablingMfa))
+          result shouldBe true
+        }
+      }
+    }
+
+    "the user is part logged in and" when {
+      val user = Developer("Email", "firstName", "lastName", loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+
+      "authority of LoggedInUser is requested" should {
+        "return false" in {
+          val result = await(TestAuthConfigImpl.authorize(user, LoggedInUser))
+          result shouldBe false
+        }
+      }
+
+      "authority of PartLoggedInEnablingMfa is requested" should {
+        "return true" in {
+          val result = await(TestAuthConfigImpl.authorize(user, PartLoggedInEnablingMfa))
+          result shouldBe true
+        }
+      }
     }
   }
 }

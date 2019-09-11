@@ -34,7 +34,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite {
       val clientId = "clientId123"
       val applicationName = "Test Application"
 
-      val loggedInUser = Developer("givenname.familyname@example.com", "Givenname", "Familyname")
+      val loggedInUser = Developer("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
       val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
         Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),

@@ -66,7 +66,8 @@ class Profile @Inject()(applicationService: ApplicationService,
       profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ =>
           Ok(profileUpdated("profile updated", "Manage profile", "manage-profile",
-            Developer(loggedIn.email, profile.firstName, profile.lastName, profile.organisation)))
+            // TODO - Move the loggedInState to a parent session object? Or should it be a property of the 'user / developer' class.
+            loggedIn.copy(firstName = profile.firstName, lastName = profile.lastName, organisation = profile.organisation)))
       }
     )
   }

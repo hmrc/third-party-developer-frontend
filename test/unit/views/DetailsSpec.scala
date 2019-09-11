@@ -43,7 +43,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
   "Application details view" when {
     implicit val mockConfig = mock[ApplicationConfig]
     implicit val request = FakeRequest()
-    implicit val loggedIn = Developer("developer@example.com", "Joe", "Bloggs")
+    implicit val loggedIn = Developer("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection = "details"
 
     val id = "id"

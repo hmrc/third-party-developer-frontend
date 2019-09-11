@@ -48,7 +48,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
 
     val request = FakeRequest().withCSRFToken
 
-    val developer = Developer("Test", "Test", "Test", None)
+    val developer = Developer("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val clientSecret1 = ClientSecret("", "clientSecret1Content", DateTimeUtils.now)
 

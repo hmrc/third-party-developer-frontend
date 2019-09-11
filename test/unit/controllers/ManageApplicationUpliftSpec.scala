@@ -40,7 +40,7 @@ class ManageApplicationUpliftSpec extends BaseControllerSpec with Writeables wit
   val appId = "1234"
   val clientId = "clientId456"
   val appName = "app Name!"
-  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
 
   val sessionId = "sessionId"
   val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)

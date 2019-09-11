@@ -43,7 +43,7 @@ class ManageApplicationsSpec
 
   val appId = "1234"
   val clientId = "clientId123"
-  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   val sessionId = "sessionId"
   val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
   val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
