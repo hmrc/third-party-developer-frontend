@@ -43,9 +43,12 @@ import scala.concurrent.Future._
 
 class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
 
-  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+  val developer = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
-  val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
+  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+
+  val loggedInUser = Developer.apply(session)
+
   val appId = "1234"
   val clientId = "clientId123"
   val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),

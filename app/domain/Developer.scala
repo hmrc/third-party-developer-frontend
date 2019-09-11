@@ -20,15 +20,30 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 import play.api.libs.json.{Format, Json}
+import play.api.mvc.Session
 
 import scala.concurrent.Future
 
+// TODO: add session
+// TODO: Rename this to DeveloperSession
 case class Developer(email: String,
                      firstName: String,
                      lastName: String,
                      organisation: Option[String] = None,
                      mfaEnabled: Option[Boolean] = None,
-                     loggedInState: LoggedInState) { // TODO: Make optional, or move to session only.
+                     loggedInState: LoggedInState) {
+  val displayedName = s"$firstName $lastName"
+  val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
+
+  def isMfaEnabled: Boolean = mfaEnabled.getOrElse(false)
+}
+
+// TODO : Rename this to Developer?
+case class DeveloperDto(email: String,
+                        firstName: String,
+                        lastName: String,
+                        organisation: Option[String] = None,
+                        mfaEnabled: Option[Boolean] = None) {
   val displayedName = s"$firstName $lastName"
   val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 
@@ -38,6 +53,19 @@ case class Developer(email: String,
 object Developer {
   implicit val format: Format[Developer] = Json.format[Developer]
 
+  // TODO: Test me
+  implicit def apply(session: Session) : Developer = {
+    Developer(session.developer.email,
+      session.developer.firstName,
+      session.developer.lastName,
+      session.developer.organisation,
+      session.developer.mfaEnabled,
+      session.loggedInState)
+  }
+}
+
+object DeveloperDto {
+  implicit val format: Format[DeveloperDto] = Json.format[DeveloperDto]
 }
 
 sealed trait UserStatus {
@@ -48,7 +76,7 @@ case object LoggedInUser extends UserStatus {
   override val app: Future[Application] = Future.failed(new IllegalStateException("Unsupported"))
 }
 
-case object PartLoggedInEnablingMfa extends UserStatus{
+case object PartLoggedInEnablingMfa extends UserStatus {
   override val app: Future[Application] = Future.failed(new IllegalStateException("Unsupported"))
 }
 
@@ -60,5 +88,4 @@ case class User(email: String, verified: Option[Boolean])
 
 object User {
   implicit val format: Format[User] = Json.format[User]
-
 }

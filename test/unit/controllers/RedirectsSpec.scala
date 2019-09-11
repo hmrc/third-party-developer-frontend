@@ -42,9 +42,13 @@ class RedirectsSpec extends BaseControllerSpec {
   val applicationId = "1234"
   val clientId = "clientId123"
 
-  val loggedInDeveloper = Developer("third.party.developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+  val developer = DeveloperDto("third.party.developer@example.com", "John", "Doe")
   val sessionId = "sessionId"
-  val session = Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN)
+  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+
+  val loggedInDeveloper = Developer.apply(session)
+
+
   val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
   trait Setup {

@@ -43,9 +43,13 @@ class ManageApplicationsSpec
 
   val appId = "1234"
   val clientId = "clientId123"
-  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+
+  val developer = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
-  val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
+  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+
+  val loggedInUser = Developer.apply(session)
+
   val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))

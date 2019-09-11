@@ -46,7 +46,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationConfig])
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInUser = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
   }
 

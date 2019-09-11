@@ -17,7 +17,7 @@
 package config
 
 import controllers.routes
-import domain._
+import domain.{Session, _}
 import jp.t2v.lab.play2.auth._
 import play.api.Logger
 import play.api.libs.json.Json
@@ -45,8 +45,13 @@ trait AuthConfigImpl extends AuthConfig {
 
   val dummyHeader = HeaderCarrier()
 
+
+
   def resolveUser(id: Id)(implicit ctx: ExecutionContext): Future[Option[User]] =
-    sessionService.fetch(id)(dummyHeader).map(_.map(_.developer))
+    // TODO : Add sessionId to developer session?
+    sessionService
+      .fetch(id)(dummyHeader)
+      .map(ses => ses.map(Developer.apply))
 
   def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
     Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
@@ -76,7 +81,7 @@ trait AuthConfigImpl extends AuthConfig {
     Future.successful(result)
   }
 
-  override def authorizationFailed(request: RequestHeader, user: Developer,
+  override def authorizationFailed(request: RequestHeader, user: User,
                                    authority: Option[Authority])(implicit context: ExecutionContext): Future[Result] = {
     Future.successful(NotFound(errorHandler.notFoundTemplate(Request(request, user))))
   }

@@ -20,7 +20,7 @@ import java.util.UUID
 
 import config.ApplicationConfig
 import controllers._
-import domain.{Developer, LoggedInState, Session}
+import domain.{Developer, DeveloperDto, LoggedInState, Session}
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
@@ -38,10 +38,11 @@ import scala.concurrent.Future
 
 class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  val user = Developer("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+  val developer = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = UUID.randomUUID().toString
-  val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
+  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
+  val user = Developer.apply(session)
 
   trait Setup {
     implicit val mockAppConfig = mock[ApplicationConfig]
