@@ -25,8 +25,9 @@ import domain.{Developer, LoggedInState, Session}
 import org.jsoup.Jsoup
 import org.mockito.BDDMockito._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.scalatest.Assertion
 import play.api.http.Status.{BAD_REQUEST, SEE_OTHER}
-import play.api.mvc.Result
+import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -50,19 +51,20 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     val otpUri = new URI("OTPURI")
     val correctCode = "123123"
 
-    val underTest = new ProtectAccount(
+    val underTest: ProtectAccount = new ProtectAccount(
       mock[ThirdPartyDeveloperConnector],
       mock[OtpAuthUri],
       mock[MFAService],
       mock[SessionService],
       messagesApi,
       mock[ErrorHandler])(mock[ApplicationConfig], global) {
-      override val qrCode = mock[QRCode]
+      override val qrCode: QRCode = mock[QRCode]
     }
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
+    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+      .willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
 
-    def protectAccountRequest(code: String) = {
+    def protectAccountRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       FakeRequest().
         withLoggedIn(underTest)(sessionId).
         withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken).
@@ -106,15 +108,16 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       willReturn(Future.successful(MFAResponse(true)))
   }
 
+
   "getQrCode" should {
     "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV {
-      val request = FakeRequest().
+      private val request = FakeRequest().
         withLoggedIn(underTest)(sessionId)
 
-      val result = await(underTest.getQrCode()(request))
+      private val result = await(underTest.getQrCode()(request))
 
       status(result) shouldBe 200
-      val dom = Jsoup.parse(bodyOf(result))
+      private val dom = Jsoup.parse(bodyOf(result))
       dom.getElementById("secret").html() shouldBe "abcd efgh"
       dom.getElementById("qrCode").attr("src") shouldBe qrImage
     }
@@ -122,20 +125,20 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   "getProtectAccount" should {
     "return protect account page for user without MFA enabled" in new SetupUnprotectedAccount {
-      val request = FakeRequest().
+      private val request = FakeRequest().
         withLoggedIn(underTest)(sessionId)
 
-      val result = await(addToken(underTest.getProtectAccount())(request))
+      private val result = await(addToken(underTest.getProtectAccount())(request))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Protect your Developer Hub account by adding 2-step verification")
     }
 
     "return protected account page for user with MFA enabled" in new SetupProtectedAccount {
-      val request = FakeRequest().
+      private val request = FakeRequest().
         withLoggedIn(underTest)(sessionId)
 
-      val result = await(addToken(underTest.getProtectAccount())(request))
+      private val result = await(addToken(underTest.getProtectAccount())(request))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Your Developer Hub account is currently protected with 2-step verification. This is linked to your smartphone or tablet.")
@@ -145,27 +148,27 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   "protectAccount" should {
     "return error when access code in invalid format" in new SetupSuccessfulStart2SV {
-      val request = protectAccountRequest("abc")
+      private val request = protectAccountRequest("abc")
 
-      val result = await(addToken(underTest.protectAccount())(request))
+      private val result = await(addToken(underTest.protectAccount())(request))
 
       status(result) shouldBe BAD_REQUEST
       assertIncludesOneError(result, "You have entered an invalid access code")
     }
 
     "return error when verification fails" in new SetupFailedVerification {
-      val request = protectAccountRequest(correctCode)
+      private val request = protectAccountRequest(correctCode)
 
-      val result = await(addToken(underTest.protectAccount())(request))
+      private val result = await(addToken(underTest.protectAccount())(request))
 
       status(result) shouldBe BAD_REQUEST
       assertIncludesOneError(result, "You have entered an incorrect access code")
     }
 
     "redirect to getProtectAccountCompletedAction" in new SetupSuccessfulVerification {
-      val request = protectAccountRequest(correctCode)
+      private val request = protectAccountRequest(correctCode)
 
-      val result = await(addToken(underTest.protectAccount())(request))
+      private val result = await(addToken(underTest.protectAccount())(request))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ProtectAccount.getProtectAccountCompletedPage().url)
@@ -174,33 +177,33 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   "removeMfa" should {
     "return error when totpCode in invalid format" in new SetupSuccessfulRemoval {
-      val request = protectAccountRequest("abc")
+      private val request = protectAccountRequest("abc")
 
-      val result = await(addToken(underTest.remove2SV())(request))
+      private val result = await(addToken(underTest.remove2SV())(request))
 
       status(result) shouldBe BAD_REQUEST
       assertIncludesOneError(result, "You have entered an invalid access code")
     }
 
     "return error when verification fails" in new SetupFailedRemoval {
-      val request = protectAccountRequest(correctCode)
+      private val request = protectAccountRequest(correctCode)
 
-      val result = await(addToken(underTest.remove2SV())(request))
+      private val result = await(addToken(underTest.remove2SV())(request))
 
       assertIncludesOneError(result, "You have entered an incorrect access code")
     }
 
     "redirect to 2SV removal completed action" in new SetupSuccessfulRemoval {
-      val request = protectAccountRequest(correctCode)
+      private val request = protectAccountRequest(correctCode)
 
-      val result = await(addToken(underTest.remove2SV())(request))
+      private val result = await(addToken(underTest.remove2SV())(request))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2SVRemovalCompletePage().url)
     }
   }
 
-  def assertIncludesOneError(result: Result, message: String) = {
+  private def assertIncludesOneError(result: Result, message: String): Assertion = {
 
     val body = bodyOf(result)
 
