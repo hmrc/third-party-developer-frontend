@@ -51,7 +51,7 @@ trait AuthConfigImpl extends AuthConfig {
     // TODO : Add sessionId to developer session?
     sessionService
       .fetch(id)(dummyHeader)
-      .map(ses => ses.map(Developer.apply))
+      .map(ses => ses.map(Developer.createDeveloper))
 
   def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
     Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")

@@ -42,7 +42,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   val sessionId = UUID.randomUUID().toString
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-  val user = Developer.apply(session)
+  val user = Developer.createDeveloper(session)
 
   trait Setup {
     implicit val mockAppConfig = mock[ApplicationConfig]

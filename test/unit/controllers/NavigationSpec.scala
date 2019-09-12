@@ -38,7 +38,7 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
   val developer = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-  val loggedInUser = Developer.apply(session)
+  val loggedInUser = Developer.createDeveloper(session)
 
   var userPassword = "Password1!"
 

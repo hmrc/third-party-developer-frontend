@@ -18,10 +18,7 @@ package domain
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-
 import play.api.libs.json.{Format, Json}
-import play.api.mvc.Session
-
 import scala.concurrent.Future
 
 // TODO: add session
@@ -53,8 +50,7 @@ case class DeveloperDto(email: String,
 object Developer {
   implicit val format: Format[Developer] = Json.format[Developer]
 
-  // TODO: Test me
-  implicit def apply(session: Session) : Developer = {
+  def createDeveloper(session: Session) : Developer = {
     Developer(session.developer.email,
       session.developer.firstName,
       session.developer.lastName,

@@ -58,7 +58,7 @@ class DeleteApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    val loggedInUser = Developer.apply(session)
+    val loggedInUser = Developer.createDeveloper(session)
 
     val application = Application(appId, clientId, appName, DateTime.now.withTimeAtStartOfDay(), Environment.PRODUCTION, Some("Description 1"),
       Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
