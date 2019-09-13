@@ -48,7 +48,7 @@ class ManageApplicationsSpec
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-  val loggedInUser = DeveloperSession.createDeveloper(session)
+  val loggedInUser = DeveloperSession.apply(session)
 
   val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),

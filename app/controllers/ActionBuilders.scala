@@ -39,15 +39,15 @@ trait ActionBuilders {
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-  def applicationAction(applicationId: String, user: DeveloperSession)(implicit ec: ExecutionContext) = new ActionRefiner[Request, ApplicationRequest] {
+  def applicationAction(applicationId: String, developerSession: DeveloperSession)(implicit ec: ExecutionContext) = new ActionRefiner[Request, ApplicationRequest] {
     override def refine[A](request: Request[A]) = {
       implicit val implicitRequest = request
 
       applicationService.fetchByApplicationId(applicationId)
         .map { application =>
-          application.role(user.email)
-            .map(role => ApplicationRequest(application, role, user, request))
-            .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, user))))
+          application.role(developerSession.developer.email)
+            .map(role => ApplicationRequest(application, role, developerSession, request))
+            .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession))))
         }
     }
   }

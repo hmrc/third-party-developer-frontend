@@ -46,8 +46,8 @@ class Profile @Inject()(applicationService: ApplicationService,
   val passwordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
-  private def changeProfileView(user: DeveloperSession)(implicit req: RequestWithAttributes[_]) = {
-    views.html.changeProfile(profileForm.fill(ProfileForm(user.firstName, user.lastName, user.organisation)))
+  private def changeProfileView(developerSession: DeveloperSession)(implicit req: RequestWithAttributes[_]) = {
+    views.html.changeProfile(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
   }
 
   def showProfile(): Action[AnyContent] = loggedInAction { implicit request =>
@@ -68,9 +68,11 @@ class Profile @Inject()(applicationService: ApplicationService,
         _ => {
           Ok(profileUpdated("profile updated", "Manage profile", "manage-profile",
             loggedIn.copy(
-              firstName = profile.firstName,
-              lastName = profile.lastName,
-              organisation = profile.organisation)))
+              developer = loggedIn.developer.copy(
+                firstName = profile.firstName,
+                lastName = profile.lastName,
+                organisation = profile.organisation))
+          ))
         }
       }
     )

@@ -84,7 +84,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
     userAuthenticationResponse.session match {
 
-      case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => audit(LoginSucceeded, DeveloperSession.createDeveloper(session))
+      case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => audit(LoginSucceeded, DeveloperSession.apply(session))
         // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
         gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails))
           .withSession(playSession)))
@@ -133,7 +133,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       validForm => {
         val email = request.session.get("emailAddress").get
         sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
-          audit(LoginSucceeded, DeveloperSession.createDeveloper(session))
+          audit(LoginSucceeded, DeveloperSession.apply(session))
           gotoLoginSucceeded(session.sessionId)
         } recover {
           case _: InvalidCredentials =>

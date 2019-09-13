@@ -18,20 +18,20 @@ package domain
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+
 import play.api.libs.json.{Format, Json}
+
 import scala.concurrent.Future
 
 // TODO: add session
-case class DeveloperSession(email: String,
-                            firstName: String,
-                            lastName: String,
-                            organisation: Option[String] = None,
-                            mfaEnabled: Option[Boolean] = None,
-                            loggedInState: LoggedInState) {
-  val displayedName = s"$firstName $lastName"
+case class DeveloperSession(loggedInState: LoggedInState,
+                            developer: Developer) {
+  val displayedName: String = s"${developer.firstName} ${developer.lastName}"
   val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 
-  def isMfaEnabled: Boolean = mfaEnabled.getOrElse(false)
+  val email: String = developer.email
+
+  def isMfaEnabled: Boolean = developer.mfaEnabled.getOrElse(false)
 }
 
 case class Developer(email: String,
@@ -48,13 +48,20 @@ case class Developer(email: String,
 object DeveloperSession {
   implicit val format: Format[DeveloperSession] = Json.format[DeveloperSession]
 
-  def createDeveloper(session: Session) : DeveloperSession = {
-    DeveloperSession(session.developer.email,
-      session.developer.firstName,
-      session.developer.lastName,
-      session.developer.organisation,
-      session.developer.mfaEnabled,
-      session.loggedInState)
+  def apply(session: Session): DeveloperSession =
+    DeveloperSession(session.loggedInState, session.developer)
+
+  def apply(email: String,
+            firstName: String,
+            lastName: String,
+            organisation: Option[String] = None,
+            mfaEnabled: Option[Boolean] = None,
+            loggedInState: LoggedInState): DeveloperSession = {
+    DeveloperSession(loggedInState, Developer(email,
+      firstName,
+      lastName,
+      organisation,
+      mfaEnabled))
   }
 }
 

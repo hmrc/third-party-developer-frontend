@@ -29,7 +29,7 @@ class DevelopersSessionSpec extends UnitSpec {
 
   "Developer.apply" should {
     "create a Developer when passed in a Session" in {
-      val dev = DeveloperSession.createDeveloper(session)
+      val dev = DeveloperSession.apply(session)
       dev shouldBe expectedDeveloper
     }
   }
