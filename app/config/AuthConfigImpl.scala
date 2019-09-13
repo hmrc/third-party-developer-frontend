@@ -88,8 +88,8 @@ trait AuthConfigImpl extends AuthConfig {
       (developerSession.session.loggedInState, requiredAuthority) match {
         case (LoggedInState.LOGGED_IN, LoggedInUser) => true
         case (LoggedInState.PART_LOGGED_IN_ENABLING_MFA, LoggedInUser) => false
-        case (LoggedInState.LOGGED_IN, PartLoggedInEnablingMfa) => true
-        case (LoggedInState.PART_LOGGED_IN_ENABLING_MFA, PartLoggedInEnablingMfa) => true
+        case (LoggedInState.LOGGED_IN, AtLeastPartLoggedInEnablingMfa) => true
+        case (LoggedInState.PART_LOGGED_IN_ENABLING_MFA, AtLeastPartLoggedInEnablingMfa) => true
         case _ => false
       }
 

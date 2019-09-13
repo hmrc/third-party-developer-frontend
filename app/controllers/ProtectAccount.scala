@@ -18,11 +18,12 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import domain.{LoggedInState, UpdateLoggedInStateRequest}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, SessionService}
 import views.html.protectaccount
@@ -43,7 +44,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
   private val scale = 4
   val qrCode = QRCode(scale)
 
-  def getQrCode: Action[AnyContent] = loggedInAction { implicit request =>
+  def getQrCode: Action[AnyContent] = enablingMfaInAction { implicit request =>
     connector.createMfaSecret(loggedIn.email).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
@@ -51,7 +52,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
     })
   }
 
-  def getProtectAccount: Action[AnyContent] = loggedInAction { implicit request =>
+  def getProtectAccount: Action[AnyContent] = enablingMfaInAction { implicit request =>
     connector.fetchDeveloper(loggedIn.email).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
         case true => Ok(protectedAccount())
@@ -60,31 +61,45 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
     })
   }
 
-  def getAccessCodePage: Action[AnyContent] = loggedInAction { implicit request =>
+  def getAccessCodePage: Action[AnyContent] = enablingMfaInAction { implicit request =>
     Future.successful(Ok(protectAccountAccessCode(ProtectAccountForm.form)))
   }
 
-  def getProtectAccountCompletedPage: Action[AnyContent] = loggedInAction { implicit request =>
+  def getProtectAccountCompletedPage: Action[AnyContent] = enablingMfaInAction { implicit request =>
     Future.successful(Ok(protectAccountCompleted()))
   }
 
-  def protectAccount: Action[AnyContent] = loggedInAction { implicit request =>
+  def protectAccount: Action[AnyContent] = enablingMfaInAction { implicit request =>
+
+    def logonAndComplete(): Result = {
+      // TODO : Test this
+      // TODO: Call session Service
+      // 1) Update state in TPD
+      // 2) Update session in Play?
+      // connector.updateSessionLoggedInState(loggedIn.session.sessionId, UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN)))
+      Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
+    }
+
+    def invalidCode(form: ProtectAccountForm): Result = {
+      val protectAccountForm = ProtectAccountForm
+        .form
+        .fill(form)
+        .withError(key = "accessCode", message = "You have entered an incorrect access code")
+
+      BadRequest(protectAccountAccessCode(protectAccountForm))
+    }
+
     ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountAccessCode(form)))
     },
-      form => {
-        mfaService.enableMfa(loggedIn.email, form.accessCode).map(r => {
-          r.totpVerified match {
-            case true => {
-              // TODO: call connector.updateSessionLoggedInState()
-              Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
-            }
-            case _ =>
-              val protectAccountForm = ProtectAccountForm.form.fill(form)
-                .withError(key = "accessCode", message = "You have entered an incorrect access code")
-              BadRequest(protectAccountAccessCode(protectAccountForm))
+      (form: ProtectAccountForm) => {
+        for {
+          mfaResponse <- mfaService.enableMfa(loggedIn.email, form.accessCode)
+          result = {
+            if (mfaResponse.totpVerified) logonAndComplete()
+            else invalidCode(form)
           }
-        })
+        } yield result
       })
   }
 

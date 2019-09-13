@@ -17,7 +17,7 @@
 package unit.config
 
 import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
-import domain.{LoggedInState, LoggedInUser, PartLoggedInEnablingMfa}
+import domain.{LoggedInState, LoggedInUser, AtLeastPartLoggedInEnablingMfa}
 import org.mockito.BDDMockito.given
 import org.scalatest.mockito.MockitoSugar
 import play.api.mvc.AnyContentAsEmpty
@@ -64,7 +64,7 @@ class AuthConfigImplSpec extends UnitSpec with MockitoSugar with WithFakeApplica
 
       "authority of PartLoggedInEnablingMfa is requested" should {
         "return true" in {
-          val result = await(TestAuthConfigImpl.authorize(user, PartLoggedInEnablingMfa))
+          val result = await(TestAuthConfigImpl.authorize(user, AtLeastPartLoggedInEnablingMfa))
           result shouldBe true
         }
       }
@@ -82,7 +82,7 @@ class AuthConfigImplSpec extends UnitSpec with MockitoSugar with WithFakeApplica
 
       "authority of PartLoggedInEnablingMfa is requested" should {
         "return true" in {
-          val result = await(TestAuthConfigImpl.authorize(user, PartLoggedInEnablingMfa))
+          val result = await(TestAuthConfigImpl.authorize(user, AtLeastPartLoggedInEnablingMfa))
           result shouldBe true
         }
       }

@@ -61,7 +61,7 @@ case object LoggedInUser extends UserStatus {
   override val app: Future[Application] = Future.failed(new IllegalStateException("Unsupported"))
 }
 
-case object PartLoggedInEnablingMfa extends UserStatus {
+case object AtLeastPartLoggedInEnablingMfa extends UserStatus {
   override val app: Future[Application] = Future.failed(new IllegalStateException("Unsupported"))
 }
 

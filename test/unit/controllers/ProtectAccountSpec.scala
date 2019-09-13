@@ -140,22 +140,21 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
   }
 
-  // TODO: Make this test work (add part logged in annotation to controller action?
-//  "Given a user is part logged in and enabling Mfa" when {
-//    "getQrCode() is called it" should {
-//      "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV with PartLogged {
-//        private val request = FakeRequest().
-//          withLoggedIn(underTest)(sessionId)
-//
-//        private val result = await(underTest.getQrCode()(request))
-//
-//        status(result) shouldBe 200
-//        private val dom = Jsoup.parse(bodyOf(result))
-//        dom.getElementById("secret").html() shouldBe "abcd efgh"
-//        dom.getElementById("qrCode").attr("src") shouldBe qrImage
-//      }
-//    }
-//  }
+  "Given a user is part logged in and enabling Mfa" when {
+    "getQrCode() is called it" should {
+      "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV with PartLogged {
+        private val request = FakeRequest().
+          withLoggedIn(underTest)(sessionId)
+
+        private val result = await(underTest.getQrCode()(request))
+
+        status(result) shouldBe 200
+        private val dom = Jsoup.parse(bodyOf(result))
+        dom.getElementById("secret").html() shouldBe "abcd efgh"
+        dom.getElementById("qrCode").attr("src") shouldBe qrImage
+      }
+    }
+  }
 
   "Given a user is logged in" when {
     "getQrCode() is called it" should {
