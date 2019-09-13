@@ -41,9 +41,9 @@ import scala.concurrent.Future._
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
 
-  val developer = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
-  val user = Developer.createDeveloper(session)
+  val user = DeveloperSession.createDeveloper(session)
   val sessionPartLoggedInEnablingMfa = Session(UUID.randomUUID().toString, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
   val emailFieldName: String = "emailaddress"
   val passwordFieldName: String = "password"

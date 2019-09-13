@@ -17,7 +17,7 @@
 package service
 
 import connectors.DeskproConnector
-import domain.{Application, DeskproTicket, Developer, TicketResult}
+import domain.{Application, DeskproTicket, DeveloperSession, TicketResult}
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -27,20 +27,20 @@ import scala.concurrent.Future
 class SubscriptionsService @Inject()(deskproConnector: DeskproConnector,
                                      auditService: AuditService) {
 
-  private def doRequest(requester: Developer, application: Application, apiName: String, apiVersion: String)
+  private def doRequest(requester: DeveloperSession, application: Application, apiName: String, apiVersion: String)
                        (f: (String, String, String, String, String, String) => DeskproTicket)
                        (implicit hc: HeaderCarrier) = {
     f(requester.displayedName, requester.email, application.name, application.id, apiName, apiVersion)
   }
 
-  def requestApiSubscription(requester: Developer,
+  def requestApiSubscription(requester: DeveloperSession,
                              application: Application,
                              apiName: String,
                              apiVersion: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     deskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiSubscribe))
   }
 
-  def requestApiUnsubscribe(requester: Developer,
+  def requestApiUnsubscribe(requester: DeveloperSession,
                             application: Application,
                             apiName: String,
                             apiVersion: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {

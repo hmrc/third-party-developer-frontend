@@ -21,7 +21,7 @@ import component.pages._
 import component.stubs.Stubs
 import cucumber.api.DataTable
 import cucumber.api.scala.{EN, ScalaDsl}
-import domain.{Developer, DeveloperDto, LoggedInState, LoginRequest, Session, UserAuthenticationResponse}
+import domain._
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
 import play.api.http.Status._
@@ -48,7 +48,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   Given("""^I am registered with$""") { (data: DataTable) =>
     val result = data.asMaps(classOf[String], classOf[String]).get(0)
-    val developer = DeveloperDto(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
+    val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))

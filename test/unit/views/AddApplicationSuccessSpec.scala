@@ -17,7 +17,7 @@
 package unit.views
 
 import config.ApplicationConfig
-import domain.{Developer, Environment, LoggedInState}
+import domain.{DeveloperSession, Environment, LoggedInState}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.mockito.MockitoSugar
@@ -40,7 +40,7 @@ class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite with Moc
 
     def testPage(applicationName: String, environment: Environment): Document = {
       val applicationId = "application-id"
-      val loggedIn = Developer("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = DeveloperSession("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
       val page = views.html.addApplicationSuccess.render(applicationName, applicationId, environment.toString, request, loggedIn, applicationMessages, appConfig, navSection = "nav-section")
       val document = Jsoup.parse(page.body)

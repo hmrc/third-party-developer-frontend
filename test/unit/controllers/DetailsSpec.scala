@@ -283,11 +283,11 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationConfig]
     )
 
-    val developer = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
+    val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    val loggedInUser = Developer.createDeveloper(session)
+    val loggedInUser = DeveloperSession.createDeveloper(session)
 
     val newName = "new name"
     val newDescription = Some("new description")

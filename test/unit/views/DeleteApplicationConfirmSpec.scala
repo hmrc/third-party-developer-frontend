@@ -38,7 +38,7 @@ class DeleteApplicationConfirmSpec extends UnitSpec with OneServerPerSuite with 
     val request = FakeRequest().withCSRFToken
     val appId = "1234"
     val clientId = "clientId123"
-    val loggedInUser = Developer("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+    val loggedInUser = DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
     val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
       Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))

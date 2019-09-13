@@ -20,7 +20,7 @@
 @import model.Crumb
 
 @(applicationId: String, app: Application)(
-        implicit request: Request[_], loggedIn: Developer, messages: Messages, appConfig: ApplicationConfig, navSection: String = "credentials")
+        implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "credentials")
 
 @devMain(
     title = "Application submitted for checking",

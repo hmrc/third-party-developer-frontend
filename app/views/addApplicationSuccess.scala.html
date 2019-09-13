@@ -15,13 +15,13 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.Developer
+@import domain.DeveloperSession
 @import domain.Environment
 @import include._
 @import model.Crumb
 
 @(applicationName: String, applicationId: String, environment: String)(
-        implicit request: Request[_], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "add-application")
+        implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "add-application")
 
 @devMain(
     title = "Application added",

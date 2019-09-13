@@ -15,7 +15,7 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment, Developer, Role, State, TermsOfUseStatus}
+@import domain.{Application, Environment, DeveloperSession, Role, State, TermsOfUseStatus}
 @import domain.TermsOfUseStatus._
 @import include._
 @import model.Crumb
@@ -23,7 +23,7 @@
 @import org.joda.time.format.DateTimeFormat
 
 @(app: Application, form: Form[controllers.TermsOfUseForm])(
-        implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 @title = { @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) { Agree to our terms of use } else { Terms of use } }
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 

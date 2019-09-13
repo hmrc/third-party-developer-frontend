@@ -36,7 +36,7 @@ trait AuthConfigImpl extends AuthConfig {
   implicit val appConfig: ApplicationConfig
 
   type Id = String
-  type User = Developer
+  type User = DeveloperSession
   type Authority = UserStatus
 
   override def idTag: ClassTag[String] = classTag[Id]
@@ -49,7 +49,7 @@ trait AuthConfigImpl extends AuthConfig {
     // TODO : Add sessionId to developer session?
     sessionService
       .fetch(id)(dummyHeader)
-      .map(ses => ses.map(Developer.createDeveloper))
+      .map(ses => ses.map(DeveloperSession.createDeveloper))
 
   def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
     Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")

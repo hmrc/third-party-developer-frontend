@@ -19,7 +19,7 @@ package unit.controllers
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Registration
-import domain.{Developer, LoggedInState, RegistrationSuccessful}
+import domain.{DeveloperSession, LoggedInState, RegistrationSuccessful}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.BDDMockito._
@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class RegistrationSpec extends BaseControllerSpec {
 
-  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInUser = DeveloperSession("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   var userPassword = "Password1!"
 
   trait Setup {

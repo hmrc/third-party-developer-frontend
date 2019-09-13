@@ -18,7 +18,7 @@ package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.{Support, SupportEnquiryForm}
-import domain.{Developer, TicketCreated, _}
+import domain.{DeveloperSession, TicketCreated, _}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito._
@@ -46,7 +46,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationConfig])
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInUser = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
+    val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
   }
 

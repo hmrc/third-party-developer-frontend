@@ -38,7 +38,7 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
 
     def renderPage(application: Application) = {
 
-      val loggedIn = Developer("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
       val form = EditApplicationForm.form.fill(EditApplicationForm(application.id, application.name, application.description,
         application.privacyPolicyUrl, application.termsAndConditionsUrl))

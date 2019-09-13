@@ -15,12 +15,12 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Developer, Application, Role}
+@import domain.{DeveloperSession, Application, Role}
 @import helpers.string._
 @import include._
 @import model.Crumb
 
-@(app: Application, role: Role, form: Form[controllers.AddTeamMemberForm], loggedIn: Developer)(
+@(app: Application, role: Role, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 

@@ -32,7 +32,7 @@ case object AppKey extends RequestAttributeKey[Future[Application]]
 
 trait HeaderEnricher {
 
-  def enrichHeaders(hc: HeaderCarrier, user: Option[Developer]) =
+  def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]) =
     user match {
       case Some(dev) => hc.withExtraHeaders("X-email-address" -> dev.email, "X-name" -> dev.displayedNameEncoded)
       case _ => hc
@@ -72,7 +72,7 @@ abstract class LoggedInController extends BaseController with AuthElement {
 
 }
 
-case class ApplicationRequest[A](application: Application, role: Role, user: Developer, request: Request[A]) extends WrappedRequest[A](request)
+case class ApplicationRequest[A](application: Application, role: Role, user: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
 
 abstract class ApplicationController()
   extends LoggedInController with ActionBuilders {

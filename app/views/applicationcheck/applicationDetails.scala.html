@@ -19,7 +19,7 @@
 @import include._
 @import model.Crumb
 
-@(app: Application, form: Form[DetailsForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(app: Application, form: Form[DetailsForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(

@@ -18,7 +18,7 @@ package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.Navigation
-import domain.{Developer, DeveloperDto, LoggedInState, NavLink, Session}
+import domain.{DeveloperSession, Developer, LoggedInState, NavLink, Session}
 import org.mockito.ArgumentMatchers
 import org.mockito.BDDMockito._
 import org.mockito.ArgumentMatchers._
@@ -35,10 +35,10 @@ import scala.concurrent.Future._
 class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   implicit val materializer = fakeApplication.materializer
-  val developer = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-  val loggedInUser = Developer.createDeveloper(session)
+  val loggedInUser = DeveloperSession.createDeveloper(session)
 
   var userPassword = "Password1!"
 

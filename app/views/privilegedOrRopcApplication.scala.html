@@ -14,12 +14,12 @@
  * limitations under the License.
  *@
 
-@import domain.{AccessType, Application, Developer}
+@import domain.{AccessType, Application, DeveloperSession}
 @import include._
 @import model.Crumb
 
 @(app: Application)(implicit request: play.api.mvc.Request[Any],
-        loggedIn: Developer, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
+        loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 
 
 @devMain(

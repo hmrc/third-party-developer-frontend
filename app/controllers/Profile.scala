@@ -18,10 +18,11 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import domain.{Developer, UpdateProfileRequest}
+import domain.{DeveloperSession, UpdateProfileRequest}
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
 import service.{ApplicationService, AuditService, SessionService}
 import views.html._
 
@@ -45,48 +46,51 @@ class Profile @Inject()(applicationService: ApplicationService,
   val passwordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
-  private def changeProfileView(user: Developer)(implicit req: RequestWithAttributes[_]) = {
+  private def changeProfileView(user: DeveloperSession)(implicit req: RequestWithAttributes[_]) = {
     views.html.changeProfile(profileForm.fill(ProfileForm(user.firstName, user.lastName, user.organisation)))
   }
 
-  def showProfile() = loggedInAction { implicit request =>
+  def showProfile(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.profile()))
   }
 
-  def changeProfile() = loggedInAction { implicit request =>
+  def changeProfile(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(changeProfileView(loggedIn)))
   }
 
-  def updateProfile() = loggedInAction { implicit request =>
+  def updateProfile(): Action[AnyContent] = loggedInAction { implicit request =>
     val requestForm = profileForm.bindFromRequest
     requestForm.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.changeProfile(formWithErrors.firstnameGlobal().lastnameGlobal())))
       },
       profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
-        _ =>
+        _ => {
           Ok(profileUpdated("profile updated", "Manage profile", "manage-profile",
-            // TODO - Move the loggedInState to a parent session object? Or should it be a property of the 'user / developer' class.
-            loggedIn.copy(firstName = profile.firstName, lastName = profile.lastName, organisation = profile.organisation)))
+            loggedIn.copy(
+              firstName = profile.firstName,
+              lastName = profile.lastName,
+              organisation = profile.organisation)))
+        }
       }
     )
   }
 
-  def showPasswordPage() = loggedInAction { implicit request =>
+  def showPasswordPage(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(changeProfilePassword(passwordForm)))
   }
 
-  def updatePassword() = loggedInAction { implicit request =>
+  def updatePassword(): Action[AnyContent] = loggedInAction { implicit request =>
     processPasswordChange(loggedIn.email,
       Ok(passwordUpdated("password changed", "Password changed", "change-password")),
       changeProfilePassword(_))
   }
 
-  def requestDeletion() = loggedInAction { implicit request =>
+  def requestDeletion(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(profileDeleteConfirmation(DeleteProfileForm.form)))
   }
 
-  def deleteAccount() = loggedInAction { implicit request =>
+  def deleteAccount(): Action[AnyContent] = loggedInAction { implicit request =>
     val form = deleteProfileForm.bindFromRequest
 
     form.fold(
@@ -95,8 +99,9 @@ class Profile @Inject()(applicationService: ApplicationService,
       },
       validForm => {
         validForm.confirmation match {
-          case Some("true") =>
-            applicationService.requestDeveloperAccountDeletion(loggedIn.displayedName, loggedIn.email).map(_ => Ok(profileDeleteSubmitted()))
+          case Some("true") => applicationService
+            .requestDeveloperAccountDeletion(loggedIn.displayedName, loggedIn.email)
+            .map(_ => Ok(profileDeleteSubmitted()))
 
           case _ => Future.successful(Ok(changeProfileView(loggedIn)))
         }

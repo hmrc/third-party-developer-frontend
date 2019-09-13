@@ -47,11 +47,11 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   val displayStatus = "Status"
   val clientId = "clientId123"
 
-  val developer = DeveloperDto("third.party.developer@example.com", "John", "Doe")
+  val developer = Developer("third.party.developer@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-  val loggedInDeveloper = Developer.createDeveloper(session)
+  val loggedInDeveloper = DeveloperSession.createDeveloper(session)
 
   val anApplication = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInDeveloper.email, ""),

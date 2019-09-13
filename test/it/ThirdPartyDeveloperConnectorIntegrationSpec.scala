@@ -80,7 +80,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       private val result = await(underTest.fetchSession(sessionId))
 
-      result shouldBe Session(sessionId, DeveloperDto(userEmail, "John", "Doe"), loggedInState = LoggedInState.LOGGED_IN)
+      result shouldBe Session(sessionId, Developer(userEmail, "John", "Doe"), loggedInState = LoggedInState.LOGGED_IN)
     }
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
@@ -165,7 +165,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
       result shouldBe UserAuthenticationResponse(
         accessCodeRequired = false,
-        session = Some(Session(sessionId, DeveloperDto(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)))
+        session = Some(Session(sessionId, Developer(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)))
     }
 
     "return the nonce when the credentials are valid and MFA is enabled" in new Setup {
@@ -273,7 +273,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: Session = await(underTest.authenticateTotp(totpAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-totp")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
-      result shouldBe Session(sessionId, DeveloperDto(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)
+      result shouldBe Session(sessionId, Developer(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {

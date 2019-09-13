@@ -21,7 +21,7 @@ import java.net.URI
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.{ProtectAccount, routes}
-import domain.{DeveloperDto, LoggedInState, Session}
+import domain.{Developer, LoggedInState, Session}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito._
@@ -47,7 +47,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
-    val loggedInUser = DeveloperDto("johnsmith@example.com", "John", "Doe")
+    val loggedInUser = Developer("johnsmith@example.com", "John", "Doe")
     val qrImage = "qrImage"
     val otpUri = new URI("OTPURI")
     val correctCode = "123123"
@@ -77,12 +77,12 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait SetupUnprotectedAccount extends Setup {
     given(underTest.connector.fetchDeveloper(mockEq(loggedInUser.email))(any[HeaderCarrier])).
-      willReturn(Some(DeveloperDto(loggedInUser.email, "Bob", "Smith", None)))
+      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None)))
   }
 
   trait SetupProtectedAccount extends Setup {
     given(underTest.connector.fetchDeveloper(mockEq(loggedInUser.email))(any[HeaderCarrier])).
-      willReturn(Some(DeveloperDto(loggedInUser.email, "Bob", "Smith", None, Some(true))))
+      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None, Some(true))))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {

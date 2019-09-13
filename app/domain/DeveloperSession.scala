@@ -22,36 +22,34 @@ import play.api.libs.json.{Format, Json}
 import scala.concurrent.Future
 
 // TODO: add session
-// TODO: Rename this to DeveloperSession
+case class DeveloperSession(email: String,
+                            firstName: String,
+                            lastName: String,
+                            organisation: Option[String] = None,
+                            mfaEnabled: Option[Boolean] = None,
+                            loggedInState: LoggedInState) {
+  val displayedName = s"$firstName $lastName"
+  val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
+
+  def isMfaEnabled: Boolean = mfaEnabled.getOrElse(false)
+}
+
 case class Developer(email: String,
                      firstName: String,
                      lastName: String,
                      organisation: Option[String] = None,
-                     mfaEnabled: Option[Boolean] = None,
-                     loggedInState: LoggedInState) {
+                     mfaEnabled: Option[Boolean] = None) {
   val displayedName = s"$firstName $lastName"
   val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 
   def isMfaEnabled: Boolean = mfaEnabled.getOrElse(false)
 }
 
-// TODO : Rename this to Developer?
-case class DeveloperDto(email: String,
-                        firstName: String,
-                        lastName: String,
-                        organisation: Option[String] = None,
-                        mfaEnabled: Option[Boolean] = None) {
-  val displayedName = s"$firstName $lastName"
-  val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
+object DeveloperSession {
+  implicit val format: Format[DeveloperSession] = Json.format[DeveloperSession]
 
-  def isMfaEnabled: Boolean = mfaEnabled.getOrElse(false)
-}
-
-object Developer {
-  implicit val format: Format[Developer] = Json.format[Developer]
-
-  def createDeveloper(session: Session) : Developer = {
-    Developer(session.developer.email,
+  def createDeveloper(session: Session) : DeveloperSession = {
+    DeveloperSession(session.developer.email,
       session.developer.firstName,
       session.developer.lastName,
       session.developer.organisation,
@@ -60,8 +58,8 @@ object Developer {
   }
 }
 
-object DeveloperDto {
-  implicit val format: Format[DeveloperDto] = Json.format[DeveloperDto]
+object Developer {
+  implicit val format: Format[Developer] = Json.format[Developer]
 }
 
 sealed trait UserStatus {

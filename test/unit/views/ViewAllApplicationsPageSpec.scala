@@ -18,7 +18,7 @@ package unit.views
 
 import config.ApplicationConfig
 import controllers.ApplicationSummary
-import domain.{Developer, _}
+import domain.{DeveloperSession, _}
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -36,7 +36,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request = FakeRequest()
-      val loggedIn = Developer("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+      val loggedIn = DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       views.html.manageApplications.render(appSummaries, request, Flash(), loggedIn, applicationMessages, appConfig, "nav-section")
     }
 

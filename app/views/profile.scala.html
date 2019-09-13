@@ -18,7 +18,7 @@
 @import include._
 @import model.Crumb
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "manage-profile")
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "manage-profile")
 
 @devMain(
     title = "Manage profile",

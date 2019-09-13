@@ -18,7 +18,7 @@ package unit.views
 
 import config.ApplicationConfig
 import controllers.AddApplicationForm
-import domain.{Developer, LoggedInState}
+import domain.{DeveloperSession, LoggedInState}
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -31,7 +31,7 @@ import utils.ViewHelpers._
 
 class AddApplicationSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
-  val loggedInUser = Developer("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInUser = DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val appConfig = mock[ApplicationConfig]
 
   "Add application page" should {

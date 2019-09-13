@@ -104,7 +104,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
   "fetchSession" should {
     val sessionId = "sessionId"
-    val session = Session(sessionId, DeveloperDto("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
+    val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
 
     "return session" in new Setup {
       when(mockHttp.GET(endpoint(s"session/$sessionId"))).
@@ -147,7 +147,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
     val invalidLoggedInStateRequest = UpdateLoggedInStateRequest(None)
 
     // TODO: This seems off having the state in the session and the developer
-    val session = Session(sessionId, DeveloperDto("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
+    val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
 
     "update session logged in state" in new Setup {
       when(mockHttp.PUT(endpoint(s"session/$sessionId/loggedInState/LOGGED_IN"), ""))
@@ -277,7 +277,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
   "accountSetupQuestions" should {
 
     val email = "john.smith@example.com"
-    val developer = DeveloperDto(email, "test", "testington", None)
+    val developer = Developer(email, "test", "testington", None)
 
     "successfully complete a developer account setup" in new Setup {
       when(mockHttp.POSTEmpty(endpoint(s"developer/account-setup/$email/complete"))).

@@ -17,7 +17,7 @@
 package unit.config
 
 import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
-import domain.{Developer, LoggedInState, LoggedInUser, PartLoggedInEnablingMfa}
+import domain.{DeveloperSession, LoggedInState, LoggedInUser, PartLoggedInEnablingMfa}
 import org.mockito.BDDMockito.given
 import org.scalatest.mockito.MockitoSugar
 import play.api.mvc.AnyContentAsEmpty
@@ -53,7 +53,7 @@ class AuthConfigImplSpec extends UnitSpec with MockitoSugar with WithFakeApplica
 
   "authorize" when {
     "the user is logged in and" when {
-      val user = Developer("Email", "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
+      val user = DeveloperSession("Email", "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
 
       "authority of LoggedInUser is requested" should {
         "return true" in {
@@ -71,7 +71,7 @@ class AuthConfigImplSpec extends UnitSpec with MockitoSugar with WithFakeApplica
     }
 
     "the user is part logged in and" when {
-      val user = Developer("Email", "firstName", "lastName", loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+      val user = DeveloperSession("Email", "firstName", "lastName", loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
       "authority of LoggedInUser is requested" should {
         "return false" in {

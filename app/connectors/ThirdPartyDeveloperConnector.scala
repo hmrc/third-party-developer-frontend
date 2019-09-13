@@ -144,35 +144,35 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       }
   }
 
-  def updateRoles(email: String, roles: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[DeveloperDto] =
+  def updateRoles(email: String, roles: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
       http.PUT(s"$serviceBaseUrl/developer/account-setup/$email/roles", roles)
-        .map(_.json.as[DeveloperDto])
+        .map(_.json.as[Developer])
     }
 
 
-  def updateServices(email: String, services: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[DeveloperDto] =
+  def updateServices(email: String, services: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
       http.PUT(s"$serviceBaseUrl/developer/account-setup/$email/services", services)
-        .map(_.json.as[DeveloperDto])
+        .map(_.json.as[Developer])
     }
 
-  def updateTargets(email: String, targets: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[DeveloperDto] =
+  def updateTargets(email: String, targets: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
       http.PUT(s"$serviceBaseUrl/developer/account-setup/$email/targets", targets)
-        .map(_.json.as[DeveloperDto])
+        .map(_.json.as[Developer])
     }
 
-  def completeAccountSetup(email: String)(implicit hc: HeaderCarrier): Future[DeveloperDto] =
+  def completeAccountSetup(email: String)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
       http.POSTEmpty(s"$serviceBaseUrl/developer/account-setup/$email/complete")
-        .map(_.json.as[DeveloperDto])
+        .map(_.json.as[Developer])
     }
 
 
-  def fetchDeveloper(email: String)(implicit hc: HeaderCarrier): Future[Option[DeveloperDto]] = {
+  def fetchDeveloper(email: String)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
     metrics.record(api) {
-      http.GET[DeveloperDto](s"$serviceBaseUrl/developer", Seq("email" -> email)) map { result =>
+      http.GET[Developer](s"$serviceBaseUrl/developer", Seq("email" -> email)) map { result =>
         Option(result)
       } recover {
         case _: NotFoundException => None

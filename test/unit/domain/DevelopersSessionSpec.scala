@@ -18,22 +18,19 @@ package unit.domain
 
 import java.util.UUID
 
-import domain.{Developer, DeveloperDto, LoggedInState, Session}
+import domain.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class DeveloperSpec extends UnitSpec{
+class DevelopersSessionSpec extends UnitSpec {
 
-  val developer = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
-  val expectedDeveloper = Developer("thirdpartydeveloper@example.com", "John", "Doe", None, None, LoggedInState.LOGGED_IN)
+  val expectedDeveloper = DeveloperSession("thirdpartydeveloper@example.com", "John", "Doe", None, None, LoggedInState.LOGGED_IN)
 
-"Developer.apply" should{
-  "create a Developer when passed in a Session" in {
-    val dev = Developer.createDeveloper(session)
-    dev shouldBe expectedDeveloper
+  "Developer.apply" should {
+    "create a Developer when passed in a Session" in {
+      val dev = DeveloperSession.createDeveloper(session)
+      dev shouldBe expectedDeveloper
+    }
   }
-}
-
-
-
 }

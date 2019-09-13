@@ -33,7 +33,7 @@ class ProfileSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
   val appConfig = mock[ApplicationConfig]
   private val request = FakeRequest().withCSRFToken
 
-  val developer = Developer("developer@example.com", "FirstName", "LastName", Some("TestOrganisation"), loggedInState = LoggedInState.LOGGED_IN)
+  val developer = DeveloperSession("developer@example.com", "FirstName", "LastName", Some("TestOrganisation"), loggedInState = LoggedInState.LOGGED_IN)
 
   "Profile page" should {
 

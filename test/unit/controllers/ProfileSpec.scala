@@ -50,7 +50,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationConfig]
     )
 
-    val loggedInUser = DeveloperDto("thirdpartydeveloper@example.com", "John", "Doe")
+    val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
 
     val sessionId = "sessionId"
   }
