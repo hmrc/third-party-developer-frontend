@@ -79,9 +79,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                 playSession: play.api.mvc.Session)(implicit request: Request[AnyContent]): Future[Result] = {
     def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
 
-    //    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.session is: ${userAuthenticationResponse.session}")
-    //    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.mfaEnablementRequired is: ${userAuthenticationResponse.mfaEnablementRequired}")
-
     userAuthenticationResponse.session match {
 
       case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => audit(LoginSucceeded, DeveloperSession.apply(session))

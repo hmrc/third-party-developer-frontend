@@ -46,7 +46,6 @@ trait AuthConfigImpl extends AuthConfig {
   val dummyHeader = HeaderCarrier()
 
   def resolveUser(id: Id)(implicit ctx: ExecutionContext): Future[Option[User]] =
-    // TODO : Add sessionId to developer session?
     sessionService
       .fetch(id)(dummyHeader)
       .map(ses => ses.map(DeveloperSession.apply))
