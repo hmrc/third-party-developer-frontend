@@ -23,15 +23,13 @@ import play.api.libs.json.{Format, Json}
 
 import scala.concurrent.Future
 
-// TODO: add session
+// TODO: add session instead of loggedInState?
 case class DeveloperSession(loggedInState: LoggedInState,
                             developer: Developer) {
   val displayedName: String = s"${developer.firstName} ${developer.lastName}"
   val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 
   val email: String = developer.email
-
-  def isMfaEnabled: Boolean = developer.mfaEnabled.getOrElse(false)
 }
 
 case class Developer(email: String,
@@ -41,8 +39,6 @@ case class Developer(email: String,
                      mfaEnabled: Option[Boolean] = None) {
   val displayedName = s"$firstName $lastName"
   val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
-
-  def isMfaEnabled: Boolean = mfaEnabled.getOrElse(false)
 }
 
 object DeveloperSession {
