@@ -62,8 +62,6 @@ abstract class LoggedInController extends BaseController with AuthElement {
     }
   }
 
-  // TODO: Create a partAuthenticated action, or PartLoggedInController?
-
   def adminAction(app: Future[Application])(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
     AsyncStack(AuthorityKey -> AppAdmin(app), AppKey -> app) {
       f

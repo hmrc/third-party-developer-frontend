@@ -32,7 +32,7 @@ import views.html.protectaccount._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
+class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
                                val otpAuthUri: OtpAuthUri,
                                val mfaService: MFAService,
                                val sessionService: SessionService,
@@ -45,7 +45,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
   val qrCode = QRCode(scale)
 
   def getQrCode: Action[AnyContent] = enablingMfaInAction { implicit request =>
-    connector.createMfaSecret(loggedIn.email).map(secret => {
+    thirdPartyDeveloperConnector.createMfaSecret(loggedIn.email).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(protectAccountSetup(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
@@ -53,7 +53,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
   }
 
   def getProtectAccount: Action[AnyContent] = enablingMfaInAction { implicit request =>
-    connector.fetchDeveloper(loggedIn.email).map(dev => {
+    thirdPartyDeveloperConnector.fetchDeveloper(loggedIn.email).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
         case true => Ok(protectedAccount())
         case false => Ok(protectaccount.protectAccount())
@@ -72,11 +72,7 @@ class ProtectAccount @Inject()(val connector: ThirdPartyDeveloperConnector,
   def protectAccount: Action[AnyContent] = enablingMfaInAction { implicit request =>
 
     def logonAndComplete(): Result = {
-      // TODO : Test this
-      // TODO: Call session Service
-      // 1) Update state in TPD
-      // 2) Update session in Play?
-      // connector.updateSessionLoggedInState(loggedIn.session.sessionId, UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN)))
+      thirdPartyDeveloperConnector.updateSessionLoggedInState(loggedIn.session.sessionId, UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN)))
       Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 

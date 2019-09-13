@@ -103,7 +103,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       login => {
 
         for {
-          // TODO don't call TPA admin check twice
+          // TODO don't call TPA admin check twice - check if this is the case?
           userAuthenticationResponse <- sessionService.authenticate(login.emailaddress, login.password)
           showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress)
           response <- routeToLoginOr2SV(login, userAuthenticationResponse, showAdminMfaMandateMessage, request.session)

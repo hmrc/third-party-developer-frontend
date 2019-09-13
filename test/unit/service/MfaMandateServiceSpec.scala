@@ -147,7 +147,6 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
     }
   }
 
-  // TODO
   "isMfaMandatedForUser" when {
     "Mfa mandate date has passed" should {
       "be false" in new Setup {

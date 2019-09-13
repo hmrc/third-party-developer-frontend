@@ -145,8 +145,6 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
     val sessionId = "sessionId"
     val updateLoggedInStateRequest = UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN))
     val invalidLoggedInStateRequest = UpdateLoggedInStateRequest(None)
-
-    // TODO: This seems off having the state in the session and the developer
     val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
 
     "update session logged in state" in new Setup {
