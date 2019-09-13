@@ -23,13 +23,13 @@ import play.api.libs.json.{Format, Json}
 
 import scala.concurrent.Future
 
-// TODO: add session instead of loggedInState?
-case class DeveloperSession(loggedInState: LoggedInState,
+case class DeveloperSession(session: Session,
                             developer: Developer) {
   val displayedName: String = s"${developer.firstName} ${developer.lastName}"
   val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 
   val email: String = developer.email
+  val loggedInState: LoggedInState = session.loggedInState
 }
 
 case class Developer(email: String,
@@ -44,20 +44,32 @@ case class Developer(email: String,
 object DeveloperSession {
   implicit val format: Format[DeveloperSession] = Json.format[DeveloperSession]
 
+  def apply(loggedInState: LoggedInState,
+            sessionId: String,
+            developer: Developer): DeveloperSession = {
+    new DeveloperSession(
+      Session(sessionId = sessionId, developer = developer, loggedInState = loggedInState),
+      developer)
+  }
+
   def apply(session: Session): DeveloperSession =
-    DeveloperSession(session.loggedInState, session.developer)
+    DeveloperSession(session, session.developer)
 
   def apply(email: String,
             firstName: String,
             lastName: String,
             organisation: Option[String] = None,
             mfaEnabled: Option[Boolean] = None,
-            loggedInState: LoggedInState): DeveloperSession = {
-    DeveloperSession(loggedInState, Developer(email,
-      firstName,
-      lastName,
-      organisation,
-      mfaEnabled))
+            loggedInState: LoggedInState,
+            sessionId: String = ""): DeveloperSession = {
+    DeveloperSession(
+      loggedInState,
+      sessionId,
+      Developer(email,
+        firstName,
+        lastName,
+        organisation,
+        mfaEnabled))
   }
 }
 

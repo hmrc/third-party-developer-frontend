@@ -84,9 +84,9 @@ trait AuthConfigImpl extends AuthConfig {
     Future.successful(NotFound(errorHandler.notFoundTemplate(Request(request, user))))
   }
 
-  def authorize(user: User, requiredAuthority: Authority)(implicit ctx: ExecutionContext): Future[Boolean] = {
+  def authorize(developerSession: User, requiredAuthority: Authority)(implicit ctx: ExecutionContext): Future[Boolean] = {
     def isAuthorized =
-      (user.loggedInState, requiredAuthority) match {
+      (developerSession.session.loggedInState, requiredAuthority) match {
         case (LoggedInState.LOGGED_IN, LoggedInUser) => true
         case (LoggedInState.PART_LOGGED_IN_ENABLING_MFA, LoggedInUser) => false
         case (LoggedInState.LOGGED_IN, PartLoggedInEnablingMfa) => true
