@@ -26,7 +26,6 @@ import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-
 import config.ApplicationConfig
 import controllers.TermsOfUseForm
 import controllers.routes
@@ -46,7 +45,7 @@ class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneSe
   "Terms of use view" when {
     implicit val mockConfig = mock[ApplicationConfig]
     implicit val request = FakeRequest().withCSRFToken
-    implicit val loggedIn = DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+    implicit val loggedIn = utils.DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection = "details"
 
     val id = "id"

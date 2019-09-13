@@ -35,7 +35,7 @@ class ProfileDeleteSubmittedSpec extends UnitSpec with OneServerPerSuite with Mo
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = views.html.profileDeleteSubmitted.render(request, developer, appConfig, applicationMessages, "details")
       page.contentType should include("text/html")

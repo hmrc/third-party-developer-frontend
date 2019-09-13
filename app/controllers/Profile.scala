@@ -66,13 +66,17 @@ class Profile @Inject()(applicationService: ApplicationService,
       },
       profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ => {
-          Ok(profileUpdated("profile updated", "Manage profile", "manage-profile",
-            loggedIn.copy(
-              developer = loggedIn.developer.copy(
-                firstName = profile.firstName,
-                lastName = profile.lastName,
-                organisation = profile.organisation))
-          ))
+
+          val updatedDeveloper = loggedIn.developer.copy(
+              firstName = profile.firstName,
+              lastName = profile.lastName,
+              organisation = profile.organisation)
+
+          val updatedLoggedIn = loggedIn.copy(
+            session = loggedIn.session.copy(developer = updatedDeveloper)
+          )
+
+          Ok(profileUpdated("profile updated", "Manage profile", "manage-profile", updatedLoggedIn))
         }
       }
     )

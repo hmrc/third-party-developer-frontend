@@ -33,7 +33,7 @@ import utils.ViewHelpers._
 class SignInSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
-  val loggedInUser = DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
 
   "Sign in page" should {
 

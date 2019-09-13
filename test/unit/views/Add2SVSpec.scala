@@ -17,7 +17,7 @@
 package unit.views
 
 import config.ApplicationConfig
-import domain.{DeveloperSession, LoggedInState}
+import domain.LoggedInState
 import model.MfaMandateDetails
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
@@ -30,7 +30,7 @@ import utils.CSRFTokenHelper._
 
 class Add2SVSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
-  val loggedInUser = DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   private implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
   private def renderPage(mfaMandateDetails: MfaMandateDetails) = {

@@ -310,7 +310,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "update application" in new Setup {
-      val user = DeveloperSession("email@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
+      val user = utils.DeveloperSession("email@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
       val editApplicationForm = EditApplicationForm(applicationId, "name")
       given(mockProductionApplicationConnector.update(mockEq(applicationId),
         any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(Future.successful(ApplicationUpdateSuccessful))
@@ -324,8 +324,8 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
   "Create" should {
     val applicationId = "applicationId"
-    val developer = DeveloperSession("email@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
-    val developer2 = DeveloperSession("username+alias@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
+    val developer = utils.DeveloperSession("email@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
+    val developer2 = utils.DeveloperSession("username+alias@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
 
     "create the user as an administrator on create request" in new Setup {
       val addApplicationForm = AddApplicationForm("name", Some(Environment.PRODUCTION.toString), Some("description"))
@@ -424,7 +424,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val applicationId = "applicationId"
     val applicationName = "applicationName"
 
-    val user = DeveloperSession("Firstname", "Lastname", "email@example.com", loggedInState = LoggedInState.LOGGED_IN)
+    val user = utils.DeveloperSession("Firstname", "Lastname", "email@example.com", loggedInState = LoggedInState.LOGGED_IN)
 
     "request uplift" in new Setup {
       given(mockDeskproConnector.createTicket(any[DeskproTicket])(mockEq(hc))).willReturn(TicketCreated)
@@ -663,9 +663,9 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   "request application deletion" should {
 
     val adminEmail = "admin@example.com"
-    val adminRequester = DeveloperSession(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+    val adminRequester = utils.DeveloperSession(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
     val developerEmail = "developer@example.com"
-    val developerRequester = DeveloperSession(developerEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+    val developerRequester = utils.DeveloperSession(developerEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
     val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER))
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val productionApp = productionApplication.copy(collaborators = teamMembers)

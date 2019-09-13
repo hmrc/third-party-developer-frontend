@@ -18,20 +18,20 @@ package utils
 
 import java.util.UUID
 
-import domain.{Developer, DeveloperSession, LoggedInState}
+import domain.{Developer, LoggedInState}
 
-object DeveloperSessionSpecHelper {
+object DeveloperSession {
 
   def apply(email: String,
             firstName: String,
             lastName: String,
             organisation: Option[String] = None,
             mfaEnabled: Option[Boolean] = None,
-            loggedInState: LoggedInState): DeveloperSession = {
+            loggedInState: LoggedInState): domain.DeveloperSession = {
 
     val sessionId: String = UUID.randomUUID().toString
 
-    DeveloperSession(
+    domain.DeveloperSession(
       loggedInState,
       sessionId,
       Developer(email,

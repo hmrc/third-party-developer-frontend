@@ -18,7 +18,7 @@ package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.{Support, SupportEnquiryForm}
-import domain.{DeveloperSession, TicketCreated, _}
+import domain.{Developer, LoggedInState, Session, TicketCreated}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito._

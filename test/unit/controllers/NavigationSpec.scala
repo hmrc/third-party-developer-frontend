@@ -18,7 +18,7 @@ package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.Navigation
-import domain.{DeveloperSession, Developer, LoggedInState, NavLink, Session}
+import domain.{Developer, DeveloperSession, LoggedInState, NavLink, Session}
 import org.mockito.ArgumentMatchers
 import org.mockito.BDDMockito._
 import org.mockito.ArgumentMatchers._
@@ -38,7 +38,7 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-  val loggedInUser = DeveloperSession.apply(session)
+  val loggedInUser = DeveloperSession(session)
 
   var userPassword = "Password1!"
 

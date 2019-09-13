@@ -23,21 +23,12 @@ import play.api.libs.json.{Format, Json}
 
 import scala.concurrent.Future
 
-case class DeveloperSession(session: Session,
-                            developer: Developer) {
-  val displayedName: String = s"${developer.firstName} ${developer.lastName}"
-  val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
-
+case class DeveloperSession(session: Session) {
+  val developer: Developer = session.developer
   val email: String = developer.email
   val loggedInState: LoggedInState = session.loggedInState
-}
 
-case class Developer(email: String,
-                     firstName: String,
-                     lastName: String,
-                     organisation: Option[String] = None,
-                     mfaEnabled: Option[Boolean] = None) {
-  val displayedName = s"$firstName $lastName"
+  val displayedName = s"${developer.firstName} ${developer.lastName}"
   val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 }
 
@@ -48,30 +39,15 @@ object DeveloperSession {
             sessionId: String,
             developer: Developer): DeveloperSession = {
     new DeveloperSession(
-      Session(sessionId = sessionId, developer = developer, loggedInState = loggedInState),
-      developer)
-  }
-
-  def apply(session: Session): DeveloperSession =
-    DeveloperSession(session, session.developer)
-
-  def apply(email: String,
-            firstName: String,
-            lastName: String,
-            organisation: Option[String] = None,
-            mfaEnabled: Option[Boolean] = None,
-            loggedInState: LoggedInState,
-            sessionId: String = ""): DeveloperSession = {
-    DeveloperSession(
-      loggedInState,
-      sessionId,
-      Developer(email,
-        firstName,
-        lastName,
-        organisation,
-        mfaEnabled))
+      Session(sessionId = sessionId, developer = developer, loggedInState = loggedInState))
   }
 }
+
+case class Developer(email: String,
+                     firstName: String,
+                     lastName: String,
+                     organisation: Option[String] = None,
+                     mfaEnabled: Option[Boolean] = None)
 
 object Developer {
   implicit val format: Format[Developer] = Json.format[Developer]

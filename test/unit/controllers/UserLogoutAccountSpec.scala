@@ -20,7 +20,7 @@ import java.util.UUID
 
 import config.ApplicationConfig
 import controllers._
-import domain.{DeveloperSession, Developer, LoggedInState, Session}
+import domain.{Developer, DeveloperSession, LoggedInState, Session}
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._

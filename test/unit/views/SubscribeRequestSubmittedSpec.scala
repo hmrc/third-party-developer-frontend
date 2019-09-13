@@ -39,7 +39,7 @@ class SubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with
       val apiName = "Test API"
       val apiVersion = "1.0"
       val clientId = "clientId123"
-      val developer = DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+      val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
       val application = Application(appId, clientId, "Test Application", DateTimeUtils.now, Environment.PRODUCTION, Some("Test Application Description"),
         Set(Collaborator(developer.email, Role.ADMINISTRATOR)), state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))

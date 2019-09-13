@@ -25,11 +25,11 @@ class DevelopersSessionSpec extends UnitSpec {
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
-  val expectedDeveloper = DeveloperSession("thirdpartydeveloper@example.com", "John", "Doe", None, None, LoggedInState.LOGGED_IN)
+  val expectedDeveloper = DeveloperSession(session.loggedInState, session.sessionId, developer)
 
   "Developer.apply" should {
     "create a Developer when passed in a Session" in {
-      val dev = DeveloperSession.apply(session)
+      val dev = DeveloperSession(session)
       dev shouldBe expectedDeveloper
     }
   }
