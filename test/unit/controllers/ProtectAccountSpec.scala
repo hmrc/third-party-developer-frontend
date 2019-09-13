@@ -21,7 +21,7 @@ import java.net.URI
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.{ProtectAccount, routes}
-import domain.{Developer, DeveloperDto, LoggedInState, Session}
+import domain.{DeveloperDto, LoggedInState, Session}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito._

@@ -17,7 +17,7 @@
 package config
 
 import controllers.routes
-import domain.{Session, _}
+import domain._
 import jp.t2v.lab.play2.auth._
 import play.api.Logger
 import play.api.libs.json.Json
@@ -44,8 +44,6 @@ trait AuthConfigImpl extends AuthConfig {
   override def sessionTimeoutInSeconds: Int = appConfig.sessionTimeoutInSeconds
 
   val dummyHeader = HeaderCarrier()
-
-
 
   def resolveUser(id: Id)(implicit ctx: ExecutionContext): Future[Option[User]] =
     // TODO : Add sessionId to developer session?
