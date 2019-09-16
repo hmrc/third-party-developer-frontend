@@ -56,7 +56,7 @@ abstract class LoggedInController extends BaseController with AuthElement {
     }
   }
 
-  def enablingMfaInAction(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
+  def atLeastPartLoggedInEnablingMfa(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
     AsyncStack(AuthorityKey -> AtLeastPartLoggedInEnablingMfa) {
       f
     }

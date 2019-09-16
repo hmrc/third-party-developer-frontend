@@ -44,7 +44,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   private val scale = 4
   val qrCode = QRCode(scale)
 
-  def getQrCode: Action[AnyContent] = enablingMfaInAction { implicit request =>
+  def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
     thirdPartyDeveloperConnector.createMfaSecret(loggedIn.email).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
@@ -52,7 +52,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
     })
   }
 
-  def getProtectAccount: Action[AnyContent] = enablingMfaInAction { implicit request =>
+  def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(loggedIn.email).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
         case true => Ok(protectedAccount())
@@ -61,15 +61,15 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
     })
   }
 
-  def getAccessCodePage: Action[AnyContent] = enablingMfaInAction { implicit request =>
+  def getAccessCodePage: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
     Future.successful(Ok(protectAccountAccessCode(ProtectAccountForm.form)))
   }
 
-  def getProtectAccountCompletedPage: Action[AnyContent] = enablingMfaInAction { implicit request =>
+  def getProtectAccountCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
     Future.successful(Ok(protectAccountCompleted()))
   }
 
-  def protectAccount: Action[AnyContent] = enablingMfaInAction { implicit request =>
+  def protectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
 
     def logonAndComplete(): Result = {
       thirdPartyDeveloperConnector.updateSessionLoggedInState(loggedIn.session.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
