@@ -30,8 +30,8 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import views.html._
 import views.html.protectaccount._
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
 
 trait Auditing {
   val auditService: AuditService
@@ -79,10 +79,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                 playSession: play.api.mvc.Session)(implicit request: Request[AnyContent]): Future[Result] = {
     def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
 
-    userAuthenticationResponse.session match {
 
+    // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
+    userAuthenticationResponse.session match {
       case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => audit(LoginSucceeded, DeveloperSession.apply(session))
-        // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
         gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails))
           .withSession(playSession)))
 
@@ -103,7 +103,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       login => {
 
         for {
-          // TODO don't call TPA admin check twice - check if this is the case?
           userAuthenticationResponse <- sessionService.authenticate(login.emailaddress, login.password)
           showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress)
           response <- routeToLoginOr2SV(login, userAuthenticationResponse, showAdminMfaMandateMessage, request.session)

@@ -52,10 +52,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   val nonce = "ABC-123"
 
   val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+
   val userAuthenticationResponseWithMfaEnablementRequired = UserAuthenticationResponse(
     accessCodeRequired = false,
-    nonce = Some(nonce), //TODO need to handle case with nonce
+    nonce = None,
     session = Some(sessionPartLoggedInEnablingMfa))
+
   val userAuthenticationWith2SVResponse = UserAuthenticationResponse(
     accessCodeRequired = true,
     nonce = Some(nonce),
