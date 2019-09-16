@@ -143,8 +143,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
   "updateSessionLoggedInState" should {
     val sessionId = "sessionId"
-    val updateLoggedInStateRequest = UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN))
-    val invalidLoggedInStateRequest = UpdateLoggedInStateRequest(None)
+    val updateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
     val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
 
     "update session logged in state" in new Setup {
@@ -162,12 +161,6 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       private val error = await(connector.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest).failed)
 
       error shouldBe a[SessionInvalid]
-    }
-
-    "error with exception if no loggedInState on session" in new Setup {
-      private val error = await(connector.updateSessionLoggedInState(sessionId, invalidLoggedInStateRequest).failed)
-      error shouldBe a[SessionInvalid]
-      error.getMessage shouldBe "Missing loggedInState"
     }
   }
 

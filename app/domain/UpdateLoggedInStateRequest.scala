@@ -18,8 +18,7 @@ package domain
 
 import play.api.libs.json.Json
 
-// TODO: Should this be an option type?
-case class UpdateLoggedInStateRequest(loggedInState: Option[LoggedInState] = None)
+case class UpdateLoggedInStateRequest(loggedInState: LoggedInState)
 
 object UpdateLoggedInStateRequest {
   implicit val format = Json.format[UpdateLoggedInStateRequest]

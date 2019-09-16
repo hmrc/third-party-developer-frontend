@@ -72,7 +72,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   def protectAccount: Action[AnyContent] = enablingMfaInAction { implicit request =>
 
     def logonAndComplete(): Result = {
-      thirdPartyDeveloperConnector.updateSessionLoggedInState(loggedIn.session.sessionId, UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN)))
+      thirdPartyDeveloperConnector.updateSessionLoggedInState(loggedIn.session.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
       Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 
@@ -87,7 +87,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
 
     ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountAccessCode(form)))
-    },
+  },
       (form: ProtectAccountForm) => {
         for {
           mfaResponse <- mfaService.enableMfa(loggedIn.email, form.accessCode)

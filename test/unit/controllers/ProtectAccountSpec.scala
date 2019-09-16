@@ -225,7 +225,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         redirectLocation(result) shouldBe Some(routes.ProtectAccount.getProtectAccountCompletedPage().url)
 
         verify(underTest.thirdPartyDeveloperConnector)
-          .updateSessionLoggedInState(mockEq(sessionId), mockEq(UpdateLoggedInStateRequest(Some(LoggedInState.LOGGED_IN))))(any[HeaderCarrier])
+          .updateSessionLoggedInState(mockEq(sessionId), mockEq(UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)))(any[HeaderCarrier])
       }
     }
 
