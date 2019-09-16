@@ -19,11 +19,11 @@
 @import model.Crumb
 
 @import config.ApplicationConfig
-@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
 
 @devMain(
     title = "Enter your access code",
-    userFullName = None,
+    userFullName = Some(loggedIn.displayedName),
     breadcrumbs = Seq(
         Crumb("Enter your access code"),
         Crumb.protectAccount,
