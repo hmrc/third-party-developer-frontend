@@ -78,9 +78,12 @@ trait AuthConfigImpl extends AuthConfig {
     Future.successful(result)
   }
 
+  // Access page while not logged in (e.g. part logged in) redirect to logon page.
   override def authorizationFailed(request: RequestHeader, user: User,
                                    authority: Option[Authority])(implicit context: ExecutionContext): Future[Result] = {
-    Future.successful(NotFound(errorHandler.notFoundTemplate(Request(request, user))))
+    Future.successful(Redirect(
+      routes.UserLoginAccount.login())
+    )
   }
 
   def authorize(developerSession: User, requiredAuthority: Authority)(implicit ctx: ExecutionContext): Future[Boolean] = {
@@ -106,6 +109,5 @@ trait AuthConfigImpl extends AuthConfig {
   implicit class RequestWithAjaxSupport(h: Headers) {
     def isAjaxRequest: Boolean = h.get("X-Requested-With").contains("XMLHttpRequest")
   }
-
 }
 

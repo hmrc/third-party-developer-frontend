@@ -23,8 +23,8 @@ import domain._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.BDDMockito.given
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -50,6 +50,9 @@ class ManageApplicationsSpec
 
   val loggedInUser = DeveloperSession(session)
 
+  val partLoggedInSessionId = "partLoggedInSessionId"
+  val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+
   val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
@@ -70,12 +73,22 @@ class ManageApplicationsSpec
     val hc = HeaderCarrier()
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
+    given(underTest.sessionService.fetch(mockEq(partLoggedInSessionId))(any[HeaderCarrier])).willReturn(Some(partLoggedInSession))
+
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
     given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest)(sessionId).withSession(sessionParams: _*)
+    val loggedOutRequest = FakeRequest()
+      .withSession(sessionParams: _*)
+
+    val loggedInRequest = FakeRequest()
+      .withLoggedIn(underTest)(sessionId)
+      .withSession(sessionParams: _*)
+
+    val partLoggedInRequest = FakeRequest()
+      .withLoggedIn(underTest)(partLoggedInSessionId)
+      .withSession(sessionParams: _*)
   }
 
   "manageApps" should {
@@ -238,6 +251,15 @@ class ManageApplicationsSpec
       elementIdentifiedByAttrWithValueContainsText(
         dom, "a", "href", s"/developer/applications/${application.id}/subscriptions", "Manage API subscriptions") shouldBe true
       element shouldBe defined
+    }
+
+    "when part logged in" should {
+      "redirect to the login screen" in new Setup {
+        val result = await(underTest.manageApps()(partLoggedInRequest))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/login")
+      }
     }
   }
 
