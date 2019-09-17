@@ -25,6 +25,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -78,15 +79,13 @@ class ManageApplicationsSpec
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
     given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val loggedOutRequest = FakeRequest()
-      .withSession(sessionParams: _*)
+    private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
-    val loggedInRequest = FakeRequest()
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest)(sessionId)
       .withSession(sessionParams: _*)
 
-    val partLoggedInRequest = FakeRequest()
+    val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
   }
@@ -98,7 +97,7 @@ class ManageApplicationsSpec
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application)))
 
-      val result = await(underTest.manageApps()(loggedInRequest))
+      private val result = await(underTest.manageApps()(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Manage applications")
@@ -113,10 +112,10 @@ class ManageApplicationsSpec
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application)))
 
-      val result = await(underTest.manageApps()(loggedInRequest))
+      private val result = await(underTest.manageApps()(loggedInRequest))
 
       status(result) shouldBe OK
-      val dom = Jsoup.parse(bodyOf(result))
+      private val dom = Jsoup.parse(bodyOf(result))
       termsOfUseWarningExists(dom) shouldBe true
       termsOfUseColumnExists(dom) shouldBe true
       elementIdentifiedByAttrWithValueContainsText(
@@ -125,15 +124,15 @@ class ManageApplicationsSpec
 
     "show the needs admin rights indication for a developer on an app that has not has the terms of use agreed" in new Setup {
 
-      val appWithDeveloperRights = application.copy(id = "56768", collaborators = Set(Collaborator(loggedInUser.email, Role.DEVELOPER)))
+      private val appWithDeveloperRights = application.copy(id = "56768", collaborators = Set(Collaborator(loggedInUser.email, Role.DEVELOPER)))
 
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application, appWithDeveloperRights)))
 
-      val result = await(underTest.manageApps()(loggedInRequest))
+      private val result = await(underTest.manageApps()(loggedInRequest))
 
       status(result) shouldBe OK
-      val dom = Jsoup.parse(bodyOf(result))
+      private val dom = Jsoup.parse(bodyOf(result))
       termsOfUseWarningExists(dom) shouldBe true
       termsOfUseColumnExists(dom) shouldBe true
       termsOfUseIndicatorExistsWithText(dom, appWithDeveloperRights.id, "Need admin rights") shouldBe true
@@ -141,17 +140,17 @@ class ManageApplicationsSpec
 
     "show the terms of use agreed indication for an app that has has the terms of use agreed" in new Setup {
 
-      val appWithTermsOfUseAgreed =
+      private val appWithTermsOfUseAgreed =
         application.copy(
           id = "56768", checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))))
 
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application, appWithTermsOfUseAgreed)))
 
-      val result = await(underTest.manageApps()(loggedInRequest))
+      private val result = await(underTest.manageApps()(loggedInRequest))
 
       status(result) shouldBe OK
-      val dom = Jsoup.parse(bodyOf(result))
+      private val dom = Jsoup.parse(bodyOf(result))
       termsOfUseWarningExists(dom) shouldBe true
       termsOfUseColumnExists(dom) shouldBe true
       termsOfUseIndicatorExistsWithText(dom, appWithTermsOfUseAgreed.id, "Agreed") shouldBe true
@@ -159,15 +158,15 @@ class ManageApplicationsSpec
 
     "show the terms of use not applicable indication for a sandbox app" in new Setup {
 
-      val sandboxApp = application.copy(id = "56768", deployedTo = Environment.SANDBOX)
+      private val sandboxApp = application.copy(id = "56768", deployedTo = Environment.SANDBOX)
 
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application, sandboxApp)))
 
-      val result = await(underTest.manageApps()(loggedInRequest))
+      private val result = await(underTest.manageApps()(loggedInRequest))
 
       status(result) shouldBe OK
-      val dom = Jsoup.parse(bodyOf(result))
+      private val dom = Jsoup.parse(bodyOf(result))
       termsOfUseWarningExists(dom) shouldBe true
       termsOfUseColumnExists(dom) shouldBe true
       termsOfUseIndicatorExistsWithText(dom, sandboxApp.id, "Not applicable") shouldBe true
@@ -175,16 +174,16 @@ class ManageApplicationsSpec
 
     "not show the terms of use warning and column when there are no apps requiring terms of use agreement" in new Setup {
 
-      val appWithTermsOfUseAgreed = application.copy(
+      private val appWithTermsOfUseAgreed = application.copy(
         id = "56768", checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))))
 
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(appWithTermsOfUseAgreed)))
 
-      val result = await(underTest.manageApps()(loggedInRequest))
+      private val result = await(underTest.manageApps()(loggedInRequest))
 
       status(result) shouldBe OK
-      val dom = Jsoup.parse(bodyOf(result))
+      private val dom = Jsoup.parse(bodyOf(result))
       termsOfUseWarningExists(dom) shouldBe false
       termsOfUseColumnExists(dom) shouldBe false
     }
@@ -194,7 +193,7 @@ class ManageApplicationsSpec
 
       val request = FakeRequest()
 
-      val result = await(underTest.manageApps()(request))
+      private val result = await(underTest.manageApps()(request))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -206,15 +205,15 @@ class ManageApplicationsSpec
       given(underTest.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
         .willReturn(successful(ApplicationCreatedResponse(application.id)))
 
-      val request = loggedInRequest
+      private val request = loggedInRequest
         .withFormUrlEncodedBody(
           ("applicationName", "Application Name"),
           ("environment", "PRODUCTION"),
           ("description", ""))
 
-      val result = await(underTest.addApplicationAction()(request))
-      val dom = Jsoup.parse(bodyOf(result))
-      val element = dom.getElementsByAttribute("data-journey").first
+      private val result = await(underTest.addApplicationAction()(request))
+      private val dom = Jsoup.parse(bodyOf(result))
+      private val element = dom.getElementsByAttribute("data-journey").first
 
       element.attr("data-journey") shouldEqual "application:added"
     }
@@ -222,14 +221,14 @@ class ManageApplicationsSpec
       given(underTest.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
         .willReturn(successful(ApplicationCreatedResponse(application.id)))
 
-      val request = loggedInRequest
+      private val request = loggedInRequest
         .withFormUrlEncodedBody(
           ("applicationName", "Application Name"),
           ("environment", "PRODUCTION"),
           ("description", ""))
 
-      val result = await(underTest.addApplicationAction()(request))
-      val dom = Jsoup.parse(bodyOf(result))
+      private val result = await(underTest.addApplicationAction()(request))
+      private val dom = Jsoup.parse(bodyOf(result))
       val element = Option(dom.getElementById("start"))
 
       element shouldBe defined
@@ -239,14 +238,14 @@ class ManageApplicationsSpec
       given(underTest.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
         .willReturn(successful(ApplicationCreatedResponse(application.id)))
 
-      val request = loggedInRequest
+      private val request = loggedInRequest
         .withFormUrlEncodedBody(
           ("applicationName", "Application Name"),
           ("environment", "SANDBOX"),
           ("description", ""))
 
-      val result = await(underTest.addApplicationAction()(request))
-      val dom = Jsoup.parse(bodyOf(result))
+      private val result = await(underTest.addApplicationAction()(request))
+      private val dom = Jsoup.parse(bodyOf(result))
       val element = Option(dom.getElementById("manage-api-subscriptions"))
       elementIdentifiedByAttrWithValueContainsText(
         dom, "a", "href", s"/developer/applications/${application.id}/subscriptions", "Manage API subscriptions") shouldBe true
@@ -255,7 +254,7 @@ class ManageApplicationsSpec
 
     "when part logged in" should {
       "redirect to the login screen" in new Setup {
-        val result = await(underTest.manageApps()(partLoggedInRequest))
+        private val result = await(underTest.manageApps()(partLoggedInRequest))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
