@@ -18,7 +18,7 @@ package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.{Support, SupportEnquiryForm}
-import domain.{Developer, TicketCreated, _}
+import domain.{Developer, LoggedInState, Session, TicketCreated}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito._
@@ -58,7 +58,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
         .withSession(sessionParams: _*)
 
       given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
+        .willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
 
       val result = await(addToken(underTest.raiseSupportEnquiry())(request))
       status(result) shouldBe 200

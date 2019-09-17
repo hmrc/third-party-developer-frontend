@@ -18,10 +18,10 @@ package domain
 
 import play.api.libs.json.Json
 
-case class Session(sessionId: String, developer: Developer)
+case class Session(sessionId: String, developer: Developer, loggedInState: LoggedInState)
 
 object Session {
   implicit val formatSession = Json.format[Session]
 }
 
-class SessionInvalid extends Throwable
+class SessionInvalid(message: Option[String] = None) extends Throwable(message.orNull)

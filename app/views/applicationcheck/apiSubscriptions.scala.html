@@ -20,7 +20,7 @@
 @import config.ApplicationConfig
 @import model.Crumb
 
-@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
 @devMain(
 title = "Confirm the APIs your application uses",

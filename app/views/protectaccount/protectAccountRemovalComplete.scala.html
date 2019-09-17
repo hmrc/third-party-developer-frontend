@@ -15,11 +15,11 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Developer}
+@import domain.{Application, DeveloperSession}
 @import include._
 @import model.Crumb
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
     title = "2-step verification removed",

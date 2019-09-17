@@ -32,7 +32,7 @@ case object AppKey extends RequestAttributeKey[Future[Application]]
 
 trait HeaderEnricher {
 
-  def enrichHeaders(hc: HeaderCarrier, user: Option[Developer]) =
+  def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]) =
     user match {
       case Some(dev) => hc.withExtraHeaders("X-email-address" -> dev.email, "X-name" -> dev.displayedNameEncoded)
       case _ => hc
@@ -56,21 +56,14 @@ abstract class LoggedInController extends BaseController with AuthElement {
     }
   }
 
-  def adminAction(app: Future[Application])(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack(AuthorityKey -> AppAdmin(app), AppKey -> app) {
+  def atLeastPartLoggedInEnablingMfa(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
+    AsyncStack(AuthorityKey -> AtLeastPartLoggedInEnablingMfa) {
       f
     }
   }
-
-  def teamMemberAction(app: Future[Application])(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack(AuthorityKey -> AppTeamMember(app), AppKey -> app) {
-      f
-    }
-  }
-
 }
 
-case class ApplicationRequest[A](application: Application, role: Role, user: Developer, request: Request[A]) extends WrappedRequest[A](request)
+case class ApplicationRequest[A](application: Application, role: Role, user: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
 
 abstract class ApplicationController()
   extends LoggedInController with ActionBuilders {
@@ -121,8 +114,8 @@ abstract class LoggedOutController()
     AsyncStack {
       implicit request =>
         loggedIn match {
-          case Some(_) => loginSucceeded(request)
-          case None => f(request)
+          case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => loginSucceeded(request)
+          case Some(_) | None => f(request)
         }
     }
   }

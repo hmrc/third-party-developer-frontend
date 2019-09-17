@@ -18,7 +18,7 @@ package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.Navigation
-import domain.{Developer, NavLink, Session}
+import domain.{Developer, DeveloperSession, LoggedInState, NavLink, Session}
 import org.mockito.ArgumentMatchers
 import org.mockito.BDDMockito._
 import org.mockito.ArgumentMatchers._
@@ -35,9 +35,11 @@ import scala.concurrent.Future._
 class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   implicit val materializer = fakeApplication.materializer
-  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
-  val session = Session(sessionId, loggedInUser)
+  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+  val loggedInUser = DeveloperSession(session)
+
   var userPassword = "Password1!"
 
   class Setup(loggedIn: Boolean) {
@@ -47,7 +49,8 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
       mock[ApplicationConfig]
     )
 
-    given(underTest.sessionService.fetch(ArgumentMatchers.eq(sessionId))(any[HeaderCarrier])).willReturn(successful(Some(Session(sessionId, loggedInUser))))
+    given(underTest.sessionService.fetch(ArgumentMatchers.eq(sessionId))(any[HeaderCarrier]))
+      .willReturn(successful(Some(Session(sessionId, developer, LoggedInState.LOGGED_IN))))
 
     val request = if (loggedIn) FakeRequest().withLoggedIn(underTest)(sessionId) else FakeRequest()
     val result = await(underTest.navLinks()(request))

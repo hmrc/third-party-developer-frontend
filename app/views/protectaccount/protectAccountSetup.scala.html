@@ -18,7 +18,7 @@
 @import include._
 @import model.Crumb
 
-@(secret: String, qrImg: String)(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "protect-account")
+@(secret: String, qrImg: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "protect-account")
 
 @devMain(
     title = "Set up your device",

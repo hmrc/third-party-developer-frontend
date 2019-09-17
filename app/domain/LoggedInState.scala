@@ -16,12 +16,16 @@
 
 package domain
 
-import play.api.libs.json.Json
+import enumeratum.{EnumEntry, PlayEnum}
 
-case class UserAuthenticationResponse(accessCodeRequired: Boolean,
-                                      nonce: Option[String] = None,
-                                      session: Option[Session] = None)
+sealed trait LoggedInState extends EnumEntry
 
-object UserAuthenticationResponse {
-  implicit val formatUserAuthenticationResponse = Json.format[UserAuthenticationResponse]
+object LoggedInState extends PlayEnum[LoggedInState] {
+
+  val values = findValues
+
+  final case object LOGGED_IN extends LoggedInState
+
+  final case object PART_LOGGED_IN_ENABLING_MFA extends LoggedInState
+
 }

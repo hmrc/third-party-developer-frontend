@@ -20,7 +20,7 @@ import java.util.UUID
 
 import config.ApplicationConfig
 import controllers._
-import domain.{Developer, Session}
+import domain.{Developer, DeveloperSession, LoggedInState, Session}
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
@@ -38,10 +38,11 @@ import scala.concurrent.Future
 
 class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = UUID.randomUUID().toString
-  val session = Session(sessionId, user)
+  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
+  val developerSession: DeveloperSession = DeveloperSession(session)
 
   trait Setup {
     implicit val mockAppConfig = mock[ApplicationConfig]
@@ -127,7 +128,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     "submit the survey and redirect to the logout confirmation page if the user is logged in" in new Setup {
       givenUserLoggedIn()
 
-      val form = SignOutSurveyForm(Some(2), "no suggestions", s"${user.firstName} ${user.lastName}", user.email, isJavascript = true)
+      val form = SignOutSurveyForm(Some(2), "no suggestions", s"${developerSession.developer.firstName} ${developerSession.developer.lastName}", developerSession.email, isJavascript = true)
       val request = requestWithCsrfToken.withFormUrlEncodedBody(
         "rating" -> form.rating.get.toString, "email" -> form.email, "name" -> form.name,
         "isJavascript" -> form.isJavascript.toString, "improvementSuggestions" -> form.improvementSuggestions

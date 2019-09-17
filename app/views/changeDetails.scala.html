@@ -15,13 +15,13 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment, Developer, State}
+@import domain.{Application, Environment, DeveloperSession, State}
 @import include._
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
 
 @(form: Form[controllers.EditApplicationForm], app: Application)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(

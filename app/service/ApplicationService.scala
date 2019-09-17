@@ -156,7 +156,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.updateApproval(id, checkInformation))
   }
 
-  def requestUplift(applicationId: String, applicationName: String, requestedBy: Developer)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = {
+  def requestUplift(applicationId: String, applicationName: String, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = {
     for {
       result <- connectorWrapper.productionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, requestedBy.email))
       upliftTicket = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, applicationName, applicationId)
@@ -164,7 +164,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield result
   }
 
-  def requestApplicationDeletion(requester: Developer, application: Application)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestApplicationDeletion(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[TicketResult] = {
 
     val requesterName = requester.displayedName
     val requesterEmail = requester.email

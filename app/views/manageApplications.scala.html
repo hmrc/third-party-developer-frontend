@@ -16,12 +16,12 @@
 
 @import domain.Role
 @import domain.TermsOfUseStatus
-@import domain.Developer
+@import domain.DeveloperSession
 @import domain.State
 @import model.Crumb
 @import include._
 
-@(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: Developer, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
+@(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 
 @devMain(
     title = "View all applications",

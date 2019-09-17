@@ -36,7 +36,7 @@ class ProfileDeleteConfirmationSpec extends UnitSpec with OneServerPerSuite with
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = Developer("Test", "Test", "Test", None)
+      val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = views.html.profileDeleteConfirmation.render(DeleteProfileForm.form, request, developer, appConfig, applicationMessages, "details")
       page.contentType should include("text/html")
@@ -50,7 +50,7 @@ class ProfileDeleteConfirmationSpec extends UnitSpec with OneServerPerSuite with
     "render with error when no radio button has been selected" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = Developer("Test", "Test", "Test", None)
+      val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val formWithErrors = DeleteProfileForm.form.withError("confirmation", "Tell us if you want us to delete your account")
 

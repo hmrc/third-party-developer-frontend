@@ -15,14 +15,14 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment, Developer, Role, State, TermsOfUseStatus}
+@import domain.{Application, Environment, DeveloperSession, Role, State, TermsOfUseStatus}
 @import include._
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
 @import org.joda.time.format.DateTimeFormat
 
 @(role: Role, app: Application)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 
 @devMain(
     title = "Manage details",

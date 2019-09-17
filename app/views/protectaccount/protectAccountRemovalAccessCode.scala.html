@@ -19,7 +19,7 @@
 @import model.Crumb
 
 @import config.ApplicationConfig
-@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: Developer, applicationConfig: ApplicationConfig)
+@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, applicationConfig: ApplicationConfig)
 
 @devMain(
     title = "Enter your access code",

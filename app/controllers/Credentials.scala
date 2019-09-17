@@ -187,7 +187,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     DeleteClientSecretsConfirmForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  private def audit(auditAction: AuditAction, developer: Developer)(implicit hc: HeaderCarrier) = {
+  private def audit(auditAction: AuditAction, developer: DeveloperSession)(implicit hc: HeaderCarrier) = {
     auditService.audit(auditAction, Map("developerEmail" -> developer.email, "developerFullName" -> developer.displayedName))
   }
 }

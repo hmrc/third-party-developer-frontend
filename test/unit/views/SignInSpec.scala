@@ -18,7 +18,7 @@ package unit.views
 
 import config.ApplicationConfig
 import controllers.LoginForm
-import domain.Developer
+import domain.{DeveloperSession, LoggedInState}
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -33,7 +33,7 @@ import utils.ViewHelpers._
 class SignInSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
-  val loggedInUser = Developer("admin@example.com", "firstName1", "lastName1")
+  val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
 
   "Sign in page" should {
 

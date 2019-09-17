@@ -21,15 +21,15 @@ import java.util.UUID
 import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import domain._
-import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers.{any, eq => meq, _}
 import org.mockito.BDDMockito.given
+import org.mockito.MockSettings
 import org.mockito.Mockito._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditAction._
-import service.{ApplicationService, AuditAction, AuditService, MfaMandateService, SessionService}
+import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import utils.WithCSRFAddToken
@@ -41,8 +41,10 @@ import scala.concurrent.Future._
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  val user = Developer("thirdpartydeveloper@example.com", "John", "Doe")
-  val session = Session(UUID.randomUUID().toString, user)
+  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
+  val user = DeveloperSession(session)
+  val sessionPartLoggedInEnablingMfa = Session(UUID.randomUUID().toString, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
   val emailFieldName: String = "emailaddress"
   val passwordFieldName: String = "password"
   val userPassword = "Password1!"
@@ -50,48 +52,67 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   val nonce = "ABC-123"
 
   val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
-  val userAuthenticationWith2SVResponse = UserAuthenticationResponse(accessCodeRequired = true, nonce = Some(nonce), session = None)
+
+  val userAuthenticationResponseWithMfaEnablementRequired = UserAuthenticationResponse(
+    accessCodeRequired = false,
+    nonce = None,
+    session = Some(sessionPartLoggedInEnablingMfa))
+
+  val userAuthenticationWith2SVResponse = UserAuthenticationResponse(
+    accessCodeRequired = true,
+    nonce = Some(nonce),
+    session = None)
 
   trait Setup {
+    private val daysRemaining = 10
+
     implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     val mfaMandateService: MfaMandateService = mock[MfaMandateService]
 
-    private val daysRemaining = 10
-    when(mfaMandateService.daysTillAdminMfaMandate).thenReturn(Some(daysRemaining))
-    when(mfaMandateService.showAdminMfaMandatedMessage(any())(any[HeaderCarrier])).thenReturn(true)
-    when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(new LocalDate().plusDays(daysRemaining)))
+    private val verboseLogginSettings: MockSettings = withSettings().verboseLogging()
 
     val underTest = new UserLoginAccount(mock[AuditService],
       mock[ErrorHandler],
-      mock[SessionService],
+      mock[SessionService](verboseLogginSettings),
       mock[ApplicationService],
       messagesApi,
       mfaMandateService
     )
+    when(mfaMandateService.daysTillAdminMfaMandate).thenReturn(Some(daysRemaining))
+    when(mfaMandateService.showAdminMfaMandatedMessage(any())(any[HeaderCarrier])).thenReturn(true)
 
-    def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse]) : Unit =
-      given(underTest.sessionService.authenticate(meq(email), meq(password))(any[HeaderCarrier])).willReturn(result)
+    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
-    def mockAuthenticateTotp(email: String, totp: String, nonce: String, result: Future[Session]) : Unit =
-      given(underTest.sessionService.authenticateTotp(meq(email), meq(totp), meq(nonce))(any[HeaderCarrier])).willReturn(result)
+    def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse],
+                         resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
+
+      given(underTest.sessionService.authenticate(meq(email), meq(password))(any[HeaderCarrier]))
+        .willReturn(result)
+
+      given(underTest.mfaMandateService.showAdminMfaMandatedMessage(meq(email))(any[HeaderCarrier]))
+        .willReturn(resultShowAdminMfaMandateMessage)
+    }
+
+    def mockAuthenticateTotp(email: String, totp: String, nonce: String, result: Future[Session]): Unit =
+      given(underTest.sessionService.authenticateTotp(meq(email), meq(totp), meq(nonce))(any[HeaderCarrier]))
+        .willReturn(result)
 
     def mockLogout(): Unit =
       given(underTest.sessionService.destroy(meq(session.sessionId))(any[HeaderCarrier]))
         .willReturn(Future.successful(NO_CONTENT))
 
-    def mockAudit(auditAction: AuditAction, result: Future[AuditResult]): Unit =
-      given(underTest.auditService.audit(meq(auditAction), meq(Map.empty))(any[HeaderCarrier])).willReturn(result)
-
     given(underTest.appConfig.isExternalTestEnvironment).willReturn(false)
     given(underTest.sessionService.authenticate(anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
     given(underTest.sessionService.authenticateTotp(anyString(), anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
-    val sessionParams : Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+
+    def mockAudit(auditAction: AuditAction, result: Future[AuditResult]): Unit =
+      given(underTest.auditService.audit(meq(auditAction), meq(Map.empty))(any[HeaderCarrier])).willReturn(result)
   }
 
   "authenticate" should {
 
     "display the 2-step verification code page when logging in with 2SV configured" in new Setup {
-      mockAuthenticate(user.email, userPassword, successful(userAuthenticationWith2SVResponse))
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationWith2SVResponse), false)
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
@@ -105,7 +126,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "display the Add 2-step Verification suggestion page when successfully logging in without having 2SV configured" in new Setup {
-      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse))
+
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse), true)
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
@@ -120,6 +142,39 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       verify(underTest.auditService, times(1)).audit(
         meq(LoginSucceeded), meq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
+    }
+
+    "display the Add 2-step Verification suggestion page when successfully logging in with not 2SV enabled and not 2SV configured" in new Setup {
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse), false)
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
+
+      private val result = await(underTest.authenticate()(request))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Add 2-step verification")
+      bodyOf(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
+
+      verify(underTest.auditService, times(1)).audit(
+        meq(LoginSucceeded), meq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
+    }
+
+    "display the 2-step protect account page when successfully logging in without having 2SV configured and is 2SV mandated" in new Setup {
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponseWithMfaEnablementRequired), true)
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, user.email), (passwordFieldName, userPassword))
+
+      private val result = await(underTest.authenticate()(request))
+
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some("/developer/profile/protect-account")
     }
 
     "return the login page when the password is incorrect" in new Setup {
@@ -137,7 +192,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "return the login page when the email has not been registered" in new Setup {
       private val unregisteredEmail = "unregistered@email.test"
-      mockAuthenticate(unregisteredEmail, userPassword, failed(new InvalidEmail))
+      mockAuthenticate(unregisteredEmail, userPassword, failed(new InvalidEmail), false)
 
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
@@ -151,7 +206,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "return to the login page when the account is unverified" in new Setup {
-      mockAuthenticate(user.email, userPassword, failed(new UnverifiedAccount))
+      mockAuthenticate(user.email, userPassword, failed(new UnverifiedAccount), false)
 
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
@@ -164,7 +219,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "return the login page when the account is locked" in new Setup {
-      mockAuthenticate(user.email, userPassword, failed(new LockedAccount))
+      mockAuthenticate(user.email, userPassword, failed(new LockedAccount), false)
 
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
@@ -186,7 +241,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
-        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce :_*)
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", totp))
 
       private val result = await(underTest.authenticateTotp()(request))
@@ -199,7 +254,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "return the login page when the access code is incorrect" in new Setup {
       private val request = FakeRequest()
-        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce :_*)
+        .withSession(sessionParams :+ "emailAddress" -> user.email :+ "nonce" -> nonce: _*)
         .withFormUrlEncodedBody(("accessCode", "654321"))
 
       private val result = await(addToken(underTest.authenticateTotp())(request))
@@ -243,7 +298,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "return 2-step removal request completed page on submission" in new Setup {
 
-      private val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> user.email :_*)
+      private val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> user.email: _*)
 
       given(underTest.applicationService.request2SVRemoval(meq(user.email))(any[HeaderCarrier]))
         .willReturn(Future.successful(TicketCreated))
@@ -266,6 +321,49 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       private val request = FakeRequest().withLoggedIn(underTest)(session.sessionId)
       await(underTest.accountLocked()(request))
       verify(underTest.sessionService, atLeastOnce()).destroy(meq(session.sessionId))(any[HeaderCarrier])
+    }
+  }
+
+  "login" should {
+    "show the sign-in page" when {
+      "Not logged in" in new Setup {
+        private val request = FakeRequest()
+
+        private val result = await(addToken(underTest.login())(request))
+
+        status(result) shouldBe OK
+        bodyOf(result) should include("Sign in")
+      }
+
+      "Part logged in" in new Setup {
+        given(underTest.sessionService.fetch(meq(sessionPartLoggedInEnablingMfa.sessionId))(any[HeaderCarrier]))
+          .willReturn(Future.successful(Some(sessionPartLoggedInEnablingMfa)))
+
+        private val partLoggedInRequest = FakeRequest()
+          .withLoggedIn(underTest)(sessionPartLoggedInEnablingMfa.sessionId)
+          .withSession(sessionParams: _*)
+
+        private val result = await(addToken(underTest.login())(partLoggedInRequest))
+
+        status(result) shouldBe OK
+        bodyOf(result) should include("Sign in")
+      }
+    }
+
+    "Redirect to the XXX page" when {
+      "already logged in" in new Setup {
+        given(underTest.sessionService.fetch(meq(session.sessionId))(any[HeaderCarrier]))
+          .willReturn(Future.successful(Some(session)))
+
+        private val loggedInRequest = FakeRequest()
+          .withLoggedIn(underTest)(session.sessionId)
+          .withSession(sessionParams: _*)
+
+        private val result = await(addToken(underTest.login())(loggedInRequest))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/applications")
+      }
     }
   }
 }

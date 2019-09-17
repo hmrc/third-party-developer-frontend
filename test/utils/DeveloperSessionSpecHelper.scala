@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-package domain
+package utils
 
-import play.api.libs.json.Json
+import java.util.UUID
 
-case class UserAuthenticationResponse(accessCodeRequired: Boolean,
-                                      nonce: Option[String] = None,
-                                      session: Option[Session] = None)
+import domain.{Developer, LoggedInState}
 
-object UserAuthenticationResponse {
-  implicit val formatUserAuthenticationResponse = Json.format[UserAuthenticationResponse]
+object DeveloperSession {
+
+  def apply(email: String,
+            firstName: String,
+            lastName: String,
+            organisation: Option[String] = None,
+            mfaEnabled: Option[Boolean] = None,
+            loggedInState: LoggedInState): domain.DeveloperSession = {
+
+    val sessionId: String = UUID.randomUUID().toString
+
+    domain.DeveloperSession(
+      loggedInState,
+      sessionId,
+      Developer(email,
+        firstName,
+        lastName,
+        organisation,
+        mfaEnabled))
+  }
 }

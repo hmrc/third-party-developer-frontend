@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.urls.Link
 @import controllers.AddRedirectForm
 
-@(application: Application, form: Form[AddRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@(application: Application, form: Form[AddRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(

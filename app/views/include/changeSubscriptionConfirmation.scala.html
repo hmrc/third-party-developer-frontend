@@ -15,13 +15,13 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Developer, Environment, State}
+@import domain.{Application, DeveloperSession, Environment, State}
 @import model.Crumb
 @import include._
 
 @(app: Application, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
     implicit request: play.api.mvc.Request[Any],
-    loggedIn: Developer,
+    loggedIn: DeveloperSession,
     messages: Messages,
     applicationConfig: ApplicationConfig,
     navSection: String = "subscriptions"

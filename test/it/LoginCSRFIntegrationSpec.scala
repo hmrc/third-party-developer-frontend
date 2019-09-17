@@ -114,6 +114,7 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
                    |  "accessCodeRequired": false,
                    |  "session": {
                    |    "sessionId": "$sessionId",
+                   |    "loggedInState": "LOGGED_IN",
                    |    "developer": {
                    |      "email":"$userEmail",
                    |      "firstName":"John",

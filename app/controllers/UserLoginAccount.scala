@@ -22,7 +22,7 @@ import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import model.MfaMandateDetails
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,8 +30,8 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import views.html._
 import views.html.protectaccount._
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
 
 trait Auditing {
   val auditService: AuditService
@@ -40,7 +40,7 @@ trait Auditing {
     auditService.audit(auditAction, data)
   }
 
-  def audit(auditAction: AuditAction, developer: Developer)(implicit hc: HeaderCarrier): Future[AuditResult] = {
+  def audit(auditAction: AuditAction, developer: DeveloperSession)(implicit hc: HeaderCarrier): Future[AuditResult] = {
     auditService.audit(auditAction, Map("developerEmail" -> developer.email, "developerFullName" -> developer.displayedName))
   }
 }
@@ -73,29 +73,40 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     } yield Locked(views.html.accountLocked())
   }
 
+  private def routeToLoginOr2SV(login: LoginForm,
+                                userAuthenticationResponse: UserAuthenticationResponse,
+                                showAdminMfaMandateMessage: Boolean,
+                                playSession: play.api.mvc.Session)(implicit request: Request[AnyContent]): Future[Result] = {
+    def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
+
+
+    // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
+    userAuthenticationResponse.session match {
+      case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => audit(LoginSucceeded, DeveloperSession.apply(session))
+        gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails))
+          .withSession(playSession)))
+
+      case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+        .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+
+      case Some(session) if session.loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA =>
+        gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.getProtectAccount().url)
+          .withSession(playSession)))
+    }
+  }
+
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
     val requestForm = loginForm.bindFromRequest
 
-    def routeToLoginOr2SV(login: LoginForm, userAuthenticationResponse: UserAuthenticationResponse, showAdminMfaMandateMessage: Boolean) = {
-      def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
-
-      userAuthenticationResponse.session match {
-        case Some(session) => audit(LoginSucceeded, session.developer)
-          // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
-          gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails)).withSession(request.session)))
-        case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
-          .withSession(request.session + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
-      }
-    }
-
     requestForm.fold(
       errors => successful(BadRequest(signIn("Sign in", errors))),
-      login => sessionService.authenticate(login.emailaddress, login.password) flatMap {
-        userAuthenticationResponse => {
-          mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress).flatMap(showAdminMfaMandateMessage => {
-            routeToLoginOr2SV(login, userAuthenticationResponse, showAdminMfaMandateMessage)
-          })
-        }
+      login => {
+
+        for {
+          userAuthenticationResponse <- sessionService.authenticate(login.emailaddress, login.password)
+          showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress)
+          response <- routeToLoginOr2SV(login, userAuthenticationResponse, showAdminMfaMandateMessage, request.session)
+        } yield response
       } recover {
         case _: InvalidEmail =>
           audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
@@ -118,7 +129,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       validForm => {
         val email = request.session.get("emailAddress").get
         sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
-          audit(LoginSucceeded, session.developer)
+          audit(LoginSucceeded, DeveloperSession.apply(session))
           gotoLoginSucceeded(session.sessionId)
         } recover {
           case _: InvalidCredentials =>

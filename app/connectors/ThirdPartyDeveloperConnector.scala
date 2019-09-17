@@ -32,6 +32,16 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
                                             )(implicit val ec: ExecutionContext) {
+
+  def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+
+    http.PUT(s"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState}", "")
+      .map(_.json.as[Session])
+      .recover {
+        case _: NotFoundException => throw new SessionInvalid
+      }
+  }
+
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api = API("third-party-developer")
 
@@ -62,15 +72,15 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     http.GET(s"$serviceBaseUrl/verification?code=$code") map status
   }
 
-  private def status: (HttpResponse) => Int = _.status
+  private def status: HttpResponse => Int = _.status
 
   def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[String] = metrics.record(api) {
     http.GET(s"$serviceBaseUrl/reset-password?code=$code")
       .map(r => (r.json \ "email").as[String])
       .recover {
-      case _ : BadRequestException => throw new InvalidResetCode
-      case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-    }
+        case _: BadRequestException => throw new InvalidResetCode
+        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
+      }
   }
 
   def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
@@ -89,15 +99,16 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       })
   }
 
-  def changePassword(change: ChangePassword)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) { encryptedJson.secretRequestJson[Int](
-    Json.toJson(change), { secretRequestJson =>
-      http.POST(s"$serviceBaseUrl/change-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
-        .map(status).recover {
-        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
-      }
-    })
+  def changePassword(change: ChangePassword)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+    encryptedJson.secretRequestJson[Int](
+      Json.toJson(change), { secretRequestJson =>
+        http.POST(s"$serviceBaseUrl/change-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
+          .map(status).recover {
+          case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
+          case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
+          case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
+        }
+      })
   }
 
   def fetchSession(sessionId: String)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
@@ -165,7 +176,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     }
   }
 
-  def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier) = {
+  def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
     http.GET[Seq[User]](s"$serviceBaseUrl/developers", Seq("emails" -> emails.mkString(",")))
   }
 
@@ -215,8 +226,8 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       http.POST(s"$serviceBaseUrl/authenticate-totp", _, Seq(CONTENT_TYPE -> JSON)))
       .map(_.json.as[Session])
       .recover {
-        case e: BadRequestException => throw new InvalidCredentials
-        case e: NotFoundException => throw new InvalidEmail
+        case _: BadRequestException => throw new InvalidCredentials
+        case _: NotFoundException => throw new InvalidEmail
       }
   }
 }

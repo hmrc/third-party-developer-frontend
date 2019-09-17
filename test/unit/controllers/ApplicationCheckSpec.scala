@@ -46,9 +46,13 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val appId = "1234"
   val appName: String = "app"
   val clientId = "clientIdzzz"
-  val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
-  val session = Session(sessionId, loggedInUser)
+
+  val developerDto = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
+
+  val loggedInUser = DeveloperSession(session)
+
   val testing = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
   val production = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
@@ -102,7 +106,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       .willReturn(ApplicationUpdateSuccessful)
     given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
       .willReturn(ApplicationUpdateSuccessful)
-    given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[Developer])(any[HeaderCarrier]))
+    given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
       .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs), hasSubscriptions = true))))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
@@ -281,7 +285,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
           providedTermsAndConditionsURL = true,
           Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
-      given(underTest.applicationService.requestUplift(mockEq(appId), any[String], any[Developer])(any[HeaderCarrier])).willReturn(ApplicationUpliftSuccessful)
+      given(underTest.applicationService.requestUplift(mockEq(appId), any[String], any[DeveloperSession])(any[HeaderCarrier])).willReturn(ApplicationUpliftSuccessful)
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
 
@@ -442,7 +446,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "return 404 NOT FOUND when no API subscriptions are retrieved" in new Setup {
-      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[Developer])(any[HeaderCarrier]))
+      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(successful(None))
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
@@ -452,14 +456,14 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "fail validation when no APIs have been subscribed to" in new SubscriptionValidationSetup {
-      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[Developer])(any[HeaderCarrier]))
+      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToNothing), hasSubscriptions = false))))
 
       testSubscriptionValidation
     }
 
     "fail validation when only the example API has been subscribed to" in new SubscriptionValidationSetup {
-      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[Developer])(any[HeaderCarrier]))
+      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToExampleOnly), hasSubscriptions = true))))
 
       testSubscriptionValidation

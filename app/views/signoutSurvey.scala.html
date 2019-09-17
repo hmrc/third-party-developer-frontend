@@ -15,11 +15,11 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.Developer
+@import domain.DeveloperSession
 @import include._
 
 @(heading: String, form: Form[controllers.SignOutSurveyForm])(implicit request: play.api.mvc.Request[Any],
-        loggedIn: Developer, messages: Messages, applicationConfig: ApplicationConfig)
+        loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 
 @devMain(

@@ -18,7 +18,7 @@
 @import include._
 @import model.Crumb
 
-@(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: Developer, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "manage-profile")
+@(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "manage-profile")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 @devMain(
     title = titleError + "Delete account",

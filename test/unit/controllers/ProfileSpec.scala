@@ -51,6 +51,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+
     val sessionId = "sessionId"
   }
 
@@ -65,8 +66,11 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       val requestCaptor: ArgumentCaptor[UpdateProfileRequest] = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
 
-      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
-      given(underTest.connector.updateProfile(meq(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier])).willReturn(Future.successful(OK))
+      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier]))
+        .willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
+
+      given(underTest.connector.updateProfile(meq(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier]))
+        .willReturn(Future.successful(OK))
 
       val result = await(addToken(underTest.updateProfile())(request))
 
@@ -85,7 +89,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
           ("confirmpassword", "StrongNewPwd!2")
         )
 
-      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
+      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
       given(underTest.connector.changePassword(meq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
         .willReturn(Future.failed(new InvalidCredentials()))
 
@@ -105,7 +109,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
           ("confirmpassword", "StrongNewPwd!2")
         )
 
-      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser))))
+      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
       given(underTest.connector.changePassword(meq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
         .willReturn(Future.successful(OK))
 

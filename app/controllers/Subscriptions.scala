@@ -226,7 +226,7 @@ class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(i
     }
   }
 
-  def fetchAllSubscriptions(application: Application, developer: Developer)(implicit hc: HeaderCarrier): Future[Option[SubscriptionData]] = {
+  def fetchAllSubscriptions(application: Application, developer: DeveloperSession)(implicit hc: HeaderCarrier): Future[Option[SubscriptionData]] = {
     fetchPageDataFor(application).map { data =>
       val role = roleForApplication(data.app, developer.email)
       Some(SubscriptionData(role, application, data.subscriptions, data.hasSubscriptions))

@@ -142,7 +142,7 @@ case class CreateApplicationRequest(name: String,
 object CreateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[CreateApplicationRequest]
 
-  def from(user: Developer, application: AddApplicationForm) = CreateApplicationRequest(
+  def from(user: DeveloperSession, application: AddApplicationForm) = CreateApplicationRequest(
     application.applicationName.trim,
     application.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX),
     normalizeDescription(application.description),
