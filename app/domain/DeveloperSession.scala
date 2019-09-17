@@ -53,21 +53,11 @@ object Developer {
   implicit val format: Format[Developer] = Json.format[Developer]
 }
 
-sealed trait UserStatus {
-  val app: Future[Application]
-}
+sealed trait UserStatus
 
-case object LoggedInUser extends UserStatus {
-  override val app: Future[Application] = Future.failed(new IllegalStateException("Unsupported"))
-}
+case object LoggedInUser extends UserStatus
 
-case object AtLeastPartLoggedInEnablingMfa extends UserStatus {
-  override val app: Future[Application] = Future.failed(new IllegalStateException("Unsupported"))
-}
-
-case class AppAdmin(override val app: Future[Application]) extends UserStatus
-
-case class AppTeamMember(override val app: Future[Application]) extends UserStatus
+case object AtLeastPartLoggedInEnablingMfa extends UserStatus
 
 case class User(email: String, verified: Option[Boolean])
 

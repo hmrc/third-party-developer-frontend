@@ -61,19 +61,6 @@ abstract class LoggedInController extends BaseController with AuthElement {
       f
     }
   }
-
-  def adminAction(app: Future[Application])(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack(AuthorityKey -> AppAdmin(app), AppKey -> app) {
-      f
-    }
-  }
-
-  def teamMemberAction(app: Future[Application])(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack(AuthorityKey -> AppTeamMember(app), AppKey -> app) {
-      f
-    }
-  }
-
 }
 
 case class ApplicationRequest[A](application: Application, role: Role, user: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
