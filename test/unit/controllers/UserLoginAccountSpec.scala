@@ -23,6 +23,7 @@ import controllers._
 import domain._
 import org.mockito.ArgumentMatchers.{any, eq => meq, _}
 import org.mockito.BDDMockito.given
+import org.mockito.MockSettings
 import org.mockito.Mockito._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -39,7 +40,6 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
-
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
@@ -68,9 +68,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     val mfaMandateService: MfaMandateService = mock[MfaMandateService]
+
+    private val verboseLogginSettings: MockSettings = withSettings().verboseLogging()
+
     val underTest = new UserLoginAccount(mock[AuditService],
       mock[ErrorHandler],
-      mock[SessionService],
+      mock[SessionService](verboseLogginSettings),
       mock[ApplicationService],
       messagesApi,
       mfaMandateService
@@ -85,6 +88,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       given(underTest.sessionService.authenticate(meq(email), meq(password))(any[HeaderCarrier]))
         .willReturn(result)
+
       given(underTest.mfaMandateService.showAdminMfaMandatedMessage(meq(email))(any[HeaderCarrier]))
         .willReturn(resultShowAdminMfaMandateMessage)
     }
@@ -317,6 +321,49 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       private val request = FakeRequest().withLoggedIn(underTest)(session.sessionId)
       await(underTest.accountLocked()(request))
       verify(underTest.sessionService, atLeastOnce()).destroy(meq(session.sessionId))(any[HeaderCarrier])
+    }
+  }
+
+  "login" should {
+    "show the sign-in page" when {
+      "Not logged in" in new Setup {
+        private val request = FakeRequest()
+
+        private val result = await(addToken(underTest.login())(request))
+
+        status(result) shouldBe OK
+        bodyOf(result) should include("Sign in")
+      }
+
+      "Part logged in" in new Setup {
+        given(underTest.sessionService.fetch(meq(sessionPartLoggedInEnablingMfa.sessionId))(any[HeaderCarrier]))
+          .willReturn(Future.successful(Some(sessionPartLoggedInEnablingMfa)))
+
+        private val partLoggedInRequest = FakeRequest()
+          .withLoggedIn(underTest)(sessionPartLoggedInEnablingMfa.sessionId)
+          .withSession(sessionParams: _*)
+
+        private val result = await(addToken(underTest.login())(partLoggedInRequest))
+
+        status(result) shouldBe OK
+        bodyOf(result) should include("Sign in")
+      }
+    }
+
+    "Redirect to the XXX page" when {
+      "already logged in" in new Setup {
+        given(underTest.sessionService.fetch(meq(session.sessionId))(any[HeaderCarrier]))
+          .willReturn(Future.successful(Some(session)))
+
+        private val loggedInRequest = FakeRequest()
+          .withLoggedIn(underTest)(session.sessionId)
+          .withSession(sessionParams: _*)
+
+        private val result = await(addToken(underTest.login())(loggedInRequest))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/applications")
+      }
     }
   }
 }
