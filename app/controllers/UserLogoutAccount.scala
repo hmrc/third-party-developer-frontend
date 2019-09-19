@@ -17,12 +17,14 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.TicketId
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
+import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request}
-import service.{DeskproService, SessionService}
+import service.{ApplicationService, DeskproService, SessionService}
 import views.html.signoutSurvey
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,6 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val sessionService: SessionService,
+                                  val applicationService: ApplicationService,
                                   val errorHandler: ErrorHandler,
                                   val messagesApi: MessagesApi)
                                  (implicit ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController with LoginLogout {
@@ -40,13 +43,24 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
     Future.successful(Ok(page))
   }
 
-  def logoutSurveyAction = loggedInAction { implicit request =>
-    SignOutSurveyForm.form.bindFromRequest.value match {
-      case Some(form) => deskproService.submitSurvey(form)
-      case None => Logger.error(s"Survey form invalid.")
-    }
+  def logoutSurveyAction = loggedInAction { implicit request: RequestWithAttributes[AnyContent] =>
 
-    Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
+    SignOutSurveyForm.form.bindFromRequest.value match {
+      case Some(form) => {
+        val res: Future[TicketId] = deskproService.submitSurvey(form)
+        res.onFailure {
+          case _ => Logger.error(s"Failed to create deskpro ticket")
+//            applicationService.userLogoutSurveyCompleted(form.email, form.name, form.rating.toString, form.improvementSuggestions)
+        }
+        applicationService.userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions).flatMap(_ => {
+          Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
+        })
+      }
+      case None => {
+        Logger.error(s"Survey form invalid.")
+        Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
+      }
+    }
   }
 
   def logout = Action.async { implicit request: Request[AnyContent] =>

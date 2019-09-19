@@ -20,7 +20,7 @@ import java.util.UUID
 
 import config.ApplicationConfig
 import controllers._
-import domain.{Developer, Session}
+import domain.{Developer, Session, TicketId, TicketResult}
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
@@ -28,8 +28,9 @@ import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF._
-import service.{DeskproService, SessionService}
+import service.{ApplicationService, DeskproService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
@@ -48,6 +49,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     val underTest = new UserLogoutAccount(
       mock[DeskproService],
       mock[SessionService],
+      mock[ApplicationService],
       mock[config.ErrorHandler],
       messagesApi)
 
@@ -127,6 +129,13 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     "submit the survey and redirect to the logout confirmation page if the user is logged in" in new Setup {
       givenUserLoggedIn()
 
+      given(underTest.deskproService.submitSurvey(any())(any[Request[AnyRef]], any[HeaderCarrier]))
+        .willReturn(Future.successful(TicketId(123)))
+
+      given(underTest.applicationService.userLogoutSurveyCompleted(any(), any(), any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.successful(Success))
+
+
       val form = SignOutSurveyForm(Some(2), "no suggestions", s"${user.firstName} ${user.lastName}", user.email, isJavascript = true)
       val request = requestWithCsrfToken.withFormUrlEncodedBody(
         "rating" -> form.rating.get.toString, "email" -> form.email, "name" -> form.name,
@@ -139,6 +148,32 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       redirectLocation(result) shouldBe Some("/developer/logout")
 
       verify(underTest.deskproService).submitSurvey(meq(form))(any[Request[AnyRef]], any[HeaderCarrier])
+      verify(underTest.applicationService).userLogoutSurveyCompleted(meq(user.email), meq("John Doe"), meq("2"), meq("no suggestions"))(any[HeaderCarrier])
+    }
+
+    "submit the survey and redirect to logout confirmation page if the user is logged in and has not given a satisfaction rating" in new Setup {
+      givenUserLoggedIn()
+
+      given(underTest.deskproService.submitSurvey(any())(any[Request[AnyRef]], any[HeaderCarrier]))
+        .willReturn(Future.successful(TicketId(123)))
+
+      given(underTest.applicationService.userLogoutSurveyCompleted(any(), any(), any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.successful(Success))
+
+
+      val form = SignOutSurveyForm(None, "no suggestions", s"${user.firstName} ${user.lastName}", user.email, isJavascript = true)
+      val request = requestWithCsrfToken.withFormUrlEncodedBody(
+        "rating" -> form.rating.getOrElse("").toString, "email" -> form.email, "name" -> form.name,
+        "isJavascript" -> form.isJavascript.toString, "improvementSuggestions" -> form.improvementSuggestions
+      )
+
+      val result = await(underTest.logoutSurveyAction()(request))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some("/developer/logout")
+
+      verify(underTest.deskproService).submitSurvey(meq(form))(any[Request[AnyRef]], any[HeaderCarrier])
+      verify(underTest.applicationService).userLogoutSurveyCompleted(meq(user.email), meq("John Doe"), meq(""), meq("no suggestions"))(any[HeaderCarrier])
     }
   }
 }
