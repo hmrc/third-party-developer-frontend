@@ -21,9 +21,10 @@ import connectors._
 import domain.APIStatus._
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import domain._
-import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested}
+import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -288,4 +289,14 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield ticketResponse
   }
 
+  def userLogoutSurveyCompleted(email: String, name: String, rating: String, improvementSuggestions: String)
+                                                                                (implicit hc: HeaderCarrier): Future[AuditResult] = {
+
+    auditService.audit(UserLogoutSurveyCompleted, Map(
+      "userEmailAddress" -> email,
+      "userName" -> name,
+      "satisfactionRating" -> rating,
+      "improvementSuggestions" -> improvementSuggestions,
+      "timestamp" -> DateTimeUtils.now.toString))
+  }
 }

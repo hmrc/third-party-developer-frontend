@@ -116,4 +116,8 @@ object AuditAction {
     override val auditType: String = "ApplicationDeletionRequest"
   }
 
+  case object UserLogoutSurveyCompleted extends AuditAction {
+    val name = "Developer has submitted log out survey"
+    val auditType = "LogOutSurveySubmission"
+  }
 }
