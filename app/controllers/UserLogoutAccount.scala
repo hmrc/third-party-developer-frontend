@@ -49,7 +49,6 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
         val res: Future[TicketId] = deskproService.submitSurvey(form)
         res.onFailure {
           case _ => Logger.error(s"Failed to create deskpro ticket")
-//            applicationService.userLogoutSurveyCompleted(form.email, form.name, form.rating.toString, form.improvementSuggestions)
         }
         applicationService.userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions).flatMap(_ => {
           Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
