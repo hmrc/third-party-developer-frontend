@@ -31,7 +31,7 @@ import org.mockito.ArgumentMatchers.{any, anyString, eq => mockEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import service.AuditAction.Remove2SVRequested
+import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service._
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
@@ -784,6 +784,22 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
       verify(mockDeskproConnector, times(1)).createTicket(any[DeskproTicket])(mockEq(hc))
       verify(mockAuditService, times(1)).audit(mockEq(Remove2SVRequested), any[Map[String, String]])(mockEq(hc))
+    }
+  }
+
+  "userLogoutSurveyCompleted" should {
+
+    val email = "testy@example.com"
+    val name = "John Smith"
+    val rating = "5"
+    val improvementSuggestions = "Test"
+
+    "audit user logout survey" in new Setup {
+      given(mockAuditService.audit(mockEq(UserLogoutSurveyCompleted), any[Map[String, String]])(mockEq(hc))).willReturn(Future.successful(Success))
+
+      await(service.userLogoutSurveyCompleted(email, name, rating, improvementSuggestions))
+
+      verify(mockAuditService, times(1)).audit(mockEq(UserLogoutSurveyCompleted), any[Map[String, String]])(mockEq(hc))
     }
   }
 
