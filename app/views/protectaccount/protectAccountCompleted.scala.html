@@ -22,22 +22,17 @@
 
 @devMain(
     title = "Protect account complete",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("2-step verification set up"),
-        Crumb.protectAccount,
-        Crumb.home
-    )
+    userFullName = loggedIn.loggedInName
 ) {
 
-    <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge">You have successfully set up <p class="heading-xlarge"> 2-step verification</p></h1>
-    </div>
+    <header>
+        <h1 class="heading-xlarge">You have successfully set up 2-step verification</h1>
+    </header>
     <h2 class="heading-medium">Keep the app on your smartphone or tablet</h2>
     <p>You'll need a new access code every time you sign in.</p>
 
     <div>
-        <a id="submit" class="button" type="submit" href="@routes.ManageApplications.manageApps">View all applications</a>
+        <a id="submit" class="button" type="submit" href="@routes.ManageApplications.manageApps">Continue</a>
     </div>
 
 }
