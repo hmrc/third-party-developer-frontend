@@ -23,15 +23,19 @@
 @devMain(
     title = "Protect account",
     userFullName = loggedIn.loggedInName,
-    back = Some("/developer/login"),
+    back = Some(""),
     isRegistering = true
 ) {
 
     <header>
-        <h1 class="heading-xlarge">Protect account</h1>
+        <h1 class="heading-xlarge">Protect your account</h1>
     </header>
     <div>
-        <p>Protect your Developer Hub account by adding 2-step verification. You'll need a new access code every time you sign in.</p>
+<!--        // TODO: Show this line if on mandate journey-->
+        <p>Your account has access to sensitive information, for example client secrets.</p>
+
+        <p>Set up 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
+        <p>You’ll need a new access code every time you sign in.</p>
         <p>You can get an access code on your smartphone or tablet with an authentication app, even with no mobile reception.</p>
     </div>
 

@@ -116,8 +116,14 @@
 @getHelpForm = @{uiHelpers.reportAProblemLink(applicationConfig.reportAProblemPartialUrl, applicationConfig.reportAProblemNonJSUrl)}
 
 @backLink = {
-    @if(back.isDefined) {
-        <a href="@back.get" class="link-back">Back</a>
+    @back match {
+        case Some(value) if value == "" => {
+            <a href="javascript:history.back()" class="link-back">Back</a>
+        }
+        case Some(value) => {
+            <a href="@back.get" class="link-back">Back</a>
+        }
+        case None => {}
     }
 }
 
