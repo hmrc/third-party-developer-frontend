@@ -23,11 +23,8 @@
 @devMain(
     title = "Protect account",
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Protect account"),
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    back = Some("/developer/login"),
+    isRegistering = true
 ) {
 
     <header>
