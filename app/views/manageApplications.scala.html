@@ -25,7 +25,7 @@
 
 @devMain(
     title = "View all applications",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
         Crumb.home

@@ -24,7 +24,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
 @devMain(
     title = "API Subscriptions",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
     Crumb("Manage API Subscriptions"),
     Crumb.application(app),

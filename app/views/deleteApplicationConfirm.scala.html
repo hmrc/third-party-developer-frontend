@@ -25,7 +25,7 @@
 
 @devMain(
     title = titleError + "Delete application",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Delete application"),
         Crumb.application(app),

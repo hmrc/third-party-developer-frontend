@@ -23,7 +23,7 @@
 
 @devMain(
     title = "Delete account",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Delete account"),
         Crumb.home

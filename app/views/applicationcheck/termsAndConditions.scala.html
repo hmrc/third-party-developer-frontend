@@ -24,7 +24,7 @@
 
 @devMain(
     title = titleError + "Where can we find your terms and conditions?",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage credentials"),
         Crumb.application(app),

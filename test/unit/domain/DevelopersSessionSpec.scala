@@ -22,15 +22,34 @@ import domain.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class DevelopersSessionSpec extends UnitSpec {
+  val email = "thirdpartydeveloper@example.com"
+  val firstName = "John"
+  val lastName = "Doe"
+  val developer = Developer(email, firstName = firstName, lastName = lastName)
 
-  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
-  val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
-  val expectedDeveloper = DeveloperSession(session.loggedInState, session.sessionId, developer)
+  val loggedInSession = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
+  val partLoggedInSession = Session(UUID.randomUUID().toString, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
   "Developer.apply" should {
     "create a Developer when passed in a Session" in {
-      val dev = DeveloperSession(session)
+      val expectedDeveloper = DeveloperSession(loggedInSession.loggedInState, loggedInSession.sessionId, developer)
+
+      val dev = DeveloperSession(loggedInSession)
       dev shouldBe expectedDeveloper
+    }
+  }
+
+  "Logged in name" should {
+    "be none" when {
+      "Part logged in" in {
+        DeveloperSession(session = partLoggedInSession).loggedInName shouldBe None
+      }
+    }
+
+    "be the user's name" when {
+      "logged in" in {
+        DeveloperSession(session = loggedInSession).loggedInName shouldBe Some("John Doe")
+      }
     }
   }
 }

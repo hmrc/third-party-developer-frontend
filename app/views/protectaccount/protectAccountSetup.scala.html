@@ -22,7 +22,7 @@
 
 @devMain(
     title = "Set up your device",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Set up 2SV"),
         Crumb.protectAccount,

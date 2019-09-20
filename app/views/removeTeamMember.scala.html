@@ -25,7 +25,7 @@
 
 @devMain(
     title = titleError + "Remove a team member",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage team members"),
         Crumb.application(app),

@@ -22,7 +22,7 @@
 
 @devMain(
     title = "Protect account",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Protect account"),
         Crumb.home

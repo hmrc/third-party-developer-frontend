@@ -22,7 +22,7 @@
 
 @devMain(
     title = "Protect account complete",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("2-step verification set up"),
         Crumb.protectAccount,

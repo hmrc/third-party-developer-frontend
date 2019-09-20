@@ -40,7 +40,7 @@ class Navigation @Inject()(val sessionService: SessionService,
         loggedIn.flatMap {
           session: DeveloperSession => {
             session.loggedInState match {
-              case LOGGED_IN => Some(session.displayedName)
+              case LOGGED_IN => session.loggedInName
               case PART_LOGGED_IN_ENABLING_MFA => None
             }
           }

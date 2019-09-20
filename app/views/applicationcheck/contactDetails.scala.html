@@ -24,7 +24,7 @@
 
 @devMain(
     title = titleError + "Who is your application review contact?",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage credentials"),
         Crumb.application(app),

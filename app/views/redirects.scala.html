@@ -24,7 +24,7 @@
 
 @devMain(
     title = "Manage redirect URIs",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage redirect URIs"),
         Crumb.application(application),

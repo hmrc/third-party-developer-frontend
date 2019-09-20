@@ -25,7 +25,7 @@
 
 @devMain(
     title = "Change a redirect URI",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Change a redirect URI"),
         Crumb.application(application),

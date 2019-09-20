@@ -26,7 +26,7 @@
 
 @devMain(
     title = titleError + "Change application details",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Change application details"),
         Crumb.application(app),

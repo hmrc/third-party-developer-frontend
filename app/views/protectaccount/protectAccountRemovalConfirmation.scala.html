@@ -26,7 +26,7 @@
 
 @devMain(
     title = "Remove 2-step verification",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb.protectAccount,
         Crumb.home
