@@ -24,14 +24,12 @@
 
 @devMain(
     title = "Enter your access code",
-    breadcrumbs = Seq(
-        Crumb("Enter your access code"),
-        Crumb.home
-    )
+    isRegistering = true,
+    back = Some("")
 ) {
 
     <header>
-        <h1 class="heading-xlarge">Enter your access code</h1>
+        <h1 class="heading-xlarge">Enter your access code </h1>
     </header>
     <div>
         @errorSummary(form)
