@@ -48,7 +48,9 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
     "Edit password success" -> ChangePasswordSuccessPage,
     "Logout survey" -> SignOutSurveyPage,
     "Account deletion confirmation" -> AccountDeletionConfirmationPage,
-    "Account deletion request submitted" -> AccountDeletionRequestSubmittedPage
+    "Account deletion request submitted" -> AccountDeletionRequestSubmittedPage,
+    "Recommend Mfa" -> RecommendMfaPage,
+    "Recommend Mfa Skip Acknowledge" -> RecommendMfaSkipAcknowledgePage
   )
 
   Given( """^I navigate to the '(.*)' page$""") { (pageName: String) =>

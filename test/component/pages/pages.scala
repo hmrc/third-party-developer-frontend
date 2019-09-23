@@ -24,7 +24,8 @@ trait FormPage extends WebPage {
   val pageHeading: String
 
   override def isCurrentPage: Boolean = find(tagName("h1")).fold(false)({
-    e => Logger.info(s"HEADING: ${e.text}")
+    e =>
+      Logger.info(s"HEADING: ${e.text}")
       e.text == pageHeading
   })
 
@@ -89,6 +90,7 @@ object ManageApplicationPage extends FormPage {
   override val pageHeading = "View all applications"
   override val url: String = s"${Env.host}/developer/applications/"
 }
+
 object ManageApplicationEmptyPage extends FormPage {
   override val pageHeading = "Welcome to your account"
   override val url: String = s"${Env.host}/developer/applications/"
@@ -122,6 +124,16 @@ case object AccountDeletionRequestSubmittedPage extends FormPage {
 
 case class SignInPage(override val pageHeading: String = "Sign in") extends FormPage {
   override val url: String = s"${Env.host}/developer/login"
+}
+
+case object RecommendMfaPage extends FormPage {
+  override val pageHeading: String = "Add 2-step verification"
+  override val url: String = s"${Env.host}/developer/login"
+}
+
+case object RecommendMfaSkipAcknowledgePage extends FormPage {
+  override val pageHeading: String = "Add 2-step verification"
+  override val url: String = s"${Env.host}/developer/login/2SV-not-set"
 }
 
 case object SignOutSurveyPage extends FormPage {
