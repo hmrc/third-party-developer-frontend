@@ -31,8 +31,9 @@
         <h1 class="heading-xlarge">Protect your account</h1>
     </header>
     <div>
-<!--        // TODO: Show this line if on mandate journey-->
-        <p>Your account has access to sensitive information, for example client secrets.</p>
+        @if(loggedIn.session.loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA){
+          <p>Your account has access to sensitive information, for example client secrets.</p>
+        }
 
         <p>Set up 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
         <p>You’ll need a new access code every time you sign in.</p>
