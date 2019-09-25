@@ -20,9 +20,8 @@ Feature: Sign in
     Then I am on the 'Manage applications empty nest' page
 
 
-  Scenario: Signing with a valid credentials, no mfa enabled and with a production admin app
+  Scenario: Signing with a valid credentials, no mfa enabled and with a production admin app and the mandate date is in the past
     Given application with name 'My Admin Production App' can be created
-    Given the MFA Mandate date is in the past
     Given I navigate to the 'Sign in' page
     And I enter all the fields:
       | email address | john.smith@example.com |

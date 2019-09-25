@@ -80,14 +80,6 @@ object DeveloperStub {
 }
 
 object ApplicationStub {
-//  def setUpFetchAllApplications(status: Int, response: String) = {
-////    stubFor(get(urlEqualTo("/applications?emailAddress=john.smith%40example.com&environment=PRODUCTION"))
-////      .willReturn(aResponse().withStatus(status).withBody(response))
-////    )
-//
-//
-//  }
-
   def setUpFetchApplication(id: String, status: Int, response: String = "") = {
     stubFor(get(urlEqualTo(s"/application/$id"))
       .willReturn(aResponse().withStatus(status).withBody(response))

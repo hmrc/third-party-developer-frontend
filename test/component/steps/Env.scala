@@ -52,9 +52,7 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps {
   val stubHost = "localhost"
   val wireMockUrl = s"http://$stubHost:$stubPort"
 
-  private val wireMockConfiguration = wireMockConfig()
-    .notifier(new ConsoleNotifier(true))
-    .port(stubPort)
+  private val wireMockConfiguration = wireMockConfig().port(stubPort)
 
   val wireMockServer = new WireMockServer(wireMockConfiguration)
   var server: TestServer = null

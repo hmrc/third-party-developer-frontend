@@ -39,6 +39,13 @@ object MfaSecret {
   implicit val format: Format[MfaSecret] = Json.format[MfaSecret]
 }
 
+object TestContext {
+  var developer: Developer = null
+
+  var sessionIdForLoggedInUser: String = ""
+  var sessionIdForMfaMandatingUser: String = ""
+}
+
 class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers {
 
   import scala.collection.JavaConverters._
@@ -55,7 +62,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     click on waitForElement(By.id("submit")) // Continue past confirmation of skipping 2SV setup
   }
 
-  Given("""^I am registered with$""") { (data: DataTable) =>
+  Given("""^I am registered with$""") { data: DataTable =>
     val result = data.asMaps(classOf[String], classOf[String]).get(0)
 
     val password = result.get("Password")
@@ -65,57 +72,48 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
     val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
 
-    // TODO: Can we do this better or more clearly?
-    def setupLoggedOrPartLoggedInDeveloper(loggedInState: LoggedInState) = {
-      val sessionId = "sessionId_" + loggedInState.toString
-      val session = Session(sessionId, developer, loggedInState)
-      val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+    TestContext.developer = developer
 
-      val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
-
-      Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser),
-        OK, Json.toJson(userAuthenticationResponse).toString())
-
-      Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
-      Stubs.setupDeleteRequest(s"/session/$sessionId", OK)
-    }
-
-    setupLoggedOrPartLoggedInDeveloper(LoggedInState.LOGGED_IN)
-    setupLoggedOrPartLoggedInDeveloper(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
-
+    TestContext.sessionIdForLoggedInUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
+    TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
     setupGettingDeveloperByEmail(developer)
 
+    setupGettingMfaSecret(developer)
 
+    setupVerificationOfAccessCode(developer)
 
-    //val encodedEmail = URLEncoder.encode(developer.email, "UTF-8")
+    setupEnablingMfa(developer)
+  }
 
-    // Get mfa secret
-    stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.email}/mfa"))
-        .willReturn(aResponse()
-          .withStatus(OK)
-          .withBody(Json.toJson(MfaSecret("mySecret")).toString())))
+  private val accessCode = "123456"
 
-
-    stubFor(
-      put(urlPathEqualTo(s"/developer/${developer.email}/mfa/enable"))
-        //.withRequestBody(equalTo(Json.toJson(VerifyMfaRequest("123456")).toString()))
-        .willReturn(aResponse()
-          .withStatus(OK)
-        ))
-
-
-    // Validate access code
+  private def setupVerificationOfAccessCode(developer: Developer): Unit = {
     stubFor(
       post(urlPathEqualTo(s"/developer/${developer.email}/mfa/verification"))
-        //.withRequestBody(equalTo(Json.toJson(VerifyMfaRequest("123456")).toString()))
+        .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT)
         ))
   }
 
-  private def setupGettingDeveloperByEmail(developer: Developer) = {
+  private def setupEnablingMfa(developer: Developer): Unit = {
+    stubFor(
+      put(urlPathEqualTo(s"/developer/${developer.email}/mfa/enable"))
+        .willReturn(aResponse()
+          .withStatus(OK)
+        ))
+  }
+
+  private def setupGettingMfaSecret(developer: Developer): Unit = {
+    stubFor(
+      post(urlPathEqualTo(s"/developer/${developer.email}/mfa"))
+        .willReturn(aResponse()
+          .withStatus(OK)
+          .withBody(Json.toJson(MfaSecret("mySecret")).toString())))
+  }
+
+  private def setupGettingDeveloperByEmail(developer: Developer): Unit = {
     val encodedEmail = URLEncoder.encode(developer.email, "UTF-8")
 
     stubFor(get(urlPathEqualTo("/developer"))
@@ -126,15 +124,14 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
-    // TODO: First name & last name?
-    val developer = Developer(email, "", "", None)
+    if (email != TestContext.developer.email) {
+      throw new IllegalArgumentException(s"Can only know how to uplift ${TestContext.developer.email}'s session")
+    }
 
-    // TODO: Can we do this better or more clearly?
-    val sessionId = "sessionId_" + LoggedInState.PART_LOGGED_IN_ENABLING_MFA.toString
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session = Session(TestContext.sessionIdForMfaMandatingUser, TestContext.developer, LoggedInState.LOGGED_IN)
 
-    Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
-    Stubs.setupDeleteRequest(s"/session/$sessionId", OK)
+    Stubs.setupRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK, Json.toJson(session).toString())
+    Stubs.setupDeleteRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK)
   }
 
   Given("""^I fill in the login form with$""") { (data: DataTable) =>
@@ -160,24 +157,35 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
       val link = webDriver.findElement(By.linkText("Sign out"))
       link.click()
     } catch {
-      case _: org.openqa.selenium.NoSuchElementException => {
+      case _: org.openqa.selenium.NoSuchElementException =>
         val menu = webDriver.findElement(By.linkText("Menu"))
         menu.click()
 
         val link2 = webDriver.findElement(By.linkText("Sign out"))
         link2.click()
-      }
     }
   }
 
   When("""^I enter the correct access code and continue$""") {
-    // TODO : Get the correct code!
-    Setup2svEnterAccessCodePage.enterAccessCode("123456")
+    Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
     Setup2svEnterAccessCodePage.clickContinue()
-
   }
 
-  Given("""the MFA Mandate date is in the past""") {
+  def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
 
+    val sessionId = "sessionId_" + loggedInState.toString
+
+    val session = Session(sessionId, developer, loggedInState)
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+
+    val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+
+    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser),
+      OK, Json.toJson(userAuthenticationResponse).toString())
+
+    Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
+    Stubs.setupDeleteRequest(s"/session/$sessionId", OK)
+
+    sessionId
   }
 }

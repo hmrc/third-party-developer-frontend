@@ -61,14 +61,12 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   )
 
   Given( """^application with name '(.*)' can be created$""") { (name: String) =>
+
     val app = defaultApp(name, "PRODUCTION")
 
     Stubs.setupPostRequest("/application", CREATED, Json.toJson(app).toString())
 
     ApplicationStub.setUpFetchApplication(applicationId, OK, Json.toJson(app).toString())
-
-    // TODO : Move this to it's own function
-//    ApplicationStub.setUpFetchAllApplications(OK, Json.toJson(Seq(app)).toString())
 
     configureUserApplications(app.collaborators.head.emailAddress, List(app))
   }
