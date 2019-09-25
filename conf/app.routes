@@ -9,6 +9,7 @@ GET         /resend-verification                                                
 GET         /resend-confirmation                                                        controllers.Registration.resendConfirmation
 
 GET         /login                                                                      controllers.UserLoginAccount.login
+GET         /login/2sv-recomendation                                                    controllers.ProtectAccount.get2svRecommendationPage
 POST        /login                                                                      controllers.UserLoginAccount.authenticate
 GET         /login/2SV-help                                                             controllers.UserLoginAccount.get2SVHelpConfirmationPage
 POST        /login/2SV-help                                                             controllers.UserLoginAccount.confirm2SVHelp

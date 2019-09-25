@@ -75,20 +75,18 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   private def routeToLoginOr2SV(login: LoginForm,
                                 userAuthenticationResponse: UserAuthenticationResponse,
-                                showAdminMfaMandateMessage: Boolean,
                                 playSession: play.api.mvc.Session)(implicit request: Request[AnyContent]): Future[Result] = {
-    def mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
-
 
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     userAuthenticationResponse.session match {
       case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => audit(LoginSucceeded, DeveloperSession.apply(session))
-        gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails))
+        gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER)
           .withSession(playSession)))
 
       case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
         .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
 
+        // TODO .url?
       case Some(session) if session.loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA =>
         gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.getProtectAccount().url)
           .withSession(playSession)))
@@ -104,8 +102,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
         for {
           userAuthenticationResponse <- sessionService.authenticate(login.emailaddress, login.password)
-          showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(login.emailaddress)
-          response <- routeToLoginOr2SV(login, userAuthenticationResponse, showAdminMfaMandateMessage, request.session)
+          response <- routeToLoginOr2SV(login, userAuthenticationResponse, request.session)
         } yield response
       } recover {
         case _: InvalidEmail =>

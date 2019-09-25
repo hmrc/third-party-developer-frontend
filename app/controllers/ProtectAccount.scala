@@ -20,14 +20,15 @@ import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.{LoggedInState, UpdateLoggedInStateRequest}
 import javax.inject.{Inject, Singleton}
+import model.MfaMandateDetails
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
 import qr.{OtpAuthUri, QRCode}
-import service.{MFAService, SessionService}
-import views.html.{protectaccount, userDidNotAdd2SV}
+import service.{MFAService, MfaMandateService, SessionService}
 import views.html.protectaccount._
+import views.html.{add2SV, protectaccount, userDidNotAdd2SV}
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +39,8 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
                                val mfaService: MFAService,
                                val sessionService: SessionService,
                                val messagesApi: MessagesApi,
-                               val errorHandler: ErrorHandler)
+                               val errorHandler: ErrorHandler,
+                               val mfaMandateService: MfaMandateService)
                               (implicit val appConfig: ApplicationConfig,
                                ec: ExecutionContext) extends LoggedInController {
 
@@ -144,6 +146,16 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
 
   def get2SVNotSetPage(): Action[AnyContent] = loggedInAction { implicit request =>
     successful(Ok(userDidNotAdd2SV()))
+  }
+  
+  def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
+    implicit request => {
+
+      for {
+        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn.email)
+        mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
+      }  yield (Ok(add2SV(mfaMandateDetails)))
+    }
   }
 }
 
