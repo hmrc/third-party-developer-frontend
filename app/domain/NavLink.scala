@@ -37,11 +37,12 @@ case object StaticNavLinks {
 
 case object UserNavLinks {
 
-  def apply(userFullName: Option[String], isRegistering: Boolean = false) = (userFullName, isRegistering) match {
-    case (_, true) => Seq.empty
-    case (Some(name), _) => loggedInNavLinks(name)
-    case (_, _) => loggedOutNavLinks
-  }
+  def apply(userFullName: Option[String], isRegistering: Boolean = false) =
+    (userFullName, isRegistering) match {
+      case (_, true) => Seq.empty
+      case (Some(name), _) => loggedInNavLinks(name)
+      case (_, _) => loggedOutNavLinks
+    }
 
   private def loggedInNavLinks(userFullName: String) = Seq(
     NavLink(userFullName,"/developer/profile"),

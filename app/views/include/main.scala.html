@@ -86,6 +86,12 @@
 @banner = {
     <div class="banner">
         @include.breadcrumbs(breadcrumbs: _*)
+        @backLink
+
+        @if(back == NoBackButton && breadcrumbs.isEmpty){
+            <p>&nbsp;</p>
+        }
+
         @serviceInfoContent
     </div>
 }
@@ -133,7 +139,6 @@
         @leftNav.getOrElse(HtmlFormat.empty)
     </div>
     <div class="column-three-quarters">
-        @backLink
         <div id="content">
             @mainContentHeader
             @mainContent
@@ -146,7 +151,6 @@
 @content = {
     <div class="@if(fullWidthContent) {column-full} else {column-three-quarters}">
         <div id="content">
-            @backLink
             @mainContentHeader
             @mainContent
             @sidebar
