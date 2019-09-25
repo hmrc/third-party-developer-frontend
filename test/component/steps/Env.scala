@@ -23,7 +23,6 @@ import java.util.Calendar
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import component.stubs.AuditStub
 import cucumber.api.scala.{EN, ScalaDsl}
