@@ -17,10 +17,12 @@
 package controllers
 
 import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
-import domain.UserNavLinks
+import domain.LoggedInState.{LOGGED_IN, PART_LOGGED_IN_ENABLING_MFA}
+import domain.{DeveloperSession, UserNavLinks}
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.OptionalAuthElement
 import play.api.libs.json._
+import play.api.mvc.{Action, AnyContent}
 import service.SessionService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -32,8 +34,19 @@ class Navigation @Inject()(val sessionService: SessionService,
                            implicit val appConfig: ApplicationConfig)
   extends FrontendController with AuthConfigImpl with HeaderEnricher with OptionalAuthElement {
 
-  def navLinks() = AsyncStack { implicit request =>
-    val username = loggedIn.map(_.displayedName)
-    Future.successful(Ok(Json.toJson(UserNavLinks(username))))
+  def navLinks(): Action[AnyContent] = AsyncStack {
+    implicit request => {
+      val username =
+        loggedIn.flatMap {
+          session: DeveloperSession => {
+            session.loggedInState match {
+              case LOGGED_IN => session.loggedInName
+              case PART_LOGGED_IN_ENABLING_MFA => None
+            }
+          }
+        }
+
+      Future.successful(Ok(Json.toJson(UserNavLinks(username))))
+    }
   }
 }

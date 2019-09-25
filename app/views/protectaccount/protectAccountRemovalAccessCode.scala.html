@@ -23,7 +23,7 @@
 
 @devMain(
     title = "Enter your access code",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Remove 2-step verification"),
         Crumb.protectAccount,

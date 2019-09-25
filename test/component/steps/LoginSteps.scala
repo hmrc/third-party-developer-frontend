@@ -16,6 +16,9 @@
 
 package component.steps
 
+import java.net.URLEncoder
+
+import com.github.tomakehurst.wiremock.client.WireMock._
 import component.matchers.CustomMatchers
 import component.pages._
 import component.stubs.Stubs
@@ -25,10 +28,23 @@ import domain._
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
 import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 import steps.PageSugar
 
 import scala.collection.mutable
+
+case class MfaSecret(secret: String)
+
+object MfaSecret {
+  implicit val format: Format[MfaSecret] = Json.format[MfaSecret]
+}
+
+object TestContext {
+  var developer: Developer = null
+
+  var sessionIdForLoggedInUser: String = ""
+  var sessionIdForMfaMandatingUser: String = ""
+}
 
 class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers {
 
@@ -46,22 +62,76 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     click on waitForElement(By.id("submit")) // Continue past confirmation of skipping 2SV setup
   }
 
-  Given("""^I am registered with$""") { (data: DataTable) =>
+  Given("""^I am registered with$""") { data: DataTable =>
     val result = data.asMaps(classOf[String], classOf[String]).get(0)
-    val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
-    val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+
     val password = result.get("Password")
 
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
     Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
 
-    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser = false),
-      OK, Json.toJson(userAuthenticationResponse).toString())
+    val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
 
-    Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
-    Stubs.setupDeleteRequest(s"/session/$sessionId", OK)
+    TestContext.developer = developer
+
+    TestContext.sessionIdForLoggedInUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
+    TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+
+    setupGettingDeveloperByEmail(developer)
+
+    setupGettingMfaSecret(developer)
+
+    setupVerificationOfAccessCode(developer)
+
+    setupEnablingMfa(developer)
+  }
+
+  private val accessCode = "123456"
+
+  private def setupVerificationOfAccessCode(developer: Developer): Unit = {
+    stubFor(
+      post(urlPathEqualTo(s"/developer/${developer.email}/mfa/verification"))
+        .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
+        .willReturn(aResponse()
+          .withStatus(NO_CONTENT)
+        ))
+  }
+
+  private def setupEnablingMfa(developer: Developer): Unit = {
+    stubFor(
+      put(urlPathEqualTo(s"/developer/${developer.email}/mfa/enable"))
+        .willReturn(aResponse()
+          .withStatus(OK)
+        ))
+  }
+
+  private def setupGettingMfaSecret(developer: Developer): Unit = {
+    stubFor(
+      post(urlPathEqualTo(s"/developer/${developer.email}/mfa"))
+        .willReturn(aResponse()
+          .withStatus(OK)
+          .withBody(Json.toJson(MfaSecret("mySecret")).toString())))
+  }
+
+  private def setupGettingDeveloperByEmail(developer: Developer): Unit = {
+    val encodedEmail = URLEncoder.encode(developer.email, "UTF-8")
+
+    stubFor(get(urlPathEqualTo("/developer"))
+      .withQueryParam("email", equalTo(encodedEmail))
+      .willReturn(aResponse()
+        .withStatus(OK)
+        .withBody(Json.toJson(developer).toString())))
+  }
+
+  Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
+    if (email != TestContext.developer.email) {
+      throw new IllegalArgumentException(s"Can only know how to uplift ${TestContext.developer.email}'s session")
+    }
+
+    val session = Session(TestContext.sessionIdForMfaMandatingUser, TestContext.developer, LoggedInState.LOGGED_IN)
+
+    Stubs.setupRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK, Json.toJson(session).toString())
+    Stubs.setupDeleteRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK)
   }
 
   Given("""^I fill in the login form with$""") { (data: DataTable) =>
@@ -87,14 +157,35 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
       val link = webDriver.findElement(By.linkText("Sign out"))
       link.click()
     } catch {
-      case _: org.openqa.selenium.NoSuchElementException => {
+      case _: org.openqa.selenium.NoSuchElementException =>
         val menu = webDriver.findElement(By.linkText("Menu"))
         menu.click()
 
         val link2 = webDriver.findElement(By.linkText("Sign out"))
         link2.click()
-      }
     }
   }
 
+  When("""^I enter the correct access code and continue$""") {
+    Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
+    Setup2svEnterAccessCodePage.clickContinue()
+  }
+
+  def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
+
+    val sessionId = "sessionId_" + loggedInState.toString
+
+    val session = Session(sessionId, developer, loggedInState)
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+
+    val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+
+    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser),
+      OK, Json.toJson(userAuthenticationResponse).toString())
+
+    Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
+    Stubs.setupDeleteRequest(s"/session/$sessionId", OK)
+
+    sessionId
+  }
 }

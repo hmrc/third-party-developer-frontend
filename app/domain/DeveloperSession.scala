@@ -21,15 +21,20 @@ import java.nio.charset.StandardCharsets
 
 import play.api.libs.json.{Format, Json}
 
-import scala.concurrent.Future
-
 case class DeveloperSession(session: Session) {
   val developer: Developer = session.developer
   val email: String = developer.email
   val loggedInState: LoggedInState = session.loggedInState
 
-  val displayedName = s"${developer.firstName} ${developer.lastName}"
+  val displayedName: String = s"${developer.firstName} ${developer.lastName}"
   val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
+
+  val loggedInName: Option[String] =
+    if (loggedInState == LoggedInState.LOGGED_IN) {
+      Some(displayedName)
+    } else {
+      None
+    }
 }
 
 object DeveloperSession {

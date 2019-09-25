@@ -24,7 +24,7 @@
 
 @devMain(
     title = "Submit your application for checking",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage credentials"),
         Crumb.application(app),

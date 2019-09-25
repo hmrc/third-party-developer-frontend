@@ -23,7 +23,7 @@
 
 @devMain(
     title = "Profile updated",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage profile"),
         Crumb.home

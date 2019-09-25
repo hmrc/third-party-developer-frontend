@@ -32,7 +32,7 @@
 
 @devMain(
     title = "Manage API subscriptions",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage API subscriptions"),
         Crumb.application(app),

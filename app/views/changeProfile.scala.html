@@ -23,7 +23,7 @@
 
 @devMain(
     title = titleError + "Change profile details",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage profile"),
         Crumb.home

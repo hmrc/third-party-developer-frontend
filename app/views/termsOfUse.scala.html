@@ -29,7 +29,7 @@
 
 @devMain(
     title = titleError + title.toString,
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage details"),
         Crumb.application(app),

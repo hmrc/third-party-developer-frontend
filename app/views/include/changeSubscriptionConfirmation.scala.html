@@ -41,7 +41,7 @@
 
 @devMain(
     title = title,
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb(test(navSection).toString),
         Crumb.application(app),

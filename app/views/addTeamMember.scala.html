@@ -25,7 +25,7 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
 
 @devMain(
 title = titleError + "Add a team member",
-userFullName = Some(loggedIn.displayedName),
+userFullName = loggedIn.loggedInName,
 breadcrumbs = Seq(
 Crumb("Manage team members"),
 Crumb.application(app),

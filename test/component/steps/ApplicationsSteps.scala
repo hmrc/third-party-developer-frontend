@@ -20,6 +20,7 @@ import java.util.UUID
 
 import component.matchers.CustomMatchers
 import component.pages._
+import component.stubs.ApplicationStub.configureUserApplications
 import component.stubs._
 import cucumber.api.DataTable
 import cucumber.api.scala.{EN, ScalaDsl}
@@ -60,9 +61,14 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   )
 
   Given( """^application with name '(.*)' can be created$""") { (name: String) =>
+
     val app = defaultApp(name, "PRODUCTION")
+
     Stubs.setupPostRequest("/application", CREATED, Json.toJson(app).toString())
+
     ApplicationStub.setUpFetchApplication(applicationId, OK, Json.toJson(app).toString())
+
+    configureUserApplications(app.collaborators.head.emailAddress, List(app))
   }
 
   Then( """^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) =>

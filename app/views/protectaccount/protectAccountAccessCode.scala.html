@@ -23,12 +23,9 @@
 
 @devMain(
     title = "Enter your access code",
-    userFullName = Some(loggedIn.displayedName),
-    breadcrumbs = Seq(
-        Crumb("Enter your access code"),
-        Crumb.protectAccount,
-        Crumb.home
-    )
+    userFullName = loggedIn.loggedInName,
+    back = Some(""),
+    isRegistering = true
 ) {
 
     <header>

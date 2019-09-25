@@ -180,7 +180,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         private val result = await(addToken(underTest.getProtectAccount())(request))
 
         status(result) shouldBe OK
-        bodyOf(result) should include("Protect your Developer Hub account by adding 2-step verification")
+        bodyOf(result) should include("Set up 2-step verification to protect your Developer Hub account and application details from being compromised.")
       }
 
       "return protected account page for user with MFA enabled" in new SetupProtectedAccount with LoggedIn {

@@ -25,7 +25,7 @@
 
 @devMain(
     title = "Application added",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
         Crumb.home

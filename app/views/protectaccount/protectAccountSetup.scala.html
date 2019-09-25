@@ -22,12 +22,9 @@
 
 @devMain(
     title = "Set up your device",
-    userFullName = Some(loggedIn.displayedName),
-    breadcrumbs = Seq(
-        Crumb("Set up 2SV"),
-        Crumb.protectAccount,
-        Crumb.home
-    )
+    userFullName = loggedIn.loggedInName,
+    back = Some(""),
+    isRegistering = true
 ) {
 
     <header>

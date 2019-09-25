@@ -22,7 +22,7 @@
 
 @devMain(
     title = "Manage profile",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage profile"),
         Crumb.home

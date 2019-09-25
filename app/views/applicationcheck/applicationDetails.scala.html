@@ -24,7 +24,7 @@
 
 @devMain(
     title = titleError + "Tell us what your application does",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage credentials"),
         Crumb.application(app),

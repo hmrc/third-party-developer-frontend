@@ -24,7 +24,7 @@
 
 @devMain(
     title = "View application",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb.application(app),
         Crumb.viewAllApplications,

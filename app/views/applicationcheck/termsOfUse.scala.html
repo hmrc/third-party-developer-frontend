@@ -25,7 +25,7 @@
 
 @devMain(
     title = titleError + "Agree to our terms of use",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage credentials"),
         Crumb.application(app),

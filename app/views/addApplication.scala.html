@@ -23,7 +23,7 @@
 
 @devMain(
     title = titleError + "Add an application",
-    userFullName = Some(loggedIn.displayedName),
+    userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-add-application")),
         Crumb.home

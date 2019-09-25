@@ -16,14 +16,16 @@
 
 package unit.controllers
 
+import akka.stream.Materializer
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.Navigation
-import domain.{Developer, DeveloperSession, LoggedInState, NavLink, Session}
+import domain._
 import org.mockito.ArgumentMatchers
-import org.mockito.BDDMockito._
 import org.mockito.ArgumentMatchers._
+import org.mockito.BDDMockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.OK
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -34,7 +36,7 @@ import scala.concurrent.Future._
 
 class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
-  implicit val materializer = fakeApplication.materializer
+  implicit val materializer: Materializer = fakeApplication.materializer
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
@@ -42,49 +44,73 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
 
   var userPassword = "Password1!"
 
-  class Setup(loggedIn: Boolean) {
+  class Setup(loggedInState: Option[LoggedInState]) {
     val underTest = new Navigation(
       mock[SessionService],
       mock[ErrorHandler],
       mock[ApplicationConfig]
     )
 
-    given(underTest.sessionService.fetch(ArgumentMatchers.eq(sessionId))(any[HeaderCarrier]))
-      .willReturn(successful(Some(Session(sessionId, developer, LoggedInState.LOGGED_IN))))
+    loggedInState.map(loggedInState => {
+      given(underTest.sessionService.fetch(ArgumentMatchers.eq(sessionId))(any[HeaderCarrier]))
+        .willReturn(successful(Some(Session(sessionId, developer, loggedInState))))
+    })
 
-    val request = if (loggedIn) FakeRequest().withLoggedIn(underTest)(sessionId) else FakeRequest()
-    val result = await(underTest.navLinks()(request))
-    val links = jsonBodyOf(result).as[Seq[NavLink]]
+    private val request =
+      if (loggedInState.isDefined) {
+        FakeRequest().withLoggedIn(underTest)(sessionId)
+      }
+      else {
+        FakeRequest()
+      }
+
+    val result: Result = await(underTest.navLinks()(request))
+    val links: Seq[NavLink] = jsonBodyOf(result).as[Seq[NavLink]]
   }
 
   "navigation" when {
     "user is not logged in" should {
-      "be successful" in new Setup(loggedIn = false) {
+      "be successful" in new Setup(loggedInState = None) {
         status(result) shouldBe OK
         links.size shouldBe 2
       }
 
-      "return a register link" in new Setup(loggedIn = false) {
-        links(0) shouldBe NavLink("Register", controllers.routes.Registration.register().url)
+      "return a register link" in new Setup(loggedInState = None) {
+        links.head shouldBe NavLink("Register", controllers.routes.Registration.register().url)
       }
 
-      "return a sign in link" in new Setup(loggedIn = false) {
+      "return a sign in link" in new Setup(loggedInState = None) {
         links(1) shouldBe NavLink("Sign in", controllers.routes.UserLoginAccount.login().url)
       }
     }
 
     "user is logged in" should {
-      "be successful" in new Setup(loggedIn = true) {
+      "be successful" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
         status(result) shouldBe OK
         links.size shouldBe 2
       }
 
-      "return the user's profile link" in new Setup(loggedIn = true) {
-        links(0) shouldBe NavLink("John Doe", controllers.routes.Profile.showProfile().url)
+      "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
+        links.head shouldBe NavLink("John Doe", controllers.routes.Profile.showProfile().url)
       }
 
-      "return a signout link" in new Setup(loggedIn = true) {
+      "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
         links(1) shouldBe NavLink("Sign out", controllers.routes.UserLogoutAccount.logoutSurvey().url)
+      }
+    }
+
+    "user is part logged in enabling MFA in" should {
+      "be successful" in new Setup(loggedInState = Some(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)) {
+        status(result) shouldBe OK
+        links.size shouldBe 2
+      }
+
+      "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)) {
+        links.head shouldBe NavLink("Register", controllers.routes.Registration.register().url)
+      }
+
+      "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)) {
+        links(1) shouldBe NavLink("Sign in", controllers.routes.UserLoginAccount.login().url)
       }
     }
   }
