@@ -80,6 +80,13 @@ object DeveloperStub {
 }
 
 object ApplicationStub {
+//  def setUpFetchAllApplications(status: Int, response: String) = {
+////    stubFor(get(urlEqualTo("/applications?emailAddress=john.smith%40example.com&environment=PRODUCTION"))
+////      .willReturn(aResponse().withStatus(status).withBody(response))
+////    )
+//
+//
+//  }
 
   def setUpFetchApplication(id: String, status: Int, response: String = "") = {
     stubFor(get(urlEqualTo(s"/application/$id"))
@@ -122,9 +129,12 @@ object ApplicationStub {
     val encodedEmail = URLEncoder.encode(email, "UTF-8")
 
     def stubResponse(environment: Environment, applications: List[Application]) = {
-      stubFor(get(urlPathEqualTo("/developer/applications")).withQueryParam("emailAddress", equalTo(encodedEmail))
+      stubFor(get(urlPathEqualTo("/developer/applications"))
+        .withQueryParam("emailAddress", equalTo(encodedEmail))
         .withQueryParam("environment", equalTo(environment.toString))
-        .willReturn(aResponse().withStatus(status).withBody(Json.toJson(applications).toString())))
+        .willReturn(aResponse()
+          .withStatus(status)
+          .withBody(Json.toJson(applications).toString())))
     }
 
     val (prodApps, sandboxApps) = applications.partition(_.deployedTo == Environment.PRODUCTION)

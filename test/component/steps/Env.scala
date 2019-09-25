@@ -23,6 +23,7 @@ import java.util.Calendar
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import component.stubs.AuditStub
 import cucumber.api.scala.{EN, ScalaDsl}
@@ -40,7 +41,7 @@ import utils.BrowserStackCaps
 import scala.util.{Properties, Try}
 
 
-trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
+trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps {
   var passedTestCount: Int = 0
   var failedTestCount: Int = 0
   // please do not change this port as it is used for acceptance tests
@@ -50,7 +51,12 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
   val stubPort = sys.env.getOrElse("WIREMOCK_PORT", "11111").toInt
   val stubHost = "localhost"
   val wireMockUrl = s"http://$stubHost:$stubPort"
-  val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
+
+  private val wireMockConfiguration = wireMockConfig()
+    .notifier(new ConsoleNotifier(true))
+    .port(stubPort)
+
+  val wireMockServer = new WireMockServer(wireMockConfiguration)
   var server: TestServer = null
   lazy val windowSize = new Dimension(1280, 720)
 
@@ -94,7 +100,7 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
   }
 
   def javascriptEnabled: Boolean = {
-    val jsEnabled:String = System.getProperty("javascriptEnabled", "true")
+    val jsEnabled: String = System.getProperty("javascriptEnabled", "true")
     if (jsEnabled == null) System.getProperties.setProperty("javascriptEnabled", "true")
     if (jsEnabled != "false") {
       true
@@ -148,7 +154,16 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps{
   }
 
   def startServer() {
-    val application = GuiceApplicationBuilder().configure("run.mode" -> "Stub").in(Mode.Prod).build()
+    val application =
+      GuiceApplicationBuilder()
+        .configure(
+          Map(
+            "run.mode" -> "Stub",
+            "dateOfAdminMfaMandate" -> "2001-01-01")
+        )
+        .in(Mode.Prod)
+        .build()
+
     server = new TestServer(port, application)
     server.start()
   }

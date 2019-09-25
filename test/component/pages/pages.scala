@@ -16,9 +16,11 @@
 
 package component.pages
 
-import component.steps.Env
+import component.steps.{Env, Form}
 import org.openqa.selenium.By
 import play.api.Logger
+
+import scala.collection.mutable
 
 trait FormPage extends WebPage {
   val pageHeading: String
@@ -134,6 +136,36 @@ case object RecommendMfaPage extends FormPage {
 case object RecommendMfaSkipAcknowledgePage extends FormPage {
   override val pageHeading: String = "Add 2-step verification"
   override val url: String = s"${Env.host}/developer/login/2SV-not-set"
+}
+
+case object ProtectAccountPage extends FormPage {
+  override val pageHeading: String = "Protect your account"
+  override val url: String = s"${Env.host}/developer/profile/protect-account"
+}
+
+case object Setup2svQrPage extends FormPage {
+  override val pageHeading: String = "Set up 2SV"
+  override val url: String = s"${Env.host}/developer/profile/protect-account/setup"
+}
+
+case object Setup2svEnterAccessCodePage extends FormPage {
+  def clickContinue() = {
+    click on id("submit")
+  }
+
+  override val pageHeading: String = "Enter your access code"
+  override val url: String = s"${Env.host}/developer/profile/protect-account/access-code"
+
+  def enterAccessCode(accessCode: String) = {
+    val formData = mutable.Map("accessCode" -> accessCode)
+
+    Form.populate(formData)
+  }
+}
+
+case object ProtectAccountCompletePage extends FormPage {
+  override val pageHeading: String = "You have successfully set up 2-step verification"
+  override val url: String = s"${Env.host}/developer/profile/protect-account/enable"
 }
 
 case object SignOutSurveyPage extends FormPage {
