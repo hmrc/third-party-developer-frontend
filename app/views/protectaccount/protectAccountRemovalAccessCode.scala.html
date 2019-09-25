@@ -24,11 +24,7 @@
 @devMain(
     title = "Enter your access code",
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Remove 2-step verification"),
-        Crumb.protectAccount,
-        Crumb.home
-    )
+    back = BackButtonWithJavaScript
 ) {
 
     <header>

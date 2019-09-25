@@ -17,6 +17,7 @@
 @import config.ApplicationConfig
 @import domain.{Application, DeveloperSession}
 @import include._
+@import domain._
 @import model.Crumb
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
@@ -24,17 +25,12 @@
 @devMain(
     title = "2-step verification removed",
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb.protectAccount,
-        Crumb.home
-    )
+    back = BackButtonWithJavaScript
 ) {
 
-    <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge">2-step verification removed</h1>
-    </div>
-    <br>
-    <p>You can <a href="@routes.ProtectAccount.getQrCode()">add 2-step verification</a> back again at any time.</p>
+    <h1 class="heading-xlarge">2-step verification removed</h1>
+
+    <p>You can <a href="@routes.ProtectAccount.getQrCode()">set up 2-step verification</a> at any time.</p>
 
     <div>
         <a id="view-all-apps" class="button" type="submit" href="@routes.ManageApplications.manageApps">View all applications</a>

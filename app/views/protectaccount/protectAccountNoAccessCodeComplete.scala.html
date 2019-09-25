@@ -24,21 +24,18 @@
 
 @devMain(
     title = "Request submitted",
-    breadcrumbs = Seq(
-        Crumb("Request submitted"),
-        Crumb.signIn,
-        Crumb.home
-    )
+    isRegistering = true,
+    back = BackButtonWithJavaScript
 ) {
 
-    <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge">Request submitted</h1>
-    </div>
-    <p>You have requested to remove 2-step verification from your account.</p>
+    <h1 class="heading-xlarge">Request submitted</h1>
 
-    <h2 class="heading-medium">What happens next?</h2>
-    <p>We will email you within 2 working days.</p>
-    <p>In the meantime, you can still sign in to your account if you do have an access code.</p>
+    <p>We have received your request to remove 2-step verification from your account.</p>
 
+    <h2 class="heading-large">
+        What happens next?
+    </h2>
+
+    <p>We'll email you within 2 working days.</p>
 }
 
