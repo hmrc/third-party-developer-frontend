@@ -23,16 +23,11 @@
 @devMain(
     title = "Protected account",
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Protect account"),
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    back = BackButtonWithJavaScript
 ) {
 
-
     <header>
-        <h1 class="heading-xlarge">Protect account</h1>
+        <h1 class="heading-xlarge">Account protection</h1>
     </header>
 
     <div>

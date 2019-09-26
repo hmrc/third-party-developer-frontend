@@ -15,6 +15,7 @@
  *@
 
 @import model.Crumb
+@import domain.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, NoBackButton}
 
 @(title: String,
     navTitle: Option[String] = None,
@@ -26,7 +27,7 @@
     fullWidthBanner: Option[Html] = None,
     leftNav: Option[Html] = None,
     breadcrumbs: Seq[Crumb] = Seq.empty,
-    back: Option[String] = None,
+    back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false
     )(mainContent: Html = HtmlFormat.empty)(implicit messages: Messages, applicationConfig: config.ApplicationConfig)
 
@@ -85,6 +86,12 @@
 @banner = {
     <div class="banner">
         @include.breadcrumbs(breadcrumbs: _*)
+        @backLink
+
+        @if(back == NoBackButton && breadcrumbs.isEmpty){
+            <p>&nbsp;</p>
+        }
+
         @serviceInfoContent
     </div>
 }
@@ -117,13 +124,13 @@
 
 @backLink = {
     @back match {
-        case Some(value) if value == "" => {
+        case BackButtonToUrl(url) => {
+            <a href="@url" class="link-back">Back</a>
+        }
+        case  BackButtonWithJavaScript => {
             <a href="javascript:history.back()" class="link-back">Back</a>
         }
-        case Some(value) => {
-            <a href="@back.get" class="link-back">Back</a>
-        }
-        case None => {}
+        case  NoBackButton => {}
     }
 }
 
@@ -132,7 +139,6 @@
         @leftNav.getOrElse(HtmlFormat.empty)
     </div>
     <div class="column-three-quarters">
-        @backLink
         <div id="content">
             @mainContentHeader
             @mainContent
@@ -145,7 +151,6 @@
 @content = {
     <div class="@if(fullWidthContent) {column-full} else {column-three-quarters}">
         <div id="content">
-            @backLink
             @mainContentHeader
             @mainContent
             @sidebar

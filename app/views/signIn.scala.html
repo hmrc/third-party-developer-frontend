@@ -21,10 +21,7 @@
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 @devMain(
     title = titleError + heading,
-    breadcrumbs = Seq(
-        Crumb("Sign in"),
-        Crumb.home
-    )
+    isRegistering = true
 ) {
 
     @errorSummary(form)

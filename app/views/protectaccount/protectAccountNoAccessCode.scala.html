@@ -24,19 +24,17 @@
 
 @devMain(
     title = "Get help accessing your account",
-    breadcrumbs = Seq(
-        Crumb("Get help accessing your account"),
-        Crumb.signIn,
-        Crumb.home
-    )
+    isRegistering = true,
+    back = BackButtonWithJavaScript
 ) {
 
-    <h1 class="heading-xlarge">Get help accessing your account</h1>
+    <h1 class="heading-xlarge">Remove 2-step verification</h1>
 
-    <p>Ask us to remove 2-step verification so you can sign in to your account.</p>
-    <p>We'll respond within 2 working days.</p>
+    <p>We will remove 2-step verification so you can sign in to your account.</p>
+    <p>We'll email you within 2 working days.</p>
+    <p>In the meantime, if you can get an access code you can still <a href="@routes.UserLoginAccount.login()">sign in</a> to your account.</p>
 
-    @helper.form(action = controllers.routes.UserLoginAccount.confirm2SVHelp(), 'class -> "form") {
+@helper.form(action = controllers.routes.UserLoginAccount.confirm2SVHelp(), 'class -> "form") {
         @helper.CSRF.formField
         <div class="form-group">
             <button id="submit" class="button" type="submit">Continue</button>
