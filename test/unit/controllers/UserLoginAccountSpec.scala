@@ -69,11 +69,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     val mfaMandateService: MfaMandateService = mock[MfaMandateService]
 
-    private val verboseLogginSettings: MockSettings = withSettings().verboseLogging()
-
     val underTest = new UserLoginAccount(mock[AuditService],
       mock[ErrorHandler],
-      mock[SessionService](verboseLogginSettings),
+      mock[SessionService],
       mock[ApplicationService],
       messagesApi,
       mfaMandateService
@@ -278,8 +276,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       private val body = bodyOf(result)
 
       body should include("Get help accessing your account")
-      body should include("Ask us to remove 2-step verification so you can sign in to your account.")
-
+      body should include("We will remove 2-step verification so you can sign in to your account.")
     }
 
     "return the remove 2SV complete page when user selects yes" in new Setup {
@@ -292,8 +289,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       private val body = bodyOf(result)
 
       body should include("Request submitted")
-      body should include("You have requested to remove 2-step verification from your account")
-
+      body should include("We have received your request to remove 2-step verification from your account")
     }
 
     "return 2-step removal request completed page on submission" in new Setup {
@@ -308,7 +304,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       status(result) shouldBe OK
       private val body = bodyOf(result)
 
-      body should include("You have requested to remove 2-step verification from your account")
+      body should include("We have received your request to remove 2-step verification from your account")
       body should include("Request submitted")
       verify(underTest.applicationService).request2SVRemoval(meq(user.email))(any[HeaderCarrier])
 
