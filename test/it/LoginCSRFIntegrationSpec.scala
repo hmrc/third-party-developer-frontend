@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import connectors.{ConnectorMetrics, NoopConnectorMetrics}
+import controllers.routes
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -100,7 +101,7 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
     }
 
     "there is a valid CSRF token" should {
-      "display 2SV sign-up reminder if user does not have it set up" in new Setup {
+      "redirect to the 2SV sign-up reminder if user does not have it set up" in new Setup {
         implicit val materializer: Materializer = fakeApplication().materializer
 
         stubFor(post(urlEqualTo("/authenticate"))
@@ -130,8 +131,9 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
         private val result = await(route(app, request)).get
 
-        status(result) shouldBe OK
-        bodyOf(result) contains "Add 2-step verification"
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2svRecommendationPage().url)
+
         verify(1, postRequestedFor(urlMatching("/authenticate")))
       }
 

@@ -86,7 +86,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
         .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
 
-        // TODO .url?
       case Some(session) if session.loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA =>
         gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.getProtectAccount().url)
           .withSession(playSession)))

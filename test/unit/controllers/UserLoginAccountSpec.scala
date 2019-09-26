@@ -23,7 +23,6 @@ import controllers._
 import domain._
 import org.mockito.ArgumentMatchers.{any, eq => meq, _}
 import org.mockito.BDDMockito.given
-import org.mockito.MockSettings
 import org.mockito.Mockito._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -123,8 +122,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       bodyOf(result) should include("Enter your access code")
     }
 
-    "display the Add 2-step Verification suggestion page when successfully logging in without having 2SV configured" in new Setup {
-
+    "Redirect to the display the Add 2-step Verification suggestion page when successfully logging in without having 2SV configured" in new Setup {
       mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse), true)
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
@@ -134,9 +132,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       private val result = await(underTest.authenticate()(request))
 
-      status(result) shouldBe OK
-      bodyOf(result) should include("Add 2-step verification")
-      bodyOf(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2svRecommendationPage.url)
 
       verify(underTest.auditService, times(1)).audit(
         meq(LoginSucceeded), meq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
@@ -152,9 +150,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       private val result = await(underTest.authenticate()(request))
 
-      status(result) shouldBe OK
-      bodyOf(result) should include("Add 2-step verification")
-      bodyOf(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2svRecommendationPage.url)
 
       verify(underTest.auditService, times(1)).audit(
         meq(LoginSucceeded), meq(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
