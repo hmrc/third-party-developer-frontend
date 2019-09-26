@@ -16,18 +16,16 @@
 
 @import config.ApplicationConfig
 @import include._
-@import model.Crumb
 @import model.MfaMandateDetails
+@import domain.BackButtonWithJavaScript
+@import domain.DeveloperSession
 
-@(mfaMandateDetails: MfaMandateDetails)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(mfaMandateDetails: MfaMandateDetails)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
     title = "Add 2-step verification",
-    breadcrumbs = Seq(
-        Crumb("Add 2-step verification"),
-        Crumb.signIn,
-        Crumb.home
-    )
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript
 ) {
 
     <header>
@@ -51,7 +49,7 @@
         }
         <br/>
 
-        <p><a id="skip" href="@routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a></p>
+        <p><a id="skip" href="@routes.ProtectAccount.get2SVNotSetPage()">I can't do this right now</a></p>
     </section>
 
 }

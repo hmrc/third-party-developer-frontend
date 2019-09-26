@@ -34,7 +34,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import qr.{OtpAuthUri, QRCode}
-import service.{MFAResponse, MFAService, SessionService}
+import service.{MFAResponse, MFAService, MfaMandateService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
@@ -61,7 +61,8 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[MFAService],
       mock[SessionService],
       messagesApi,
-      mock[ErrorHandler])(mock[ApplicationConfig], global) {
+      mock[ErrorHandler],
+      mock[MfaMandateService])(mock[ApplicationConfig], global) {
       override val qrCode: QRCode = mock[QRCode]
     }
 
@@ -87,7 +88,6 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
-
     given(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).willReturn(otpUri)
     given(underTest.qrCode.generateDataImageBase64(otpUri.toString)).willReturn(qrImage)
     given(underTest.thirdPartyDeveloperConnector.createMfaSecret(mockEq(loggedInUser.email))(any[HeaderCarrier])).willReturn(secret)
@@ -254,6 +254,55 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2SVRemovalCompletePage().url)
+      }
+    }
+
+    "Given a user with MFA enabled" when {
+      "they have logged in when MFA is mandated in the future" should {
+        "be shown the MFA recommendation with 10 days warning" in new LoggedIn {
+
+          given(underTest.mfaMandateService.showAdminMfaMandatedMessage(any())(any[HeaderCarrier]))
+            .willReturn(Future.successful(true))
+
+          private val daysInTheFuture = 10
+          given(underTest.mfaMandateService.daysTillAdminMfaMandate)
+            .willReturn(Some(daysInTheFuture))
+
+          private val request = FakeRequest().
+            withLoggedIn(underTest)(sessionId)
+
+          private val result = await(underTest.get2svRecommendationPage()(request))
+
+          status(result) shouldBe OK
+
+          bodyOf(result) should include("Add 2-step verification")
+          bodyOf(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
+
+          verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(mockEq(loggedInUser.email))(any[HeaderCarrier])
+        }
+      }
+    }
+
+    "they have logged in when MFA is mandated yet" should {
+      "they have logged in when MFA is mandated is not configured" in new LoggedIn {
+        given(underTest.mfaMandateService.showAdminMfaMandatedMessage(any())(any[HeaderCarrier]))
+          .willReturn(Future.successful(true))
+
+        private val mfaMandateNotConfigured = None
+        given(underTest.mfaMandateService.daysTillAdminMfaMandate)
+          .willReturn(mfaMandateNotConfigured)
+
+        private val request = FakeRequest().
+          withLoggedIn(underTest)(sessionId)
+
+        private val result = await(underTest.get2svRecommendationPage()(request))
+
+        status(result) shouldBe OK
+
+        bodyOf(result) should include("Add 2-step verification")
+        bodyOf(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
+
+        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(mockEq(loggedInUser.email))(any[HeaderCarrier])
       }
     }
   }
