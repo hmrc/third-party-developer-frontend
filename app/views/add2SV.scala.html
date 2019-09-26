@@ -18,11 +18,13 @@
 @import include._
 @import model.MfaMandateDetails
 @import domain.BackButtonWithJavaScript
+@import domain.DeveloperSession
 
-@(mfaMandateDetails: MfaMandateDetails)(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(mfaMandateDetails: MfaMandateDetails)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
     title = "Add 2-step verification",
+    userFullName = loggedIn.loggedInName,
     back = BackButtonWithJavaScript
 ) {
 

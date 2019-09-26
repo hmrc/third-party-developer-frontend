@@ -17,7 +17,7 @@
 package unit.views
 
 import config.ApplicationConfig
-import domain.LoggedInState
+import domain.{Developer, DeveloperSession, LoggedInState, Session}
 import model.MfaMandateDetails
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
@@ -36,16 +36,20 @@ class Add2SVSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
   private def renderPage(mfaMandateDetails: MfaMandateDetails) = {
     val request = FakeRequest().withCSRFToken
 
-    views.html.add2SV.render(mfaMandateDetails, applicationMessages, request, appConfig)
+    val developer = Developer("email", "firstName", "lastName")
+    val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
+    val developerSession = DeveloperSession(session)
+
+    views.html.add2SV.render(mfaMandateDetails, applicationMessages, developerSession, request, appConfig)
   }
 
   "MFA Admin warning" should {
     "not be displayed" in {
-        val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = false, daysTillAdminMfaMandate = 0))
+      val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = false, daysTillAdminMfaMandate = 0))
 
-        page.contentType should include("text/html")
-        page.body should not include "If you are the Administrator of an application you have"
-      }
+      page.contentType should include("text/html")
+      page.body should not include "If you are the Administrator of an application you have"
+    }
 
     "is displayed with plural 'days remaining'" in {
       given(appConfig.dateOfAdminMfaMandate).willReturn(Some(new LocalDate().plusDays(1)))
