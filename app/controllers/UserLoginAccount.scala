@@ -152,7 +152,4 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeComplete()))
   }
 
-  def get2SVNotSetPage(): Action[AnyContent] = Action.async { implicit request =>
-    successful(Ok(userDidNotAdd2SV()))
-  }
 }

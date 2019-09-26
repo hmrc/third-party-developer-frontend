@@ -26,9 +26,10 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, SessionService}
-import views.html.protectaccount
+import views.html.{protectaccount, userDidNotAdd2SV}
 import views.html.protectaccount._
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -139,6 +140,10 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
 
   def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalComplete()))
+  }
+
+  def get2SVNotSetPage(): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Ok(userDidNotAdd2SV()))
   }
 }
 

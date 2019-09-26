@@ -16,17 +16,14 @@
 
 @import config.ApplicationConfig
 @import include._
-@import model.Crumb
+@import domain.{BackButtonWithJavaScript, DeveloperSession}
 
-@()(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
     title = "2-step verification not set",
-    breadcrumbs = Seq(
-        Crumb("2-step verification not set"),
-        Crumb.signIn,
-        Crumb.home
-    )
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript
 ) {
 
     <header>
