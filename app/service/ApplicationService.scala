@@ -83,45 +83,6 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield apiVersions
   }
 
-
-  // TODO: For diagnostic purposes. Remove this function
-  def apisWithSubscriptions2(application: Application, maybeCount: Option[Int])(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
-
-    def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription): Future[APISubscriptionStatus] = {
-      subscriptionFieldsService.fetchFields(application, api.context, version.version.version).map { fields =>
-        APISubscriptionStatus(
-          api.name,
-          api.serviceName,
-          api.context,
-          version.version,
-          version.subscribed,
-          api.requiresTrust.getOrElse(false),
-          Some(SubscriptionFieldsWrapper(application.id, application.clientId, api.context, version.version.version, fields)),
-          api.isTestSupport)
-      }
-    }
-
-    def toApiVersions(api: APISubscription): Seq[Future[APISubscriptionStatus]] = {
-      api.versions
-        .filterNot(_.version.status == RETIRED)
-        .filterNot(s => s.version.status == DEPRECATED && !s.subscribed)
-        .sortWith(APIDefinition.descendingVersion)
-        .map(toApiSubscriptionStatuses(api, _))
-    }
-
-    val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
-
-    val count = maybeCount.getOrElse(58)
-    for {
-      subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
-      data <- Future.sequence(subscriptions.sortBy(a => a.serviceName).slice(0, count).flatMap(toApiVersions))
-    } yield data
-  }
-
-
-
-
-
   def subscribeToApi(id: String, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.subscribeToApi(id, APIIdentifier(context, version)))
 
