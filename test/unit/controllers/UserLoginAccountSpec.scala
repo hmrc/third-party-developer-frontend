@@ -118,7 +118,21 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       private val result = await(addToken(underTest.authenticate())(request))
 
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp().url)
+    }
+
+    "display the enter access code page" in new Setup {
+
+      mockAuthenticate(user.email, userPassword, successful(userAuthenticationWith2SVResponse), false)
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = FakeRequest()
+        .withSession(sessionParams: _*)
+
+      private val result = await(addToken(underTest.enterTotp())(request))
+
       status(result) shouldBe OK
+
       bodyOf(result) should include("Enter your access code")
     }
 
