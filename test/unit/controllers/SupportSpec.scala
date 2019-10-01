@@ -23,7 +23,7 @@ import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
-import play.api.mvc.Request
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -46,7 +46,8 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationConfig])
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+
     val sessionId = "sessionId"
   }
 
@@ -58,13 +59,11 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
         .withSession(sessionParams: _*)
 
       given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
+        .willReturn(Future.successful(Some(Session(sessionId, developer, LoggedInState.LOGGED_IN))))
 
-      val result = await(addToken(underTest.raiseSupportEnquiry())(request))
-      status(result) shouldBe 200
-      val dom = Jsoup.parse(bodyOf(result))
-      dom.getElementsByAttributeValue("name", "fullname").attr("value") shouldEqual "John Doe"
-      dom.getElementsByAttributeValue("name", "emailaddress").attr("value") shouldEqual "thirdpartydeveloper@example.com"
+      val result: Result = await(addToken(underTest.raiseSupportEnquiry())(request))
+
+      assertFullNameAndEmail(result,"John Doe", "thirdpartydeveloper@example.com")
     }
 
     "support form fields are blank when not logged in" in new Setup {
@@ -75,10 +74,20 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
         .willReturn(Future.successful(None))
 
       val result = await(addToken(underTest.raiseSupportEnquiry())(request))
-      status(result) shouldBe 200
-      val dom = Jsoup.parse(bodyOf(result))
-      dom.getElementById("fullname").attr("value") shouldEqual ""
-      dom.getElementById("emailaddress").attr("value") shouldEqual ""
+      assertFullNameAndEmail(result, "", "")
+    }
+
+    "support form fields are blank when part logged in enabling MFA" in new Setup {
+      val request = FakeRequest()
+        .withLoggedIn(underTest)(sessionId)
+        .withSession(sessionParams: _*)
+
+      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+        .willReturn(Future.successful(Some(Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))))
+
+      val result = await(addToken(underTest.raiseSupportEnquiry())(request))
+
+      assertFullNameAndEmail(result, "","")
     }
 
     "submit request with name, email & comments from form" in new Setup {
@@ -112,5 +121,13 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
      val result = await(addToken(underTest.submitSupportEnquiry())(request))
       status(result) shouldBe 400
     }
+  }
+
+  private def assertFullNameAndEmail(result: Result, fullName: String, email: String): Any = {
+    status(result) shouldBe 200
+    val dom = Jsoup.parse(bodyOf(result))
+
+    dom.getElementsByAttributeValue("name", "fullname").attr("value") shouldEqual fullName
+    dom.getElementsByAttributeValue("name", "emailaddress").attr("value") shouldEqual email
   }
 }
