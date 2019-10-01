@@ -137,7 +137,7 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
         verify(1, postRequestedFor(urlMatching("/authenticate")))
       }
 
-      "display 2SV code entry page if user has it configured" in new Setup {
+      "redirect to the 2SV code entry page if user has it configured" in new Setup {
         implicit val materializer: Materializer = fakeApplication().materializer
 
         stubFor(post(urlEqualTo("/authenticate"))
@@ -159,9 +159,8 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
         private val result = await(route(app, request)).get
 
-        status(result) shouldBe OK
-        bodyOf(result) contains "Enter your access code"
-        verify(1, postRequestedFor(urlMatching("/authenticate")))
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp().url)
       }
     }
   }

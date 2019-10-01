@@ -20,7 +20,6 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
-import model.MfaMandateDetails
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import service.AuditAction._
@@ -83,7 +82,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER)
           .withSession(playSession)))
 
-      case None => successful(Ok(logInAccessCode(ProtectAccountForm.form))
+      case None => successful(Redirect(routes.UserLoginAccount.enterTotp(), SEE_OTHER)
         .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
 
       case Some(session) if session.loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA =>
@@ -117,6 +116,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           .withSession("email" -> login.emailaddress)
       }
     )
+  }
+
+  def enterTotp: Action[AnyContent] = Action.async { implicit request =>
+      Future.successful(Ok(logInAccessCode(ProtectAccountForm.form)))
   }
 
   def authenticateTotp: Action[AnyContent] = Action.async { implicit request =>
