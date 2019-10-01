@@ -17,10 +17,13 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.LoggedInState.LOGGED_IN
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.OptionalAuthElement
+import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.data.Form
 import play.api.i18n.MessagesApi
+import play.api.mvc.AnyContent
 import service.{DeskproService, SessionService}
 import views.html.{supportEnquiry, supportThankyou}
 
@@ -37,23 +40,27 @@ class Support @Inject()(val deskproService: DeskproService,
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
-  def raiseSupportEnquiry = AsyncStack { implicit request =>
-    val prefilledForm = loggedIn.fold(supportForm) { user =>
-      supportForm.bind(Map("fullname" -> user.displayedName, "emailaddress" -> user.email)).discardingErrors
-    }
-    Future.successful(Ok(supportEnquiry(loggedIn.map(_.displayedName), prefilledForm)))
+  private def fullyLoggedInUser(implicit request: RequestWithAttributes[AnyContent] ) : Option[User] =
+    loggedIn.filter(user => user.loggedInState == LOGGED_IN)
+
+  def raiseSupportEnquiry = AsyncStack { implicit request: RequestWithAttributes[AnyContent] =>
+    val prefilledForm = fullyLoggedInUser
+      .fold(supportForm) { user =>
+        supportForm.bind(Map("fullname" -> user.displayedName, "emailaddress" -> user.email)).discardingErrors
+      }
+    Future.successful(Ok(supportEnquiry(fullyLoggedInUser.map(_.displayedName), prefilledForm)))
   }
 
   def submitSupportEnquiry = AsyncStack { implicit request =>
     val requestForm = supportForm.bindFromRequest
-    val displayName = loggedIn.map(_.displayedName)
+    val displayName = fullyLoggedInUser.map(_.displayedName)
     requestForm.fold(
       formWithErrors => Future.successful(BadRequest(supportEnquiry(displayName, formWithErrors))),
       formData => deskproService.submitSupportEnquiry(formData).map { _ => Redirect(routes.Support.thankyou().url, SEE_OTHER) })
   }
 
   def thankyou = AsyncStack { implicit request =>
-    val displayName = loggedIn.map(_.displayedName)
+    val displayName = fullyLoggedInUser.map(_.displayedName)
     Future.successful(Ok(supportThankyou("Thank you", displayName)))
   }
 }
