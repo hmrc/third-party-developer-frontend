@@ -348,17 +348,17 @@ object ClientSecretResponse {
   implicit val format = Json.format[ClientSecretResponse]
 }
 
-class ApplicationAlreadyExists extends Throwable
+class ApplicationAlreadyExists extends RuntimeException
 
-class ApplicationNotFound extends Throwable
+class ApplicationNotFound extends RuntimeException
 
-class ClientSecretLimitExceeded extends Throwable
+class ClientSecretLimitExceeded extends RuntimeException
 
-class CannotDeleteOnlyClientSecret extends Throwable
+class CannotDeleteOnlyClientSecret extends RuntimeException
 
 class TeamMemberAlreadyExists extends RuntimeException("This user is already a teamMember on this application.")
 
-class ApplicationNeedsAdmin extends Throwable
+class ApplicationNeedsAdmin extends RuntimeException
 
 case class ApplicationCreatedResponse(id: String)
 
@@ -375,7 +375,7 @@ sealed trait ApplicationVerificationSuccessful
 
 case object ApplicationVerificationSuccessful extends ApplicationVerificationSuccessful
 
-class ApplicationVerificationFailed(verificationCode: String) extends Throwable
+class ApplicationVerificationFailed(verificationCode: String) extends RuntimeException
 
 sealed trait VerifyPasswordSuccessful
 
