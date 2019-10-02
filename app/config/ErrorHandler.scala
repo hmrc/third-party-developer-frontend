@@ -17,10 +17,10 @@
 package config
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.Configuration
 import play.api.i18n.MessagesApi
-import play.api.mvc.Request
+import play.api.mvc.{Request, RequestHeader, Result}
+import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 
 @Singleton
@@ -29,7 +29,17 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi,
                              implicit val appConfig: ApplicationConfig)
   extends FrontendErrorHandler {
 
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]) = {
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): HtmlFormat.Appendable = {
     views.html.errorTemplate(pageTitle, heading, message)
+  }
+
+
+  override def resolveError(rh: RequestHeader, ex: Throwable): Result = {
+    implicit val r: Request[String] = Request(rh, "")
+
+    ex match {
+      case _: domain.ApplicationNotFound => play.api.mvc.Results.NotFound(notFoundTemplate)
+      case _ => super.resolveError(rh, ex)
+    }
   }
 }
