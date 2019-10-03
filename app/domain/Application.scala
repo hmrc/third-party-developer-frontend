@@ -339,6 +339,7 @@ case class Application(id: String,
       case _ => false
     }
 
+  // TODO: Test
   def canViewAndEditCredentials(developer: Developer): Boolean = {
     (deployedTo, isAdmin(developer), state.name) match {
       case (Environment.SANDBOX, _, _) => true
@@ -347,12 +348,23 @@ case class Application(id: String,
     }
   }
 
+  // TODO: Implicit. Should we do an implicit conversion from DeveloperSession to Developer?
+  // TODO: Test
   def canViewApprovalStatus(developer: Developer) : Boolean = {
     (deployedTo, isAdmin(developer), state.name) match {
       case (Environment.SANDBOX,_,_) => false
       case (Environment.PRODUCTION, true, State.TESTING) => true
       case (Environment.PRODUCTION, true, State.PENDING_GATEKEEPER_APPROVAL) => true
       case (Environment.PRODUCTION, true, State.PENDING_REQUESTER_VERIFICATION) => true
+      case _ => false
+    }
+  }
+
+  // TODO: Test
+  def canViewServerToken(developer: Developer) : Boolean = {
+    (deployedTo, isAdmin(developer), state.name, access.accessType) match {
+      case (Environment.SANDBOX, _, _, AccessType.STANDARD) => true
+      case (Environment.PRODUCTION, true, State.PRODUCTION, AccessType.STANDARD) => true
       case _ => false
     }
   }

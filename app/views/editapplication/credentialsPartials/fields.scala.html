@@ -20,9 +20,10 @@
 @import domain.Environment
 @import domain.Application
 @import domain.AccessType
+@import domain.Developer
 @import include._
 
-@(app: Application, token: EnvironmentToken, form: Form[VerifyPasswordForm])(
+@(app: Application, developer: Developer, token: EnvironmentToken, form: Form[VerifyPasswordForm])(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 <div class="credentials-section" aria-describedby="client-id-info">
@@ -111,7 +112,7 @@
     }
 </div>
 
-@if(app.access.accessType == AccessType.STANDARD) {
+@if(app.canViewServerToken(developer)){
     <div class="credentials-section" aria-describedby="server-token-info">
         <h2 class="heading-large" id="serverTokenHeading">Server token</h2>
         <p id="server-token-info">
