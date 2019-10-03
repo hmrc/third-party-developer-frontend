@@ -17,6 +17,8 @@
 package domain
 
 import controllers.{AddApplicationForm, EditApplicationForm, GroupedSubscriptions, _}
+import domain.Environment.{PRODUCTION, SANDBOX}
+import domain.Role.ADMINISTRATOR
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, JsError, _}
 import uk.gov.hmrc.play.json.Union
@@ -295,6 +297,12 @@ case class Application(id: String,
 
   def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
 
+  private def hasRole(desiredRole: Role)(developer: Developer): Boolean = {
+    role(developer.email).contains(desiredRole)
+  }
+
+  def isAdmin: Developer => Boolean = hasRole(Role.ADMINISTRATOR)
+
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
   def termsOfUseStatus: TermsOfUseStatus = {
@@ -329,6 +337,24 @@ case class Application(id: String,
       case (Environment.SANDBOX, _, _) => true
       case (_, Role.ADMINISTRATOR, AccessType.STANDARD) => true
       case _ => false
+    }
+
+  def canViewAndEditCredentials(developer: Developer): Boolean = {
+    (deployedTo, isAdmin(developer), state.name) match {
+      case (Environment.SANDBOX, _, _) => true
+      case (Environment.PRODUCTION, true, State.PRODUCTION) => true
+      case _ => false
+    }
+  }
+
+  def canViewApprovalStatus(developer: Developer) : Boolean = {
+    (deployedTo, isAdmin(developer), state.name) match {
+      case (Environment.SANDBOX,_,_) => false
+      case (Environment.PRODUCTION, true, State.TESTING) => true
+      case (Environment.PRODUCTION, true, State.PENDING_GATEKEEPER_APPROVAL) => true
+      case (Environment.PRODUCTION, true, State.PENDING_REQUESTER_VERIFICATION) => true
+      case _ => false
+    }
   }
 
   def canAddRedirectUri = access match {
