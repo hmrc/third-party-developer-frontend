@@ -32,7 +32,7 @@ class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicat
   }
 
   def isMfaMandatedForUser(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    mfaMandateCheck(email, mandatedDate => mandatedDate.isBefore(new LocalDate()))
+    mfaMandateCheck(email, mandatedDate => !(mandatedDate.isAfter(new LocalDate())))
   }
 
   private def mfaMandateCheck(email: String, dateCheck : LocalDate => Boolean)(implicit hc: HeaderCarrier): Future[Boolean] = {
