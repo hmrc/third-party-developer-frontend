@@ -58,7 +58,7 @@
             <tr>
                 <th>Application details</th>
                 <td class="numeric">
-                    @if(app.isPermittedToMakeChanges(role)) {
+                    @if(app.isPermittedToMakeChangeAppDetails(role)) {
                         <a id="change" href="@controllers.routes.Details.changeDetails(app.id)">Change <span class="visually-hidden">application details</span></a>
                     }
                 </td>

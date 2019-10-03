@@ -44,7 +44,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
                            (implicit ec: ExecutionContext)
   extends ApplicationController {
 
-  def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
+  def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
     applicationService.fetchCredentials(applicationId).map { tokens =>
       val view = views.html.credentials(request.role, request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
       error.map(_ => BadRequest(view)).getOrElse(Ok(view))
@@ -53,6 +53,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
+  // TODO: adminOnAnyProductionApp
   def addClientSecret(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
 
     def result(err: Option[String] = None): Result = Redirect(controllers.routes.Credentials.credentials(applicationId, err))
@@ -66,6 +67,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
+  // TODO: adminOnAnyProductionApp
   def getProductionClientSecret(applicationId: String, index: Integer) =
     adminIfStandardProductionApp(applicationId, Seq(appInStateProductionFilter)) { implicit request =>
 
@@ -98,6 +100,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
+  // TODO: adminOnAnyProductionApp
   def selectClientSecretsToDelete(applicationId: String): Action[AnyContent] = adminIfStandardProductionApp(applicationId) { implicit request =>
 
     val application = request.application
@@ -140,6 +143,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     else VerifyPasswordForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
+  // TODO: adminOnAnyProductionApp
   def selectClientSecretsToDeleteAction(applicationId: String, error: Option[String] = None) = adminIfStandardProductionApp(applicationId) { implicit request =>
 
     val application = request.application
@@ -167,6 +171,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     SelectClientSecretsToDeleteForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
+  // TODO: adminOnAnyProductionApp
   def deleteClientSecretsAction(applicationId: String): Action[AnyContent] = adminIfStandardProductionApp(applicationId) { implicit request =>
 
     val application = request.application

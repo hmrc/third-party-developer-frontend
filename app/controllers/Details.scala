@@ -38,7 +38,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                        (implicit ec: ExecutionContext)
   extends ApplicationController {
 
-  def details(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
+  def details(applicationId: String) = teamMemberOnApp(applicationId) { implicit request =>
     Future.successful(Ok(views.html.details(request.role, request.application)))
   }
 

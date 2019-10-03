@@ -87,8 +87,10 @@ abstract class ApplicationController()
     teamMemberOnApp(applicationId, Seq(adminOnAppFilter) ++: furtherActionFunctions)(fun)
 
   def adminOnTestingApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                       (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    teamMemberOnApp(applicationId, Seq(adminOnAppFilter, appInStateTestingFilter) ++: furtherActionFunctions)(fun)
+                       (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    val filters: Seq[ActionRefiner[ApplicationRequest, ApplicationRequest]] = Seq(adminOnAppFilter, appInStateTestingFilter)
+    teamMemberOnApp(applicationId, filters ++: furtherActionFunctions)(fun)
+  }
 
   def teamMemberOnApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =

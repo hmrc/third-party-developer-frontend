@@ -323,6 +323,14 @@ case class Application(id: String,
     case _ => false
   }
 
+  // TODO: Can you edit details for ROPC and Priv on Sandbox? No?
+  def isPermittedToMakeChangeAppDetails(role: Role): Boolean =
+    (deployedTo, role, this.access.accessType) match {
+      case (Environment.SANDBOX, _, _) => true
+      case (_, Role.ADMINISTRATOR, AccessType.STANDARD) => true
+      case _ => false
+  }
+
   def canAddRedirectUri = access match {
     case s: Standard => s.redirectUris.lengthCompare(5) < 0
     case _ => false
