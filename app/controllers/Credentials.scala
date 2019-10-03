@@ -46,7 +46,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
 
   def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
     applicationService.fetchCredentials(applicationId).map { tokens =>
-      val view = views.html.credentials(request.role, request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
+      val view = views.html.credentials(request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
       error.map(_ => BadRequest(view)).getOrElse(Ok(view))
     } recover {
       case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
@@ -107,7 +107,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
 
     def showCredentials(form: Form[VerifyPasswordForm]) = {
       applicationService.fetchCredentials(applicationId).map { tokens =>
-        val view = views.html.credentials(request.role, application, tokens, form)
+        val view = views.html.credentials(application, tokens, form)
         if (form.hasErrors) BadRequest(view) else Ok(view)
       } recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
