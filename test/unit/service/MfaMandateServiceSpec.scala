@@ -34,9 +34,9 @@ import scala.concurrent.Future
 class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar with ScalaFutures with UnitSpec {
 
   trait Setup {
-    val dateInThePast: LocalDate = Instant.now().minus(Duration.standardDays(1L)).toDateTime().toLocalDate
+    val dateAFewDaysAgo: LocalDate = Instant.now().minus(Duration.standardDays((2L))).toDateTime().toLocalDate
+    val dateToday: LocalDate = Instant.now().toDateTime().toLocalDate
     val dateInTheFuture: LocalDate = Instant.now().plus(Duration.standardDays(1L)).toDateTime().toLocalDate
-    val now: LocalDate = Instant.now().toDateTime().toLocalDate
 
     val email = "test@example.com"
 
@@ -86,10 +86,19 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
   "showAdminMfaMandateMessage" when {
     "Mfa mandate date has passed" should {
       "be false" in new Setup {
-        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
         when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
 
         await(service.showAdminMfaMandatedMessage(email)) shouldBe false
+      }
+
+      "Mfa mandate date was today" should {
+        "be false" in new Setup {
+          when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateToday))
+          when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
+
+          await(service.showAdminMfaMandatedMessage(email)) shouldBe false
+        }
       }
     }
 
@@ -149,8 +158,17 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
 
   "isMfaMandatedForUser" when {
     "Mfa mandate date has passed" should {
-      "be false" in new Setup {
-        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+      "be true" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
+        when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
+
+        await(service.isMfaMandatedForUser(email)) shouldBe true
+      }
+    }
+
+    "Mfa mandate date was today" should {
+      "be true" in new Setup {
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateToday))
         when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
 
         await(service.isMfaMandatedForUser(email)) shouldBe true
@@ -158,7 +176,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
     }
 
     "Mfa mandate date has not passed and they are an admin on a principal application" should {
-      "be true" in new Setup {
+      "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
         when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInProduction)
 
@@ -170,7 +188,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
 
     "Mfa mandate date has passed and they are not an admin on a principle application" should {
       "be false" in new Setup {
-        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
         when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsAdminInSandbox)
 
         await(service.isMfaMandatedForUser(email)) shouldBe false
@@ -181,7 +199,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
 
     "Mfa mandate date has passed and they are a developer on a principle application" should {
       "be false" in new Setup {
-        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
         when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsDeveloperInProduction)
 
         await(service.isMfaMandatedForUser(email)) shouldBe false
@@ -192,7 +210,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
 
     "Mfa mandate date has passed and they are are not a collaborator on a principle application" should {
       "be false" in new Setup {
-        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
         when(mockApplicationService.fetchByTeamMemberEmail(any())(any())).thenReturn(applicationsWhereUserIsNotACollaboratorInProduction)
 
         await(service.isMfaMandatedForUser(email)) shouldBe false
@@ -222,7 +240,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
 
     "mfaAdminMandateDate is now" should {
       "be 0" in new Setup {
-        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(now))
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateToday))
 
         service.daysTillAdminMfaMandate shouldBe Some(0)
       }
@@ -230,7 +248,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
 
     "mfaAdminMandateDate is in the past" should {
       "be none" in new Setup {
-        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
 
         service.daysTillAdminMfaMandate shouldBe None
       }
@@ -240,7 +258,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
   "daysTillAdminMfaMandate" when {
     "mfaAdminMandateDate is not set" should {
       "be none" in new Setup {
-        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInThePast))
+        when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(None)
 
         service.daysTillAdminMfaMandate shouldBe None
       }
