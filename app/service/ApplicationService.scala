@@ -126,7 +126,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield result
   }
 
-  def requestApplicationDeletion(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestPrincipalApplicationDeletion(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[TicketResult] = {
 
     val requesterName = requester.displayedName
     val requesterEmail = requester.email
@@ -135,7 +135,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     val appId = application.id
 
     if (environment == Environment.SANDBOX || requesterRole == Role.ADMINISTRATOR) {
-      val deskproTicket = DeskproTicket.createForApplicationDeletion(
+      val deskproTicket = DeskproTicket.createForPrincipalApplicationDeletion(
         requesterName,
         requesterEmail,
         requesterRole,

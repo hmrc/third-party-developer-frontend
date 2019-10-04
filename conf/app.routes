@@ -85,8 +85,8 @@ POST        /application/:id/redirect-uris/change                               
 POST        /application/:id/redirect-uris/change-confirmation                          controllers.Redirects.changeRedirectAction(id: String)
 
 GET         /applications/:id/delete                                                    controllers.DeleteApplication.deleteApplication(id: String, error: Option[String])
-GET         /applications/:id/delete-confirm                                            controllers.DeleteApplication.deleteApplicationConfirm(id: String, error: Option[String])
-POST        /applications/:id/delete                                                    controllers.DeleteApplication.deleteApplicationAction(id: String)
+GET         /applications/:id/delete-confirm                                            controllers.DeleteApplication.deletePrincipalApplicationConfirm(id: String, error: Option[String])
+POST        /applications/:id/delete                                                    controllers.DeleteApplication.deletePrincipalApplicationAction(id: String)
 
 GET         /applications/:id/subscriptions                                             controllers.Subscriptions.subscriptions(id: String)
 

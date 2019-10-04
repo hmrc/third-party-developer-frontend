@@ -679,7 +679,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(mockEq(hc)))
         .willReturn(Future.successful(Success))
 
-      await(service.requestApplicationDeletion(adminRequester, sandboxApp)) shouldBe TicketCreated
+      await(service.requestPrincipalApplicationDeletion(adminRequester, sandboxApp)) shouldBe TicketCreated
       captor.getValue.email shouldBe adminEmail
       captor.getValue.subject shouldBe subject
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(mockEq(hc))
@@ -691,7 +691,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(mockEq(hc)))
         .willReturn(Future.successful(Success))
 
-      await(service.requestApplicationDeletion(developerRequester, sandboxApp)) shouldBe TicketCreated
+      await(service.requestPrincipalApplicationDeletion(developerRequester, sandboxApp)) shouldBe TicketCreated
       captor.getValue.email shouldBe developerEmail
       captor.getValue.subject shouldBe subject
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(mockEq(hc))
@@ -703,7 +703,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(mockEq(hc)))
         .willReturn(Future.successful(Success))
 
-      await(service.requestApplicationDeletion(adminRequester, productionApp)) shouldBe TicketCreated
+      await(service.requestPrincipalApplicationDeletion(adminRequester, productionApp)) shouldBe TicketCreated
       captor.getValue.email shouldBe adminEmail
       captor.getValue.subject shouldBe subject
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(mockEq(hc))
@@ -711,7 +711,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     "not create a deskpro ticket or audit record for a Developer in a Production app" in new Setup {
 
       intercept[ForbiddenException] {
-        await(service.requestApplicationDeletion(developerRequester, productionApp))
+        await(service.requestPrincipalApplicationDeletion(developerRequester, productionApp))
       }
       verifyZeroInteractions(mockDeskproConnector)
       verifyZeroInteractions(mockAuditService)

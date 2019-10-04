@@ -29,7 +29,7 @@ import utils.CSRFTokenHelper._
 import utils.ViewHelpers.elementExistsByText
 
 
-class DeleteApplicationCompleteSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class DeletePrincipalApplicationCompleteSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
 
@@ -46,7 +46,7 @@ class DeleteApplicationCompleteSpec extends UnitSpec with OneServerPerSuite with
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
 
-      val page = views.html.deleteApplicationComplete.render(application, request, loggedInUser, applicationMessages, appConfig, "details")
+      val page = views.html.deletePrincipalApplicationComplete.render(application, request, loggedInUser, applicationMessages, appConfig, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
