@@ -28,7 +28,7 @@ class ApplicationSpec extends FunSpec with Matchers {
   val productionApplicationState: ApplicationState = ApplicationState.production(requestedBy = "other email", verificationCode = "123")
   val testingApplicationState: ApplicationState = ApplicationState.testing
 
-  describe("Application.canViewAndEditCredentials()") {
+  describe("Application.canViewCredentials()") {
     val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
       (Environment.SANDBOX, Standard(), developer, true),
       (Environment.SANDBOX, Standard(), administrator, true),
@@ -46,7 +46,28 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.PRODUCTION, Privileged(), administrator, true)
     )
 
-    runTableTests(data, productionApplicationState)({ case (application, user) => application.canViewAndEditCredentials(user) })
+    runTableTests(data, productionApplicationState)({ case (application, user) => application.canViewCredentials(user) })
+  }
+
+  describe("Application.canEditCredentials()") {
+    val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
+      (Environment.SANDBOX, Standard(), developer, true),
+      (Environment.SANDBOX, Standard(), administrator, true),
+      (Environment.PRODUCTION, Standard(), developer, false),
+      (Environment.PRODUCTION, Standard(), administrator, true),
+
+      (Environment.SANDBOX, ROPC(), developer, false),
+      (Environment.SANDBOX, ROPC(), administrator, false),
+      (Environment.PRODUCTION, ROPC(), developer, false),
+      (Environment.PRODUCTION, ROPC(), administrator, false),
+
+      (Environment.SANDBOX, Privileged(), developer, false),
+      (Environment.SANDBOX, Privileged(), administrator, false),
+      (Environment.PRODUCTION, Privileged(), developer, false),
+      (Environment.PRODUCTION, Privileged(), administrator, false)
+    )
+
+    runTableTests(data, productionApplicationState)({ case (application, user) => application.canEditCredentials(user) })
   }
 
   describe("Application.canViewServerToken()") {

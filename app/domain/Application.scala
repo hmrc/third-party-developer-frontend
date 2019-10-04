@@ -17,6 +17,10 @@
 package domain
 
 import controllers.{AddApplicationForm, EditApplicationForm, GroupedSubscriptions, _}
+import domain.AccessType.{PRIVILEGED, STANDARD}
+import domain.Environment.{PRODUCTION, SANDBOX}
+import domain.Role.ADMINISTRATOR
+import domain.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, JsError, _}
 import uk.gov.hmrc.play.json.Union
@@ -331,40 +335,52 @@ case class Application(id: String,
 
   // TODO: Can you edit details for ROPC and Priv on Sandbox? No?
   def isPermittedToMakeChangeAppDetails(role: Role): Boolean =
-    (deployedTo, role, this.access.accessType) match {
-      case (Environment.SANDBOX, _, _) => true
-      case (_, Role.ADMINISTRATOR, AccessType.STANDARD) => true
+    (deployedTo, access.accessType, role) match {
+      case (SANDBOX, _, _) => true
+      case (_, STANDARD, ADMINISTRATOR) => true
       case _ => false
     }
 
-  def canViewAndEditCredentials(developer: Developer): Boolean = {
-    (deployedTo, isAdmin(developer), state.name) match {
-      case (Environment.SANDBOX, _, _) => true
-      case (Environment.PRODUCTION, true, State.PRODUCTION) => true
+  def canViewCredentials(developer: Developer): Boolean = {
+    (deployedTo, state.name, role(developer.email)) match {
+      case (SANDBOX, _, _) => true
+      case (PRODUCTION, State.PRODUCTION, Some(ADMINISTRATOR)) => true
+      case _ => false
+    }
+  }
+
+  def canEditCredentials(developer: Developer): Boolean = {
+    (deployedTo, access.accessType, state.name, role(developer.email)) match {
+      case (_, AccessType.ROPC, _, _) => false
+      case (_, PRIVILEGED, _, _) => false
+
+      case (SANDBOX, _, _, _) => true
+      case (PRODUCTION, _, State.PRODUCTION, Some(ADMINISTRATOR)) => true
       case _ => false
     }
   }
 
   // TODO: Implicit. Should we do an implicit conversion from DeveloperSession to Developer?
   def canPerformApprovalProcess(developer: Developer): Boolean = {
-    (deployedTo, isAdmin(developer), state.name, access.accessType) match {
+    (deployedTo, access.accessType, state.name, role(developer.email)) match {
       case (Environment.SANDBOX, _, _, _) => false
-      case (Environment.PRODUCTION, true, State.TESTING, AccessType.STANDARD) => true
-      case (Environment.PRODUCTION, true, State.PENDING_GATEKEEPER_APPROVAL, AccessType.STANDARD) => true
-      case (Environment.PRODUCTION, true, State.PENDING_REQUESTER_VERIFICATION, AccessType.STANDARD) => true
+      case (PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR)) => true
+      case (PRODUCTION, STANDARD, PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR)) => true
+      case (PRODUCTION, STANDARD, PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
       case _ => false
     }
   }
 
   def canViewServerToken(developer: Developer): Boolean = {
-    (deployedTo, isAdmin(developer), state.name, access.accessType) match {
-      case (Environment.SANDBOX, _, _, AccessType.STANDARD) => true
-      case (Environment.PRODUCTION, true, State.PRODUCTION, AccessType.STANDARD) => true
+    (deployedTo, access.accessType, state.name, role(developer.email)) match {
+      case (SANDBOX, STANDARD, _, _) => true
+      case (PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
       case _ => false
     }
   }
 
   private val maximumNumberOfRedirectUris = 5
+
   def canAddRedirectUri: Boolean = access match {
     case s: Standard => s.redirectUris.lengthCompare(maximumNumberOfRedirectUris) < 0
     case _ => false
