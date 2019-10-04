@@ -350,11 +350,13 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       status(result) shouldBe FORBIDDEN
     }
 
-    "display privileged page when it is a privileged app" in new Setup {
+    "return the select client secrets to delete page when the correct password is entered for a privileged app" in new Setup {
       val privilegedAppId = "privAppId"
       val password = "aPassword"
 
       givenTheApplicationExistWithUserRole(privilegedAppId, ADMINISTRATOR, access = Privileged())
+      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
+        .willReturn(Future.successful(VerifyPasswordSuccessful))
 
       val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
 
@@ -362,20 +364,24 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe OK
       bodyOf(result) should include("This application is a privileged application.")
+      bodyOf(result) should include("Choose which client secrets to delete")
     }
 
-    "display ROPC page when it is a ROPC app" in new Setup {
+    "return the select client secrets to delete page when the correct password is entered for an ROPC app" in new Setup {
       val ROPCAppId = "ROPCAppId"
       val password = "aPassword"
 
       givenTheApplicationExistWithUserRole(ROPCAppId, ADMINISTRATOR, access = ROPC())
+      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
+        .willReturn(Future.successful(VerifyPasswordSuccessful))
 
       val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
 
       val result = await(underTest.selectClientSecretsToDelete(ROPCAppId)(requestWithFormBody))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("This application is a ROPC application.")
+      bodyOf(result) should include("This application is an ROPC application.")
+      bodyOf(result) should include("Choose which client secrets to delete")
     }
   }
 

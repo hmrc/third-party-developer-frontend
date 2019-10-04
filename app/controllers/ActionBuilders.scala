@@ -52,17 +52,14 @@ trait ActionBuilders {
     }
   }
 
-  // TODO: Rename to standardAppFilter
-  def notRopcOrPrivilegedAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+  def standardAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
       implicit val implicitRequest = request
       implicit val implicitUser = request.user
 
       val application = request.application
       application.access.accessType match {
-        // TODO: Change to return a FORBIDDEN Response? Confirm this is sensible?
-        // TODO: Then delete the privilegedOrRopcApplication view
-        case PRIVILEGED | ROPC => Some(Ok(views.html.privilegedOrRopcApplication(application)))
+        case PRIVILEGED | ROPC => Some(Forbidden(errorHandler.badRequestTemplate))
         case _ => None
       }
     }
@@ -95,7 +92,7 @@ trait ActionBuilders {
     }
   }
 
-  def adminIfProductionAppFilter = new ActionFilter[ApplicationRequest] {
+  def sandboxOrAdminIfProductionAppFilter = new ActionFilter[ApplicationRequest] {
     override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
       implicit val implicitRequest = request
 

@@ -42,11 +42,11 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
     Future.successful(Ok(views.html.details(request.role, request.application)))
   }
 
-  def changeDetails(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def changeDetails(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), request.application)))
   }
 
-  def changeDetailsAction(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def changeDetailsAction(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     val application = request.application
     val access = application.access.asInstanceOf[Standard]
 
