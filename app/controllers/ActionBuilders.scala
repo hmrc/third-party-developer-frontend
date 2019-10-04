@@ -52,6 +52,7 @@ trait ActionBuilders {
     }
   }
 
+  // TODO: Rename to standardAppFilter
   def notRopcOrPrivilegedAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
       implicit val implicitRequest = request
@@ -67,6 +68,7 @@ trait ActionBuilders {
     }
   }
 
+  // TODO: Make this a filter
   def appInStateProductionFilter = new ActionRefiner[ApplicationRequest, ApplicationRequest] {
     override protected def refine[A](request: ApplicationRequest[A]) = Future.successful {
       if (request.application.state.name == State.PRODUCTION) Right(request)
@@ -74,6 +76,7 @@ trait ActionBuilders {
     }
   }
 
+  // TODO: Make this a filter
   def appInStateTestingFilter = new ActionRefiner[ApplicationRequest, ApplicationRequest] {
     override protected def refine[A](request: ApplicationRequest[A]) = Future.successful {
       if (request.application.state.name == State.TESTING) Right(request)

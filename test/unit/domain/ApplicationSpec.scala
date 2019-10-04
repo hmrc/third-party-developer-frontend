@@ -88,7 +88,7 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.PRODUCTION, Privileged(), administrator, false)
     )
 
-    runTableTests(data, testingApplicationState)({ case (app, user) => app.canViewApprovalStatus(user) })
+    runTableTests(data, testingApplicationState)({ case (app, user) => app.canPerformApprovalProcess(user) })
   }
 
   private def createApp(environment: Environment, access: Access, defaultApplicationState: ApplicationState): Application = {

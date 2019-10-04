@@ -63,7 +63,6 @@ abstract class LoggedInController extends BaseController with AuthElement {
   }
 }
 
-// TODO - Remove role, as it can be inferred from developer and application
 case class ApplicationRequest[A](application: Application, role: Role, user: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
 
 abstract class ApplicationController()
