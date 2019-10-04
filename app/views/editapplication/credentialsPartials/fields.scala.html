@@ -53,62 +53,67 @@
     @for((secret, i) <- token.clientSecrets.zipWithIndex) {
         @maskedContent(secret, accessibleText = s"client secret ${i + 1}", secure = app.deployedTo == Environment.PRODUCTION, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
     }
-    @if(token.clientSecrets.size < 5) {
-        <div>
-        @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
-            @helper.CSRF.formField
-            <button id="submit" class="secondary-button button--small button--flush flush hard" type="submit">Add another client secret</button>
-        }
-        </div>
-    }
-    @if(token.clientSecrets.size > 1) {
-        @if(app.deployedTo == Environment.PRODUCTION) {
-            <div class="js-mask-container row" data-mask-timer="20">
-                <div>
-                    <p>
-                        <a href="#"
-                        role="button"
-                        class="js-visible js-mask-control"
-                        data-clientsecretdelete-toggle
-                        data-mask-toggle-target="js-mask-form"
-                        aria-live="polite"
-                        data-text-hide="Delete a client secret"
-                        data-text-show="Delete a client secret">
-                            <span data-toggle-text>Delete a client secret</span>
-                        </a>
-                    </p>
-                </div>
-                @helper.form(action = controllers.routes.Credentials.selectClientSecretsToDelete(app.id), if(form.errors("password").nonEmpty) {'class -> "js-mask-form js-visible"} else {'class -> "js-mask-form js-hidden"}) {
-                    @helper.CSRF.formField
-                    <div class="form-group @if(form.errors("password").nonEmpty) {form-group-error}">
-                        <label for="password" class="form-label-bold" id="password-label" aria-live="polite">
-                            Enter your Developer Hub account password
-                            @fieldError(form.errors, "password")
-                        </label>
-                        <input id="password"
-                        class="form-control @if(form.errors("password").nonEmpty) {form-control-error}"
-                        data-ajax-header="true"
-                        name="password"
-                        type="password"
-                        aria-labelledby="password-label"/>
-                        <button id="password-for-delete-client-secret"
-                        type="submit"
-                        class="button button--padded float--right">Submit</button>
-                    </div>
-                }
-            </div>
-        } else {
+
+    @if(app.canEditCredentials(developer)){
+        @if(token.clientSecrets.size < 5) {
             <div>
-            @helper.form(action = controllers.routes.Credentials.selectClientSecretsToDelete(app.id), 'class -> "form") {
+            @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
                 @helper.CSRF.formField
-                <p>
-                    <button id="delete-client-secret" class="secondary-button button--small button--flush flush hard">Delete a client secret</button>
-                </p>
+                <button id="submit" class="secondary-button button--small button--flush flush hard" type="submit">Add another client secret</button>
             }
             </div>
         }
+        @if(token.clientSecrets.size > 1) {
+            @if(app.deployedTo == Environment.PRODUCTION) {
+                <div class="js-mask-container row" data-mask-timer="20">
+                    <div>
+                        <p>
+                            <a href="#"
+                            role="button"
+                            class="js-visible js-mask-control"
+                            data-clientsecretdelete-toggle
+                            data-mask-toggle-target="js-mask-form"
+                            aria-live="polite"
+                            data-text-hide="Delete a client secret"
+                            data-text-show="Delete a client secret">
+                                <span data-toggle-text>Delete a client secret</span>
+                            </a>
+                        </p>
+                    </div>
+                    @helper.form(action = controllers.routes.Credentials.selectClientSecretsToDelete(app.id), if(form.errors("password").nonEmpty) {'class -> "js-mask-form js-visible"} else {'class -> "js-mask-form js-hidden"}) {
+                        @helper.CSRF.formField
+                        <div class="form-group @if(form.errors("password").nonEmpty) {form-group-error}">
+                            <label for="password" class="form-label-bold" id="password-label" aria-live="polite">
+                                Enter your Developer Hub account password
+                                @fieldError(form.errors, "password")
+                            </label>
+                            <input id="password"
+                            class="form-control @if(form.errors("password").nonEmpty) {form-control-error}"
+                            data-ajax-header="true"
+                            name="password"
+                            type="password"
+                            aria-labelledby="password-label"/>
+                            <button id="password-for-delete-client-secret"
+                            type="submit"
+                            class="button button--padded float--right">Submit</button>
+                        </div>
+                    }
+                </div>
+            } else {
+                <div>
+                @helper.form(action = controllers.routes.Credentials.selectClientSecretsToDelete(app.id), 'class -> "form") {
+                    @helper.CSRF.formField
+                    <p>
+                        <button id="delete-client-secret" class="secondary-button button--small button--flush flush hard">Delete a client secret</button>
+                    </p>
+                }
+                </div>
+            }
+        } else {
+            <p>To delete a client secret, you must add one first.</p>
+        }
     } else {
-        <p>To delete a client secret, you must add one first.</p>
+        <div>&nbsp;</div>
     }
 </div>
 

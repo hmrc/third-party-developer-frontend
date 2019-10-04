@@ -53,7 +53,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def addClientSecret(applicationId: String) = sandboxOrAdminIfProductionForAnyApp(applicationId) { implicit request =>
+  def addClientSecret(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
 
     def result(err: Option[String] = None): Result = Redirect(controllers.routes.Credentials.credentials(applicationId, err))
 
@@ -98,7 +98,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def selectClientSecretsToDelete(applicationId: String): Action[AnyContent] = sandboxOrAdminIfProductionForAnyApp(applicationId) { implicit request =>
+  def selectClientSecretsToDelete(applicationId: String): Action[AnyContent] = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
 
     val application = request.application
 
@@ -168,7 +168,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     SelectClientSecretsToDeleteForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  def deleteClientSecretsAction(applicationId: String): Action[AnyContent] = sandboxOrAdminIfProductionForAnyApp(applicationId) { implicit request =>
+  def deleteClientSecretsAction(applicationId: String): Action[AnyContent] = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
 
     val application = request.application
 

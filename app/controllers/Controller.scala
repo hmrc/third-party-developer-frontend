@@ -85,6 +85,8 @@ abstract class ApplicationController()
                                               (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     teamMemberOnApp(applicationId, Seq(sandboxOrAdminIfProductionAppFilter) ++: furtherActionFunctions)(fun)
 
+  // TODO - Add something in here to discriminate between view and edit creds
+
   def teamMemberOnStandardApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
                              (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     teamMemberOnApp(applicationId, standardAppFilter +: furtherActionFunctions)(fun)
