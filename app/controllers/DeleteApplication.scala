@@ -41,25 +41,25 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
     Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
-  def deleteApplicationConfirm(applicationId: String, error: Option[String] = None) = adminIfStandardProductionApp(applicationId) { implicit request =>
-    val view = views.html.deleteApplicationConfirm(request.application, DeleteApplicationForm.form.fill(DeleteApplicationForm(None)))
+  def deletePrincipalApplicationConfirm(applicationId: String, error: Option[String] = None) = adminIfStandardProductionApp(applicationId) { implicit request =>
+    val view = views.html.deletePrincipalApplicationConfirm(request.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
     Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
-  def deleteApplicationAction(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def deletePrincipalApplicationAction(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
     val application = request.application
 
-    def handleInvalidForm(formWithErrors: Form[DeleteApplicationForm]) =
-      Future(BadRequest(views.html.deleteApplicationConfirm(application, formWithErrors)))
+    def handleInvalidForm(formWithErrors: Form[DeletePrincipalApplicationForm]) =
+      Future(BadRequest(views.html.deletePrincipalApplicationConfirm(application, formWithErrors)))
 
-    def handleValidForm(validForm: DeleteApplicationForm) = {
+    def handleValidForm(validForm: DeletePrincipalApplicationForm) = {
       validForm.deleteConfirm match {
-        case Some("Yes") => applicationService.requestApplicationDeletion(request.user, application)
-          .map(_ => Ok(views.html.deleteApplicationComplete(application)))
+        case Some("Yes") => applicationService.requestPrincipalApplicationDeletion(request.user, application)
+          .map(_ => Ok(views.html.deletePrincipalApplicationComplete(application)))
         case _ => Future(Redirect(routes.Details.details(applicationId)))
       }
     }
 
-    DeleteApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    DeletePrincipalApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 }

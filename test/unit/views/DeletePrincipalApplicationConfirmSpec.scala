@@ -17,7 +17,7 @@
 package unit.views
 
 import config.ApplicationConfig
-import controllers.DeleteApplicationForm
+import controllers.DeletePrincipalApplicationForm
 import domain._
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
@@ -29,7 +29,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueContainsText}
 
-class DeleteApplicationConfirmSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class DeletePrincipalApplicationConfirmSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
 
@@ -45,7 +45,7 @@ class DeleteApplicationConfirmSpec extends UnitSpec with OneServerPerSuite with 
 
     "render with no errors" in {
 
-      val page = views.html.deleteApplicationConfirm.render(application, DeleteApplicationForm.form, request, loggedInUser, applicationMessages, appConfig, "details")
+      val page = views.html.deletePrincipalApplicationConfirm.render(application, DeletePrincipalApplicationForm.form, request, loggedInUser, applicationMessages, appConfig, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -57,9 +57,9 @@ class DeleteApplicationConfirmSpec extends UnitSpec with OneServerPerSuite with 
 
     "render with error when no radio button has been selected" in {
 
-      val formWithErrors = DeleteApplicationForm.form.withError("confirmation", "Confirmation error message")
+      val formWithErrors = DeletePrincipalApplicationForm.form.withError("confirmation", "Confirmation error message")
 
-      val page = views.html.deleteApplicationConfirm.render(application, formWithErrors, request, loggedInUser, applicationMessages, appConfig, "details")
+      val page = views.html.deletePrincipalApplicationConfirm.render(application, formWithErrors, request, loggedInUser, applicationMessages, appConfig, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

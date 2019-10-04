@@ -67,8 +67,8 @@ object DeskproTicket extends FieldTransformer {
     DeskproTicket(requestorName, requestorEmail, "Request to unsubscribe from an API", message, routes.Subscriptions.subscriptions(applicationId).url)
   }
 
-  def createForApplicationDeletion(name: String, requestedByEmail: String, role: Role, environment: Environment,
-                      applicationName: String, applicationId: String): DeskproTicket = {
+  def createForPrincipalApplicationDeletion(name: String, requestedByEmail: String, role: Role, environment: Environment,
+                                            applicationName: String, applicationId: String): DeskproTicket = {
 
     val actor = role match {
       case Role.ADMINISTRATOR => "an administrator"

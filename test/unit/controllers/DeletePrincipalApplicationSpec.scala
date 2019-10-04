@@ -37,7 +37,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 
-class DeleteApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
+class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup {
     val underTest = new DeleteApplication(
@@ -87,7 +87,7 @@ class DeleteApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
   "delete application confirm page" should {
     "return delete application confirm page" in new Setup {
 
-      val result = await(addToken(underTest.deleteApplicationConfirm(application.id, None))(loggedInRequest))
+      val result = await(addToken(underTest.deletePrincipalApplicationConfirm(application.id, None))(loggedInRequest))
 
       status(result) shouldBe OK
       val body = bodyOf(result)
@@ -103,24 +103,24 @@ class DeleteApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
-      given(underTest.applicationService.requestApplicationDeletion(mockEq(loggedInUser), mockEq(application))(any[HeaderCarrier]))
+      given(underTest.applicationService.requestPrincipalApplicationDeletion(mockEq(loggedInUser), mockEq(application))(any[HeaderCarrier]))
         .willReturn(Future.successful(TicketCreated))
 
-      val result = await(addToken(underTest.deleteApplicationAction(application.id))(requestWithFormBody))
+      val result = await(addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody))
 
       status(result) shouldBe OK
       val body = bodyOf(result)
 
       body should include("Delete application")
       body should include("Request submitted")
-      verify(underTest.applicationService).requestApplicationDeletion(mockEq(loggedInUser), mockEq(application))(any[HeaderCarrier])
+      verify(underTest.applicationService).requestPrincipalApplicationDeletion(mockEq(loggedInUser), mockEq(application))(any[HeaderCarrier])
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No"))
 
-      val result = await(addToken(underTest.deleteApplicationAction(application.id))(requestWithFormBody))
+      val result = await(addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody))
 
       status(result) shouldBe SEE_OTHER
 

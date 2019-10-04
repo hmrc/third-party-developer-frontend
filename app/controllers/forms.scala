@@ -281,14 +281,14 @@ object SupportEnquiryForm {
 }
 
 
-final case class DeleteApplicationForm(deleteConfirm: Option[String] = Some(""))
+final case class DeletePrincipalApplicationForm(deleteConfirm: Option[String] = Some(""))
 
-object DeleteApplicationForm {
+object DeletePrincipalApplicationForm {
 
-  def form: Form[DeleteApplicationForm] = Form(
+  def form: Form[DeletePrincipalApplicationForm] = Form(
     mapping(
       "deleteConfirm" -> optional(text).verifying(FormKeys.deleteApplicationConfirmNoChoiceKey, s => s.isDefined)
-    )(DeleteApplicationForm.apply)(DeleteApplicationForm.unapply)
+    )(DeletePrincipalApplicationForm.apply)(DeletePrincipalApplicationForm.unapply)
   )
 }
 

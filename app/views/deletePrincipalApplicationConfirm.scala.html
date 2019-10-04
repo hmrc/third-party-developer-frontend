@@ -19,7 +19,7 @@
 @import include._
 @import model.Crumb
 
-@(app: Application, form: Form[DeleteApplicationForm])(
+@(app: Application, form: Form[DeletePrincipalApplicationForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
@@ -38,7 +38,7 @@
     @errorSummary(form)
     <h1 class="heading-xlarge">Delete application</h1>
     @appEnvironment(app)
-    @helper.form(action = controllers.routes.DeleteApplication.deleteApplicationAction(app.id), 'class -> "form") {
+    @helper.form(action = controllers.routes.DeleteApplication.deletePrincipalApplicationAction(app.id), 'class -> "form") {
         <fieldset id="deleteConfirm" class="inline @if(form.errors("deleteConfirm").nonEmpty) {form-group-error}">
         <legend>
             <h2 class="heading-large">Are you sure you want us to delete this application?</h2>
