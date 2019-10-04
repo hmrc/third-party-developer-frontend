@@ -19,8 +19,6 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.AccessType.{PRIVILEGED, ROPC}
 import domain.{BadRequestError, DeveloperSession, Role, State}
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, ActionRefiner, Request, Result}
@@ -39,9 +37,11 @@ trait ActionBuilders {
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-  def applicationAction(applicationId: String, developerSession: DeveloperSession)(implicit ec: ExecutionContext) = new ActionRefiner[Request, ApplicationRequest] {
-    override def refine[A](request: Request[A]) = {
-      implicit val implicitRequest = request
+  def applicationAction(applicationId: String, developerSession: DeveloperSession)(
+    implicit ec: ExecutionContext): ActionRefiner[Request, ApplicationRequest] = new ActionRefiner[Request, ApplicationRequest] {
+
+    override def refine[A](request: Request[A]): Future[Either[Result, ApplicationRequest[A]]] = {
+      implicit val implicitRequest: Request[A] = request
 
       applicationService.fetchByApplicationId(applicationId)
         .map { application =>
@@ -54,8 +54,8 @@ trait ActionBuilders {
 
   def standardAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
-      implicit val implicitRequest = request
-      implicit val implicitUser = request.user
+      implicit val implicitRequest: ApplicationRequest[A] = request
+      implicit val implicitUser: DeveloperSession = request.user
 
       val application = request.application
       application.access.accessType match {
@@ -65,25 +65,31 @@ trait ActionBuilders {
     }
   }
 
-  // TODO: Make this a filter
-  def appInStateProductionFilter = new ActionRefiner[ApplicationRequest, ApplicationRequest] {
-    override protected def refine[A](request: ApplicationRequest[A]) = Future.successful {
-      if (request.application.state.name == State.PRODUCTION) Right(request)
-      else Left(BadRequest(Json.toJson(BadRequestError)))
+  def appInStateProductionFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
+      implicit val implicitRequest: ApplicationRequest[A] = request
+
+      request.application.state.name match {
+        case State.PRODUCTION => None
+        case _ => Some(BadRequest(Json.toJson(BadRequestError)))
+      }
     }
   }
 
-  // TODO: Make this a filter
-  def appInStateTestingFilter = new ActionRefiner[ApplicationRequest, ApplicationRequest] {
-    override protected def refine[A](request: ApplicationRequest[A]) = Future.successful {
-      if (request.application.state.name == State.TESTING) Right(request)
-      else Left(BadRequest(Json.toJson(BadRequestError)))
+  def appInStateTestingFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
+      implicit val implicitRequest: ApplicationRequest[A] = request
+
+      request.application.state.name match {
+        case State.TESTING => None
+        case _ => Some(BadRequest(Json.toJson(BadRequestError)))
+      }
     }
   }
 
-  def adminOnAppFilter = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
-      implicit val implicitRequest = request
+  def adminOnAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
+      implicit val implicitRequest: ApplicationRequest[A] = request
 
       request.role match {
         case Role.ADMINISTRATOR => None
@@ -92,9 +98,9 @@ trait ActionBuilders {
     }
   }
 
-  def sandboxOrAdminIfProductionAppFilter = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
-      implicit val implicitRequest = request
+  def sandboxOrAdminIfProductionAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
+      implicit val implicitRequest: ApplicationRequest[A] = request
 
       if (request.application.isPermittedToMakeChanges(request.role)) None
       else Some(Forbidden(errorHandler.badRequestTemplate))
