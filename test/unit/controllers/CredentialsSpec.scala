@@ -350,7 +350,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       status(result) shouldBe FORBIDDEN
     }
 
-    "return the select client secrets to delete page when the correct password is entered for a privileged app" in new Setup {
+    "Forbidden from deleting client secrets for privileged apps" in new Setup {
       val privilegedAppId = "privAppId"
       val password = "aPassword"
 
@@ -362,12 +362,10 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       val result = await(underTest.selectClientSecretsToDelete(privilegedAppId)(requestWithFormBody))
 
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is a privileged application.")
-      bodyOf(result) should include("Choose which client secrets to delete")
+      status(result) shouldBe FORBIDDEN
     }
 
-    "return the select client secrets to delete page when the correct password is entered for an ROPC app" in new Setup {
+    "Forbidden from deleting client secrets for ROPC apps" in new Setup {
       val ROPCAppId = "ROPCAppId"
       val password = "aPassword"
 
@@ -379,9 +377,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       val result = await(underTest.selectClientSecretsToDelete(ROPCAppId)(requestWithFormBody))
 
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is an ROPC application.")
-      bodyOf(result) should include("Choose which client secrets to delete")
+      status(result) shouldBe FORBIDDEN
     }
   }
 

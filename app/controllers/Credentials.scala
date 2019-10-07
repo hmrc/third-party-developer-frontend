@@ -141,7 +141,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   }
 
   def selectClientSecretsToDeleteAction(applicationId: String, error: Option[String] = None)
-    = sandboxOrAdminIfProductionForAnyApp(applicationId) { implicit request =>
+    = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
 
     val application = request.application
 
