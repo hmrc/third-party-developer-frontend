@@ -15,9 +15,14 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment}
+@import domain.{Application, Environment,AccessType}
 
 @(app: Application)(implicit appConfig: ApplicationConfig)
+
+@if(app.access.accessType != AccessType.STANDARD) {
+    <p>This application is @applicationType() application.</p>
+}
+
 <div class="grid-row">
     <div class="column-one-quarter"><span class="bold">Application:</span></div>
     <div class="column-three-quarters" data-app-name>@app.name</div>
@@ -30,3 +35,8 @@
 
 
 <br>
+
+@applicationType() = @{app.access.accessType match {
+    case AccessType.PRIVILEGED => "a privileged"
+    case _ => "an ROPC"
+}}

@@ -41,12 +41,12 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
     Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
-  def deletePrincipalApplicationConfirm(applicationId: String, error: Option[String] = None) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def deletePrincipalApplicationConfirm(applicationId: String, error: Option[String] = None) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     val view = views.html.deletePrincipalApplicationConfirm(request.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
     Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
-  def deletePrincipalApplicationAction(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def deletePrincipalApplicationAction(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     val application = request.application
 
     def handleInvalidForm(formWithErrors: Form[DeletePrincipalApplicationForm]) =

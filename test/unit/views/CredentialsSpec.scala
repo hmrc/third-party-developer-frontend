@@ -63,11 +63,11 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
       DateTime.now(),
       Environment.PRODUCTION,
       Some("Test Application"),
-      Set.empty,
-      Standard(),
-      false,
-      ApplicationState.testing,
-      None
+      collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR)),
+      access = Standard(),
+      trusted = false,
+      state = ApplicationState.testing,
+      checkInformation = None
     )
 
     val sandboxApplication = application.copy(deployedTo = Environment.SANDBOX)
@@ -78,7 +78,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
 
     "render" in new Setup {
 
-      val page = credentials.render(Role.ADMINISTRATOR, application, emptyTokens, form, request, developer, applicationMessages, appConfig, "credentials")
+      val page = credentials.render(application, emptyTokens, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include("text/html")
 
@@ -87,11 +87,45 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
       elementExistsByText(document, "h1", "Manage credentials") shouldBe true
     }
 
+    "show add client secret button for a standard app" in new Setup {
+
+      val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
+      val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"))
+      val page = credentials.render(productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
+
+      page.contentType should include ("text/html")
+
+      val document = Jsoup.parse(page.body)
+      elementExistsByText(document, "button", "Add another client secret") shouldBe true
+    }
+
+    "show add client secret button for an ROPC app" in new Setup {
+      val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
+      val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"), access = ROPC())
+      val page = credentials.render(productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
+
+      page.contentType should include ("text/html")
+
+      val document = Jsoup.parse(page.body)
+      elementExistsByText(document, "button", "Add another client secret") shouldBe false
+    }
+
+    "show add client secret button for a Privileged app" in new Setup {
+      val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
+      val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"), access = Privileged())
+      val page = credentials.render(productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
+
+      page.contentType should include ("text/html")
+
+      val document = Jsoup.parse(page.body)
+      elementExistsByText(document, "button", "Add another client secret") shouldBe false
+    }
+
     "show delete client secret button in production app if it has more than one client secret" in new Setup {
 
       val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1, clientSecret2), ""))
       val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"))
-      val page = credentials.render(Role.ADMINISTRATOR, productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
+      val page = credentials.render(productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include ("text/html")
 
@@ -104,7 +138,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
 
       val tokensWithOneClientSecret = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
       val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"))
-      val page = credentials.render(Role.ADMINISTRATOR, productionApp, tokensWithOneClientSecret, form, request, developer, applicationMessages, appConfig, "credentials")
+      val page = credentials.render(productionApp, tokensWithOneClientSecret, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include("text/html")
 
@@ -117,7 +151,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
 
       val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1, clientSecret2), ""))
 
-      val page = credentials.render(Role.ADMINISTRATOR, sandboxApplication, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
+      val page = credentials.render(sandboxApplication, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include ("text/html")
 
@@ -130,7 +164,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
 
       val tokensWithOneClientSecret = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
 
-      val page = credentials.render(Role.ADMINISTRATOR, sandboxApplication, tokensWithOneClientSecret, form, request, developer, applicationMessages, appConfig, "credentials")
+      val page = credentials.render(sandboxApplication, tokensWithOneClientSecret, form, request, developer, applicationMessages, appConfig, "credentials")
 
       page.contentType should include("text/html")
 
