@@ -45,7 +45,7 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with Mockito
 
 
   "delete application page" should {
-    "show content and link to delete application for appropriate role/environment combinations" in {
+    "show content and link to delete application for Administrator on Production" in {
 
       def verifyRequestDeletionContent(role: Role, app: Application)(implicit playApp: play.api.Application) {
 
@@ -63,8 +63,28 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with Mockito
       }
 
       verifyRequestDeletionContent(ADMINISTRATOR, prodApp)
+//      verifyRequestDeletionContent(ADMINISTRATOR, sandboxApp)
+//      verifyRequestDeletionContent(DEVELOPER, sandboxApp)
+    }
+
+    "show content and link to delete application for Administrator on Sandbox" in {
+
+      def verifyRequestDeletionContent(role: Role, app: Application)(implicit playApp: play.api.Application) {
+
+        val request = FakeRequest().withCSRFToken
+
+        val page = views.html.deleteApplication.render(app, role, request, loggedInUser, applicationMessages, appConfig, "details")
+
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+
+        elementExistsByText(document, "h1", "Delete application") shouldBe true
+        elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe true
+      }
+
       verifyRequestDeletionContent(ADMINISTRATOR, sandboxApp)
-      verifyRequestDeletionContent(DEVELOPER, sandboxApp)
+
     }
 
     "show no link with explanation to developer in a prod app" in {

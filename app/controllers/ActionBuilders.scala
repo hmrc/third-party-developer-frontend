@@ -18,7 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import domain.AccessType.{PRIVILEGED, ROPC}
-import domain.{BadRequestError, DeveloperSession, Role, State}
+import domain.{BadRequestError, DeveloperSession, Environment, Role, State}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.libs.json.Json
@@ -95,6 +95,24 @@ trait ActionBuilders {
       implicit val implicitRequest = request
 
       if (request.application.isPermittedToMakeChanges(request.role)) None
+      else Some(Forbidden(errorHandler.badRequestTemplate))
+    }
+  }
+
+  def adminFilter = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
+      implicit val implicitRequest = request
+
+      if (request.role == Role.ADMINISTRATOR) None
+      else Some(Forbidden(errorHandler.badRequestTemplate))
+    }
+  }
+
+  def notProductionAppFilter = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
+      implicit val implicitRequest = request
+
+      if (request.application.deployedTo == Environment.SANDBOX) None
       else Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }

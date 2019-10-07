@@ -25,6 +25,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
+import play.api.http.Status.NO_CONTENT
 import play.api.libs.json.Json
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -172,6 +173,18 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   private def recovery: PartialFunction[Throwable, Nothing] = {
     case _: NotFoundException => throw new ApplicationNotFound
   }
+
+  def deleteApplication(applicationId: String, deleteApplicationRequest: DeleteApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationDeleteResult] = {
+    http.POST[DeleteApplicationRequest, HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete", deleteApplicationRequest, Seq(CONTENT_TYPE -> JSON))
+      .map(response => response.status match {
+        case NO_CONTENT => ApplicationDeleteSuccessResult
+        case _ => ApplicationDeleteFailureResult
+      })
+      .recover {
+        case _ => ApplicationDeleteFailureResult
+      }
+  }
+
 }
 
 @Singleton

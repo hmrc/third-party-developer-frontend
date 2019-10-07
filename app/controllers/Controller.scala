@@ -78,6 +78,10 @@ abstract class ApplicationController()
                                   (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     teamMemberOnApp(applicationId, Seq(notRopcOrPrivilegedAppFilter, adminIfProductionAppFilter) ++: furtherActionFunctions)(fun)
 
+  def adminOnStandardSandboxApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
+                                  (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    teamMemberOnApp(applicationId, Seq(notRopcOrPrivilegedAppFilter, notProductionAppFilter, adminFilter) ++: furtherActionFunctions)(fun)
+
   def teamMemberOnStandardApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
                              (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     teamMemberOnApp(applicationId, notRopcOrPrivilegedAppFilter +: furtherActionFunctions)(fun)

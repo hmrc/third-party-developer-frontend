@@ -20,24 +20,33 @@
 @import model.Crumb
 
 @(app: Application, roleOfLoggedIn: Role)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
+implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
 
 @devMain(
-    title = "Delete application",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Delete application"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+title = "Delete application",
+userFullName = loggedIn.loggedInName,
+breadcrumbs = Seq(
+Crumb("Delete application"),
+Crumb.application(app),
+Crumb.viewAllApplications,
+Crumb.home
+),
+leftNav = Some(leftHandNav(Option(app), Option(navSection)))
 ) {
 
-    <h1 class="heading-xlarge">Delete application</h1>
-    @appEnvironment(app)
+<h1 class="heading-xlarge">Delete application</h1>
+@appEnvironment(app)
 
-    @if(app.deployedTo == Environment.SANDBOX || roleOfLoggedIn == Role.ADMINISTRATOR) {
+@if(roleOfLoggedIn == Role.ADMINISTRATOR) {
+    @if(app.deployedTo == Environment.SANDBOX) {
+        <p>
+            Before deleting this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
+            team members</a>.
+        </p>
+
+        <a class="button" href="@controllers.routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
+            Continue</a>
+    } else {
         <p>
             Before requesting to delete this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
             team members</a>.
@@ -48,6 +57,8 @@
 
         <a class="button" href="@controllers.routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
             Request deletion</a>
+    }
+
     } else {
         <p data-admin-required-msg>
             You need admin rights to delete an application

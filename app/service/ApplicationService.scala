@@ -19,10 +19,13 @@ package service
 import config.ApplicationConfig
 import connectors._
 import domain.APIStatus._
+import domain.AccessType.{PRIVILEGED, ROPC}
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import domain.Environment.PRODUCTION
 import domain._
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import javax.inject.{Inject, Singleton}
+import play.api.mvc.Results.Ok
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
@@ -35,6 +38,8 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
                                    deskproConnector: DeskproConnector,
                                    applicationConfig: ApplicationConfig,
                                    developerConnector: ThirdPartyDeveloperConnector,
+                                   sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
+                                   productionApplicationConnector: ThirdPartyApplicationProductionConnector,
                                    auditService: AuditService)(implicit val ec: ExecutionContext) {
 
   def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier) =
@@ -157,6 +162,22 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     }
   }
 
+  def deleteSubordinateApplication(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[ApplicationDeleteResult] = {
+
+    val requesterEmail = requester.email
+    val environment = application.deployedTo
+    val requesterRole = roleForApplication(application, requesterEmail)
+
+
+    if (environment == Environment.SANDBOX && requesterRole == Role.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD ) {
+
+      applicationConnectorFor(application).deleteApplication(requesterEmail, DeleteApplicationRequest(requester))
+
+    } else {
+      Future.failed(new ForbiddenException("Developer cannot request to delete a sandbox application"))
+    }
+  }
+
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationSuccessful] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
   }
@@ -260,4 +281,12 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
       "improvementSuggestions" -> improvementSuggestions,
       "timestamp" -> DateTimeUtils.now.toString))
   }
+
+  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector =
+    if (application.deployedTo == "PRODUCTION") productionApplicationConnector else sandboxApplicationConnector
+
+  def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
+
+    if (environment == Some(PRODUCTION)) productionApplicationConnector else sandboxApplicationConnector
+
 }
