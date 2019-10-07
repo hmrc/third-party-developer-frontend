@@ -23,10 +23,12 @@ import domain.Environment.SANDBOX
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import org.joda.time.DateTimeZone
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.BDDMockito
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.Json
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -76,15 +78,17 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
     given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest)(sessionId).withSession(sessionParams: _*)
+    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest)(sessionId).withSession(sessionParams: _*)
 
     def givenTheApplicationExistWithUserRole(appId: String,
                                              userRole: Role,
                                              state: ApplicationState = ApplicationState.testing,
                                              access: Access = Standard(),
-                                             environment: Environment = Environment.PRODUCTION) = {
+                                             environment: Environment = Environment.PRODUCTION)
+                                                : BDDMockito.BDDMyOngoingStubbing[Future[Seq[APISubscriptionStatus]]] = {
+
       val application = Application(appId, clientId, "app", DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), state = state, access = access)
 
@@ -93,6 +97,18 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty)
     }
   }
+
+  "The credentials page" should {
+    "be displayed for an app" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
+
+      val result: Result = await(underTest.credentials(appId)(loggedInRequest))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Manage credentials")
+    }
+  }
+
 
   "addClientSecret" should {
     val appId = "1234"
@@ -104,7 +120,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
       given(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier])).willReturn(updatedTokens)
 
-      val result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials")
@@ -117,7 +133,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
-      val result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials?error=client.secret.limit.exceeded")
@@ -129,7 +145,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
-      val result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials?error=client.secret.limit.exceeded")
@@ -142,7 +158,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
         .thenReturn(failed(new ApplicationNotFound))
 
-      val result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe NOT_FOUND
     }
@@ -151,7 +167,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe FORBIDDEN
       verify(underTest.applicationService, never()).addClientSecret(any[String])(any[HeaderCarrier])
@@ -161,7 +177,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
 
-      val result = await(underTest.addClientSecret(appId)(loggedOutRequest))
+      val result: Result = await(underTest.addClientSecret(appId)(loggedOutRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -177,7 +193,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(VerifyPasswordSuccessful)
 
-      val result = await(underTest.getProductionClientSecret(application.id, 1)(loggedInRequest.withHeaders("password" -> password)))
+      val result: Result = await(underTest.getProductionClientSecret(application.id, 1)(loggedInRequest.withHeaders("password" -> password)))
 
       status(result) shouldBe OK
       jsonBodyOf(result) shouldBe Json.toJson(ClientSecretResponse(tokens.production.clientSecrets(1).secret))
@@ -185,7 +201,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
     "return password required when the password is not set" in new Setup {
 
-      val result = await(underTest.getProductionClientSecret(application.id, 1)(loggedInRequest.withHeaders("password" -> "  ")))
+      val result: Result = await(underTest.getProductionClientSecret(application.id, 1)(loggedInRequest.withHeaders("password" -> "  ")))
 
       status(result) shouldBe BAD_REQUEST
       jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.PASSWORD_REQUIRED, "Password is required"))
@@ -197,7 +213,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, invalidPassword)))(any[HeaderCarrier]))
         .willReturn(failed(new InvalidCredentials))
 
-      val result = await(underTest.getProductionClientSecret(application.id, 0)(loggedInRequest.withHeaders("password" -> invalidPassword)))
+      val result: Result = await(underTest.getProductionClientSecret(application.id, 0)(loggedInRequest.withHeaders("password" -> invalidPassword)))
 
       status(result) shouldBe UNAUTHORIZED
       jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.INVALID_PASSWORD, "Invalid password"))
@@ -209,7 +225,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, invalidPassword)))(any[HeaderCarrier]))
         .willReturn(failed(new LockedAccount))
 
-      val result = await(underTest.getProductionClientSecret(application.id, 0)(loggedInRequest.withHeaders("password" -> invalidPassword)))
+      val result: Result = await(underTest.getProductionClientSecret(application.id, 0)(loggedInRequest.withHeaders("password" -> invalidPassword)))
 
       status(result) shouldBe LOCKED
       jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.LOCKED_ACCOUNT, "Locked Account"))
@@ -217,13 +233,13 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
     "return Forbidden when the user is not an admin" in new Setup {
       val password = "aPassword"
-      val applicationWithoutAdminRights = application.copy(collaborators = Set(Collaborator(loggedInUser.email, Role.DEVELOPER)))
+      val applicationWithoutAdminRights: Application = application.copy(collaborators = Set(Collaborator(loggedInUser.email, Role.DEVELOPER)))
 
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(VerifyPasswordSuccessful)
       given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(applicationWithoutAdminRights)
 
-      val result = await(underTest.getProductionClientSecret(application.id, 0)(loggedInRequest.withHeaders("password" -> password)))
+      val result: Result = await(underTest.getProductionClientSecret(application.id, 0)(loggedInRequest.withHeaders("password" -> password)))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -234,7 +250,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(VerifyPasswordSuccessful)
 
-      val result = await(underTest.getProductionClientSecret(application.id, 2)(loggedInRequest.withHeaders("password" -> password)))
+      val result: Result = await(underTest.getProductionClientSecret(application.id, 2)(loggedInRequest.withHeaders("password" -> password)))
 
       status(result) shouldBe BAD_REQUEST
       jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.BAD_REQUEST, "Bad Request"))
@@ -242,14 +258,14 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
     "return BadRequest when the application is not in Production state" in new Setup {
       val password = "aPassword"
-      val testingApplication = application.copy(state = ApplicationState.testing)
+      val testingApplication: Application = application.copy(state = ApplicationState.testing)
 
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(VerifyPasswordSuccessful)
       given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(testingApplication)
 
 
-      val result = await(underTest.getProductionClientSecret(testingApplication.id, 0)(loggedInRequest.withHeaders("password" -> password)))
+      val result: Result = await(underTest.getProductionClientSecret(testingApplication.id, 0)(loggedInRequest.withHeaders("password" -> password)))
 
       status(result) shouldBe BAD_REQUEST
       jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.BAD_REQUEST, "Bad Request"))
@@ -264,9 +280,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(Future.successful(VerifyPasswordSuccessful))
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
 
-      val result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Choose which client secrets to delete")
@@ -276,7 +292,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
     "return the select client secrets to delete page for an admin on a sandbox app without password" in new Setup {
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = SANDBOX)
-      val result = await(underTest.selectClientSecretsToDelete(appId)(loggedInRequest.withCSRFToken))
+      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Choose which client secrets to delete")
@@ -287,7 +303,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return the select client secrets to delete page for a developer on a sandbox app without password" in new Setup {
       givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = SANDBOX)
 
-      val result = await(underTest.selectClientSecretsToDelete(appId)(loggedInRequest.withCSRFToken))
+      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Choose which client secrets to delete")
@@ -301,9 +317,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, incorrectPassword)))(any[HeaderCarrier]))
         .willReturn(Future.failed(new InvalidCredentials))
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> incorrectPassword)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> incorrectPassword)
 
-      val result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
       bodyOf(result) should include("Invalid password")
@@ -313,9 +329,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "display the appropriate error message when nothing is entered" in new Setup {
       val emptyPassword = ""
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> emptyPassword)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> emptyPassword)
 
-      val result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
       bodyOf(result) should include("Provide your password")
@@ -327,9 +343,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, incorrectPassword)))(any[HeaderCarrier]))
         .willReturn(Future.failed(new LockedAccount))
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> incorrectPassword)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> incorrectPassword)
 
-      val result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/locked")
@@ -343,9 +359,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(Future.successful(VerifyPasswordSuccessful))
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
 
-      val result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -358,9 +374,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(Future.successful(VerifyPasswordSuccessful))
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
 
-      val result = await(underTest.selectClientSecretsToDelete(privilegedAppId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDelete(privilegedAppId)(requestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -373,9 +389,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(Future.successful(VerifyPasswordSuccessful))
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
 
-      val result = await(underTest.selectClientSecretsToDelete(ROPCAppId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDelete(ROPCAppId)(requestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -384,9 +400,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   "select client secrets to delete action" should {
     "return the confirmation page when an appropriate amount of client secrets selected" in new Setup {
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("client-secret[]" -> "secret")
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("client-secret[]" -> "secret")
 
-      val result = await(underTest.selectClientSecretsToDeleteAction(appId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDeleteAction(appId)(requestWithFormBody))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Are you sure you want us to delete these client secrets?")
@@ -394,18 +410,19 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "display error when no client secrets selected" in new Setup {
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody()
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody()
 
-      val result = await(underTest.selectClientSecretsToDeleteAction(appId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDeleteAction(appId)(requestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
       bodyOf(result) should include("Choose one or more client secrets")
     }
 
     "display error when all client secrets selected" in new Setup {
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("client-secret[]" -> "secret", "client-secret[]" -> "secret2")
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] =
+        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("client-secret[]" -> "secret", "client-secret[]" -> "secret2")
 
-      val result = await(underTest.selectClientSecretsToDeleteAction(appId)(requestWithFormBody))
+      val result: Result = await(underTest.selectClientSecretsToDeleteAction(appId)(requestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
       bodyOf(result) should include("You must keep at least one client secret")
@@ -417,12 +434,13 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return the complete page when Yes is selected" in new Setup {
       val secretsToDelete = "secret"
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("deleteConfirm" -> "Yes", "clientSecretsToDelete" -> secretsToDelete)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] =
+        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("deleteConfirm" -> "Yes", "clientSecretsToDelete" -> secretsToDelete)
 
       given(underTest.applicationService.deleteClientSecrets(mockEq(appId), mockEq(Seq(secretsToDelete)))(any[HeaderCarrier]))
         .willReturn(successful(ApplicationUpdateSuccessful))
 
-      val result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
+      val result: Result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Client secrets deleted")
@@ -432,9 +450,10 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "redirect to the credentials page when No is selected" in new Setup {
       val secretsToDelete = "secret"
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("deleteConfirm" -> "No", "clientSecretsToDelete" -> secretsToDelete)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] =
+        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("deleteConfirm" -> "No", "clientSecretsToDelete" -> secretsToDelete)
 
-      val result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
+      val result: Result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials")
@@ -444,9 +463,10 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "display error when neither Yes or No are selected" in new Setup {
       val secretsToDelete = "secret"
 
-      val requestWithFormBody = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("clientSecretsToDelete" -> secretsToDelete)
+      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] =
+        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("clientSecretsToDelete" -> secretsToDelete)
 
-      val result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
+      val result: Result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
       bodyOf(result) should include("Tell us if you want us to delete your client secrets")

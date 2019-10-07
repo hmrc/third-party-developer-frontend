@@ -44,6 +44,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
                            (implicit ec: ExecutionContext)
   extends ApplicationController {
 
+
   def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
     applicationService.fetchCredentials(applicationId).map { tokens =>
       val view = views.html.credentials(request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))

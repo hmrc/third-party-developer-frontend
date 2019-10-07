@@ -360,7 +360,6 @@ case class Application(id: String,
     }
   }
 
-  // TODO: Implicit. Should we do an implicit conversion from DeveloperSession to Developer?
   def canPerformApprovalProcess(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
       case (Environment.SANDBOX, _, _, _) => false
