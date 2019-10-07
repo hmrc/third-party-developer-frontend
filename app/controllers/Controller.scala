@@ -94,8 +94,7 @@ abstract class ApplicationController()
 
   def adminOnTestingApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
                        (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    val filters: Seq[ActionRefiner[ApplicationRequest, ApplicationRequest]] = Seq(adminOnAppFilter, appInStateTestingFilter)
-    teamMemberOnApp(applicationId, filters ++: furtherActionFunctions)(fun)
+    teamMemberOnApp(applicationId, Seq(adminOnAppFilter, appInStateTestingFilter) ++: furtherActionFunctions)(fun)
   }
 
   def teamMemberOnApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)

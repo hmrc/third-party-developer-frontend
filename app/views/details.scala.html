@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.urls.Link
 @import org.joda.time.format.DateTimeFormat
 
-@(role: Role, app: Application)(
+@(app: Application)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 
 @devMain(
@@ -41,7 +41,7 @@
 
     @appEnvironment(app)
 
-    @if(app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED && app.isPermittedToMakeChanges(role)) {
+    @if(app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED && app.isPermittedToEditAppDetails(loggedIn.developer)) {
         <div id="termsOfUseWarning" class="notice">
             <i class="icon icon-important"><span class="visually-hidden">Warning</span></i>
             <strong class="bold-small">You must agree to the terms of use on this application.</strong>
@@ -58,7 +58,7 @@
             <tr>
                 <th>Application details</th>
                 <td class="numeric">
-                    @if(app.isPermittedToMakeChangeAppDetails(role)) {
+                    @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
                         <a id="change" href="@controllers.routes.Details.changeDetails(app.id)">Change <span class="visually-hidden">application details</span></a>
                     }
                 </td>
@@ -114,7 +114,7 @@
                         }
                     </td>
                     <td class="numeric">
-                      @if(app.isPermittedToMakeChanges(role)) {
+                      @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
                           @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
                               <a id="termsOfUseReadLink" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a>
                           } else {

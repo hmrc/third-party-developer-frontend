@@ -39,10 +39,11 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
   extends ApplicationController {
 
   def details(applicationId: String) = teamMemberOnApp(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.details(request.role, request.application)))
+    Future.successful(Ok(views.html.details(request.application)))
   }
 
   def changeDetails(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
+    println("*** changeDetails")
     Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), request.application)))
   }
 

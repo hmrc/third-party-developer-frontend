@@ -327,17 +327,13 @@ case class Application(id: String,
     case _ => None
   }
 
-  def isPermittedToMakeChanges(role: Role) = (deployedTo, role) match {
-    case (Environment.SANDBOX, _) => true
-    case (_, Role.ADMINISTRATOR) => true
-    case _ => false
-  }
+  def isPermittedToEditAppDetails(developer: Developer): Boolean =
+    (deployedTo, access.accessType, role(developer.email)) match {
+      case (_,AccessType.ROPC, _) => false
+      case (_,PRIVILEGED, _) => false
 
-  // TODO: Can you edit details for ROPC and Priv on Sandbox? No?
-  def isPermittedToMakeChangeAppDetails(role: Role): Boolean =
-    (deployedTo, access.accessType, role) match {
       case (SANDBOX, _, _) => true
-      case (_, STANDARD, ADMINISTRATOR) => true
+      case (_, STANDARD, Some(ADMINISTRATOR)) => true
       case _ => false
     }
 
