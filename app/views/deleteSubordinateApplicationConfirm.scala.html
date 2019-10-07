@@ -36,7 +36,14 @@
 
     <h1 class="heading-xlarge">Are you sure you want us to delete your application?</h1>
     @appEnvironment(app)
-            <a class="button" href="@routes.DeleteApplication.deleteSubordinateApplicationAction(app.id)">Continue</>
-            <a id="cancel" href="@routes.Details.details(app.id)" class="secondary-button">Cancel</a>
+    @helper.form(action = controllers.routes.DeleteApplication.deleteSubordinateApplicationAction(app.id), 'class -> "form") {
+
+    <p>This will be deleted immediately. We cannot restore applications once they have been deleted.</p>
+    <div class="form-group">
+        @helper.CSRF.formField
+        <button class="button" id="submit" type="submit" href="@routes.DeleteApplication.deleteSubordinateApplicationAction(app.id)">Continue</></button>
+       <a id="cancel" href="@routes.Details.details(app.id)" class="secondary-button">Cancel</a>
+    </div>
     }
+}
 

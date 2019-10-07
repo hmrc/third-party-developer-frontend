@@ -175,7 +175,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def deleteApplication(applicationId: String, deleteApplicationRequest: DeleteApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationDeleteResult] = {
-    http.POST[DeleteApplicationRequest, HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete", deleteApplicationRequest, Seq(CONTENT_TYPE -> JSON))
+    http.POST[DeleteApplicationRequest, HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete-subordinate", deleteApplicationRequest, Seq(CONTENT_TYPE -> JSON))
       .map(response => response.status match {
         case NO_CONTENT => ApplicationDeleteSuccessResult
         case _ => ApplicationDeleteFailureResult

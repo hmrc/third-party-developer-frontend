@@ -63,8 +63,6 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with Mockito
       }
 
       verifyRequestDeletionContent(ADMINISTRATOR, prodApp)
-//      verifyRequestDeletionContent(ADMINISTRATOR, sandboxApp)
-//      verifyRequestDeletionContent(DEVELOPER, sandboxApp)
     }
 
     "show content and link to delete application for Administrator on Sandbox" in {
@@ -92,6 +90,21 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with Mockito
       val request = FakeRequest().withCSRFToken
 
       val page = views.html.deleteApplication.render(prodApp, DEVELOPER, request, loggedInUser, applicationMessages, appConfig, "details")
+
+      page.contentType should include("text/html")
+
+      val document = Jsoup.parse(page.body)
+
+      elementExistsByText(document, "h1", "Delete application") shouldBe true
+      elementExistsByText(document, "p", "You need admin rights to delete an application") shouldBe true
+      elementIdentifiedByIdContainsText(document, "submit", "Request deletion") shouldBe false
+    }
+
+    "show no link with explanation to developer in a sandbox app" in {
+
+      val request = FakeRequest().withCSRFToken
+
+      val page = views.html.deleteApplication.render(sandboxApp, DEVELOPER, request, loggedInUser, applicationMessages, appConfig, "details")
 
       page.contentType should include("text/html")
 
