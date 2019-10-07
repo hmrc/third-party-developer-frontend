@@ -89,8 +89,8 @@
                 </td>
                 <td data-app-environment>@app.environment</td>
                 <td data-app-user-role>
-                    @if(app.role == Role.ADMINISTRATOR) {Admin}
-                    @if(app.role == Role.DEVELOPER) {Developer}
+                    @if(app.role.isAdministrator) {Admin}
+                    @if(app.role.isDeveloper) {Developer}
                 </td>
                 @if(includeTermsOfUseColumn) {
                 <td id="terms-of-use-@{app.id}" data-app-terms-of-use>@(app.termsOfUseStatus, app.role, app.state) match {

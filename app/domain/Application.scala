@@ -164,7 +164,7 @@ object UpdateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[UpdateApplicationRequest]
 
   def from(form: EditApplicationForm, application: Application) = {
-    val name = if (application.state.name == State.TESTING || application.deployedTo == Environment.SANDBOX) {
+    val name = if (application.state.name == State.TESTING || application.deployedTo.isSandbox) {
       form.applicationName.trim
     } else {
       application.name
@@ -308,7 +308,7 @@ case class Application(id: String,
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
   def termsOfUseStatus: TermsOfUseStatus = {
-    if (deployedTo == Environment.SANDBOX || access.accessType != AccessType.STANDARD) {
+    if (deployedTo.isSandbox || access.accessType != AccessType.STANDARD) {
       TermsOfUseStatus.NOT_APPLICABLE
     } else if (termsOfUseAgreements.isEmpty) {
       TermsOfUseStatus.AGREEMENT_REQUIRED
@@ -386,7 +386,7 @@ case class Application(id: String,
     case _ => false
   }
 
-  def hasLockedSubscriptions = deployedTo == Environment.PRODUCTION && state.name != State.TESTING
+  def hasLockedSubscriptions = deployedTo.isProduction && state.name != State.TESTING
 }
 
 object Application {

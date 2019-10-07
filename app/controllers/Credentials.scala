@@ -137,7 +137,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
 
     def handleInvalidForm(form: Form[VerifyPasswordForm]): Future[Result] = showCredentials(form)
 
-    if (application.deployedTo == Environment.SANDBOX) showClientSecretsToDelete
+    if (application.deployedTo.isSandbox) showClientSecretsToDelete
     else VerifyPasswordForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 

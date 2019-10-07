@@ -24,7 +24,7 @@
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
-    application.deployedTo == Environment.PRODUCTION && (
+    application.deployedTo.isProduction && (
         application.state.name == State.PENDING_GATEKEEPER_APPROVAL ||
         application.state.name == State.PENDING_REQUESTER_VERIFICATION ||
         application.state.name == State.PRODUCTION)
@@ -55,11 +55,11 @@
 
             <p>Learn more about our APIs in @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation")).toHtml.</p>
 
-            @if(role == Role.ADMINISTRATOR && isPendingOrActiveProductionApplication(app)) {
+            @if(role.isAdministrator && isPendingOrActiveProductionApplication(app)) {
                 <p class="panel panel-border-wide">For security reasons we must review any API subscription changes. This takes up to 2 working days.</p>
             }
 
-            @if(role == Role.DEVELOPER && isPendingOrActiveProductionApplication(app)) {
+            @if(role.isDeveloper && isPendingOrActiveProductionApplication(app)) {
                 <p class="panel panel-border-wide">You need admin rights to make API subscription changes.</p>
             }
 

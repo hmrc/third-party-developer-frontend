@@ -46,7 +46,7 @@
     @helper.form(action = controllers.routes.Details.changeDetailsAction(app.id), 'class -> "form") {
         @helper.CSRF.formField
         <input type="hidden" id="applicationId" name="applicationId" value="@form.data("applicationId")"/>
-        @if(app.state.name == State.TESTING || app.deployedTo == Environment.SANDBOX) {
+        @if(app.state.name == State.TESTING || app.deployedTo.isSandbox) {
             <div class="form-group @if(form.errors("applicationName").nonEmpty) {form-group-error}">
                 <label id="applicationName-label" class="form-label-bold" for="applicationName">
                     Application name

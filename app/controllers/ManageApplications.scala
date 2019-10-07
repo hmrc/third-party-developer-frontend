@@ -62,7 +62,7 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
     def addApplicationWithValidForm(validForm: AddApplicationForm) = {
 
       applicationService.createForUser(CreateApplicationRequest.from(loggedIn, validForm))
-        .map(appCreated => Created(addApplicationSuccess(validForm.applicationName, appCreated.id, validForm.environment.getOrElse(Environment.SANDBOX.toString))))
+        .map(appCreated => Created(addApplicationSuccess(validForm.applicationName, appCreated.id, validForm.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX))))
     }
 
     requestForm.fold(addApplicationWithFormErrors, addApplicationWithValidForm)

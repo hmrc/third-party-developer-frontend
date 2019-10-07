@@ -82,7 +82,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
     }
 
     def updateCheckInformation(updateRequest: UpdateApplicationRequest) = {
-      if (application.deployedTo == Environment.PRODUCTION) {
+      if (application.deployedTo.isProduction) {
         applicationService.updateCheckInformation(applicationId, buildCheckInformation(updateRequest))
       } else {
         Future.successful(ApplicationUpdateSuccessful)
