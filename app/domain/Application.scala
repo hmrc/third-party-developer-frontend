@@ -307,6 +307,14 @@ case class Application(id: String,
 
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
+  def hasPermission(developer: Developer): Boolean = {
+    (deployedTo, role(developer.email)) match {
+      case (Environment.SANDBOX, _) => true
+      case (_, Some(Role.ADMINISTRATOR)) => true
+      case _ => false
+    }
+
+  }
   def termsOfUseStatus: TermsOfUseStatus = {
     if (deployedTo.isSandbox || access.accessType.isNotStandard) {
       TermsOfUseStatus.NOT_APPLICABLE

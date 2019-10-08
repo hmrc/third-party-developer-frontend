@@ -21,6 +21,7 @@ import domain._
 import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
 import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
 import play.api.i18n.I18nSupport
+import play.api.mvc.Results.Forbidden
 import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -63,6 +64,7 @@ abstract class LoggedInController extends BaseController with AuthElement {
   }
 }
 
+// TODO : Can we remove role ???
 case class ApplicationRequest[A](application: Application, role: Role, user: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
 
 abstract class ApplicationController()
@@ -103,6 +105,14 @@ abstract class ApplicationController()
       val stackedActions = furtherActionFunctions.foldLeft(Action andThen applicationAction(applicationId, loggedIn))((a, af) => a.andThen(af))
       stackedActions.async(fun)(request)
     }
+
+
+  def canRotateClientCreds(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      val action = Action andThen applicationAction(applicationId, loggedIn) andThen standardAppFilter andThen sandboxOrAdminIfProductionAppFilter
+        action.async(fun)(request)
+    }
+  }
 }
 
 abstract class LoggedOutController()

@@ -54,7 +54,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def addClientSecret(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
+  def addClientSecret(applicationId: String) = canRotateClientCreds(applicationId) { implicit request =>
 
     def result(err: Option[String] = None): Result = Redirect(controllers.routes.Credentials.credentials(applicationId, err))
 
