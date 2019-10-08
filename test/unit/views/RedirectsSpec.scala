@@ -35,7 +35,7 @@ class RedirectsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq.empty, termsAndConditionsUrl = None)
   )

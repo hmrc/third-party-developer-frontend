@@ -51,6 +51,7 @@ class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with MockitoSuga
     "Test Application Client ID",
     "Test Application",
     DateTime.now(),
+    DateTime.now(),
     environment,
     Some("Test Application"),
     Set.empty,

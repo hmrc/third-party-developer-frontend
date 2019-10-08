@@ -326,7 +326,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
                                                    userRole: Role,
                                                    state: ApplicationState = ApplicationState.testing,
                                                    additionalTeamMembers: Seq[Collaborator] = Seq()) = {
-    val application = Application(appId, clientId, "app", DateTime.parse("2018-04-06T09:00"), Environment.PRODUCTION,
+    val application = Application(appId, clientId, "app", DateTime.parse("2018-04-06T09:00"), DateTime.parse("2018-04-06T09:00"), Environment.PRODUCTION,
       collaborators = Set(Collaborator(loggedInUser.email, userRole)) ++ additionalTeamMembers, state = state)
 
     given(applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(application)

@@ -53,6 +53,7 @@ trait TestApplications {
       clientId = clientId,
       name = "App name 1",
       createdOn = DateTimeUtils.now,
+      lastAccess = DateTimeUtils.now,
       deployedTo = environment,
       description = Some("Description 1"),
       collaborators = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER)),

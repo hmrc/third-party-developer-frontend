@@ -43,7 +43,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
   val applicationName: String = "third-party-application"
   val applicationId: String = "application-id"
   val clientId = "clientId"
-  val application = Application(applicationId, clientId, applicationName, DateTime.now(), Environment.PRODUCTION)
+  val application = Application(applicationId, clientId, applicationName, DateTime.now(), DateTime.now(), Environment.PRODUCTION)
 
   trait Setup {
 
@@ -64,7 +64,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
       .willReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector))
 
     given(mockThirdPartyApplicationConnector.fetchApplicationById(meq(applicationId))(any[HeaderCarrier]))
-      .willReturn(Future.successful(Some(Application(applicationId, clientId, "name", DateTime.now(), Environment.PRODUCTION))))
+      .willReturn(Future.successful(Some(Application(applicationId, clientId, "name", DateTime.now(), DateTime.now(), Environment.PRODUCTION))))
   }
 
   "fetchFields" should {

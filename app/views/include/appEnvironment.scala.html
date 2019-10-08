@@ -15,7 +15,8 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment}
+@import domain.Application
+@import helpers.DateFormatter.{formatDate, formatLastAccessDate}
 
 @(app: Application)(implicit appConfig: ApplicationConfig)
 <div class="grid-row">
@@ -28,5 +29,12 @@
     <div class="column-three-quarters" data-app-env>@app.deployedTo.toString.toLowerCase.capitalize</div>
 </div>
 
+<div class="metadata-wrapper"></div>
+<p class="metadata">
+    Created @{formatDate(app.createdOn)}
+</p>
+<p class="metadata">
+    Last API call @{formatLastAccessDate(app.lastAccess)}
+</p>
 
 <br>

@@ -56,7 +56,7 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
 
     "render" in {
 
-      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now, Environment.SANDBOX)
+      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX)
       val document = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "h1", "Change application details") shouldBe true
@@ -72,7 +72,7 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
       val aPrivacyPolicyURL = Some("a privacy policy url")
       val aTermsAndConditionsURL = Some("a terms and conditions url")
       val standardAccess = Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
-      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now, Environment.SANDBOX,
+      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX,
         description = aDescription,
         access = standardAccess)
       val document = Jsoup.parse(renderPage(application).body)
@@ -85,7 +85,7 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
 
     "not display the option to change the app name if in prod pending GK approval" in {
 
-      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now,
+      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now, DateTimeUtils.now,
         Environment.PRODUCTION, state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None))
       val document = Jsoup.parse(renderPage(application).body)
 
@@ -94,7 +94,7 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
 
     "not display the option to change the app name if in prod pending requestor verification" in {
 
-      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now,
+      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now, DateTimeUtils.now,
         Environment.PRODUCTION, state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None))
       val document = Jsoup.parse(renderPage(application).body)
 
@@ -103,7 +103,7 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
 
     "not display the option to change the app name if in prod with state production" in {
 
-      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now,
+      val application = Application("1234", "clientId1234", "An App Name", DateTimeUtils.now, DateTimeUtils.now,
         Environment.PRODUCTION, state = ApplicationState(State.PRODUCTION, None))
       val document = Jsoup.parse(renderPage(application).body)
 
