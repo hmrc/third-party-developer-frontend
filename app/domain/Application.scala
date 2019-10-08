@@ -308,7 +308,7 @@ case class Application(id: String,
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
   def termsOfUseStatus: TermsOfUseStatus = {
-    if (deployedTo.isSandbox || access.accessType != AccessType.STANDARD) {
+    if (deployedTo.isSandbox || access.accessType.isNotStandard) {
       TermsOfUseStatus.NOT_APPLICABLE
     } else if (termsOfUseAgreements.isEmpty) {
       TermsOfUseStatus.AGREEMENT_REQUIRED

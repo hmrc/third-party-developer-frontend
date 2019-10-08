@@ -19,8 +19,8 @@ package domain
 import enumeratum.{EnumEntry, PlayEnum}
 
 sealed trait Role extends EnumEntry {
-  def isDeveloper(): Boolean = this.equals(Role.DEVELOPER)
-  def isAdministrator(): Boolean = this.equals(Role.ADMINISTRATOR)
+  def isDeveloper(): Boolean = this == Role.DEVELOPER
+  def isAdministrator(): Boolean = this == Role.ADMINISTRATOR
 }
 
 object Role extends PlayEnum[Role] {

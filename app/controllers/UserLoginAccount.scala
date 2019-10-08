@@ -78,14 +78,14 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     userAuthenticationResponse.session match {
-      case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => audit(LoginSucceeded, DeveloperSession.apply(session))
+      case Some(session) if session.loggedInState.isLoggedIn => audit(LoginSucceeded, DeveloperSession.apply(session))
         gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER)
           .withSession(playSession)))
 
       case None => successful(Redirect(routes.UserLoginAccount.enterTotp(), SEE_OTHER)
         .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
 
-      case Some(session) if session.loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA =>
+      case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA =>
         gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.getProtectAccount().url)
           .withSession(playSession)))
     }

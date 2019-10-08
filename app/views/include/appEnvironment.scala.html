@@ -19,7 +19,7 @@
 
 @(app: Application)(implicit appConfig: ApplicationConfig)
 
-@if(app.access.accessType != AccessType.STANDARD) {
+@if(app.access.accessType.isNotStandard) {
     <p>This application is @applicationType() application.</p>
 }
 

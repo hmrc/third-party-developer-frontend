@@ -121,7 +121,7 @@ abstract class LoggedOutController()
     AsyncStack {
       implicit request =>
         loggedIn match {
-          case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => loginSucceeded(request)
+          case Some(session) if session.loggedInState.isLoggedIn => loginSucceeded(request)
           case Some(_) | None => f(request)
         }
     }
