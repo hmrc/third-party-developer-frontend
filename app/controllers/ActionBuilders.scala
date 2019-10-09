@@ -19,11 +19,6 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.AccessType.{PRIVILEGED, ROPC}
 import domain.{BadRequestError, DeveloperSession, Environment, Role, State}
-<<<<<<< HEAD
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
-=======
->>>>>>> origin/master
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, ActionRefiner, Request, Result}
