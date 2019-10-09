@@ -21,6 +21,7 @@
 @import domain.Application
 @import domain.AccessType
 @import domain.Developer
+@import domain.Capabilities._
 @import include._
 
 @(app: Application, developer: Developer, token: EnvironmentToken, form: Form[VerifyPasswordForm])(
@@ -54,7 +55,7 @@
         @maskedContent(secret, accessibleText = s"client secret ${i + 1}", secure = app.deployedTo.isProduction, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
     }
 
-    @if(app.canEditCredentials(developer)){
+    @if(app.hasPermission(EditCredentials, developer)){
         @if(token.clientSecrets.size < 5) {
             <div>
             @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {

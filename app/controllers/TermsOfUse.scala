@@ -17,11 +17,13 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.Capabilities.SupportsTermsOfUse
+import domain.Permissions.SandboxOrAdmin
 import domain.{Application, CheckInformation, TermsOfUseAgreement, TermsOfUseStatus}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
-import play.api.mvc.Action
+import play.api.mvc.{Action, AnyContent, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import views.html.partials
@@ -37,11 +39,16 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
                           (implicit ec: ExecutionContext)
   extends ApplicationController() with ApplicationHelper {
 
+  def canChangeTermsOfUseAction(applicationId: String)
+                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    permissionThenCapabilityAction(SandboxOrAdmin,SupportsTermsOfUse)(applicationId)(fun)
+
+
   def termsOfUsePartial() = Action {
     Ok(partials.termsOfUse())
   }
 
-  def termsOfUse(id: String) = sandboxOrAdminIfProductionForStandardApp(id) { implicit request =>
+  def termsOfUse(id: String) = canChangeTermsOfUseAction(id) { implicit request =>
     if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
       Future.successful(BadRequest(errorHandler.badRequestTemplate))
     } else {
@@ -49,7 +56,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
     }
   }
 
-  def agreeTermsOfUse(id: String) = sandboxOrAdminIfProductionForStandardApp(id) { implicit request =>
+  def agreeTermsOfUse(id: String) = canChangeTermsOfUseAction(id) { implicit request =>
 
     def handleValidForm(app: Application, form: TermsOfUseForm) = {
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {

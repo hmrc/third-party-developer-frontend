@@ -68,7 +68,7 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
     requestForm.fold(addApplicationWithFormErrors, addApplicationWithValidForm)
   }
 
-  def editApplication(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
+  def editApplication(applicationId: String, error: Option[String] = None) = whenTeamMemberOnApp(applicationId) { implicit request =>
     Future.successful(Redirect(routes.Details.details(applicationId)))
   }
 }

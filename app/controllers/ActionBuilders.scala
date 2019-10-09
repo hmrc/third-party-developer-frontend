@@ -17,8 +17,7 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.AccessType.{PRIVILEGED, ROPC}
-import domain.{BadRequestError, DeveloperSession, Environment, Role, State}
+import domain.{BadRequestError, Capability, DeveloperSession, Permission, State}
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, ActionRefiner, Request, Result}
@@ -33,24 +32,6 @@ trait ActionBuilders {
   val errorHandler: ErrorHandler
   val applicationService: ApplicationService
   implicit val appConfig: ApplicationConfig
-
-  private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
-    if (cond) {
-      None
-    } else {
-      // TODO - should this be a forbiddenTemplate ?
-      Some(Forbidden(errorHandler.badRequestTemplate))
-    }
-  }
-
-  private def badRequestWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
-    if (cond) {
-      None
-    } else {
-      // TODO - should this be JSON ?
-      Some(BadRequest(Json.toJson(BadRequestError)))
-    }
-  }
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
@@ -70,12 +51,25 @@ trait ActionBuilders {
     }
   }
 
-
-  private def not(fn: ApplicationRequest[_] => Boolean)(req: ApplicationRequest[_]): Boolean = {
-    ! (fn(req))
+  private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
+    if (cond) {
+      None
+    } else {
+      // TODO - should this be a forbiddenTemplate ?
+      Some(Forbidden(errorHandler.badRequestTemplate))
+    }
   }
 
-  private def forbiddenWhenNotFilter(cond: ApplicationRequest[_] => Boolean): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+  private def badRequestWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
+    if (cond) {
+      None
+    } else {
+      // TODO - should this be JSON ?
+      Some(BadRequest(Json.toJson(BadRequestError)))
+    }
+  }
+
+  def forbiddenWhenNotFilter(cond: ApplicationRequest[_] => Boolean): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
@@ -83,7 +77,7 @@ trait ActionBuilders {
     }
   }
 
-  private def badRequestWhenNotFilter(cond: ApplicationRequest[_] => Boolean): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+  def badRequestWhenNotFilter(cond: ApplicationRequest[_] => Boolean): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
@@ -91,10 +85,9 @@ trait ActionBuilders {
     }
   }
 
-  val standardAppFilter = forbiddenWhenNotFilter(_.application.access.accessType.isStandard)
-  val appInStateProductionFilter = badRequestWhenNotFilter(_.application.state.name == State.PRODUCTION)
-  val appInStateTestingFilter = badRequestWhenNotFilter(_.application.state.name == State.TESTING)
-  val adminOnAppFilter = forbiddenWhenNotFilter(_.role.isAdministrator)
+  def capabilityFilter(capability: Capability) =
+    badRequestWhenNotFilter(req => capability.hasCapability(req.application))
 
-  val sandboxOrAdminIfProductionAppFilter = forbiddenWhenNotFilter(req => req.application.hasPermission(req.user.developer))
+  def permissionFilter(permission: Permission) =
+    forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.user.developer))
 }

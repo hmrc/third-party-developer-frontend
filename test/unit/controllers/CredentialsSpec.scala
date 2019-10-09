@@ -366,11 +366,11 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       status(result) shouldBe FORBIDDEN
     }
 
-    "Forbidden from deleting client secrets for privileged apps" in new Setup {
+    "Prevented from deleting client secrets for privileged apps" in new Setup {
       val privilegedAppId = "privAppId"
       val password = "aPassword"
 
-      givenTheApplicationExistWithUserRole(privilegedAppId, ADMINISTRATOR, access = Privileged())
+      givenTheApplicationExistWithUserRole(privilegedAppId, ADMINISTRATOR, access = Privileged(), state = ApplicationState.production("a","b"))
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(Future.successful(VerifyPasswordSuccessful))
 
@@ -378,14 +378,14 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       val result: Result = await(underTest.selectClientSecretsToDelete(privilegedAppId)(requestWithFormBody))
 
-      status(result) shouldBe FORBIDDEN
+      status(result) shouldBe BAD_REQUEST //FORBIDDEN
     }
 
-    "Forbidden from deleting client secrets for ROPC apps" in new Setup {
+    "Prevented from deleting client secrets for ROPC apps" in new Setup {
       val ROPCAppId = "ROPCAppId"
       val password = "aPassword"
 
-      givenTheApplicationExistWithUserRole(ROPCAppId, ADMINISTRATOR, access = ROPC())
+      givenTheApplicationExistWithUserRole(ROPCAppId, ADMINISTRATOR, access = ROPC(), state = ApplicationState.production("a","b"))
       given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
         .willReturn(Future.successful(VerifyPasswordSuccessful))
 
@@ -393,7 +393,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       val result: Result = await(underTest.selectClientSecretsToDelete(ROPCAppId)(requestWithFormBody))
 
-      status(result) shouldBe FORBIDDEN
+      status(result) shouldBe BAD_REQUEST //FORBIDDEN
     }
   }
 

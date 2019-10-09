@@ -16,13 +16,14 @@
 
 package domain
 
-import controllers.{AddApplicationForm, EditApplicationForm, GroupedSubscriptions, _}
+import controllers.{AddApplicationForm, AddRedirectForm, ChangeRedirectForm, DeleteRedirectConfirmationForm, EditApplicationForm, GroupedSubscriptions}
 import domain.AccessType.{PRIVILEGED, STANDARD}
 import domain.Environment.{PRODUCTION, SANDBOX}
+import domain.Permissions._
 import domain.Role.ADMINISTRATOR
 import domain.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import org.joda.time.DateTime
-import play.api.libs.json.{Format, JsError, _}
+import play.api.libs.json._
 import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.time.DateTimeUtils
 
@@ -32,7 +33,12 @@ object UpliftRequest {
   implicit val format = Json.format[UpliftRequest]
 }
 
-case class ApplicationState(name: State, requestedByEmailAddress: Option[String], verificationCode: Option[String] = None, updatedOn: DateTime = DateTimeUtils.now)
+case class ApplicationState(
+    name: State,
+    requestedByEmailAddress: Option[String],
+    verificationCode: Option[String] = None,
+    updatedOn: DateTime = DateTimeUtils.now
+)
 
 object ApplicationState {
   implicit val format = Json.format[ApplicationState]
@@ -285,6 +291,8 @@ object CheckInformationForm {
 
 case class SubscriptionData(role: Role, application: Application, subscriptions: Option[GroupedSubscriptions], hasSubscriptions: Boolean)
 
+
+
 case class Application(id: String,
                        clientId: String,
                        name: String,
@@ -307,14 +315,15 @@ case class Application(id: String,
 
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
-  def hasPermission(developer: Developer): Boolean = {
-    (deployedTo, role(developer.email)) match {
-      case (Environment.SANDBOX, _) => true
-      case (_, Some(Role.ADMINISTRATOR)) => true
-      case _ => false
-    }
 
+  def has(capability: Capability): Boolean = {
+    capability.hasCapability(this)
   }
+
+  def hasPermission(capability: Capability, developer: Developer, permission: Permission = SandboxOrAdmin): Boolean = {
+    capability.hasCapability(this) && permission.hasPermissions(this, developer)
+  }
+
   def termsOfUseStatus: TermsOfUseStatus = {
     if (deployedTo.isSandbox || access.accessType.isNotStandard) {
       TermsOfUseStatus.NOT_APPLICABLE
@@ -349,17 +358,6 @@ case class Application(id: String,
     (deployedTo, state.name, role(developer.email)) match {
       case (SANDBOX, _, _) => true
       case (PRODUCTION, State.PRODUCTION, Some(ADMINISTRATOR)) => true
-      case _ => false
-    }
-  }
-
-  def canEditCredentials(developer: Developer): Boolean = {
-    (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (_, AccessType.ROPC, _, _) => false
-      case (_, PRIVILEGED, _, _) => false
-
-      case (SANDBOX, _, _, _) => true
-      case (PRODUCTION, _, State.PRODUCTION, Some(ADMINISTRATOR)) => true
       case _ => false
     }
   }
