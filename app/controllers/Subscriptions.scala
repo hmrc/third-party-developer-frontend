@@ -50,10 +50,10 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   private def canManageLockedApiSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     permissionThenCapabilityAction(AdministratorOnly,HasLockedSubscriptions)(applicationId)(fun)
 
-  private def canViewSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    permissionThenCapabilityAction(TeamMembersOnly,SupportsSubscriptions)(applicationId)(fun)
+  private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
+    capabilityThenPermissionsAction(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
 
-  def subscriptions(applicationId: String) = canViewSubscriptionsAction(applicationId) { implicit request =>
+  def subscriptions(applicationId: String) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
       val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
       val form = EditApplicationForm.withData(data.app)

@@ -20,6 +20,11 @@ sealed trait Capability {
   def hasCapability(app: Application): Boolean
 }
 
+// Marker trait
+trait LikePermission {
+  self: Capability =>
+}
+
 object Capabilities {
   trait StandardAppCapability extends Capability {
     final def hasCapability(app: Application): Boolean = app.access.accessType.isStandard
@@ -45,7 +50,7 @@ object Capabilities {
 
   case object SupportsTeamMembers extends StandardAppCapability
 
-  case object SupportsSubscriptions extends StandardAppCapability
+  case object SupportsSubscriptions extends StandardAppCapability with LikePermission
 
   case object SupportsDetails extends StandardAppCapability
 

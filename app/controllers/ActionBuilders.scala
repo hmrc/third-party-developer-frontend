@@ -17,7 +17,7 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{BadRequestError, Capability, DeveloperSession, Permission, State}
+import domain.{BadRequestError, Capability, DeveloperSession, LikePermission, Permission, State}
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, ActionRefiner, Request, Result}
@@ -85,8 +85,13 @@ trait ActionBuilders {
     }
   }
 
-  def capabilityFilter(capability: Capability) =
-    badRequestWhenNotFilter(req => capability.hasCapability(req.application))
+  def capabilityFilter(capability: Capability) = {
+    val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
+    capability match {
+      case c : LikePermission => forbiddenWhenNotFilter(capabilityCheck)
+      case c : Capability => badRequestWhenNotFilter(capabilityCheck)
+    }
+  }
 
   def permissionFilter(permission: Permission) =
     forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.user.developer))
