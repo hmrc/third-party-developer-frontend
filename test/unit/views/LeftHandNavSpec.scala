@@ -31,9 +31,9 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite {
 
   trait Setup {
     implicit val request = FakeRequest()
-    val standardApplication = Application("std-app-id", "std-client-id", "name", now, PRODUCTION, access = Standard())
-    val privilegedApplication = Application("std-app-id", "std-client-id", "name", now, PRODUCTION, access = Privileged())
-    val ropcApplication = Application("std-app-id", "std-client-id", "name", now, PRODUCTION, access = ROPC())
+    val standardApplication = Application("std-app-id", "std-client-id", "name", now, now, PRODUCTION, access = Standard())
+    val privilegedApplication = Application("std-app-id", "std-client-id", "name", now, now, PRODUCTION, access = Privileged())
+    val ropcApplication = Application("std-app-id", "std-client-id", "name", now, now, PRODUCTION, access = ROPC())
 
     def elementExistsById(doc: Document, id: String) = doc.select(s"#$id").nonEmpty
   }

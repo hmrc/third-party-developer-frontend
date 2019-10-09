@@ -94,6 +94,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     clientId,
     appName,
     DateTimeUtils.now,
+    DateTimeUtils.now,
     Environment.PRODUCTION,
     Some("Description"),
     Set(Collaborator("john@example.com", Role.ADMINISTRATOR)),

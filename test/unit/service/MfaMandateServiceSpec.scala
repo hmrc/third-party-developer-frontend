@@ -52,6 +52,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
       "myClientId",
       "myName",
       new DateTime(),
+      new DateTime(),
       Environment.PRODUCTION,
       collaborators = Set(Collaborator(email, Role.ADMINISTRATOR))
     )))
@@ -60,6 +61,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
       "myId",
       "myClientId",
       "myName",
+      new DateTime(),
       new DateTime(),
       Environment.PRODUCTION,
       collaborators = Set(Collaborator(email, Role.DEVELOPER))
@@ -70,6 +72,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
       "myClientId",
       "myName",
       new DateTime(),
+      new DateTime(),
       Environment.PRODUCTION
     )))
 
@@ -77,6 +80,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
       "myId",
       "myClientId",
       "myName",
+      new DateTime(),
       new DateTime(),
       Environment.SANDBOX,
       collaborators = Set(Collaborator(email, Role.ADMINISTRATOR))
