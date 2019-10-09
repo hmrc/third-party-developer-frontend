@@ -111,15 +111,13 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     "return the ROPC page for a ROPC app" in new Setup {
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(ropcApplication))
       val result = await(addToken(underTest.subscriptions(appId))(loggedInRequest))
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is a ROPC application")
+      status(result) shouldBe FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(privilegedApplication))
       val result = await(addToken(underTest.subscriptions(appId))(loggedInRequest))
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is a privileged application")
+      status(result) shouldBe FORBIDDEN
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {

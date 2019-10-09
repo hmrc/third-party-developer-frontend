@@ -34,7 +34,7 @@ import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.TestApplications._
 import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -17,6 +17,10 @@
 package domain
 
 import controllers.{AddApplicationForm, EditApplicationForm, GroupedSubscriptions, _}
+import domain.AccessType.{PRIVILEGED, STANDARD}
+import domain.Environment.{PRODUCTION, SANDBOX}
+import domain.Role.ADMINISTRATOR
+import domain.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, JsError, _}
 import uk.gov.hmrc.play.json.Union
@@ -251,7 +255,7 @@ case class CheckInformationForm(confirmedNameComplete: Boolean = false,
                                 contactDetailsComplete: Boolean = false,
                                 providedPrivacyPolicyURLComplete: Boolean = false,
                                 providedTermsAndConditionsURLComplete: Boolean = false,
-                                termsOfUseAgreementComplete : Boolean = false)
+                                termsOfUseAgreementComplete: Boolean = false)
 
 case class CheckInformation(confirmedName: Boolean = false,
                             applicationDetails: Option[String] = None,
@@ -279,7 +283,7 @@ object CheckInformationForm {
   }
 }
 
-case class SubscriptionData (role: Role, application: Application, subscriptions: Option[GroupedSubscriptions], hasSubscriptions: Boolean)
+case class SubscriptionData(role: Role, application: Application, subscriptions: Option[GroupedSubscriptions], hasSubscriptions: Boolean)
 
 case class Application(id: String,
                        clientId: String,
@@ -295,6 +299,12 @@ case class Application(id: String,
                        checkInformation: Option[CheckInformation] = None) {
 
   def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
+
+  private def hasRole(desiredRole: Role)(developer: Developer): Boolean = {
+    role(developer.email).contains(desiredRole)
+  }
+
+  def isAdmin: Developer => Boolean = hasRole(Role.ADMINISTRATOR)
 
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
@@ -318,14 +328,57 @@ case class Application(id: String,
     case _ => None
   }
 
-  def isPermittedToMakeChanges(role: Role) = (deployedTo, role) match {
-    case (Environment.SANDBOX, _) => true
-    case (_, Role.ADMINISTRATOR) => true
-    case _ => false
+  def isPermittedToEditAppDetails(developer: Developer): Boolean =
+    (deployedTo, access.accessType, role(developer.email)) match {
+      case (_,AccessType.ROPC, _) => false
+      case (_,PRIVILEGED, _) => false
+
+      case (SANDBOX, _, _) => true
+      case (_, STANDARD, Some(ADMINISTRATOR)) => true
+      case _ => false
+    }
+
+  def canViewCredentials(developer: Developer): Boolean = {
+    (deployedTo, state.name, role(developer.email)) match {
+      case (SANDBOX, _, _) => true
+      case (PRODUCTION, State.PRODUCTION, Some(ADMINISTRATOR)) => true
+      case _ => false
+    }
   }
 
-  def canAddRedirectUri = access match {
-    case s: Standard => s.redirectUris.lengthCompare(5) < 0
+  def canEditCredentials(developer: Developer): Boolean = {
+    (deployedTo, access.accessType, state.name, role(developer.email)) match {
+      case (_, AccessType.ROPC, _, _) => false
+      case (_, PRIVILEGED, _, _) => false
+
+      case (SANDBOX, _, _, _) => true
+      case (PRODUCTION, _, State.PRODUCTION, Some(ADMINISTRATOR)) => true
+      case _ => false
+    }
+  }
+
+  def canPerformApprovalProcess(developer: Developer): Boolean = {
+    (deployedTo, access.accessType, state.name, role(developer.email)) match {
+      case (Environment.SANDBOX, _, _, _) => false
+      case (PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR)) => true
+      case (PRODUCTION, STANDARD, PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR)) => true
+      case (PRODUCTION, STANDARD, PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
+      case _ => false
+    }
+  }
+
+  def canViewServerToken(developer: Developer): Boolean = {
+    (deployedTo, access.accessType, state.name, role(developer.email)) match {
+      case (SANDBOX, STANDARD, _, _) => true
+      case (PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
+      case _ => false
+    }
+  }
+
+  private val maximumNumberOfRedirectUris = 5
+
+  def canAddRedirectUri: Boolean = access match {
+    case s: Standard => s.redirectUris.lengthCompare(maximumNumberOfRedirectUris) < 0
     case _ => false
   }
 

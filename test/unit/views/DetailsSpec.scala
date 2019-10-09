@@ -16,58 +16,57 @@
 
 package unit.views
 
+import config.ApplicationConfig
+import controllers.routes
+import domain._
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
+import org.jsoup.nodes.{Document, Element}
 import org.scalatest.Matchers
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits.applicationMessages
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import play.twirl.api.HtmlFormat.Appendable // ???
+import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
+import utils.TestApplications
 
-import config.ApplicationConfig
-import controllers.routes
-import domain._
+class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with TestApplications {
 
-class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite {
   case class Page(doc: Appendable) {
-    lazy val body = Jsoup.parse(doc.body)
-    lazy val warning = body.getElementById("termsOfUseWarning")
-    lazy val termsOfUse = body.getElementById("termsOfUse")
-    lazy val agreementDetails = termsOfUse.getElementById("termsOfUseAagreementDetails")
-    lazy val readLink = termsOfUse.getElementById("termsOfUseReadLink")
+    lazy val body: Document = Jsoup.parse(doc.body)
+    lazy val warning: Element = body.getElementById("termsOfUseWarning")
+    lazy val termsOfUse: Element = body.getElementById("termsOfUse")
+    lazy val agreementDetails: Element = termsOfUse.getElementById("termsOfUseAagreementDetails")
+    lazy val readLink: Element = termsOfUse.getElementById("termsOfUseReadLink")
   }
 
   "Application details view" when {
-    implicit val mockConfig = mock[ApplicationConfig]
-    implicit val request = FakeRequest()
-    implicit val loggedIn = utils.DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
-    implicit val navSection = "details"
-
-    val id = "id"
-    val clientId = "clientId"
-    val appName = "an application"
-    val createdOn = DateTimeUtils.now
-    val lastAccess = DateTimeUtils.now
+    implicit val mockConfig: ApplicationConfig = mock[ApplicationConfig]
+    implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    implicit val loggedIn: DeveloperSession = utils.DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
+    implicit val navSection: String = "details"
 
     "showing Terms of Use details" when {
       "managing a sandbox application" should {
         val deployedTo = Environment.SANDBOX
 
         "show nothing when a developer" in {
-          val role = Role.DEVELOPER
-          val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo)
-          val page = Page(views.html.details(role, application))
+          val application = anApplication(environment = deployedTo)
+            .withTeamMember(loggedIn.developer.email, Role.DEVELOPER)
+
+          val page = Page(views.html.details(application))
 
           page.termsOfUse shouldBe null
         }
 
         "show nothing when an admin" in {
-          val role = Role.ADMINISTRATOR
-          val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo)
-          val page = Page(views.html.details(role, application))
+          val application = anApplication(environment = deployedTo)
+            .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+
+          val page = Page(views.html.details(application))
 
           page.termsOfUse shouldBe null
         }
@@ -80,17 +79,20 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
           val access = Privileged()
 
           "show nothing when a developer" in {
-            val role = Role.DEVELOPER
-            val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, access = access)
-            val page = Page(views.html.details(role, application))
+
+            val application = anApplication(environment = deployedTo, access = access)
+              .withTeamMember(loggedIn.developer.email, Role.DEVELOPER)
+
+            val page = Page(views.html.details(application))
 
             page.termsOfUse shouldBe null
           }
 
           "show nothing when an admin" in {
-            val role = Role.ADMINISTRATOR
-            val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, access = access)
-            val page = Page(views.html.details(role, application))
+            val application = anApplication(environment = deployedTo, access = access)
+              .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+
+            val page = Page(views.html.details(application))
 
             page.termsOfUse shouldBe null
           }
@@ -100,17 +102,19 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
           val access = ROPC()
 
           "show nothing when a developer" in {
-            val role = Role.DEVELOPER
-            val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, access = access)
-            val page = Page(views.html.details(role, application))
+            val application = anApplication(environment = deployedTo, access = access)
+              .withTeamMember(loggedIn.developer.email, Role.DEVELOPER)
+
+            val page = Page(views.html.details(application))
 
             page.termsOfUse shouldBe null
           }
 
           "show nothing when an admin" in {
-            val role = Role.ADMINISTRATOR
-            val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, access = access)
-            val page = Page(views.html.details(role, application))
+            val application = anApplication(environment = deployedTo, access = access)
+              .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+
+            val page = Page(views.html.details(application))
 
             page.termsOfUse shouldBe null
           }
@@ -120,12 +124,14 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
           val access = Standard()
 
           "the user is a developer" should {
-            val role = Role.DEVELOPER
-
             "show 'not agreed' and have no link to read and agree when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
-              val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, access = access, checkInformation = Some(checkInformation))
-              val page = Page(views.html.details(role, application))
+
+              val application = anApplication(environment = deployedTo, access = access)
+                .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+                .withCheckInformation(checkInformation)
+
+              val page = Page(views.html.details(application))
 
               page.agreementDetails.text shouldBe "Not agreed"
               page.readLink shouldBe null
@@ -137,8 +143,12 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
               val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
               val version = "1.0"
               val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(emailAddress, timeStamp, version)))
-              val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, access = access, checkInformation = Some(checkInformation))
-              val page = Page(views.html.details(role, application))
+
+              val application = anApplication(environment = deployedTo, access = access)
+                .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+                .withCheckInformation(checkInformation)
+
+              val page = Page(views.html.details(application))
 
               page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
               page.readLink shouldBe null
@@ -146,12 +156,17 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
           }
 
           "the user is an administrator" should {
-            val role = Role.ADMINISTRATOR
+
+            val collaborators = Set(Collaborator(loggedIn.developer.email, Role.ADMINISTRATOR))
 
             "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
-              val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, access = access, checkInformation = Some(checkInformation))
-              val page = Page(views.html.details(role, application))
+
+              val application = anApplication(environment = deployedTo, access = access)
+                .withTeamMembers(collaborators)
+                .withCheckInformation(checkInformation)
+
+              val page = Page(views.html.details(application))
 
               page.agreementDetails.text shouldBe "Not agreed"
               page.readLink.text shouldBe "Read and agree"
@@ -165,8 +180,12 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
               val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
               val version = "1.0"
               val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(emailAddress, timeStamp, version)))
-              val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, access = access, checkInformation = Some(checkInformation))
-              val page = Page(views.html.details(role, application))
+
+              val application = anApplication(environment = deployedTo, access = access)
+                .withTeamMembers(collaborators)
+                .withCheckInformation(checkInformation)
+
+              val page = Page(views.html.details(application))
 
               page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
               page.readLink.text shouldBe "Read"

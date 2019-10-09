@@ -41,7 +41,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
     Ok(partials.termsOfUse())
   }
 
-  def termsOfUse(id: String) = adminIfStandardProductionApp(id) { implicit request =>
+  def termsOfUse(id: String) = sandboxOrAdminIfProductionForStandardApp(id) { implicit request =>
     if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
       Future.successful(BadRequest(errorHandler.badRequestTemplate))
     } else {
@@ -49,7 +49,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
     }
   }
 
-  def agreeTermsOfUse(id: String) = adminIfStandardProductionApp(id) { implicit request =>
+  def agreeTermsOfUse(id: String) = sandboxOrAdminIfProductionForStandardApp(id) { implicit request =>
 
     def handleValidForm(app: Application, form: TermsOfUseForm) = {
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {

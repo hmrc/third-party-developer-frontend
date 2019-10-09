@@ -44,16 +44,17 @@ class Credentials @Inject()(val applicationService: ApplicationService,
                            (implicit ec: ExecutionContext)
   extends ApplicationController {
 
-  def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
+
+  def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
     applicationService.fetchCredentials(applicationId).map { tokens =>
-      val view = views.html.credentials(request.role, request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
+      val view = views.html.credentials(request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
       error.map(_ => BadRequest(view)).getOrElse(Ok(view))
     } recover {
       case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
     }
   }
 
-  def addClientSecret(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def addClientSecret(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
 
     def result(err: Option[String] = None): Result = Redirect(controllers.routes.Credentials.credentials(applicationId, err))
 
@@ -67,7 +68,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   }
 
   def getProductionClientSecret(applicationId: String, index: Integer) =
-    adminIfStandardProductionApp(applicationId, Seq(appInStateProductionFilter)) { implicit request =>
+    sandboxOrAdminIfProductionForAnyApp(applicationId, Seq(appInStateProductionFilter)) { implicit request =>
 
     def fetchClientSecret(password: String) = {
       val future = for {
@@ -98,13 +99,13 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def selectClientSecretsToDelete(applicationId: String): Action[AnyContent] = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def selectClientSecretsToDelete(applicationId: String): Action[AnyContent] = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
 
     val application = request.application
 
     def showCredentials(form: Form[VerifyPasswordForm]) = {
       applicationService.fetchCredentials(applicationId).map { tokens =>
-        val view = views.html.credentials(request.role, application, tokens, form)
+        val view = views.html.credentials(application, tokens, form)
         if (form.hasErrors) BadRequest(view) else Ok(view)
       } recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
@@ -140,7 +141,8 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     else VerifyPasswordForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  def selectClientSecretsToDeleteAction(applicationId: String, error: Option[String] = None) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def selectClientSecretsToDeleteAction(applicationId: String, error: Option[String] = None)
+    = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
 
     val application = request.application
 
@@ -167,7 +169,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     SelectClientSecretsToDeleteForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  def deleteClientSecretsAction(applicationId: String): Action[AnyContent] = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def deleteClientSecretsAction(applicationId: String): Action[AnyContent] = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
 
     val application = request.application
 
