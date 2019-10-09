@@ -35,7 +35,7 @@ class BreadcrumbsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
     "render in the right order" in {
 
       val applicationName = "An Application Name"
-      val application = Application("appId123", "clientId123", applicationName, DateTimeUtils.now, Environment.PRODUCTION)
+      val application = Application("appId123", "clientId123", applicationName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION)
       val crumbs = Array(Crumb("Another Breadcrumb"), Crumb.application(application), Crumb.viewAllApplications, Crumb.home(appConfig))
 
       val page = views.html.include.breadcrumbs.render(crumbs)

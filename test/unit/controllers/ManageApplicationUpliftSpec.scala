@@ -45,7 +45,7 @@ class ManageApplicationUpliftSpec extends BaseControllerSpec with Writeables wit
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
   val loggedInUser = DeveloperSession(session)
 
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.testing)
   val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret")), "token"))
 

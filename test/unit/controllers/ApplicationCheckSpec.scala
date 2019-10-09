@@ -56,7 +56,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val testing = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
   val production = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
@@ -120,7 +120,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
                                   checkInformation: Option[CheckInformation] = None,
                                   access: Access = Standard()) = {
 
-      val application = Application(appId, clientId, appName, DateTimeUtils.now, Environment.PRODUCTION,
+      val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), access = access, state = state, checkInformation = checkInformation)
 
       given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)

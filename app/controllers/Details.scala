@@ -38,15 +38,16 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                        (implicit ec: ExecutionContext)
   extends ApplicationController {
 
-  def details(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.details(request.role, request.application)))
+  def details(applicationId: String) = teamMemberOnApp(applicationId) { implicit request =>
+    Future.successful(Ok(views.html.details(request.application)))
   }
 
-  def changeDetails(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def changeDetails(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
+    println("*** changeDetails")
     Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), request.application)))
   }
 
-  def changeDetailsAction(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def changeDetailsAction(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     val application = request.application
     val access = application.access.asInstanceOf[Standard]
 

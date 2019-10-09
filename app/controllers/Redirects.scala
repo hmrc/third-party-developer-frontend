@@ -40,11 +40,11 @@ class Redirects @Inject()(val applicationService: ApplicationService,
     successful(Ok(views.html.redirects(request.application, appAccess.redirectUris, request.role)))
   }
 
-  def addRedirect(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def addRedirect(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     successful(Ok(views.html.addRedirect(request.application, AddRedirectForm.form)))
   }
 
-  def addRedirectAction(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def addRedirectAction(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     val application = request.application
 
     def handleValidForm(form: AddRedirectForm) = {
@@ -64,7 +64,7 @@ class Redirects @Inject()(val applicationService: ApplicationService,
     AddRedirectForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def deleteRedirect(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def deleteRedirect(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     val application = request.application
 
     def handleValidForm(form: DeleteRedirectForm) = {
@@ -78,7 +78,7 @@ class Redirects @Inject()(val applicationService: ApplicationService,
     DeleteRedirectForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def deleteRedirectAction(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def deleteRedirectAction(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     val application = request.application
 
     def handleValidForm(form: DeleteRedirectConfirmationForm) = {
@@ -96,11 +96,11 @@ class Redirects @Inject()(val applicationService: ApplicationService,
     DeleteRedirectConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def changeRedirect(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def changeRedirect(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     successful(Ok(views.html.changeRedirect(request.application, ChangeRedirectForm.form.bindFromRequest())))
   }
 
-  def changeRedirectAction(applicationId: String) = adminIfStandardProductionApp(applicationId) { implicit request =>
+  def changeRedirectAction(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
     def handleValidForm(form: ChangeRedirectForm) = {
       def updateUris() = {
         applicationService.update(UpdateApplicationRequest.from(request.application, form)).map(_ => Redirect(routes.Redirects.redirects(applicationId)))

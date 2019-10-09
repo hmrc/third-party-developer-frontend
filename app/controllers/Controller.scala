@@ -72,11 +72,17 @@ abstract class ApplicationController()
 
   def adminOnStandardApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
                         (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    teamMemberOnApp(applicationId, Seq(notRopcOrPrivilegedAppFilter, adminOnAppFilter) ++: furtherActionFunctions)(fun)
+    teamMemberOnApp(applicationId, Seq(standardAppFilter, adminOnAppFilter) ++: furtherActionFunctions)(fun)
 
-  def adminIfStandardProductionApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                                  (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    teamMemberOnApp(applicationId, Seq(notRopcOrPrivilegedAppFilter, adminIfProductionAppFilter) ++: furtherActionFunctions)(fun)
+  def sandboxOrAdminIfProductionForStandardApp(applicationId: String,
+                                               furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
+                                              (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    teamMemberOnApp(applicationId, Seq(standardAppFilter, sandboxOrAdminIfProductionAppFilter) ++: furtherActionFunctions)(fun)
+
+  def sandboxOrAdminIfProductionForAnyApp(applicationId: String,
+                                               furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
+                                              (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    teamMemberOnApp(applicationId, Seq(sandboxOrAdminIfProductionAppFilter) ++: furtherActionFunctions)(fun)
 
   def adminOnStandardSandboxApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
                                   (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
@@ -84,15 +90,16 @@ abstract class ApplicationController()
 
   def teamMemberOnStandardApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
                              (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    teamMemberOnApp(applicationId, notRopcOrPrivilegedAppFilter +: furtherActionFunctions)(fun)
+    teamMemberOnApp(applicationId, standardAppFilter +: furtherActionFunctions)(fun)
 
   def adminOnApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
                 (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     teamMemberOnApp(applicationId, Seq(adminOnAppFilter) ++: furtherActionFunctions)(fun)
 
   def adminOnTestingApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                       (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+                       (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     teamMemberOnApp(applicationId, Seq(adminOnAppFilter, appInStateTestingFilter) ++: furtherActionFunctions)(fun)
+  }
 
   def teamMemberOnApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =

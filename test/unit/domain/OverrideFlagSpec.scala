@@ -21,7 +21,7 @@ import play.api.libs.json.{JsError, JsString, Json}
 import uk.gov.hmrc.play.test.UnitSpec
 
 
-class ApplicationTest extends UnitSpec {
+class OverrideFlagSpec extends UnitSpec {
 
   "OverrideFlag" should {
     "parse from the new format" in {

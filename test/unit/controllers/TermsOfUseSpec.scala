@@ -65,7 +65,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
                                   state: ApplicationState = ApplicationState.testing,
                                   checkInformation: Option[CheckInformation] = None,
                                   access: Access = Standard()) = {
-      val application = Application(appId, "clientId", "appName", DateTimeUtils.now, environment,
+      val application = Application(appId, "clientId", "appName", DateTimeUtils.now, DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), access = access, state = state, checkInformation = checkInformation)
       given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
       application
@@ -127,15 +127,13 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     "return the ROPC page for a ROPC app" in new Setup {
       givenTheApplicationExists(access = ROPC())
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is a ROPC application")
+      status(result) shouldBe FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
       givenTheApplicationExists(access = Privileged())
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is a privileged application")
+      status(result) shouldBe FORBIDDEN
     }
   }
 
@@ -182,16 +180,14 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       givenTheApplicationExists(access = ROPC())
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(request))
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is a ROPC application")
+      status(result) shouldBe FORBIDDEN
     }
 
     "return the privileged page for a ROPC app" in new Setup {
       givenTheApplicationExists(access = Privileged())
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(request))
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is a privileged application")
+      status(result) shouldBe FORBIDDEN
     }
   }
 }

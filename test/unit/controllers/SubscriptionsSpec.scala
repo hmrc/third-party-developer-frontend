@@ -53,7 +53,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
   val loggedInDeveloper = DeveloperSession(session)
 
-  val anApplication = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val anApplication = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
@@ -111,15 +111,13 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     "return the ROPC page for a ROPC app" in new Setup {
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(ropcApplication))
       val result = await(addToken(underTest.subscriptions(appId))(loggedInRequest))
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is a ROPC application")
+      status(result) shouldBe FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(privilegedApplication))
       val result = await(addToken(underTest.subscriptions(appId))(loggedInRequest))
-      status(result) shouldBe OK
-      bodyOf(result) should include("This application is a privileged application")
+      status(result) shouldBe FORBIDDEN
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
@@ -502,7 +500,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   }
 
   private def givenTheApplicationExistWithUserRole(applicationService: ApplicationService, appId: String, userRole: Role, state: ApplicationState = ApplicationState.testing) = {
-    val application = Application(appId, clientId, "app", DateTimeUtils.now, Environment.PRODUCTION,
+    val application = Application(appId, clientId, "app", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
       collaborators = Set(Collaborator(loggedInDeveloper.email, userRole)), state = state)
 
     given(applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(application)

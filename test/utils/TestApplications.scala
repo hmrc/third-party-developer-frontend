@@ -31,7 +31,7 @@ trait TestApplications {
   def aSandboxApplication(appId: String = UUID.randomUUID().toString,
                           clientId: String = randomString(28),
                           adminEmail: String = "admin@example.com",
-                          developerEmail: String = "developer@example.com") = {
+                          developerEmail: String = "developer@example.com"): Application = {
 
     anApplication(appId,
       clientId,
@@ -47,12 +47,13 @@ trait TestApplications {
                     state: ApplicationState = ApplicationState.testing,
                     adminEmail: String = "admin@example.com",
                     developerEmail: String = "developer@example.com",
-                    access: Access = standardAccess()) = {
+                    access: Access = standardAccess()): Application = {
 
     Application(id = appId,
       clientId = clientId,
       name = "App name 1",
       createdOn = DateTimeUtils.now,
+      lastAccess = DateTimeUtils.now,
       deployedTo = environment,
       description = Some("Description 1"),
       collaborators = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER)),
@@ -79,37 +80,48 @@ trait TestApplications {
 
   def tokens(clientId: String = randomString(28),
              clientSecret: String = randomString(28),
-             accessToken: String = randomString(28)) = {
+             accessToken: String = randomString(28)): ApplicationTokens = {
 
     ApplicationTokens(EnvironmentToken(clientId, Seq(aClientSecret(clientSecret)), accessToken))
   }
 
-  private def aClientSecret(secret: String = randomString(28)) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret(secret: String = randomString(28)) =
+    ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
-  implicit class AppAugment(val app: Application) {
-    val standardAccess = app.access.asInstanceOf[Standard]
+   implicit class AppAugment(val app: Application) {
+    final def withName(name: String): Application = app.copy(name = name)
 
-    final def withName(name: String) = app.copy(name = name)
+    final def withDescription(description: Option[String]): Application = app.copy(description = description)
 
-    final def withDescription(description: Option[String]) = app.copy(description = description)
+    final def withTeamMember(email: String, userRole: Role): Application = app.copy(collaborators = app.collaborators + Collaborator(email, userRole))
 
-    final def withRedirectUri(redirectUri: String) = app.copy(access = standardAccess.copy(redirectUris = standardAccess.redirectUris :+ redirectUri))
+    final def withTeamMembers(teamMembers: Set[Collaborator]): Application = app.copy(collaborators = teamMembers)
 
-    final def withRedirectUris(redirectUris: Seq[String]) = app.copy(access = standardAccess.copy(redirectUris = redirectUris))
+    final def withState(state: ApplicationState): Application = app.copy(state = state)
 
-    final def withTermsAndConditionsUrl(url: Option[String]) = app.copy(access = standardAccess.copy(termsAndConditionsUrl = url))
+    final def withEnvironment(environment: Environment): Application = app.copy(deployedTo = environment)
 
-    final def withPrivacyPolicyUrl(url: Option[String]) = app.copy(access = standardAccess.copy(privacyPolicyUrl = url))
+    final def withCheckInformation(checkInformation: CheckInformation): Application = app.copy(checkInformation = Some(checkInformation))
+  }
 
-    final def withTeamMember(email: String, userRole: Role) = app.copy(collaborators = app.collaborators + Collaborator(email, userRole))
+  implicit class AppAugment2(val app: Application) {
+    def standardAccess(): Standard = {
+      if (app.access.accessType != AccessType.STANDARD) {
+        throw new IllegalArgumentException(s"You can only use this method on a Standard application. Your app was ${app.access.accessType}")
+      } else {
+        app.access.asInstanceOf[Standard]
+      }
+    }
 
-    final def withTeamMembers(teamMembers: Set[Collaborator]) = app.copy(collaborators = teamMembers)
+    final def withRedirectUri(redirectUri: String): Application =
+      app.copy(access = standardAccess().copy(redirectUris = standardAccess().redirectUris :+ redirectUri))
 
-    final def withState(state: ApplicationState) = app.copy(state = state)
+    final def withRedirectUris(redirectUris: Seq[String]): Application = app.copy(access = standardAccess().copy(redirectUris = redirectUris))
 
-    final def withEnvironment(environment: Environment) = app.copy(deployedTo = environment)
+    final def withTermsAndConditionsUrl(url: Option[String]): Application = app.copy(access = standardAccess().copy(termsAndConditionsUrl = url))
+
+    final def withPrivacyPolicyUrl(url: Option[String]): Application = app.copy(access = standardAccess().copy(privacyPolicyUrl = url))
   }
 }
-
 
 object TestApplications extends TestApplications

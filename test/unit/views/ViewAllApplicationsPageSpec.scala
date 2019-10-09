@@ -19,6 +19,7 @@ package unit.views
 import config.ApplicationConfig
 import controllers.ApplicationSummary
 import domain._
+import helpers.DateFormatter.formatLastAccessDate
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -26,11 +27,12 @@ import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 
 class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
-  val appConfig = mock[ApplicationConfig]
+  val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
   "veiw all applications page" should {
 
@@ -55,23 +57,25 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       val appName = "App name 1"
       val appEnvironment = "Sandbox"
       val appUserRole = Role.ADMINISTRATOR
+      val appLastAccess = DateTimeUtils.now
 
-      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole, TermsOfUseStatus.NOT_APPLICABLE, State.TESTING ))
+      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
       elementExistsByText(document, "h1", "View all applications") shouldBe true
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
-      elementIdentifiedByAttrContainsText(document, "td", "data-app-environment", appEnvironment) shouldBe true
+      elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", formatLastAccessDate(appLastAccess)) shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
-
     }
 
     "alert the user to agreeing to the terms of use on prod apps iff relevant" should {
 
       def shouldViewWithAppShowAlert(environment: String, termsOfUseStatus: TermsOfUseStatus, shouldAlert: Boolean) = {
 
-        val appSummaries = Seq(ApplicationSummary("1111", "App name 1", environment, Role.ADMINISTRATOR, termsOfUseStatus, State.TESTING ))
+        val appSummaries = Seq(ApplicationSummary("1111", "App name 1", environment, Role.ADMINISTRATOR,
+          termsOfUseStatus, State.TESTING, DateTimeUtils.now))
 
         val document = Jsoup.parse(renderPage(appSummaries).body)
 
