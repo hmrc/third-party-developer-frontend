@@ -32,7 +32,7 @@ object Permissions {
 
   case object AdministratorOnly extends Permission {
     override def hasPermissions(app: Application, developer: Developer): Boolean =
-      app.isAdmin(developer)
+      app.role(developer.email).contains(Role.ADMINISTRATOR)
   }
 
   case object TeamMembersOnly extends Permission {

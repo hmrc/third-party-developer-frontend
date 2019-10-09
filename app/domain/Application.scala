@@ -307,18 +307,8 @@ case class Application(id: String,
 
   def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
 
-  private def hasRole(desiredRole: Role)(developer: Developer): Boolean = {
-    role(developer.email).contains(desiredRole)
-  }
-
-  def isAdmin: Developer => Boolean = hasRole(Role.ADMINISTRATOR)
-
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
-
-  def has(capability: Capability): Boolean = {
-    capability.hasCapability(this)
-  }
 
   def hasPermission(capability: Capability, developer: Developer, permission: Permission = SandboxOrAdmin): Boolean = {
     capability.hasCapability(this) && permission.hasPermissions(this, developer)
