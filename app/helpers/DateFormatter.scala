@@ -29,8 +29,10 @@ object DateFormatter {
     standardFormatter.print(dateTime)
   }
 
-  def formatLastAccessDate(lastAccessDate: DateTime): String = {
-    if (daysBetween(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
+  def formatLastAccessDate(lastAccessDate: DateTime, createdOnDate: DateTime): String = {
+    if (lastAccessDate.isEqual(createdOnDate)) {
+      "never used"
+    } else if (daysBetween(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
       standardFormatter.print(lastAccessDate)
     } else {
       s"more than ${monthsBetween(lastAccessDate, now).getMonths} months ago"

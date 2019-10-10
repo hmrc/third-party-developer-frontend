@@ -97,7 +97,7 @@
                             @if(app.role == Role.ADMINISTRATOR) {Admin}
                             @if(app.role == Role.DEVELOPER) {Developer}
                         </td>
-                        <td data-app-lastAccess>@{formatLastAccessDate(app.lastAccess)}</td>
+                        <td data-app-lastAccess>@{formatLastAccessDate(app.lastAccess, app.createdOn).capitalize}</td>
                         @if(includeTermsOfUseColumn) {
                             <td id="terms-of-use-@{app.id}" data-app-terms-of-use>@(app.termsOfUseStatus, app.role, app.state) match {
                                 case (TermsOfUseStatus.AGREEMENT_REQUIRED, Role.ADMINISTRATOR, State.TESTING) => {<a href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>}
