@@ -57,8 +57,8 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       val appName = "App name 1"
       val appEnvironment = "Sandbox"
       val appUserRole = Role.ADMINISTRATOR
-      val appLastAccess = DateTimeUtils.now
       val appCreatedOn = DateTimeUtils.now
+      val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
         TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn))
