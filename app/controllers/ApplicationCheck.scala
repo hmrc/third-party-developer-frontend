@@ -18,7 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
-import domain.Capabilities.SupportsInTesting
+import domain.Capabilities.SupportsAppChecks
 import domain.Permissions.AdministratorOnly
 import domain._
 import javax.inject.{Inject, Singleton}
@@ -45,7 +45,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 
   private def canUseChecksAction(applicationId: String)
                         (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(SupportsInTesting,AdministratorOnly)(applicationId)(fun)
+    capabilityThenPermissionsAction(SupportsAppChecks,AdministratorOnly)(applicationId)(fun)
 
   def requestCheckPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val application = request.application

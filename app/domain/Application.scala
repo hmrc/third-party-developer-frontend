@@ -18,6 +18,7 @@ package domain
 
 import controllers.{AddApplicationForm, AddRedirectForm, ChangeRedirectForm, DeleteRedirectConfirmationForm, EditApplicationForm, GroupedSubscriptions}
 import domain.AccessType.{PRIVILEGED, STANDARD}
+import domain.Capabilities.{SupportsDetails, SupportsProductionClientSecret}
 import domain.Environment.{PRODUCTION, SANDBOX}
 import domain.Permissions._
 import domain.Role.ADMINISTRATOR
@@ -309,9 +310,10 @@ case class Application(id: String,
 
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
+  def hasCapability(capability: Capability): Boolean = capability.hasCapability(this)
 
   def hasPermission(capability: Capability, developer: Developer, permission: Permission = SandboxOrAdmin): Boolean = {
-    capability.hasCapability(this) && permission.hasPermissions(this, developer)
+    hasCapability(capability) && permission.hasPermissions(this, developer)
   }
 
   def termsOfUseStatus: TermsOfUseStatus = {
@@ -334,23 +336,9 @@ case class Application(id: String,
     case _ => None
   }
 
-  def isPermittedToEditAppDetails(developer: Developer): Boolean =
-    (deployedTo, access.accessType, role(developer.email)) match {
-      case (_,AccessType.ROPC, _) => false
-      case (_,PRIVILEGED, _) => false
+  def isPermittedToEditAppDetails(developer: Developer): Boolean = hasPermission(SupportsDetails, developer, SandboxOrAdmin)
 
-      case (SANDBOX, _, _) => true
-      case (_, STANDARD, Some(ADMINISTRATOR)) => true
-      case _ => false
-    }
-
-  def canViewCredentials(developer: Developer): Boolean = {
-    (deployedTo, state.name, role(developer.email)) match {
-      case (SANDBOX, _, _) => true
-      case (PRODUCTION, State.PRODUCTION, Some(ADMINISTRATOR)) => true
-      case _ => false
-    }
-  }
+  def canViewCredentials(developer: Developer): Boolean = hasPermission(SupportsProductionClientSecret, developer, SandboxOrAdmin)
 
   def canPerformApprovalProcess(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
@@ -364,7 +352,7 @@ case class Application(id: String,
 
   def canViewServerToken(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (SANDBOX, STANDARD, _, _) => true
+      case (SANDBOX, STANDARD, State.PRODUCTION, _) => true
       case (PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
       case _ => false
     }

@@ -18,7 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import domain.Capabilities.{HasLockedSubscriptions, SupportsSubscriptions}
+import domain.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain.SubscriptionRedirect._
 import domain._
@@ -48,7 +48,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   extends ApplicationController with ApplicationHelper {
 
   private def canManageLockedApiSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    permissionThenCapabilityAction(AdministratorOnly,HasLockedSubscriptions)(applicationId)(fun)
+    permissionThenCapabilityAction(AdministratorOnly,ManageLockedSubscriptions)(applicationId)(fun)
 
   private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     capabilityThenPermissionsAction(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)

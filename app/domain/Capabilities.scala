@@ -42,10 +42,11 @@ object Capabilities {
     def hasCapability(app: Application) = true
   }
   case object EditCredentials extends StandardAppCapability
+
   case object ChangeClientSecret extends StandardAppCapability
 
   case object SupportsProductionClientSecret extends Capability {
-    def hasCapability(app: Application): Boolean = app.access.accessType.isStandard && app.state.name == State.PRODUCTION
+    def hasCapability(app: Application): Boolean = app.access.accessType.isStandard && (app.deployedTo.isSandbox || app.state.name == State.PRODUCTION)
   }
 
   case object SupportsTeamMembers extends StandardAppCapability
@@ -54,7 +55,7 @@ object Capabilities {
 
   case object SupportsDetails extends StandardAppCapability
 
-  case object HasLockedSubscriptions extends Capability {
+  case object ManageLockedSubscriptions extends Capability {
     def hasCapability(app: Application) = app.hasLockedSubscriptions
   }
 
@@ -62,7 +63,11 @@ object Capabilities {
 
   case object SupportsDeletion extends StandardAppCapability
 
-  case object SupportsInTesting extends Capability {
+  case object SupportsAppChecks extends Capability {
     def hasCapability(app: Application): Boolean = app.state.name == State.TESTING
+  }
+
+  case object SupportChangingAppDetails extends Capability {
+    def hasCapability(app: Application): Boolean = app.state.name == State.TESTING || app.deployedTo.isSandbox
   }
 }
