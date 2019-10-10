@@ -18,6 +18,7 @@ package helpers
 
 import org.joda.time.DateTime
 import org.joda.time.Months.monthsBetween
+import org.joda.time.Seconds.secondsBetween
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.gov.hmrc.time.DateTimeUtils.{daysBetween, now}
 
@@ -30,7 +31,7 @@ object DateFormatter {
   }
 
   def formatLastAccessDate(lastAccessDate: DateTime, createdOnDate: DateTime): String = {
-    if (lastAccessDate.isEqual(createdOnDate)) {
+    if (secondsBetween(createdOnDate, lastAccessDate).getSeconds == 0) {
       "never used"
     } else if (daysBetween(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
       standardFormatter.print(lastAccessDate)

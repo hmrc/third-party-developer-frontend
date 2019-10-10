@@ -64,5 +64,11 @@ class DateFormatterSpec extends UnitSpec with ScalaFutures with MockitoSugar wit
       val createdDate = initialLastAccessDate.plusHours(3)
       DateFormatter.formatLastAccessDate(createdDate, createdDate) shouldBe "never used"
     }
+
+    "display 'never used' if the last access date is within a second of the created date" in {
+      val createdDate = initialLastAccessDate.plusHours(3)
+      DateFormatter.formatLastAccessDate(createdDate.plusMillis(900), createdDate) shouldBe "never used" // scalastyle:ignore magic.number
+      DateFormatter.formatLastAccessDate(createdDate.minusMillis(900), createdDate) shouldBe "never used" // scalastyle:ignore magic.number
+    }
   }
 }
