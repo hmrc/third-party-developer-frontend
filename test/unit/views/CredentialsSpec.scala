@@ -61,6 +61,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
       "Test Application Client ID",
       "Test Application",
       DateTime.now(),
+      DateTime.now(),
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR)),

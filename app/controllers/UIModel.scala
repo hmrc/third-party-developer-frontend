@@ -19,7 +19,7 @@ package controllers
 import controllers.APISubscriptions.subscriptionNumberLabel
 import domain.APIGroup._
 import domain._
-import enumeratum.{EnumEntry, PlayEnum}
+import org.joda.time.DateTime
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.NotFoundException
 
@@ -29,11 +29,12 @@ case class PageData(app: Application, tokens: ApplicationTokens, subscriptions: 
   lazy val hasSubscriptions = subscriptions.fold(false)(subs => subs.apis.exists(_.hasSubscriptions) || subs.testApis.exists(_.hasSubscriptions) || subs.exampleApi.exists(_.hasSubscriptions))
 }
 
-case class ApplicationSummary(id: String, name: String, environment: String, role: Role, termsOfUseStatus: TermsOfUseStatus, state: State)
+case class ApplicationSummary(id: String, name: String, environment: String, role: Role,
+                              termsOfUseStatus: TermsOfUseStatus, state: State, lastAccess: DateTime)
 
 object ApplicationSummary {
   def from(app: Application, email: String) = ApplicationSummary(app.id, app.name, app.deployedTo.toString.toLowerCase.capitalize,
-    app.role(email).getOrElse(throw new NotFoundException("Role not found")), app.termsOfUseStatus, app.state.name)
+    app.role(email).getOrElse(throw new NotFoundException("Role not found")), app.termsOfUseStatus, app.state.name, app.lastAccess)
 }
 
 case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISubscriptions], exampleApi: Option[APISubscriptions] = None)

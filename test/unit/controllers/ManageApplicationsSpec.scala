@@ -54,7 +54,7 @@ class ManageApplicationsSpec
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
@@ -156,7 +156,7 @@ class ManageApplicationsSpec
       termsOfUseIndicatorExistsWithText(dom, appWithTermsOfUseAgreed.id, "Agreed") shouldBe true
     }
 
-    "show the terms of use not applicable indication for a sandbox app" in new Setup {
+    "not show the terms of use indication for a sandbox app" in new Setup {
 
       private val sandboxApp = application.copy(id = "56768", deployedTo = Environment.SANDBOX)
 
@@ -169,7 +169,7 @@ class ManageApplicationsSpec
       private val dom = Jsoup.parse(bodyOf(result))
       termsOfUseWarningExists(dom) shouldBe true
       termsOfUseColumnExists(dom) shouldBe true
-      termsOfUseIndicatorExistsWithText(dom, sandboxApp.id, "Not applicable") shouldBe true
+      termsOfUseIndicatorExistsWithId(dom, sandboxApp.id) shouldBe false
     }
 
     "not show the terms of use warning and column when there are no apps requiring terms of use agreement" in new Setup {
@@ -272,5 +272,9 @@ class ManageApplicationsSpec
 
   private def termsOfUseIndicatorExistsWithText(doc: Document, id: String, text: String) = {
     elementIdentifiedByAttrWithValueContainsText(doc, "td", "id", s"terms-of-use-$id", text)
+  }
+
+  private def termsOfUseIndicatorExistsWithId(doc: Document, id: String) = {
+    elementExistsById(doc, s"terms-of-use-$id")
   }
 }

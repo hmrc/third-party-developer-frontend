@@ -44,7 +44,7 @@ class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPe
 
   case class Page(role: Role, environment: Environment, state: ApplicationState) {
     lazy val body: Document = {
-      val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, environment, Some("Description 1"),
+      val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, environment, Some("Description 1"),
         Set(Collaborator(loggedInUser.email, role)), state = state,
         access = Standard(redirectUris = Seq("https://red1.example.com", "https://red2.example.con"), termsAndConditionsUrl = Some("http://tnc-url.example.com")))
 

@@ -53,7 +53,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   val appId = "1234"
   val clientId = "clientId123"
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
@@ -89,7 +89,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
                                              environment: Environment = Environment.PRODUCTION)
                                                 : BDDMockito.BDDMyOngoingStubbing[Future[Seq[APISubscriptionStatus]]] = {
 
-      val application = Application(appId, clientId, "app", DateTimeUtils.now, environment,
+      val application = Application(appId, clientId, "app", DateTimeUtils.now, DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), state = state, access = access)
 
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(application)

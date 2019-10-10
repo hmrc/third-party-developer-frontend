@@ -38,6 +38,7 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
         "CLIENT_ID",
         "APPLICATION NAME",
         DateTimeUtils.now,
+        DateTimeUtils.now,
         Environment.PRODUCTION,
         Some("APPLICATION DESCRIPTION"),
         Set(Collaborator("sample@example.com", Role.ADMINISTRATOR), Collaborator("someone@example.com", Role.DEVELOPER)),

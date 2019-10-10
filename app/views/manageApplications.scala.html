@@ -14,12 +14,10 @@
  * limitations under the License.
  *@
 
-@import domain.Role
-@import domain.TermsOfUseStatus
-@import domain.DeveloperSession
-@import domain.State
-@import model.Crumb
+@import domain.{DeveloperSession, Role, State, TermsOfUseStatus}
+@import helpers.DateFormatter.formatLastAccessDate
 @import include._
+@import model.Crumb
 
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 
@@ -65,45 +63,54 @@
 }
 
 @applicationList(applications: Seq[controllers.ApplicationSummary]) = {
-    @defining(applications.exists(_.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED)) { includeTermsOfUseColumn =>
+    @defining(applications.partition(_.environment == "Production")) { case (productionApps, sandboxApps) =>
+        @applicationTable(productionApps)
+        <br>
+        @applicationTable(sandboxApps)
+    }
+}
 
-    <table>
-        <caption class="visually-hidden">Applications</caption>
-        <colgroup>
-            <col/>
-            <col/>
-            <col/>
-            @if(includeTermsOfUseColumn) {<col width="25%"/>}
-        </colgroup>
-        <thead>
-            <th>Application name</th>
-            <th>Environment</th>
-            <th>Your role</th>
-            @if(includeTermsOfUseColumn) {<th>Terms of use</th>}
-        </thead>
-        <tbody>
-        @for(app<-applications) {
-            <tr>
-                <td>
-                    <a href="@{routes.Details.details(app.id)}" data-app-name>@app.name</a>
-                </td>
-                <td data-app-environment>@app.environment</td>
-                <td data-app-user-role>
-                    @if(app.role.isAdministrator) {Admin}
-                    @if(app.role.isDeveloper) {Developer}
-                </td>
-                @if(includeTermsOfUseColumn) {
-                <td id="terms-of-use-@{app.id}" data-app-terms-of-use>@(app.termsOfUseStatus, app.role, app.state) match {
-                        case (TermsOfUseStatus.AGREEMENT_REQUIRED, Role.ADMINISTRATOR, State.TESTING) => {<a href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>}
-                        case (TermsOfUseStatus.AGREEMENT_REQUIRED, Role.ADMINISTRATOR, _) => { <a class="button" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a> }
-                        case (TermsOfUseStatus.AGREEMENT_REQUIRED, _, _) => {Need admin rights}
-                        case (TermsOfUseStatus.AGREED, _, _) => {Agreed}
-                        case (_, _, _) => {Not applicable}
-                    }</td>
+@applicationTable(applications: Seq[controllers.ApplicationSummary]) = {
+    @if(applications.nonEmpty) {
+        @defining(applications.exists(_.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED)) { includeTermsOfUseColumn =>
+            <table>
+                <caption class="visually-hidden">Applications</caption>
+                <colgroup>
+                    <col/>
+                    <col width="20%"/>
+                    <col width="30%"/>
+                    @if(includeTermsOfUseColumn) {<col width="25%"/>}
+                </colgroup>
+                <thead>
+                    <th>@{applications.head.environment} applications</th>
+                    <th>Your role</th>
+                    <th>Last API call</th>
+                    @if(includeTermsOfUseColumn) {<th>Terms of use</th>}
+                </thead>
+                <tbody>
+                @for(app<-applications) {
+                    <tr>
+                        <td>
+                            <a href="@{routes.Details.details(app.id)}" data-app-name>@app.name</a>
+                        </td>
+                        <td data-app-user-role>
+                            @if(app.role.isAdministrator) {Admin}
+                            @if(app.role.isDeveloper) {Developer}
+                        </td>
+                        <td data-app-lastAccess>@{formatLastAccessDate(app.lastAccess)}</td>
+                        @if(includeTermsOfUseColumn) {
+                            <td id="terms-of-use-@{app.id}" data-app-terms-of-use>@(app.termsOfUseStatus, app.role, app.state) match {
+                                case (TermsOfUseStatus.AGREEMENT_REQUIRED, Role.ADMINISTRATOR, State.TESTING) => {<a href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>}
+                                case (TermsOfUseStatus.AGREEMENT_REQUIRED, Role.ADMINISTRATOR, _) => { <a class="button" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a> }
+                                case (TermsOfUseStatus.AGREEMENT_REQUIRED, _, _) => {Need admin rights}
+                                case (TermsOfUseStatus.AGREED, _, _) => {Agreed}
+                                case (_, _, _) => {Not applicable}
+                            }</td>
+                        }
+                    </tr>
                 }
-            </tr>
+                </tbody>
+            </table>
         }
-        </tbody>
-    </table>
     }
 }
