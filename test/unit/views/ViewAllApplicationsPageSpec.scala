@@ -58,15 +58,16 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       val appEnvironment = "Sandbox"
       val appUserRole = Role.ADMINISTRATOR
       val appLastAccess = DateTimeUtils.now
+      val appCreatedOn = DateTimeUtils.now
 
       val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess))
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
       elementExistsByText(document, "h1", "View all applications") shouldBe true
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
-      elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", formatLastAccessDate(appLastAccess)) shouldBe true
+      elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "Never used") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
     }
 
@@ -75,7 +76,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       def shouldViewWithAppShowAlert(environment: String, termsOfUseStatus: TermsOfUseStatus, shouldAlert: Boolean) = {
 
         val appSummaries = Seq(ApplicationSummary("1111", "App name 1", environment, Role.ADMINISTRATOR,
-          termsOfUseStatus, State.TESTING, DateTimeUtils.now))
+          termsOfUseStatus, State.TESTING, DateTimeUtils.now, DateTimeUtils.now))
 
         val document = Jsoup.parse(renderPage(appSummaries).body)
 

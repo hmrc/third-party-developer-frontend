@@ -36,10 +36,10 @@
 
 <div class="metadata-wrapper"></div>
 <p class="metadata">
-    Created @{formatDate(app.createdOn)}
+    Created: @{formatDate(app.createdOn)}
 </p>
 <p class="metadata">
-    Last API call @{formatLastAccessDate(app.lastAccess)}
+    Last API call: @{formatLastAccessDate(app.lastAccess, app.createdOn)}
 </p>
 
 <br>
