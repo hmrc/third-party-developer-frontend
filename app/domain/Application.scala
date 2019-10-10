@@ -313,8 +313,12 @@ case class Application(id: String,
 
   def hasCapability(capability: Capability): Boolean = capability.hasCapability(this)
 
-  def hasPermission(capability: Capability, developer: Developer, permission: Permission = SandboxOrAdmin): Boolean = {
-    hasCapability(capability) && permission.hasPermissions(this, developer)
+  def allows(capability: Capability, developer: Developer, permission: Permission): Boolean = {
+    hasCapability(capability) && permits(developer, permission)
+  }
+
+  def permits(developer: Developer, permission: Permission = SandboxOrAdmin): Boolean = {
+    permission.hasPermissions(this, developer)
   }
 
   def termsOfUseStatus: TermsOfUseStatus = {
@@ -337,9 +341,9 @@ case class Application(id: String,
     case _ => None
   }
 
-  def isPermittedToEditAppDetails(developer: Developer): Boolean = hasPermission(SupportsDetails, developer, SandboxOrAdmin)
+  def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOrAdmin)
 
-  def canViewCredentials(developer: Developer): Boolean = hasPermission(SupportsProductionClientSecret, developer, SandboxOrAdmin)
+  def canViewCredentials(developer: Developer): Boolean = allows(SupportsProductionClientSecret, developer, SandboxOrAdmin)
 
   def canPerformApprovalProcess(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
