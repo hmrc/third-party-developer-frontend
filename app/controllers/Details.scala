@@ -43,7 +43,6 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
   }
 
   def changeDetails(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
-    println("*** changeDetails")
     Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), request.application)))
   }
 

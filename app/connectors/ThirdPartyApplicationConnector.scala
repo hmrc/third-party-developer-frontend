@@ -16,11 +16,12 @@
 
 package connectors
 
-import config.ApplicationConfig
-import domain.DefinitionFormats._
-import domain._
 import java.net.URLEncoder.encode
 
+import config.ApplicationConfig
+import domain.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
+import domain.DefinitionFormats._
+import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
@@ -162,6 +163,14 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
                           deleteClientSecretsRequest: DeleteClientSecretsRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     http.POST(s"$serviceBaseUrl/application/$appId/revoke-client-secrets", deleteClientSecretsRequest) map { _ =>
       ApplicationUpdateSuccessful
+    } recover recovery
+  }
+
+  def validateName(name: String)(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+    val body = ApplicationNameValidationRequest(name)
+
+    http.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](s"$serviceBaseUrl/application/name/validate", body) map {
+      ApplicationNameValidationResult.apply
     } recover recovery
   }
 

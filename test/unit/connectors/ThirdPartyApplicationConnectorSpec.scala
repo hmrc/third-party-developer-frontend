@@ -20,10 +20,11 @@ import java.net.URLEncoder.encode
 
 import config.ApplicationConfig
 import connectors.{NoopConnectorMetrics, ProxiedHttpClient, ThirdPartyApplicationConnector}
+import domain.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => meq}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.ContentTypes.JSON
@@ -537,6 +538,28 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       intercept[ApplicationNotFound] {
         await(connector.deleteClientSecrets(applicationId, deleteClientSecretsRequest))
       }
+    }
+  }
+
+
+  "validateName" should {
+    val url = s"$baseUrl/application/name/validate"
+
+    "returns a valid response" in new Setup {
+
+      val applicationName = "my valid application name"
+
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful( ApplicationNameValidationResult(None)))
+
+      val result = await(connector.validateName(applicationName))
+
+      result shouldBe Valid
+
+      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+
+      verify(mockHttpClient)
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
     }
   }
 
