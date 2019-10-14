@@ -39,6 +39,7 @@
     <h1 class="heading-xlarge">Change a redirect URI</h1>
 
     @appEnvironment(application)
+    <br>
 
     @helper.form(action = controllers.routes.Redirects.changeRedirectAction(application.id), 'class -> "form") {
         @helper.CSRF.formField

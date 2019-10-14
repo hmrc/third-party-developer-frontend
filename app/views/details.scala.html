@@ -15,10 +15,10 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment, DeveloperSession, Role, State, TermsOfUseStatus}
+@import domain.{Application, DeveloperSession, TermsOfUseStatus}
+@import helpers.DateFormatter.{formatDate, formatLastAccessDate}
 @import include._
 @import model.Crumb
-@import uk.gov.hmrc.urls.Link
 @import org.joda.time.format.DateTimeFormat
 
 @(app: Application)(
@@ -40,6 +40,18 @@
     </header>
 
     @appEnvironment(app)
+
+    <div class="metadata-wrapper"></div>
+    <p class="metadata">
+        Created @{formatDate(app.createdOn)}
+    </p>
+    <p class="metadata">
+    @{formatLastAccessDate(app.lastAccess, app.createdOn) match {
+        case Some(formattedDate) => s"Last API call $formattedDate"
+        case _ => "No API called"
+    }}
+    </p>
+    <br>
 
     @if(app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED && app.isPermittedToEditAppDetails(loggedIn.developer)) {
         <div id="termsOfUseWarning" class="notice">

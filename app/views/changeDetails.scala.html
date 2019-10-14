@@ -42,6 +42,7 @@
     </header>
 
     @appEnvironment(app)
+    <br>
 
     @helper.form(action = controllers.routes.Details.changeDetailsAction(app.id), 'class -> "form") {
         @helper.CSRF.formField
