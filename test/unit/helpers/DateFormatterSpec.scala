@@ -37,7 +37,7 @@ class DateFormatterSpec extends UnitSpec with ScalaFutures with MockitoSugar wit
   "formatDate" should {
     "use long date format" in {
       val dateTime = new DateTime(2019, 1, 1, 0, 0) // scalastyle:ignore magic.number
-      DateFormatter.formatDate(dateTime) shouldBe "01 January 2019"
+      DateFormatter.formatDate(dateTime) shouldBe "1 January 2019"
     }
   }
 
@@ -45,24 +45,30 @@ class DateFormatterSpec extends UnitSpec with ScalaFutures with MockitoSugar wit
     "use long date format for dates after the initial last access date" in {
       val lastAccessDate = initialLastAccessDate.plusDays(1)
       val createdOnDate = lastAccessDate.minusHours(1)
-      DateFormatter.formatLastAccessDate(lastAccessDate, createdOnDate) shouldBe "26 June 2019"
+      DateFormatter.formatLastAccessDate(lastAccessDate, createdOnDate) shouldBe Some("26 June 2019")
     }
 
     "use inexact format for dates before the initial last access date" in {
       val lastAccessDate = initialLastAccessDate.minusDays(1)
       val createdOnDate = lastAccessDate.minusHours(1)
-      DateFormatter.formatLastAccessDate(lastAccessDate, createdOnDate) shouldBe "more than 2 months ago"
+      DateFormatter.formatLastAccessDate(lastAccessDate, createdOnDate) shouldBe Some("more than 2 months ago")
     }
 
     "use inexact format for dates on the initial last access date" in {
       val lastAccessDate = initialLastAccessDate.plusHours(3)
       val createdOnDate = lastAccessDate.minusHours(1)
-      DateFormatter.formatLastAccessDate(lastAccessDate, createdOnDate) shouldBe "more than 2 months ago"
+      DateFormatter.formatLastAccessDate(lastAccessDate, createdOnDate) shouldBe Some("more than 2 months ago")
     }
 
     "display 'never used' if the last access date is the same as the created date" in {
       val createdDate = initialLastAccessDate.plusHours(3)
-      DateFormatter.formatLastAccessDate(createdDate, createdDate) shouldBe "never used"
+      DateFormatter.formatLastAccessDate(createdDate, createdDate) shouldBe None
+    }
+
+    "display 'never used' if the last access date is within a second of the created date" in {
+      val createdDate = initialLastAccessDate.plusHours(3)
+      DateFormatter.formatLastAccessDate(createdDate.plusMillis(900), createdDate) shouldBe None // scalastyle:ignore magic.number
+      DateFormatter.formatLastAccessDate(createdDate.minusMillis(900), createdDate) shouldBe None // scalastyle:ignore magic.number
     }
   }
 }
