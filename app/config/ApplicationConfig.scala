@@ -37,6 +37,8 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   val thirdPartyApplicationSandboxUrl = thirdPartyApplicationUrl("third-party-application-sandbox")
   val thirdPartyApplicationSandboxBearerToken = bearerToken("third-party-application-sandbox")
   val thirdPartyApplicationSandboxUseProxy = useProxy("third-party-application-sandbox")
+  val thirdPartyApplicationProductionApiKey = apiKey("third-party-application-production")
+  val thirdPartyApplicationSandboxApiKey = apiKey("third-party-application-sandbox")
   val deskproUrl = baseUrl("hmrc-deskpro")
 
   lazy val contactPath = runModeConfiguration.getString(s"$env.contactPath").getOrElse("")
