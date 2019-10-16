@@ -122,6 +122,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(applicationcheck.confirmName(request.application, NameForm.form.fill(NameForm(request.application.name)))))
   }
 
+  // TODO: add name validation service
   def nameAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
     val requestForm = NameForm.form.bindFromRequest
     val app = request.application

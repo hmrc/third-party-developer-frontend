@@ -226,7 +226,7 @@ class FormValidationSpec extends UnitSpec with Matchers {
 
     "validate name in wrong format and generate error when an name is not valid" in {
       val boundForm = AddApplicationForm.form.bind(validAddAplicationForm + ("applicationName" -> "a"))
-      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.field")))
+      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.and.characters")))
       boundForm.globalErrors shouldBe List()
     }
 
@@ -256,7 +256,7 @@ class FormValidationSpec extends UnitSpec with Matchers {
 
     "validate name in wrong format and generate error when an name is not valid" in {
       val boundForm = EditApplicationForm.form.bind(validEditApplicationForm + ("applicationName" -> "a"))
-      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.field")))
+      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.and.characters")))
       boundForm.globalErrors shouldBe List()
     }
 
@@ -285,7 +285,7 @@ class FormValidationSpec extends UnitSpec with Matchers {
 
         "validate name in wrong format and generate error when an name is not valid" in {
           val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm + ("applicationName" -> "a"))
-          boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.field")))
+          boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.and.characters")))
           boundForm.globalErrors shouldBe List()
         }
 

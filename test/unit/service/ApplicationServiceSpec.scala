@@ -803,5 +803,33 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
   }
 
+  "validate application name" should {
+    "call the application connector validate method in sandbox" in new Setup {
+      private val applicationName = "applicationName"
+
+      given(mockSandboxApplicationConnector.validateName(any())(any[HeaderCarrier]))
+        .willReturn(Valid)
+
+      val result = await (service.isApplicationNameValid(applicationName, Environment.SANDBOX))
+
+      result shouldBe Valid
+
+      verify(mockSandboxApplicationConnector).validateName(mockEq(applicationName))(mockEq(hc))
+    }
+
+    "call the application connector validate method in production" in new Setup {
+      private val applicationName = "applicationName"
+
+      given(mockProductionApplicationConnector.validateName(any())(any[HeaderCarrier]))
+        .willReturn(Valid)
+
+      val result = await (service.isApplicationNameValid(applicationName, Environment.PRODUCTION))
+
+      result shouldBe Valid
+
+      verify(mockProductionApplicationConnector).validateName(mockEq(applicationName))(mockEq(hc))
+    }
+  }
+
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now)
 }

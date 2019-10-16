@@ -118,7 +118,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
       val result: Seq[SubscriptionField] = await(underTest.fetchFields(application, apiContext, apiVersion))
       result shouldBe Seq.empty[SubscriptionField]
 
-      verify(mockSubscriptionFieldsConnector, Mockito.times(0)).fetchFieldValues(any(), any(), any())(any())
+      verify(mockSubscriptionFieldsConnector, Mockito.times(0))
+        .fetchFieldValues(any(), any(), any())(any())
     }
   }
 
