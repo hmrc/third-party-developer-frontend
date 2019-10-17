@@ -56,7 +56,7 @@
         @maskedContent(secret, accessibleText = s"client secret ${i + 1}", secure = app.deployedTo.isProduction, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
     }
 
-    @if(app.allows(EditCredentials, developer, SandboxOrAdmin)){
+    @if(app.allows(ChangeClientSecret, developer, SandboxOrAdmin)){
         @if(token.clientSecrets.size < 5) {
             <div>
             @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {

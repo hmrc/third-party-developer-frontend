@@ -17,8 +17,8 @@
 package domain
 
 import controllers.{AddApplicationForm, AddRedirectForm, ChangeRedirectForm, DeleteRedirectConfirmationForm, EditApplicationForm, GroupedSubscriptions}
-import domain.AccessType.{PRIVILEGED, STANDARD}
-import domain.Capabilities.{SupportsDetails, SupportsProductionClientSecret}
+import domain.AccessType.STANDARD
+import domain.Capabilities.{HasReachedProductionState, SupportsDetails}
 import domain.Environment.{PRODUCTION, SANDBOX}
 import domain.Permissions._
 import domain.Role.ADMINISTRATOR
@@ -343,7 +343,10 @@ case class Application(id: String,
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOrAdmin)
 
-  def canViewCredentials(developer: Developer): Boolean = allows(SupportsProductionClientSecret, developer, SandboxOrAdmin)
+  /*
+  Allows access to at least one of (client id, client secrets and server token) (where appropriate)
+   */
+  def canViewClientCredentials(developer: Developer): Boolean = allows(HasReachedProductionState, developer, SandboxOrAdmin)
 
   def canPerformApprovalProcess(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
