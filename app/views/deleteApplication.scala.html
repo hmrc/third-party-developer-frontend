@@ -38,7 +38,7 @@
     @appEnvironment(app)
     <br>
 
-    @if(app.deployedTo == Environment.SANDBOX || roleOfLoggedIn == Role.ADMINISTRATOR) {
+    @if(app.deployedTo.isSandbox || roleOfLoggedIn.isAdministrator) {
         <p>
             Before requesting to delete this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
             team members</a>.

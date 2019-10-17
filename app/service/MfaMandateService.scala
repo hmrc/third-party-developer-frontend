@@ -46,10 +46,10 @@ class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicat
   private def isAdminOnProductionApplication(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     applicationService.fetchByTeamMemberEmail(email).map(applications =>
       applications
-        .filter(app => app.deployedTo == Environment.PRODUCTION)
+        .filter(app => app.deployedTo.isProduction)
         .flatMap(app => app.collaborators)
         .filter(collaborators => collaborators.emailAddress == email)
-        .exists(collaborator => collaborator.role == Role.ADMINISTRATOR)
+        .exists(collaborator => collaborator.role.isAdministrator)
     )
   }
 

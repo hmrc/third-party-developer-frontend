@@ -63,6 +63,7 @@ abstract class LoggedInController extends BaseController with AuthElement {
   }
 }
 
+// TODO : Can we remove role ???
 case class ApplicationRequest[A](application: Application, role: Role, user: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
 
 abstract class ApplicationController()
@@ -70,40 +71,32 @@ abstract class ApplicationController()
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): User = request.user
 
-  def adminOnStandardApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                        (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    teamMemberOnApp(applicationId, Seq(standardAppFilter, adminOnAppFilter) ++: furtherActionFunctions)(fun)
-
-  def sandboxOrAdminIfProductionForStandardApp(applicationId: String,
-                                               furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                                              (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    teamMemberOnApp(applicationId, Seq(standardAppFilter, sandboxOrAdminIfProductionAppFilter) ++: furtherActionFunctions)(fun)
-
-  def sandboxOrAdminIfProductionForAnyApp(applicationId: String,
-                                               furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                                              (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    teamMemberOnApp(applicationId, Seq(sandboxOrAdminIfProductionAppFilter) ++: furtherActionFunctions)(fun)
-
-  def teamMemberOnStandardApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                             (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    teamMemberOnApp(applicationId, standardAppFilter +: furtherActionFunctions)(fun)
-
-  def adminOnApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    teamMemberOnApp(applicationId, Seq(adminOnAppFilter) ++: furtherActionFunctions)(fun)
-
-  def adminOnTestingApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                       (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    teamMemberOnApp(applicationId, Seq(adminOnAppFilter, appInStateTestingFilter) ++: furtherActionFunctions)(fun)
-  }
-
-  def teamMemberOnApp(applicationId: String, furtherActionFunctions: Seq[ActionFunction[ApplicationRequest, ApplicationRequest]] = Seq.empty)
-                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  def whenTeamMemberOnApp(applicationId: String)
+                         (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>
-      val stackedActions = furtherActionFunctions.foldLeft(Action andThen applicationAction(applicationId, loggedIn))((a, af) => a.andThen(af))
+      val stackedActions = Action andThen applicationAction(applicationId, loggedIn)
       stackedActions.async(fun)(request)
     }
+
+  def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
+                                     (applicationId: String)
+                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
+      stackedActions.async(fun)(request)
+    }
+  }
+
+  def permissionThenCapabilityAction(permissions: Permission, capability: Capability)
+                                    (applicationId: String)
+                                    (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
+      stackedActions.async(fun)(request)
+    }
+  }
 }
+
 
 abstract class LoggedOutController()
   extends BaseController() with OptionalAuthElement {
@@ -121,7 +114,7 @@ abstract class LoggedOutController()
     AsyncStack {
       implicit request =>
         loggedIn match {
-          case Some(session) if session.loggedInState == LoggedInState.LOGGED_IN => loginSucceeded(request)
+          case Some(session) if session.loggedInState.isLoggedIn => loginSucceeded(request)
           case Some(_) | None => f(request)
         }
     }

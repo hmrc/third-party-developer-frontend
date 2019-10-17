@@ -134,7 +134,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     val requesterRole = roleForApplication(application, requesterEmail)
     val appId = application.id
 
-    if (environment == Environment.SANDBOX || requesterRole == Role.ADMINISTRATOR) {
+    if (environment.isSandbox || requesterRole.isAdministrator) {
       val deskproTicket = DeskproTicket.createForPrincipalApplicationDeletion(
         requesterName,
         requesterEmail,
@@ -164,7 +164,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
   def addTeamMember(app: Application, requestingEmail: String, teamMember: Collaborator)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse] = {
 
     val otherAdminEmails = app.collaborators
-      .filter(_.role == Role.ADMINISTRATOR)
+      .filter(_.role.isAdministrator)
       .map(_.emailAddress)
       .filterNot(_ == requestingEmail)
 
@@ -184,7 +184,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
                        requestingEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
 
     val otherAdminEmails = app.collaborators
-      .filter(_.role == Role.ADMINISTRATOR)
+      .filter(_.role.isAdministrator)
       .map(_.emailAddress)
       .filterNot(_ == requestingEmail)
       .filterNot(_ == teamMemberToRemove)

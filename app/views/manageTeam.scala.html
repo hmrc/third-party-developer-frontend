@@ -48,7 +48,7 @@
     <section class="hard--top flush--bottom">
         <h2 class="heading-large">Team members</h2>
 
-    @if(role == Role.DEVELOPER) {
+    @if(role.isDeveloper) {
         <p class="alert alert--info">You need admin rights to add or remove team members.</p>
     }
         <table class="table--spaced-top">
@@ -68,14 +68,14 @@
                 <tr data-teamMember-row="@teamMember.emailAddress">
                     <td class="table--large">@teamMember.emailAddress</td>
                     <td class="table--large text--left hard--left">
-                        @if(teamMember.role == Role.ADMINISTRATOR) {
+                        @if(teamMember.role.isAdministrator) {
                             <span>Admin</span>
                         }
-                        @if(teamMember.role == Role.DEVELOPER) {
+                        @if(teamMember.role.isDeveloper) {
                             <span>Developer</span>
                         }
                     </td>
-                    @if(role == Role.ADMINISTRATOR && (teamMember.role == Role.DEVELOPER || teamMember.emailAddress != loggedIn.email)) {
+                    @if(role.isAdministrator && (teamMember.role.isDeveloper || teamMember.emailAddress != loggedIn.email)) {
                         <td class="text--right hard--right">
                             <a href="@controllers.routes.ManageTeam.removeTeamMember(app.id, teamMember.emailAddress.toSha256).url">
                                 Remove <span class="visually-hidden">@teamMember.emailAddress</span>
@@ -93,7 +93,7 @@
     <br>
     <section>
 
-        @if(role == Role.ADMINISTRATOR) {
+        @if(role.isAdministrator) {
             <a href="@routes.ManageTeam.addTeamMember(app.id)" class="button">Add a team member</a>
         }
     </section>

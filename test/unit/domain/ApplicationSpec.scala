@@ -16,6 +16,8 @@
 
 package unit.domain
 
+import domain.Capabilities.{EditCredentials, ViewCredentials}
+import domain.Permissions.SandboxOrAdmin
 import domain._
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
@@ -46,7 +48,7 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.PRODUCTION, Privileged(), administrator, true)
     )
 
-    runTableTests(data, productionApplicationState)({ case (application, user) => application.canViewCredentials(user) })
+    runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(ViewCredentials,user, SandboxOrAdmin) })
   }
 
   describe("Application.isPermittedToEditAppDetails"){
@@ -89,7 +91,7 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.PRODUCTION, Privileged(), administrator, false)
     )
 
-    runTableTests(data, productionApplicationState)({ case (application, user) => application.canEditCredentials(user) })
+    runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(EditCredentials,user, SandboxOrAdmin)  })
   }
 
   describe("Application.canViewServerToken()") {
