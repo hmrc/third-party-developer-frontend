@@ -19,7 +19,7 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.FormKeys.clientSecretLimitExceeded
-import domain.Capabilities.{ChangeClientSecret, EditCredentials, SupportsProductionClientSecret, ViewCredentials}
+import domain.Capabilities.{ChangeClientSecret, HasReachedProductionState, ViewCredentials}
 import domain.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import domain._
 import javax.inject.{Inject, Singleton}
@@ -27,7 +27,7 @@ import play.api.Logger
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
-import play.api.mvc.{Action, ActionFunction, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, Result}
 import service.AuditAction.{LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount}
 import service._
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
@@ -47,22 +47,19 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   extends ApplicationController {
 
 
-  private def canViewClientCredentials(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def canViewClientCredentialsPage(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(ViewCredentials, TeamMembersOnly)(applicationId)(fun)
-
-  private def canRotateClientCredentials(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(EditCredentials, SandboxOrAdmin)(applicationId)(fun)
 
   private def canChangeClientSecrets(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(ChangeClientSecret, SandboxOrAdmin)(applicationId)(fun)
 
-  private def canViewProductionClientSecret(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(SupportsProductionClientSecret, SandboxOrAdmin)(applicationId)(fun)
+  private def canViewClientSecrets(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    capabilityThenPermissionsAction(HasReachedProductionState, SandboxOrAdmin)(applicationId)(fun)
 
 
 
   def credentials(applicationId: String, error: Option[String] = None) =
-    canViewClientCredentials(applicationId) { implicit request =>
+    canViewClientCredentialsPage(applicationId) { implicit request =>
       applicationService.fetchCredentials(applicationId).map { tokens =>
         val view = views.html.credentials(request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
         error.map(_ => BadRequest(view)).getOrElse(Ok(view))
@@ -71,7 +68,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
       }
   }
 
-  def addClientSecret(applicationId: String) = canRotateClientCredentials(applicationId) { implicit request =>
+  def addClientSecret(applicationId: String) = canChangeClientSecrets(applicationId) { implicit request =>
 
     def result(err: Option[String] = None): Result = Redirect(controllers.routes.Credentials.credentials(applicationId, err))
 
@@ -85,7 +82,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   }
 
   def getProductionClientSecret(applicationId: String, index: Integer) =
-    canViewProductionClientSecret(applicationId) { implicit request =>
+    canViewClientSecrets(applicationId) { implicit request =>
 
     def fetchClientSecret(password: String) = {
       val future = for {

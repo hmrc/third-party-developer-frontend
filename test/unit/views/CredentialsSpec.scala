@@ -71,11 +71,9 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
       checkInformation = None
     )
 
-    val sandboxApplication = application.copy(deployedTo = Environment.SANDBOX)
+    val sandboxApplication = application.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production("",""))
 
     val form = VerifyPasswordForm.form
-
-    val pageData = PageData(application, null, None)
 
     "render" in new Setup {
 

@@ -16,7 +16,7 @@
 
 package unit.domain
 
-import domain.Capabilities.{EditCredentials, ViewCredentials}
+import domain.Capabilities.{ChangeClientSecret, ViewCredentials}
 import domain.Permissions.SandboxOrAdmin
 import domain._
 import org.joda.time.DateTime
@@ -73,7 +73,7 @@ class ApplicationSpec extends FunSpec with Matchers {
     runTableTests(data, productionApplicationState)({ case (application, user) => application.isPermittedToEditAppDetails(user) })
   }
 
-  describe("Application.canEditCredentials()") {
+  describe("Application.allows(ChangeClientSecret,user, SandboxOrAdmin)") {
     val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
       (Environment.SANDBOX, Standard(), developer, true),
       (Environment.SANDBOX, Standard(), administrator, true),
@@ -91,7 +91,7 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.PRODUCTION, Privileged(), administrator, false)
     )
 
-    runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(EditCredentials,user, SandboxOrAdmin)  })
+    runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(ChangeClientSecret,user, SandboxOrAdmin)  })
   }
 
   describe("Application.canViewServerToken()") {
