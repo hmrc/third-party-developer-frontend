@@ -38,6 +38,7 @@
     @errorSummary(form)
     <h1 class="heading-xlarge">Delete application</h1>
     @appEnvironment(app)
+    <br>
     @helper.form(action = controllers.routes.DeleteApplication.deletePrincipalApplicationAction(app.id), 'class -> "form") {
         <fieldset id="deleteConfirm" class="inline @if(form.errors("deleteConfirm").nonEmpty) {form-group-error}">
         <legend>

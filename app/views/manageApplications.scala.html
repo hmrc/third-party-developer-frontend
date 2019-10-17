@@ -14,11 +14,14 @@
  * limitations under the License.
  *@
 
-@import domain.{DeveloperSession, Role, State, TermsOfUseStatus}
+@import domain.{DeveloperSession, Role}
 @import helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import model.Crumb
 
+@import domain.TermsOfUseStatus
+@import uk.gov.hmrc.auth.core.Admin
+@import domain.Developer
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 
 @devMain(
@@ -47,16 +50,6 @@
             <h1 class="heading-xlarge">View all applications</h1>
         </header>
         <p>After testing in the sandbox, you can create a production application to use live data.</p>
-        @if(applications.exists(_.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED)) {
-            <div class="notice">
-                <i class="icon icon-important">
-                    <span class="visually-hidden">Warning</span>
-                </i>
-                <strong class="bold-small">
-                    You must agree to the terms of use on all production applications.
-                </strong>
-            </div>
-        }
         <br>
         @applicationList(applications)
     }
@@ -72,45 +65,37 @@
 
 @applicationTable(applications: Seq[controllers.ApplicationSummary]) = {
     @if(applications.nonEmpty) {
-        @defining(applications.exists(_.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED)) { includeTermsOfUseColumn =>
-            <table>
-                <caption class="visually-hidden">Applications</caption>
-                <colgroup>
-                    <col/>
-                    <col width="20%"/>
-                    <col width="30%"/>
-                    @if(includeTermsOfUseColumn) {<col width="25%"/>}
-                </colgroup>
-                <thead>
-                    <th>@{applications.head.environment} applications</th>
-                    <th>Your role</th>
-                    <th>Last API call</th>
-                    @if(includeTermsOfUseColumn) {<th>Terms of use</th>}
-                </thead>
-                <tbody>
-                @for(app<-applications) {
-                    <tr>
-                        <td>
-                            <a href="@{routes.Details.details(app.id)}" data-app-name>@app.name</a>
-                        </td>
-                        <td data-app-user-role>
-                            @if(app.role.isAdministrator) {Admin}
-                            @if(app.role.isDeveloper) {Developer}
-                        </td>
-                        <td data-app-lastAccess>@{formatLastAccessDate(app.lastAccess)}</td>
-                        @if(includeTermsOfUseColumn) {
-                            <td id="terms-of-use-@{app.id}" data-app-terms-of-use>@(app.termsOfUseStatus, app.role, app.state) match {
-                                case (TermsOfUseStatus.AGREEMENT_REQUIRED, Role.ADMINISTRATOR, State.TESTING) => {<a href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>}
-                                case (TermsOfUseStatus.AGREEMENT_REQUIRED, Role.ADMINISTRATOR, _) => { <a class="button" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a> }
-                                case (TermsOfUseStatus.AGREEMENT_REQUIRED, _, _) => {Need admin rights}
-                                case (TermsOfUseStatus.AGREED, _, _) => {Agreed}
-                                case (_, _, _) => {Not applicable}
-                            }</td>
-                        }
-                    </tr>
-                }
-                </tbody>
-            </table>
-        }
+        <table>
+            <caption class="visually-hidden">Applications</caption>
+            <colgroup>
+                <col/>
+                <col width="20%"/>
+                <col width="30%"/>
+            </colgroup>
+            <thead>
+                <th>@{applications.head.environment} applications</th>
+                <th>Your role</th>
+                <th>Last API call</th>
+            </thead>
+            <tbody>
+            @for(app<-applications) {
+                <tr>
+                    <td>
+                        <a href="@{routes.Details.details(app.id)}" data-app-name>@app.name</a>
+                    </td>
+                    <td data-app-user-role>
+                        @if(app.role.isAdministrator) {Admin}
+                        @if(app.role.isDeveloper) {Developer}
+                    </td>
+                    <td data-app-lastAccess>
+                        @{formatLastAccessDate(app.lastAccess, app.createdOn) match {
+                            case Some(formattedDate) => formattedDate.capitalize
+                            case _ => "No API called"
+                        }}
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
     }
 }

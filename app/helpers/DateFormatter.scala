@@ -18,22 +18,25 @@ package helpers
 
 import org.joda.time.DateTime
 import org.joda.time.Months.monthsBetween
+import org.joda.time.Seconds.secondsBetween
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.gov.hmrc.time.DateTimeUtils.{daysBetween, now}
 
 object DateFormatter {
-  val standardFormatter: DateTimeFormatter = DateTimeFormat.forPattern("dd MMMM yyyy")
+  val standardFormatter: DateTimeFormatter = DateTimeFormat.forPattern("d MMMM yyyy")
   val initialLastAccessDate = new DateTime(2019, 6, 25, 0, 0) // scalastyle:ignore magic.number
 
   def formatDate(dateTime: DateTime): String = {
     standardFormatter.print(dateTime)
   }
 
-  def formatLastAccessDate(lastAccessDate: DateTime): String = {
-    if (daysBetween(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
-      standardFormatter.print(lastAccessDate)
+  def formatLastAccessDate(lastAccessDate: DateTime, createdOnDate: DateTime): Option[String] = {
+    if (secondsBetween(createdOnDate, lastAccessDate).getSeconds == 0) {
+      None
+    } else if (daysBetween(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
+      Some(standardFormatter.print(lastAccessDate))
     } else {
-      s"more than ${monthsBetween(lastAccessDate, now).getMonths} months ago"
+      Some(s"more than ${monthsBetween(lastAccessDate, now).getMonths} months ago")
     }
   }
 }

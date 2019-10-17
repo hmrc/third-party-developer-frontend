@@ -36,6 +36,7 @@
 
     <h1 class="heading-xlarge">Delete application</h1>
     @appEnvironment(app)
+    <br>
 
     @if(app.deployedTo.isSandbox || roleOfLoggedIn.isAdministrator) {
         <p>
