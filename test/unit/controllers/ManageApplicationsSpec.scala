@@ -191,7 +191,7 @@ class ManageApplicationsSpec
 
     "when an invalid name is entered" when {
 
-      "it shows an error page and lets you re-submit the name" in new Setup {
+      "and it contains HMRC it shows an error page and lets you re-submit the name" in new Setup {
         private val invalidApplicationName = "invalidApplicationName"
 
         given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
@@ -215,6 +215,32 @@ class ManageApplicationsSpec
         verify(underTest.applicationService)
           .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX))(any[HeaderCarrier])
       }
+
+      "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
+        private val applicationName = "duplicate name"
+
+        given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+          .willReturn(Invalid(invalidName = false, duplicateName = true))
+
+        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
+          .withCSRFToken
+          .withFormUrlEncodedBody(
+            ("applicationName", applicationName),
+            ("environment", "SANDBOX"),
+            ("description", ""))
+
+        private val result = await(underTest.addApplicationAction()(request))
+
+        status(result) shouldBe BAD_REQUEST
+        bodyOf(result) should include("Choose an application name that is not already registered on the Developer Hub")
+
+        verify(underTest.applicationService, Mockito.times(0))
+          .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
+
+        verify(underTest.applicationService)
+          .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.SANDBOX))(any[HeaderCarrier])
+      }
+
     }
 
     // TODO: Handle duplicate name validation error

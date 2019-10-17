@@ -144,13 +144,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       }
     }
 
-    def getValidationErrorKey(invalidName: Boolean, duplicateName: Boolean) = {
-      (invalidName, duplicateName) match {
-        case (true, _) => applicationNameInvalid2Key
-        case _ => applicationNameAlreadyExistsKey
-      }
-    }
-
     def withValidForm(form: NameForm): Future[Result] = {
       applicationService.isApplicationNameValid(form.applicationName, app.deployedTo)
         .flatMap({
@@ -160,13 +153,12 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
               _ <- updateNameIfChanged(form)
               _ <- applicationService.updateCheckInformation(app.id, information.copy(confirmedName = true))
             } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
-          case Invalid(invalidName, duplicateName) =>
+          case invalid : Invalid =>
             def invalidNameCheckForm = {
-              val validationErrorMessageKey = getValidationErrorKey(invalidName, duplicateName)
               requestForm
                 .withError("submissionError", "true")
-                .withError(appNameField, validationErrorMessageKey, controllers.routes.ApplicationCheck.namePage(appId))
-                .withGlobalError(validationErrorMessageKey)
+                .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ApplicationCheck.namePage(appId))
+                .withGlobalError(invalid.validationErrorMessageKey)
             }
 
             Future.successful(BadRequest(views.html.applicationcheck.confirmName(request.application, invalidNameCheckForm)))

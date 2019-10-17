@@ -80,14 +80,13 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
                 ))
               })
           }
-          case Invalid(invalidName, duplicateName) => {
+          case invalid : Invalid => {
             def invalidApplicationNameForm =
-            // TODO : Handle duplicate name error
               requestForm
                 .withError("submissionError", "true")
                 // TODO: Remove the route reference below - does it still word?
-                .withError(appNameField, applicationNameInvalid2Key, controllers.routes.ManageApplications.addApplicationAction())
-                .withGlobalError(applicationNameInvalid2Key)
+                .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ManageApplications.addApplicationAction())
+                .withGlobalError(invalid.validationErrorMessageKey)
 
             Future.successful(BadRequest(views.html.addApplication(invalidApplicationNameForm)))
           }

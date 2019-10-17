@@ -16,10 +16,20 @@
 
 package domain
 
+import controllers.FormKeys.{applicationNameAlreadyExistsKey, applicationNameInvalid2Key}
+
 sealed class ApplicationNameValidation
 
 case object Valid extends ApplicationNameValidation
-case class Invalid(invalidName: Boolean, duplicateName: Boolean) extends ApplicationNameValidation
+
+case class Invalid(invalidName: Boolean, duplicateName: Boolean) extends ApplicationNameValidation{
+  def validationErrorMessageKey: String = {
+    (invalidName, duplicateName) match {
+      case (true, _) => applicationNameInvalid2Key
+      case _ => applicationNameAlreadyExistsKey
+    }
+  }
+}
 
 object Invalid {
   def invalidName = Invalid(invalidName = true, duplicateName = false)
