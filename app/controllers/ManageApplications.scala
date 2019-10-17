@@ -76,7 +76,7 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
                 Created(addApplicationSuccess(
                   formThatPassesSimpleValidation.applicationName,
                   appCreated.id,
-                  environment.toString // TODO: Does this need to be a string?
+                  environment
                 ))
               })
           }
