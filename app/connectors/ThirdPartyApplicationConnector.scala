@@ -198,7 +198,7 @@ class ThirdPartyApplicationSandboxConnector @Inject()(val httpClient: HttpClient
   val serviceBaseUrl = appConfig.thirdPartyApplicationSandboxUrl
   val useProxy = appConfig.thirdPartyApplicationSandboxUseProxy
   val bearerToken = appConfig.thirdPartyApplicationSandboxBearerToken
-  val apiKey = appConfig.thirdPartyApplicationProductionApiKey
+  val apiKey = appConfig.thirdPartyApplicationSandboxApiKey
 }
 
 @Singleton
@@ -214,5 +214,5 @@ class ThirdPartyApplicationProductionConnector @Inject()(val httpClient: HttpCli
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
   val useProxy = appConfig.thirdPartyApplicationProductionUseProxy
   val bearerToken = appConfig.thirdPartyApplicationProductionBearerToken
-  val apiKey = appConfig.thirdPartyApplicationSandboxApiKey
+  val apiKey = appConfig.thirdPartyApplicationProductionApiKey
 }

@@ -26,7 +26,7 @@ import domain._
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => meq}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.ContentTypes.JSON
@@ -48,7 +48,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
   private val baseUrl = "https://example.com"
   private val environmentName = "ENVIRONMENT"
 
-  trait Setup {
+  class Setup(proxyEnabled: Boolean = false) {
     implicit val hc = HeaderCarrier()
     protected val mockHttpClient = mock[HttpClient]
     protected val mockProxiedHttpClient = mock[ProxiedHttpClient]
@@ -57,14 +57,15 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     protected val mockMetrics = new NoopConnectorMetrics()
     private val futureTimeoutSupport = new FutureTimeoutSupportImpl
     private val actorSystemTest = ActorSystem("test-actor-system")
-    private val apiKeyTest = UUID.randomUUID().toString
+    val apiKeyTest = "5bb51bca-8f97-4f2b-aee4-81a4a70a42d3"
+    val bearer = "TestBearerToken"
 
     val connector = new ThirdPartyApplicationConnector(mockAppConfig, mockMetrics) {
       val ec = global
       val httpClient = mockHttpClient
       val proxiedHttpClient = mockProxiedHttpClient
       val serviceBaseUrl = baseUrl
-      val useProxy = false
+      val useProxy = proxyEnabled
       val bearerToken = "TestBearerToken"
       val environment = mockEnvironment
       val apiKey = apiKeyTest
@@ -221,6 +222,20 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       )
 
       val result = await(connector.fetchApplicationById(applicationId))
+
+      result shouldBe defined
+      result.get.id shouldBe applicationId
+      result.get.name shouldBe appName
+    }
+
+    "when useProxy is enabled returns an application from proxy" in new Setup(proxyEnabled = true) {
+      when(mockProxiedHttpClient.GET[Application](meq(url))(any(), any(), any()))
+        .thenReturn(Future.successful(applicationResponse(applicationId, "client-id", appName)))
+      when(connector.http).thenReturn(mockProxiedHttpClient)
+
+      val result = await(connector.fetchApplicationById(applicationId))
+
+      verify(mockProxiedHttpClient).withHeaders(bearer, apiKeyTest)
 
       result shouldBe defined
       result.get.id shouldBe applicationId
@@ -596,6 +611,24 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
       intercept[ApplicationNotFound] {
         await(connector.deleteClientSecrets(applicationId, deleteClientSecretsRequest))
+      }
+    }
+  }
+
+  "http" when {
+    "configured not to use the proxy" should {
+      "use the HttpClient" in new Setup {
+        connector.http shouldBe mockHttpClient
+      }
+    }
+
+    "configured to use the proxy" should {
+      "use the ProxiedHttpClient with the correct authorisation" in new Setup(proxyEnabled = true) {
+        when(connector.http)
+            .thenReturn(mockProxiedHttpClient)
+
+        connector.http shouldBe mockProxiedHttpClient
+        verify(mockProxiedHttpClient).withHeaders(bearer, apiKeyTest)
       }
     }
   }
