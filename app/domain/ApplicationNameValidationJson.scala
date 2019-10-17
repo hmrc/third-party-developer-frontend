@@ -16,14 +16,14 @@
 
 package domain
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 object ApplicationNameValidationJson {
 
   case class ApplicationNameValidationRequest(applicationName: String)
 
   object ApplicationNameValidationRequest {
-    implicit val format = Json.format[ApplicationNameValidationRequest]
+    implicit val format: OFormat[ApplicationNameValidationRequest] = Json.format[ApplicationNameValidationRequest]
   }
 
   case class ApplicationNameValidationResult(errors: Option[Errors])
@@ -32,13 +32,13 @@ object ApplicationNameValidationJson {
   object ApplicationNameValidationResult {
     def apply(applicationNameValidationResult: ApplicationNameValidationResult) : ApplicationNameValidation  = {
       applicationNameValidationResult.errors match {
-        case Some(errors) => Invalid(errors.duplicateName, errors.invalidName)
+        case Some(errors) => Invalid(errors.invalidName,errors.duplicateName)
         case None => Valid
       }
     }
 
-    implicit val formatErrors = Json.format[Errors]
-    implicit val format = Json.format[ApplicationNameValidationResult]
+    implicit val formatErrors: OFormat[Errors] = Json.format[Errors]
+    implicit val format: OFormat[ApplicationNameValidationResult] = Json.format[ApplicationNameValidationResult]
   }
 }
 

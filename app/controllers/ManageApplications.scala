@@ -67,7 +67,6 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
 
       val environment = formThatPassesSimpleValidation.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX)
 
-      // TODO: Use correct environment
       applicationService.isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment)
         .flatMap {
           case Valid => {
@@ -78,14 +77,17 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
                   formThatPassesSimpleValidation.applicationName,
                   appCreated.id,
                   environment.toString // TODO: Does this need to be a string?
-                  ))
+                ))
               })
           }
           case Invalid(invalidName, duplicateName) => {
-            def invalidApplicationNameForm = requestForm.
-              withError("submissionError", "true").
-              withError(appNameField, applicationNameInvalid2Key, controllers.routes.ManageApplications.addApplicationAction()).
-              withGlobalError(applicationNameInvalid2Key)
+            def invalidApplicationNameForm =
+            // TODO : Handle duplicate name error
+              requestForm
+                .withError("submissionError", "true")
+                // TODO: Remove the route reference below - does it still word?
+                .withError(appNameField, applicationNameInvalid2Key, controllers.routes.ManageApplications.addApplicationAction())
+                .withGlobalError(applicationNameInvalid2Key)
 
             Future.successful(BadRequest(views.html.addApplication(invalidApplicationNameForm)))
           }
@@ -94,27 +96,6 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
 
     requestForm.fold(addApplicationWithFormErrors, addApplicationWithValidForm)
   }
-
-  // TODO - Delete
-  //  def addApplicationAction2() = loggedInAction { implicit request =>
-  //    val requestForm = AddApplicationForm.form.bindFromRequest
-  //
-  //    def addApplicationWithFormErrors(errors: Form[AddApplicationForm]) =
-  //      Future.successful(BadRequest(views.html.addApplication(errors)))
-  //
-  //    def addApplicationWithValidForm(validForm: AddApplicationForm) = {
-  //
-  //      val y: Future[Result] = applicationService.createForUser(CreateApplicationRequest.from(loggedIn, validForm))
-  //        .map(appCreated => {
-  //          val x: Result = Created(addApplicationSuccess(validForm.applicationName, appCreated.id, validForm.environment.getOrElse(Environment.SANDBOX.toString)))
-  //          x
-  //        })
-  //
-  //      y
-  //    }
-  //
-  //    requestForm.fold(addApplicationWithFormErrors, addApplicationWithValidForm)
-  //  }
 
   def editApplication(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
     Future.successful(Redirect(routes.Details.details(applicationId)))

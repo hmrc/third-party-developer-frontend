@@ -190,7 +190,6 @@ class ManageApplicationsSpec
     }
 
     "when an invalid name is entered" when {
-      // TODO: Handle duplicate name validation errors
 
       "it shows an error page and lets you re-submit the name" in new Setup {
         private val invalidApplicationName = "invalidApplicationName"
@@ -217,6 +216,8 @@ class ManageApplicationsSpec
           .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX))(any[HeaderCarrier])
       }
     }
+
+    // TODO: Handle duplicate name validation error
   }
 
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))

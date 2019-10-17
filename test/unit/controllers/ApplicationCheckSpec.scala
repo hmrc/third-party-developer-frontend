@@ -97,18 +97,27 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
       .willReturn(Some(session))
+
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
       .willReturn(successful(ApplicationUpdateSuccessful))
+
     given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
       .willReturn(successful(application))
+
     given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier]))
       .willReturn(tokens)
+
     given(underTest.applicationService.removeTeamMember(any[Application], any[String], mockEq(loggedInUser.email))(any[HeaderCarrier]))
       .willReturn(ApplicationUpdateSuccessful)
+
     given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
       .willReturn(ApplicationUpdateSuccessful)
+
     given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
       .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs), hasSubscriptions = true))))
+
+    given(underTest.applicationService.isApplicationNameValid(any(), any())(any[HeaderCarrier]))
+      .willReturn(Future.successful(Valid))
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
@@ -701,13 +710,51 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
 
-    "Validation failure name action" in new Setup {
+    "Validation failure name is blank action" in new Setup {
       givenTheApplicationExists()
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
+      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "")
 
       private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
+    }
+
+    "Validation failure name contains HMRC action" in new Setup {
+      givenTheApplicationExists()
+
+      given(underTest.applicationService.isApplicationNameValid(any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.successful(Invalid.invalidName))
+
+      private val applicationName = "Blacklisted HMRC"
+
+      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> applicationName)
+
+      private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
+
+      status(result) shouldBe BAD_REQUEST
+
+      bodyOf(result) should include("Choose an application name that does not include HMRC")
+
+      verify(underTest.applicationService).isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION))(any[HeaderCarrier])
+    }
+
+    "Validation failure when duplicate name" in new Setup {
+      givenTheApplicationExists()
+
+      given(underTest.applicationService.isApplicationNameValid(any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.successful(Invalid.duplicateName))
+
+      private val applicationName = "Duplicate Name"
+
+      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> applicationName)
+
+      private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
+
+      status(result) shouldBe BAD_REQUEST
+
+      bodyOf(result) should include("Choose an application name that is not already registered on the Developer Hub")
+
+      verify(underTest.applicationService).isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION))(any[HeaderCarrier])
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
