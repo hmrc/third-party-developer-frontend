@@ -24,6 +24,7 @@ import component.stubs.ApplicationStub.configureUserApplications
 import component.stubs._
 import cucumber.api.DataTable
 import cucumber.api.scala.{EN, ScalaDsl}
+import domain.ApplicationNameValidationJson.ApplicationNameValidationResult
 import domain.Environment.PRODUCTION
 import domain._
 import org.openqa.selenium.By
@@ -62,6 +63,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   )
 
   Given( """^application with name '(.*)' can be created$""") { (name: String) =>
+    ApplicationStub.setupApplicationNameValidation()
 
     val app = defaultApp(name, "PRODUCTION")
 
