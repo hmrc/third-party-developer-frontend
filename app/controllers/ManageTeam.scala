@@ -18,11 +18,14 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import domain.Capabilities.SupportsTeamMembers
+import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain._
 import helpers.string._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent, Result}
 import service._
 
 import scala.concurrent.Future.successful
@@ -38,17 +41,23 @@ class ManageTeam @Inject()(val sessionService: SessionService,
                            implicit val appConfig: ApplicationConfig)
                           (implicit ec: ExecutionContext) extends ApplicationController {
 
-  def manageTeam(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
+  private def whenAppSupportsTeamMembers(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    capabilityThenPermissionsAction(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
+
+  private def canEditTeamMembers(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    capabilityThenPermissionsAction(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
+
+  def manageTeam(applicationId: String, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     val application = request.application
     val view = views.html.manageTeam(application, request.role, AddTeamMemberForm.form, request.user)
     Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
-  def addTeamMember(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
+  def addTeamMember(applicationId: String) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     Future.successful(Ok(views.html.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
   }
 
-  def addTeamMemberAction(applicationId: String) = adminOnStandardApp(applicationId) { implicit request =>
+  def addTeamMemberAction(applicationId: String) = canEditTeamMembers(applicationId) { implicit request =>
     def handleValidForm(form: AddTeamMemberForm) = {
       applicationService.addTeamMember(request.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
         .map(_ => Redirect(controllers.routes.ManageTeam.manageTeam(applicationId, None))) recover {
@@ -68,7 +77,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     AddTeamMemberForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def removeTeamMember(applicationId: String, teamMemberHash: String) = teamMemberOnStandardApp(applicationId) {
+  def removeTeamMember(applicationId: String, teamMemberHash: String) = whenAppSupportsTeamMembers(applicationId) {
     implicit request =>
       val application = request.application
 
@@ -79,7 +88,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
       }
   }
 
-  def removeTeamMemberAction(applicationId: String) = adminOnStandardApp(applicationId) { implicit request =>
+  def removeTeamMemberAction(applicationId: String) = canEditTeamMembers(applicationId) { implicit request =>
     val application = request.application
 
     def handleValidForm(form: RemoveTeamMemberConfirmationForm) = {

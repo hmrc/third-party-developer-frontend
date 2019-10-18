@@ -67,36 +67,35 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
 
       val environment = formThatPassesSimpleValidation.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX)
 
-      applicationService.isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment)
-        .flatMap {
-          case Valid => {
-            applicationService
-              .createForUser(CreateApplicationRequest.from(loggedIn, formThatPassesSimpleValidation))
-              .map(appCreated => {
-                Created(addApplicationSuccess(
-                  formThatPassesSimpleValidation.applicationName,
-                  appCreated.id,
-                  environment
-                ))
-              })
-          }
-          case invalid : Invalid => {
-            def invalidApplicationNameForm =
-              requestForm
-                .withError("submissionError", "true")
-                // TODO: Remove the route reference below - does it still word?
-                .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ManageApplications.addApplicationAction())
-                .withGlobalError(invalid.validationErrorMessageKey)
-
-            Future.successful(BadRequest(views.html.addApplication(invalidApplicationNameForm)))
-          }
+      applicationService.isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment).flatMap {
+        case Valid => {
+          applicationService
+            .createForUser(CreateApplicationRequest.from(loggedIn, formThatPassesSimpleValidation))
+            .map(appCreated => {
+              Created(addApplicationSuccess(
+                formThatPassesSimpleValidation.applicationName,
+                appCreated.id,
+                environment
+              ))
+            })
         }
+        case invalid : Invalid => {
+          def invalidApplicationNameForm =
+            requestForm
+              .withError("submissionError", "true")
+              // TODO: Remove the route reference below - does it still word?
+              .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ManageApplications.addApplicationAction())
+              .withGlobalError(invalid.validationErrorMessageKey)
+
+          Future.successful(BadRequest(views.html.addApplication(invalidApplicationNameForm)))
+        }
+      }
     }
 
     requestForm.fold(addApplicationWithFormErrors, addApplicationWithValidForm)
   }
 
-  def editApplication(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
+  def editApplication(applicationId: String, error: Option[String] = None) = whenTeamMemberOnApp(applicationId) { implicit request =>
     Future.successful(Redirect(routes.Details.details(applicationId)))
   }
 }

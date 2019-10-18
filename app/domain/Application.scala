@@ -16,13 +16,15 @@
 
 package domain
 
-import controllers.{AddApplicationForm, EditApplicationForm, GroupedSubscriptions, _}
-import domain.AccessType.{PRIVILEGED, STANDARD}
+import controllers.{AddApplicationForm, AddRedirectForm, ChangeRedirectForm, DeleteRedirectConfirmationForm, EditApplicationForm, GroupedSubscriptions}
+import domain.AccessType.STANDARD
+import domain.Capabilities.{HasReachedProductionState, SupportsDetails}
 import domain.Environment.{PRODUCTION, SANDBOX}
+import domain.Permissions._
 import domain.Role.ADMINISTRATOR
 import domain.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import org.joda.time.DateTime
-import play.api.libs.json.{Format, JsError, _}
+import play.api.libs.json._
 import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.time.DateTimeUtils
 
@@ -32,7 +34,12 @@ object UpliftRequest {
   implicit val format = Json.format[UpliftRequest]
 }
 
-case class ApplicationState(name: State, requestedByEmailAddress: Option[String], verificationCode: Option[String] = None, updatedOn: DateTime = DateTimeUtils.now)
+case class ApplicationState(
+    name: State,
+    requestedByEmailAddress: Option[String],
+    verificationCode: Option[String] = None,
+    updatedOn: DateTime = DateTimeUtils.now
+)
 
 object ApplicationState {
   implicit val format = Json.format[ApplicationState]
@@ -164,7 +171,7 @@ object UpdateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[UpdateApplicationRequest]
 
   def from(form: EditApplicationForm, application: Application) = {
-    val name = if (application.state.name == State.TESTING || application.deployedTo == Environment.SANDBOX) {
+    val name = if (application.state.name == State.TESTING || application.deployedTo.isSandbox) {
       form.applicationName.trim
     } else {
       application.name
@@ -285,6 +292,8 @@ object CheckInformationForm {
 
 case class SubscriptionData(role: Role, application: Application, subscriptions: Option[GroupedSubscriptions], hasSubscriptions: Boolean)
 
+
+
 case class Application(id: String,
                        clientId: String,
                        name: String,
@@ -300,16 +309,20 @@ case class Application(id: String,
 
   def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
 
-  private def hasRole(desiredRole: Role)(developer: Developer): Boolean = {
-    role(developer.email).contains(desiredRole)
-  }
-
-  def isAdmin: Developer => Boolean = hasRole(Role.ADMINISTRATOR)
-
   def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
+  def hasCapability(capability: Capability): Boolean = capability.hasCapability(this)
+
+  def allows(capability: Capability, developer: Developer, permission: Permission): Boolean = {
+    hasCapability(capability) && permits(developer, permission)
+  }
+
+  def permits(developer: Developer, permission: Permission = SandboxOrAdmin): Boolean = {
+    permission.hasPermissions(this, developer)
+  }
+
   def termsOfUseStatus: TermsOfUseStatus = {
-    if (deployedTo == Environment.SANDBOX || access.accessType != AccessType.STANDARD) {
+    if (deployedTo.isSandbox || access.accessType.isNotStandard) {
       TermsOfUseStatus.NOT_APPLICABLE
     } else if (termsOfUseAgreements.isEmpty) {
       TermsOfUseStatus.AGREEMENT_REQUIRED
@@ -328,34 +341,12 @@ case class Application(id: String,
     case _ => None
   }
 
-  def isPermittedToEditAppDetails(developer: Developer): Boolean =
-    (deployedTo, access.accessType, role(developer.email)) match {
-      case (_,AccessType.ROPC, _) => false
-      case (_,PRIVILEGED, _) => false
+  def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOrAdmin)
 
-      case (SANDBOX, _, _) => true
-      case (_, STANDARD, Some(ADMINISTRATOR)) => true
-      case _ => false
-    }
-
-  def canViewCredentials(developer: Developer): Boolean = {
-    (deployedTo, state.name, role(developer.email)) match {
-      case (SANDBOX, _, _) => true
-      case (PRODUCTION, State.PRODUCTION, Some(ADMINISTRATOR)) => true
-      case _ => false
-    }
-  }
-
-  def canEditCredentials(developer: Developer): Boolean = {
-    (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (_, AccessType.ROPC, _, _) => false
-      case (_, PRIVILEGED, _, _) => false
-
-      case (SANDBOX, _, _, _) => true
-      case (PRODUCTION, _, State.PRODUCTION, Some(ADMINISTRATOR)) => true
-      case _ => false
-    }
-  }
+  /*
+  Allows access to at least one of (client id, client secrets and server token) (where appropriate)
+   */
+  def canViewClientCredentials(developer: Developer): Boolean = allows(HasReachedProductionState, developer, SandboxOrAdmin)
 
   def canPerformApprovalProcess(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
@@ -369,7 +360,7 @@ case class Application(id: String,
 
   def canViewServerToken(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (SANDBOX, STANDARD, _, _) => true
+      case (SANDBOX, STANDARD, State.PRODUCTION, _) => true
       case (PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
       case _ => false
     }
@@ -387,7 +378,7 @@ case class Application(id: String,
     case _ => false
   }
 
-  def hasLockedSubscriptions = deployedTo == Environment.PRODUCTION && state.name != State.TESTING
+  def hasLockedSubscriptions = deployedTo.isProduction && state.name != State.TESTING
 }
 
 object Application {

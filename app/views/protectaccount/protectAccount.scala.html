@@ -31,7 +31,7 @@
         <h1 class="heading-xlarge">Protect your account</h1>
     </header>
     <div>
-        @if(loggedIn.session.loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA){
+        @if(loggedIn.session.loggedInState.isPartLoggedInEnablingMFA){
           <p>Your account has access to sensitive information, for example client secrets.</p>
         }
 

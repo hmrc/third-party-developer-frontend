@@ -19,6 +19,8 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.FormKeys.clientSecretLimitExceeded
+import domain.Capabilities.{ChangeClientSecret, HasReachedProductionState, ViewCredentials}
+import domain.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
@@ -45,16 +47,28 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   extends ApplicationController {
 
 
-  def credentials(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
-    applicationService.fetchCredentials(applicationId).map { tokens =>
-      val view = views.html.credentials(request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
-      error.map(_ => BadRequest(view)).getOrElse(Ok(view))
-    } recover {
-      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
-    }
+  private def canViewClientCredentialsPage(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    capabilityThenPermissionsAction(ViewCredentials, TeamMembersOnly)(applicationId)(fun)
+
+  private def canChangeClientSecrets(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    capabilityThenPermissionsAction(ChangeClientSecret, SandboxOrAdmin)(applicationId)(fun)
+
+  private def canViewClientSecrets(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    capabilityThenPermissionsAction(HasReachedProductionState, SandboxOrAdmin)(applicationId)(fun)
+
+
+
+  def credentials(applicationId: String, error: Option[String] = None) =
+    canViewClientCredentialsPage(applicationId) { implicit request =>
+      applicationService.fetchCredentials(applicationId).map { tokens =>
+        val view = views.html.credentials(request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
+        error.map(_ => BadRequest(view)).getOrElse(Ok(view))
+      } recover {
+        case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+      }
   }
 
-  def addClientSecret(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
+  def addClientSecret(applicationId: String) = canChangeClientSecrets(applicationId) { implicit request =>
 
     def result(err: Option[String] = None): Result = Redirect(controllers.routes.Credentials.credentials(applicationId, err))
 
@@ -68,7 +82,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   }
 
   def getProductionClientSecret(applicationId: String, index: Integer) =
-    sandboxOrAdminIfProductionForAnyApp(applicationId, Seq(appInStateProductionFilter)) { implicit request =>
+    canViewClientSecrets(applicationId) { implicit request =>
 
     def fetchClientSecret(password: String) = {
       val future = for {
@@ -99,7 +113,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def selectClientSecretsToDelete(applicationId: String): Action[AnyContent] = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
+  def selectClientSecretsToDelete(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
 
     val application = request.application
 
@@ -137,12 +151,12 @@ class Credentials @Inject()(val applicationService: ApplicationService,
 
     def handleInvalidForm(form: Form[VerifyPasswordForm]): Future[Result] = showCredentials(form)
 
-    if (application.deployedTo == Environment.SANDBOX) showClientSecretsToDelete
+    if (application.deployedTo.isSandbox) showClientSecretsToDelete
     else VerifyPasswordForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def selectClientSecretsToDeleteAction(applicationId: String, error: Option[String] = None)
-    = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
+    = canChangeClientSecrets(applicationId) { implicit request =>
 
     val application = request.application
 
@@ -169,7 +183,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     SelectClientSecretsToDeleteForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  def deleteClientSecretsAction(applicationId: String): Action[AnyContent] = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
+  def deleteClientSecretsAction(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
 
     val application = request.application
 

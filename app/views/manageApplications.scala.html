@@ -19,6 +19,9 @@
 @import include._
 @import model.Crumb
 
+@import domain.TermsOfUseStatus
+@import uk.gov.hmrc.auth.core.Admin
+@import domain.Developer
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 
 @devMain(
@@ -81,8 +84,8 @@
                         <a href="@{routes.Details.details(app.id)}" data-app-name>@app.name</a>
                     </td>
                     <td data-app-user-role>
-                        @if(app.role == Role.ADMINISTRATOR) {Admin}
-                        @if(app.role == Role.DEVELOPER) {Developer}
+                        @if(app.role.isAdministrator) {Admin}
+                        @if(app.role.isDeveloper) {Developer}
                     </td>
                     <td data-app-lastAccess>
                         @{formatLastAccessDate(app.lastAccess, app.createdOn) match {
