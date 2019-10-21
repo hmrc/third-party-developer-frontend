@@ -105,6 +105,7 @@ trait ActionBuilders {
     }
   }
 
+
   def adminFilter = new ActionFilter[ApplicationRequest] {
     override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
       implicit val implicitRequest = request
@@ -122,6 +123,8 @@ trait ActionBuilders {
       else Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
+
   def permissionFilter(permission: Permission) =
     forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.user.developer))
+
 }
