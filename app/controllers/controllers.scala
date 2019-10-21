@@ -85,8 +85,7 @@ package object controllers {
 
     val applicationNameInvalidKeyLengthAndCharacters = "application.name.invalid.length.and.characters"
 
-    // TODO : This name is terrible
-    val applicationNameInvalid2Key = "application.name.invalid.name"
+    val applicationNameInvalidKey = "application.name.invalid.name"
     val applicationNameAlreadyExistsKey = "application.name.already.exists.field"
 
     val environmentInvalidKey = "environment.error.required.field"
@@ -246,13 +245,6 @@ package object controllers {
 
   def tNcUrlValidator = Forms.text.verifying(tNcUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
 
-  // TODO: Name rules are:
-  // 1) 2 - 50 chars
-  // 2) Ascii only (chars 32 -> 126)
-
-  // 3) Must not be on name black list (e.g. HMRC)
-  // 4) For prod app - app must not already exist.
-
   def applicationNameValidator = {
     // This does 1 & 2 above
         Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters,
@@ -275,7 +267,6 @@ package object controllers {
 
   private def isOutOfBoundsRedirectUrl: String => Boolean = s => s == "urn:ietf:wg:oauth:2.0:oob:auto" || s == "urn:ietf:wg:oauth:2.0:oob"
 
-  // TODO - Should we move this into TPA?
   private def isAcceptedAscii(s: String) = {
     !s.toCharArray.exists(c => 32 > c || c > 126)
   }

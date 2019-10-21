@@ -20,7 +20,7 @@ import java.io
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import controllers.FormKeys.{appNameField, applicationNameInvalid2Key, emailaddressAlreadyInUseGlobalKey, emailaddressField, emailalreadyInUseKey}
+import controllers.FormKeys.{appNameField, applicationNameInvalidKey, emailaddressAlreadyInUseGlobalKey, emailaddressField, emailalreadyInUseKey}
 import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
@@ -83,7 +83,6 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
           def invalidApplicationNameForm =
             requestForm
               .withError("submissionError", "true")
-              // TODO: Remove the route reference below - does it still word?
               .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ManageApplications.addApplicationAction())
               .withGlobalError(invalid.validationErrorMessageKey)
 

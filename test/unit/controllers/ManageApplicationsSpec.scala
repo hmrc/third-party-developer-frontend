@@ -242,8 +242,6 @@ class ManageApplicationsSpec
       }
 
     }
-
-    // TODO: Handle duplicate name validation error
   }
 
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
