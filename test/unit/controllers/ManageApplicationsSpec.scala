@@ -86,7 +86,7 @@ class ManageApplicationsSpec
     given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
       .willReturn(successful(application))
 
-    given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+    given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
       .willReturn(successful(Valid))
 
     private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
@@ -194,7 +194,7 @@ class ManageApplicationsSpec
       "and it contains HMRC it shows an error page and lets you re-submit the name" in new Setup {
         private val invalidApplicationName = "invalidApplicationName"
 
-        given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+        given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
           .willReturn(Invalid(invalidName = true, duplicateName = false))
 
         private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
@@ -213,13 +213,13 @@ class ManageApplicationsSpec
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
 
         verify(underTest.applicationService)
-          .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX))(any[HeaderCarrier])
+          .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX), any())(any[HeaderCarrier])
       }
 
       "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
         private val applicationName = "duplicate name"
 
-        given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+        given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
           .willReturn(Invalid(invalidName = false, duplicateName = true))
 
         private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
@@ -238,7 +238,7 @@ class ManageApplicationsSpec
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
 
         verify(underTest.applicationService)
-          .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.SANDBOX))(any[HeaderCarrier])
+          .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.SANDBOX), any())(any[HeaderCarrier])
       }
 
     }

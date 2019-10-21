@@ -16,6 +16,8 @@
 
 package service
 
+import java.util.UUID
+
 import config.ApplicationConfig
 import connectors._
 import domain.APIStatus._
@@ -252,10 +254,11 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield ticketResponse
   }
 
-  def isApplicationNameValid(name: String, environment: Environment)(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+  def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[String])
+                            (implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
     environment match {
-      case PRODUCTION => connectorWrapper.productionApplicationConnector.validateName(name)
-      case SANDBOX => connectorWrapper.sandboxApplicationConnector.validateName(name)
+      case PRODUCTION => connectorWrapper.productionApplicationConnector.validateName(name, selfApplicationId)
+      case SANDBOX => connectorWrapper.sandboxApplicationConnector.validateName(name, selfApplicationId)
     }
   }
 

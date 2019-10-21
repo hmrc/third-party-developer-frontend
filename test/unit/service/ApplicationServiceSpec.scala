@@ -806,28 +806,30 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   "validate application name" should {
     "call the application connector validate method in sandbox" in new Setup {
       private val applicationName = "applicationName"
+      private val applicationId = UUID.randomUUID().toString
 
-      given(mockSandboxApplicationConnector.validateName(any())(any[HeaderCarrier]))
+      given(mockSandboxApplicationConnector.validateName(any(), any())(any[HeaderCarrier]))
         .willReturn(Valid)
 
-      val result = await (service.isApplicationNameValid(applicationName, Environment.SANDBOX))
+      val result = await (service.isApplicationNameValid(applicationName, Environment.SANDBOX, Some(applicationId)))
 
       result shouldBe Valid
 
-      verify(mockSandboxApplicationConnector).validateName(mockEq(applicationName))(mockEq(hc))
+      verify(mockSandboxApplicationConnector).validateName(mockEq(applicationName), mockEq(Some(applicationId)))(mockEq(hc))
     }
 
     "call the application connector validate method in production" in new Setup {
       private val applicationName = "applicationName"
+      private val applicationId = UUID.randomUUID().toString
 
-      given(mockProductionApplicationConnector.validateName(any())(any[HeaderCarrier]))
+      given(mockProductionApplicationConnector.validateName(any(), any())(any[HeaderCarrier]))
         .willReturn(Valid)
 
-      val result = await (service.isApplicationNameValid(applicationName, Environment.PRODUCTION))
+      val result = await (service.isApplicationNameValid(applicationName, Environment.PRODUCTION, Some(applicationId)))
 
       result shouldBe Valid
 
-      verify(mockProductionApplicationConnector).validateName(mockEq(applicationName))(mockEq(hc))
+      verify(mockProductionApplicationConnector).validateName(mockEq(applicationName), mockEq(Some(applicationId)))(mockEq(hc))
     }
   }
 

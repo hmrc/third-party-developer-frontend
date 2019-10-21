@@ -177,8 +177,8 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } recover recovery
   }
 
-  def validateName(name: String)(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
-    val body = ApplicationNameValidationRequest(name)
+  def validateName(name: String, selfApplicationId: Option[String])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+    val body = ApplicationNameValidationRequest(name, selfApplicationId)
 
     retry {
       http.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](s"$serviceBaseUrl/application/name/validate", body) map {
