@@ -19,6 +19,7 @@
 @import include._
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
+@import domain.Capabilities.SupportChangingAppDetails
 
 @(form: Form[controllers.EditApplicationForm], app: Application)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
@@ -42,11 +43,12 @@
     </header>
 
     @appEnvironment(app)
+    <br>
 
     @helper.form(action = controllers.routes.Details.changeDetailsAction(app.id), 'class -> "form") {
         @helper.CSRF.formField
         <input type="hidden" id="applicationId" name="applicationId" value="@form.data("applicationId")"/>
-        @if(app.state.name == State.TESTING || app.deployedTo == Environment.SANDBOX) {
+        @if(app.hasCapability(SupportChangingAppDetails)) {
             <div class="form-group @if(form.errors("applicationName").nonEmpty) {form-group-error}">
                 <label id="applicationName-label" class="form-label-bold" for="applicationName">
                     Application name

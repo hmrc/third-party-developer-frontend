@@ -35,8 +35,17 @@ class RedirectsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
+  val loggedInDev = utils.DeveloperSession("developer2@example.com", "Billy", "Fontaine", loggedInState = LoggedInState.LOGGED_IN)
+  val application = Application(
+    appId,
+    clientId,
+    "App name 1",
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR), Collaborator(loggedInDev.email, Role.DEVELOPER)),
+    state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq.empty, termsAndConditionsUrl = None)
   )
 
@@ -49,8 +58,14 @@ class RedirectsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
       val standardAccess = Standard(redirectUris = redirects, termsAndConditionsUrl = None)
 
       val applicationWithRedirects = application.copy(access = standardAccess)
+      val user = if(role.isAdministrator) {
+        loggedInUser
+      }
+      else {
+        loggedInDev
+      }
 
-      views.html.redirects.render(applicationWithRedirects, redirects, role, request, loggedInUser, applicationMessages, appConfig, "redirects")
+      views.html.redirects.render(applicationWithRedirects, redirects, request, user, applicationMessages, appConfig, "redirects")
     }
 
     def renderPageForStandardApplicationAsAdminWithRedirectUris(numberOfRedirectUris: Int) = {

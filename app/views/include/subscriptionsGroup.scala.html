@@ -65,7 +65,7 @@
                                             </a>
                                         }
                                     </div>
-                                    @if(app.hasLockedSubscriptions && role == Role.ADMINISTRATOR) {
+                                    @if(app.hasLockedSubscriptions && role.isAdministrator) {
                                         <div class="accordion__body__row__right accordion__body__row__right--link">
                                           <a href="@routes.Subscriptions.changeLockedApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)"
                                              aria-label="Request to @if(api.subscribed) {unsubscribe from} else {subscribe to} @apiVersionFullName">

@@ -16,7 +16,6 @@
 
 package domain
 
-import enumeratum.{EnumEntry, PlayEnum}
 import play.api.i18n.Messages
 import play.api.libs.json.Json
 import play.api.i18n.Messages.Implicits._

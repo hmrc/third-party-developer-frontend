@@ -62,13 +62,13 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
     def addApplicationWithValidForm(validForm: AddApplicationForm) = {
 
       applicationService.createForUser(CreateApplicationRequest.from(loggedIn, validForm))
-        .map(appCreated => Created(addApplicationSuccess(validForm.applicationName, appCreated.id, validForm.environment.getOrElse(Environment.SANDBOX.toString))))
+        .map(appCreated => Created(addApplicationSuccess(validForm.applicationName, appCreated.id, validForm.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX))))
     }
 
     requestForm.fold(addApplicationWithFormErrors, addApplicationWithValidForm)
   }
 
-  def editApplication(applicationId: String, error: Option[String] = None) = teamMemberOnApp(applicationId) { implicit request =>
+  def editApplication(applicationId: String, error: Option[String] = None) = whenTeamMemberOnApp(applicationId) { implicit request =>
     Future.successful(Redirect(routes.Details.details(applicationId)))
   }
 }

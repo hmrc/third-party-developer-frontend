@@ -21,8 +21,10 @@
 @import domain.Application
 @import domain.AccessType
 @import domain.Developer
+@import domain.Capabilities._
 @import include._
 
+@import domain.Permissions.SandboxOrAdmin
 @(app: Application, developer: Developer, token: EnvironmentToken, form: Form[VerifyPasswordForm])(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
@@ -51,10 +53,10 @@
         value = Some("OAuth 2.0")).toHtml journey. Keep them private.
     </p>
     @for((secret, i) <- token.clientSecrets.zipWithIndex) {
-        @maskedContent(secret, accessibleText = s"client secret ${i + 1}", secure = app.deployedTo == Environment.PRODUCTION, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
+        @maskedContent(secret, accessibleText = s"client secret ${i + 1}", secure = app.deployedTo.isProduction, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
     }
 
-    @if(app.canEditCredentials(developer)){
+    @if(app.allows(ChangeClientSecret, developer, SandboxOrAdmin)){
         @if(token.clientSecrets.size < 5) {
             <div>
             @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
@@ -64,7 +66,7 @@
             </div>
         }
         @if(token.clientSecrets.size > 1) {
-            @if(app.deployedTo == Environment.PRODUCTION) {
+            @if(app.deployedTo.isProduction) {
                 <div class="js-mask-container row" data-mask-timer="20">
                     <div>
                         <p>

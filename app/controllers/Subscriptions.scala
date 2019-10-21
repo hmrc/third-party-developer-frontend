@@ -18,13 +18,15 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import domain.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
+import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain.SubscriptionRedirect._
 import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
-import play.api.mvc.Result
+import play.api.mvc.{AnyContent, Result}
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.include.{changeSubscriptionConfirmation, subscriptionFields}
@@ -45,7 +47,13 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                              (implicit ec: ExecutionContext)
   extends ApplicationController with ApplicationHelper {
 
-  def subscriptions(applicationId: String) = teamMemberOnStandardApp(applicationId) { implicit request =>
+  private def canManageLockedApiSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
+    permissionThenCapabilityAction(AdministratorOnly,ManageLockedSubscriptions)(applicationId)(fun)
+
+  private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
+    capabilityThenPermissionsAction(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
+
+  def subscriptions(applicationId: String) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
       val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
       val form = EditApplicationForm.withData(data.app)
@@ -62,7 +70,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     case _ => Redirect(routes.ManageApplications.editApplication(applicationId, None))
   }
 
-  def changeApiSubscription(applicationId: String, apiContext: String, apiVersion: String, redirectTo: String) = teamMemberOnApp(applicationId) {
+  def changeApiSubscription(applicationId: String, apiContext: String, apiVersion: String, redirectTo: String) = whenTeamMemberOnApp(applicationId) {
     implicit request =>
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
@@ -89,27 +97,26 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                   apiName: String,
                                   apiContext: String,
                                   apiVersion: String,
-                                  redirectTo: String) = adminOnApp(applicationId) {
+                                  redirectTo: String) = canManageLockedApiSubscriptionsAction(applicationId) {
     implicit request =>
-      if (request.application.hasLockedSubscriptions) {
         applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).map(subscribed =>
           Ok(changeSubscriptionConfirmation(
             request.application, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo)))
-      } else {
-        Future.successful(BadRequest(errorHandler.badRequestTemplate))
-      }
   }
 
   def changeLockedApiSubscriptionAction(applicationId: String,
                                         apiName: String,
                                         apiContext: String,
                                         apiVersion: String,
-                                        redirectTo: String) = adminOnApp(applicationId) { implicit request =>
+                                        redirectTo: String) = canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
     def requestChangeSubscription(subscribed: Boolean) = {
-      if (subscribed)
-        subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion).map(_ => Ok(views.html.unsubscribeRequestSubmitted(request.application, apiName, apiVersion)))
-      else
-        subscriptionsService.requestApiSubscription(request.user, request.application, apiName, apiVersion).map(_ => Ok(views.html.subscribeRequestSubmitted(request.application, apiName, apiVersion)))
+      if (subscribed) {
+        subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
+          .map(_ => Ok(views.html.unsubscribeRequestSubmitted(request.application, apiName, apiVersion)))
+      } else {
+        subscriptionsService.requestApiSubscription(request.user, request.application, apiName, apiVersion)
+          .map(_ => Ok(views.html.subscribeRequestSubmitted(request.application, apiName, apiVersion)))
+      }
     }
 
     def handleValidForm(subscribed: Boolean)(form: ChangeSubscriptionConfirmationForm) = form.confirm match {
@@ -121,12 +128,8 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
       Future.successful(
         BadRequest(changeSubscriptionConfirmation(request.application, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
 
-    if (request.application.hasLockedSubscriptions) {
-      applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).flatMap(subscribed =>
-        ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
-    } else {
-      Future.successful(BadRequest(errorHandler.badRequestTemplate))
-    }
+    applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).flatMap(subscribed =>
+      ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
   }
 
   def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String) = loggedInAction { implicit request =>
