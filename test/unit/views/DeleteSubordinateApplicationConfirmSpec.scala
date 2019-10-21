@@ -17,7 +17,6 @@
 package unit.views
 
 import config.ApplicationConfig
-import controllers.DeletePrincipalApplicationForm
 import domain._
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
@@ -27,7 +26,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
-import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueContainsText}
+import utils.ViewHelpers.elementExistsByText
 
 class DeleteSubordinateApplicationConfirmSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
@@ -39,7 +38,7 @@ class DeleteSubordinateApplicationConfirmSpec extends UnitSpec with OneServerPer
     val appId = "1234"
     val clientId = "clientId123"
     val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
-    val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, Environment.SANDBOX, Some("Description 1"),
+    val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX, Some("Description 1"),
       Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
