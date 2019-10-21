@@ -180,9 +180,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def validateName(name: String)(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
     val body = ApplicationNameValidationRequest(name)
 
-    http.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](s"$serviceBaseUrl/application/name/validate", body) map {
-      ApplicationNameValidationResult.apply
-    } recover recovery
+    retry {
+      http.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](s"$serviceBaseUrl/application/name/validate", body) map {
+        ApplicationNameValidationResult.apply
+      } recover recovery
+    }
   }
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = {

@@ -26,6 +26,7 @@ import domain._
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.Mockito
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -649,6 +650,28 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val expectedRequest = ApplicationNameValidationRequest(applicationName)
 
       verify(mockHttpClient)
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
+    }
+
+
+    "when retry logic is enabled should retry on failure" in new Setup {
+      val applicationName = "my valid application name"
+
+      when(mockAppConfig.retryCount).thenReturn(1)
+
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+        .thenReturn(
+          Future.failed(new BadRequestException("")),
+          Future.successful(ApplicationNameValidationResult(None))
+          )
+
+      val result = await(connector.validateName(applicationName))
+
+      result shouldBe Valid
+
+      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+
+      verify(mockHttpClient, Mockito.atLeastOnce)
         .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
     }
   }
