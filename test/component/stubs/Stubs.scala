@@ -22,6 +22,7 @@ import java.util.UUID
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.ApiSubscriptionFields.SubscriptionFields
+import domain.ApplicationNameValidationJson.ApplicationNameValidationResult
 import domain.DefinitionFormats._
 import domain._
 import org.scalatest.Matchers
@@ -80,6 +81,12 @@ object DeveloperStub {
 }
 
 object ApplicationStub {
+  def setupApplicationNameValidation() = {
+    val validNameResult = ApplicationNameValidationResult(None)
+
+    Stubs.setupPostRequest("/application/name/validate", OK, Json.toJson(validNameResult).toString)
+  }
+
   def setUpFetchApplication(id: String, status: Int, response: String = "") = {
     stubFor(get(urlEqualTo(s"/application/$id"))
       .willReturn(aResponse().withStatus(status).withBody(response))

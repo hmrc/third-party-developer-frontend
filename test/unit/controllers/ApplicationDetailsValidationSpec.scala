@@ -25,7 +25,7 @@ class ApplicationDetailsValidationSpec extends UnitSpec with Matchers {
 
   "applicationNameValidator" should {
     val testForm = Form("name" -> applicationNameValidator)
-    val applicationNameInvalidKey = "application.name.invalid.field"
+    val applicationNameInvalidKeyLengthAndCharacters = "application.name.invalid.length.and.characters"
 
     "generate no error when valid" in {
       val res = testForm.bind(Map("name" -> "Parsley App"))
@@ -45,7 +45,7 @@ class ApplicationDetailsValidationSpec extends UnitSpec with Matchers {
     }
 
     "generate an error when empty, or one character long" in {
-      val expectedErrors = List(FormError("name", applicationNameInvalidKey))
+      val expectedErrors = List(FormError("name", applicationNameInvalidKeyLengthAndCharacters))
 
       testForm.bind(Map("name" -> "")).errors shouldBe expectedErrors
       testForm.bind(Map("name" -> "a")).errors shouldBe expectedErrors
@@ -53,7 +53,7 @@ class ApplicationDetailsValidationSpec extends UnitSpec with Matchers {
 
     "generate an error when max length exceeded" in {
       val name = "a" * 51
-      val expectedErrors = List(FormError("name", applicationNameInvalidKey))
+      val expectedErrors = List(FormError("name", applicationNameInvalidKeyLengthAndCharacters))
 
       val res = testForm.bind(Map("name" -> name))
       res.errors shouldBe expectedErrors
@@ -61,7 +61,7 @@ class ApplicationDetailsValidationSpec extends UnitSpec with Matchers {
 
     "generate an error when non ASCII characters are used" in {
       val name = "ddɐ ʎǝlsɹɐԀ"
-      val expectedErrors = List(FormError("name", applicationNameInvalidKey))
+      val expectedErrors = List(FormError("name", applicationNameInvalidKeyLengthAndCharacters))
       val res = testForm.bind(Map("name" -> name))
       res.errors shouldBe expectedErrors
     }

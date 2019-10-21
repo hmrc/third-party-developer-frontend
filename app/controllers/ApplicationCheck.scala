@@ -44,7 +44,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   extends ApplicationController() with ApplicationHelper {
 
   private def canUseChecksAction(applicationId: String)
-                        (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(SupportsAppChecks,AdministratorOnly)(applicationId)(fun)
 
   def requestCheckPage(appId: String) = canUseChecksAction(appId) { implicit request =>
@@ -133,12 +133,25 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       }
     }
 
-    def withValidForm(form: NameForm) = {
-      val information = app.checkInformation.getOrElse(CheckInformation())
-      for {
-        _ <- updateNameIfChanged(form)
-        _ <- applicationService.updateCheckInformation(app.id, information.copy(confirmedName = true))
-      } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
+    def withValidForm(form: NameForm): Future[Result] = {
+      applicationService.isApplicationNameValid(form.applicationName, app.deployedTo)
+        .flatMap({
+          case Valid =>
+            val information = app.checkInformation.getOrElse(CheckInformation())
+            for {
+              _ <- updateNameIfChanged(form)
+              _ <- applicationService.updateCheckInformation(app.id, information.copy(confirmedName = true))
+            } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
+          case invalid : Invalid =>
+            def invalidNameCheckForm = {
+              requestForm
+                .withError("submissionError", "true")
+                .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ApplicationCheck.namePage(appId))
+                .withGlobalError(invalid.validationErrorMessageKey)
+            }
+
+            Future.successful(BadRequest(views.html.applicationcheck.confirmName(request.application, invalidNameCheckForm)))
+        })
     }
 
     requestForm.fold(withFormErrors, withValidForm)

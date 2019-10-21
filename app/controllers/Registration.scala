@@ -48,7 +48,7 @@ class Registration @Inject()(override val sessionService: SessionService,
 
   def register() = Action.async {
     implicit request =>
-      val requestForm = regForm.bindFromRequest
+      val requestForm: Form[RegisterForm] = regForm.bindFromRequest
       requestForm.fold(
         formWithErrors => {
           Future.successful(BadRequest(views.html.registration(

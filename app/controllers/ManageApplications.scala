@@ -16,12 +16,16 @@
 
 package controllers
 
+import java.io
+
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import controllers.FormKeys.{appNameField, applicationNameInvalidKey, emailaddressAlreadyInUseGlobalKey, emailaddressField, emailalreadyInUseKey}
 import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
+import play.api.mvc.Result
 import service._
 import views.html._
 
@@ -54,15 +58,37 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
   }
 
   def addApplicationAction() = loggedInAction { implicit request =>
-    val requestForm = AddApplicationForm.form.bindFromRequest
+    val requestForm: Form[AddApplicationForm] = AddApplicationForm.form.bindFromRequest
 
     def addApplicationWithFormErrors(errors: Form[AddApplicationForm]) =
       Future.successful(BadRequest(views.html.addApplication(errors)))
 
-    def addApplicationWithValidForm(validForm: AddApplicationForm) = {
+    def addApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationForm) = {
 
-      applicationService.createForUser(CreateApplicationRequest.from(loggedIn, validForm))
-        .map(appCreated => Created(addApplicationSuccess(validForm.applicationName, appCreated.id, validForm.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX))))
+      val environment = formThatPassesSimpleValidation.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX)
+
+      applicationService.isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment).flatMap {
+        case Valid => {
+          applicationService
+            .createForUser(CreateApplicationRequest.from(loggedIn, formThatPassesSimpleValidation))
+            .map(appCreated => {
+              Created(addApplicationSuccess(
+                formThatPassesSimpleValidation.applicationName,
+                appCreated.id,
+                environment
+              ))
+            })
+        }
+        case invalid : Invalid => {
+          def invalidApplicationNameForm =
+            requestForm
+              .withError("submissionError", "true")
+              .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ManageApplications.addApplicationAction())
+              .withGlobalError(invalid.validationErrorMessageKey)
+
+          Future.successful(BadRequest(views.html.addApplication(invalidApplicationNameForm)))
+        }
+      }
     }
 
     requestForm.fold(addApplicationWithFormErrors, addApplicationWithValidForm)

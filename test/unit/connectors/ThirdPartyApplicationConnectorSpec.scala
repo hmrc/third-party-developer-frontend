@@ -17,15 +17,16 @@
 package unit.connectors
 
 import java.net.URLEncoder.encode
-import java.util.UUID
 
 import akka.actor.ActorSystem
 import config.ApplicationConfig
 import connectors.{NoopConnectorMetrics, ProxiedHttpClient, ThirdPartyApplicationConnector}
+import domain.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain._
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.Mockito
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -615,6 +616,66 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
   }
 
+  "validateName" should {
+    val url = s"$baseUrl/application/name/validate"
+
+    "returns a valid response" in new Setup {
+
+      val applicationName = "my valid application name"
+
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(ApplicationNameValidationResult(None)))
+
+      val result = await(connector.validateName(applicationName))
+
+      result shouldBe Valid
+
+      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+
+      verify(mockHttpClient)
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
+    }
+
+    "returns a invalid response" in new Setup {
+
+      val applicationName = "my invalid application name"
+
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(ApplicationNameValidationResult(Some(Errors(invalidName = true, duplicateName = false)))))
+
+      val result = await(connector.validateName(applicationName))
+
+      result shouldBe Invalid(invalidName = true, duplicateName = false)
+
+      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+
+      verify(mockHttpClient)
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
+    }
+
+
+    "when retry logic is enabled should retry on failure" in new Setup {
+      val applicationName = "my valid application name"
+
+      when(mockAppConfig.retryCount).thenReturn(1)
+
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+        .thenReturn(
+          Future.failed(new BadRequestException("")),
+          Future.successful(ApplicationNameValidationResult(None))
+          )
+
+      val result = await(connector.validateName(applicationName))
+
+      result shouldBe Valid
+
+      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+
+      verify(mockHttpClient, Mockito.atLeastOnce)
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
+    }
+  }
+
   "http" when {
     "configured not to use the proxy" should {
       "use the HttpClient" in new Setup {
@@ -625,7 +686,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     "configured to use the proxy" should {
       "use the ProxiedHttpClient with the correct authorisation" in new Setup(proxyEnabled = true) {
         when(connector.http)
-            .thenReturn(mockProxiedHttpClient)
+          .thenReturn(mockProxiedHttpClient)
 
         connector.http shouldBe mockProxiedHttpClient
         verify(mockProxiedHttpClient).withHeaders(bearer, apiKeyTest)

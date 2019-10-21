@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import connectors._
 import domain.APIStatus._
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import domain.Environment.{PRODUCTION, SANDBOX}
 import domain._
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import javax.inject.{Inject, Singleton}
@@ -118,7 +119,8 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.updateApproval(id, checkInformation))
   }
 
-  def requestUplift(applicationId: String, applicationName: String, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = {
+  def requestUplift(applicationId: String, applicationName: String, requestedBy: DeveloperSession)
+                   (implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = {
     for {
       result <- connectorWrapper.productionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, requestedBy.email))
       upliftTicket = DeskproTicket.createForUplift(requestedBy.displayedName, requestedBy.email, applicationName, applicationId)
@@ -250,8 +252,15 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield ticketResponse
   }
 
+  def isApplicationNameValid(name: String, environment: Environment)(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+    environment match {
+      case PRODUCTION => connectorWrapper.productionApplicationConnector.validateName(name)
+      case SANDBOX => connectorWrapper.sandboxApplicationConnector.validateName(name)
+    }
+  }
+
   def userLogoutSurveyCompleted(email: String, name: String, rating: String, improvementSuggestions: String)
-                                                                                (implicit hc: HeaderCarrier): Future[AuditResult] = {
+                               (implicit hc: HeaderCarrier): Future[AuditResult] = {
 
     auditService.audit(UserLogoutSurveyCompleted, Map(
       "userEmailAddress" -> email,

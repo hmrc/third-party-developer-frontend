@@ -16,20 +16,21 @@
 
 package connectors
 
-import config.ApplicationConfig
-import domain.DefinitionFormats._
-import domain._
 import java.net.URLEncoder.encode
 
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
+import config.ApplicationConfig
+import domain.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
+import domain.DefinitionFormats._
+import domain._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
@@ -174,6 +175,16 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     http.POST(s"$serviceBaseUrl/application/$appId/revoke-client-secrets", deleteClientSecretsRequest) map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
+  }
+
+  def validateName(name: String)(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+    val body = ApplicationNameValidationRequest(name)
+
+    retry {
+      http.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](s"$serviceBaseUrl/application/name/validate", body) map {
+        ApplicationNameValidationResult.apply
+      } recover recovery
+    }
   }
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = {

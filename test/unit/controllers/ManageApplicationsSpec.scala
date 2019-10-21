@@ -24,6 +24,8 @@ import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
+import org.mockito.Mockito
+import org.mockito.Mockito.verify
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -72,11 +74,20 @@ class ManageApplicationsSpec
 
     val hc = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-    given(underTest.sessionService.fetch(mockEq(partLoggedInSessionId))(any[HeaderCarrier])).willReturn(Some(partLoggedInSession))
+    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+      .willReturn(Some(session))
 
-    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
+    given(underTest.sessionService.fetch(mockEq(partLoggedInSessionId))(any[HeaderCarrier]))
+      .willReturn(Some(partLoggedInSession))
+
+    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
+      .willReturn(successful(ApplicationUpdateSuccessful))
+
+    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
+      .willReturn(successful(application))
+
+    given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+      .willReturn(successful(Valid))
 
     private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
@@ -176,6 +187,60 @@ class ManageApplicationsSpec
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
       }
+    }
+
+    "when an invalid name is entered" when {
+
+      "and it contains HMRC it shows an error page and lets you re-submit the name" in new Setup {
+        private val invalidApplicationName = "invalidApplicationName"
+
+        given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+          .willReturn(Invalid(invalidName = true, duplicateName = false))
+
+        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
+          .withCSRFToken
+          .withFormUrlEncodedBody(
+            ("applicationName", invalidApplicationName),
+            ("environment", "SANDBOX"),
+            ("description", ""))
+
+        private val result = await(underTest.addApplicationAction()(request))
+
+        status(result) shouldBe BAD_REQUEST
+        bodyOf(result) should include("Choose an application name that does not include HMRC")
+
+        verify(underTest.applicationService, Mockito.times(0))
+          .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
+
+        verify(underTest.applicationService)
+          .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX))(any[HeaderCarrier])
+      }
+
+      "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
+        private val applicationName = "duplicate name"
+
+        given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+          .willReturn(Invalid(invalidName = false, duplicateName = true))
+
+        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
+          .withCSRFToken
+          .withFormUrlEncodedBody(
+            ("applicationName", applicationName),
+            ("environment", "SANDBOX"),
+            ("description", ""))
+
+        private val result = await(underTest.addApplicationAction()(request))
+
+        status(result) shouldBe BAD_REQUEST
+        bodyOf(result) should include("Choose an application name that is not already registered on the Developer Hub")
+
+        verify(underTest.applicationService, Mockito.times(0))
+          .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
+
+        verify(underTest.applicationService)
+          .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.SANDBOX))(any[HeaderCarrier])
+      }
+
     }
   }
 
