@@ -15,12 +15,11 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment,AccessType}
-@import helpers.DateFormatter.{formatDate, formatLastAccessDate}
+@import domain.{AccessType, Application}
 
 @(app: Application)(implicit appConfig: ApplicationConfig)
 
-@if(app.access.accessType != AccessType.STANDARD) {
+@if(app.access.accessType.isNotStandard) {
     <p>This application is @applicationType() application.</p>
 }
 
@@ -33,16 +32,6 @@
     <div class="column-one-quarter"><span class="bold">Environment:</span></div>
     <div class="column-three-quarters" data-app-env>@app.deployedTo.toString.toLowerCase.capitalize</div>
 </div>
-
-<div class="metadata-wrapper"></div>
-<p class="metadata">
-    Created @{formatDate(app.createdOn)}
-</p>
-<p class="metadata">
-    Last API call @{formatLastAccessDate(app.lastAccess)}
-</p>
-
-<br>
 
 @applicationType() = @{app.access.accessType match {
     case AccessType.PRIVILEGED => "a privileged"

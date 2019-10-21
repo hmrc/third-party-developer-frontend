@@ -22,9 +22,10 @@ import controllers._
 import domain._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
+import org.mockito.Mockito
+import org.mockito.Mockito.verify
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -73,11 +74,20 @@ class ManageApplicationsSpec
 
     val hc = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-    given(underTest.sessionService.fetch(mockEq(partLoggedInSessionId))(any[HeaderCarrier])).willReturn(Some(partLoggedInSession))
+    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+      .willReturn(Some(session))
 
-    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
+    given(underTest.sessionService.fetch(mockEq(partLoggedInSessionId))(any[HeaderCarrier]))
+      .willReturn(Some(partLoggedInSession))
+
+    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
+      .willReturn(successful(ApplicationUpdateSuccessful))
+
+    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
+      .willReturn(successful(application))
+
+    given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+      .willReturn(successful(Valid))
 
     private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
@@ -106,88 +116,6 @@ class ManageApplicationsSpec
       bodyOf(result) should include("App name 1")
       bodyOf(result) should not include "Sign in"
     }
-
-    "show the link to agree terms of use for an app that has not has the terms of use agreed" in new Setup {
-
-      given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn(successful(List(application)))
-
-      private val result = await(underTest.manageApps()(loggedInRequest))
-
-      status(result) shouldBe OK
-      private val dom = Jsoup.parse(bodyOf(result))
-      termsOfUseWarningExists(dom) shouldBe true
-      termsOfUseColumnExists(dom) shouldBe true
-      elementIdentifiedByAttrWithValueContainsText(
-        dom, "a", "href", s"/developer/applications/${application.id}/details/terms-of-use", "Read and agree") shouldBe true
-    }
-
-    "show the needs admin rights indication for a developer on an app that has not has the terms of use agreed" in new Setup {
-
-      private val appWithDeveloperRights = application.copy(id = "56768", collaborators = Set(Collaborator(loggedInUser.email, Role.DEVELOPER)))
-
-      given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn(successful(List(application, appWithDeveloperRights)))
-
-      private val result = await(underTest.manageApps()(loggedInRequest))
-
-      status(result) shouldBe OK
-      private val dom = Jsoup.parse(bodyOf(result))
-      termsOfUseWarningExists(dom) shouldBe true
-      termsOfUseColumnExists(dom) shouldBe true
-      termsOfUseIndicatorExistsWithText(dom, appWithDeveloperRights.id, "Need admin rights") shouldBe true
-    }
-
-    "show the terms of use agreed indication for an app that has has the terms of use agreed" in new Setup {
-
-      private val appWithTermsOfUseAgreed =
-        application.copy(
-          id = "56768", checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))))
-
-      given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn(successful(List(application, appWithTermsOfUseAgreed)))
-
-      private val result = await(underTest.manageApps()(loggedInRequest))
-
-      status(result) shouldBe OK
-      private val dom = Jsoup.parse(bodyOf(result))
-      termsOfUseWarningExists(dom) shouldBe true
-      termsOfUseColumnExists(dom) shouldBe true
-      termsOfUseIndicatorExistsWithText(dom, appWithTermsOfUseAgreed.id, "Agreed") shouldBe true
-    }
-
-    "not show the terms of use indication for a sandbox app" in new Setup {
-
-      private val sandboxApp = application.copy(id = "56768", deployedTo = Environment.SANDBOX)
-
-      given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn(successful(List(application, sandboxApp)))
-
-      private val result = await(underTest.manageApps()(loggedInRequest))
-
-      status(result) shouldBe OK
-      private val dom = Jsoup.parse(bodyOf(result))
-      termsOfUseWarningExists(dom) shouldBe true
-      termsOfUseColumnExists(dom) shouldBe true
-      termsOfUseIndicatorExistsWithId(dom, sandboxApp.id) shouldBe false
-    }
-
-    "not show the terms of use warning and column when there are no apps requiring terms of use agreement" in new Setup {
-
-      private val appWithTermsOfUseAgreed = application.copy(
-        id = "56768", checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))))
-
-      given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn(successful(List(appWithTermsOfUseAgreed)))
-
-      private val result = await(underTest.manageApps()(loggedInRequest))
-
-      status(result) shouldBe OK
-      private val dom = Jsoup.parse(bodyOf(result))
-      termsOfUseWarningExists(dom) shouldBe false
-      termsOfUseColumnExists(dom) shouldBe false
-    }
-
 
     "return to the login page when the user is not logged in" in new Setup {
 
@@ -260,21 +188,61 @@ class ManageApplicationsSpec
         redirectLocation(result) shouldBe Some("/developer/login")
       }
     }
+
+    "when an invalid name is entered" when {
+
+      "and it contains HMRC it shows an error page and lets you re-submit the name" in new Setup {
+        private val invalidApplicationName = "invalidApplicationName"
+
+        given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+          .willReturn(Invalid(invalidName = true, duplicateName = false))
+
+        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
+          .withCSRFToken
+          .withFormUrlEncodedBody(
+            ("applicationName", invalidApplicationName),
+            ("environment", "SANDBOX"),
+            ("description", ""))
+
+        private val result = await(underTest.addApplicationAction()(request))
+
+        status(result) shouldBe BAD_REQUEST
+        bodyOf(result) should include("Choose an application name that does not include HMRC")
+
+        verify(underTest.applicationService, Mockito.times(0))
+          .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
+
+        verify(underTest.applicationService)
+          .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX))(any[HeaderCarrier])
+      }
+
+      "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
+        private val applicationName = "duplicate name"
+
+        given(underTest.applicationService.isApplicationNameValid(any(),any())(any[HeaderCarrier]))
+          .willReturn(Invalid(invalidName = false, duplicateName = true))
+
+        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
+          .withCSRFToken
+          .withFormUrlEncodedBody(
+            ("applicationName", applicationName),
+            ("environment", "SANDBOX"),
+            ("description", ""))
+
+        private val result = await(underTest.addApplicationAction()(request))
+
+        status(result) shouldBe BAD_REQUEST
+        bodyOf(result) should include("Choose an application name that is not already registered on the Developer Hub")
+
+        verify(underTest.applicationService, Mockito.times(0))
+          .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
+
+        verify(underTest.applicationService)
+          .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.SANDBOX))(any[HeaderCarrier])
+      }
+
+    }
   }
 
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
-
-  private def termsOfUseWarningExists(doc: Document) = {
-    elementExistsByText(doc, "strong", "You must agree to the terms of use on all production applications.")
-  }
-
-  private def termsOfUseColumnExists(doc: Document) = elementExistsByText(doc, "th", "Terms of use")
-
-  private def termsOfUseIndicatorExistsWithText(doc: Document, id: String, text: String) = {
-    elementIdentifiedByAttrWithValueContainsText(doc, "td", "id", s"terms-of-use-$id", text)
-  }
-
-  private def termsOfUseIndicatorExistsWithId(doc: Document, id: String) = {
-    elementExistsById(doc, s"terms-of-use-$id")
-  }
 }

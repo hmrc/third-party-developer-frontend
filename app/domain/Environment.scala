@@ -18,7 +18,11 @@ package domain
 
 import enumeratum.{EnumEntry, PlayEnum}
 
-sealed trait Environment extends EnumEntry
+sealed trait Environment extends EnumEntry {
+  def isSandbox(): Boolean = this == Environment.SANDBOX
+
+  def isProduction(): Boolean = this == Environment.PRODUCTION
+}
 
 object Environment extends PlayEnum[Environment] {
   val values = findValues

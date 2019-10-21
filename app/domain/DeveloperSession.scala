@@ -30,7 +30,7 @@ case class DeveloperSession(session: Session) {
   val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 
   val loggedInName: Option[String] =
-    if (loggedInState == LoggedInState.LOGGED_IN) {
+    if (loggedInState.isLoggedIn) {
       Some(displayedName)
     } else {
       None

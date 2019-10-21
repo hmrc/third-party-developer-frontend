@@ -18,9 +18,12 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import domain.Capabilities.SupportsDeletion
+import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
+import play.api.mvc.{AnyContent, Result}
 import service._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,17 +39,26 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
                                  (implicit ec: ExecutionContext)
   extends ApplicationController {
 
-  def deleteApplication(applicationId: String, error: Option[String] = None) = teamMemberOnStandardApp(applicationId) { implicit request =>
-    val view = views.html.deleteApplication(request.application, request.role)
-    Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
-  }
+  private def canDeleteApplicationAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
+    capabilityThenPermissionsAction(SupportsDeletion,AdministratorOnly)(applicationId)(fun)
 
-  def deletePrincipalApplicationConfirm(applicationId: String, error: Option[String] = None) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
-    val view = views.html.deletePrincipalApplicationConfirm(request.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
-    Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
-  }
+  private def canViewDeleteApplicationAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
+    capabilityThenPermissionsAction(SupportsDeletion,TeamMembersOnly)(applicationId)(fun)
 
-  def deletePrincipalApplicationAction(applicationId: String) = sandboxOrAdminIfProductionForStandardApp(applicationId) { implicit request =>
+
+  def deleteApplication(applicationId: String, error: Option[String] = None) =
+    canViewDeleteApplicationAction(applicationId) { implicit request =>
+      val view = views.html.deleteApplication(request.application, request.role)
+      Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
+    }
+
+  def deletePrincipalApplicationConfirm(applicationId: String, error: Option[String] = None) =
+    canDeleteApplicationAction(applicationId) { implicit request =>
+      val view = views.html.deletePrincipalApplicationConfirm(request.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
+      Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
+    }
+
+  def deletePrincipalApplicationAction(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
     val application = request.application
 
     def handleInvalidForm(formWithErrors: Form[DeletePrincipalApplicationForm]) =
@@ -63,11 +75,11 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
     DeletePrincipalApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def deleteSubordinateApplicationConfirm(applicationId: String) = adminOnStandardSandboxApp(applicationId) { implicit request =>
+  def deleteSubordinateApplicationConfirm(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
     Future(Ok(views.html.deleteSubordinateApplicationConfirm(request.application)))
   }
 
-  def deleteSubordinateApplicationAction(applicationId: String) = adminOnStandardSandboxApp(applicationId) { implicit request =>
+  def deleteSubordinateApplicationAction(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
     val application = request.application
 
     applicationService.deleteSubordinateApplication(request.user, application)

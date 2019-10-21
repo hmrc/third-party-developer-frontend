@@ -20,6 +20,7 @@ import domain.Environment
 import play.api.data.Forms
 import play.api.data.Forms.{optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
+import service.ApplicationService
 import uk.gov.hmrc.emailaddress.EmailAddress
 
 import scala.util.Try
@@ -82,7 +83,9 @@ package object controllers {
     val tNcUrlNoChoiceKey = "terms.conditions.url.no.choice.field"
     val tNcUrlRequiredKey = "terms.conditions.url.required.field"
 
-    val applicationNameInvalidKey = "application.name.invalid.field"
+    val applicationNameInvalidKeyLengthAndCharacters = "application.name.invalid.length.and.characters"
+
+    val applicationNameInvalidKey = "application.name.invalid.name"
     val applicationNameAlreadyExistsKey = "application.name.already.exists.field"
 
     val environmentInvalidKey = "environment.error.required.field"
@@ -242,9 +245,11 @@ package object controllers {
 
   def tNcUrlValidator = Forms.text.verifying(tNcUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
 
-  def applicationNameValidator =
-    Forms.text.verifying(applicationNameInvalidKey,
-      s => s.length >= 2 && s.length <= 50 && isAcceptedAscii(s))
+  def applicationNameValidator = {
+    // This does 1 & 2 above
+        Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters,
+          s => s.length >= 2 && s.length <= 50 && isAcceptedAscii(s))
+  }
 
   def environmentValidator = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))
 

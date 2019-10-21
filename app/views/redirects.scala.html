@@ -19,8 +19,9 @@
 @import include._
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
+@import domain.Permissions.SandboxOrAdmin
 
-@(application: Application, redirectUris: Seq[String], role: Role)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@(application: Application, redirectUris: Seq[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
 @devMain(
     title = "Manage redirect URIs",
@@ -36,8 +37,9 @@
     <h1 class="heading-xlarge">Manage redirect URIs</h1>
 
     @appEnvironment(application)
+    <br>
 
-    @if(role == Role.DEVELOPER) {
+    @if(application.role(loggedIn.developer.email).isDefined) {
         <p class="panel panel-border-wide">You need admin rights to change redirect URIs.</p>
     }
 
@@ -68,7 +70,7 @@
                 <tr>
                     <td class="break-word">@uri</td>
                     <td class="numeric">
-                        @if(role == Role.ADMINISTRATOR || application.deployedTo == Environment.SANDBOX){
+                        @if(application.permits(loggedIn.developer, SandboxOrAdmin)){
                             @helper.form(action = controllers.routes.Redirects.changeRedirect(application.id), 'class -> "form inline-controls") {
                                 @helper.CSRF.formField
                                 <input id="originalRedirectUri" name="originalRedirectUri" class="form-control" hidden aria-hidden="true" type="text" value="@uri">
@@ -89,7 +91,7 @@
         <br>
     }
 
-    @if(role == Role.ADMINISTRATOR || application.deployedTo == Environment.SANDBOX) {
+    @if(application.permits(loggedIn.developer, SandboxOrAdmin)) {
         @if(application.canAddRedirectUri) {
             <a href="@routes.Redirects.addRedirect(application.id)" class="button">Add a redirect URI</a>
         } else {

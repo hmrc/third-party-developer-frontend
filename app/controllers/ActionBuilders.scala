@@ -17,8 +17,7 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.AccessType.{PRIVILEGED, ROPC}
-import domain.{BadRequestError, DeveloperSession, Environment, Role, State}
+import domain._
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, ActionRefiner, Request, Result}
@@ -52,49 +51,45 @@ trait ActionBuilders {
     }
   }
 
-  def standardAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
-      implicit val implicitRequest: ApplicationRequest[A] = request
-      implicit val implicitUser: DeveloperSession = request.user
-
-      val application = request.application
-      application.access.accessType match {
-        case PRIVILEGED | ROPC => Some(Forbidden(errorHandler.badRequestTemplate))
-        case _ => None
-      }
+  private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
+    if (cond) {
+      None
+    } else {
+      // TODO - should this be a forbiddenTemplate ?
+      Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
 
-  def appInStateProductionFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
-      implicit val implicitRequest: ApplicationRequest[A] = request
-
-      request.application.state.name match {
-        case State.PRODUCTION => None
-        case _ => Some(BadRequest(Json.toJson(BadRequestError)))
-      }
+  private def badRequestWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
+    if (cond) {
+      None
+    } else {
+      // TODO - should this be JSON ?
+      Some(BadRequest(Json.toJson(BadRequestError)))
     }
   }
 
-  def appInStateTestingFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
+  def forbiddenWhenNotFilter(cond: ApplicationRequest[_] => Boolean): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
-      request.application.state.name match {
-        case State.TESTING => None
-        case _ => Some(BadRequest(Json.toJson(BadRequestError)))
-      }
+      Future.successful(forbiddenWhenNot(cond(request)))
     }
   }
 
-  def adminOnAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
+  def badRequestWhenNotFilter(cond: ApplicationRequest[_] => Boolean): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
-      request.role match {
-        case Role.ADMINISTRATOR => None
-        case _ => Some(Forbidden(errorHandler.badRequestTemplate))
-      }
+      Future.successful(badRequestWhenNot(cond(request)))
+    }
+  }
+
+  def capabilityFilter(capability: Capability) = {
+    val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
+    capability match {
+      case c : LikePermission => forbiddenWhenNotFilter(capabilityCheck)
+      case c : Capability => badRequestWhenNotFilter(capabilityCheck)
     }
   }
 
@@ -127,4 +122,6 @@ trait ActionBuilders {
       else Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
+  def permissionFilter(permission: Permission) =
+    forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.user.developer))
 }

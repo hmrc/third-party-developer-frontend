@@ -18,13 +18,14 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
+import domain.Capabilities.SupportsAppChecks
+import domain.Permissions.AdministratorOnly
 import domain._
 import javax.inject.{Inject, Singleton}
-import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, Result}
+import play.api.mvc.{Action, ActionFunction, AnyContent, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.voa.play.form.ConditionalMappings._
@@ -42,24 +43,18 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                 (implicit ec: ExecutionContext)
   extends ApplicationController() with ApplicationHelper {
 
-  def withAppInTestingState(appId: String)(f: Application => Future[Result])(implicit request: RequestWithAttributes[AnyContent]) = {
-    applicationForRequest(appId) flatMap { app =>
-      if (app.state.name == ApplicationState.testing.name) {
-        f(app)
-      } else {
-        Future.successful(Redirect(controllers.routes.ManageApplications.editApplication(appId, None)))
-      }
-    }
-  }
+  private def canUseChecksAction(applicationId: String)
+                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    capabilityThenPermissionsAction(SupportsAppChecks,AdministratorOnly)(applicationId)(fun)
 
-  def requestCheckPage(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def requestCheckPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val application = request.application
 
     Future.successful(Ok(applicationcheck.landingPage(application,
       ApplicationInformationForm.form.fill(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))))))
   }
 
-  def requestCheckAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def requestCheckAction(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
     val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(app.checkInformation.getOrElse(CheckInformation())))
 
@@ -85,7 +80,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  def contactPage(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def contactPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
     val contactForm = for {
@@ -100,7 +95,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     })
   }
 
-  def contactAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def contactAction(appId: String) = canUseChecksAction(appId) { implicit request =>
     val requestForm = ContactForm.form.bindFromRequest
     val app = request.application
 
@@ -118,11 +113,11 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  def namePage(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def namePage(appId: String) = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(applicationcheck.confirmName(request.application, NameForm.form.fill(NameForm(request.application.name)))))
   }
 
-  def nameAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def nameAction(appId: String) = canUseChecksAction(appId) { implicit request =>
     val requestForm = NameForm.form.bindFromRequest
     val app = request.application
 
@@ -138,18 +133,31 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       }
     }
 
-    def withValidForm(form: NameForm) = {
-      val information = app.checkInformation.getOrElse(CheckInformation())
-      for {
-        _ <- updateNameIfChanged(form)
-        _ <- applicationService.updateCheckInformation(app.id, information.copy(confirmedName = true))
-      } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
+    def withValidForm(form: NameForm): Future[Result] = {
+      applicationService.isApplicationNameValid(form.applicationName, app.deployedTo)
+        .flatMap({
+          case Valid =>
+            val information = app.checkInformation.getOrElse(CheckInformation())
+            for {
+              _ <- updateNameIfChanged(form)
+              _ <- applicationService.updateCheckInformation(app.id, information.copy(confirmedName = true))
+            } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
+          case invalid : Invalid =>
+            def invalidNameCheckForm = {
+              requestForm
+                .withError("submissionError", "true")
+                .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ApplicationCheck.namePage(appId))
+                .withGlobalError(invalid.validationErrorMessageKey)
+            }
+
+            Future.successful(BadRequest(views.html.applicationcheck.confirmName(request.application, invalidNameCheckForm)))
+        })
     }
 
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  def detailsPage(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def detailsPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
     val detailsForm = for {
@@ -163,7 +171,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     })
   }
 
-  def detailsAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def detailsAction(appId: String) = canUseChecksAction(appId) { implicit request =>
     val requestForm = DetailsForm.form.bindFromRequest
     val app = request.application
 
@@ -181,7 +189,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  def apiSubscriptionsPage(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def apiSubscriptionsPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
     apiSubscriptionsHelper.fetchAllSubscriptions(app, request.user)(hc).flatMap {
@@ -192,7 +200,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def apiSubscriptionsAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def apiSubscriptionsAction(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
     val information = app.checkInformation.getOrElse(CheckInformation())
 
@@ -217,7 +225,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     views.html.applicationcheck.apiSubscriptions(app, subscriptionData.role, subscriptionData.subscriptions, app.id, subscriptionData.hasSubscriptions, form)
   }
 
-  def privacyPolicyPage(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def privacyPolicyPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
     Future.successful(app.access match {
@@ -230,7 +238,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     })
   }
 
-  def privacyPolicyAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def privacyPolicyAction(appId: String) = canUseChecksAction(appId) { implicit request =>
     val requestForm = PrivacyPolicyForm.form.bindFromRequest
     val app = request.application
 
@@ -258,7 +266,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  def termsAndConditionsPage(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def termsAndConditionsPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
     Future.successful(app.access match {
@@ -271,7 +279,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     })
   }
 
-  def termsAndConditionsAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def termsAndConditionsAction(appId: String) = canUseChecksAction(appId) { implicit request =>
     val requestForm = TermsAndConditionsForm.form.bindFromRequest
     val app = request.application
 
@@ -299,7 +307,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  def termsOfUsePage(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def termsOfUsePage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
     val checkInformation = app.checkInformation.getOrElse(CheckInformation())
     val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
@@ -307,7 +315,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(applicationcheck.termsOfUse(app, TermsOfUseForm.form.fill(termsOfUseForm))))
   }
 
-  def termsOfUseAction(appId: String) = adminOnTestingApp(appId) { implicit request =>
+  def termsOfUseAction(appId: String) = canUseChecksAction(appId) { implicit request =>
 
     val version = appConfig.currentTermsOfUseVersion
     val app = request.application

@@ -19,7 +19,6 @@ package unit.views
 import config.ApplicationConfig
 import controllers.ApplicationSummary
 import domain._
-import helpers.DateFormatter.formatLastAccessDate
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -57,45 +56,18 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       val appName = "App name 1"
       val appEnvironment = "Sandbox"
       val appUserRole = Role.ADMINISTRATOR
-      val appLastAccess = DateTimeUtils.now
+      val appCreatedOn = DateTimeUtils.now
+      val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess))
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
       elementExistsByText(document, "h1", "View all applications") shouldBe true
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
-      elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", formatLastAccessDate(appLastAccess)) shouldBe true
+      elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
-    }
-
-    "alert the user to agreeing to the terms of use on prod apps iff relevant" should {
-
-      def shouldViewWithAppShowAlert(environment: String, termsOfUseStatus: TermsOfUseStatus, shouldAlert: Boolean) = {
-
-        val appSummaries = Seq(ApplicationSummary("1111", "App name 1", environment, Role.ADMINISTRATOR,
-          termsOfUseStatus, State.TESTING, DateTimeUtils.now))
-
-        val document = Jsoup.parse(renderPage(appSummaries).body)
-
-        elementExistsByText(document, "strong", "You must agree to the terms of use on all production applications.") shouldBe shouldAlert
-      }
-
-      "view with sandbox app with NA TouStatus should not show alert" in {
-
-        shouldViewWithAppShowAlert("Sandbox", TermsOfUseStatus.NOT_APPLICABLE, shouldAlert = false)
-      }
-
-      "view with prod app which has agreed Terms of Use should not show alert" in {
-
-        shouldViewWithAppShowAlert("Production", TermsOfUseStatus.AGREED, shouldAlert = false)
-      }
-
-      "view with prod app which has not agreed Terms of Use should show alert" in {
-
-        shouldViewWithAppShowAlert("Production", TermsOfUseStatus.AGREEMENT_REQUIRED, shouldAlert = true)
-      }
     }
   }
 }

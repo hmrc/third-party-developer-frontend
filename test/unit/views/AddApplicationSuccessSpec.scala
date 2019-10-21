@@ -42,7 +42,7 @@ class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite with Moc
       val applicationId = "application-id"
       val loggedIn = utils.DeveloperSession("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
-      val page = views.html.addApplicationSuccess.render(applicationName, applicationId, environment.toString, request, loggedIn, applicationMessages, appConfig, navSection = "nav-section")
+      val page = views.html.addApplicationSuccess.render(applicationName, applicationId, environment, request, loggedIn, applicationMessages, appConfig, navSection = "nav-section")
       val document = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", s"You added $applicationName") shouldBe true
       document

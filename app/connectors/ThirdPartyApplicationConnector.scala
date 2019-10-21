@@ -16,11 +16,15 @@
 
 package connectors
 
-import config.ApplicationConfig
-import domain.DefinitionFormats._
-import domain._
 import java.net.URLEncoder.encode
 
+import akka.actor.ActorSystem
+import akka.pattern.FutureTimeoutSupport
+import config.ApplicationConfig
+import domain.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
+import domain.DefinitionFormats._
+import domain._
+import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
@@ -34,7 +38,7 @@ import uk.gov.hmrc.play.http.metrics.API
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
-abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) {
+abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends Retries {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
   implicit val ec: ExecutionContext
@@ -42,8 +46,9 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   val serviceBaseUrl: String
   val useProxy: Boolean
   val bearerToken: String
+  val apiKey: String
 
-  def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(bearerToken) else httpClient
+  def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
 
   val api = API("third-party-application")
 
@@ -60,18 +65,19 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] = metrics.record(api) {
+    retry {
+      val url = s"$serviceBaseUrl/developer/applications"
 
-    val url = s"$serviceBaseUrl/developer/applications"
+      Logger.debug(s"fetchByTeamMemberEmail() - About to call $url for $email in ${environment.toString}")
 
-    Logger.debug(s"fetchByTeamMemberEmail() - About to call $url for $email in ${environment.toString}")
-
-    http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
-      .andThen {
-        case Success(_) =>
-          Logger.debug(s"fetchByTeamMemberEmail() - done call to $url for $email in ${environment.toString}")
-        case _ =>
-          Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
-      }
+      http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
+        .andThen {
+          case Success(_) =>
+            Logger.debug(s"fetchByTeamMemberEmail() - done call to $url for $email in ${environment.toString}")
+          case _ =>
+            Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
+        }
+    }
   }
 
   def addTeamMember(applicationId: String, teamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse] = metrics.record(api) {
@@ -96,17 +102,21 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] = metrics.record(api) {
-    http.GET[Application](s"$serviceBaseUrl/application/$id") map {
-      Some(_)
-    } recover {
-      case _: NotFoundException => None
+    retry{
+      http.GET[Application](s"$serviceBaseUrl/application/$id") map {
+        Some(_)
+      } recover {
+        case _: NotFoundException => None
+      }
     }
   }
 
   def fetchSubscriptions(id: String)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]] = metrics.record(api) {
-    http.GET[Seq[APISubscription]](s"$serviceBaseUrl/application/$id/subscription") recover {
-      case _: Upstream5xxResponse => Seq.empty
-      case _: NotFoundException => throw new ApplicationNotFound
+    retry{
+      http.GET[Seq[APISubscription]](s"$serviceBaseUrl/application/$id/subscription") recover {
+        case _: Upstream5xxResponse => Seq.empty
+        case _: NotFoundException => throw new ApplicationNotFound
+      }
     }
   }
 
@@ -125,7 +135,9 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = metrics.record(api) {
-    http.GET[ApplicationTokens](s"$serviceBaseUrl/application/$id/credentials") recover recovery
+    retry{
+      http.GET[ApplicationTokens](s"$serviceBaseUrl/application/$id/credentials") recover recovery
+    }
   }
 
   def requestUplift(applicationId: String,
@@ -166,6 +178,16 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } recover recovery
   }
 
+  def validateName(name: String)(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+    val body = ApplicationNameValidationRequest(name)
+
+    retry {
+      http.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](s"$serviceBaseUrl/application/name/validate", body) map {
+        ApplicationNameValidationResult.apply
+      } recover recovery
+    }
+  }
+
   private def urlEncode(str: String, encoding: String = "UTF-8") = {
     encode(str, encoding)
   }
@@ -190,25 +212,31 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 @Singleton
 class ThirdPartyApplicationSandboxConnector @Inject()(val httpClient: HttpClient,
                                                       val proxiedHttpClient: ProxiedHttpClient,
-                                                      appConfig: ApplicationConfig,
-                                                      metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
+                                                      val actorSystem: ActorSystem,
+                                                      val futureTimeout: FutureTimeoutSupport,
+                                                      val appConfig: ApplicationConfig,
+                                                      val metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
   extends ThirdPartyApplicationConnector(appConfig, metrics) {
 
   val environment = Environment.SANDBOX
   val serviceBaseUrl = appConfig.thirdPartyApplicationSandboxUrl
   val useProxy = appConfig.thirdPartyApplicationSandboxUseProxy
   val bearerToken = appConfig.thirdPartyApplicationSandboxBearerToken
+  val apiKey = appConfig.thirdPartyApplicationSandboxApiKey
 }
 
 @Singleton
 class ThirdPartyApplicationProductionConnector @Inject()(val httpClient: HttpClient,
                                                          val proxiedHttpClient: ProxiedHttpClient,
-                                                         appConfig: ApplicationConfig,
-                                                         metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
+                                                         val actorSystem: ActorSystem,
+                                                         val futureTimeout: FutureTimeoutSupport,
+                                                         val appConfig: ApplicationConfig,
+                                                         val metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
   extends ThirdPartyApplicationConnector(appConfig, metrics) {
 
   val environment = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
   val useProxy = appConfig.thirdPartyApplicationProductionUseProxy
   val bearerToken = appConfig.thirdPartyApplicationProductionBearerToken
+  val apiKey = appConfig.thirdPartyApplicationProductionApiKey
 }

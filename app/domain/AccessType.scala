@@ -18,7 +18,12 @@ package domain
 
 import enumeratum.{EnumEntry, PlayEnum}
 
-sealed trait AccessType extends EnumEntry
+sealed trait AccessType extends EnumEntry {
+  def isStandard = this == AccessType.STANDARD
+  def isNotStandard = ! isStandard
+  def isPriviledged = this == AccessType.PRIVILEGED
+  def isROPC = this == AccessType.ROPC
+}
 
 object AccessType extends PlayEnum[AccessType] {
   val values = findValues

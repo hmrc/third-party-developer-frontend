@@ -18,12 +18,16 @@ package unit.connectors
 
 import java.net.URLEncoder.encode
 
+import akka.actor.ActorSystem
 import config.ApplicationConfig
 import connectors.{NoopConnectorMetrics, ProxiedHttpClient, ThirdPartyApplicationConnector}
+import domain.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain._
+import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => meq}
-import org.mockito.Mockito.when
+import org.mockito.Mockito
+import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.ContentTypes.JSON
@@ -45,22 +49,31 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
   private val baseUrl = "https://example.com"
   private val environmentName = "ENVIRONMENT"
 
-  trait Setup {
+  class Setup(proxyEnabled: Boolean = false) {
     implicit val hc = HeaderCarrier()
     protected val mockHttpClient = mock[HttpClient]
     protected val mockProxiedHttpClient = mock[ProxiedHttpClient]
     protected val mockAppConfig = mock[ApplicationConfig]
     protected val mockEnvironment = mock[Environment]
     protected val mockMetrics = new NoopConnectorMetrics()
+    private val futureTimeoutSupport = new FutureTimeoutSupportImpl
+    private val actorSystemTest = ActorSystem("test-actor-system")
+    val apiKeyTest = "5bb51bca-8f97-4f2b-aee4-81a4a70a42d3"
+    val bearer = "TestBearerToken"
 
     val connector = new ThirdPartyApplicationConnector(mockAppConfig, mockMetrics) {
       val ec = global
       val httpClient = mockHttpClient
       val proxiedHttpClient = mockProxiedHttpClient
       val serviceBaseUrl = baseUrl
-      val useProxy = false
+      val useProxy = proxyEnabled
       val bearerToken = "TestBearerToken"
       val environment = mockEnvironment
+      val apiKey = apiKeyTest
+      val appConfig = mockAppConfig
+      val actorSystem = actorSystemTest
+      val futureTimeout = futureTimeoutSupport
+      val metrics = mockMetrics
     }
 
     when(mockEnvironment.toString).thenReturn(environmentName)
@@ -143,14 +156,14 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
   "fetch by teamMember email" should {
     val email = "email@email.com"
+    val url = baseUrl + "/developer/applications"
+    val applicationResponses = List(
+      applicationResponse("app id 1", "client id 1", "app 1"),
+      applicationResponse("app id 2", "client id 2", "app 2"))
+
+    val response: Seq[String] = Seq("app 1", "app 2")
 
     "return list of applications" in new Setup {
-
-      val applicationResponses = List(
-        applicationResponse("app id 1", "client id 1", "app 1"),
-        applicationResponse("app id 2", "client id 2", "app 2")
-      )
-      val url = baseUrl + "/developer/applications"
       when(mockHttpClient
         .GET[Seq[Application]](meq(url), meq(Seq("emailAddress" -> email, "environment" -> environmentName)))(any(), any(), any()))
         .thenReturn(Future.successful(applicationResponses))
@@ -158,7 +171,20 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val result = await(connector.fetchByTeamMemberEmail(email))
 
       result.size shouldBe 2
-      result.map(_.name) shouldBe Seq("app 1", "app 2")
+      result.map(_.name) shouldBe response
+    }
+
+    "when retry logic is enabled should retry on failure" in new Setup {
+      when(mockAppConfig.retryCount).thenReturn(1)
+      when(mockHttpClient.GET[Seq[Application]](meq(url), meq(Seq("emailAddress" -> email, "environment" -> environmentName)))(any(), any(), any())).thenReturn(
+        Future.failed(new BadRequestException("")),
+        Future.successful(applicationResponses)
+      )
+
+      val result = await(connector.fetchByTeamMemberEmail(email))
+
+      result.size shouldBe 2
+      result.map(_.name) shouldBe response
     }
   }
 
@@ -166,11 +192,9 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     val fetchUrl = s"/application/$applicationId"
     val url = baseUrl + fetchUrl
+    val appName = "app name"
 
     "return an application" in new Setup {
-
-      val appName = "app name"
-
       when(mockHttpClient.GET[Application](meq(url))(any(), any(), any()))
         .thenReturn(Future.successful(applicationResponse(applicationId, "client-id", appName)))
 
@@ -189,6 +213,34 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val result = await(connector.fetchApplicationById(applicationId))
 
       result shouldBe empty
+    }
+
+    "when retry logic is enabled should retry on failure" in new Setup {
+      when(mockAppConfig.retryCount).thenReturn(1)
+      when(mockHttpClient.GET[Application](meq(url))(any(), any(), any())).thenReturn(
+        Future.failed(new BadRequestException("")),
+        Future.successful(applicationResponse(applicationId, "client-id", appName))
+      )
+
+      val result = await(connector.fetchApplicationById(applicationId))
+
+      result shouldBe defined
+      result.get.id shouldBe applicationId
+      result.get.name shouldBe appName
+    }
+
+    "when useProxy is enabled returns an application from proxy" in new Setup(proxyEnabled = true) {
+      when(mockProxiedHttpClient.GET[Application](meq(url))(any(), any(), any()))
+        .thenReturn(Future.successful(applicationResponse(applicationId, "client-id", appName)))
+      when(connector.http).thenReturn(mockProxiedHttpClient)
+
+      val result = await(connector.fetchApplicationById(applicationId))
+
+      verify(mockProxiedHttpClient).withHeaders(bearer, apiKeyTest)
+
+      result shouldBe defined
+      result.get.id shouldBe applicationId
+      result.get.name shouldBe appName
     }
   }
 
@@ -214,6 +266,18 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       intercept[ApplicationNotFound](
         await(connector.fetchCredentials(applicationId))
       )
+    }
+
+    "when retry logic is enabled should retry on failure" in new Setup {
+      when(mockAppConfig.retryCount).thenReturn(1)
+      when(mockHttpClient.GET[ApplicationTokens](meq(url))(any(), any(), any())).thenReturn(
+        Future.failed(new BadRequestException("")),
+        Future.successful(tokens)
+      )
+
+      val result = await(connector.fetchCredentials(applicationId))
+
+      Json.toJson(result) shouldBe Json.toJson(tokens)
     }
   }
 
@@ -252,6 +316,18 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       intercept[ApplicationNotFound](
         await(connector.fetchSubscriptions(applicationId))
       )
+    }
+
+    "when retry logic is enabled should retry on failure" in new Setup {
+      when(mockAppConfig.retryCount).thenReturn(1)
+      when(mockHttpClient.GET[Seq[APISubscription]](meq(url))(any(), any(), any())).thenReturn(
+        Future.failed(new BadRequestException("")),
+        Future.successful(subscriptions)
+      )
+
+      val result = await(connector.fetchSubscriptions(applicationId))
+
+      result shouldBe subscriptions
     }
 
   }
@@ -536,6 +612,84 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
       intercept[ApplicationNotFound] {
         await(connector.deleteClientSecrets(applicationId, deleteClientSecretsRequest))
+      }
+    }
+  }
+
+  "validateName" should {
+    val url = s"$baseUrl/application/name/validate"
+
+    "returns a valid response" in new Setup {
+
+      val applicationName = "my valid application name"
+
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(ApplicationNameValidationResult(None)))
+
+      val result = await(connector.validateName(applicationName))
+
+      result shouldBe Valid
+
+      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+
+      verify(mockHttpClient)
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
+    }
+
+    "returns a invalid response" in new Setup {
+
+      val applicationName = "my invalid application name"
+
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(ApplicationNameValidationResult(Some(Errors(invalidName = true, duplicateName = false)))))
+
+      val result = await(connector.validateName(applicationName))
+
+      result shouldBe Invalid(invalidName = true, duplicateName = false)
+
+      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+
+      verify(mockHttpClient)
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
+    }
+
+
+    "when retry logic is enabled should retry on failure" in new Setup {
+      val applicationName = "my valid application name"
+
+      when(mockAppConfig.retryCount).thenReturn(1)
+
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+        .thenReturn(
+          Future.failed(new BadRequestException("")),
+          Future.successful(ApplicationNameValidationResult(None))
+          )
+
+      val result = await(connector.validateName(applicationName))
+
+      result shouldBe Valid
+
+      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+
+      verify(mockHttpClient, Mockito.atLeastOnce)
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
+    }
+  }
+
+  "http" when {
+    "configured not to use the proxy" should {
+      "use the HttpClient" in new Setup {
+        connector.http shouldBe mockHttpClient
+      }
+    }
+
+    "configured to use the proxy" should {
+      "use the ProxiedHttpClient with the correct authorisation" in new Setup(proxyEnabled = true) {
+        when(connector.http)
+          .thenReturn(mockProxiedHttpClient)
+
+        connector.http shouldBe mockProxiedHttpClient
+        verify(mockProxiedHttpClient).withHeaders(bearer, apiKeyTest)
       }
     }
   }
