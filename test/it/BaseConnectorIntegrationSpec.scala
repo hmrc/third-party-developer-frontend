@@ -36,7 +36,6 @@ trait BaseConnectorIntegrationSpec extends UnitSpec with ScalaFutures with Mocki
   }
 
   override def afterAll() {
-    wireMockServer.resetMappings()
     wireMockServer.stop()
   }
 
