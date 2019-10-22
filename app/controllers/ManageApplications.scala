@@ -80,11 +80,7 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
             })
         }
         case invalid : Invalid => {
-          def invalidApplicationNameForm =
-            requestForm
-              .withError("submissionError", "true")
-              .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ManageApplications.addApplicationAction())
-              .withGlobalError(invalid.validationErrorMessageKey)
+          def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
           Future.successful(BadRequest(views.html.addApplication(invalidApplicationNameForm)))
         }
