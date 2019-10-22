@@ -19,24 +19,29 @@ package it
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.UnitSpec
 
-trait BaseConnectorIntegrationSpec extends UnitSpec with BeforeAndAfterEach with ScalaFutures with MockitoSugar {
+trait BaseConnectorIntegrationSpec extends UnitSpec with ScalaFutures with MockitoSugar with BeforeAndAfterAll with BeforeAndAfterEach {
   val stubPort = sys.env.getOrElse("WIREMOCK", "22222").toInt
   val stubHost = "localhost"
   val wireMockUrl = s"http://$stubHost:$stubPort"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
-  override def beforeEach() {
+  override def beforeAll() {
     wireMockServer.start()
     WireMock.configureFor(stubHost, stubPort)
   }
 
-  override def afterEach() {
+  override def afterAll() {
     wireMockServer.resetMappings()
     wireMockServer.stop()
   }
+
+  override def beforeEach() {
+    wireMockServer.resetMappings()
+  }
+
 }
