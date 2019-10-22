@@ -17,6 +17,7 @@
 package unit.connectors
 
 import java.net.URLEncoder.encode
+import java.util.UUID
 
 import akka.actor.ActorSystem
 import config.ApplicationConfig
@@ -622,15 +623,16 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     "returns a valid response" in new Setup {
 
       val applicationName = "my valid application name"
+      val appId = UUID.randomUUID().toString
 
       when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(ApplicationNameValidationResult(None)))
 
-      val result = await(connector.validateName(applicationName))
+      val result = await(connector.validateName(applicationName, Some(appId)))
 
       result shouldBe Valid
 
-      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+      val expectedRequest = ApplicationNameValidationRequest(applicationName, Some(appId))
 
       verify(mockHttpClient)
         .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
@@ -643,11 +645,11 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(ApplicationNameValidationResult(Some(Errors(invalidName = true, duplicateName = false)))))
 
-      val result = await(connector.validateName(applicationName))
+      val result = await(connector.validateName(applicationName, None))
 
       result shouldBe Invalid(invalidName = true, duplicateName = false)
 
-      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+      val expectedRequest = ApplicationNameValidationRequest(applicationName, None)
 
       verify(mockHttpClient)
         .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())
@@ -656,6 +658,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "when retry logic is enabled should retry on failure" in new Setup {
       val applicationName = "my valid application name"
+      val appId = UUID.randomUUID().toString
 
       when(mockAppConfig.retryCount).thenReturn(1)
 
@@ -663,13 +666,13 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
         .thenReturn(
           Future.failed(new BadRequestException("")),
           Future.successful(ApplicationNameValidationResult(None))
-          )
+        )
 
-      val result = await(connector.validateName(applicationName))
+      val result = await(connector.validateName(applicationName, Some(appId)))
 
       result shouldBe Valid
 
-      val expectedRequest = ApplicationNameValidationRequest(applicationName)
+      val expectedRequest = ApplicationNameValidationRequest(applicationName, Some(appId))
 
       verify(mockHttpClient, Mockito.atLeastOnce)
         .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](meq(url), meq(expectedRequest), any())(any(), any(), any(), any())

@@ -16,6 +16,8 @@
 
 package controllers
 
+import java.util.UUID
+
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
 import domain.Capabilities.SupportsAppChecks
@@ -134,7 +136,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     }
 
     def withValidForm(form: NameForm): Future[Result] = {
-      applicationService.isApplicationNameValid(form.applicationName, app.deployedTo)
+      applicationService.isApplicationNameValid(form.applicationName, app.deployedTo, Some(app.id))
         .flatMap({
           case Valid =>
             val information = app.checkInformation.getOrElse(CheckInformation())

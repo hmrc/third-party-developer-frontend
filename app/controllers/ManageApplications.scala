@@ -67,7 +67,7 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
 
       val environment = formThatPassesSimpleValidation.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX)
 
-      applicationService.isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment).flatMap {
+      applicationService.isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment, selfApplicationId = None).flatMap {
         case Valid => {
           applicationService
             .createForUser(CreateApplicationRequest.from(loggedIn, formThatPassesSimpleValidation))

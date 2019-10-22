@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 
 object ApplicationNameValidationJson {
 
-  case class ApplicationNameValidationRequest(applicationName: String)
+  case class ApplicationNameValidationRequest(applicationName: String, selfApplicationId: Option[String])
 
   object ApplicationNameValidationRequest {
     implicit val format: OFormat[ApplicationNameValidationRequest] = Json.format[ApplicationNameValidationRequest]

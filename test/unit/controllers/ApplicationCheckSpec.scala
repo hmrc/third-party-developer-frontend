@@ -116,7 +116,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
       .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs), hasSubscriptions = true))))
 
-    given(underTest.applicationService.isApplicationNameValid(any(), any())(any[HeaderCarrier]))
+    given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
       .willReturn(Future.successful(Valid))
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
@@ -722,7 +722,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "Validation failure name contains HMRC action" in new Setup {
       givenTheApplicationExists()
 
-      given(underTest.applicationService.isApplicationNameValid(any(), any())(any[HeaderCarrier]))
+      given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
         .willReturn(Future.successful(Invalid.invalidName))
 
       private val applicationName = "Blacklisted HMRC"
@@ -735,13 +735,14 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       bodyOf(result) should include("Choose an application name that does not include HMRC")
 
-      verify(underTest.applicationService).isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION))(any[HeaderCarrier])
+      verify(underTest.applicationService)
+        .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION), mockEq(Some(appId)))(any[HeaderCarrier])
     }
 
     "Validation failure when duplicate name" in new Setup {
       givenTheApplicationExists()
 
-      given(underTest.applicationService.isApplicationNameValid(any(), any())(any[HeaderCarrier]))
+      given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
         .willReturn(Future.successful(Invalid.duplicateName))
 
       private val applicationName = "Duplicate Name"
@@ -754,7 +755,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       bodyOf(result) should include("Choose an application name that is not already registered on the Developer Hub")
 
-      verify(underTest.applicationService).isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION))(any[HeaderCarrier])
+      verify(underTest.applicationService)
+        .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION), mockEq(Some(appId)))(any[HeaderCarrier])
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
