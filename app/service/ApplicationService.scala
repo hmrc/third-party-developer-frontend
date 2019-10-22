@@ -16,18 +16,14 @@
 
 package service
 
-import java.util.UUID
-
 import config.ApplicationConfig
 import connectors._
 import domain.APIStatus._
-import domain.AccessType.{PRIVILEGED, ROPC}
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import domain.Environment.{PRODUCTION, SANDBOX}
 import domain._
-import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.Results.Ok
+import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
@@ -165,7 +161,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     }
   }
 
-  def deleteSubordinateApplication(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[ApplicationDeleteResult] = {
+  def deleteSubordinateApplication(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[Unit] = {
 
     val requesterEmail = requester.email
     val environment = application.deployedTo
