@@ -74,4 +74,18 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
 
     DeletePrincipalApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
+
+  def deleteSubordinateApplicationConfirm(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
+    Future(Ok(views.html.deleteSubordinateApplicationConfirm(request.application)))
+  }
+
+  def deleteSubordinateApplicationAction(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
+    val application = request.application
+
+    applicationService.deleteSubordinateApplication(request.user, application)
+      .map(_ => Ok(views.html.deleteSubordinateApplicationComplete(request.application)))
+
+  }
+
+
 }

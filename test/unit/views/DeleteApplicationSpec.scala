@@ -45,7 +45,7 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with Mockito
 
 
   "delete application page" should {
-    "show content and link to delete application for appropriate role/environment combinations" in {
+    "show content and link to delete application for Administrator on Production" in {
 
       def verifyRequestDeletionContent(role: Role, app: Application)(implicit playApp: play.api.Application) {
 
@@ -63,8 +63,26 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with Mockito
       }
 
       verifyRequestDeletionContent(ADMINISTRATOR, prodApp)
+    }
+
+    "show content and link to delete application for Administrator on Sandbox" in {
+
+      def verifyRequestDeletionContent(role: Role, app: Application)(implicit playApp: play.api.Application) {
+
+        val request = FakeRequest().withCSRFToken
+
+        val page = views.html.deleteApplication.render(app, role, request, loggedInUser, applicationMessages, appConfig, "details")
+
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+
+        elementExistsByText(document, "h1", "Delete application") shouldBe true
+        elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe true
+      }
+
       verifyRequestDeletionContent(ADMINISTRATOR, sandboxApp)
-      verifyRequestDeletionContent(DEVELOPER, sandboxApp)
+
     }
 
     "show no link with explanation to developer in a prod app" in {
@@ -72,6 +90,21 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with Mockito
       val request = FakeRequest().withCSRFToken
 
       val page = views.html.deleteApplication.render(prodApp, DEVELOPER, request, loggedInUser, applicationMessages, appConfig, "details")
+
+      page.contentType should include("text/html")
+
+      val document = Jsoup.parse(page.body)
+
+      elementExistsByText(document, "h1", "Delete application") shouldBe true
+      elementExistsByText(document, "p", "You need admin rights to delete an application") shouldBe true
+      elementIdentifiedByIdContainsText(document, "submit", "Request deletion") shouldBe false
+    }
+
+    "show no link with explanation to developer in a sandbox app" in {
+
+      val request = FakeRequest().withCSRFToken
+
+      val page = views.html.deleteApplication.render(sandboxApp, DEVELOPER, request, loggedInUser, applicationMessages, appConfig, "details")
 
       page.contentType should include("text/html")
 
