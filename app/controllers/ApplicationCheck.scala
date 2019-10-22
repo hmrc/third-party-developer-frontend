@@ -145,12 +145,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
               _ <- applicationService.updateCheckInformation(app.id, information.copy(confirmedName = true))
             } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
           case invalid : Invalid =>
-            def invalidNameCheckForm = {
-              requestForm
-                .withError("submissionError", "true")
-                .withError(appNameField, invalid.validationErrorMessageKey, controllers.routes.ApplicationCheck.namePage(appId))
-                .withGlobalError(invalid.validationErrorMessageKey)
-            }
+            def invalidNameCheckForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
             Future.successful(BadRequest(views.html.applicationcheck.confirmName(request.application, invalidNameCheckForm)))
         })
