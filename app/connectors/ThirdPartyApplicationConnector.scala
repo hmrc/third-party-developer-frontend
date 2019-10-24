@@ -102,7 +102,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] = metrics.record(api) {
-    retry {
+    retry{
       http.GET[Application](s"$serviceBaseUrl/application/$id") map {
         Some(_)
       } recover {
@@ -112,7 +112,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchSubscriptions(id: String)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]] = metrics.record(api) {
-    retry {
+    retry{
       http.GET[Seq[APISubscription]](s"$serviceBaseUrl/application/$id/subscription") recover {
         case _: Upstream5xxResponse => Seq.empty
         case _: NotFoundException => throw new ApplicationNotFound
@@ -135,7 +135,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = metrics.record(api) {
-    retry {
+    retry{
       http.GET[ApplicationTokens](s"$serviceBaseUrl/application/$id/credentials") recover recovery
     }
   }
@@ -196,13 +196,17 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     case _: NotFoundException => throw new ApplicationNotFound
   }
 
-  def deleteApplication(applicationId: String, deleteApplicationRequest: DeleteApplicationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.POST[DeleteApplicationRequest, HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete", deleteApplicationRequest, Seq(CONTENT_TYPE -> JSON))
+  def deleteApplication(applicationId: String, deleteApplicationRequest: DeleteApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationDeleteResult] = {
+    http.POST[DeleteApplicationRequest, HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete-subordinate", deleteApplicationRequest, Seq(CONTENT_TYPE -> JSON))
       .map(response => response.status match {
-        case NO_CONTENT => Unit
-        case _ => throw new Exception("error deleting subordinate application")
+        case NO_CONTENT => ApplicationDeleteSuccessResult
+        case _ => ApplicationDeleteFailureResult
       })
+      .recover {
+        case _ => ApplicationDeleteFailureResult
+      }
   }
+
 }
 
 @Singleton

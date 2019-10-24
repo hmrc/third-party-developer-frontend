@@ -430,3 +430,7 @@ final case class DeleteApplicationRequest(requester: DeveloperSession)
 object DeleteApplicationRequest {
   implicit val format = Json.format[DeleteApplicationRequest]
 }
+
+sealed trait ApplicationDeleteResult
+case object ApplicationDeleteSuccessResult extends ApplicationDeleteResult
+case object ApplicationDeleteFailureResult extends ApplicationDeleteResult
