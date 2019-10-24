@@ -63,6 +63,7 @@ abstract class LoggedInController extends BaseController with AuthElement {
   }
 }
 
+// TODO : Can we remove role ???
 case class ApplicationRequest[A](application: Application, role: Role, user: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
 
 abstract class ApplicationController()
@@ -76,7 +77,6 @@ abstract class ApplicationController()
       val stackedActions = Action andThen applicationAction(applicationId, loggedIn)
       stackedActions.async(fun)(request)
     }
-
 
   def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
                                      (applicationId: String)
