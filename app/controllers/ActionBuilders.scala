@@ -17,7 +17,7 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{BadRequestError, Capability, DeveloperSession, LikePermission, Permission, State}
+import domain._
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, ActionRefiner, Request, Result}
@@ -93,6 +93,38 @@ trait ActionBuilders {
     }
   }
 
+  def sandboxOrAdminIfProductionAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
+      implicit val implicitRequest: ApplicationRequest[A] = request
+
+      (request.application.deployedTo, request.role) match {
+        case (Environment.SANDBOX, _) => None
+        case (_, Role.ADMINISTRATOR) => None
+        case _ => Some(Forbidden(errorHandler.badRequestTemplate))
+      }
+    }
+  }
+
+
+  def adminFilter = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
+      implicit val implicitRequest = request
+
+      if (request.role == Role.ADMINISTRATOR) None
+      else Some(Forbidden(errorHandler.badRequestTemplate))
+    }
+  }
+
+  def notProductionAppFilter = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
+      implicit val implicitRequest = request
+
+      if (request.application.deployedTo == Environment.SANDBOX) None
+      else Some(Forbidden(errorHandler.badRequestTemplate))
+    }
+  }
+
   def permissionFilter(permission: Permission) =
     forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.user.developer))
+
 }

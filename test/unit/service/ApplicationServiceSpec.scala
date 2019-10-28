@@ -26,8 +26,8 @@ import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import domain._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, anyString, eq => mockEq}
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -67,7 +67,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val mockDeskproConnector = mock[DeskproConnector]
 
    
-    val service = new ApplicationService(connectorsWrapper, mockSubscriptionFieldsService,  mockDeskproConnector, mockAppConfig, mockDeveloperConnector, mockAuditService)
+    val service = new ApplicationService(connectorsWrapper, mockSubscriptionFieldsService,  mockDeskproConnector, mockAppConfig, mockDeveloperConnector, mockSandboxApplicationConnector, mockProductionApplicationConnector, mockAuditService)
 
     def theProductionConnectorWillReturnTheApplication(applicationId: String, application: Application) = {
       given(mockProductionApplicationConnector.fetchApplicationById(applicationId)).willReturn(Future.successful(Some(application)))
@@ -716,6 +716,59 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       verifyZeroInteractions(mockDeskproConnector)
       verifyZeroInteractions(mockAuditService)
     }
+  }
+
+  "delete subordinate application" should {
+
+    val adminEmail = "admin@example.com"
+    val adminRequester = utils.DeveloperSession(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+    val developerEmail = "developer@example.com"
+    val developerRequester = utils.DeveloperSession(developerEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+    val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER))
+    val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
+    val invalidROPCApp = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
+    val productionApp = productionApplication.copy(collaborators = teamMembers)
+    val adminDeleteApplicationRequest = DeleteApplicationRequest(adminRequester)
+
+    var expectedMessage = "Only standard subordinate applications can be deleted by admins"
+
+    "delete standard subordinate application when requested by an admin" in new Setup {
+
+      given(mockSandboxApplicationConnector.deleteApplication(any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.successful(successful()))
+
+      await(service.deleteSubordinateApplication(adminRequester, sandboxApp))
+
+      verify(mockSandboxApplicationConnector).deleteApplication(mockEq(sandboxApplicationId), mockEq(adminDeleteApplicationRequest))(mockEq(hc))
+    }
+
+    "throw an exception when a subordinate application is requested to be deleted by a developer" in new Setup {
+
+      given(mockSandboxApplicationConnector.deleteApplication(any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.failed(new ForbiddenException(expectedMessage)))
+
+      val exception = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, sandboxApp)))
+      exception.getMessage shouldBe expectedMessage
+    }
+
+    "throw an exception when a production application is requested to be deleted by a developer" in new Setup {
+
+      given(mockSandboxApplicationConnector.deleteApplication(any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.failed(new ForbiddenException(expectedMessage)))
+
+      val exception = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, productionApp)))
+      exception.getMessage shouldBe expectedMessage
+    }
+
+    "throw an exception when a ROPC application is requested to be deleted by a developer" in new Setup {
+
+      given(mockSandboxApplicationConnector.deleteApplication(any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.failed(new ForbiddenException(expectedMessage)))
+
+      val exception = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, invalidROPCApp)))
+      exception.getMessage shouldBe expectedMessage
+    }
+
   }
 
   "request delete developer" should {
