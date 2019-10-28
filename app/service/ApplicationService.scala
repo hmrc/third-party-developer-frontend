@@ -170,7 +170,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
 
     if (environment == Environment.SANDBOX && requesterRole == Role.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD ) {
 
-      applicationConnectorFor(application).deleteApplication(application.id, DeleteApplicationRequest(requester))
+      applicationConnectorFor(application).deleteApplication(application.id)
 
     } else {
       Future.failed(new ForbiddenException("Only standard subordinate applications can be deleted by admins"))

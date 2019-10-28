@@ -734,17 +734,17 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "delete standard subordinate application when requested by an admin" in new Setup {
 
-      given(mockSandboxApplicationConnector.deleteApplication(any(), any())(any[HeaderCarrier]))
+      given(mockSandboxApplicationConnector.deleteApplication(any())(any[HeaderCarrier]))
         .willReturn(Future.successful(successful()))
 
       await(service.deleteSubordinateApplication(adminRequester, sandboxApp))
 
-      verify(mockSandboxApplicationConnector).deleteApplication(mockEq(sandboxApplicationId), mockEq(adminDeleteApplicationRequest))(mockEq(hc))
+      verify(mockSandboxApplicationConnector).deleteApplication(mockEq(sandboxApplicationId))(mockEq(hc))
     }
 
     "throw an exception when a subordinate application is requested to be deleted by a developer" in new Setup {
 
-      given(mockSandboxApplicationConnector.deleteApplication(any(), any())(any[HeaderCarrier]))
+      given(mockSandboxApplicationConnector.deleteApplication(any())(any[HeaderCarrier]))
         .willReturn(Future.failed(new ForbiddenException(expectedMessage)))
 
       val exception = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, sandboxApp)))
@@ -753,7 +753,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "throw an exception when a production application is requested to be deleted by a developer" in new Setup {
 
-      given(mockSandboxApplicationConnector.deleteApplication(any(), any())(any[HeaderCarrier]))
+      given(mockSandboxApplicationConnector.deleteApplication(any())(any[HeaderCarrier]))
         .willReturn(Future.failed(new ForbiddenException(expectedMessage)))
 
       val exception = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, productionApp)))
@@ -762,7 +762,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "throw an exception when a ROPC application is requested to be deleted by a developer" in new Setup {
 
-      given(mockSandboxApplicationConnector.deleteApplication(any(), any())(any[HeaderCarrier]))
+      given(mockSandboxApplicationConnector.deleteApplication(any())(any[HeaderCarrier]))
         .willReturn(Future.failed(new ForbiddenException(expectedMessage)))
 
       val exception = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, invalidROPCApp)))

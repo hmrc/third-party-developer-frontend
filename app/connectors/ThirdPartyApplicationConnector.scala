@@ -196,10 +196,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     case _: NotFoundException => throw new ApplicationNotFound
   }
 
-  def deleteApplication(applicationId: String, deleteApplicationRequest: DeleteApplicationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.POST[DeleteApplicationRequest, HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete", deleteApplicationRequest, Seq(CONTENT_TYPE -> JSON))
+  def deleteApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete")
       .map(response => response.status match {
-        case NO_CONTENT => Unit
+        case NO_CONTENT => ()
         case _ => throw new Exception("error deleting subordinate application")
       })
   }
