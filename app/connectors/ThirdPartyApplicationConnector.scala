@@ -29,6 +29,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
+import play.api.http.Status.NO_CONTENT
 import play.api.libs.json.Json
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -101,7 +102,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] = metrics.record(api) {
-    retry{
+    retry {
       http.GET[Application](s"$serviceBaseUrl/application/$id") map {
         Some(_)
       } recover {
@@ -111,7 +112,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchSubscriptions(id: String)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]] = metrics.record(api) {
-    retry{
+    retry {
       http.GET[Seq[APISubscription]](s"$serviceBaseUrl/application/$id/subscription") recover {
         case _: Upstream5xxResponse => Seq.empty
         case _: NotFoundException => throw new ApplicationNotFound
@@ -134,7 +135,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = metrics.record(api) {
-    retry{
+    retry {
       http.GET[ApplicationTokens](s"$serviceBaseUrl/application/$id/credentials") recover recovery
     }
   }
@@ -193,6 +194,14 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   private def recovery: PartialFunction[Throwable, Nothing] = {
     case _: NotFoundException => throw new ApplicationNotFound
+  }
+
+  def deleteApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete")
+      .map(response => response.status match {
+        case NO_CONTENT => ()
+        case _ => throw new Exception("error deleting subordinate application")
+      })
   }
 }
 

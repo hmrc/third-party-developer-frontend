@@ -425,3 +425,8 @@ class ApplicationVerificationFailed(verificationCode: String) extends RuntimeExc
 sealed trait VerifyPasswordSuccessful
 
 case object VerifyPasswordSuccessful extends VerifyPasswordSuccessful
+
+final case class DeleteApplicationRequest(requester: DeveloperSession)
+object DeleteApplicationRequest {
+  implicit val format = Json.format[DeleteApplicationRequest]
+}

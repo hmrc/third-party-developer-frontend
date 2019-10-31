@@ -697,6 +697,33 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
   }
 
+  "deleteSubordinateApplication" should {
+    val url = s"$baseUrl/application/$applicationId/delete"
+
+    "successfully delete the application" in new Setup {
+
+      when(mockHttpClient
+        .POSTEmpty[HttpResponse](meq(url))(any(), any(), any()))
+        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+
+      val result = await(connector.deleteApplication(applicationId))
+
+      result shouldEqual ()
+
+    }
+
+    "throw exception response if error on back end" in new Setup {
+
+      when(mockHttpClient
+        .POSTEmpty[HttpResponse](meq(url))(any(), any(), any()))
+        .thenReturn(Future.failed(new Exception("error deleting subordinate application")))
+
+      intercept[Exception] {
+        await(connector.deleteApplication(applicationId))
+      }
+    }
+  }
+
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def aSecret(value: String) = ClientSecret(value, value, DateTimeUtils.now)
