@@ -15,7 +15,7 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, ApplicationState, DeveloperSession, Environment, Role}
+@import domain.{Application, DeveloperSession, Environment, Role}
 @import include._
 @import model.Crumb
 
@@ -34,34 +34,53 @@ Crumb.home
 leftNav = Some(leftHandNav(Option(app), Option(navSection)))
 ) {
 
-<h1 class="heading-xlarge">Delete application</h1>
-@appEnvironment(app)
+    <h1 class="heading-xlarge">Delete application</h1>
+    @appEnvironment(app)
+    <br>
 
-@if(roleOfLoggedIn == Role.ADMINISTRATOR) {
-    @if(app.deployedTo == Environment.SANDBOX) {
-    <p>
-        Before deleting this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
-        team members</a>.
-    </p>
+    @if(roleOfLoggedIn == Role.ADMINISTRATOR) {
+        @if(app.deployedTo == Environment.SANDBOX) {
+        <p>
+            Before deleting this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
+            team members</a>.
+        </p>
 
-    <a class="button" href="@controllers.routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
-        Continue</a>
+        <a class="button" href="@controllers.routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
+            Continue</a>
+        } else {
+        <p>
+            Before requesting to delete this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
+            team members</a>.
+        </p>
+        <p>
+            We'll respond to your request within 2 working days.
+        </p>
+
+        <a class="button" href="@controllers.routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
+            Request deletion</a>
+        }
+
     } else {
-    <p>
-        Before requesting to delete this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
-        team members</a>.
-    </p>
-    <p>
-        We'll respond to your request within 2 working days.
-    </p>
-
-    <a class="button" href="@controllers.routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
-        Request deletion</a>
+        <div class="panel panel-border-wide">
+            <p>
+                You cannot delete this application because you're not an administrator.
+            </p>
+        </div>
+        @defining(app.collaborators.filter(_.role.isAdministrator())) { administrators =>
+            @if(administrators.size == 1) {
+                <p>
+                    Ask the administrator <a href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> to delete it.
+                </p>
+            } else {
+                <p>
+                    Ask one of these administrators to delete it:
+                </p>
+                <ul class="list list-bullet">
+                @for(admin <- administrators) {
+                    <li><a href="mailto:@admin.emailAddress">@admin.emailAddress</a></li>
+                }
+                </ul>
+            }
+        }
     }
-
-    } else {
-    <p data-admin-required-msg>
-        You need admin rights to delete an application
-    </p>
-}
 }
