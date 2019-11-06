@@ -15,72 +15,69 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, DeveloperSession, Environment, Role}
+@import domain.{Application, BackButtonWithJavaScript, DeveloperSession, Environment, Role}
 @import include._
-@import model.Crumb
 
 @(app: Application, roleOfLoggedIn: Role)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
 
 @devMain(
-title = "Delete application",
-userFullName = loggedIn.loggedInName,
-breadcrumbs = Seq(
-Crumb("Delete application"),
-Crumb.application(app),
-Crumb.viewAllApplications,
-Crumb.home
-),
-leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+    title = "Delete application",
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript
 ) {
 
-    <h1 class="heading-xlarge">Delete application</h1>
-    @appEnvironment(app)
-    <br>
+    <header>
+        <h1 class="heading-xlarge">Delete application</h1>
+        @appEnvironment(app)
+        <br>
+    </header>
 
-    @if(roleOfLoggedIn == Role.ADMINISTRATOR) {
-        @if(app.deployedTo == Environment.SANDBOX) {
-        <p>
-            Before deleting this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
-            team members</a>.
-        </p>
-
-        <a class="button" href="@controllers.routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
-            Continue</a>
-        } else {
-        <p>
-            Before requesting to delete this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
-            team members</a>.
-        </p>
-        <p>
-            We'll respond to your request within 2 working days.
-        </p>
-
-        <a class="button" href="@controllers.routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
-            Request deletion</a>
-        }
-
-    } else {
-        <div class="panel panel-border-wide">
+    <div>
+        @if(roleOfLoggedIn == Role.ADMINISTRATOR) {
+            @if(app.deployedTo == Environment.SANDBOX) {
             <p>
-                You cannot delete this application because you're not an administrator.
+                Before deleting this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
+                team members</a>.
             </p>
-        </div>
-        @defining(app.collaborators.filter(_.role.isAdministrator())) { administrators =>
-            @if(administrators.size == 1) {
-                <p>
-                    Ask the administrator <a href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> to delete it.
-                </p>
+
+            <a class="button" href="@controllers.routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
+                Continue</a>
             } else {
+            <p>
+                Before requesting to delete this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
+                team members</a>.
+            </p>
+            <p>
+                We'll respond to your request within 2 working days.
+            </p>
+
+            <a class="button" href="@controllers.routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
+                Request deletion</a>
+            }
+
+        } else {
+            <div class="panel panel-border-wide">
                 <p>
-                    Ask one of these administrators to delete it:
+                    You cannot delete this application because you're not an administrator.
                 </p>
-                <ul class="list list-bullet">
-                @for(admin <- administrators) {
-                    <li><a href="mailto:@admin.emailAddress">@admin.emailAddress</a></li>
+            </div>
+            @defining(app.collaborators.filter(_.role.isAdministrator())) { administrators =>
+                @if(administrators.size == 1) {
+                    <p>
+                        Ask the administrator <a href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> to delete it.
+                    </p>
+                } else {
+                    <p>
+                        Ask one of these administrators to delete it:
+                    </p>
+                    <ul class="list list-bullet">
+                    @for(admin <- administrators) {
+                        <li><a href="mailto:@admin.emailAddress">@admin.emailAddress</a></li>
+                    }
+                    </ul>
                 }
-                </ul>
             }
         }
-    }
+    </div>
 }

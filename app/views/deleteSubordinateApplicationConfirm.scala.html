@@ -15,9 +15,8 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, DeveloperSession}
+@import domain.{Application, BackButtonWithJavaScript, DeveloperSession}
 @import include._
-@import model.Crumb
 
 @(app: Application)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
@@ -25,13 +24,7 @@
 @devMain(
     title = "Delete application",
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Delete application"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+    back = BackButtonWithJavaScript
 ) {
 
     <h1 class="heading-xlarge">Are you sure you want us to delete your application?</h1>
