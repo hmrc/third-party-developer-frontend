@@ -17,21 +17,13 @@
 @import config.ApplicationConfig
 @import domain.{Application, DeveloperSession}
 @import include._
-@import model.Crumb
 
 @(app: Application)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
 
 @devMain(
     title = "Delete application",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Delete application"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+    userFullName = loggedIn.loggedInName
 ) {
 
     <div class="govuk-box-highlight">
