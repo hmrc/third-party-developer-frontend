@@ -18,8 +18,8 @@ package domain
 
 
 import play.api.libs.json.Json
-
-case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false)
+//TODO: Write test for id
+case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false, id: Option[String] = None)
 
 object NavLink {
   implicit val format = Json.format[NavLink]
@@ -46,7 +46,7 @@ case object UserNavLinks {
 
   private def loggedInNavLinks(userFullName: String) = Seq(
     NavLink(userFullName,"/developer/profile"),
-    NavLink("Sign out","/developer/logout/survey"))
+    NavLink("Sign out","/developer/logout/survey", id = Some("signOut")))
 
   private val loggedOutNavLinks = Seq(
     NavLink("Register", "/developer/registration"),
