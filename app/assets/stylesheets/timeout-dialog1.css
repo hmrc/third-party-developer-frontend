@@ -62,3 +62,11 @@ tbody tr {
     font-weight:700;
     color: black;
 }
+
+/*TODO: Fix my padding please */
+#timeout-signout-btn {
+    font-size: 19px;
+    margin: 0;
+    padding: 0;
+    font-weight:700;
+}

@@ -29,8 +29,7 @@
     breadcrumbs: Seq[Crumb] = Seq.empty,
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
-    timeoutInSeconds: Int = 45
-
+    timeoutInSeconds: Int = 60
     )(mainContent: Html = HtmlFormat.empty)(implicit messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
@@ -65,7 +64,7 @@
 @scriptElem = {
     <script src='@routes.Assets.versioned("javascripts/apis-app.min.js")' type="text/javascript"></script>
     <script src='@controllers.routes.Assets.versioned("javascripts/timeout-dialog.js")' type="text/javascript"></script>
-    <script type="text/javascript" charset="utf-8">console.log("1"); $.timeoutDialog({timeout: @timeoutInSeconds, countdown: 30,keep_alive_url: '/register-your-company/renew-session',logout_url: '/register-your-company/error/destroy-session'});var dialogOpen;console.log("2");</script>
+    <script type="text/javascript" charset="utf-8">console.log("1"); $.timeoutDialog({timeout: @timeoutInSeconds, countdown: 60,keep_alive_url: '/register-your-company/renew-session',logout_url: '/developer/logout'});var dialogOpen;console.log("2");</script>
 }
 
 @bodyEnd = {

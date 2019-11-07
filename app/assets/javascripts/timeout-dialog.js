@@ -63,14 +63,14 @@ String.prototype.format = function () {
             countdown: 60,
             time: 'seconds',
             title: 'You’re about to be signed out',
-            message: 'For your security, we’ll sign you out in',
+            message: 'For your security, we will sign you out in ',
             keep_alive_url: '/register-your-company/renew-session',
             logout_url: '/register-your-company/error/destroy-session',
             restart_on_yes: true,
             dialog_width: 340,
             close_on_escape: true,
             background_no_scroll: true,
-            keep_alive_button_text: 'Resume your session',
+            keep_alive_button_text: 'Stay signed in',
             heading_text: 'You’ve been inactive for a while.'
         }
 
@@ -109,8 +109,10 @@ String.prototype.format = function () {
                     + '<p id="timeout-message" role="text">' + settings.message + '' +
                     '    <span id="timeout-countdown" class="countdown">' + time.s + ' ' +  settings.time + '</span>' +
                     '</p>' +
-                    '<button id="timeout-keep-signin-btn" class="button button--link">' + settings.keep_alive_button_text
+                    '<button id="timeout-keep-signin-btn" class="button">' + settings.keep_alive_button_text
                     + '</button>' +
+                    '<a id="timeout-signout-btn" href="' + settings.logout_url  + '" >' + "Sign out"
+                    + '</a>' +
                     '</div>' +
                     '<div id="timeout-overlay" class="timeout-overlay"></div>')
                     .appendTo('body')
