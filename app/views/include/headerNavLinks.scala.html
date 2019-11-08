@@ -19,12 +19,12 @@
 
 @for(link <- navLinks) {
    <li>
-      <a @if(link.id.isDefined){id=@link.id.get} class="@anchorClass.getOrElse("")" href="@{link.href}" @if(link.openInNewWindow){target="_blank"}>@{link.label}</a>
+      <a class="@anchorClass.getOrElse("")" href="@{link.href}" @if(link.openInNewWindow){target="_blank"}>@{link.label}</a>
    </li>
 }
 
 @for(link <- mobileNavLinks) {
     <li class="desktop-only">
-        <a @if(link.id.isDefined){id=@link.id.get} class="@anchorClass.getOrElse("")" href="@{link.href}" @if(link.openInNewWindow){target="_blank"}>@{link.label}</a>
+        <a class="@anchorClass.getOrElse("")" href="@{link.href}" @if(link.openInNewWindow){target="_blank"}>@{link.label}</a>
     </li>
 }

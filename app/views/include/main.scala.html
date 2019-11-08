@@ -29,7 +29,7 @@
     breadcrumbs: Seq[Crumb] = Seq.empty,
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
-    timeoutInSeconds: Int = 60
+    timeoutInSeconds: Int = 60,
     )(mainContent: Html = HtmlFormat.empty)(implicit messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
@@ -46,7 +46,6 @@
     headScripts = Some(headScripts))
 
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/main.css")'/>
-    <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/timeout-dialog1.css")'>
     <meta data-title="@applicationConfig.title"/>
 }
 
@@ -63,8 +62,18 @@
 
 @scriptElem = {
     <script src='@routes.Assets.versioned("javascripts/apis-app.min.js")' type="text/javascript"></script>
-    <script src='@controllers.routes.Assets.versioned("javascripts/timeout-dialog.js")' type="text/javascript"></script>
-    <script type="text/javascript" charset="utf-8">console.log("1"); $.timeoutDialog({timeout: @timeoutInSeconds, countdown: 60,keep_alive_url: '/register-your-company/renew-session',logout_url: '/developer/logout'});var dialogOpen;console.log("2");</script>
+
+    <script type="text/javascript">
+          window.GOVUK.timeoutDialog({
+              timeout: 900,
+              countdown: 895,
+              message: 'For your security, we will delete your answers and you will be signed out in',
+              keepAliveUrl: '/customs/subscribe-for-cds/keep-alive',
+              signOutUrl: '/developer/logout',
+              keepAliveButtonText: 'Get another 15 minutes',
+              signOutButtonText: 'Sign out now',
+          });
+    </script>
 }
 
 @bodyEnd = {
