@@ -31,7 +31,8 @@
         Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    leftNav = Some(leftHandNav(None, Option(navSection))),
+    developerSession = Some(loggedIn)
 ) {
 
     @if(applications.isEmpty) {

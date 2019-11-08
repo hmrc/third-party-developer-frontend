@@ -15,8 +15,9 @@
  *@
 
 @import model.Crumb
-@import domain.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, NoBackButton}
+@import domain.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, NoBackButton, LoggedInState}
 
+@import domain.DeveloperSession
 @(title: String,
     navTitle: Option[String] = None,
     navTitleLink: Option[play.api.mvc.Call] = None,
@@ -29,8 +30,8 @@
     breadcrumbs: Seq[Crumb] = Seq.empty,
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
-    timeoutInSeconds: Int = 60,
-    )(mainContent: Html = HtmlFormat.empty)(implicit messages: Messages, applicationConfig: config.ApplicationConfig)
+    developerSession: Option[DeveloperSession]
+)(mainContent: Html = HtmlFormat.empty)(implicit messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
@@ -63,16 +64,18 @@
 @scriptElem = {
     <script src='@routes.Assets.versioned("javascripts/apis-app.min.js")' type="text/javascript"></script>
 
-    <script type="text/javascript">
-          window.GOVUK.timeoutDialog({
-              timeout: 900,
-              countdown: 895,
-              message: 'For your security, we will delete your answers and you will be signed out in',
-              keepAliveUrl: '/customs/subscribe-for-cds/keep-alive',
-              signOutUrl: '/developer/logout',
-              keepAliveButtonText: 'Get another 15 minutes',
-              signOutButtonText: 'Sign out now',
-          });
+    @if(developerSession.isDefined){
+        <script type="text/javascript">
+              window.GOVUK.timeoutDialog({
+                  timeout: 900,
+                  countdown: 895,
+                  message: 'For your security, we will delete your answers and you will be signed out in',
+                  keepAliveUrl: '/customs/subscribe-for-cds/keep-alive',
+                  signOutUrl: '/developer/logout',
+                  keepAliveButtonText: 'Get another 15 minutes',
+                  signOutButtonText: 'Sign out now',
+              });
+    }
     </script>
 }
 

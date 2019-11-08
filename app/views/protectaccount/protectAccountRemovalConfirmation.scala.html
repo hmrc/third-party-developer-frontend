@@ -27,7 +27,8 @@
 @devMain(
     title = "Remove 2-step verification",
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
 ) {
     @errorSummary(form)
 

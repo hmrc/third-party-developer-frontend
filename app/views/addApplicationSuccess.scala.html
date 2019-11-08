@@ -30,7 +30,8 @@
         Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    leftNav = Some(leftHandNav(None, Option(navSection))),
+    developerSession = Some(loggedIn)
 ){
     <h1 class="heading-large" data-journey="application:added">You added @applicationName</h1>
     @if(environment.isProduction) {

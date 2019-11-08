@@ -24,7 +24,8 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 @devMain(
     title = "Delete application",
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
 ) {
 
     <header>

@@ -24,7 +24,8 @@
 @devMain(
     title = "Delete application",
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
 ) {
 
     <h1 class="heading-xlarge">Are you sure you want us to delete your application?</h1>

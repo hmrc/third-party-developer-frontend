@@ -24,15 +24,16 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-title = titleError + "Add a team member",
-userFullName = loggedIn.loggedInName,
-breadcrumbs = Seq(
-Crumb("Manage team members"),
-Crumb.application(app),
-Crumb.viewAllApplications,
-Crumb.home
-),
-leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+    title = titleError + "Add a team member",
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb("Manage team members"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    developerSession = Some(loggedIn)
 ) {
 
     @errorSummary(form)

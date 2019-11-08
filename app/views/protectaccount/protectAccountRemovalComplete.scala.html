@@ -25,7 +25,8 @@
 @devMain(
     title = "2-step verification removed",
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
 ) {
 
     <h1 class="heading-xlarge">2-step verification removed</h1>

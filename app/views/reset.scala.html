@@ -21,7 +21,10 @@
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
-@devMain(title = titleError + "Create a new password") {
+@devMain(
+    title = titleError + "Create a new password",
+    developerSession = None
+) {
 
     @errorSummary(form)
 
