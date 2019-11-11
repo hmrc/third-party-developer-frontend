@@ -38,7 +38,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         @if(roleOfLoggedIn == Role.ADMINISTRATOR) {
             @if(app.deployedTo == Environment.SANDBOX) {
             <p>
-                Before deleting this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
+                Before deleting this application, check with all your <a href="@routes.ManageTeam.manageTeam(app.id, None)">
                 team members</a>.
             </p>
 

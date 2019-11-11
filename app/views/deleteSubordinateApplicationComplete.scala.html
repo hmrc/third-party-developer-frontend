@@ -22,7 +22,7 @@
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
 
 @devMain(
-    title = "Delete application",
+    title = "Application deleted",
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn)
 ) {
@@ -30,7 +30,8 @@
     <div class="govuk-box-highlight">
         <h1 class="heading-xlarge">Application deleted</h1>
     </div>
-    <p>Your sandbox application is now deleted.</p>
+    <br>
+    <p>Your sandbox application <span class="bold">@app.name</span> is now deleted.</p>
 
 <p><a href="@routes.ManageApplications.manageApps">View your applications</a> or <a href="@routes.ManageApplications.addApplication">add an application to the sandbox</a>.</p>
 }
