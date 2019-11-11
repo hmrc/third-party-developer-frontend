@@ -35,7 +35,6 @@ class SessionController @Inject()(val auditService: AuditService,
   extends LoggedInController with PasswordChange {
 
   def keepAlive(): Action[AnyContent] = loggedInAction { implicit request =>
-    // TODO : Test me
     successful(NoContent)
   }
 }
