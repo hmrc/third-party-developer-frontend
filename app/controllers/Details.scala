@@ -44,58 +44,59 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(SupportsDetails,SandboxOrAdmin)(applicationId)(fun)
 
-  def details(applicationId: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
+  def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     Future.successful(Ok(views.html.details(request.application)))
   }
 
-  def changeDetails(applicationId: String) = canChangeDetailsAction(applicationId) { implicit request =>
+  def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
     Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), request.application)))
   }
 
-  def changeDetailsAction(applicationId: String) =
-    canChangeDetailsAction(applicationId) { implicit request =>
+  private def buildCheckInformation(updateRequest: UpdateApplicationRequest, application: Application): CheckInformation = {
+    val updatedAccess = updateRequest.access.asInstanceOf[Standard]
+    val access = application.access.asInstanceOf[Standard]
+
+    def confirmedNameValue(checkInformation: CheckInformation): Boolean =
+      updateRequest.name == application.name && checkInformation.confirmedName
+
+    def providedPrivacyPolicyUrlValue(checkInformation: CheckInformation): Boolean = {
+      updatedAccess.privacyPolicyUrl == access.privacyPolicyUrl && checkInformation.providedPrivacyPolicyURL
+    }
+
+    def providedTermsAndConditionsUrlValue(checkInformation: CheckInformation): Boolean = {
+      updatedAccess.termsAndConditionsUrl == access.termsAndConditionsUrl && checkInformation.providedTermsAndConditionsURL
+    }
+
+    val checkInformation = application.checkInformation.getOrElse(CheckInformation())
+
+    CheckInformation(
+      confirmedName = confirmedNameValue(checkInformation),
+      applicationDetails = checkInformation.applicationDetails,
+      contactDetails = checkInformation.contactDetails,
+      providedPrivacyPolicyURL = providedPrivacyPolicyUrlValue(checkInformation),
+      providedTermsAndConditionsURL = providedTermsAndConditionsUrlValue(checkInformation),
+      termsOfUseAgreements = checkInformation.termsOfUseAgreements
+    )
+  }
+
+  private def updateApplication(updateRequest: UpdateApplicationRequest)
+                               (implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
+    applicationService.update(updateRequest)
+  }
+
+  def changeDetailsAction(applicationId: String): Action[AnyContent] =
+    canChangeDetailsAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
       val application = request.application
-      val access = application.access.asInstanceOf[Standard]
 
-      def buildCheckInformation(updateRequest: UpdateApplicationRequest): CheckInformation = {
-        val updatedAccess = updateRequest.access.asInstanceOf[Standard]
-
-        def confirmedNameValue(checkInformation: CheckInformation): Boolean =
-          updateRequest.name == application.name && checkInformation.confirmedName
-
-        def providedPrivacyPolicyUrlValue(checkInformation: CheckInformation): Boolean = {
-          updatedAccess.privacyPolicyUrl == access.privacyPolicyUrl && checkInformation.providedPrivacyPolicyURL
-        }
-
-        def providedTermsAndConditionsUrlValue(checkInformation: CheckInformation): Boolean = {
-          updatedAccess.termsAndConditionsUrl == access.termsAndConditionsUrl && checkInformation.providedTermsAndConditionsURL
-        }
-
-        val checkInformation = application.checkInformation.getOrElse(CheckInformation())
-
-        CheckInformation(
-          confirmedName = confirmedNameValue(checkInformation),
-          applicationDetails = checkInformation.applicationDetails,
-          contactDetails = checkInformation.contactDetails,
-          providedPrivacyPolicyURL = providedPrivacyPolicyUrlValue(checkInformation),
-          providedTermsAndConditionsURL = providedTermsAndConditionsUrlValue(checkInformation),
-          termsOfUseAgreements = checkInformation.termsOfUseAgreements
-        )
-      }
-
-      def updateApplication(updateRequest: UpdateApplicationRequest) = {
-        applicationService.update(updateRequest)
-      }
-
-      def updateCheckInformation(updateRequest: UpdateApplicationRequest) = {
-        if (application.deployedTo.isProduction) {
-          applicationService.updateCheckInformation(applicationId, buildCheckInformation(updateRequest))
+      def updateCheckInformation(updateRequest: UpdateApplicationRequest): Future[ApplicationUpdateSuccessful] = {
+        if (application.deployedTo.isProduction()) {
+          applicationService.updateCheckInformation(applicationId, buildCheckInformation(updateRequest, application))
         } else {
           Future.successful(ApplicationUpdateSuccessful)
         }
       }
 
-      def handleValidForm(form: EditApplicationForm) = {
+      def handleValidForm(form: EditApplicationForm): Future[Result] = {
         val updateRequest = UpdateApplicationRequest.from(form, application)
 
         for {
@@ -104,7 +105,8 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
         } yield Redirect(controllers.routes.Details.details(applicationId))
       }
 
-      def handleInvalidForm(formWithErrors: Form[EditApplicationForm]) = errorView(application.id, formWithErrors, application)
+      def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
+        errorView(application.id, formWithErrors, application)
 
       EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
     }
