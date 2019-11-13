@@ -158,6 +158,23 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         status(result) shouldBe BAD_REQUEST
       }
+
+      "update name which contain HMRC should fail" in new Setup {
+        given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
+          .willReturn(Future.successful(Invalid.invalidName))
+
+        val application = anApplication(adminEmail = loggedInUser.email)
+        givenTheApplicationExists(application)
+
+        val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
+
+        status(result) shouldBe BAD_REQUEST
+
+        verify(underTest.applicationService).isApplicationNameValid(
+          mockEq("my invalid HMRC application name"),
+          mockEq(application.deployedTo),
+          mockEq(Some(application.id)))(any[HeaderCarrier])
+      }
     }
 
     "changeDetailsAction for production app in testing state" should {
@@ -270,7 +287,6 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(application.id), any[CheckInformation])(any[HeaderCarrier])
       }
 
-      // TODO - Test invalid name doesn't submit and shows error
     }
 
   }
