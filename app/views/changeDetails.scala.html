@@ -68,7 +68,7 @@
             <label id=description-label" class="form-label-bold" for="description">
                 Application description (optional)
                 <span class="form-hint">We will not show this to users.</span>
-                @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
+                @fieldError(form.errors, "description", form.error("submissionError").isEmpty)
             </label>
             <textarea class="js-char-count form-control @if(form.errors("description").nonEmpty) {form-control-error}"
                       id="description"
