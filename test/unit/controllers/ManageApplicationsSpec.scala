@@ -207,7 +207,7 @@ class ManageApplicationsSpec
         private val result = await(underTest.addApplicationAction()(request))
 
         status(result) shouldBe BAD_REQUEST
-        bodyOf(result) should include("Choose an application name that does not include HMRC")
+        bodyOf(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
         verify(underTest.applicationService, Mockito.times(0))
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
@@ -232,7 +232,7 @@ class ManageApplicationsSpec
         private val result = await(underTest.addApplicationAction()(request))
 
         status(result) shouldBe BAD_REQUEST
-        bodyOf(result) should include("Choose an application name that is not already registered on the Developer Hub")
+        bodyOf(result) should include("That application name already exists. Enter a unique name for your application")
 
         verify(underTest.applicationService, Mockito.times(0))
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])

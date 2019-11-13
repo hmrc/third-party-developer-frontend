@@ -344,7 +344,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
 
       private val errorMessageElement = Jsoup.parse(bodyOf(result)).select("td#confirmedName span.error-message")
-      errorMessageElement.text() shouldBe "Choose an application name that is not already registered on the Developer Hub"
+      errorMessageElement.text() shouldBe "That application name already exists. Enter a unique name for your application."
     }
 
     "return forbidden when accessing action without being an admin" in new Setup {
@@ -733,7 +733,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       status(result) shouldBe BAD_REQUEST
 
-      bodyOf(result) should include("Choose an application name that does not include HMRC")
+      bodyOf(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
       verify(underTest.applicationService)
         .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION), mockEq(Some(appId)))(any[HeaderCarrier])
@@ -753,7 +753,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       status(result) shouldBe BAD_REQUEST
 
-      bodyOf(result) should include("Choose an application name that is not already registered on the Developer Hub")
+      bodyOf(result) should include("That application name already exists. Enter a unique name for your application.")
 
       verify(underTest.applicationService)
         .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION), mockEq(Some(appId)))(any[HeaderCarrier])
