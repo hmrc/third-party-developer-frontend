@@ -37,7 +37,7 @@ class MainTemplateSpec extends UnitSpec with Matchers with MockitoSugar with One
 
       given(mockConfig.isExternalTestEnvironment).willReturn(true)
 
-      val mainView: Html = html.include.main("Test")()
+      val mainView: Html = html.include.main("Test", developerSession = None)()
 
       mainView.body should include("class=\"sandbox")
     }
@@ -45,7 +45,7 @@ class MainTemplateSpec extends UnitSpec with Matchers with MockitoSugar with One
     "Not use the sandbox class when the Enhanced Sandbox configuration is switched off" in {
       given(mockConfig.isExternalTestEnvironment).willReturn(false)
 
-      val mainView: Html = html.include.main("Test")()
+      val mainView: Html = html.include.main("Test", developerSession = None)()
 
       mainView.body should not include "class=\"sandbox"
     }
@@ -53,7 +53,7 @@ class MainTemplateSpec extends UnitSpec with Matchers with MockitoSugar with One
     "Application title meta data set by configuration" in {
       given(mockConfig.title).willReturn("Application Title")
 
-      val mainView: Html = html.include.main("Test")()
+      val mainView: Html = html.include.main("Test", developerSession = None)()
 
       mainView.body should include("data-title=\"Application Title")
     }

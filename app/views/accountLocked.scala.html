@@ -16,9 +16,10 @@
 
 @import include._
 
+
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
-@devMain(title = "Account Locked") {
+@devMain(title = "Account Locked", developerSession = None) {
     <h1 class="heading-xlarge">Account locked</h1>
 
     <p>

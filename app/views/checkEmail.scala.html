@@ -19,7 +19,7 @@
 
 @(email: String)(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
-@devMain(title = "Check your emails") {
+@devMain(title = "Check your emails", developerSession = None) {
 
     <div class="govuk-box-highlight" role="alert">
         <h1>Password reset email sent</h1>

@@ -28,7 +28,8 @@
         Crumb("Manage profile"),
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    leftNav = Some(leftHandNav(None, Option(navSection))),
+    developerSession = Some(loggedIn)
 ) {
 
     @errorSummary(form)

@@ -28,7 +28,9 @@
     Crumb.home
     ),
     headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
-    serviceInfoContent = Some(HtmlFormat.empty)) {
+    serviceInfoContent = Some(HtmlFormat.empty),
+    developerSession = None
+) {
 
             @if(success) {
 

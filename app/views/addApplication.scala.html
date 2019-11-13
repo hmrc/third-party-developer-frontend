@@ -28,7 +28,8 @@
         Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-add-application")),
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(None, Option(navSection)))
+    leftNav = Some(leftHandNav(None, Option(navSection))),
+    developerSession = Some(loggedIn)
 ) {
 
     @errorSummary(form)

@@ -130,3 +130,5 @@ GET         /user-navlinks                                                      
 GET         /partials/terms-of-use                                                      controllers.TermsOfUse.termsOfUsePartial
 
 GET         /assets/*file                                                               @controllers.Assets.versioned(path="/public", file: Asset)
+
+GET         /keep-alive                                                                 controllers.SessionController.keepAlive()

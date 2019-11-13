@@ -18,7 +18,10 @@
 
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
-@devMain(title = "Reset password link no longer valid") {
+@devMain(
+    title = "Reset password link no longer valid",
+    developerSession = None
+){
 
     <h1 class="heading-xlarge">Error resetting password</h1>
 

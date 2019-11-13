@@ -26,6 +26,7 @@ import play.api.mvc.{Action, AnyContent}
 import service.{ApplicationService, AuditService, SessionService}
 import views.html._
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

@@ -18,9 +18,22 @@
 @import domain._
 @import model.Crumb
 
-@(title: String, userFullName: Option[String] = None, isRegistering: Boolean = false, breadcrumbs: Seq[Crumb] = Seq.empty,
-    leftNav: Option[Html] = None, back: BackButton = NoBackButton, fullWidthContent: Boolean = false)(mainContent: Html)(
-    implicit request: Request[_], messages: Messages, applicationConfig: config.ApplicationConfig)
+@(
+    title: String,
+    userFullName: Option[String] = None,
+    isRegistering: Boolean = false,
+    breadcrumbs: Seq[Crumb] = Seq.empty,
+    leftNav: Option[Html] = None,
+    back: BackButton = NoBackButton,
+    fullWidthContent: Boolean = false,
+    developerSession: Option[DeveloperSession]
+)(
+    mainContent: Html
+)(
+    implicit request: Request[_],
+        messages: Messages,
+        applicationConfig: config.ApplicationConfig
+)
 
 
 @userBanner = {
@@ -41,6 +54,7 @@
     breadcrumbs = breadcrumbs,
     leftNav = leftNav,
     back = back,
-    fullWidthContent = fullWidthContent) {
+    fullWidthContent = fullWidthContent,
+    developerSession = developerSession) {
     @mainContent
 }

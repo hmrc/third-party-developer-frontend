@@ -21,7 +21,8 @@
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 @devMain(
     title = titleError + heading,
-    isRegistering = true
+    isRegistering = true,
+    developerSession = None
 ) {
 
     @errorSummary(form)

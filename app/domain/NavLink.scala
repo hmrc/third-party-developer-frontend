@@ -46,9 +46,11 @@ case object UserNavLinks {
 
   private def loggedInNavLinks(userFullName: String) = Seq(
     NavLink(userFullName,"/developer/profile"),
-    NavLink("Sign out","/developer/logout/survey"))
+    NavLink("Sign out","/developer/logout/survey")
+  )
 
   private val loggedOutNavLinks = Seq(
     NavLink("Register", "/developer/registration"),
-    NavLink("Sign in", "/developer/login"))
+    NavLink("Sign in", "/developer/login")
+  )
 }

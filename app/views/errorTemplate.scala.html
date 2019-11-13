@@ -20,11 +20,14 @@
 @(title: String, heading: String, message: String)(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
-    @main(title = applicationConfig.title,
-        navTitle = Some(applicationConfig.title),
-        navTitleLink = Some(Call("GET", "/api-documentation")),
-        headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
-        serviceInfoContent = Some(HtmlFormat.empty)) {
+@main(
+    title = applicationConfig.title,
+    navTitle = Some(applicationConfig.title),
+    navTitleLink = Some(Call("GET", "/api-documentation")),
+    headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
+    serviceInfoContent = Some(HtmlFormat.empty),
+    developerSession = None
+) {
 
         <h1>@heading</h1>
         <p>@message</p>

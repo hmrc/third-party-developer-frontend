@@ -33,7 +33,8 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection)))
+    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    developerSession = Some(loggedIn)
 ) {
 
     @errorSummary(form)
