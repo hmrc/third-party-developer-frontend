@@ -86,8 +86,11 @@ invalid.password.global = Provide a valid password
 password.used.before.global =Choose a password you have no used before
 password.used.before.field =Choose a password you have no used before
 
+# TODO - Swap these
 application.name.invalid.length.and.characters=Choose an application name between 2 and 50 characters
+#application.name.invalid.length.and.characters=Application name must be between 2 and 50 characters
 application.name.invalid.name=Choose an application name that does not include HMRC''s name
+#application.name.invalid.name=Application name must not include HMRC or HM Revenue and Customs
 application.name.already.exists.field=Choose an application name that is not already registered on the Developer Hub
 
 environment.error.required.field=Choose an environment for your application

@@ -18,6 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import controllers.FormKeys.appNameField
 import domain.Capabilities.SupportsDetails
 import domain.Permissions.SandboxOrAdmin
 import domain._
@@ -97,12 +98,24 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
       }
 
       def handleValidForm(form: EditApplicationForm): Future[Result] = {
-        val updateRequest = UpdateApplicationRequest.from(form, application)
+        val requestForm = EditApplicationForm.form.bindFromRequest
 
-        for {
-          _ <- updateApplication(updateRequest)
-          _ <- updateCheckInformation(updateRequest)
-        } yield Redirect(controllers.routes.Details.details(applicationId))
+        applicationService.isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
+          .flatMap({
+
+            case Valid =>
+              val updateRequest = UpdateApplicationRequest.from(form, application)
+              for {
+                _ <- updateApplication(updateRequest)
+                _ <- updateCheckInformation(updateRequest)
+              } yield Redirect(controllers.routes.Details.details(applicationId))
+
+            case invalid : Invalid =>
+              def invalidNameCheckForm: Form[EditApplicationForm] =
+                requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+
+              Future.successful(BadRequest(views.html.changeDetails(invalidNameCheckForm, request.application)))
+          })
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
