@@ -38,6 +38,7 @@ import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.Future._
 
 class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
@@ -157,6 +158,23 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         status(result) shouldBe BAD_REQUEST
       }
+
+      "update name which contain HMRC should fail" in new Setup {
+        given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
+          .willReturn(Future.successful(Invalid.invalidName))
+
+        val application = anApplication(adminEmail = loggedInUser.email)
+        givenTheApplicationExists(application)
+
+        val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
+
+        status(result) shouldBe BAD_REQUEST
+
+        verify(underTest.applicationService).isApplicationNameValid(
+          mockEq("my invalid HMRC application name"),
+          mockEq(application.deployedTo),
+          mockEq(Some(application.id)))(any[HeaderCarrier])
+      }
     }
 
     "changeDetailsAction for production app in testing state" should {
@@ -268,6 +286,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         verify(underTest.applicationService).update(any[UpdateApplicationRequest])(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(application.id), any[CheckInformation])(any[HeaderCarrier])
       }
+
     }
 
   }
@@ -294,10 +313,15 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     val newTermsUrl = Some("http://example.com/new-terms")
     val newPrivacyUrl = Some("http://example.com/new-privacy")
 
+    given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
+      .willReturn(Future.successful(Valid))
+
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
       .willReturn(Some(session))
+
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
       .willReturn(successful(ApplicationUpdateSuccessful))
+
     given(underTest.applicationService.updateCheckInformation(any[String], any[CheckInformation])(any[HeaderCarrier]))
       .willReturn(successful(ApplicationUpdateSuccessful))
 
