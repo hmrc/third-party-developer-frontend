@@ -69,7 +69,9 @@
             window.GOVUK.timeoutDialog({
                 timeout:  @applicationConfig.sessionTimeoutInSeconds,
                 countdown: 120,
-                message: 'For your security, we will sign you out in',
+                message: 'For your security, we need to sign you out.\n' +
+                        'Any information you’ve entered won’t be saved.\n' +
+                        'We’ll sign you out in',
                 keepAliveUrl: '/developer/keep-alive',
                 signOutUrl: '/developer/logout',
                 keepAliveButtonText: 'Stay signed in',
