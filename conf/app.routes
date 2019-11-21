@@ -62,6 +62,8 @@ GET         /reset-password/error                                               
 GET         /applications                                                               controllers.ManageApplications.manageApps
 GET         /applications/add                                                           controllers.ManageApplications.addApplication
 POST        /applications/add                                                           controllers.ManageApplications.addApplicationAction
+GET         /applications/add-applications                                              controllers.ApplicationName.addApplication
+POST        /applications/add-applications                                              controllers.ApplicationName.addApplicationAction
 GET         /applications/:id                                                           controllers.ManageApplications.editApplication(id: String, error: Option[String])
 
 GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])

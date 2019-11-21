@@ -215,6 +215,17 @@ object AddApplicationForm {
   )
 }
 
+case class AddApplicationNameForm(applicationName: String)
+
+object AddApplicationNameForm {
+
+  val form: Form[AddApplicationNameForm] = Form(
+    mapping(
+      "applicationName" -> applicationNameValidator
+    )(AddApplicationNameForm.apply)(AddApplicationNameForm.unapply)
+  )
+}
+
 case class EditApplicationForm(applicationId: String,
                                applicationName: String,
                                description: Option[String] = None,
