@@ -60,11 +60,7 @@ class ApplicationName @Inject()(val applicationService: ApplicationService,
           applicationService
             .createForUser(CreateApplicationRequest.fromSandboxJourney(loggedIn, formThatPassesSimpleValidation))
             .map(appCreated => {
-              Created(addApplicationSuccess(
-                formThatPassesSimpleValidation.applicationName,
-                appCreated.id,
-                environment
-              ))
+              Redirect(routes.Subscriptions.subscriptions(appCreated.id))
         })
         case invalid: Invalid => {
           def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)

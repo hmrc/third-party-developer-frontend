@@ -21,7 +21,6 @@ import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain._
 import org.joda.time.DateTimeZone
-import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito
@@ -33,6 +32,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
+import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
@@ -106,14 +106,14 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application)))
 
-      private val result = await(underTest.addApplication()(loggedInRequest))
+      private val result = await(underTest.addApplication()(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
       bodyOf(result) should include("What's the name of your application?")
       bodyOf(result) should include(loggedInUser.displayedName)
-      bodyOf(result) should include("Sign in")
-      bodyOf(result) should include("Application Name")
-      bodyOf(result) should not include ("Sign in")
+      bodyOf(result) should include("Continue")
+      bodyOf(result) should include("Application name")
+      bodyOf(result) should not include("Sign in")
 
     }
 
@@ -127,22 +127,13 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
-    "contain a google analytics event (via the data-journey attribute) when adding an application is successful" in new Setup {
-      given(underTest.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationCreatedResponse(application.id)))
+    "redirect to the login screen when part logged in" in new Setup {
+      val result = await(underTest.addApplication()(partLoggedInRequest))
 
-      private val request = loggedInRequest
-        .withFormUrlEncodedBody(
-          ("applicationName", "Application Name"),
-          ("environment", "SANDBOX"),
-          ("description", ""))
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
 
-      private val result = await(underTest.addApplicationAction()(request))
-      private val dom = Jsoup.parse(bodyOf(result))
-      private val element = dom.getElementsByAttribute("data-journey").first
-
-      element.attr("data-journey") shouldEqual "application:added"
-    }
+      }
 
     "when an invalid name is entered" when {
 
