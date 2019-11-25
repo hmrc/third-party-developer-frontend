@@ -78,6 +78,10 @@ object DeveloperStub {
       .willReturn(aResponse().withStatus(status))
     )
   }
+
+  def verifyResetPassword(email: String) = {
+      verify(1, postRequestedFor(urlPathEqualTo(s"/$email/password-reset-request")))
+  }
 }
 
 object ApplicationStub {
