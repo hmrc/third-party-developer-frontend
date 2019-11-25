@@ -66,6 +66,8 @@ GET         /applications/add-applications                                      
 POST        /applications/add-applications                                              controllers.ApplicationName.addApplicationAction
 GET         /applications/:id                                                           controllers.ManageApplications.editApplication(id: String, error: Option[String])
 
+GET         /applications/add-application/start                                         controllers.AddApplicationStart.addApplicationTerms
+
 GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMember(id: String)
 POST        /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMemberAction(id: String)
