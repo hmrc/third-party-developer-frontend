@@ -16,7 +16,7 @@
 
 package domain
 
-import controllers.{AddApplicationForm, AddRedirectForm, ChangeRedirectForm, DeleteRedirectConfirmationForm, EditApplicationForm, GroupedSubscriptions}
+import controllers._
 import domain.AccessType.STANDARD
 import domain.Capabilities.{HasReachedProductionState, SupportsDetails}
 import domain.Environment.{PRODUCTION, SANDBOX}
@@ -158,6 +158,13 @@ object CreateApplicationRequest extends ApplicationRequest {
     application.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX),
     normalizeDescription(application.description),
     Seq(Collaborator(user.email, Role.ADMINISTRATOR)))
+
+  def fromSandboxJourney(user: DeveloperSession, application: AddApplicationNameForm) = CreateApplicationRequest(
+    application.applicationName.trim,
+    Environment.SANDBOX,
+    None,
+    Seq(Collaborator(user.email, Role.ADMINISTRATOR))
+  )
 }
 
 case class UpdateApplicationRequest(id: String,
