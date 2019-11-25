@@ -182,10 +182,6 @@ case object SignOutPage extends WebLink {
   override val url: String = s"${Env.host}/developer/logout"
 }
 
-case class ResetPasswordLink(email: String, code: String) extends WebLink {
-  override val url: String = s"${Env.host}/developer/$email/reset-password?code=$code"
-}
-
 case class ResendVerificationLink(email: String) extends WebLink {
   override val url: String = s"${Env.host}/developer/resend-verification"
 }
