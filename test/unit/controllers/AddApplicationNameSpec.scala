@@ -162,31 +162,6 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
           .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX), any())(any[HeaderCarrier])
       }
 
-      "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
-        private val applicationName = "duplicate name"
-
-        given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-          .willReturn(Invalid(invalidName = false, duplicateName = true))
-
-        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
-          .withCSRFToken
-          .withFormUrlEncodedBody(
-            ("applicationName", applicationName),
-            ("environment", "SANDBOX"),
-            ("description", ""))
-
-        private val result = await(underTest.addApplicationAction()(request))
-
-        status(result) shouldBe BAD_REQUEST
-        bodyOf(result) should include("That application name already exists. Enter a unique name for your application")
-
-        verify(underTest.applicationService, Mockito.times(0))
-          .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
-
-        verify(underTest.applicationService)
-          .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.SANDBOX), any())(any[HeaderCarrier])
-      }
-
     }
   }
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
