@@ -32,7 +32,7 @@ import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ApplicationName @Inject()(val applicationService: ApplicationService,
+class AddApplicationSubordinate@Inject()(val applicationService: ApplicationService,
   val developerConnector: ThirdPartyDeveloperConnector,
   val sessionService: SessionService,
   val auditService: AuditService,
@@ -40,6 +40,10 @@ class ApplicationName @Inject()(val applicationService: ApplicationService,
   val messagesApi: MessagesApi,
   implicit val appConfig: ApplicationConfig)
   (implicit ec: ExecutionContext) extends ApplicationController {
+
+  def addApplicationTerms = loggedInAction { implicit request =>
+    Future.successful(Ok(views.html.addApplicationStart()))
+  }
 
   def addApplication() = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.addApplicationName(AddApplicationNameForm.form)))
