@@ -21,7 +21,7 @@ import java.net.URLEncoder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import component.matchers.CustomMatchers
 import component.pages._
-import component.stubs.Stubs
+import component.stubs.{DeveloperStub, Stubs}
 import cucumber.api.DataTable
 import cucumber.api.scala.{EN, ScalaDsl}
 import domain._
@@ -170,6 +170,11 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     Setup2svEnterAccessCodePage.enterAccessCode(accessCode)
     Setup2svEnterAccessCodePage.clickContinue()
   }
+
+  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email : String =>
+    DeveloperStub.verifyResetPassword(email)
+  }
+
 
   def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
 

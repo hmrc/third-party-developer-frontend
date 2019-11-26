@@ -37,3 +37,12 @@ Feature: Sign in
     Given 'john.smith@example.com' session is uplifted to LoggedIn
     When I click on the button with id 'submit'
     Then I am on the 'View all applications' page
+
+
+  Scenario: I have forgotten my password, and I want a link to reset it
+    Given I navigate to the 'Sign in' page
+    Given I click on the button with id 'forgottenPassword'
+    And I enter all the fields:
+      | email address | john.smith@example.com |
+    When I click on the button with id 'submit'
+    Then I should be sent an email with a link to reset for 'john.smith@example.com'

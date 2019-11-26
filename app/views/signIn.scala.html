@@ -53,7 +53,7 @@
                        name="password"
                        class="form-control @if(form.errors("invalidCredentials").nonEmpty || form.errors("password").nonEmpty){form-control-error}"
                        aria-required="true"/>
-                <p><a href="@controllers.routes.Password.showForgotPassword">I've forgotten my password</a></p>
+                <p><a id="forgottenPassword" href="@controllers.routes.Password.showForgotPassword">I've forgotten my password</a></p>
             </div>
         </div>
 
