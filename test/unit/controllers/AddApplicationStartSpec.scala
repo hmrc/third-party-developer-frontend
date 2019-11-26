@@ -17,7 +17,8 @@
 package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.AddApplicationStart
+import connectors.ThirdPartyDeveloperConnector
+import controllers.AddApplicationSubordinate
 import domain._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
@@ -25,11 +26,13 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
-import service.{AuditService, SessionService}
+import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class addApplicationStartSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
@@ -51,9 +54,11 @@ class addApplicationStartSpec extends BaseControllerSpec
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
   trait Setup {
-    val underTest = new AddApplicationStart(
-      mock[AuditService],
+    val underTest = new AddApplicationSubordinate(
+      mock[ApplicationService],
+      mock[ThirdPartyDeveloperConnector],
       mock[SessionService],
+      mock[AuditService],
       mock[ErrorHandler],
       messagesApi,
       mock[ApplicationConfig]

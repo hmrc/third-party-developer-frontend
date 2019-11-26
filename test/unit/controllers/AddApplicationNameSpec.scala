@@ -60,7 +60,7 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
   val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
 
   trait Setup {
-    val underTest = new ApplicationName(
+    val underTest = new AddApplicationSubordinate(
       mock[ApplicationService],
       mock[ThirdPartyDeveloperConnector],
       mock[SessionService],
