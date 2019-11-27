@@ -43,7 +43,6 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
         Some("APPLICATION DESCRIPTION"),
         Set(Collaborator("sample@example.com", Role.ADMINISTRATOR), Collaborator("someone@example.com", Role.DEVELOPER)),
         Standard(),
-        trusted = true,
         ApplicationState(State.TESTING, None, None, DateTimeUtils.now)
       )
 

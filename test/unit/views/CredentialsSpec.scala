@@ -66,7 +66,6 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
       Some("Test Application"),
       collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR)),
       access = Standard(),
-      trusted = false,
       state = ApplicationState.testing,
       checkInformation = None
     )
