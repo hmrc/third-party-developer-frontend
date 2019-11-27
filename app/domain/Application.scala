@@ -310,7 +310,6 @@ case class Application(id: String,
                        description: Option[String] = None,
                        collaborators: Set[Collaborator] = Set.empty,
                        access: Access = Standard(),
-                       trusted: Boolean = false,
                        state: ApplicationState = ApplicationState.testing,
                        checkInformation: Option[CheckInformation] = None) {
 

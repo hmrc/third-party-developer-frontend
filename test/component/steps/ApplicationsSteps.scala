@@ -131,7 +131,6 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         DateTimeUtils.now, DateTimeUtils.now, environment, Some(app.get("description")),
         Set(Collaborator(email, Role.withName(app.getOrDefault("role", "ADMINISTRATOR")))),
         access,
-        trusted = app.getOrDefault("trusted", "false").toBoolean,
         state = applicationState)
     }
     // configure get all apps for user email
