@@ -18,8 +18,9 @@
 @import domain.DeveloperSession
 @import include._
 @import domain.BackButtonWithJavaScript
+@import domain.Environment
 
-@(form: Form[controllers.AddApplicationNameForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
+@(form: Form[controllers.AddApplicationNameForm], environment: Option[Environment])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(

@@ -25,6 +25,7 @@ import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
+import domain.Environment
 import play.api.mvc.Result
 import service._
 import views.html._
@@ -44,20 +45,20 @@ class AddApplicationSubordinate@Inject()(val applicationService: ApplicationServ
   def addApplicationTerms = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.addApplicationStart()))
   }
+  val environment = Environment.SANDBOX
 
-  def addApplication() = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.addApplicationName(AddApplicationNameForm.form)))
+  def addApplication(environment: String) = loggedInAction { implicit request =>
+    Future.successful(Ok(views.html.addApplicationName(AddApplicationNameForm.form, Environment.from(environment))))
   }
 
   def addApplicationAction = loggedInAction { implicit request =>
-    val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
+      val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
 
-    def addApplicationNameWithErrors(errors: Form[AddApplicationNameForm]) =
-      Future.successful(Ok(views.html.addApplicationName(errors)))
+    def addApplicationNameWithErrors(errors: Form[AddApplicationNameForm], environment: String) =
+    Future.successful(Ok(views.html.addApplicationName(errors, Environment.from(environment))))
 
     def addApplicationNameWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) = {
 
-      val environment = Environment.SANDBOX
 
       applicationService.isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment, selfApplicationId = None).flatMap {
         case Valid =>
@@ -69,11 +70,11 @@ class AddApplicationSubordinate@Inject()(val applicationService: ApplicationServ
         case invalid: Invalid => {
           def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-          Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm)))
+          Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, Environment.from(environment.toString))))
         }
       }
     }
 
-    requestForm.fold(addApplicationNameWithErrors, addApplicationNameWithValidForm)
+    requestForm.fold(formWithErrors => addApplicationNameWithErrors(formWithErrors, environment.toString), addApplicationNameWithValidForm)
   }
 }
