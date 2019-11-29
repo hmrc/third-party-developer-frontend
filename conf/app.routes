@@ -65,11 +65,13 @@ GET         /reset-password/error                                               
 GET         /applications                                                               controllers.ManageApplications.manageApps
 GET         /applications/add                                                           controllers.ManageApplications.addApplication
 POST        /applications/add                                                           controllers.ManageApplications.addApplicationAction
-GET         /applications/add-applications                                              controllers.AddApplicationSubordinate.addApplication
-POST        /applications/add-applications                                              controllers.AddApplicationSubordinate.addApplicationAction
-GET         /applications/add-application/start                                         controllers.AddApplicationSubordinate.addApplicationTerms
-GET         /applications/:id                                                           controllers.ManageApplications.editApplication(id: String, error: Option[String])
 
+GET         /applications/add-application/start/sandbox                                 controllers.AddApplication.addApplicationSubordinate
+
+GET         /applications/add-application/environment/:environment                      controllers.AddApplication.nameAddApplication(environment: String)
+POST        /applications/add-application/environment/:environment                      controllers.AddApplication.nameApplicationAction(environment: String)
+
+GET         /applications/:id                                                           controllers.ManageApplications.editApplication(id: String, error: Option[String])
 
 GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMember(id: String)
