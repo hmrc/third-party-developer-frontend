@@ -18,7 +18,7 @@ package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import controllers.AddApplicationSubordinate
+import controllers.AddApplication
 import domain._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
@@ -34,7 +34,7 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class addApplicationStartSpec extends BaseControllerSpec
+class addApplicationStartSubordinateSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val appId = "1234"
@@ -54,7 +54,7 @@ class addApplicationStartSpec extends BaseControllerSpec
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
   trait Setup {
-    val underTest = new AddApplicationSubordinate(
+    val underTest = new AddApplication(
       mock[ApplicationService],
       mock[ThirdPartyDeveloperConnector],
       mock[SessionService],
@@ -87,7 +87,7 @@ class addApplicationStartSpec extends BaseControllerSpec
 
     "return the add applications page with the user logged in" in new Setup {
 
-      private val result = await(underTest.addApplicationTerms()(loggedInRequest))
+      private val result = await(underTest.addApplicationSubordinate()(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Add an application to the sandbox")
@@ -104,14 +104,14 @@ class addApplicationStartSpec extends BaseControllerSpec
 
       val request = FakeRequest()
 
-      private val result = await(underTest.addApplicationTerms()(request))
+      private val result = await(underTest.addApplicationSubordinate()(request))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when partly logged" in new Setup {
-      private val result = await(underTest.addApplicationTerms()(partLoggedInRequest))
+      private val result = await(underTest.addApplicationSubordinate()(partLoggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")

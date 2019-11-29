@@ -18,7 +18,7 @@ package unit.views
 
 import config.ApplicationConfig
 import controllers.AddApplicationNameForm
-import domain.LoggedInState
+import domain.{Environment, LoggedInState}
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -33,12 +33,28 @@ class AddApplicationNameSpec extends UnitSpec with OneServerPerSuite with Mockit
 
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val appConfig = mock[ApplicationConfig]
+  val subordinateEnvironment = Environment.from("sandbox")
+  val principalEnvironment = Environment.from("production")
 
-  "Add application page" should {
+  "Add application page in subordinate" should {
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      views.html.addApplicationName.render(form, request, loggedInUser, applicationMessages, appConfig, "nav-section")
+      views.html.addApplicationName.render(form, subordinateEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
+    }
+
+    "show an error when application name is invalid" in {
+      val error = "An error"
+      val formWithInvalidName = AddApplicationNameForm.form.withError("applicationName", error)
+      val document = Jsoup.parse(renderPage(formWithInvalidName).body)
+      elementExistsByText(document, "span", error) shouldBe true
+    }
+  }
+  "Add application page in principal" should {
+
+    def renderPage(form: Form[AddApplicationNameForm]) = {
+      val request = FakeRequest().withCSRFToken
+      views.html.addApplicationName.render(form, principalEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
     }
 
     "show an error when application name is invalid" in {
