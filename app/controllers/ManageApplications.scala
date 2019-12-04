@@ -46,10 +46,20 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
   val subscriptionsTab = "subscriptions"
 
   val rolesTab = "roles"
+//
+//  def manageApps = loggedInAction { implicit request =>
+//    applicationService.fetchByTeamMemberEmail(loggedIn.email) map { apps =>
+//      Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn.email))))
+//    }
+//  }
 
   def manageApps = loggedInAction { implicit request =>
     applicationService.fetchByTeamMemberEmail(loggedIn.email) map { apps =>
-      Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn.email))))
+      if (apps.isEmpty) {
+      Ok(views.html.addApplicationSubordinateEmptyNest())
+      } else {
+        Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn.email))))
+      }
     }
   }
 

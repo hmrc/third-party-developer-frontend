@@ -35,25 +35,12 @@
     developerSession = Some(loggedIn)
 ) {
 
-    @if(applications.isEmpty) {
-        <h1 class="heading-xlarge">Welcome to your account</h1>
-        <section>
-            <p>You can now create applications and subscribe to APIs.</p>
-            <p>
-                <a href="@routes.ManageApplications.addApplication()" class="button">Create your first application</a>
-            </p>
-            <p>
-                or <a href="@appConfig.apiDocumentationFrontendUrl/api-documentation/docs/tutorials">Read the Hello World tutorial</a>
-            </p>
-        </section>
-    } else {
         <header>
             <h1 class="heading-xlarge">View all applications</h1>
         </header>
         <p>After testing in the sandbox, you can create a production application to use live data.</p>
         <br>
         @applicationList(applications)
-    }
 }
 
 @applicationList(applications: Seq[controllers.ApplicationSummary]) = {
