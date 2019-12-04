@@ -24,7 +24,7 @@
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = titleError + "Add an application",
+    title =if(environment == Some(SANDBOX)) { "What's the name of your application" } else { "Add an application to production" },
     userFullName = loggedIn.loggedInName,
     back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)

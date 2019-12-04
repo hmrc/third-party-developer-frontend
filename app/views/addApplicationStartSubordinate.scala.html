@@ -38,7 +38,7 @@
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
 @devMain(
-    title = "Add an application",
+    title = "Add an application to the sandbox",
     userFullName = loggedIn.loggedInName,
     back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
