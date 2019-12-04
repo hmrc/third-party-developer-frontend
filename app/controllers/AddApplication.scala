@@ -47,6 +47,10 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(views.html.addApplicationStartSubordinate()))
   }
 
+  def addApplicationProductionSuccess(applicationId: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
+    Future.successful(Ok(views.html.addApplicationProductionSuccess(request.application.name, applicationId)))
+  }
+
   def nameAddApplication(environment: String) = loggedInAction { implicit request =>
     Environment.from(environment) match {
       case Some(SANDBOX) =>
@@ -71,7 +75,9 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
               .createForUser(CreateApplicationRequest.fromSandboxJourney(loggedIn, formThatPassesSimpleValidation,
                 Environment.from(environment).getOrElse(SANDBOX)))
               .map(appCreated => {
-                Redirect(routes.Subscriptions.subscriptions(appCreated.id))
+                if (Environment.from(environment) == Some(PRODUCTION)) {
+                  Redirect(routes.AddApplication.addApplicationProductionSuccess(appCreated.id))
+                } else Redirect(routes.Subscriptions.subscriptions(appCreated.id))
               })
           case invalid: Invalid => {
             def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)

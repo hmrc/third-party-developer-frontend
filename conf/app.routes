@@ -71,6 +71,8 @@ GET         /applications/add-application/start/sandbox                         
 GET         /applications/add-application/environment/:environment                      controllers.AddApplication.nameAddApplication(environment: String)
 POST        /applications/add-application/environment/:environment                      controllers.AddApplication.nameApplicationAction(environment: String)
 
+GET         /applications/:id/add-application/success                                   controllers.AddApplication.addApplicationProductionSuccess(id: String)
+
 GET         /applications/:id                                                           controllers.ManageApplications.editApplication(id: String, error: Option[String])
 
 GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])
