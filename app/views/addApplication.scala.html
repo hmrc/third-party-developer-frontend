@@ -36,7 +36,7 @@
 
     <h1 class="heading-xlarge">Add an application</h1>
 
-    @helper.form(action = controllers.routes.ManageApplications.addApplicationAction) {
+    @helper.form(action = controllers.routes.OldManageApplications.addApplicationAction) {
         @helper.CSRF.formField
         <div class="form-group @if(form.errors("applicationName").nonEmpty) {form-group-error}">
             <label class="form-label-bold" for="applicationName" id="applicationName-label">Application name</label>

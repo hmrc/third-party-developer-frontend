@@ -32,7 +32,7 @@ import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ManageApplications @Inject()(val applicationService: ApplicationService,
+class OldManageApplications @Inject()(val applicationService: ApplicationService,
                                    val developerConnector: ThirdPartyDeveloperConnector,
                                    val sessionService: SessionService,
                                    val auditService: AuditService,

@@ -86,8 +86,8 @@ class ManageApplicationsSpec
       .withSession(sessionParams: _*)
   }
 
-  trait ManageAppsSetup {
-    val manageApps = new ManageApplications(
+  trait OldManageAppsSetup {
+    val manageApps = new OldManageApplications(
         mock[ApplicationService],
         mock[ThirdPartyDeveloperConnector],
         mock[SessionService],
@@ -151,7 +151,7 @@ class ManageApplicationsSpec
   }
 
   "addApplication" should {
-    "contain a google analytics event (via the data-journey attribute) when adding an application is successful" in new ManageAppsSetup {
+    "contain a google analytics event (via the data-journey attribute) when adding an application is successful" in new OldManageAppsSetup {
       given(manageApps.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
         .willReturn(successful(ApplicationCreatedResponse(application.id)))
 
@@ -167,7 +167,7 @@ class ManageApplicationsSpec
 
       element.attr("data-journey") shouldEqual "application:added"
     }
-    "show the application check page button when the environment specified is PRODUCTION" in new ManageAppsSetup {
+    "show the application check page button when the environment specified is PRODUCTION" in new OldManageAppsSetup {
       given(manageApps.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
         .willReturn(successful(ApplicationCreatedResponse(application.id)))
 
@@ -184,7 +184,7 @@ class ManageApplicationsSpec
       element shouldBe defined
     }
 
-    "show the manage subscriptions button when the environment specified is SANDBOX" in new ManageAppsSetup {
+    "show the manage subscriptions button when the environment specified is SANDBOX" in new OldManageAppsSetup {
       given(manageApps.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
         .willReturn(successful(ApplicationCreatedResponse(application.id)))
 
@@ -213,7 +213,7 @@ class ManageApplicationsSpec
 
     "when an invalid name is entered" when {
 
-      "and it contains HMRC it shows an error page and lets you re-submit the name" in new ManageAppsSetup {
+      "and it contains HMRC it shows an error page and lets you re-submit the name" in new OldManageAppsSetup {
         private val invalidApplicationName = "invalidApplicationName"
 
         given(manageApps.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
@@ -238,7 +238,7 @@ class ManageApplicationsSpec
           .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX), any())(any[HeaderCarrier])
       }
 
-      "and it is duplicate it shows an error page and lets you re-submit the name" in new ManageAppsSetup {
+      "and it is duplicate it shows an error page and lets you re-submit the name" in new OldManageAppsSetup {
         private val applicationName = "duplicate name"
 
         given(manageApps.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))

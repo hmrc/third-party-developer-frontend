@@ -159,7 +159,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
+        redirectLocation(result) shouldBe Some(routes.OldManageApplications.editApplication(app.id, None).url)
 
         verify(underTest.applicationService).subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
@@ -178,7 +178,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
+        redirectLocation(result) shouldBe Some(routes.OldManageApplications.editApplication(app.id, None).url)
 
         verify(underTest.applicationService).unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
@@ -217,7 +217,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
+        redirectLocation(result) shouldBe Some(routes.OldManageApplications.editApplication(app.id, None).url)
 
         verify(underTest.applicationService).subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
@@ -236,7 +236,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.ManageApplications.editApplication(app.id, None).url)
+        redirectLocation(result) shouldBe Some(routes.OldManageApplications.editApplication(app.id, None).url)
 
         verify(underTest.applicationService).unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
