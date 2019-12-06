@@ -37,7 +37,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   val pages: Map[String, WebPage] = Map(
     "Registration" -> RegistrationPage,
     "View all applications" -> ManageApplicationPage,
-    "Manage applications empty nest" -> ManageApplicationEmptyPage,
+    "Add an application to the sandbox empty nest" -> AddApplicationEmptyPage,
     "Add application" -> AddApplicationPage,
     "Add application success" -> AddApplicationSuccessPage,
     "Sign in" -> SignInPage.default,

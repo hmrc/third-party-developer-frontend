@@ -11,7 +11,7 @@ Feature:
     Scenario: TPDF should respond properly if logout fails
       Given I navigate to the 'Sign in' page
       And I am successfully logged in with 'john.smith@example.com' and 'StrongPassword1!'
-      And I am on the 'Manage applications empty nest' page
+      And I am on the 'Add an application to the sandbox empty nest' page
       When I attempt to Sign out when the session expires
       Then I am on the 'Logout survey' page
       When I click on the 'Yes, sign me out' link

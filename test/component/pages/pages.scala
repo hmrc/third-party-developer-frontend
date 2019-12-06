@@ -93,8 +93,8 @@ object ManageApplicationPage extends FormPage {
   override val url: String = s"${Env.host}/developer/applications/"
 }
 
-object ManageApplicationEmptyPage extends FormPage {
-  override val pageHeading = "Welcome to your account"
+object AddApplicationEmptyPage extends FormPage {
+  override val pageHeading = "Add an application to the sandbox"
   override val url: String = s"${Env.host}/developer/applications/"
 }
 
