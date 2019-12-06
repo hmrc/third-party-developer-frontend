@@ -102,7 +102,7 @@ class AddApplicationProductionSuccessSpec extends BaseControllerSpec
       bodyOf(result) should include("You have admin rights over this production application.")
       bodyOf(result) should include("Before you can get production credentials")
       bodyOf(result) should include("You must complete the checklist for your application and submit it for checking.")
-      bodyOf(result) should include("We take up to 10 working days to check application and issue production credentials.")
+      bodyOf(result) should include("We take up to 10 working days to check applications and issue production credentials.")
       bodyOf(result) should not include "Sign in"
     }
 
