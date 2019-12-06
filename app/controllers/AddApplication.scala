@@ -16,20 +16,15 @@
 
 package controllers
 
-import java.io
-
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import controllers.FormKeys.{appNameField, applicationNameInvalidKey, emailaddressAlreadyInUseGlobalKey, emailaddressField, emailalreadyInUseKey}
-import domain._
+import controllers.FormKeys.appNameField
+import domain.Environment.{PRODUCTION, SANDBOX}
+import domain.{Environment, _}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
-import domain.Environment
-import domain.Environment.{PRODUCTION, SANDBOX}
-import play.api.mvc.Result
 import service._
-import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,6 +37,16 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
   val messagesApi: MessagesApi,
   implicit val appConfig: ApplicationConfig)
   (implicit ec: ExecutionContext) extends ApplicationController {
+
+  def manageApps = loggedInAction { implicit request =>
+    applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>
+      if (apps.isEmpty) {
+        Future.successful(Ok(views.html.addApplicationSubordinateEmptyNest()))
+      } else {
+        Future.successful(Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn.email)))))
+      }
+    }
+  }
 
   def addApplicationSubordinate = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.addApplicationStartSubordinate()))

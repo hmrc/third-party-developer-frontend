@@ -32,7 +32,7 @@ import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ManageApplications @Inject()(val applicationService: ApplicationService,
+class OldManageApplications @Inject()(val applicationService: ApplicationService,
                                    val developerConnector: ThirdPartyDeveloperConnector,
                                    val sessionService: SessionService,
                                    val auditService: AuditService,
@@ -46,12 +46,6 @@ class ManageApplications @Inject()(val applicationService: ApplicationService,
   val subscriptionsTab = "subscriptions"
 
   val rolesTab = "roles"
-
-  def manageApps = loggedInAction { implicit request =>
-    applicationService.fetchByTeamMemberEmail(loggedIn.email) map { apps =>
-      Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn.email))))
-    }
-  }
 
   def addApplication() = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.addApplication(AddApplicationForm.form)))

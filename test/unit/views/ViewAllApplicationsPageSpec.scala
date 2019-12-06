@@ -41,16 +41,6 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       views.html.manageApplications.render(appSummaries, request, Flash(), loggedIn, applicationMessages, appConfig, "nav-section")
     }
 
-    "show the empty nest page when there are no applications" in {
-
-      val appSummaries = Seq()
-
-      val document = Jsoup.parse(renderPage(appSummaries).body)
-
-      elementExistsByText(document, "h1", "Welcome to your account") shouldBe true
-      elementExistsByText(document, "a", "Create your first application") shouldBe true
-    }
-
     "show the applications page if there is more than 0 applications" in {
 
       val appName = "App name 1"
@@ -68,6 +58,33 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
+    }
+  }
+
+  "welcome to your account page" should {
+
+    def renderPage(appSummaries: Seq[ApplicationSummary]) = {
+      val request = FakeRequest()
+      val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
+      views.html.addApplicationSubordinateEmptyNest.render(request, Flash(), loggedIn, applicationMessages, appConfig, "nav-section")
+    }
+
+    "show the empty nest page when there are no applications" in {
+
+      val appSummaries = Seq()
+
+      val document = Jsoup.parse(renderPage(appSummaries).body)
+
+      elementExistsByText(document, "h1", "Add an application to the sandbox") shouldBe true
+      elementExistsByText(document, "p", "To start using our RESTful APIs with your application, you'll need to:") shouldBe true
+      elementExistsByText(document, "li", "add it to our test environment (sandbox)") shouldBe true
+      elementExistsByText(document, "li", "choose which sandbox APIs you want to use") shouldBe true
+      elementExistsByText(document, "li", "get credentials your application needs to interact with our APIs") shouldBe true
+      elementExistsByText(document, "li", "test how your application integrates with our APIs") shouldBe true
+      elementExistsByText(document, "strong", "Make sure your application complies with our terms of use") shouldBe true
+      elementExistsByText(document, "li", "find out which RESTful and XML APIs are offered by HMRC") shouldBe true
+      elementExistsByText(document, "li", "read up on authorisation") shouldBe true
+      elementExistsByText(document, "li", "familiarise yourself with the OAuth 2.0 specification (opens in a new tab)") shouldBe true
     }
   }
 }

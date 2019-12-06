@@ -25,7 +25,7 @@
     title = titleError + "Add an application",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-        Crumb("Add an application",s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-add-application")),
+        Crumb("Add an application",s"${routes.AddApplication.manageApps}", Some("data-breadcrumb-add-application")),
         Crumb.home
     ),
     leftNav = Some(leftHandNav(None, Option(navSection))),
@@ -36,7 +36,7 @@
 
     <h1 class="heading-xlarge">Add an application</h1>
 
-    @helper.form(action = controllers.routes.ManageApplications.addApplicationAction) {
+    @helper.form(action = controllers.routes.OldManageApplications.addApplicationAction) {
         @helper.CSRF.formField
         <div class="form-group @if(form.errors("applicationName").nonEmpty) {form-group-error}">
             <label class="form-label-bold" for="applicationName" id="applicationName-label">Application name</label>
@@ -102,7 +102,7 @@
         }
         <div class="form-group">
             <button id="add" class="button" type="submit" role="button">Add</button>
-            <a id="cancel" href="@routes.ManageApplications.manageApps" class="secondary-button">Cancel</a>
+            <a id="cancel" href="@routes.AddApplication.manageApps" class="secondary-button">Cancel</a>
         </div>
     }
 }

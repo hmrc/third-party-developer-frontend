@@ -62,9 +62,10 @@ GET         /reset-password                                                     
 POST        /reset-password                                                             controllers.Password.resetPassword
 GET         /reset-password/error                                                       controllers.Password.resetPasswordError
 
-GET         /applications                                                               controllers.ManageApplications.manageApps
-GET         /applications/add                                                           controllers.ManageApplications.addApplication
-POST        /applications/add                                                           controllers.ManageApplications.addApplicationAction
+GET         /applications/add                                                           controllers.OldManageApplications.addApplication
+POST        /applications/add                                                           controllers.OldManageApplications.addApplicationAction
+
+GET         /applications                                                               controllers.AddApplication.manageApps
 
 GET         /applications/add-application/start/sandbox                                 controllers.AddApplication.addApplicationSubordinate
 
@@ -73,7 +74,7 @@ POST        /applications/add-application/environment/:environment              
 
 GET         /applications/:id/add-application/success                                   controllers.AddApplication.addApplicationProductionSuccess(id: String)
 
-GET         /applications/:id                                                           controllers.ManageApplications.editApplication(id: String, error: Option[String])
+GET         /applications/:id                                                           controllers.OldManageApplications.editApplication(id: String, error: Option[String])
 
 GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMember(id: String)

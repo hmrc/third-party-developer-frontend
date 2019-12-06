@@ -53,7 +53,7 @@ class ManageApplicationUpliftSpec extends BaseControllerSpec with Writeables wit
 
     trait Setup {
 
-      val underTest = new ManageApplications(
+      val underTest = new OldManageApplications(
         mock[ApplicationService],
         mock[ThirdPartyDeveloperConnector],
         mock[SessionService],
