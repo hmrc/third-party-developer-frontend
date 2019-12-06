@@ -17,7 +17,7 @@ Feature: Sign in
     When I click on the button with id 'skip'
     Then I am on the 'Recommend Mfa Skip Acknowledge' page
     When I click on the button with id 'submit'
-    Then I am on the 'Manage applications empty nest' page
+    Then I am on the 'Add an application to the sandbox empty nest' page
 
 
   Scenario: Signing with a valid credentials, no mfa enabled and with a production admin app and the mandate date is in the past
