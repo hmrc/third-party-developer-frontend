@@ -22,25 +22,60 @@
 @import domain.TermsOfUseStatus
 @import uk.gov.hmrc.auth.core.Admin
 @import domain.Developer
-@()(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
+@()(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-account")
 
 @devMain(
     title = "View all applications",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-    Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
-    Crumb.home
-),
+        Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
+        Crumb.home
+    ),
     leftNav = Some(leftHandNav(None, Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
 
-    <h1 class="heading-xlarge">Welcome to your account</h1>
-    <p>You can now create applications and subscribe to APIs.</p>
+    <h1 class="heading-xlarge">Add an application to the sandbox</h1>
+    <p>To start using our RESTful APIs with your application, you'll need to:</p>
+    <ol class="list list-number">
+        <li>
+            add it to our test environment (sandbox)
+        </li>
+        <li>
+            choose which sandbox APIs you want to use
+        </li>
+        <li>
+            get credentials your application needs to interact with our APIs
+        </li>
+        <li>
+            test how your application integrates with our APIs
+        </li>
+    </ol>
+    <div class="notice">
+        <i class="icon icon-important">
+            <span class="visually-hidden">Warning</span>
+        </i>
+        <strong class="bold-small">
+            Make sure your application complies with our <a href="/documentation/terms-of-use">terms of use</a>
+        </strong>
+    </div>
+    <br>
     <p>
-        <a href="@routes.ManageApplications.addApplication()" class="button">Create your first application</a>
+        If you have not already done so:
     </p>
+    <ul class="list list-bullet">
+        <li>
+            find out which <a href="/documentation/api-docs">RESTful and XML APIs</a> are offered by HMRC
+        </li>
+        <li>
+            read up on <a href="/documentation/authorisation/introduction">authorisation</a>
+        </li>
+        <li>
+            familiarise yourself with the <a href="https://oauth.net/2/" target="_blank">OAuth 2.0 specification (opens in a new tab)</a>
+        </li>
+    </ul>
     <p>
-        or <a href="@appConfig.apiDocumentationFrontendUrl/api-documentation/docs/tutorials">Read the Hello World tutorial</a>
+        <a class="button" href="@appConfig.apiDocumentationFrontendUrl/api-documentation/docs/tutorials">Continue</a>
     </p>
+
 }

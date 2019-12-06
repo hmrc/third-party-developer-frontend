@@ -43,11 +43,22 @@
     }
 
     @(navSection) match {
+
+        case (Some(section)) if (section == "manage-account") => {
+        <div class="side-nav" role="navigation" aria-labelledby="nav3">
+            <span class="heading-small" id="nav3">Manage account</span>
+            <ul>
+                <li class="side-nav__list @if(section == "manage-profile") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.Profile.showProfile">Manage profile</a></li>
+                <li class="side-nav__list @if(section == "change-password") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.Profile.showPasswordPage">Change password</a></li>
+                <li class="side-nav__list @if(section == "protect-account") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.ProtectAccount.getProtectAccount()">Account protection</a></li>
+            </ul>
+        </div>
+        }
         case (Some(section)) => {
             <div class="side-nav" role="navigation" aria-labelledby="nav2">
                 <span class="heading-small" id="nav2">Manage applications</span>
                 <ul>
-                    <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.ManageApplications.manageApps">View all applications</a></li>
+                    <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.AddApplication.manageApps">View all applications</a></li>
                     <li class="side-nav__list @if(section == "add-application") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.ManageApplications.addApplication">Add an application</a></li>
                 </ul>
                 <br>

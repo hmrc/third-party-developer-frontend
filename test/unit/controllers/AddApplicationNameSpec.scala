@@ -35,6 +35,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import play.filters.csrf.CSRF.TokenProvider
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful

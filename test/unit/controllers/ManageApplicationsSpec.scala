@@ -61,8 +61,10 @@ class ManageApplicationsSpec
 
   val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
 
-  trait Setup {
-    val underTest = new ManageApplications(
+  private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+
+  trait AddApplicationSetup {
+    val addApplicationController = new AddApplication(
       mock[ApplicationService],
       mock[ThirdPartyDeveloperConnector],
       mock[SessionService],
@@ -72,56 +74,76 @@ class ManageApplicationsSpec
       mock[ApplicationConfig]
     )
 
-    val hc = HeaderCarrier()
-
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+    given(addApplicationController.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
       .willReturn(Some(session))
 
-    given(underTest.sessionService.fetch(mockEq(partLoggedInSessionId))(any[HeaderCarrier]))
-      .willReturn(Some(partLoggedInSession))
-
-    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
-      .willReturn(successful(ApplicationUpdateSuccessful))
-
-    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
-      .willReturn(successful(application))
-
-    given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-      .willReturn(successful(Valid))
-
-    private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest)(sessionId)
+      .withLoggedIn(addApplicationController)(sessionId)
       .withSession(sessionParams: _*)
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest)(partLoggedInSessionId)
+      .withLoggedIn(addApplicationController)(partLoggedInSessionId)
+      .withSession(sessionParams: _*)
+  }
+
+  trait ManageAppsSetup {
+    val manageApps = new ManageApplications(
+        mock[ApplicationService],
+        mock[ThirdPartyDeveloperConnector],
+        mock[SessionService],
+        mock[AuditService],
+        mock[ErrorHandler],
+        messagesApi,
+        mock[ApplicationConfig]
+      )
+
+    val hc = HeaderCarrier()
+
+    given(manageApps.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+      .willReturn(Some(session))
+
+    given(manageApps.sessionService.fetch(mockEq(partLoggedInSessionId))(any[HeaderCarrier]))
+      .willReturn(Some(partLoggedInSession))
+
+    given(manageApps.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
+      .willReturn(successful(ApplicationUpdateSuccessful))
+
+    given(manageApps.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
+      .willReturn(successful(application))
+
+    given(manageApps.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
+      .willReturn(successful(Valid))
+
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+      .withLoggedIn(manageApps)(sessionId)
+      .withSession(sessionParams: _*)
+
+    val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+      .withLoggedIn(manageApps)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
   }
 
   "manageApps" should {
 
-    "return the manage Applications page with the user logged in" in new Setup {
+    "return the manage Applications page with the user logged in" in new AddApplicationSetup {
 
-      given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
+      given(addApplicationController.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application)))
 
-      private val result = await(underTest.manageApps()(loggedInRequest))
+      private val result = await(addApplicationController.manageApps()(loggedInRequest))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Manage applications")
       bodyOf(result) should include(loggedInUser.displayedName)
       bodyOf(result) should include("Sign out")
       bodyOf(result) should include("App name 1")
       bodyOf(result) should not include "Sign in"
     }
 
-    "return to the login page when the user is not logged in" in new Setup {
+    "return to the login page when the user is not logged in" in new AddApplicationSetup {
 
       val request = FakeRequest()
 
-      private val result = await(underTest.manageApps()(request))
+      private val result = await(addApplicationController.manageApps()(request))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -129,8 +151,8 @@ class ManageApplicationsSpec
   }
 
   "addApplication" should {
-    "contain a google analytics event (via the data-journey attribute) when adding an application is successful" in new Setup {
-      given(underTest.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
+    "contain a google analytics event (via the data-journey attribute) when adding an application is successful" in new ManageAppsSetup {
+      given(manageApps.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
         .willReturn(successful(ApplicationCreatedResponse(application.id)))
 
       private val request = loggedInRequest
@@ -139,14 +161,14 @@ class ManageApplicationsSpec
           ("environment", "PRODUCTION"),
           ("description", ""))
 
-      private val result = await(underTest.addApplicationAction()(request))
+      private val result = await(manageApps.addApplicationAction()(request))
       private val dom = Jsoup.parse(bodyOf(result))
       private val element = dom.getElementsByAttribute("data-journey").first
 
       element.attr("data-journey") shouldEqual "application:added"
     }
-    "show the application check page button when the environment specified is PRODUCTION" in new Setup {
-      given(underTest.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
+    "show the application check page button when the environment specified is PRODUCTION" in new ManageAppsSetup {
+      given(manageApps.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
         .willReturn(successful(ApplicationCreatedResponse(application.id)))
 
       private val request = loggedInRequest
@@ -155,15 +177,15 @@ class ManageApplicationsSpec
           ("environment", "PRODUCTION"),
           ("description", ""))
 
-      private val result = await(underTest.addApplicationAction()(request))
+      private val result = await(manageApps.addApplicationAction()(request))
       private val dom = Jsoup.parse(bodyOf(result))
       val element = Option(dom.getElementById("start"))
 
       element shouldBe defined
     }
 
-    "show the manage subscriptions button when the environment specified is SANDBOX" in new Setup {
-      given(underTest.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
+    "show the manage subscriptions button when the environment specified is SANDBOX" in new ManageAppsSetup {
+      given(manageApps.applicationService.createForUser(any[CreateApplicationRequest])(any[HeaderCarrier]))
         .willReturn(successful(ApplicationCreatedResponse(application.id)))
 
       private val request = loggedInRequest
@@ -172,7 +194,7 @@ class ManageApplicationsSpec
           ("environment", "SANDBOX"),
           ("description", ""))
 
-      private val result = await(underTest.addApplicationAction()(request))
+      private val result = await(manageApps.addApplicationAction()(request))
       private val dom = Jsoup.parse(bodyOf(result))
       val element = Option(dom.getElementById("manage-api-subscriptions"))
       elementIdentifiedByAttrWithValueContainsText(
@@ -181,8 +203,8 @@ class ManageApplicationsSpec
     }
 
     "when part logged in" should {
-      "redirect to the login screen" in new Setup {
-        private val result = await(underTest.manageApps()(partLoggedInRequest))
+      "redirect to the login screen" in new AddApplicationSetup {
+        private val result = await(addApplicationController.manageApps()(partLoggedInRequest))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -191,10 +213,10 @@ class ManageApplicationsSpec
 
     "when an invalid name is entered" when {
 
-      "and it contains HMRC it shows an error page and lets you re-submit the name" in new Setup {
+      "and it contains HMRC it shows an error page and lets you re-submit the name" in new ManageAppsSetup {
         private val invalidApplicationName = "invalidApplicationName"
 
-        given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
+        given(manageApps.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
           .willReturn(Invalid(invalidName = true, duplicateName = false))
 
         private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
@@ -204,22 +226,22 @@ class ManageApplicationsSpec
             ("environment", "SANDBOX"),
             ("description", ""))
 
-        private val result = await(underTest.addApplicationAction()(request))
+        private val result = await(manageApps.addApplicationAction()(request))
 
         status(result) shouldBe BAD_REQUEST
         bodyOf(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
-        verify(underTest.applicationService, Mockito.times(0))
+        verify(manageApps.applicationService, Mockito.times(0))
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
 
-        verify(underTest.applicationService)
+        verify(manageApps.applicationService)
           .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX), any())(any[HeaderCarrier])
       }
 
-      "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
+      "and it is duplicate it shows an error page and lets you re-submit the name" in new ManageAppsSetup {
         private val applicationName = "duplicate name"
 
-        given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
+        given(manageApps.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
           .willReturn(Invalid(invalidName = false, duplicateName = true))
 
         private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
@@ -229,15 +251,15 @@ class ManageApplicationsSpec
             ("environment", "SANDBOX"),
             ("description", ""))
 
-        private val result = await(underTest.addApplicationAction()(request))
+        private val result = await(manageApps.addApplicationAction()(request))
 
         status(result) shouldBe BAD_REQUEST
         bodyOf(result) should include("That application name already exists. Enter a unique name for your application")
 
-        verify(underTest.applicationService, Mockito.times(0))
+        verify(manageApps.applicationService, Mockito.times(0))
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
 
-        verify(underTest.applicationService)
+        verify(manageApps.applicationService)
           .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.SANDBOX), any())(any[HeaderCarrier])
       }
 

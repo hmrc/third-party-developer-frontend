@@ -33,6 +33,6 @@
     <p>You'll need a new access code every time you sign in.</p>
 
     <div>
-        <a id="submit" class="button" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps())">Continue</a>
+        <a id="submit" class="button" href="@request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps())">Continue</a>
     </div>
 }
