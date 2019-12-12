@@ -17,20 +17,20 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import connectors.ThirdPartyDeveloperConnector
 import controllers.FormKeys.appNameField
 import domain.Environment.{PRODUCTION, SANDBOX}
 import domain.{Environment, _}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
+import play.api.mvc.Result
 import service._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 @Singleton
 class AddApplication @Inject()(val applicationService: ApplicationService,
-  val developerConnector: ThirdPartyDeveloperConnector,
   val sessionService: SessionService,
   val auditService: AuditService,
   val errorHandler: ErrorHandler,
@@ -52,13 +52,16 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(views.html.addApplicationStartSubordinate()))
   }
 
-  def addApplicationSuccess(applicationId: String, environment: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
-    Environment.from(environment) match {
-      case Some(SANDBOX) =>
+  def addApplicationSuccess(applicationId: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
+    applicationService.fetchByApplicationId(applicationId).map(_.deployedTo).flatMap{
+      case SANDBOX =>
         Future.successful(Ok(views.html.addApplicationSubordinateSuccess(request.application.name, applicationId)))
-      case Some(PRODUCTION) =>
+      case PRODUCTION =>
         Future.successful(Ok(views.html.addApplicationPrincipalSuccess(request.application.name, applicationId)))
-      case _ => Future.successful(NotFound(errorHandler.notFoundTemplate(request)))
+    }.recoverWith {
+      case NonFatal(_) =>
+        val x = Future.successful(NotFound(errorHandler.notFoundTemplate(request)))
+        x
     }
   }
 
@@ -87,7 +90,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
                 Environment.from(environment).getOrElse(SANDBOX)))
               .map(appCreated => {
                 if (Environment.from(environment) == Some(PRODUCTION)) {
-                  Redirect(routes.AddApplication.addApplicationSuccess(appCreated.id, "PRODUCTION"))
+                  Redirect(routes.AddApplication.addApplicationSuccess(appCreated.id))
                 } else Redirect(routes.Subscriptions.subscriptions(appCreated.id))
               })
           case invalid: Invalid => {

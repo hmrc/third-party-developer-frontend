@@ -51,14 +51,17 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val principalApp = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+
+  val subordinateApp = Application(appId, clientId, "App name 2", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX, Some("Description 2"),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
   trait Setup {
     val underTest = new AddApplication(
       mock[ApplicationService],
-      mock[ThirdPartyDeveloperConnector],
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
@@ -94,9 +97,9 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
   "Add applications production success page" should {
 
     "return the page with the user is logged in" in new Setup {
-      givenTheApplicationExists(application)
+      givenTheApplicationExists(principalApp)
 
-      private val result = await(underTest.addApplicationSuccess(appId, "PRODUCTION")(loggedInRequest))
+      private val result = await(underTest.addApplicationSuccess(appId)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include(loggedInUser.displayedName)
@@ -104,6 +107,39 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
       bodyOf(result) should include("Before you can get production credentials")
       bodyOf(result) should include("You must complete the checklist for your application and submit it for checking.")
       bodyOf(result) should include("We take up to 10 working days to check applications and issue production credentials.")
+      bodyOf(result) should not include "Sign in"
+    }
+
+    "return to the login page when the user is not logged in" in new Setup {
+
+      val request = FakeRequest()
+
+      private val result = await(underTest.addApplicationSubordinate()(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+    }
+
+    "redirect to the login screen when partly logged" in new Setup {
+      private val result = await(underTest.addApplicationSubordinate()(partLoggedInRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+    }
+  }
+
+  "Add applications subordinate success page" should {
+
+    "return the page with the user is logged in" in new Setup {
+      givenTheApplicationExists(subordinateApp)
+
+      private val result = await(underTest.addApplicationSuccess(appId)(loggedInRequest))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include(loggedInUser.displayedName)
+      bodyOf(result) should include("You can now use its credentials to test with sandbox APIs.")
+      bodyOf(result) should include("Read the guidance on")
+      bodyOf(result) should include("to find out which endpoints to use, creating a test user and types of test data.")
       bodyOf(result) should not include "Sign in"
     }
 

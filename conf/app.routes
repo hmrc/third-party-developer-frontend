@@ -72,7 +72,7 @@ GET         /applications/add-application/start/sandbox                         
 GET         /applications/add-application/environment/:environment                      controllers.AddApplication.nameAddApplication(environment: String)
 POST        /applications/add-application/environment/:environment                      controllers.AddApplication.nameApplicationAction(environment: String)
 
-GET         /applications/:id/add-application/environment/:environment/success          controllers.AddApplication.addApplicationSuccess(id: String, environment:String)
+GET         /applications/:id/add-application/success                                   controllers.AddApplication.addApplicationSuccess(id: String)
 
 GET         /applications/:id                                                           controllers.OldManageApplications.editApplication(id: String, error: Option[String])
 

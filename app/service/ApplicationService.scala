@@ -290,7 +290,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
   }
 
   def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector =
-    if (application.deployedTo == "PRODUCTION") productionApplicationConnector else sandboxApplicationConnector
+    if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
 

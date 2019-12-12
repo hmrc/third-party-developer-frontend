@@ -63,7 +63,6 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
   trait Setup {
     val underTest = new AddApplication(
       mock[ApplicationService],
-      mock[ThirdPartyDeveloperConnector],
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
