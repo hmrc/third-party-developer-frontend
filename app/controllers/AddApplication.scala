@@ -52,8 +52,14 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(views.html.addApplicationStartSubordinate()))
   }
 
-  def addApplicationProductionSuccess(applicationId: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.addApplicationPrincipalSuccess(request.application.name, applicationId)))
+  def addApplicationSuccess(applicationId: String, environment: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
+    Environment.from(environment) match {
+      case Some(SANDBOX) =>
+        Future.successful(Ok(views.html.addApplicationSubordinateSuccess(request.application.name, applicationId)))
+      case Some(PRODUCTION) =>
+        Future.successful(Ok(views.html.addApplicationPrincipalSuccess(request.application.name, applicationId)))
+      case _ => Future.successful(NotFound(errorHandler.notFoundTemplate(request)))
+    }
   }
 
   def nameAddApplication(environment: String) = loggedInAction { implicit request =>
@@ -81,7 +87,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
                 Environment.from(environment).getOrElse(SANDBOX)))
               .map(appCreated => {
                 if (Environment.from(environment) == Some(PRODUCTION)) {
-                  Redirect(routes.AddApplication.addApplicationProductionSuccess(appCreated.id))
+                  Redirect(routes.AddApplication.addApplicationSuccess(appCreated.id, "PRODUCTION"))
                 } else Redirect(routes.Subscriptions.subscriptions(appCreated.id))
               })
           case invalid: Invalid => {

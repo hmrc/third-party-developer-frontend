@@ -19,6 +19,7 @@ package unit.controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.AddApplication
+import domain.Environment.PRODUCTION
 import domain._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
@@ -35,7 +36,7 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AddApplicationProductionSuccessSpec extends BaseControllerSpec
+class AddApplicationSuccessSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val appId = "1234"
@@ -95,7 +96,7 @@ class AddApplicationProductionSuccessSpec extends BaseControllerSpec
     "return the page with the user is logged in" in new Setup {
       givenTheApplicationExists(application)
 
-      private val result = await(underTest.addApplicationProductionSuccess(appId)(loggedInRequest))
+      private val result = await(underTest.addApplicationSuccess(appId, "PRODUCTION")(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include(loggedInUser.displayedName)
