@@ -66,7 +66,6 @@ class ManageApplicationsSpec
   trait AddApplicationSetup {
     val addApplicationController = new AddApplication(
       mock[ApplicationService],
-      mock[ThirdPartyDeveloperConnector],
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
