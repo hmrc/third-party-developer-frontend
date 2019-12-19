@@ -19,17 +19,24 @@
 @import include._
 @import domain.BackButtonWithJavaScript
 
+@import model.Crumb
 @(appName: String, id: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
+@pageHeading = @{s"You added $appName"}
+
 @devMain(
-    title = "You added " + appName,
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+    developerSession = Some(loggedIn),
+    breadcrumbs = Seq(
+        Crumb(pageHeading),
+        Crumb.viewAllApplications,
+        Crumb.home
+    )
 ) {
 
     <header>
-        <h1 class="heading-xlarge">You added @appName</h1>
+        <h1 class="heading-xlarge">@pageHeading</h1>
     </header>
 
     <p>You have admin rights over this production application.</p>

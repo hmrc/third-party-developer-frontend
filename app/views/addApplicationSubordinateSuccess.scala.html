@@ -18,17 +18,24 @@
 @import domain.DeveloperSession
 @import include._
 @import domain.BackButtonWithJavaScript
+@import model.Crumb
 
 @(appName: String, id: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
-@devMain(
-    title = "You added " + appName,
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn)
-) {
+@pageHeading = @{"Application added to the sandbox"}
 
+@devMain(
+    title = pageHeading,
+    userFullName = loggedIn.loggedInName,
+    developerSession = Some(loggedIn),
+    breadcrumbs = Seq(
+        Crumb(pageHeading),
+        Crumb.viewAllApplications,
+        Crumb.home
+    )
+) {
     <header>
-        <h1 class="heading-xlarge">Application added to the sandbox</h1>
+        <h1 class="heading-xlarge">@pageHeading</h1>
     </header>
 
     <h2 class="heading-medium">You added @appName</h2>
