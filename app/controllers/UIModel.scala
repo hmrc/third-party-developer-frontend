@@ -25,10 +25,7 @@ import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
 
-case class PageData(app: Application, tokens: ApplicationTokens, subscriptions: Option[GroupedSubscriptions]) {
-  // TODO - Do we still need this? can we delete?
-  lazy val hasSubscriptions = subscriptions.fold(false)(subs => subs.apis.exists(_.hasSubscriptions) || subs.testApis.exists(_.hasSubscriptions) || subs.exampleApi.exists(_.hasSubscriptions))
-}
+case class PageData(app: Application, tokens: ApplicationTokens, subscriptions: Option[GroupedSubscriptions])
 
 case class ApplicationSummary(id: String, name: String, environment: String, role: Role,
                               termsOfUseStatus: TermsOfUseStatus, state: State, lastAccess: DateTime, createdOn: DateTime)

@@ -735,7 +735,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     "delete standard subordinate application when requested by an admin" in new Setup {
 
       given(mockSandboxApplicationConnector.deleteApplication(any())(any[HeaderCarrier]))
-        .willReturn(Future.successful(successful()))
+        .willReturn(Future.successful(successful(())))
 
       await(service.deleteSubordinateApplication(adminRequester, sandboxApp))
 
