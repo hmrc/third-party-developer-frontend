@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.urls.Link
 
 @import domain.BackButtonWithJavaScript
-@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean)(
+@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, subscriptions: Option[GroupedSubscriptions], id: String)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
@@ -59,7 +59,7 @@
                 <p class="panel panel-border-wide">You need admin rights to make API subscription changes.</p>
             }
 
-            @subscriptionGroups(role, groupedSubscriptions, app, hasSubscriptions, API_SUBSCRIPTIONS_PAGE)
+            @subscriptionGroups(role, groupedSubscriptions, app, API_SUBSCRIPTIONS_PAGE)
         }
 
         case _ => {

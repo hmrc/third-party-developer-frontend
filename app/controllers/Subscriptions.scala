@@ -57,7 +57,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
       val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
       val form = EditApplicationForm.withData(data.app)
-      val view = views.html.subscriptions(role, data, form, request.application, data.subscriptions, data.app.id, data.hasSubscriptions)
+      val view = views.html.subscriptions(role, data, form, request.application, data.subscriptions, data.app.id)
       Ok(view)
     } recover {
       case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
@@ -69,7 +69,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
       val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
       val form = EditApplicationForm.withData(data.app)
-      val view = views.html.subscriptions2(role, data, form, request.application, data.subscriptions, data.app.id, data.hasSubscriptions)
+      val view = views.html.subscriptions2(role, data, form, request.application, data.subscriptions, data.app.id)
       Ok(view)
     } recover {
       case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
