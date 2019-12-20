@@ -91,7 +91,9 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
               .map(appCreated => {
                 if (Environment.from(environment) == Some(PRODUCTION)) {
                   Redirect(routes.AddApplication.addApplicationSuccess(appCreated.id))
-                } else Redirect(routes.Subscriptions.subscriptions(appCreated.id))
+
+                  // TODO - Test new redirect
+                } else Redirect(routes.Subscriptions.subscriptions2(appCreated.id))
               })
           case invalid: Invalid => {
             def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)

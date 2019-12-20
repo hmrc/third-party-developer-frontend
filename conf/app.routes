@@ -103,6 +103,7 @@ GET         /applications/:id/delete-subordinate-confirm                        
 POST        /applications/:id/delete-subordinate                                        controllers.DeleteApplication.deleteSubordinateApplicationAction(id: String)
 
 GET         /applications/:id/subscriptions                                             controllers.Subscriptions.subscriptions(id: String)
+GET         /applications/:id/subscriptions2                                            controllers.Subscriptions.subscriptions2(id: String)
 
 POST        /applications/:id/change-subscription                                       controllers.Subscriptions.changeApiSubscription(id: String, context: String, version: String, redirectTo: String)
 GET         /applications/:id/change-locked-subscription                                controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: String, version: String, redirectTo: String)

@@ -1,0 +1,80 @@
+@*
+ * Copyright 2019 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain.SubscriptionRedirect._
+@import domain.{Application, DeveloperSession, Environment, Role, State}
+@import model.Crumb
+@import include._
+@import uk.gov.hmrc.urls.Link
+
+@import domain.BackButtonWithJavaScript
+@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean)(
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
+
+@isPendingOrActiveProductionApplication(application: Application) = @{
+    application.deployedTo.isProduction && (
+        application.state.name == State.PENDING_GATEKEEPER_APPROVAL ||
+        application.state.name == State.PENDING_REQUESTER_VERIFICATION ||
+        application.state.name == State.PRODUCTION)
+}
+
+@pageHeading = @{"Manage API subscriptions 2"}
+
+@devMain(
+    title = pageHeading,
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
+) {
+
+    <h1 class="heading-xlarge">@pageHeading</h1>
+
+
+    @appEnvironment(app)
+    <br>
+
+    @subscriptions match {
+        case Some(groupedSubscriptions) => {
+            <p>You must subscribe to an API so your application can access it.
+                You’ll receive notifications about its lifecycle events, such as new version introductions
+                and old version retirements.</p>
+
+            <p>Learn more about our APIs in @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation")).toHtml.</p>
+
+            @if(role.isAdministrator && isPendingOrActiveProductionApplication(app)) {
+                <p class="panel panel-border-wide">For security reasons we must review any API subscription changes. This takes up to 2 working days.</p>
+            }
+
+            @if(role.isDeveloper && isPendingOrActiveProductionApplication(app)) {
+                <p class="panel panel-border-wide">You need admin rights to make API subscription changes.</p>
+            }
+
+            @subscriptionGroups(role, groupedSubscriptions, app, hasSubscriptions, API_SUBSCRIPTIONS_PAGE)
+        }
+
+        case _ => {
+            <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
+            Please <a href="@{
+                              routes.Subscriptions.subscriptions(id)
+                              }">try again</a> later</p>
+        }
+    }
+
+    <div>
+        <a class="button" href="@routes.AddApplication.addApplicationSuccess(id)">Add your application</a>
+    </div>
+
+}

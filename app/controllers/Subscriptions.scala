@@ -64,6 +64,18 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     }
   }
 
+  // TODO - Test me
+  def subscriptions2(applicationId: String) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+    apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
+      val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
+      val form = EditApplicationForm.withData(data.app)
+      val view = views.html.subscriptions2(role, data, form, request.application, data.subscriptions, data.app.id, data.hasSubscriptions)
+      Ok(view)
+    } recover {
+      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+    }
+  }
+
   private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
     case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.subscriptions(applicationId))
     case Some(APPLICATION_CHECK_PAGE) => Redirect(routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
