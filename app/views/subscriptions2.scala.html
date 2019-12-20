@@ -31,7 +31,7 @@
         application.state.name == State.PRODUCTION)
 }
 
-@pageHeading = @{"Manage API subscriptions 2"}
+@pageHeading = @{"Which APIs do you want to use?"}
 
 @devMain(
     title = pageHeading,
@@ -43,16 +43,13 @@
     <h1 class="heading-xlarge">@pageHeading</h1>
 
 
-    @appEnvironment(app)
-    <br>
-
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            <p>You must subscribe to an API so your application can access it.
-                You’ll receive notifications about its lifecycle events, such as new version introductions
-                and old version retirements.</p>
+            <p>Subscribe to APIs so your application can access them in the sandbox. You can change them at any time.</p>
 
-            <p>Learn more about our APIs in @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation")).toHtml.</p>
+            <p>Once you subscribe, we'll send you email updates such as new API versions, new endpoints or version retirements.</p>
+
+            <p>Learn more about our APIs in @Link.toExternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation (opens in a new tab)")).toHtml.</p>
 
             @if(role.isAdministrator && isPendingOrActiveProductionApplication(app)) {
                 <p class="panel panel-border-wide">For security reasons we must review any API subscription changes. This takes up to 2 working days.</p>
