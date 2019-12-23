@@ -69,8 +69,8 @@ GET         /applications                                                       
 
 GET         /applications/add-application/start/sandbox                                 controllers.AddApplication.addApplicationSubordinate
 
-GET         /applications/add-application/environment/:environment                      controllers.AddApplication.nameAddApplication(environment: String)
-POST        /applications/add-application/environment/:environment                      controllers.AddApplication.nameApplicationAction(environment: String)
+GET         /applications/add-application/environment/:environment                      controllers.AddApplication.nameAddApplication(environment: domain.Environment)
+POST        /applications/add-application/environment/:environment                      controllers.AddApplication.nameApplicationAction(environment: domain.Environment)
 
 GET         /applications/:id/add-application/success                                   controllers.AddApplication.addApplicationSuccess(id: String)
 

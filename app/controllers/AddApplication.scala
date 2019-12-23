@@ -65,31 +65,29 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def nameAddApplication(environment: String) = loggedInAction { implicit request =>
-    Environment.from(environment) match {
-      case Some(SANDBOX) =>
-        Future.successful(Ok(views.html.addApplicationName(AddApplicationNameForm.form, Environment.from(environment))))
-      case Some(PRODUCTION) =>
-        Future.successful(Ok(views.html.addApplicationName(AddApplicationNameForm.form, Environment.from(environment))))
-      case _ => Future.successful(NotFound(errorHandler.notFoundTemplate(request)))
+  def nameAddApplication(environment: Environment) = loggedInAction { implicit request =>
+    environment match {
+      case SANDBOX =>
+        Future.successful(Ok(views.html.addApplicationName(AddApplicationNameForm.form, Some(environment))))
+      case PRODUCTION =>
+        Future.successful(Ok(views.html.addApplicationName(AddApplicationNameForm.form, Some(environment))))
     }
   }
 
-    def nameApplicationAction(environment: String) = loggedInAction { implicit request =>
+    def nameApplicationAction(environment: Environment) = loggedInAction { implicit request =>
       val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
 
-      def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: String) =
-        Future.successful(Ok(views.html.addApplicationName(errors, Environment.from(environment))))
+      def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
+        Future.successful(Ok(views.html.addApplicationName(errors, Some(environment))))
 
       def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) = {
         applicationService.isApplicationNameValid(formThatPassesSimpleValidation.applicationName,
-          Environment.from(environment).getOrElse(SANDBOX), selfApplicationId = None).flatMap {
+          environment, selfApplicationId = None).flatMap {
           case Valid =>
             applicationService
-              .createForUser(CreateApplicationRequest.fromSandboxJourney(loggedIn, formThatPassesSimpleValidation,
-                Environment.from(environment).getOrElse(SANDBOX)))
+              .createForUser(CreateApplicationRequest.fromSandboxJourney(loggedIn, formThatPassesSimpleValidation, environment))
               .map(appCreated => {
-                if (Environment.from(environment) == Some(PRODUCTION)) {
+                if (environment.isProduction()) {
                   Redirect(routes.AddApplication.addApplicationSuccess(appCreated.id))
 
                   // TODO - Test new redirect
@@ -98,7 +96,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
           case invalid: Invalid => {
             def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-            Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, Environment.from(environment))))
+            Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, Some(environment))))
           }
         }
       }
