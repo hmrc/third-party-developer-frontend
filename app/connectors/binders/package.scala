@@ -20,7 +20,7 @@ import domain.Environment
 import play.api.mvc.PathBindable
 
 package object binders {
-  implicit def pathBinder(implicit textBinder: PathBindable[String]): PathBindable[Environment] = new PathBindable[Environment] {
+  implicit def environmentPathBinder(implicit textBinder: PathBindable[String]): PathBindable[Environment] = new PathBindable[Environment] {
     override def bind(key: String, value: String): Either[String, Environment] = {
       for {
         text <- textBinder.bind(key, value).right

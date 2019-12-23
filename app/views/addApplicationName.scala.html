@@ -20,7 +20,12 @@
 @import domain.BackButtonWithJavaScript
 @import domain.Environment
 @import domain.Environment.SANDBOX
-@(form: Form[controllers.AddApplicationNameForm], environment: Option[Environment])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
+@*TODO: Should environment be an Option? *@
+@(
+        form: Form[controllers.AddApplicationNameForm],
+        applicationId: String,
+        environment: Option[Environment]
+)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
@@ -46,7 +51,7 @@
     }
 
     @helper.form(action = environment match {
-        case Some(env) => controllers.routes.AddApplication.nameApplicationAction(env)
+        case Some(env) => controllers.routes.AddApplication.nameApplicationAction(applicationId, env)
     }) {
 
     @helper.CSRF.formField
