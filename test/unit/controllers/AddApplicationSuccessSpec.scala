@@ -99,7 +99,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     "return the page with the user is logged in" in new Setup {
       givenTheApplicationExists(principalApp)
 
-      private val result = await(underTest.addApplicationSuccess(appId, Environment.PRODUCTION.toString.toLowerCase)(loggedInRequest))
+      private val result = await(underTest.addApplicationSuccess(appId, Environment.PRODUCTION)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include(loggedInUser.displayedName)
@@ -133,7 +133,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     "return the page with the user is logged in" in new Setup {
       givenTheApplicationExists(subordinateApp)
 
-      private val result = await(underTest.addApplicationSuccess(appId, Environment.PRODUCTION.toString.toLowerCase)(loggedInRequest))
+      private val result = await(underTest.addApplicationSuccess(appId, Environment.PRODUCTION)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include(loggedInUser.displayedName)
