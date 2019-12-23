@@ -105,34 +105,35 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
         Future.successful(Ok(views.html.addApplicationName(errors, applicationId, Some(environment))))
 
       def updateNameIfChanged(form: AddApplicationNameForm) = {
-        if (application.name != form.applicationName) {
+        if (application.name == form.applicationName) {
+          Future.successful(())
+        } else {
           applicationService.update(UpdateApplicationRequest(
             application.id,
             application.deployedTo,
             form.applicationName))
-        } else {
-          Future.successful(())
         }
       }
 
-      def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) = applicationService.isApplicationNameValid(
-        formThatPassesSimpleValidation.applicationName,
-        environment,
-        Some(application.id)).flatMap { // TODO Test this param
+      def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =
+        applicationService.isApplicationNameValid(
+          formThatPassesSimpleValidation.applicationName,
+          environment,
+          Some(application.id))
+          .flatMap {
+            case Valid =>
+              updateNameIfChanged(formThatPassesSimpleValidation).map(
+                _ => application.deployedTo match {
+                  case PRODUCTION => Redirect(routes.AddApplication.addApplicationSuccess(application.id, application.deployedTo))
+                  case SANDBOX => Redirect(routes.Subscriptions.subscriptions2(application.id, application.deployedTo))
+                }
+              )
 
-        case Valid =>
-          updateNameIfChanged(formThatPassesSimpleValidation).map(
-            _ => application.deployedTo match {
-              case PRODUCTION => Redirect(routes.AddApplication.addApplicationSuccess(application.id, application.deployedTo))
-              case SANDBOX => Redirect(routes.Subscriptions.subscriptions2(application.id, application.deployedTo))
-            }
-          )
+            case invalid: Invalid =>
+              def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-        case invalid: Invalid =>
-          def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
-
-          Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, applicationId, Some(environment))))
-      }
+              Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, applicationId, Some(environment))))
+          }
 
       requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)
   }

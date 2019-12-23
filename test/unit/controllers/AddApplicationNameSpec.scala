@@ -159,9 +159,8 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
 
         verify(underTest.applicationService)
-          .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX), any())(any[HeaderCarrier])
+          .isApplicationNameValid(mockEq(invalidApplicationName), mockEq(Environment.SANDBOX), mockEq(Some(application.id)))(any[HeaderCarrier])
       }
-
     }
   }
   "NameApplicationPage in principal" should {
