@@ -64,7 +64,6 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     }
   }
 
-  // TODO - Test me
   def subscriptions2(applicationId: String, environment: Environment) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
       val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)

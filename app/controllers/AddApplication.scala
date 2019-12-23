@@ -38,8 +38,6 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
                                implicit val appConfig: ApplicationConfig)
                               (implicit ec: ExecutionContext) extends ApplicationController {
 
-  val newAppName = "new app"
-
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>
       if (apps.isEmpty) {
@@ -57,7 +55,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
   def addApplicationSubordinatePost(): Action[AnyContent] = loggedInAction { implicit request =>
 
     val createApplicationRequest: CreateApplicationRequest = CreateApplicationRequest(
-      newAppName,
+      AddApplication.newAppName,
       Environment.SANDBOX,
       None,
       Seq(Collaborator(loggedIn.email, Role.ADMINISTRATOR)))
@@ -81,9 +79,10 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
       }
     }
 
+  // TODO : Rename this to edit application name
   def nameAddApplication(applicationId: String, environment: Environment): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     def hideNewAppName(name: String) = {
-      if (name == newAppName) ""
+      if (name == AddApplication.newAppName) ""
       else name
     }
 
@@ -137,4 +136,8 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
 
       requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)
   }
+}
+
+object AddApplication {
+  val newAppName = "new application"
 }
