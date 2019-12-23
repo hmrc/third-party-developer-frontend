@@ -311,7 +311,8 @@ case class Application(id: String,
                        collaborators: Set[Collaborator] = Set.empty,
                        access: Access = Standard(),
                        state: ApplicationState = ApplicationState.testing,
-                       checkInformation: Option[CheckInformation] = None) {
+                       checkInformation: Option[CheckInformation] = None,
+                       ipWhitelist: Set[String] = Set.empty) {
 
   def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
 

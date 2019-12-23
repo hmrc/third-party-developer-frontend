@@ -9,6 +9,9 @@ telephone.error.required.field=Provide your telephone number
 comments.error.required.field=Tell us what you need help with
 comments.error.maxLength.field=You entered too much text - keep it under 3,000 characters
 
+whitelistedIps.error.required.field=Tell us what you want to change
+whitelistedIps.error.maxLength.field=Provide details with fewer than 3000 characters
+
 firstname.error.required.field=Provide your first name
 firstname.error.required.global=Provide your first name
 

@@ -193,3 +193,22 @@ form.inline-controls {
   line-height: 0.5;
   padding: 0;
 }
+
+.ip-whitelist {
+  .heading-medium {
+    margin-top: 1em;
+    margin-bottom: 0;
+  }
+  .form-group {
+    width: 90%;
+    textarea {
+      width: 100%;
+    }
+  }
+  .actions {
+    margin-top: 2em;
+  }
+  table {
+    width: 43%;
+  }
+}
