@@ -52,6 +52,22 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(views.html.addApplicationStartSubordinate()))
   }
 
+  def addApplicationSubordinatePost = loggedInAction { implicit request =>
+
+    // TODO: App name
+    val appName = "temp" // TODO: Use empty. Tweak validation in TPA
+    val createApplicationRequest: CreateApplicationRequest = CreateApplicationRequest(
+      appName,
+      Environment.SANDBOX,None,
+      Seq(Collaborator(loggedIn.email, Role.ADMINISTRATOR)))
+
+    applicationService.createForUser(createApplicationRequest).map(
+      createApplicationResponse =>{
+        Redirect(routes.AddApplication.nameAddApplication(createApplicationResponse.id,createApplicationRequest.environment.toString.toLowerCase))
+      }
+    )
+  }
+
   def addApplicationSuccess(applicationId: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
     applicationService.fetchByApplicationId(applicationId).map(_.deployedTo).flatMap{
       case SANDBOX =>
@@ -65,44 +81,59 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def nameAddApplication(environment: String) = loggedInAction { implicit request =>
+  def nameAddApplication(applicationId: String, environment: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
     Environment.from(environment) match {
-      case Some(SANDBOX) =>
-        Future.successful(Ok(views.html.addApplicationName(AddApplicationNameForm.form, Environment.from(environment))))
-      case Some(PRODUCTION) =>
-        Future.successful(Ok(views.html.addApplicationName(AddApplicationNameForm.form, Environment.from(environment))))
+      case Some(env) =>
+        val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(request.application.name))
+
+        Future.successful(Ok(views.html.addApplicationName(form, applicationId, Some(env))))
       case _ => Future.successful(NotFound(errorHandler.notFoundTemplate(request)))
     }
   }
 
-    def nameApplicationAction(environment: String) = loggedInAction { implicit request =>
-      val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
+    def nameApplicationAction(applicationId: String, environment: String) = whenTeamMemberOnApp(applicationId) {
+      implicit request =>
 
-      def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: String) =
-        Future.successful(Ok(views.html.addApplicationName(errors, Environment.from(environment))))
+        val application = request.application
 
-      def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) = {
-        applicationService.isApplicationNameValid(formThatPassesSimpleValidation.applicationName,
-          Environment.from(environment).getOrElse(SANDBOX), selfApplicationId = None).flatMap {
-          case Valid =>
-            applicationService
-              .createForUser(CreateApplicationRequest.fromSandboxJourney(loggedIn, formThatPassesSimpleValidation,
-                Environment.from(environment).getOrElse(SANDBOX)))
-              .map(appCreated => {
-                if (Environment.from(environment) == Some(PRODUCTION)) {
-                  Redirect(routes.AddApplication.addApplicationSuccess(appCreated.id))
+        val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
 
-                  // TODO - Test new redirect
-                } else Redirect(routes.Subscriptions.subscriptions2(appCreated.id))
-              })
-          case invalid: Invalid => {
-            def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+        def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: String) =
+          Future.successful(Ok(views.html.addApplicationName(errors, applicationId, Environment.from(environment))))
 
-            Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, Environment.from(environment))))
+        def updateNameIfChanged(form: AddApplicationNameForm) = {
+          if (application.name != form.applicationName) {
+            applicationService.update(UpdateApplicationRequest(
+              application.id,
+              application.deployedTo,
+              form.applicationName))
+          } else {
+            Future.successful(())
+
           }
         }
-      }
 
-      requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)
+        def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) = {
+          applicationService.isApplicationNameValid(
+            formThatPassesSimpleValidation.applicationName,
+            Environment.from(environment).getOrElse(SANDBOX), //TODO: Don't default to sandbox
+            Some(application.id)).flatMap { // TODO Test this param
+            case Valid =>
+              updateNameIfChanged(formThatPassesSimpleValidation).map(
+                _ => application.deployedTo match {
+                  case PRODUCTION =>  Redirect(routes.AddApplication.addApplicationSuccess(application.id))
+                  case SANDBOX => Redirect(routes.Subscriptions.subscriptions2(application.id))
+                }
+              )
+
+            case invalid: Invalid => {
+              def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+
+              Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, applicationId, Environment.from(environment))))
+            }
+          }
+        }
+
+        requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)
     }
 }

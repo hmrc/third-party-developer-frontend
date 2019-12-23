@@ -34,6 +34,8 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import utils.CSRFTokenHelper._
+
 class addApplicationStartSubordinateSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
@@ -76,6 +78,7 @@ class addApplicationStartSubordinateSpec extends BaseControllerSpec
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest)(sessionId)
       .withSession(sessionParams: _*)
+      .withCSRFToken
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest)(partLoggedInSessionId)

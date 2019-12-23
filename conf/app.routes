@@ -68,9 +68,10 @@ POST        /applications/add                                                   
 GET         /applications                                                               controllers.AddApplication.manageApps
 
 GET         /applications/add-application/start/sandbox                                 controllers.AddApplication.addApplicationSubordinate
+POST        /applications/add-application/start/sandbox                                 controllers.AddApplication.addApplicationSubordinatePost
 
-GET         /applications/add-application/environment/:environment                      controllers.AddApplication.nameAddApplication(environment: String)
-POST        /applications/add-application/environment/:environment                      controllers.AddApplication.nameApplicationAction(environment: String)
+GET         /applications/:id/add-application/:environment/name                         controllers.AddApplication.nameAddApplication(id: String, environment: String)
+POST        /applications/:id/add-application/:environment/name                         controllers.AddApplication.nameApplicationAction(id: String, environment: String)
 
 GET         /applications/:id/add-application/success                                   controllers.AddApplication.addApplicationSuccess(id: String)
 
