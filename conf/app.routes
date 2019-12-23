@@ -72,7 +72,7 @@ POST        /applications/add2/sandbox                                          
 
 GET         /applications/:id/add2/:environment/name                                    controllers.AddApplication.nameAddApplication(id: String, environment: domain.Environment)
 POST        /applications/:id/add2/:environment/name                                    controllers.AddApplication.nameApplicationAction(id: String, environment: domain.Environment)
-GET         /applications/:id/add2/:environment/subscriptions2                          controllers.Subscriptions.subscriptions2(id: String, environment: domain.Environment)
+GET         /applications/:id/add2/:environment/subscriptions                           controllers.Subscriptions.subscriptions2(id: String, environment: domain.Environment)
 
 GET         /applications/:id/add2/:environment/success                                 controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
 

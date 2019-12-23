@@ -38,6 +38,8 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
   implicit val appConfig: ApplicationConfig)
   (implicit ec: ExecutionContext) extends ApplicationController {
 
+  val newAppName = "new app"
+
   def manageApps = loggedInAction { implicit request =>
     applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>
       if (apps.isEmpty) {
@@ -54,10 +56,8 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
 
   def addApplicationSubordinatePost = loggedInAction { implicit request =>
 
-    // TODO: App name
-    val appName = "temp" // TODO: Use empty. Tweak validation in TPA
     val createApplicationRequest: CreateApplicationRequest = CreateApplicationRequest(
-      appName,
+      newAppName,
       Environment.SANDBOX,
       None,
       Seq(Collaborator(loggedIn.email, Role.ADMINISTRATOR)))
@@ -85,7 +85,13 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
   def nameAddApplication(applicationId: String, environment: Environment) = whenTeamMemberOnApp(applicationId) { implicit request =>
     environment match {
       case env =>
-        val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(request.application.name))
+
+        def hideNewAppName(name: String) = {
+          if (name == newAppName) ""
+          else name
+        }
+
+        val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(hideNewAppName(request.application.name)))
 
         Future.successful(Ok(views.html.addApplicationName(form, applicationId, Some(env))))
     }
