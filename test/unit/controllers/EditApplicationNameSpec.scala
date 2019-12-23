@@ -38,7 +38,7 @@ import utils.WithLoggedInSession._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
-class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val appId = "1234"
   val clientId = "clientId123"
@@ -99,12 +99,12 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
 
   "NameApplicationPage in subordinate" should {
 
-    "return the Add Applications Name Page with user logged in" in new Setup {
+    "return the Edit Applications Name Page with user logged in" in new Setup {
 
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application)))
 
-      private val result = await(underTest.nameAddApplication(appId, Environment.SANDBOX)(loggedInRequest.withCSRFToken))
+      private val result = await(underTest.editApplicationName(appId, Environment.SANDBOX)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
       bodyOf(result) should include("What's the name of your application?")
@@ -119,14 +119,14 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
 
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-      private val result = await(underTest.nameAddApplication(appId, Environment.SANDBOX)(request))
+      private val result = await(underTest.editApplicationName(appId, Environment.SANDBOX)(request))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when part logged in" in new Setup {
-      val result: Result = await(underTest.nameAddApplication(appId, Environment.SANDBOX)(partLoggedInRequest))
+      val result: Result = await(underTest.editApplicationName(appId, Environment.SANDBOX)(partLoggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -148,7 +148,7 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
             ("environment", "SANDBOX"),
             ("description", ""))
 
-        private val result = await(underTest.nameApplicationAction(appId, Environment.SANDBOX)(request))
+        private val result = await(underTest.editApplicationNameAction(appId, Environment.SANDBOX)(request))
 
         status(result) shouldBe BAD_REQUEST
         bodyOf(result) should include("Application name must not include HMRC or HM Revenue and Customs")
@@ -164,12 +164,12 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
 
   "NameApplicationPage in principal" should {
 
-    "return the Add Applications Name Page with user logged in" in new Setup {
+    "return the Edit Applications Name Page with user logged in" in new Setup {
 
       given(underTest.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(List(application)))
 
-      private val result = await(underTest.nameAddApplication(appId, Environment.PRODUCTION)(loggedInRequest.withCSRFToken))
+      private val result = await(underTest.editApplicationName(appId, Environment.PRODUCTION)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Add an application to production")
@@ -184,14 +184,14 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
 
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-      private val result = await(underTest.nameAddApplication(appId, Environment.PRODUCTION)(request))
+      private val result = await(underTest.editApplicationName(appId, Environment.PRODUCTION)(request))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when part logged in" in new Setup {
-      val result: Result = await(underTest.nameAddApplication(appId, Environment.PRODUCTION)(partLoggedInRequest))
+      val result: Result = await(underTest.editApplicationName(appId, Environment.PRODUCTION)(partLoggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -213,7 +213,7 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
             ("environment", "PRODUCTION"),
             ("description", ""))
 
-        private val result = await(underTest.nameApplicationAction(appId, Environment.PRODUCTION)(request))
+        private val result = await(underTest.editApplicationNameAction(appId, Environment.PRODUCTION)(request))
 
         status(result) shouldBe BAD_REQUEST
         bodyOf(result) should include("Application name must not include HMRC or HM Revenue and Customs")
@@ -238,7 +238,7 @@ class AddApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHel
             ("environment", "PRODUCTION"),
             ("description", ""))
 
-        private val result = await(underTest.nameApplicationAction(appId, Environment.PRODUCTION)(request))
+        private val result = await(underTest.editApplicationNameAction(appId, Environment.PRODUCTION)(request))
 
         status(result) shouldBe BAD_REQUEST
         bodyOf(result) should include("That application name already exists. Enter a unique name for your application")

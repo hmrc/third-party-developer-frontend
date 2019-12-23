@@ -51,7 +51,7 @@
     }
 
     @helper.form(action = environment match {
-        case Some(env) => controllers.routes.AddApplication.nameApplicationAction(applicationId, env)
+        case Some(env) => controllers.routes.AddApplication.editApplicationNameAction(applicationId, env)
     }) {
 
     @helper.CSRF.formField

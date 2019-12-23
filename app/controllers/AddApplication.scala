@@ -62,7 +62,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
 
     applicationService.createForUser(createApplicationRequest).map(
       createApplicationResponse => {
-        Redirect(routes.AddApplication.nameAddApplication(createApplicationResponse.id, createApplicationRequest.environment))
+        Redirect(routes.AddApplication.editApplicationName(createApplicationResponse.id, createApplicationRequest.environment))
       }
     )
   }
@@ -79,8 +79,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
       }
     }
 
-  // TODO : Rename this to edit application name
-  def nameAddApplication(applicationId: String, environment: Environment): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
+  def editApplicationName(applicationId: String, environment: Environment): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     def hideNewAppName(name: String) = {
       if (name == AddApplication.newAppName) ""
       else name
@@ -94,7 +93,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def nameApplicationAction(applicationId: String, environment: Environment): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
+  def editApplicationNameAction(applicationId: String, environment: Environment): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
     implicit request =>
       val application = request.application
 
