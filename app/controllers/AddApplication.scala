@@ -68,7 +68,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     )
   }
 
-  def addApplicationSuccess(applicationId: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
+  def addApplicationSuccess(applicationId: String, notUsedEnvironment: String) = whenTeamMemberOnApp(applicationId) { implicit request =>
     applicationService.fetchByApplicationId(applicationId).map(_.deployedTo).flatMap{
       case SANDBOX =>
         Future.successful(Ok(views.html.addApplicationSubordinateSuccess(request.application.name, applicationId)))
@@ -121,8 +121,8 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
             case Valid =>
               updateNameIfChanged(formThatPassesSimpleValidation).map(
                 _ => application.deployedTo match {
-                  case PRODUCTION =>  Redirect(routes.AddApplication.addApplicationSuccess(application.id))
-                  case SANDBOX => Redirect(routes.Subscriptions.subscriptions2(application.id))
+                  case PRODUCTION =>  Redirect(routes.AddApplication.addApplicationSuccess(application.id, application.deployedTo.toString.toLowerCase))
+                  case SANDBOX => Redirect(routes.Subscriptions.subscriptions2(application.id, application.deployedTo.toString.toLowerCase))
                 }
               )
 

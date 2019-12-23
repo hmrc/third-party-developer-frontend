@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.urls.Link
 
 @import domain.BackButtonWithJavaScript
-@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, subscriptions: Option[GroupedSubscriptions], id: String)(
+@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, environment: Environment, subscriptions: Option[GroupedSubscriptions])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
@@ -65,13 +65,13 @@
         case _ => {
             <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
             Please <a href="@{
-                              routes.Subscriptions.subscriptions(id)
+                              routes.Subscriptions.subscriptions(app.id)
                               }">try again</a> later</p>
         }
     }
 
     <div>
-        <a class="button" href="@routes.AddApplication.addApplicationSuccess(id)">Add your application</a>
+        <a class="button" href="@routes.AddApplication.addApplicationSuccess(app.id, environment.toString.toLowerCase)">Add your application</a>
     </div>
 
 }

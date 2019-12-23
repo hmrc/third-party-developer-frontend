@@ -65,11 +65,12 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   }
 
   // TODO - Test me
-  def subscriptions2(applicationId: String) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+  def subscriptions2(applicationId: String, environment: String) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
       val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
       val form = EditApplicationForm.withData(data.app)
-      val view = views.html.subscriptions2(role, data, form, request.application, data.subscriptions, data.app.id)
+      // TODO: Get environment from app
+      val view = views.html.subscriptions2(role, data, form, request.application, Environment.SANDBOX, data.subscriptions) // TODO
       Ok(view)
     } recover {
       case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
