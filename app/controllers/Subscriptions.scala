@@ -69,8 +69,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
       val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
       val form = EditApplicationForm.withData(data.app)
-      // TODO: Get environment from app
-      val view = views.html.subscriptions2(role, data, form, request.application, environment, data.subscriptions)
+      val view = views.html.subscriptions2(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
       Ok(view)
     } recover {
       case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
