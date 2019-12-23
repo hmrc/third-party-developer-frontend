@@ -34,6 +34,7 @@
 @import domain.DeveloperSession
 @import include._
 @import domain.BackButtonWithJavaScript
+@import domain.Environment
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
@@ -62,12 +63,10 @@
     <p>In production, your application will need to comply with the expectations set out in our
         <a href="/api-documentation/docs/terms-of-use">terms of use.</a></p>
 
-
     @helper.form(action = controllers.routes.AddApplication.addApplicationSubordinatePost()) {
         @helper.CSRF.formField
         <p>
             <button id="add" class="button" type="submit">Continue</button>
         </p>
     }
-
 }
