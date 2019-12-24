@@ -47,7 +47,8 @@ trait TestApplications {
                     state: ApplicationState = ApplicationState.testing,
                     adminEmail: String = "admin@example.com",
                     developerEmail: String = "developer@example.com",
-                    access: Access = standardAccess()): Application = {
+                    access: Access = standardAccess(),
+                    ipWhitelist: Set[String] = Set.empty): Application = {
 
     Application(id = appId,
       clientId = clientId,
@@ -58,7 +59,8 @@ trait TestApplications {
       description = Some("Description 1"),
       collaborators = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER)),
       state = state,
-      access = access)
+      access = access,
+      ipWhitelist = ipWhitelist)
   }
 
   def aStandardApplication(): Application = anApplication()
