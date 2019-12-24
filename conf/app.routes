@@ -102,6 +102,10 @@ POST        /applications/:id/delete-principal                                  
 GET         /applications/:id/delete-subordinate-confirm                                controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: String)
 POST        /applications/:id/delete-subordinate                                        controllers.DeleteApplication.deleteSubordinateApplicationAction(id: String)
 
+GET         /applications/:id/ip-whitelist                                              controllers.IpWhitelist.manageIpWhitelist(id: String)
+GET         /applications/:id/ip-whitelist/change                                       controllers.IpWhitelist.changeIpWhitelist(id: String)
+POST        /applications/:id/ip-whitelist/change                                       controllers.IpWhitelist.changeIpWhitelistAction(id: String)
+
 GET         /applications/:id/subscriptions                                             controllers.Subscriptions.subscriptions(id: String)
 
 POST        /applications/:id/change-subscription                                       controllers.Subscriptions.changeApiSubscription(id: String, context: String, version: String, redirectTo: String)

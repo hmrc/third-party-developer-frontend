@@ -443,3 +443,11 @@ object Remove2SVConfirmForm {
     )(Remove2SVConfirmForm.apply)(Remove2SVConfirmForm.unapply)
   )
 }
+
+final case class ChangeIpWhitelistForm(description: String)
+
+object ChangeIpWhitelistForm {
+  val form: Form[ChangeIpWhitelistForm] = Form(
+    mapping("description" -> whitelistedIpsValidator)(ChangeIpWhitelistForm.apply)(ChangeIpWhitelistForm.unapply)
+  )
+}

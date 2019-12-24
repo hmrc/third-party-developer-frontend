@@ -49,6 +49,8 @@ package object controllers {
     val fullnameMaxLengthKey = "fullname.error.maxLength.field"
     val commentsRequiredKey = "comments.error.required.field"
     val commentsMaxLengthKey = "comments.error.maxLength.field"
+    val whitelistedIpsRequiredKey = "whitelistedIps.error.required.field"
+    val whitelistedIpsMaxLengthKey = "whitelistedIps.error.maxLength.field"
     val telephoneRequiredKey = "telephone.error.required.field"
     val emailaddressRequiredKey = "emailaddress.error.required.field"
     val emailaddressNotValidKey = "emailaddress.error.not.valid.field"
@@ -203,6 +205,7 @@ package object controllers {
 
   def commentsValidator = textValidator(commentsRequiredKey, commentsMaxLengthKey, 3000)
 
+  def whitelistedIpsValidator = textValidator(whitelistedIpsRequiredKey, whitelistedIpsMaxLengthKey, 3000)
 
   def textValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30) =
     Forms.text.
