@@ -43,8 +43,7 @@ object LoginForm {
 
   def accountLocked(form: Form[LoginForm]) = {
     form.withError("submissionError", "true")
-      .withError(FormKeys.emailaddressField, FormKeys.accountLockedKey, controllers.routes.Password.showForgotPassword())
-      .withGlobalError(FormKeys.accountLockedGlobalKey)
+      .withGlobalError(FormKeys.accountLockedGlobalKey, controllers.routes.Password.showForgotPassword())
   }
 
   def accountUnverified(form: Form[LoginForm], email: String) = {
