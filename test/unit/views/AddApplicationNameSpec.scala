@@ -33,9 +33,9 @@ class AddApplicationNameSpec extends UnitSpec with OneServerPerSuite with Mockit
 
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val appConfig = mock[ApplicationConfig]
-  val subordinateEnvironment = Environment.from("sandbox")
+  val subordinateEnvironment = Environment.SANDBOX
   val appId = "1234"
-  val principalEnvironment = Environment.from("production")
+  val principalEnvironment = Environment.PRODUCTION
 
   "Add application page in subordinate" should {
 

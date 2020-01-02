@@ -20,11 +20,10 @@
 @import domain.BackButtonWithJavaScript
 @import domain.Environment
 @import domain.Environment.SANDBOX
-@*TODO: Should environment be an Option? *@
 @(
         form: Form[controllers.AddApplicationNameForm],
         applicationId: String,
-        environment: Option[Environment]
+        environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
@@ -38,7 +37,7 @@
     @errorSummary(form)
 
 
-    @if(environment == Some(SANDBOX)) {
+    @if(environment == SANDBOX) {
     <Header>
         <h1 class="heading-xlarge">What's the name of your application?</h1>
     </Header>
@@ -50,9 +49,7 @@
     <br>
     }
 
-    @helper.form(action = environment match {
-        case Some(env) => controllers.routes.AddApplication.editApplicationNameAction(applicationId, env)
-    }) {
+    @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(applicationId, environment)) {
 
     @helper.CSRF.formField
 
@@ -69,7 +66,7 @@
     </div>
 
     <div class="form-group">
-        @if(environment ==  Some(SANDBOX)){
+        @if(environment ==  SANDBOX){
         <button id="submit" class="button" type="submit">Continue</button>
         } else { <button id="submit" class="button" type="submit">Add</button> }
     </div>

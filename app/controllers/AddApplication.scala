@@ -89,7 +89,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
       case env =>
         val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(hideNewAppName(request.application.name)))
 
-        Future.successful(Ok(views.html.addApplicationName(form, applicationId, Some(env))))
+        Future.successful(Ok(views.html.addApplicationName(form, applicationId, env)))
     }
   }
 
@@ -100,7 +100,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
       val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
 
       def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
-        Future.successful(Ok(views.html.addApplicationName(errors, applicationId, Some(environment))))
+        Future.successful(Ok(views.html.addApplicationName(errors, applicationId, environment)))
 
       def updateNameIfChanged(form: AddApplicationNameForm) = {
         if (application.name == form.applicationName) {
@@ -130,7 +130,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
             case invalid: Invalid =>
               def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-              Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, applicationId, Some(environment))))
+              Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, applicationId, environment)))
           }
 
       requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)
