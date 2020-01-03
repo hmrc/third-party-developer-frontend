@@ -21,9 +21,10 @@ import controllers.FormKeys.appNameField
 import domain.Environment.{PRODUCTION, SANDBOX}
 import domain.{Environment, _}
 import javax.inject.{Inject, Singleton}
+import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.data.Form
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
 import service._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,19 +53,28 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(views.html.addApplicationStartSubordinate()))
   }
 
-  def addApplicationSubordinatePost(): Action[AnyContent] = loggedInAction { implicit request =>
-
+  private def createApplicationAndGetRedirect(environment: Environment)(implicit request: RequestWithAttributes[AnyContent]): Future[Result] = {
     val createApplicationRequest: CreateApplicationRequest = CreateApplicationRequest(
       AddApplication.newAppName,
-      Environment.SANDBOX,
+      environment,
       None,
       Seq(Collaborator(loggedIn.email, Role.ADMINISTRATOR)))
 
+    // TODO: The route binder isn't lower casing the environment name in the URL.
     applicationService.createForUser(createApplicationRequest).map(
       createApplicationResponse => {
         Redirect(routes.AddApplication.editApplicationName(createApplicationResponse.id, createApplicationRequest.environment))
       }
     )
+  }
+
+  def addApplicationSubordinatePost(): Action[AnyContent] = loggedInAction { implicit request =>
+    createApplicationAndGetRedirect(SANDBOX)
+  }
+
+  //TODO: This is a naughty GET that creates a new app, and returns a redirect. However, when we add the production journey start page, this quirk will go away.
+  def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request =>
+    createApplicationAndGetRedirect(PRODUCTION)
   }
 
   def addApplicationSuccess(applicationId: String, notUsedEnvironment: Environment): Action[AnyContent] =

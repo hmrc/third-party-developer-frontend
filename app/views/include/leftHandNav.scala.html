@@ -16,7 +16,7 @@
 
 @import domain.Application
 @import domain.AccessType
-@(application: Option[Application] = None, navSection: Option[String])
+@(application: Option[Application] = None, navSection: Option[String])(implicit request: play.api.mvc.Request[Any])
 
     @(application, navSection) match {
         case (Some(app), Some(section)) => {
@@ -69,7 +69,7 @@
                 <ul>
                     <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.AddApplication.manageApps">View all applications</a></li>
                     <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationSubordinate">Add an application to the sandbox</a></li>
-                    <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.nameAddApplication("production")">Add an application to the production</a></li>
+                    <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationPrincipal">Add an application to the production</a></li>
                 </ul>
                 <br>
             </div>
