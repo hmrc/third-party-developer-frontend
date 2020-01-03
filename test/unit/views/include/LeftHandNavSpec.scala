@@ -41,7 +41,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite {
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
     "render with no errors" in {
-      val page = views.html.include.leftHandNav.render(Some(application), Some("details"))
+      val page = views.html.include.leftHandNav.render(Some(application), Some("details"),(request))
 
       page.contentType should include("text/html")
 

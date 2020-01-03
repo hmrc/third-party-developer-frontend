@@ -28,6 +28,7 @@ package object binders {
       } yield env
     }
 
+    // TODO: This doesn't appear to work as expected when generating URLs from a route with an environment param.
     override def unbind(key: String, env: Environment): String = {
       env.toString.toLowerCase
     }
