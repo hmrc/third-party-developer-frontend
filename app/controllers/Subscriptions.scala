@@ -57,7 +57,18 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
       val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
       val form = EditApplicationForm.withData(data.app)
-      val view = views.html.subscriptions(role, data, form, request.application, data.subscriptions, data.app.id, data.hasSubscriptions)
+      val view = views.html.subscriptions(role, data, form, request.application, data.subscriptions, data.app.id)
+      Ok(view)
+    } recover {
+      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+    }
+  }
+
+  def subscriptions2(applicationId: String, environment: Environment) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+    apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
+      val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
+      val form = EditApplicationForm.withData(data.app)
+      val view = views.html.subscriptions2(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
       Ok(view)
     } recover {
       case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
@@ -204,7 +215,7 @@ class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(i
   def fetchAllSubscriptions(application: Application, developer: DeveloperSession)(implicit hc: HeaderCarrier): Future[Option[SubscriptionData]] = {
     fetchPageDataFor(application).map { data =>
       val role = roleForApplication(data.app, developer.email)
-      Some(SubscriptionData(role, application, data.subscriptions, data.hasSubscriptions))
+      Some(SubscriptionData(role, application, data.subscriptions))
     } recover {
       case _: ApplicationNotFound => None
     }

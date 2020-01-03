@@ -20,7 +20,8 @@
 @import include._
 @import uk.gov.hmrc.urls.Link
 
-@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, subscriptions: Option[GroupedSubscriptions], id: String)(
+@import domain.BackButtonWithJavaScript
+@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, environment: Environment, subscriptions: Option[GroupedSubscriptions])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
@@ -30,32 +31,25 @@
         application.state.name == State.PRODUCTION)
 }
 
+@pageHeading = @{"Which APIs do you want to use?"}
+
 @devMain(
-    title = "Manage API subscriptions",
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage API subscriptions"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
 
-    <h1 class="heading-xlarge">Manage API subscriptions</h1>
+    <h1 class="heading-xlarge">@pageHeading</h1>
 
-
-    @appEnvironment(app)
-    <br>
 
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            <p>You must subscribe to an API so your application can access it.
-                You’ll receive notifications about its lifecycle events, such as new version introductions
-                and old version retirements.</p>
+            <p>Subscribe to APIs so your application can access them in the sandbox. You can change them at any time.</p>
 
-            <p>Learn more about our APIs in @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation")).toHtml.</p>
+            <p>Once you subscribe, we'll send you email updates such as new API versions, new endpoints or version retirements.</p>
+
+            <p>Learn more about our APIs in @Link.toExternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation (opens in a new tab)")).toHtml.</p>
 
             @if(role.isAdministrator && isPendingOrActiveProductionApplication(app)) {
                 <p class="panel panel-border-wide">For security reasons we must review any API subscription changes. This takes up to 2 working days.</p>
@@ -71,8 +65,13 @@
         case _ => {
             <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
             Please <a href="@{
-                              routes.Subscriptions.subscriptions(id)
+                              routes.Subscriptions.subscriptions(app.id)
                               }">try again</a> later</p>
         }
     }
+
+    <div>
+        <a class="button" href="@routes.AddApplication.addApplicationSuccess(app.id, environment)">Add your application</a>
+    </div>
+
 }

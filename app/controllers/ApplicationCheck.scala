@@ -219,7 +219,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 
   private def apiSubscriptionsView(app: Application, subscriptionData: SubscriptionData, form: Option[Form[DummySubscriptionsForm]] = None
                                   )(implicit request: ApplicationRequest[AnyContent]) = {
-    views.html.applicationcheck.apiSubscriptions(app, subscriptionData.role, subscriptionData.subscriptions, app.id, subscriptionData.hasSubscriptions, form)
+    views.html.applicationcheck.apiSubscriptions(app, subscriptionData.role, subscriptionData.subscriptions, app.id, form)
   }
 
   def privacyPolicyPage(appId: String) = canUseChecksAction(appId) { implicit request =>

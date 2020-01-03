@@ -20,7 +20,7 @@
 @import config.ApplicationConfig
 @import model.Crumb
 
-@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, hasSubscriptions: Boolean, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
 @devMain(
     title = "Confirm the APIs your application uses",
@@ -49,7 +49,7 @@
     </div>
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            @subscriptionGroups(role: Role, groupedSubscriptions, app, hasSubscriptions, APPLICATION_CHECK_PAGE)
+            @subscriptionGroups(role: Role, groupedSubscriptions, app, APPLICATION_CHECK_PAGE)
             <br/>
             <br/>
             @helper.form(action = controllers.routes.ApplicationCheck.apiSubscriptionsAction(app.id), 'class -> "form") {

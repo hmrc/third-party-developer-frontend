@@ -297,7 +297,7 @@ object CheckInformationForm {
   }
 }
 
-case class SubscriptionData(role: Role, application: Application, subscriptions: Option[GroupedSubscriptions], hasSubscriptions: Boolean)
+case class SubscriptionData(role: Role, application: Application, subscriptions: Option[GroupedSubscriptions])
 
 
 

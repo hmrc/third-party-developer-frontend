@@ -67,12 +67,14 @@ POST        /applications/add                                                   
 
 GET         /applications                                                               controllers.AddApplication.manageApps
 
-GET         /applications/add-application/start/sandbox                                 controllers.AddApplication.addApplicationSubordinate
+GET         /applications/add2/sandbox                                                  controllers.AddApplication.addApplicationSubordinate
+POST        /applications/add2/sandbox                                                  controllers.AddApplication.addApplicationSubordinatePost
 
-GET         /applications/add-application/environment/:environment                      controllers.AddApplication.nameAddApplication(environment: String)
-POST        /applications/add-application/environment/:environment                      controllers.AddApplication.nameApplicationAction(environment: String)
+GET         /applications/:id/add2/:environment/name                                    controllers.AddApplication.editApplicationName(id: String, environment: domain.Environment)
+POST        /applications/:id/add2/:environment/name                                    controllers.AddApplication.editApplicationNameAction(id: String, environment: domain.Environment)
+GET         /applications/:id/add2/:environment/subscriptions                           controllers.Subscriptions.subscriptions2(id: String, environment: domain.Environment)
 
-GET         /applications/:id/add-application/success                                   controllers.AddApplication.addApplicationSuccess(id: String)
+GET         /applications/:id/add2/:environment/success                                 controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
 
 GET         /applications/:id                                                           controllers.OldManageApplications.editApplication(id: String, error: Option[String])
 

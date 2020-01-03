@@ -21,7 +21,7 @@
 
 @import include._
 
-@(role: Role, app: Application, apisSubscriptions: Seq[APISubscriptions], hasAnySubscriptions: Boolean, group: String, afterSubscriptionRedirectTo: SubscriptionRedirect)(
+@(role: Role, app: Application, apisSubscriptions: Seq[APISubscriptions], group: String, afterSubscriptionRedirectTo: SubscriptionRedirect)(
         implicit messages: Messages, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
 
 <ul class="subscriptions-group">
@@ -29,13 +29,13 @@
         <li class="accordion accordion--stacked @if(apiSubscription.isExpanded) {accordion--expanded}"
             data-accordion
             data-accordion-animate
-            @if(apiSubscription.isExpanded || !hasAnySubscriptions) {data-accordion-expanded="" aria-expanded="true"} else {aria-expanded="false"}>
+            @if(apiSubscription.isExpanded) {data-accordion-expanded="" aria-expanded="true"} else {aria-expanded="false"}>
             <div class="accordion__row">
                 <div class="accordion__row__left">
                     <a id="@apiSubscription.apiServiceName-@group" href="/developer/applications/@app.id?tab=subscriptions&serviceName=@apiSubscription.apiServiceName"
                     class="accordion__button link--no-underline bold-small" data-accordion-button role="button"
-                    @if(apiSubscription.isExpanded || !hasAnySubscriptions) {data-accordion-expanded="" aria-expanded="true"} else {aria-expanded="false"}>
-                        <i class="arrow arrow--right accordion__indicator @if(apiSubscription.isExpanded || !hasAnySubscriptions) {arrow--expand}" data-accordion-arrow aria-hidden="true"></i>
+                    @if(apiSubscription.isExpanded) {data-accordion-expanded="" aria-expanded="true"} else {aria-expanded="false"}>
+                        <i class="arrow arrow--right accordion__indicator @if(apiSubscription.isExpanded) {arrow--expand}" data-accordion-arrow aria-hidden="true"></i>
                         <span>@apiSubscription.apiHumanReadableAppName</span>
                     </a>
                 </div>
@@ -46,7 +46,7 @@
                 </div>
             </div>
 
-            <div class="accordion__body conditionallyHide" data-accordion-body @if(apiSubscription.isExpanded || !hasAnySubscriptions) {aria-hidden="false"} else {aria-hidden="true"}>
+            <div class="accordion__body conditionallyHide" data-accordion-body @if(apiSubscription.isExpanded) {aria-hidden="false"} else {aria-hidden="true"}>
                 <ul>
                     @apiSubscription.subscriptions.map { case (api) =>
                         @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
@@ -94,7 +94,7 @@
                                 </div>
 
                                 @if(api.fields.isDefined && api.fields.get.fields.nonEmpty) {
-                                    <div class="conditionallyHide fieldsContainer" id="subscription-fields-@IdFormatter.identifier(api.context, api.apiVersion.version)" @if(!apiSubscription.isExpanded && hasAnySubscriptions) {
+                                    <div class="conditionallyHide fieldsContainer" id="subscription-fields-@IdFormatter.identifier(api.context, api.apiVersion.version)" @if(!apiSubscription.isExpanded) {
                                         data-hide="true"}>
                                         @api.fields.map(f => subscriptionFields(SubscriptionFieldsViewModel(f.applicationId, f.apiContext, f.apiVersion, SubscriptionFieldsForm.form.fill(SubscriptionFieldsForm.apply(f.fields))), afterSubscriptionRedirectTo))
                                     </div>

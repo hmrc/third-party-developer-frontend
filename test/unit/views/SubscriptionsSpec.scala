@@ -78,7 +78,6 @@ class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with MockitoSuga
         application,
         Some(GroupedSubscriptions(Seq.empty, Seq.empty)),
         "",
-        false,
         request,
         developer,
         applicationMessages,

@@ -55,7 +55,6 @@ trait ActionBuilders {
     if (cond) {
       None
     } else {
-      // TODO - should this be a forbiddenTemplate ?
       Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
@@ -64,7 +63,6 @@ trait ActionBuilders {
     if (cond) {
       None
     } else {
-      // TODO - should this be JSON ?
       Some(BadRequest(Json.toJson(BadRequestError)))
     }
   }
