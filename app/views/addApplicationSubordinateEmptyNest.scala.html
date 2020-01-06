@@ -1,5 +1,5 @@
 @*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,8 +74,11 @@
             familiarise yourself with the <a href="https://oauth.net/2/" target="_blank">OAuth 2.0 specification (opens in a new tab)</a>
         </li>
     </ul>
-    <p>
-        <a class="button" href="@routes.OldManageApplications.addApplication">Continue</a>
-    </p>
 
+    @helper.form(action = controllers.routes.AddApplication.addApplicationSubordinatePost()) {
+        @helper.CSRF.formField
+        <p>
+            <button id="add" class="button" type="submit">Continue</button>
+        </p>
+    }
 }

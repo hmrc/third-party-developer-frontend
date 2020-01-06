@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,28 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       val result = await(addToken(underTest.subscriptions(appId))(loggedInRequest))
       status(result) shouldBe OK
       titleOf(result) shouldBe "Manage API subscriptions - HMRC Developer Hub - GOV.UK"
+    }
+  }
+
+  "subscriptions2" should {
+    "return the ROPC page for a ROPC app" in new Setup {
+      given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(ropcApplication))
+      val result = await(addToken(underTest.subscriptions2(appId, Environment.PRODUCTION))(loggedInRequest))
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "return the privileged page for a privileged app" in new Setup {
+      given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(privilegedApplication))
+      val result = await(addToken(underTest.subscriptions2(appId, Environment.PRODUCTION))(loggedInRequest))
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "return the subscriptions page for a developer on a standard app" in new Setup {
+      given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(activeApplication))
+      given(underTest.apiSubscriptionsHelper.fetchPageDataFor(mockEq(activeApplication))(any[HeaderCarrier])).willReturn(successful(PageData(activeApplication, ApplicationTokens(EnvironmentToken("", Nil, "")), None)))
+      val result = await(addToken(underTest.subscriptions2(appId, Environment.PRODUCTION))(loggedInRequest))
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
     }
   }
 

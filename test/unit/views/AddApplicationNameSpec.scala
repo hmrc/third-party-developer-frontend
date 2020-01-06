@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,15 @@ class AddApplicationNameSpec extends UnitSpec with OneServerPerSuite with Mockit
 
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val appConfig = mock[ApplicationConfig]
-  val subordinateEnvironment = Environment.from("sandbox")
-  val principalEnvironment = Environment.from("production")
+  val subordinateEnvironment = Environment.SANDBOX
+  val appId = "1234"
+  val principalEnvironment = Environment.PRODUCTION
 
   "Add application page in subordinate" should {
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      views.html.addApplicationName.render(form, subordinateEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
+      views.html.addApplicationName.render(form, appId, subordinateEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
     }
 
     "show an error when application name is invalid" in {
@@ -54,7 +55,7 @@ class AddApplicationNameSpec extends UnitSpec with OneServerPerSuite with Mockit
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      views.html.addApplicationName.render(form, principalEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
+      views.html.addApplicationName.render(form, appId, principalEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
     }
 
     "show an error when application name is invalid" in {

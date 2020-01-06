@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     "return the page with the user is logged in" in new Setup {
       givenTheApplicationExists(principalApp)
 
-      private val result = await(underTest.addApplicationSuccess(appId)(loggedInRequest))
+      private val result = await(underTest.addApplicationSuccess(appId, Environment.PRODUCTION)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include(loggedInUser.displayedName)
@@ -133,7 +133,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     "return the page with the user is logged in" in new Setup {
       givenTheApplicationExists(subordinateApp)
 
-      private val result = await(underTest.addApplicationSuccess(appId)(loggedInRequest))
+      private val result = await(underTest.addApplicationSuccess(appId, Environment.PRODUCTION)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include(loggedInUser.displayedName)

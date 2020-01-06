@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       .willReturn(ApplicationUpdateSuccessful)
 
     given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-      .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs), hasSubscriptions = true))))
+      .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs)))))
 
     given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
       .willReturn(Future.successful(Valid))
@@ -468,14 +468,14 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     "fail validation when no APIs have been subscribed to" in new SubscriptionValidationSetup {
       given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-        .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToNothing), hasSubscriptions = false))))
+        .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToNothing)))))
 
       testSubscriptionValidation
     }
 
     "fail validation when only the example API has been subscribed to" in new SubscriptionValidationSetup {
       given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-        .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToExampleOnly), hasSubscriptions = true))))
+        .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToExampleOnly)))))
 
       testSubscriptionValidation
     }

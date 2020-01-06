@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -735,7 +735,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     "delete standard subordinate application when requested by an admin" in new Setup {
 
       given(mockSandboxApplicationConnector.deleteApplication(any())(any[HeaderCarrier]))
-        .willReturn(Future.successful(successful()))
+        .willReturn(Future.successful(successful(())))
 
       await(service.deleteSubordinateApplication(adminRequester, sandboxApp))
 

@@ -1,5 +1,5 @@
 @*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,11 @@
 @import domain.BackButtonWithJavaScript
 @import domain.Environment
 @import domain.Environment.SANDBOX
-@(form: Form[controllers.AddApplicationNameForm], environment: Option[Environment])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
+@(
+        form: Form[controllers.AddApplicationNameForm],
+        applicationId: String,
+        environment: Environment
+)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
@@ -33,7 +37,7 @@
     @errorSummary(form)
 
 
-    @if(environment == Some(SANDBOX)) {
+    @if(environment == SANDBOX) {
     <Header>
         <h1 class="heading-xlarge">What's the name of your application?</h1>
     </Header>
@@ -45,9 +49,7 @@
     <br>
     }
 
-    @helper.form(action = environment match {
-        case Some(env) => controllers.routes.AddApplication.nameApplicationAction(env.toString)
-    }) {
+    @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(applicationId, environment)) {
 
     @helper.CSRF.formField
 
@@ -64,7 +66,7 @@
     </div>
 
     <div class="form-group">
-        @if(environment ==  Some(SANDBOX)){
+        @if(environment ==  SANDBOX){
         <button id="submit" class="button" type="submit">Continue</button>
         } else { <button id="submit" class="button" type="submit">Add</button> }
     </div>

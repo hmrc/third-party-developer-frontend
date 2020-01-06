@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite {
   "Left Hand Nav" should {
 
     "include links to manage API subscriptions, credentials and team members for an app with standard access" in new Setup {
-      val document = Jsoup.parse(leftHandNav(Some(standardApplication), Some("")).body)
+      val document = Jsoup.parse((leftHandNav(Some(standardApplication), Some(""))(request)).body)
 
       elementExistsById(document, "nav-manage-subscriptions") shouldBe true
       elementExistsById(document, "nav-manage-credentials") shouldBe true

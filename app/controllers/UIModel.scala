@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,7 @@ import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
 
-case class PageData(app: Application, tokens: ApplicationTokens, subscriptions: Option[GroupedSubscriptions]) {
-  lazy val hasSubscriptions = subscriptions.fold(false)(subs => subs.apis.exists(_.hasSubscriptions) || subs.testApis.exists(_.hasSubscriptions) || subs.exampleApi.exists(_.hasSubscriptions))
-}
+case class PageData(app: Application, tokens: ApplicationTokens, subscriptions: Option[GroupedSubscriptions])
 
 case class ApplicationSummary(id: String, name: String, environment: String, role: Role,
                               termsOfUseStatus: TermsOfUseStatus, state: State, lastAccess: DateTime, createdOn: DateTime)

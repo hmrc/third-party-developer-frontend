@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 package unit.controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import connectors.ThirdPartyDeveloperConnector
 import controllers.AddApplication
+import domain.Environment.{PRODUCTION, SANDBOX}
 import domain._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
+import org.mockito.Mockito.verify
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
@@ -33,8 +34,11 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import utils.CSRFTokenHelper._
 
-class addApplicationStartSubordinateSpec extends BaseControllerSpec
+import scala.concurrent.Future
+
+class AddApplicationStartSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val appId = "1234"
@@ -49,8 +53,10 @@ class addApplicationStartSubordinateSpec extends BaseControllerSpec
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
+  val collaborator: Collaborator = Collaborator(loggedInUser.email, Role.ADMINISTRATOR)
+
   val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
+    Set(collaborator), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
   trait Setup {
@@ -76,13 +82,14 @@ class addApplicationStartSubordinateSpec extends BaseControllerSpec
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest)(sessionId)
       .withSession(sessionParams: _*)
+      .withCSRFToken
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
   }
 
-  "Add applications start page" should {
+  "Add subordinate applications start page" should {
 
     "return the add applications page with the user logged in" in new Setup {
 
@@ -115,5 +122,34 @@ class addApplicationStartSubordinateSpec extends BaseControllerSpec
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
+  }
+
+  "Start subordinate journey continue button" in new Setup {
+
+    given(underTest.applicationService.createForUser(any())(any[HeaderCarrier]))
+      .willReturn(Future.successful(ApplicationCreatedResponse(appId)))
+
+    private val result = await(underTest.addApplicationSubordinatePost()(loggedInRequest))
+
+    status(result) shouldBe SEE_OTHER
+    redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add2/sandbox/name")
+
+    val expectedRequest = CreateApplicationRequest(AddApplication.newAppName, SANDBOX, None, List(collaborator))
+    verify(underTest.applicationService).createForUser(mockEq(expectedRequest))(any[HeaderCarrier])
+  }
+
+
+  "Start principal journey continue button" in new Setup {
+
+    given(underTest.applicationService.createForUser(any())(any[HeaderCarrier]))
+      .willReturn(Future.successful(ApplicationCreatedResponse(appId)))
+
+    private val result = await(underTest.addApplicationPrincipal()(loggedInRequest))
+
+    status(result) shouldBe SEE_OTHER
+    redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add2/production/name")
+
+    val expectedRequest = CreateApplicationRequest(AddApplication.newAppName, PRODUCTION, None, List(collaborator))
+    verify(underTest.applicationService).createForUser(mockEq(expectedRequest))(any[HeaderCarrier])
   }
 }

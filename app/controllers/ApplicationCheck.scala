@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,7 +219,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 
   private def apiSubscriptionsView(app: Application, subscriptionData: SubscriptionData, form: Option[Form[DummySubscriptionsForm]] = None
                                   )(implicit request: ApplicationRequest[AnyContent]) = {
-    views.html.applicationcheck.apiSubscriptions(app, subscriptionData.role, subscriptionData.subscriptions, app.id, subscriptionData.hasSubscriptions, form)
+    views.html.applicationcheck.apiSubscriptions(app, subscriptionData.role, subscriptionData.subscriptions, app.id, form)
   }
 
   def privacyPolicyPage(appId: String) = canUseChecksAction(appId) { implicit request =>

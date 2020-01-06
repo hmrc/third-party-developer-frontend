@@ -72,6 +72,7 @@ lazy val overrideDependencies = Set(
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
+
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
   .settings(
@@ -104,7 +105,8 @@ lazy val microservice = Project(appName, file("."))
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     scalaVersion := "2.11.11",
-    resolvers += Resolver.jcenterRepo
+    resolvers += Resolver.jcenterRepo,
+    routesImport += "connectors.binders._"
   )
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
@@ -167,3 +169,4 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
 coverageMinimum := 84
 coverageFailOnMinimum := true
 coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;app.*;uk.gov.hmrc.BuildInfo"
+

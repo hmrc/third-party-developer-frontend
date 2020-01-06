@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
+import utils.CSRFTokenHelper._
 
 class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
@@ -64,7 +65,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
   "welcome to your account page" should {
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
-      val request = FakeRequest()
+      val request = FakeRequest().withCSRFToken
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       views.html.addApplicationSubordinateEmptyNest.render(request, Flash(), loggedIn, applicationMessages, appConfig, "nav-section")
     }

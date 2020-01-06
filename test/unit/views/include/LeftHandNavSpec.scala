@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite {
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
     "render with no errors" in {
-      val page = views.html.include.leftHandNav.render(Some(application), Some("details"))
+      val page = views.html.include.leftHandNav.render(Some(application), Some("details"),(request))
 
       page.contentType should include("text/html")
 
