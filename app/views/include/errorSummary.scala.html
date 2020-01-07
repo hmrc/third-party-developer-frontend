@@ -25,7 +25,7 @@
     <ul class="error-summary-list">
     @for(error <- form.globalErrors) {
         <li>
-            <a @dataAttribute(error.message) href="@if(error.args.nonEmpty) {@(error.args)} else { @anchor(error.message) } " data-focuses="@errorField(error.message)" data-global-error>@Messages(error.message)</a>
+            <a @dataAttribute(error.message) href="@anchor(error.message)" data-focuses="@errorField(error.message)" data-global-error>@Messages(error.message)</a>
         </li>
     }
     </ul>
