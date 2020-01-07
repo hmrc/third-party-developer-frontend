@@ -228,7 +228,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       result.toString should include(user.email.replace("@", "%40"))
     }
 
-    "return the login page when the account is locked" in new Setup {
+    "display the Account locked page when the account is locked" in new Setup {
       mockAuthenticate(user.email, userPassword, failed(new LockedAccount), false)
 
       private val request = FakeRequest()
@@ -238,7 +238,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       private val result = await(addToken(underTest.authenticate())(request))
 
       status(result) shouldBe LOCKED
-      bodyOf(result) should include("You entered incorrect login details too many times you&#x27;ll now have to reset your password")
+      bodyOf(result) should include("You have entered incorrect login details too many times. You now have to reset your password")
       verify(underTest.auditService, times(1)).audit(
         meq(LoginFailedDueToLockedAccount), meq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
     }
