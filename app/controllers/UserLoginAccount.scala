@@ -111,7 +111,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
         case _: LockedAccount =>
           audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
-          Locked(signIn("Sign in", LoginForm.accountLocked(requestForm)))
+          Locked(views.html.accountLocked())
         case _: UnverifiedAccount => Forbidden(signIn("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
           .withSession("email" -> login.emailaddress)
       }

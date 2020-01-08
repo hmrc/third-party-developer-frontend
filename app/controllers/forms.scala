@@ -41,12 +41,6 @@ object LoginForm {
       .withGlobalError(FormKeys.invalidCredentialsGlobalKey)
   }
 
-  def accountLocked(form: Form[LoginForm]) = {
-    form.withError("submissionError", "true")
-      .withError(FormKeys.emailaddressField, FormKeys.accountLockedKey, controllers.routes.Password.showForgotPassword())
-      .withGlobalError(FormKeys.accountLockedGlobalKey)
-  }
-
   def accountUnverified(form: Form[LoginForm], email: String) = {
     form.withError("submissionError", "true")
       .withError(FormKeys.emailaddressField, FormKeys.accountUnverifiedKey, controllers.routes.Registration.resendVerification())
