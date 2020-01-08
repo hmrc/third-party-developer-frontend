@@ -107,7 +107,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
       private val result = await(underTest.editApplicationName(appId, Environment.SANDBOX)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("What's the name of your application?")
+      bodyOf(result) should include("What&#x27;s the name of your application?")
       bodyOf(result) should include(loggedInUser.displayedName)
       bodyOf(result) should include("Continue")
       bodyOf(result) should include("Application name")

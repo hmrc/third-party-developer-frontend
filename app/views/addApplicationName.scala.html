@@ -14,12 +14,11 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
 @import domain.DeveloperSession
 @import include._
 @import domain.BackButtonWithJavaScript
 @import domain.Environment
-@import domain.Environment.SANDBOX
+
 @(
         form: Form[controllers.AddApplicationNameForm],
         applicationId: String,
@@ -27,8 +26,15 @@
 )(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
+@pageHeading = @{
+    if(environment.isSandbox()) {
+        "What's the name of your application?"
+    } else {
+        "Add an application to production" }
+}
+
 @devMain(
-    title = if(environment == SANDBOX) { "What's the name of your application" } else { "Add an application to production" },
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
     back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
@@ -36,13 +42,11 @@
 
     @errorSummary(form)
 
-
-    @if(environment == SANDBOX) {
     <Header>
-        <h1 class="heading-xlarge">What's the name of your application?</h1>
+        <h1 class="heading-xlarge">@pageHeading</h1>
     </Header>
-    } else {
-    <h1 class="heading-xlarge">Add an application to production</h1>
+
+    @if(environment.isProduction()) {
     <p>Now that you've tested your software you can apply to use live data.</p>
     <p>To do that you must comply with our
         <a href="/api-documentation/docs/terms-of-use">terms of use.</a></p>
@@ -66,9 +70,11 @@
     </div>
 
     <div class="form-group">
-        @if(environment ==  SANDBOX){
-        <button id="submit" class="button" type="submit">Continue</button>
-        } else { <button id="submit" class="button" type="submit">Add</button> }
+        @if(environment.isSandbox()){
+            <button id="submit" class="button" type="submit">Continue</button>
+        } else {
+            <button id="submit" class="button" type="submit">Add</button>
+        }
     </div>
 
     }
