@@ -105,7 +105,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
       page.contentType should include ("text/html")
 
       val document = Jsoup.parse(page.body)
-      elementExistsByText(document, "button", "Add another client secret") shouldBe false
+      elementExistsByText(document, "button", "Add another client secret") shouldBe true
     }
 
     "show add client secret button for a Privileged app" in new Setup {
@@ -116,7 +116,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar 
       page.contentType should include ("text/html")
 
       val document = Jsoup.parse(page.body)
-      elementExistsByText(document, "button", "Add another client secret") shouldBe false
+      elementExistsByText(document, "button", "Add another client secret") shouldBe true
     }
 
     "show delete client secret button in production app if it has more than one client secret" in new Setup {

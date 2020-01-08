@@ -80,15 +80,15 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.PRODUCTION, Standard(), developer, false),
       (Environment.PRODUCTION, Standard(), administrator, true),
 
-      (Environment.SANDBOX, ROPC(), developer, false),
-      (Environment.SANDBOX, ROPC(), administrator, false),
+      (Environment.SANDBOX, ROPC(), developer, true),
+      (Environment.SANDBOX, ROPC(), administrator, true),
       (Environment.PRODUCTION, ROPC(), developer, false),
-      (Environment.PRODUCTION, ROPC(), administrator, false),
+      (Environment.PRODUCTION, ROPC(), administrator, true),
 
-      (Environment.SANDBOX, Privileged(), developer, false),
-      (Environment.SANDBOX, Privileged(), administrator, false),
+      (Environment.SANDBOX, Privileged(), developer, true),
+      (Environment.SANDBOX, Privileged(), administrator, true),
       (Environment.PRODUCTION, Privileged(), developer, false),
-      (Environment.PRODUCTION, Privileged(), administrator, false)
+      (Environment.PRODUCTION, Privileged(), administrator, true)
     )
 
     runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(ChangeClientSecret,user, SandboxOrAdmin)  })
