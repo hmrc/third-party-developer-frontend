@@ -95,12 +95,8 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
       else name
     }
 
-    environment match {
-      case env =>
-        val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(hideNewAppName(request.application.name)))
-
-        Future.successful(Ok(views.html.addApplicationName(form, applicationId, env)))
-    }
+    val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(hideNewAppName(request.application.name)))
+    Future.successful(Ok(views.html.addApplicationName(form, applicationId, environment)))
   }
 
   def editApplicationNameAction(applicationId: String, environment: Environment): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
