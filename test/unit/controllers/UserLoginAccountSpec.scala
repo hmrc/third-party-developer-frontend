@@ -238,7 +238,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       private val result = await(addToken(underTest.authenticate())(request))
 
       status(result) shouldBe LOCKED
-      bodyOf(result) should include("You have entered incorrect login details too many times. You now have to reset your password")
+      bodyOf(result) should include("You've entered details that do not match our records. Reset your password to sign in.")
       verify(underTest.auditService, times(1)).audit(
         meq(LoginFailedDueToLockedAccount), meq(Map("developerEmail" -> user.email)))(any[HeaderCarrier])
     }

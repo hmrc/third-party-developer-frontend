@@ -19,11 +19,11 @@
 
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
-@devMain(title = "Account Locked", developerSession = None) {
-    <h1 class="heading-xlarge">Account locked</h1>
+@devMain(title = "We have locked your account", developerSession = None) {
+    <h1 class="heading-xlarge">We have locked your account</h1>
 
     <p>
-    You have entered incorrect login details too many times. You now have to reset your password
+    You've entered details that do not match our records. Reset your password to sign in.
     </p>
 
             <p><a id="submit" class="button" href="@controllers.routes.Password.showForgotPassword">Reset password</a></p>
