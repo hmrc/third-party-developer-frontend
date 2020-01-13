@@ -159,8 +159,9 @@ object CreateApplicationRequest extends ApplicationRequest {
     normalizeDescription(application.description),
     Seq(Collaborator(user.email, Role.ADMINISTRATOR)))
 
-  def fromSandboxJourney(user: DeveloperSession, application: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
-    application.applicationName.trim,
+  // TODO: I don't think this is sandbox specific!
+  def fromSandboxJourney(user: DeveloperSession, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
+    form.applicationName.trim,
     environment,
     None,
     Seq(Collaborator(user.email, Role.ADMINISTRATOR))

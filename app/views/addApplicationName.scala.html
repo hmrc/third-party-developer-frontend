@@ -21,7 +21,6 @@
 
 @(
         form: Form[controllers.AddApplicationNameForm],
-        applicationId: String,
         environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -53,7 +52,7 @@
     <br>
     }
 
-    @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(applicationId, environment)) {
+    @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(environment)) {
 
     @helper.CSRF.formField
 

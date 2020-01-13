@@ -41,7 +41,7 @@ class AddApplicationNameSpec extends UnitSpec with OneServerPerSuite with Mockit
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      views.html.addApplicationName.render(form, appId, subordinateEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
+      views.html.addApplicationName.render(form, subordinateEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
     }
 
     "show an error when application name is invalid" in {
@@ -55,7 +55,7 @@ class AddApplicationNameSpec extends UnitSpec with OneServerPerSuite with Mockit
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      views.html.addApplicationName.render(form, appId, principalEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
+      views.html.addApplicationName.render(form, principalEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
     }
 
     "show an error when application name is invalid" in {

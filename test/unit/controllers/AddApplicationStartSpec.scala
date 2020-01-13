@@ -123,33 +123,4 @@ class AddApplicationStartSpec extends BaseControllerSpec
       redirectLocation(result) shouldBe Some("/developer/login")
     }
   }
-
-  "Start subordinate journey continue button" in new Setup {
-
-    given(underTest.applicationService.createForUser(any())(any[HeaderCarrier]))
-      .willReturn(Future.successful(ApplicationCreatedResponse(appId)))
-
-    private val result = await(underTest.addApplicationSubordinatePost()(loggedInRequest))
-
-    status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add2/sandbox/name")
-
-    val expectedRequest = CreateApplicationRequest(AddApplication.newAppName, SANDBOX, None, List(collaborator))
-    verify(underTest.applicationService).createForUser(mockEq(expectedRequest))(any[HeaderCarrier])
-  }
-
-
-  "Start principal journey continue button" in new Setup {
-
-    given(underTest.applicationService.createForUser(any())(any[HeaderCarrier]))
-      .willReturn(Future.successful(ApplicationCreatedResponse(appId)))
-
-    private val result = await(underTest.addApplicationPrincipal()(loggedInRequest))
-
-    status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add2/production/name")
-
-    val expectedRequest = CreateApplicationRequest(AddApplication.newAppName, PRODUCTION, None, List(collaborator))
-    verify(underTest.applicationService).createForUser(mockEq(expectedRequest))(any[HeaderCarrier])
-  }
 }
