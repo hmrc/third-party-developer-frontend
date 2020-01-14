@@ -18,6 +18,8 @@
 @import include._
 @import model.Crumb
 
+@*TODO: This is from the old journey. Needs removing.*@
+
 @(form: Form[controllers.AddApplicationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 

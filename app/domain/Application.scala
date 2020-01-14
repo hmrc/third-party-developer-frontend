@@ -153,6 +153,7 @@ case class CreateApplicationRequest(name: String,
 object CreateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[CreateApplicationRequest]
 
+  // TODO: This is from the old journey. Needs removing.
   def from(user: DeveloperSession, application: AddApplicationForm) = CreateApplicationRequest(
     application.applicationName.trim,
     application.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX),

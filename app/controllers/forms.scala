@@ -196,6 +196,7 @@ object AddTeamMemberForm {
   )
 }
 
+// TODO: This is from the old journey. Needs removing.
 case class AddApplicationForm(applicationName: String, environment: Option[String], description: Option[String] = None)
 
 object AddApplicationForm {

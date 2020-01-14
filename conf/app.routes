@@ -62,6 +62,7 @@ GET         /reset-password                                                     
 POST        /reset-password                                                             controllers.Password.resetPassword
 GET         /reset-password/error                                                       controllers.Password.resetPasswordError
 
+#TODO: These are from the old journey. Both needs removing?
 GET         /applications/add                                                           controllers.OldManageApplications.addApplication
 POST        /applications/add                                                           controllers.OldManageApplications.addApplicationAction
 

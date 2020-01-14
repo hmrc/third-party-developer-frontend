@@ -31,6 +31,7 @@ import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 
+// TODO: This is from the old journey. Needs removing?
 @Singleton
 class OldManageApplications @Inject()(val applicationService: ApplicationService,
                                    val developerConnector: ThirdPartyDeveloperConnector,
