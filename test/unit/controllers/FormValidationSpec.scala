@@ -214,30 +214,6 @@ class FormValidationSpec extends UnitSpec with Matchers {
     }
   }
 
-  "AddApplicationForm " should {
-    val validAddAplicationForm = Map("applicationName" -> "Application name", "environment" -> "PRODUCTION",
-      "description" -> "Application description")
-
-    "validate a valid form" in {
-      val boundForm = AddApplicationForm.form.bind(validAddAplicationForm)
-      boundForm.errors shouldBe List()
-      boundForm.globalErrors shouldBe List()
-    }
-
-    "validate name in wrong format and generate error when an name is not valid" in {
-      val boundForm = AddApplicationForm.form.bind(validAddAplicationForm + ("applicationName" -> "a"))
-      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.and.characters")))
-      boundForm.globalErrors shouldBe List()
-    }
-
-    "validate a valid form with empty description" in {
-      val boundForm = AddApplicationForm.form.bind(validAddAplicationForm + ("description" -> ""))
-      boundForm.errors shouldBe List()
-      boundForm.globalErrors shouldBe List()
-    }
-
-  }
-
   "EditApplicationForm " should {
     val validEditApplicationForm = Map(
       "applicationId" -> "Application ID",

@@ -36,7 +36,11 @@
 @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
+    breadcrumbs = Seq(
+        Crumb(pageHeading),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
     developerSession = Some(loggedIn)
 ) {
 

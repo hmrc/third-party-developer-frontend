@@ -19,9 +19,9 @@
 @import domain.BackButtonWithJavaScript
 @import domain.Environment
 
+@import model.Crumb
 @(
         form: Form[controllers.AddApplicationNameForm],
-        applicationId: String,
         environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -36,7 +36,11 @@
 @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
+    breadcrumbs = Seq(
+        Crumb(pageHeading),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
     developerSession = Some(loggedIn)
 ) {
 
@@ -53,7 +57,7 @@
     <br>
     }
 
-    @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(applicationId, environment)) {
+    @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(environment)) {
 
     @helper.CSRF.formField
 

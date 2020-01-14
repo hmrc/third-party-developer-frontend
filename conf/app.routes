@@ -62,23 +62,15 @@ GET         /reset-password                                                     
 POST        /reset-password                                                             controllers.Password.resetPassword
 GET         /reset-password/error                                                       controllers.Password.resetPasswordError
 
-GET         /applications/add                                                           controllers.OldManageApplications.addApplication
-POST        /applications/add                                                           controllers.OldManageApplications.addApplicationAction
-
 GET         /applications                                                               controllers.AddApplication.manageApps
 
-GET         /applications/add2/sandbox                                                  controllers.AddApplication.addApplicationSubordinate
-POST        /applications/add2/sandbox                                                  controllers.AddApplication.addApplicationSubordinatePost
+GET         /applications/add/sandbox                                                  controllers.AddApplication.addApplicationSubordinate
 
-GET         /application/add2/production                                                controllers.AddApplication.addApplicationPrincipal
+GET         /applications/add/:environment/name                                        controllers.AddApplication.addApplicationName(environment: domain.Environment)
+POST        /applications/add/:environment/name                                        controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
+GET         /applications/:id/add/:environment/subscriptions                           controllers.Subscriptions.subscriptions2(id: String, environment: domain.Environment)
 
-GET         /applications/:id/add2/:environment/name                                    controllers.AddApplication.editApplicationName(id: String, environment: domain.Environment)
-POST        /applications/:id/add2/:environment/name                                    controllers.AddApplication.editApplicationNameAction(id: String, environment: domain.Environment)
-GET         /applications/:id/add2/:environment/subscriptions                           controllers.Subscriptions.subscriptions2(id: String, environment: domain.Environment)
-
-GET         /applications/:id/add2/:environment/success                                 controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
-
-GET         /applications/:id                                                           controllers.OldManageApplications.editApplication(id: String, error: Option[String])
+GET         /applications/:id/add/:environment/success                                 controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
 
 GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMember(id: String)

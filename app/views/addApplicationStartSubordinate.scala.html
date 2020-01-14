@@ -36,17 +36,24 @@
 @import domain.BackButtonWithJavaScript
 @import domain.Environment
 
+@import model.Crumb
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
+@pageHeading = @{"Add an application to the sandbox"}
+
 @devMain(
-    title = "Add an application to the sandbox",
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
+    breadcrumbs = Seq(
+        Crumb(pageHeading),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
     developerSession = Some(loggedIn)
 ) {
 
     <header>
-        <h1 class="heading-xlarge">Add an application to the sandbox</h1>
+        <h1 class="heading-xlarge">@pageHeading</h1>
     </header>
 
     <p>Add your application to the sandbox so you can test it.</p>
@@ -61,12 +68,10 @@
     <h2 class="heading-medium">Terms of use</h2>
 
     <p>In production, your application will need to comply with the expectations set out in our
-        <a href="/api-documentation/docs/terms-of-use">terms of use.</a></p>
+        <a href="/api-documentation/docs/terms-of-use">terms of use.</a>
+    </p>
 
-    @helper.form(action = controllers.routes.AddApplication.addApplicationSubordinatePost()) {
-        @helper.CSRF.formField
-        <p>
-            <button id="add" class="button" type="submit">Continue</button>
-        </p>
-    }
+    <p>
+        <a id="add" href="@controllers.routes.AddApplication.addApplicationName(Environment.SANDBOX)" class="button">Continue</a>
+    </p>
 }

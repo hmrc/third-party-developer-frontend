@@ -196,19 +196,6 @@ object AddTeamMemberForm {
   )
 }
 
-case class AddApplicationForm(applicationName: String, environment: Option[String], description: Option[String] = None)
-
-object AddApplicationForm {
-
-  val form: Form[AddApplicationForm] = Form(
-    mapping(
-      "applicationName" -> applicationNameValidator,
-      "environment" -> environmentValidator,
-      "description" -> optional(text)
-    )(AddApplicationForm.apply)(AddApplicationForm.unapply)
-  )
-}
-
 case class AddApplicationNameForm(applicationName: String)
 
 object AddApplicationNameForm {
