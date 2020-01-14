@@ -19,6 +19,7 @@
 @import domain.BackButtonWithJavaScript
 @import domain.Environment
 
+@import model.Crumb
 @(
         form: Form[controllers.AddApplicationNameForm],
         environment: Environment
@@ -35,7 +36,11 @@
 @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
+    breadcrumbs = Seq(
+        Crumb(pageHeading),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
     developerSession = Some(loggedIn)
 ) {
 
