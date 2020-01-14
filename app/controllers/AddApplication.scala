@@ -79,7 +79,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
 
       def addApplication(form: AddApplicationNameForm) = {
         applicationService
-          .createForUser(CreateApplicationRequest.fromSandboxJourney(loggedIn, form, environment))
+          .createForUser(CreateApplicationRequest.fromAddApplicationJourney(loggedIn, form, environment))
       }
 
       def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =

@@ -153,8 +153,7 @@ case class CreateApplicationRequest(name: String,
 object CreateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[CreateApplicationRequest]
 
-  // TODO: I don't think this is sandbox specific!
-  def fromSandboxJourney(user: DeveloperSession, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
+  def fromAddApplicationJourney(user: DeveloperSession, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
     form.applicationName.trim,
     environment,
     None,
