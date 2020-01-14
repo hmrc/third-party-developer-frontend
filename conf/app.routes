@@ -70,7 +70,7 @@ GET         /applications                                                       
 
 GET         /applications/add2/sandbox                                                  controllers.AddApplication.addApplicationSubordinate
 
-GET         /applications/add2/:environment/name                                        controllers.AddApplication.editApplicationName(environment: domain.Environment)
+GET         /applications/add2/:environment/name                                        controllers.AddApplication.addApplicationName(environment: domain.Environment)
 POST        /applications/add2/:environment/name                                        controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
 GET         /applications/:id/add2/:environment/subscriptions                           controllers.Subscriptions.subscriptions2(id: String, environment: domain.Environment)
 

@@ -64,9 +64,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
       }
     }
 
-  // TODO: Rename method to add application
-  def editApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
-
+  def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
     Future.successful(Ok(views.html.addApplicationName(form, environment)))
   }
