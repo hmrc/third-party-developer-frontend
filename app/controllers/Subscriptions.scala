@@ -78,7 +78,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
     case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.subscriptions(applicationId))
     case Some(APPLICATION_CHECK_PAGE) => Redirect(routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
-    case _ => Redirect(routes.OldManageApplications.editApplication(applicationId, None))
+    case _ => Redirect(routes.Details.details(applicationId))
   }
 
   def changeApiSubscription(applicationId: String, apiContext: String, apiVersion: String, redirectTo: String) = whenTeamMemberOnApp(applicationId) {

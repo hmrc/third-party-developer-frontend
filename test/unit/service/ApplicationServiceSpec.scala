@@ -20,7 +20,7 @@ import java.util.UUID
 
 import config.ApplicationConfig
 import connectors._
-import controllers.{AddApplicationForm, EditApplicationForm}
+import controllers.EditApplicationForm
 import domain.APIStatus._
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import domain._
@@ -319,61 +319,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
       val result = await(service.update(updateApplicationRequest))
       result shouldBe ApplicationUpdateSuccessful
-    }
-  }
-
-  "Create" should {
-    val applicationId = "applicationId"
-    val developer = utils.DeveloperSession("email@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
-    val developer2 = utils.DeveloperSession("username+alias@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
-
-    "create the user as an administrator on create request" in new Setup {
-      val addApplicationForm = AddApplicationForm("name", Some(Environment.PRODUCTION.toString), Some("description"))
-
-      CreateApplicationRequest.from(developer, addApplicationForm).collaborators shouldBe Seq(Collaborator("email@example.com", Role.ADMINISTRATOR))
-    }
-
-    "create the user as a urlencoded string to allow for unusual email addresses" in new Setup {
-      val addApplicationForm = AddApplicationForm("name", Some(Environment.PRODUCTION.toString), Some("description"))
-
-      CreateApplicationRequest.from(developer2, addApplicationForm).collaborators shouldBe Seq(Collaborator("username+alias@example.com", Role.ADMINISTRATOR))
-    }
-
-    "truncate the description to 250 characters on create request" in new Setup {
-      val longDescription = "abcde" * 100
-      val addApplicationForm = AddApplicationForm("name", Some(Environment.PRODUCTION.toString), Some(longDescription))
-
-      CreateApplicationRequest.from(developer, addApplicationForm).description.get.length shouldBe 250
-    }
-
-    "leave the description untouched if it's 250 characters exactly" in new Setup {
-      val longDescription = "a" * 250
-      val addApplicationForm = AddApplicationForm("name", Some(Environment.PRODUCTION.toString), Some(longDescription))
-
-      CreateApplicationRequest.from(developer, addApplicationForm).description.get shouldBe longDescription
-    }
-
-    "create application through the production connector when the request specifies a production app" in new Setup {
-      val request = CreateApplicationRequest.from(developer, AddApplicationForm("name", Some(Environment.PRODUCTION.toString)))
-      given(mockProductionApplicationConnector.create(any[CreateApplicationRequest])(any[HeaderCarrier]))
-        .willReturn(Future.successful(ApplicationCreatedResponse(applicationId)))
-
-
-      val result = await(service.createForUser(request))
-
-      result shouldBe ApplicationCreatedResponse(applicationId)
-      verifyZeroInteractions(mockSandboxApplicationConnector)
-    }
-
-    "create application through the sandbox connector when the request specifies a sandbox app" in new Setup {
-      val request = CreateApplicationRequest.from(developer, AddApplicationForm("name", Some(Environment.SANDBOX.toString)))
-      given(mockSandboxApplicationConnector.create(any[CreateApplicationRequest])(any[HeaderCarrier]))
-        .willReturn(Future.successful(ApplicationCreatedResponse(applicationId)))
-
-      val result = await(service.createForUser(request))
-
-      result shouldBe ApplicationCreatedResponse(applicationId)
-      verifyZeroInteractions(mockProductionApplicationConnector)
     }
   }
 

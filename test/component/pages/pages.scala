@@ -98,11 +98,6 @@ object AddApplicationEmptyPage extends FormPage {
   override val url: String = s"${Env.host}/developer/applications/"
 }
 
-object AddApplicationPage extends FormPage {
-  override val pageHeading = "Add an application"
-  override val url: String = s"${Env.host}/developer/applications/add"
-}
-
 object AddApplicationSuccessPage extends FormPage {
   override val pageHeading = "You added"
   override val url: String = s"${Env.host}/developer/applications/add"

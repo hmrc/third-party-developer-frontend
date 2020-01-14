@@ -153,13 +153,6 @@ case class CreateApplicationRequest(name: String,
 object CreateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[CreateApplicationRequest]
 
-  // TODO: This is from the old journey. Needs removing.
-  def from(user: DeveloperSession, application: AddApplicationForm) = CreateApplicationRequest(
-    application.applicationName.trim,
-    application.environment.flatMap(Environment.from).getOrElse(Environment.SANDBOX),
-    normalizeDescription(application.description),
-    Seq(Collaborator(user.email, Role.ADMINISTRATOR)))
-
   // TODO: I don't think this is sandbox specific!
   def fromSandboxJourney(user: DeveloperSession, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
     form.applicationName.trim,
