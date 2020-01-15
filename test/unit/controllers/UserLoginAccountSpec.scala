@@ -326,7 +326,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   "accountLocked" should {
     "destroy session when locked" in new Setup {
       mockLogout()
-      private val request = FakeRequest().withLoggedIn(underTest)(session.sessionId)
+      private val request = FakeRequest().withLoggedIn(underTest, implicitly)(session.sessionId)
       await(underTest.accountLocked()(request))
       verify(underTest.sessionService, atLeastOnce()).destroy(meq(session.sessionId))(any[HeaderCarrier])
     }
@@ -348,7 +348,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
           .willReturn(Future.successful(Some(sessionPartLoggedInEnablingMfa)))
 
         private val partLoggedInRequest = FakeRequest()
-          .withLoggedIn(underTest)(sessionPartLoggedInEnablingMfa.sessionId)
+          .withLoggedIn(underTest, implicitly)(sessionPartLoggedInEnablingMfa.sessionId)
           .withSession(sessionParams: _*)
 
         private val result = await(addToken(underTest.login())(partLoggedInRequest))
@@ -364,7 +364,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
           .willReturn(Future.successful(Some(session)))
 
         private val loggedInRequest = FakeRequest()
-          .withLoggedIn(underTest)(session.sessionId)
+          .withLoggedIn(underTest, implicitly)(session.sessionId)
           .withSession(sessionParams: _*)
 
         private val result = await(addToken(underTest.login())(loggedInRequest))

@@ -59,7 +59,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout{
         .willReturn(Future.successful(Some(session)))
 
       val loggedInRequest = FakeRequest()
-        .withLoggedIn(sessionController)(session.sessionId)
+        .withLoggedIn(sessionController,implicitly)(session.sessionId)
         .withSession(sessionParams: _*)
 
       val result = await(sessionController.keepAlive()(loggedInRequest))

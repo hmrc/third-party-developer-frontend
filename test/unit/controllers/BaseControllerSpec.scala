@@ -22,12 +22,16 @@ import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.i18n.MessagesApi
+import play.api.libs.crypto.CookieSigner
 import play.twirl.api.Html
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class BaseControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures {
 
+  implicit val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]
+
   implicit lazy val materializer = fakeApplication.materializer
+
   lazy val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
   val mockErrorHandler = mock[ErrorHandler]

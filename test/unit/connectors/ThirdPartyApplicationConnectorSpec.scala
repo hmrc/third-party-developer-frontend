@@ -708,8 +708,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
       val result = await(connector.deleteApplication(applicationId))
 
-      result shouldEqual ()
-
+      result shouldEqual (())
     }
 
     "throw exception response if error on back end" in new Setup {

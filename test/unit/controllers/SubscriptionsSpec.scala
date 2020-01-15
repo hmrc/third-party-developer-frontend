@@ -104,7 +104,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 
   "subscriptions" should {
@@ -157,7 +157,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
 
@@ -172,7 +172,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
@@ -191,7 +191,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
@@ -210,7 +210,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "APPLICATION_CHECK_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody()
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
@@ -230,7 +230,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
@@ -249,7 +249,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
@@ -268,7 +268,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "APPLICATION_CHECK_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody()
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
@@ -299,7 +299,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest(
           "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId)
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
@@ -317,7 +317,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest(
           "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId)
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
@@ -335,7 +335,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest(
           "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId)
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(false))
@@ -352,7 +352,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest(
           "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId)
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
@@ -382,7 +382,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
@@ -400,7 +400,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
@@ -418,7 +418,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(false))
@@ -441,7 +441,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "MANAGE_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
@@ -463,7 +463,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         val redirectTo = "APPLICATION_CHECK_PAGE"
         val request = FakeRequest("POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest)(sessionId).withFormUrlEncodedBody()
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
         given(underTest.applicationService.isSubscribedToApi(mockEq(app), mockEq(apiName), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
@@ -506,7 +506,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
       val request = FakeRequest("GET",
         s"developer/applications/$appId/subscribe?context=$apiContext&version=$apiVersion&accessType=$apiAccessType&tab=subscriptions"
-      ).withLoggedIn(underTest)(sessionId)
+      ).withLoggedIn(underTest, implicitly)(sessionId)
 
       val result = await(underTest.changeApiSubscription(appId, apiContext, apiVersion, apiAccessType)(request))
       status(result) shouldBe NOT_FOUND

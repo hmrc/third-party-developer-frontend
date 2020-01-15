@@ -55,7 +55,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "support form is prepopulated when user logged in" in new Setup {
       val request = FakeRequest()
-        .withLoggedIn(underTest)(sessionId)
+        .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
 
       given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
@@ -79,7 +79,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "support form fields are blank when part logged in enabling MFA" in new Setup {
       val request = FakeRequest()
-        .withLoggedIn(underTest)(sessionId)
+        .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
 
       given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))

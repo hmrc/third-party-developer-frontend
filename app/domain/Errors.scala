@@ -18,8 +18,6 @@ package domain
 
 import play.api.i18n.Messages
 import play.api.libs.json.Json
-import play.api.i18n.Messages.Implicits._
-import play.api.Play.current
 
 class InvalidCredentials extends RuntimeException("Login failed")
 class InvalidEmail extends RuntimeException("Invalid email")
@@ -43,6 +41,5 @@ object LockedAccountError extends Error(ErrorCode.LOCKED_ACCOUNT, "Locked Accoun
 object BadRequestError extends Error(ErrorCode.BAD_REQUEST, "Bad Request")
 object InvalidPasswordError extends Error(ErrorCode.INVALID_PASSWORD, "Invalid password")
 object PasswordRequiredError extends Error(ErrorCode.PASSWORD_REQUIRED, "Password is required")
-object TeamMemberAlreadyExistsInApplication extends Error(ErrorCode.USER_ALREADY_EXISTS, Messages("team.member.error.emailAddress.already.exists.field"))
 
 

@@ -25,6 +25,7 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.BDDMockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.OK
+import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import service.SessionService
@@ -35,6 +36,8 @@ import utils.WithLoggedInSession._
 import scala.concurrent.Future._
 
 class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+
+  implicit val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]
 
   implicit val materializer: Materializer = fakeApplication.materializer
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
@@ -58,7 +61,7 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
 
     private val request =
       if (loggedInState.isDefined) {
-        FakeRequest().withLoggedIn(underTest)(sessionId)
+        FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
       }
       else {
         FakeRequest()

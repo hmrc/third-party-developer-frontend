@@ -50,7 +50,7 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
 
     val sessionId = "sessionId"
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
     val admin: Developer = Developer("admin@example.com", "Joe", "Bloggs")
     val developer: Developer = Developer("developer@example.com", "John", "Doe")
