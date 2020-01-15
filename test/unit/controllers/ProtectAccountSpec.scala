@@ -71,7 +71,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     def protectAccountRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       FakeRequest().
-        withLoggedIn(underTest)(sessionId).
+        withLoggedIn(underTest, implicitly)(sessionId).
         withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken).
         withFormUrlEncodedBody("accessCode" -> code)
     }
@@ -131,7 +131,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
           .willReturn(Future.successful(None))
 
         private val request = FakeRequest().
-          withLoggedIn(underTest)(invalidSessionId)
+          withLoggedIn(underTest, implicitly)(invalidSessionId)
 
         private val result = await(underTest.getQrCode()(request))
 
@@ -145,7 +145,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     "getQrCode() is called it" should {
       "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV with PartLogged {
         private val request = FakeRequest().
-          withLoggedIn(underTest)(sessionId)
+          withLoggedIn(underTest, implicitly)(sessionId)
 
         private val result = await(underTest.getQrCode()(request))
 
@@ -161,7 +161,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     "getQrCode() is called it" should {
       "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV with LoggedIn {
         private val request = FakeRequest().
-          withLoggedIn(underTest)(sessionId)
+          withLoggedIn(underTest, implicitly)(sessionId)
 
         private val result = await(underTest.getQrCode()(request))
 
@@ -175,7 +175,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     "getProtectAccount() is called it" should {
       "return protect account page for user without MFA enabled" in new SetupUnprotectedAccount with LoggedIn {
         private val request = FakeRequest().
-          withLoggedIn(underTest)(sessionId)
+          withLoggedIn(underTest, implicitly)(sessionId)
 
         private val result = await(addToken(underTest.getProtectAccount())(request))
 
@@ -185,7 +185,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return protected account page for user with MFA enabled" in new SetupProtectedAccount with LoggedIn {
         private val request = FakeRequest().
-          withLoggedIn(underTest)(sessionId)
+          withLoggedIn(underTest, implicitly)(sessionId)
 
         private val result = await(addToken(underTest.getProtectAccount())(request))
 
@@ -269,7 +269,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
             .willReturn(Some(daysInTheFuture))
 
           private val request = FakeRequest().
-            withLoggedIn(underTest)(sessionId)
+            withLoggedIn(underTest, implicitly)(sessionId)
 
           private val result = await(underTest.get2svRecommendationPage()(request))
 
@@ -293,7 +293,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
           .willReturn(mfaMandateNotConfigured)
 
         private val request = FakeRequest().
-          withLoggedIn(underTest)(sessionId)
+          withLoggedIn(underTest, implicitly)(sessionId)
 
         private val result = await(underTest.get2svRecommendationPage()(request))
 

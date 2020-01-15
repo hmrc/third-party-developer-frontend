@@ -80,12 +80,12 @@ class AddApplicationStartSpec extends BaseControllerSpec
     private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest)(sessionId)
+      .withLoggedIn(underTest, implicitly)(sessionId)
       .withSession(sessionParams: _*)
       .withCSRFToken
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest)(partLoggedInSessionId)
+      .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
   }
 

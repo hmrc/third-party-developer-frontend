@@ -58,7 +58,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
   "updateProfile" should {
     "update profile with normalized firstname and lastname" in new Setup {
       val request = FakeRequest()
-        .withLoggedIn(underTest)(sessionId)
+        .withLoggedIn(underTest, implicitly)(sessionId)
         .withFormUrlEncodedBody(
           ("firstname", "  first  "), // with whitespaces before and after
           ("lastname", "  last  ") // with whitespaces before and after
@@ -81,7 +81,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "fail and send an audit event while changing the password if old password is incorrect" in new Setup {
       val request = FakeRequest()
-        .withLoggedIn(underTest)(sessionId)
+        .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
         .withFormUrlEncodedBody(
           ("currentpassword", "oldPassword"),
@@ -101,7 +101,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "Password updated should have correct page title" in new Setup {
       val request = FakeRequest()
-        .withLoggedIn(underTest)(sessionId)
+        .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
         .withFormUrlEncodedBody(
           ("currentpassword", "oldPassword"),

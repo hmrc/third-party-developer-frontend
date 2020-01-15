@@ -62,7 +62,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       given(underTest.sessionService.fetch(meq(session.sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(session)))
 
     val sessionParams = Seq("csrfToken" ->  fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val requestWithCsrfToken = FakeRequest().withLoggedIn(underTest)(sessionId).withSession(sessionParams: _*)
+    val requestWithCsrfToken = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 
 

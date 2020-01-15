@@ -77,11 +77,11 @@ class ManageApplicationsSpec
       .willReturn(Some(session))
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(addApplicationController)(sessionId)
+      .withLoggedIn(addApplicationController,implicitly)(sessionId)
       .withSession(sessionParams: _*)
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(addApplicationController)(partLoggedInSessionId)
+      .withLoggedIn(addApplicationController,implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
   }
 

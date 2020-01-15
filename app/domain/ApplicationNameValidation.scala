@@ -18,7 +18,7 @@ package domain
 
 import controllers.FormKeys.{applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 
-sealed class ApplicationNameValidation
+sealed trait ApplicationNameValidation
 
 case object Valid extends ApplicationNameValidation
 
