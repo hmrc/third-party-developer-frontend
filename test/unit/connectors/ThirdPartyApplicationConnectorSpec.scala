@@ -75,6 +75,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val actorSystem = actorSystemTest
       val futureTimeout = futureTimeoutSupport
       val metrics = mockMetrics
+      val isEnabled = true
     }
 
     when(mockEnvironment.toString).thenReturn(environmentName)

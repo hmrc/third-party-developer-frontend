@@ -44,21 +44,16 @@ class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApp
   }
 
   def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Application] = {
-    if (applicationConfig.strategicSandboxEnabled) {
-      val productionApplicationFuture = productionApplicationConnector.fetchApplicationById(id)
-      val sandboxApplicationFuture = sandboxApplicationConnector.fetchApplicationById(id) recover {
-        case _ => None
-      }
-
-      for {
-        productionApplication <- productionApplicationFuture
-        sandboxApplication <- sandboxApplicationFuture
-      } yield {
-        productionApplication.orElse(sandboxApplication).getOrElse(throw new ApplicationNotFound)
-      }
+    val productionApplicationFuture = productionApplicationConnector.fetchApplicationById(id)
+    val sandboxApplicationFuture = sandboxApplicationConnector.fetchApplicationById(id) recover {
+      case _ => None
     }
-    else {
-      productionApplicationConnector.fetchApplicationById(id).map(_.getOrElse(throw new ApplicationNotFound))
+
+    for {
+      productionApplication <- productionApplicationFuture
+      sandboxApplication <- sandboxApplicationFuture
+    } yield {
+      productionApplication.orElse(sandboxApplication).getOrElse(throw new ApplicationNotFound)
     }
   }
 

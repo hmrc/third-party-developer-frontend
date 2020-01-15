@@ -32,8 +32,7 @@ class AuditService @Inject()(auditConnector: AuditConnector, appConfig: Applicat
     auditConnector.sendEvent(DataEvent(
       auditSource = "third-party-developer-frontend",
       auditType = action.auditType,
-      tags = Map("sandbox" -> s"{${appConfig.isExternalTestEnvironment}") ++
-        hc.toAuditTags(action.name, "-") ++ userContext(hc) ++ action.tags.toSeq ++ data,
+      tags = hc.toAuditTags(action.name, "-") ++ userContext(hc) ++ action.tags.toSeq ++ data,
       detail = hc.toAuditDetails(action.details.toSeq: _*)
     ))
 

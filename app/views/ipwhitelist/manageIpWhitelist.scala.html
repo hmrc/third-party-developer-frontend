@@ -60,7 +60,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
                         You cannot manage whitelisted IPs for this application because you're not an administrator.
                     </p>
                 </div>
-                @defining(app.collaborators.filter(_.role.isAdministrator())) { administrators =>
+                @defining(app.collaborators.filter(_.role.isAdministrator)) { administrators =>
                     @if(administrators.size == 1) {
                         <p>
                             Ask the administrator <a href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> to request the change.

@@ -17,7 +17,6 @@
 @import config.ApplicationConfig
 @import domain.{Application, BackButtonWithJavaScript, DeveloperSession, Environment, Role}
 @import include._
-
 @(app: Application, roleOfLoggedIn: Role)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
 
@@ -63,7 +62,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
                     You cannot delete this application because you're not an administrator.
                 </p>
             </div>
-            @defining(app.collaborators.filter(_.role.isAdministrator())) { administrators =>
+            @defining(app.collaborators.filter(_.role.isAdministrator)) { administrators =>
                 @if(administrators.size == 1) {
                     <p>
                         Ask the administrator <a href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> to delete it.

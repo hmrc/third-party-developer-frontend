@@ -74,77 +74,46 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
   val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX, Some("description"))
 
   "fetchByApplicationId" when {
-    "strategic sandbox is enabled" should {
-      "return the application fetched from the production connector when it exists there" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
-        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-        val result = await(connectors.fetchApplicationById(productionApplicationId))
-        result shouldBe productionApplication
-      }
-
-      "return the application fetched from the production connector when it exists there and sandbox throws 4xx" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
-
-        givenProductionSuccess()
-        givenSandboxFailure(Status.BAD_REQUEST)
-
-        val result = await(connectors.fetchApplicationById(productionApplicationId))
-        result shouldBe productionApplication
-      }
-
-      "return the application fetched from the production connector when it exists there and sandbox throws 5xx" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
-
-        givenProductionSuccess()
-        givenSandboxFailure(Status.BAD_REQUEST)
-
-        val result = await(connectors.fetchApplicationById(productionApplicationId))
-        result shouldBe productionApplication
-      }
-
-      "return the application fetched from the sandbox connector when it exists there" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
-        theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
-        val result = await(connectors.fetchApplicationById(sandboxApplicationId))
-        result shouldBe sandboxApplication
-      }
+    "return the application fetched from the production connector when it exists there" in new Setup {
+      theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+      val result = await(connectors.fetchApplicationById(productionApplicationId))
+      result shouldBe productionApplication
     }
 
-    "strategic sandbox is not enabled" should {
-      "return the application fetched from the production connector when it exists there" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(false)
-        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-        val result = await(connectors.fetchApplicationById(productionApplicationId))
-        result shouldBe productionApplication
-      }
+    "return the application fetched from the production connector when it exists there and sandbox throws 4xx" in new Setup {
+      givenProductionSuccess()
+      givenSandboxFailure(Status.BAD_REQUEST)
+
+      val result = await(connectors.fetchApplicationById(productionApplicationId))
+      result shouldBe productionApplication
+    }
+
+    "return the application fetched from the production connector when it exists there and sandbox throws 5xx" in new Setup {
+      givenProductionSuccess()
+      givenSandboxFailure(Status.BAD_REQUEST)
+
+      val result = await(connectors.fetchApplicationById(productionApplicationId))
+      result shouldBe productionApplication
+    }
+
+    "return the application fetched from the sandbox connector when it exists there" in new Setup {
+      theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
+      val result = await(connectors.fetchApplicationById(sandboxApplicationId))
+      result shouldBe sandboxApplication
     }
   }
 
   "connectorsForApplication" when {
-    "strategic sandbox is enabled" should {
-      "return production connectors if defined" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
-        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-        val result = await(connectors.forApplication(productionApplicationId))
-        result shouldBe Connectors(connectors.productionApplicationConnector, connectors.productionSubscriptionFieldsConnector)
-      }
-
-      "return sandbox connectors if defined" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
-        theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
-        val result = await(connectors.forApplication(sandboxApplicationId))
-        result shouldBe Connectors(connectors.sandboxApplicationConnector, connectors.sandboxSubscriptionFieldsConnector)
-      }
+    "return production connectors if defined" in new Setup {
+      theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+      val result = await(connectors.forApplication(productionApplicationId))
+      result shouldBe Connectors(connectors.productionApplicationConnector, connectors.productionSubscriptionFieldsConnector)
     }
 
-    "strategic sandbox is not enabled" should {
-      "return production connectors when they exist" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(false)
-        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-        val result = await(connectors.forApplication(productionApplicationId))
-        result shouldBe Connectors(connectors.productionApplicationConnector, connectors.productionSubscriptionFieldsConnector)
-      }
+    "return sandbox connectors if defined" in new Setup {
+      theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
+      val result = await(connectors.forApplication(sandboxApplicationId))
+      result shouldBe Connectors(connectors.sandboxApplicationConnector, connectors.sandboxSubscriptionFieldsConnector)
     }
   }
-
 }

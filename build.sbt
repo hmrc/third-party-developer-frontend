@@ -110,13 +110,15 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
-  .settings(testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
+  .settings(
+    unmanagedSourceDirectories in Test := (baseDirectory in Test) (base => Seq(base / "test" / "unit", base / "test" / "utils")).value,
+    testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
     testOptions in IntegrationTest := Seq(Tests.Filter(integrationTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
+    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test" / "it", base / "test" / "utils")).value,
     unmanagedResourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
     parallelExecution in IntegrationTest := false
   )
@@ -124,7 +126,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
     testOptions in ComponentTest := Seq(Tests.Filter(componentTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
+    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test" / "component", base / "test" / "utils")).value,
     unmanagedResourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
     unmanagedResourceDirectories in ComponentTest += baseDirectory(_ / "target/web/public/test").value,
     testOptions in ComponentTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
