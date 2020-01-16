@@ -212,3 +212,18 @@ form.inline-controls {
     width: 43%;
   }
 }
+
+a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
+  background-color: #FFF;
+  color: #005ea5;
+  font-weight: 700;
+  padding: 0.26316em 0.68421em 0.15789em 0.68421em;
+  font-size: 24px;
+}
+
+.interrupt {
+  margin: 1em 0;
+  padding: 1em 2em 1em 2em;
+  color: #fff;
+  background: #1d70b8;
+}

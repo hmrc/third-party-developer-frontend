@@ -48,6 +48,10 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     }
   }
 
+  def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(views.html.tenDaysWarning()))
+  }
+
   def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.addApplicationStartSubordinate()))
   }
