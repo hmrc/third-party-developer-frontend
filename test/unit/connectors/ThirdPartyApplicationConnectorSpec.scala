@@ -393,7 +393,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return success response in case of a 204 NO CONTENT on backend" in new Setup {
 
-      when(mockHttpClient.POSTEmpty[HttpResponse](meq(url))(any(), any(), any()))
+      when(mockHttpClient.POSTEmpty[HttpResponse](meq(url),any())(any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.verify(verificationCode))
@@ -403,7 +403,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return failure response in case of a 400 on backend" in new Setup {
 
-      when(mockHttpClient.POSTEmpty[HttpResponse](meq(url))(any(), any(), any()))
+      when(mockHttpClient.POSTEmpty[HttpResponse](meq(url),any())(any(), any(), any()))
         .thenReturn(Future.failed(new BadRequestException("")))
 
       intercept[ApplicationVerificationFailed](
@@ -530,7 +530,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return success" in new Setup {
       when(mockHttpClient
-        .DELETE[HttpResponse](meq(url))(any(), any(), any()))
+        .DELETE[HttpResponse](meq(url),any())(any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail))
@@ -539,7 +539,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return application needs administrator response" in new Setup {
       when(mockHttpClient
-        .DELETE[HttpResponse](meq(url))(any(), any(), any()))
+        .DELETE[HttpResponse](meq(url),any())(any(), any(), any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
 
       intercept[ApplicationNeedsAdmin](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
@@ -547,7 +547,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return application not found response" in new Setup {
       when(mockHttpClient
-        .DELETE[HttpResponse](meq(url))(any(), any(), any()))
+        .DELETE[HttpResponse](meq(url),any())(any(), any(), any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
@@ -704,7 +704,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     "successfully delete the application" in new Setup {
 
       when(mockHttpClient
-        .POSTEmpty[HttpResponse](meq(url))(any(), any(), any()))
+        .POSTEmpty[HttpResponse](meq(url), any())(any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.deleteApplication(applicationId))
@@ -715,7 +715,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     "throw exception response if error on back end" in new Setup {
 
       when(mockHttpClient
-        .POSTEmpty[HttpResponse](meq(url))(any(), any(), any()))
+        .POSTEmpty[HttpResponse](meq(url),any())(any(), any(), any()))
         .thenReturn(Future.failed(new Exception("error deleting subordinate application")))
 
       intercept[Exception] {

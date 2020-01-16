@@ -76,8 +76,7 @@ abstract class ApplicationController()
       val stackedActions = Action andThen applicationAction(applicationId, loggedIn)
       stackedActions.async(fun)(request)
     }
-
-
+  
   def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
