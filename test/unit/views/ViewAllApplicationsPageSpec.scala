@@ -27,8 +27,9 @@ import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
+import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, linkExistsWithHref}
 import utils.CSRFTokenHelper._
+import scala.collection.JavaConversions._
 
 class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
@@ -42,7 +43,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       views.html.manageApplications.render(appSummaries, request, Flash(), loggedIn, applicationMessages, appConfig, "nav-section")
     }
 
-    "show the applications page if there is more than 0 applications" in {
+    "show the applications page if there is more than 0 sandbox applications" in {
 
       val appName = "App name 1"
       val appEnvironment = "Sandbox"
@@ -59,6 +60,34 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
+
+      val href = controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION).url
+      (document
+        .select(s"a[href=$href]")
+        .select(s"a[class=button]")
+        .nonEmpty) shouldBe true
+//      linkExistsWithHref(document, controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION).url) shouldBe true
+    }
+
+    "hide Get production credentials button if there is more than 0 production applications" in {
+
+      val appName = "App name 1"
+      val appEnvironment = "Production"
+      val appUserRole = Role.ADMINISTRATOR
+      val appCreatedOn = DateTimeUtils.now
+      val appLastAccess = appCreatedOn
+
+      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn))
+
+      val document = Jsoup.parse(renderPage(appSummaries).body)
+
+      elementExistsByText(document, "h1", "View all applications") shouldBe true
+      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
+      elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
+      elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
+
+      linkExistsWithHref(document, controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION).url) shouldBe false
     }
   }
 

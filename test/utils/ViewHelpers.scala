@@ -39,6 +39,10 @@ object ViewHelpers {
   def linkExistsWithHref(doc: Document, href: String): Boolean = {
     doc.select(s"a[href=$href]").nonEmpty
   }
+//
+//  def linkExistsWithHref(doc: Document, href: String): Boolean = {
+//    doc.select(s"a[href=$href]").nonEmpty
+//  }
 
   def formExistsWithAction(doc: Document, action: String): Boolean = {
     doc.select(s"form[action=$action]").nonEmpty

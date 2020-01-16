@@ -14,14 +14,12 @@
  * limitations under the License.
  *@
 
-@import domain.{DeveloperSession, Role}
+@import domain.{DeveloperSession, Role, TermsOfUseStatus, Environment, Developer}
 @import helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import model.Crumb
 
-@import domain.TermsOfUseStatus
 @import uk.gov.hmrc.auth.core.Admin
-@import domain.Developer
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 
 @devMain(
@@ -34,13 +32,20 @@
     leftNav = Some(leftHandNav(None, Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
-
         <header>
             <h1 class="heading-xlarge">View all applications</h1>
         </header>
-        <p>After testing in the sandbox, you can create a production application to use live data.</p>
+
         <br>
         @applicationList(applications)
+
+        <p>After testing in the sandbox, you can apply for production credentials.</p>
+
+@*    @if(!applications.exists(a => a.environment == "Production")) {*@
+@*        <div>*@
+@*            <a class="button" href="@routes.AddApplication.addApplicationName(Environment.PRODUCTION)">Get production credentials</a>*@
+@*        </div>*@
+@*    }*@
 }
 
 @applicationList(applications: Seq[controllers.ApplicationSummary]) = {
@@ -87,3 +92,5 @@
         </table>
     }
 }
+
+
