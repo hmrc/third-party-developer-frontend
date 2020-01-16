@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
     "Test.microservice.services.third-party-developer.port" -> stubPort,
-    "json.encryption.key" -> "abcdefghijklmnopqrstuv=="
+    "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
   override def fakeApplication(): Application =
