@@ -30,12 +30,21 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, linkExistsWithHref}
 import utils.CSRFTokenHelper._
 import scala.collection.JavaConversions._
+import org.jsoup.nodes.Document
 
 class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
 
   val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
-  "veiw all applications page" should {
+  def isGreenAddProductionApplicationButtonVisible(document: Document) : Boolean ={
+    val href = controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION).url
+
+    val greenButtons = document.select(s"a[href=$href][class=button]")
+
+    greenButtons.nonEmpty
+  }
+
+  "view all applications page" should {
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request = FakeRequest()
@@ -61,12 +70,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
-      val href = controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION).url
-      (document
-        .select(s"a[href=$href]")
-        .select(s"a[class=button]")
-        .nonEmpty) shouldBe true
-//      linkExistsWithHref(document, controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION).url) shouldBe true
+      isGreenAddProductionApplicationButtonVisible(document) shouldBe true
     }
 
     "hide Get production credentials button if there is more than 0 production applications" in {
@@ -87,7 +91,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
-      linkExistsWithHref(document, controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION).url) shouldBe false
+      isGreenAddProductionApplicationButtonVisible(document) shouldBe false
     }
   }
 

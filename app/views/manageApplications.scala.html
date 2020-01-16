@@ -18,6 +18,7 @@
 @import helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import model.Crumb
+@import controllers.ApplicationSummary.noProductionApplications
 
 @import uk.gov.hmrc.auth.core.Admin
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
@@ -41,11 +42,11 @@
 
         <p>After testing in the sandbox, you can apply for production credentials.</p>
 
-@*    @if(!applications.exists(a => a.environment == "Production")) {*@
-@*        <div>*@
-@*            <a class="button" href="@routes.AddApplication.addApplicationName(Environment.PRODUCTION)">Get production credentials</a>*@
-@*        </div>*@
-@*    }*@
+        @if(noProductionApplications(applications)) {
+            <div>
+               <a class="button" href="@routes.AddApplication.addApplicationName(Environment.PRODUCTION)">Get production credentials</a>
+            </div>
+        }
 }
 
 @applicationList(applications: Seq[controllers.ApplicationSummary]) = {

@@ -33,6 +33,10 @@ case class ApplicationSummary(id: String, name: String, environment: String, rol
 object ApplicationSummary {
   def from(app: Application, email: String) = ApplicationSummary(app.id, app.name, app.deployedTo.toString.toLowerCase.capitalize,
     app.role(email).getOrElse(throw new NotFoundException("Role not found")), app.termsOfUseStatus, app.state.name, app.lastAccess, app.createdOn)
+
+  def noProductionApplications(applications: Seq[controllers.ApplicationSummary]): Boolean = {
+    !applications.exists(_.environment == "Production")
+  }
 }
 
 case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISubscriptions], exampleApi: Option[APISubscriptions] = None)
