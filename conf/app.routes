@@ -64,6 +64,8 @@ GET         /reset-password/error                                               
 
 GET         /applications                                                               controllers.AddApplication.manageApps
 
+GET         /applications/add/production/10-days                                       controllers.AddApplication.tenDaysWarning
+
 GET         /applications/add/sandbox                                                  controllers.AddApplication.addApplicationSubordinate
 
 GET         /applications/add/:environment/name                                        controllers.AddApplication.addApplicationName(environment: domain.Environment)
