@@ -47,8 +47,7 @@ class EmailValidationSpec extends UnitSpec with Matchers{
     }
 
     val ValidEmailAddresses = Seq("prettyandsimple@example.com", "very.common@example.com",
-      "disposable.style.email.with+symbol@example.com", "other.email-with-dash@example.com",
-      "user@com", "user@localserver")
+      "disposable.style.email.with+symbol@example.com", "other.email-with-dash@example.com")
 
     ValidEmailAddresses foreach { emailAddress =>
       s"accept a valid email address [$emailAddress]" in {

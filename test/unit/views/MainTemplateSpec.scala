@@ -33,23 +33,6 @@ class MainTemplateSpec extends UnitSpec with Matchers with MockitoSugar with One
 
     implicit val mockConfig = mock[ApplicationConfig]
 
-    "Use the sandbox class when the environment is set to the Enhanced Sandbox" in {
-
-      given(mockConfig.isExternalTestEnvironment).willReturn(true)
-
-      val mainView: Html = html.include.main("Test", developerSession = None)()
-
-      mainView.body should include("class=\"sandbox")
-    }
-
-    "Not use the sandbox class when the Enhanced Sandbox configuration is switched off" in {
-      given(mockConfig.isExternalTestEnvironment).willReturn(false)
-
-      val mainView: Html = html.include.main("Test", developerSession = None)()
-
-      mainView.body should not include "class=\"sandbox"
-    }
-
     "Application title meta data set by configuration" in {
       given(mockConfig.title).willReturn("Application Title")
 

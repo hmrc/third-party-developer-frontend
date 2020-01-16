@@ -99,79 +99,57 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     APISubscriptionStatus(name, name, context, APIVersion(version, status), subscribed, requiresTrust, Some(SubscriptionFieldsWrapper(appId, clientId, context, version, Seq.empty)))
 
   "Fetch by teamMember email" should {
-    "when strategic sandbox is enabled" should {
+    val emailAddress = "user@example.com"
+    val app1 = Application("id1", "cl-id1", "zapplication", DateTime.now, DateTime.now, Environment.PRODUCTION)
+    val app2 = Application("id2", "cl-id2","application", DateTime.now, DateTime.now, Environment.SANDBOX)
+    val app3 = Application("id3", "cl-id3", "4pplication", DateTime.now, DateTime.now, Environment.PRODUCTION)
 
-      val emailAddress = "user@example.com"
-      val app1 = Application("id1", "cl-id1", "zapplication", DateTime.now, DateTime.now, Environment.PRODUCTION)
-      val app2 = Application("id2", "cl-id2","application", DateTime.now, DateTime.now, Environment.SANDBOX)
-      val app3 = Application("id3", "cl-id3", "4pplication", DateTime.now, DateTime.now, Environment.PRODUCTION)
+    val productionApps = Seq(app1, app3)
+    val sandboxApps = Seq(app2)
 
-      val productionApps = Seq(app1, app3)
-      val sandboxApps = Seq(app2)
+    "sort the returned applications by name" in new Setup {
+      when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
+        .thenReturn(successful(productionApps))
+      when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
+        .thenReturn(successful(sandboxApps))
 
-      "sort the returned applications by name" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
+      val result = await(service.fetchByTeamMemberEmail(emailAddress))
+      result shouldBe Seq(app3, app2, app1)
+    }
 
-        when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-          .thenReturn(successful(productionApps))
-        when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-          .thenReturn(successful(sandboxApps))
+    "tolerate the sandbox connector failing with a 5xx error" in new Setup {
+      when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
+        .thenReturn(successful(productionApps))
+      when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
+        .thenReturn(Future.failed(new Upstream5xxResponse("Expected exception", 504, 504)))
 
-        val result = await(service.fetchByTeamMemberEmail(emailAddress))
-        result shouldBe Seq(app3, app2, app1)
-      }
+      val result = await(service.fetchByTeamMemberEmail(emailAddress))
+      result shouldBe Seq(app3, app1)
+    }
 
-      "tolerate the sandbox connector failing with a 5xx error" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
+    "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
+      when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
+        .thenReturn(Future.failed(new Upstream5xxResponse("Expected exception", 504, 504)))
+      when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
+        .thenReturn(successful(sandboxApps))
 
-        when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-          .thenReturn(successful(productionApps))
-        when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-          .thenReturn(Future.failed(new Upstream5xxResponse("Expected exception", 504, 504)))
-
-        val result = await(service.fetchByTeamMemberEmail(emailAddress))
-        result shouldBe Seq(app3, app1)
-      }
-
-      "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
-
-        when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-          .thenReturn(Future.failed(new Upstream5xxResponse("Expected exception", 504, 504)))
-        when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-          .thenReturn(successful(sandboxApps))
-
-        intercept[Upstream5xxResponse] {
-          await(service.fetchByTeamMemberEmail(emailAddress))
-        }
+      intercept[Upstream5xxResponse] {
+        await(service.fetchByTeamMemberEmail(emailAddress))
       }
     }
   }
 
   "Fetch by ID" should {
-    "when strategic sandbox is enabled" should {
-      "return the application fetched from the production connector when it exists there" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
-        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-        val result = await(service.fetchByApplicationId(productionApplicationId))
-        result shouldBe productionApplication
-      }
-
-      "return the application fetched from the sandbox connector when it exists there" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
-        theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
-        val result = await(service.fetchByApplicationId(sandboxApplicationId))
-        result shouldBe sandboxApplication
-      }
+    "return the application fetched from the production connector when it exists there" in new Setup {
+      theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+      val result = await(service.fetchByApplicationId(productionApplicationId))
+      result shouldBe productionApplication
     }
 
-    "when strategic sandbox is not enabled" should {
-      "return the application fetched from the production connector when it exists there" in new Setup {
-        given(mockAppConfig.strategicSandboxEnabled).willReturn(false)
-        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-        val result = await(service.fetchByApplicationId(productionApplicationId))
-        result shouldBe productionApplication
-      }
+    "return the application fetched from the sandbox connector when it exists there" in new Setup {
+      theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
+      val result = await(service.fetchByApplicationId(sandboxApplicationId))
+      result shouldBe sandboxApplication
     }
   }
 
@@ -433,7 +411,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     "add teamMember successfully in production app" in new Setup {
       val response = AddTeamMemberResponse(registeredUser = true)
 
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
@@ -443,7 +420,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate TeamMemberAlreadyExists from connector in production app" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
@@ -454,7 +430,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate ApplicationNotFound from connector in production app" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
@@ -466,7 +441,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     "add teamMember successfully in sandbox app" in new Setup {
       val response = AddTeamMemberResponse(registeredUser = true)
 
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
@@ -476,7 +450,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate TeamMemberAlreadyExists from connector in sandbox app" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
@@ -487,7 +460,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate ApplicationNotFound from connector in sandbox app" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
@@ -498,7 +470,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
     
     "include correct set of admins to email" in new Setup {
-
       val verifiedAdmin = Collaborator("verified@example.com", Role.ADMINISTRATOR)
       val unverifiedAdmin = Collaborator("unverified@example.com", Role.ADMINISTRATOR)
       val adderAdmin = Collaborator(adminEmail, Role.ADMINISTRATOR)
@@ -528,7 +499,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val adminsToEmail = Seq.empty[String]
 
     "remove teamMember successfully from production" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail)).willReturn(ApplicationUpdateSuccessful)
@@ -536,7 +506,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate ApplicationNeedsAdmin from connector from production" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail)).willReturn(Future.failed(new ApplicationNeedsAdmin))
@@ -544,7 +513,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate ApplicationNotFound from connector from production" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail)).willReturn(Future.failed(new ApplicationNotFound))
@@ -552,7 +520,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "remove teamMember successfully from sandbox" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
       given(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail)).willReturn(ApplicationUpdateSuccessful)
@@ -560,7 +527,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate ApplicationNeedsAdmin from connector from sandbox" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
       given(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail)).willReturn(Future.failed(new ApplicationNeedsAdmin))
@@ -568,7 +534,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate ApplicationNotFound from connector from sandbox" in new Setup {
-      given(mockAppConfig.strategicSandboxEnabled).willReturn(true)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
       given(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail)).willReturn(Future.failed(new ApplicationNotFound))

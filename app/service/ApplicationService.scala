@@ -226,27 +226,13 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
       }
     }
 
-    if (applicationConfig.strategicSandboxEnabled) {
-      val productionApplicationsFuture = fetchProductionApplications
-      val sandboxApplicationsFuture = fetchSandboxApplications
+    val productionApplicationsFuture = fetchProductionApplications
+    val sandboxApplicationsFuture = fetchSandboxApplications
 
-      for {
-        productionApplications <- productionApplicationsFuture
-        sandboxApplications <- sandboxApplicationsFuture
-      } yield (productionApplications ++ sandboxApplications).sorted
-    }
-    else {
-      val connector = if (applicationConfig.isExternalTestEnvironment) {
-        connectorWrapper.sandboxApplicationConnector
-      }
-      else {
-        connectorWrapper.productionApplicationConnector
-      }
-
-      for {
-        applications <- connector.fetchByTeamMemberEmail(email)
-      } yield applications.sorted
-    }
+    for {
+      productionApplications <- productionApplicationsFuture
+      sandboxApplications <- sandboxApplicationsFuture
+    } yield (productionApplications ++ sandboxApplications).sorted
   }
 
   private def roleForApplication(application: Application, email: String) =

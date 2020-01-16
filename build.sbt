@@ -27,17 +27,17 @@ lazy val enumeratumVersion = "1.5.11"
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.13.0",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "5.1.0",
   "uk.gov.hmrc" %% "govuk-template" % "5.36.0-play-25",
-  "uk.gov.hmrc" %% "play-ui" % "7.40.0-play-25",
+  "uk.gov.hmrc" %% "play-ui" % "8.6.0-play-25",
   "uk.gov.hmrc" %% "url-builder" % "3.3.0-play-25",
-  "uk.gov.hmrc" %% "play-json-union-formatter" % "1.5.0",
+  "uk.gov.hmrc" %% "play-json-union-formatter" % "1.7.0",
   "uk.gov.hmrc" %% "http-metrics" % "1.4.0",
-  "de.threedimensions" %% "metrics-play" % "2.5.13",
   "jp.t2v" %% "play2-auth" % t2vVersion,
   "uk.gov.hmrc" %% "json-encryption" % "4.4.0-play-25",
-  "uk.gov.hmrc" %% "emailaddress" % "3.2.0",
+  "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
   "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.1.0-play-25",
+  "de.threedimensions" %% "metrics-play" % "2.5.13",
   "io.dropwizard.metrics" % "metrics-graphite" % "3.2.1",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
@@ -52,7 +52,6 @@ lazy val test = Seq(
   "org.jsoup" % "jsoup" % "1.10.2" % "test",
   "org.pegdown" % "pegdown" % "1.6.0" % "test",
   "com.typesafe.play" %% "play-test" % PlayVersion.current % "test",
-  "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % "test",
   "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % "test",
   "com.github.tomakehurst" % "wiremock" % "1.58" % "test",
@@ -110,13 +109,15 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
-  .settings(testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
+  .settings(
+    unmanagedSourceDirectories in Test := (baseDirectory in Test) (base => Seq(base / "test" / "unit", base / "test" / "utils")).value,
+    testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
     testOptions in IntegrationTest := Seq(Tests.Filter(integrationTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
+    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test" / "it", base / "test" / "utils")).value,
     unmanagedResourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
     parallelExecution in IntegrationTest := false
   )
@@ -124,7 +125,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
     testOptions in ComponentTest := Seq(Tests.Filter(componentTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
+    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test" / "component", base / "test" / "utils")).value,
     unmanagedResourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
     unmanagedResourceDirectories in ComponentTest += baseDirectory(_ / "target/web/public/test").value,
     testOptions in ComponentTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),

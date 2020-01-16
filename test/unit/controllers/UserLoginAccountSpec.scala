@@ -98,7 +98,6 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       given(underTest.sessionService.destroy(meq(session.sessionId))(any[HeaderCarrier]))
         .willReturn(Future.successful(NO_CONTENT))
 
-    given(underTest.appConfig.isExternalTestEnvironment).willReturn(false)
     given(underTest.sessionService.authenticate(anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
     given(underTest.sessionService.authenticateTotp(anyString(), anyString(), anyString())(any[HeaderCarrier])).willReturn(failed(new InvalidCredentials))
 

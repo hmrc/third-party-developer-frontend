@@ -80,8 +80,8 @@ class ValidatorsSpec extends UnitSpec with PropertyChecks with Matchers {
       res.errors shouldBe List(FormError("emailaddress", "emailaddress.error.not.valid.field"))
     }
 
-    "no generate a field form error when a valid email 'admin@mailserver1' is provided" in {
-      val res = myForm.bind(Map("emailaddress" -> "admin@mailserver1"))
+    "do not generate a field form error when a valid email 'admin@mailserver1.com' is provided" in {
+      val res = myForm.bind(Map("emailaddress" -> "admin@mailserver1.com"))
       res.errors shouldBe List()
     }
 

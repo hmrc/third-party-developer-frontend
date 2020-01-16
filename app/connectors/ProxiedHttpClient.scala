@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HeaderNames.ACCEPT
 import play.api.libs.ws.{WSClient, WSProxyServer, WSRequest}
+import play.api.mvc.Headers
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -49,7 +50,7 @@ class ProxiedHttpClient @Inject()(config: Configuration,
 
   override def wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration(s"$env.proxy", config)
 
-  override def buildRequest[A](url: String)(implicit hc: HeaderCarrier): WSRequest = {
+  override def buildRequest[A](url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): WSRequest = {
     val extraHeaders = hc.extraHeaders :+ (ACCEPT -> "application/hmrc.vnd.1.0+json")
     val extraHeadersWithMaybeApiKeyHeader =
       if (apiKeyHeader.isDefined) extraHeaders :+ apiKeyHeader.get

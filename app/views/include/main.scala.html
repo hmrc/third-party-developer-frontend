@@ -200,8 +200,7 @@
     </main>
 }
 
-@hmrcGovUkTemplate(title = Some(title),
-    bodyClasses = if(applicationConfig.isExternalTestEnvironment) { Some("sandbox") } else None)(head = head,
+@hmrcGovUkTemplate(title = Some(title), None)(head = head,
     bodyEnd = bodyEnd,
     insideHeader = insideHeader,
     afterHeader = afterHeader,

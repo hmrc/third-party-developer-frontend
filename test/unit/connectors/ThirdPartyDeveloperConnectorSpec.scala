@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import connectors._
 import domain.Session._
 import domain.{UpdateLoggedInStateRequest, _}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{eq => meq, any}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -185,7 +185,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
       connector.resendVerificationEmail(email).futureValue shouldBe Status.OK
 
-      verify(mockHttp).POSTEmpty(endpoint(s"$email/resend-verification"))
+      verify(mockHttp).POSTEmpty(meq(endpoint(s"$email/resend-verification")),any())(any(),any(),any())
     }
   }
 
@@ -196,7 +196,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
       connector.requestReset(email).futureValue
 
-      verify(mockHttp).POSTEmpty(endpoint(s"$email/password-reset-request"))
+      verify(mockHttp).POSTEmpty(meq(endpoint(s"$email/password-reset-request")),any())(any(),any(),any())
     }
 
     "successfully validate reset code" in new Setup {
@@ -346,7 +346,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
       connector.createMfaSecret(email).futureValue shouldBe expectedSecret
 
-      verify(mockHttp).POSTEmpty(endpoint(s"developer/$email/mfa"))
+      verify(mockHttp).POSTEmpty(meq(endpoint(s"developer/$email/mfa")), any())(any(),any(),any())
 
     }
 

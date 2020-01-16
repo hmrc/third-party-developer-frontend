@@ -216,17 +216,17 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
 
     "save the fields" in new Setup {
 
-      when(mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](putUrl, subFieldsPutRequest))
+      when(mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](meq(putUrl), meq(subFieldsPutRequest), any())(any(),any(),any(),any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       await(underTest.saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
 
-      verify(mockHttpClient).PUT[SubscriptionFieldsPutRequest, HttpResponse](putUrl, subFieldsPutRequest)
+      verify(mockHttpClient).PUT[SubscriptionFieldsPutRequest, HttpResponse](meq(putUrl), meq(subFieldsPutRequest), any())(any(),any(),any(),any())
     }
 
     "fail when api-subscription-fields returns a 500" in new Setup {
 
-      when(mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](putUrl, subFieldsPutRequest))
+      when(mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](meq(putUrl), meq(subFieldsPutRequest), any())(any(),any(),any(),any()))
         .thenReturn(Future.failed(upstream500Response))
 
       intercept[Upstream5xxResponse] {
@@ -236,7 +236,7 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
 
     "fail when api-subscription-fields returns a 404" in new Setup {
 
-      when(mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](putUrl, subFieldsPutRequest))
+      when(mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](meq(putUrl), meq(subFieldsPutRequest), any())(any(),any(),any(),any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
       intercept[NotFoundException] {

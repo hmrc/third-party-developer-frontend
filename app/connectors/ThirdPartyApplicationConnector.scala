@@ -47,6 +47,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   val useProxy: Boolean
   val bearerToken: String
   val apiKey: String
+  def isEnabled: Boolean
 
   def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
 
@@ -64,27 +65,33 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
   }
 
-  def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] = metrics.record(api) {
-    retry {
-      val url = s"$serviceBaseUrl/developer/applications"
+  def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
+    if(isEnabled) {
+      metrics.record(api) {
+        retry {
+        val url = s"$serviceBaseUrl/developer/applications"
 
-      Logger.debug(s"fetchByTeamMemberEmail() - About to call $url for $email in ${environment.toString}")
+        Logger.debug(s"fetchByTeamMemberEmail() - About to call $url for $email in ${environment.toString}")
 
-      http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
-        .andThen {
+        http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
+          .andThen {
           case Success(_) =>
-            Logger.debug(s"fetchByTeamMemberEmail() - done call to $url for $email in ${environment.toString}")
+          Logger.debug(s"fetchByTeamMemberEmail() - done call to $url for $email in ${environment.toString}")
           case _ =>
-            Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
+          Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
         }
+      }
     }
+  }
+  else {
+    Future.successful(Seq.empty)
   }
 
   def addTeamMember(applicationId: String, teamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/$applicationId/collaborator", teamMember, Seq(CONTENT_TYPE -> JSON)) map { result =>
-      result.json.as[AddTeamMemberResponse]
-    } recover {
-      case e: Upstream4xxResponse if e.upstreamResponseCode == 409 => throw new TeamMemberAlreadyExists
+      http.POST(s"$serviceBaseUrl/application/$applicationId/collaborator", teamMember, Seq(CONTENT_TYPE -> JSON)) map { result =>
+    result.json.as[AddTeamMemberResponse]
+  } recover {
+    case e: Upstream4xxResponse if e.upstreamResponseCode == 409 => throw new TeamMemberAlreadyExists
     } recover recovery
   }
 
@@ -101,24 +108,36 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } recover recovery
   }
 
-  def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] = metrics.record(api) {
-    retry {
-      http.GET[Application](s"$serviceBaseUrl/application/$id") map {
-        Some(_)
-      } recover {
-        case _: NotFoundException => None
+  def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] =
+    if(isEnabled) {
+      metrics.record(api) {
+        retry {
+          http.GET[Application](s"$serviceBaseUrl/application/$id") map {
+            Some(_)
+          } recover {
+            case _: NotFoundException => None
+          }
+        }
       }
     }
-  }
+    else {
+      Future.successful(None)
+    }
 
-  def fetchSubscriptions(id: String)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]] = metrics.record(api) {
-    retry {
-      http.GET[Seq[APISubscription]](s"$serviceBaseUrl/application/$id/subscription") recover {
-        case _: Upstream5xxResponse => Seq.empty
-        case _: NotFoundException => throw new ApplicationNotFound
+  def fetchSubscriptions(id: String)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]] =
+    if(isEnabled) {
+      metrics.record(api) {
+        retry {
+          http.GET[Seq[APISubscription]](s"$serviceBaseUrl/application/$id/subscription") recover {
+            case _: Upstream5xxResponse => Seq.empty
+            case _: NotFoundException => throw new ApplicationNotFound
+          }
+        }
       }
     }
-  }
+    else {
+      Future.successful(Seq.empty)
+    }
 
   def subscribeToApi(applicationId: String,
                      apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
@@ -219,6 +238,8 @@ class ThirdPartyApplicationSandboxConnector @Inject()(val httpClient: HttpClient
   val useProxy = appConfig.thirdPartyApplicationSandboxUseProxy
   val bearerToken = appConfig.thirdPartyApplicationSandboxBearerToken
   val apiKey = appConfig.thirdPartyApplicationSandboxApiKey
+
+  override val isEnabled = appConfig.hasSandbox;
 }
 
 @Singleton
@@ -235,4 +256,6 @@ class ThirdPartyApplicationProductionConnector @Inject()(val httpClient: HttpCli
   val useProxy = appConfig.thirdPartyApplicationProductionUseProxy
   val bearerToken = appConfig.thirdPartyApplicationProductionBearerToken
   val apiKey = appConfig.thirdPartyApplicationProductionApiKey
+
+  override val isEnabled = true
 }

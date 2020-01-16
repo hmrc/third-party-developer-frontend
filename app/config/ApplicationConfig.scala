@@ -52,10 +52,9 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   lazy val analyticsToken = runModeConfiguration.getString(s"$env.google-analytics.token")
   lazy val analyticsHost = runModeConfiguration.getString(s"$env.google-analytics.host").getOrElse("auto")
   lazy val securedCookie = runModeConfiguration.getBoolean(s"$env.cookie.secure").getOrElse(true)
-  lazy val isExternalTestEnvironment = runModeConfiguration.getBoolean("isExternalTestEnvironment").getOrElse(false)
-  lazy val title = if (isExternalTestEnvironment) "Developer Sandbox" else "Developer Hub"
+  lazy val title = "Developer Hub"
   lazy val jsonEncryptionKey = getConfig("json.encryption.key")
-  lazy val strategicSandboxEnabled = runModeConfiguration.getBoolean("strategicSandboxEnabled").getOrElse(false)
+  lazy val hasSandbox = runModeConfiguration.getBoolean("hasSandbox").getOrElse(false)
   lazy val currentTermsOfUseVersion = runModeConfiguration.getString("currentTermsOfUseVersion").getOrElse("")
   lazy val currentTermsOfUseDate = DateTime.parse(runModeConfiguration.getString("currentTermsOfUseDate").getOrElse(""))
   lazy val retryCount = runModeConfiguration.getInt("retryCount").getOrElse(0)
