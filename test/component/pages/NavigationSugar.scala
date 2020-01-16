@@ -30,7 +30,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 
 trait NavigationSugar extends WebBrowser with Eventually with Assertions with Matchers with MockitoSugar {
   private val mockAppConfig = mock[ApplicationConfig]
-  when(mockAppConfig.jsonEncryptionKey).thenReturn("abcdefghijklmnopqrstuv==")
+  when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
 
   implicit override val patienceConfig = PatienceConfig(timeout = scaled(Span(3, Seconds)), interval = scaled(Span(100, Millis)))
   implicit val encryptedJson = new EncryptedJson(new PayloadEncryption(new LocalCrypto(mockAppConfig)))
