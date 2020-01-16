@@ -22,13 +22,17 @@
 @import model.Crumb
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
-@pageHeading = @{s"We will check your software"}
+@pageHeading = @{s"We will check your application"}
 
 @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn),
-    back = BackButtonWithJavaScript,
+    breadcrumbs = Seq(
+        Crumb(pageHeading),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
     fullWidthContent = true
 ) {
 
@@ -42,7 +46,7 @@
             </p>
             <br>
             <p>
-                <a href="@controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION)" class="button-white">Continue</a>
+                <a href="@controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION)" class="button interrupt-button">Continue</a>
 
             </p>
         </div>

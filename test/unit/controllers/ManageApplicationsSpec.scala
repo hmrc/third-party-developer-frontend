@@ -112,5 +112,27 @@ class ManageApplicationsSpec
     }
   }
 
+  "tenDaysWarning" should {
+    "return the 10 days warning interrupt page when the user is logged in" in new AddApplicationSetup {
+
+      private val result = await(addApplicationController.tenDaysWarning()(loggedInRequest))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("We will check your application")
+      bodyOf(result) should include("This takes up to 10 working days and we may ask you to demonstrate it.")
+      bodyOf(result) should not include "Sign in"
+    }
+
+    "return to the login page when the user is not logged in" in new AddApplicationSetup {
+
+      val request = FakeRequest()
+
+      private val result = await(addApplicationController.tenDaysWarning()(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+    }
+  }
+
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 }

@@ -213,8 +213,12 @@ form.inline-controls {
   }
 }
 
-.button-white button {
-
+a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
+  background-color: #FFF;
+  color: #005ea5;
+  font-weight: 700;
+  padding: 0.26316em 0.68421em 0.15789em 0.68421em;
+  font-size: 24px;
 }
 
 .interrupt {
@@ -222,61 +226,4 @@ form.inline-controls {
   padding: 1em 2em 1em 2em;
   color: #fff;
   background: #1d70b8;
-}
-
-a.interrupt-button, a.interrupt-button:link, a.interrupt-button:visited {
-  color: #005ea5;
-}
-a.interrupt-button:link, a.interrupt-button:hover, a.interrupt-button:focus, a.interrupt-button:visited {
-  color: #0b0c0c;
-}
-
-a.interrupt-button:visited {
-  background-color: #fff;
-}
-
-a.interrupt-button {
-   display: inline-block;
-   text-align: left;
- }
-
-a.interrupt-button {
-   font-size: 24px;
-   line-height: 1.25;
- }
-
-a.interrupt-button {
-  background-color: #fff;
-  position: relative;
-  display: -moz-inline-stack;
-  display: inline-block;
-  padding: .526315em .789473em .263157em;
-  border: none;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
-  outline: 1px solid transparent;
-  outline-offset: -1px;
-  -webkit-appearance: none;
-  -webkit-box-shadow: 0 2px 0 #d9d9d9;
-  -moz-box-shadow: 0 2px 0 #d9d9d9;
-  box-shadow: 0 2px 0 #d9d9d9;
-  font-size: 1em;
-  line-height: 1.25;
-  text-decoration: none;
-  -webkit-font-smoothing: antialiased;
-  cursor: pointer;
-  color: #0b0c0c;
-  font-family: "nta", Arial, sans-serif;
-  font-weight: 700;
-  text-transform: none;
-  font-size: 18px;
-  line-height: 1.2;
-  -webkit-box-shadow: 0 2px 0 #004172;
-  -moz-box-shadow: 0 2px 0 #004172;
-  box-shadow: 0 2px 0 #004172;
-  padding: 0.26316em 0.68421em 0.15789em 0.68421em;
-  margin: 0em 0.52632em 0.52632em 0em;
-  display: block;
-  text-align: center;
 }
