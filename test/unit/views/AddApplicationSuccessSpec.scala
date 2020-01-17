@@ -26,9 +26,10 @@ import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 
-class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val productionMessage = "We take up to 10 working days to check applications and issue production credentials."
   val productionButton = "Start the checklist"

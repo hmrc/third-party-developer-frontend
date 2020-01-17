@@ -29,11 +29,12 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import views.html.subscriptions
 
 import scala.collection.JavaConversions._
 
-class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
 

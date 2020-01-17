@@ -34,9 +34,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
                            val sessionService: SessionService,
                            val applicationService: ApplicationService,
-                           val messagesApi: MessagesApi,
-                           implicit val appConfig: ApplicationConfig)
-                          (implicit ec: ExecutionContext)
+                           val messagesApi: MessagesApi
+                           )
+                          (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController() with ApplicationHelper {
 
   def canChangeTermsOfUseAction(applicationId: String)

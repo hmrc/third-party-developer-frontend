@@ -16,6 +16,9 @@
 
 package unit.views
 
+import config.ApplicationConfig
+import controllers.TermsOfUseForm
+import domain._
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import org.scalatest.Matchers
@@ -26,13 +29,10 @@ import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import config.ApplicationConfig
-import controllers.TermsOfUseForm
-import controllers.routes
-import domain._
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 
-class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite {
+class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
   case class Page(doc: Appendable) {
     lazy val body = Jsoup.parse(doc.body)
     lazy val title = body.title

@@ -16,13 +16,13 @@
 
 package unit.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import controllers.{Support, SupportEnquiryForm}
 import domain.{Developer, LoggedInState, Session, TicketCreated}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
-import org.mockito.BDDMockito._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.BDDMockito._
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -32,7 +32,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
@@ -42,8 +41,8 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[DeskproService],
       mock[SessionService],
       mock[ErrorHandler],
-      messagesApi,
-      mock[ApplicationConfig])
+      messagesApi
+      )
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")

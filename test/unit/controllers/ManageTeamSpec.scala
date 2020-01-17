@@ -16,15 +16,14 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import helpers.string._
 import org.joda.time.{DateTime, DateTimeZone}
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, anyString, eq => mockEq}
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -59,8 +58,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       mock[ThirdPartyDeveloperConnector],
       mock[ApplicationService],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val hc = HeaderCarrier()

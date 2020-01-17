@@ -16,18 +16,20 @@
 
 package unit.config
 
+import com.codahale.metrics.SharedMetricRegistries
 import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
-import domain.{LoggedInState, LoggedInUser, AtLeastPartLoggedInEnablingMfa}
+import domain.{AtLeastPartLoggedInEnablingMfa, LoggedInState, LoggedInUser}
 import org.mockito.BDDMockito.given
 import org.scalatest.mockito.MockitoSugar
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeHeaders, FakeRequest}
 import service.SessionService
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import utils.SharedMetricsClearDown
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuthConfigImplSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class AuthConfigImplSpec extends UnitSpec with MockitoSugar with WithFakeApplication with SharedMetricsClearDown {
 
   object TestAuthConfigImpl extends AuthConfigImpl {
     val sessionService: SessionService = mock[SessionService]

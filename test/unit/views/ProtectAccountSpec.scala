@@ -24,9 +24,10 @@ import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
+import utils.SharedMetricsClearDown
 import views.html
 
-class ProtectAccountSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite {
+class ProtectAccountSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
 
   "Protect Account view" should {
     implicit val mockConfig = mock[ApplicationConfig]

@@ -34,9 +34,9 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
                                val sessionService: SessionService,
                                val auditService: AuditService,
                                val errorHandler: ErrorHandler,
-                               val messagesApi: MessagesApi,
-                               implicit val appConfig: ApplicationConfig)
-                              (implicit ec: ExecutionContext) extends ApplicationController {
+                               val messagesApi: MessagesApi
+                               )
+                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>

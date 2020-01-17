@@ -29,9 +29,9 @@ import scala.concurrent.ExecutionContext
 class ApplicationVerification @Inject()(val service: ApplicationService,
                                         val sessionService: SessionService,
                                         val errorHandler: ErrorHandler,
-                                        val messagesApi: MessagesApi,
-                                        implicit val appConfig: ApplicationConfig)
-                                       (implicit ec: ExecutionContext) extends LoggedOutController {
+                                        val messagesApi: MessagesApi
+                                        )
+                                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedOutController {
 
   def verifyUplift(code: String) = Action.async { implicit request =>
     service.verify(code) map { _ => Ok(views.html.applicationVerification(success = true))

@@ -16,10 +16,8 @@
 
 package unit.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
-import connectors.ThirdPartyDeveloperConnector
+import config.ErrorHandler
 import controllers.AddApplication
-import domain.Environment.PRODUCTION
 import domain._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
@@ -30,11 +28,10 @@ import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.TestApplications.{aStandardApplication, tokens}
+import utils.TestApplications.tokens
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class AddApplicationSuccessSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
@@ -65,8 +62,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val hc = HeaderCarrier()

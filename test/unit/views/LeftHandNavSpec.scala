@@ -16,18 +16,20 @@
 
 package unit.views
 
-import domain._
 import domain.Environment.PRODUCTION
+import domain._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils.now
+import utils.SharedMetricsClearDown
 import views.html.include.leftHandNav
+
 import scala.collection.JavaConversions._
 
-class LeftHandNavSpec extends UnitSpec with OneServerPerSuite {
+class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown {
 
   trait Setup {
     implicit val request = FakeRequest()

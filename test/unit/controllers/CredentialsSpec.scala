@@ -16,7 +16,6 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain.Environment.SANDBOX
@@ -39,7 +38,6 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
@@ -66,8 +64,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       mock[AuditService],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
 

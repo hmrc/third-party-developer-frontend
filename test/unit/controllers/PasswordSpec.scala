@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers.{Password, routes}
 import domain.{ChangePassword, InvalidResetCode, PasswordReset, UnverifiedAccount}
-import org.mockito.ArgumentMatchers.{eq => meq, any}
+import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -30,7 +30,6 @@ import service.{AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
 
@@ -48,8 +47,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mockConnector,
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     def mockRequestResetFor(email: String) =
@@ -113,7 +111,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
         (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
         .withSession((emailSessionName, developerEmail))
       val result = await(underTest.processPasswordChange(
-        developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, global))
+        developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, implicitly))
       status(result) shouldBe FORBIDDEN
       result.toString should include(developerEmail.replace("@", "%40"))
     }

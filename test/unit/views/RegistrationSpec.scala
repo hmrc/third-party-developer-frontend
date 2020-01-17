@@ -27,9 +27,10 @@ import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 
-class RegistrationSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite {
+class RegistrationSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
   "Registration page" should {
 
     val appConfig = mock[ApplicationConfig]

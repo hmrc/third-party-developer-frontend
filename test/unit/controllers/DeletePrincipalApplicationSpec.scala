@@ -16,13 +16,13 @@
 
 package unit.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import controllers.DeleteApplication
 import domain._
 import org.joda.time.DateTime
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito.verify
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -32,7 +32,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
@@ -46,8 +45,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       mock[ApplicationService],
       mock[SessionService],
       mock[ErrorHandler],
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val appId = "1234"

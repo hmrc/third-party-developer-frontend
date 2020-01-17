@@ -16,14 +16,13 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
 import play.api.libs.json.Json
 import play.api.mvc.Result
@@ -34,10 +33,9 @@ import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.TestApplications._
 import utils.ViewHelpers._
-import utils.{TestApplications, WithCSRFAddToken}
+import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
@@ -298,8 +296,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
@@ -335,7 +332,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq())
     }
 
-    def captureUpdatedApplication = {
+    def captureUpdatedApplication: UpdateApplicationRequest = {
       val captor = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
       verify(underTest.applicationService).update(captor.capture())(any[HeaderCarrier])
       captor.getValue

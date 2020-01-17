@@ -30,11 +30,12 @@ import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilterConfig
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import utils.SharedMetricsClearDown
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
+class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication with SharedMetricsClearDown {
 
   trait Setup {
     implicit val sys = ActorSystem("SessionTimeoutFilterWithWhitelistSpec")

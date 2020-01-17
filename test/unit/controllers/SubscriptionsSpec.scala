@@ -16,13 +16,12 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain._
 import org.joda.time.DateTimeZone
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -93,8 +92,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig])
+      messagesApi
+    )
 
     val hc = HeaderCarrier()
 

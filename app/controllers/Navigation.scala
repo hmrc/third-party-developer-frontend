@@ -26,12 +26,12 @@ import play.api.mvc.{Action, AnyContent}
 import service.SessionService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Navigation @Inject()(val sessionService: SessionService,
-                           val errorHandler: ErrorHandler,
-                           implicit val appConfig: ApplicationConfig)
+                           val errorHandler: ErrorHandler)
+                          (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends FrontendController with AuthConfigImpl with HeaderEnricher with OptionalAuthElement {
 
   def navLinks(): Action[AnyContent] = AsyncStack {

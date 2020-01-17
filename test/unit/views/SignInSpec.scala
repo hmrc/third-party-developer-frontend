@@ -18,7 +18,7 @@ package unit.views
 
 import config.ApplicationConfig
 import controllers.LoginForm
-import domain.{DeveloperSession, LoggedInState}
+import domain.LoggedInState
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -28,9 +28,10 @@ import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 
-class SignInSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class SignInSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)

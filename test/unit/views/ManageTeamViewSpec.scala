@@ -29,9 +29,10 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 
-class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
   val appId = "1234"

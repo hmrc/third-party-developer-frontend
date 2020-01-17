@@ -23,6 +23,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import service.{AuditService, SessionService}
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
 
 @Singleton
@@ -30,8 +31,8 @@ class SessionController @Inject()(val auditService: AuditService,
                         val sessionService: SessionService,
                         val connector: ThirdPartyDeveloperConnector,
                         val errorHandler: ErrorHandler,
-                        val messagesApi: MessagesApi,
-                        implicit val appConfig: ApplicationConfig)
+                        val messagesApi: MessagesApi)
+                         (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController with PasswordChange {
 
   def keepAlive(): Action[AnyContent] = loggedInAction { implicit request =>
