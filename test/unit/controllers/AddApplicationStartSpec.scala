@@ -123,4 +123,36 @@ class AddApplicationStartSpec extends BaseControllerSpec
       redirectLocation(result) shouldBe Some("/developer/login")
     }
   }
+
+  "Add principal applications start page" should {
+
+    "return the add applications page with the user logged in" in new Setup {
+
+      private val result = await(underTest.addApplicationPrincipal()(loggedInRequest))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Get production credentials")
+      bodyOf(result) should include(loggedInUser.displayedName)
+      bodyOf(result) should include("Sign out")
+      bodyOf(result) should include("Now that you've tested your software you can request production credentials to use live data.")
+      bodyOf(result) should not include "Sign in"
+    }
+
+    "return to the login page when the user is not logged in" in new Setup {
+
+      val request = FakeRequest()
+
+      private val result = await(underTest.addApplicationPrincipal()(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+    }
+
+    "redirect to the login screen when partly logged" in new Setup {
+      private val result = await(underTest.addApplicationPrincipal()(partLoggedInRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+    }
+  }
 }
