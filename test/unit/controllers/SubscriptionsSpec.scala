@@ -93,8 +93,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig])
+      messagesApi
+    )
 
     val hc = HeaderCarrier()
 

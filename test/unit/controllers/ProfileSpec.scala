@@ -34,7 +34,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
@@ -46,8 +45,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mock[ThirdPartyDeveloperConnector],
       mock[ErrorHandler],
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")

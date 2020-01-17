@@ -40,9 +40,9 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                  val apiSubscriptionsHelper: ApiSubscriptionsHelper,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
-                                 val messagesApi: MessagesApi,
-                                 implicit val appConfig: ApplicationConfig)
-                                (implicit ec: ExecutionContext)
+                                 val messagesApi: MessagesApi
+                                 )
+                                (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController() with ApplicationHelper {
 
   private def canUseChecksAction(applicationId: String)

@@ -35,7 +35,6 @@ import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
 class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
@@ -64,8 +63,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val hc: HeaderCarrier = HeaderCarrier()

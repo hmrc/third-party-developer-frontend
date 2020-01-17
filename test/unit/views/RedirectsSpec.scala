@@ -27,9 +27,10 @@ import play.api.i18n.Messages.Implicits._
 import config.ApplicationConfig
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 
-class RedirectsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class RedirectsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
   val appId = "1234"

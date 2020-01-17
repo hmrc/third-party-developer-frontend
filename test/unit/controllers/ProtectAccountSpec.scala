@@ -39,7 +39,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
@@ -62,7 +61,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       messagesApi,
       mock[ErrorHandler],
-      mock[MfaMandateService])(mock[ApplicationConfig], global) {
+      mock[MfaMandateService]) {
       override val qrCode: QRCode = mock[QRCode]
     }
 

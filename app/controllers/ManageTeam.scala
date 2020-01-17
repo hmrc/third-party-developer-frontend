@@ -37,9 +37,10 @@ class ManageTeam @Inject()(val sessionService: SessionService,
                            developerConnector: ThirdPartyDeveloperConnector,
                            val applicationService: ApplicationService,
                            val errorHandler: ErrorHandler,
-                           val messagesApi: MessagesApi,
-                           implicit val appConfig: ApplicationConfig)
-                          (implicit ec: ExecutionContext) extends ApplicationController {
+                           val messagesApi: MessagesApi
+                           )
+                          (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+  extends ApplicationController {
 
   private def whenAppSupportsTeamMembers(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)

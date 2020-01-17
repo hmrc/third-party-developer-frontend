@@ -38,7 +38,6 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
@@ -89,8 +88,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       mock[ApiSubscriptionsHelper],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val hc = HeaderCarrier()

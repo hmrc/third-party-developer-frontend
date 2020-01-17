@@ -36,9 +36,9 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                         val applicationService: ApplicationService,
                         val sessionService: SessionService,
                         val errorHandler: ErrorHandler,
-                        val messagesApi: MessagesApi,
-                        implicit val appConfig: ApplicationConfig)
-                       (implicit ec: ExecutionContext)
+                        val messagesApi: MessagesApi
+                        )
+                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController {
 
   def canChangeDetailsAction(applicationId: String)

@@ -26,9 +26,10 @@ import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 
-class ProfileSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class ProfileSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
   private val request = FakeRequest().withCSRFToken

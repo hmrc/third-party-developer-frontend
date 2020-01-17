@@ -18,7 +18,7 @@ package unit.controllers
 
 import java.util.UUID
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import controllers._
 import domain._
 import org.mockito.ArgumentMatchers.{any, eq => meq, _}
@@ -34,7 +34,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
@@ -65,7 +64,6 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   trait Setup {
     private val daysRemaining = 10
 
-    implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     val mfaMandateService: MfaMandateService = mock[MfaMandateService]
 
     val underTest = new UserLoginAccount(mock[AuditService],

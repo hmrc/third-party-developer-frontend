@@ -18,23 +18,26 @@ package unit.config
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import com.codahale.metrics.SharedMetricRegistries
 import config.{SessionTimeoutFilterWithWhitelist, WhitelistedCall}
 import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilterConfig
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import utils.SharedMetricsClearDown
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
+class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication with SharedMetricsClearDown {
 
   trait Setup {
     implicit val sys = ActorSystem("SessionTimeoutFilterWithWhitelistSpec")

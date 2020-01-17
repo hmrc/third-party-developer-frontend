@@ -59,8 +59,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       mock[ThirdPartyDeveloperConnector],
       mock[ApplicationService],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val hc = HeaderCarrier()

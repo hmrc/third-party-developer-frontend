@@ -25,9 +25,10 @@ import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 
-class ProfileDeleteSubmittedSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class ProfileDeleteSubmittedSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
 

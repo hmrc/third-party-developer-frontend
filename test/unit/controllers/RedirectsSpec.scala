@@ -55,8 +55,7 @@ class RedirectsSpec extends BaseControllerSpec {
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)

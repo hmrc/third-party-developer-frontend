@@ -33,9 +33,9 @@ import scala.concurrent.Future.successful
 class Redirects @Inject()(val applicationService: ApplicationService,
                           val sessionService: SessionService,
                           val errorHandler: ErrorHandler,
-                          val messagesApi: MessagesApi,
-                          implicit val appConfig: ApplicationConfig)
-                         (implicit ec: ExecutionContext)
+                          val messagesApi: MessagesApi
+                         )
+                         (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController {
 
 

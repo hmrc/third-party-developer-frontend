@@ -51,7 +51,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val applicationService: ApplicationService,
                                  val messagesApi: MessagesApi,
                                  val mfaMandateService: MfaMandateService)
-                                (implicit ec: ExecutionContext, val appConfig: ApplicationConfig)
+                                (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedOutController with LoginLogout with Auditing {
 
   import play.api.data._

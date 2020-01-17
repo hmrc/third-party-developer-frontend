@@ -32,7 +32,6 @@ import utils.CSRFTokenHelper._
 import utils.WithLoggedInSession._
 import utils.{TestApplications, WithCSRFAddToken}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.failed
 
 class IpWhitelistSpec extends BaseControllerSpec with TestApplications with WithCSRFAddToken {
@@ -44,8 +43,7 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val sessionId = "sessionId"

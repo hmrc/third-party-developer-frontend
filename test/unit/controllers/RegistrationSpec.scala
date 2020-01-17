@@ -41,8 +41,7 @@ class RegistrationSpec extends BaseControllerSpec {
       mock[SessionService],
       mock[ThirdPartyDeveloperConnector],
       mockErrorHandler,
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)

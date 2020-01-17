@@ -42,9 +42,8 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                               val applicationService: ApplicationService,
                               val sessionService: SessionService,
                               val errorHandler: ErrorHandler,
-                              val messagesApi: MessagesApi,
-                              implicit val appConfig: ApplicationConfig)
-                             (implicit ec: ExecutionContext)
+                              val messagesApi: MessagesApi)
+                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController with ApplicationHelper {
 
   private def canManageLockedApiSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =

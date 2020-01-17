@@ -18,10 +18,8 @@ package unit.controllers
 
 import java.util.UUID
 
-import config.ApplicationConfig
 import controllers._
-import domain.{Developer, DeveloperSession, LoggedInState, Session}
-import domain.{Developer, Session, TicketId, TicketResult}
+import domain._
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
@@ -35,7 +33,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
@@ -47,7 +44,6 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   val developerSession: DeveloperSession = DeveloperSession(session)
 
   trait Setup {
-    implicit val mockAppConfig = mock[ApplicationConfig]
     val underTest = new UserLogoutAccount(
       mock[DeskproService],
       mock[SessionService],

@@ -16,17 +16,26 @@
 
 package unit.controllers
 
-import config.ErrorHandler
+import com.codahale.metrics.SharedMetricRegistries
+import config.{ApplicationConfig, ErrorHandler}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
 import play.twirl.api.Html
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import utils.SharedMetricsClearDown
 
-class BaseControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication with ScalaFutures {
+import scala.concurrent.ExecutionContext
+
+class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication with SharedMetricsClearDown {
+
+  implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
+
+  implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
   implicit val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]
 
