@@ -17,7 +17,7 @@
 package unit.views
 
 import config.ApplicationConfig
-import controllers.{PageData, VerifyPasswordForm}
+import controllers.VerifyPasswordForm
 import domain._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
@@ -29,11 +29,12 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import views.html.credentials
 
 import scala.collection.JavaConversions._
 
-class CredentialsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
   trait Setup {
     val appConfig = mock[ApplicationConfig]
 

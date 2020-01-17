@@ -16,7 +16,7 @@
 
 package unit.domain
 
-import domain.{APIStatus, APISubscriptionStatus, APIVersion, Role}
+import domain.{APIStatus, APISubscriptionStatus, APIVersion}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class APISubscriptionStatusTest extends UnitSpec {

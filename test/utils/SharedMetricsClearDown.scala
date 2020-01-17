@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-package unit.domain
+package utils
 
-import controllers.SupportEnquiryForm
-import domain.DeskproTicket
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
+import com.codahale.metrics.SharedMetricRegistries
+import org.scalatest.{BeforeAndAfterAll, Suite}
 
-class DeskproTicketSpec extends UnitSpec {
+trait SharedMetricsClearDown extends BeforeAndAfterAll {
+  self: Suite =>
 
-  implicit val fakeRequest = FakeRequest()
-
-  "A DeskproTicket created from a support enquiry" should {
-    "have the email address of the party submitting the enquiry" in {
-
-      val form = SupportEnquiryForm("A Developer", "developer@example.com", "My comments")
-
-      val ticket = DeskproTicket.createFromSupportEnquiry(form, "Developer Hub")
-
-      ticket.email shouldBe "developer@example.com"
-    }
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    SharedMetricRegistries.clear()
   }
+
+  override def afterAll(): Unit = {
+    SharedMetricRegistries.clear()
+    super.afterAll()
+  }
+
 }

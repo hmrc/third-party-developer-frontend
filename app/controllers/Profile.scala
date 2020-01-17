@@ -30,14 +30,15 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class Profile @Inject()(applicationService: ApplicationService,
-                        val auditService: AuditService,
-                        val sessionService: SessionService,
-                        val connector: ThirdPartyDeveloperConnector,
-                        val errorHandler: ErrorHandler,
-                        val messagesApi: MessagesApi,
-                        implicit val appConfig: ApplicationConfig)
-                       (implicit ec: ExecutionContext)
+class Profile @Inject()(
+  val applicationService: ApplicationService,
+  val auditService: AuditService,
+  val sessionService: SessionService,
+  val connector: ThirdPartyDeveloperConnector,
+  val errorHandler: ErrorHandler,
+  val messagesApi: MessagesApi
+)
+(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController with PasswordChange {
 
   import ErrorFormBuilder.GlobalError

@@ -28,8 +28,9 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 
-class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPerSuite {
+class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
   val request = FakeRequest().withCSRFToken
   val appConfig = mock[ApplicationConfig]
   val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)

@@ -16,16 +16,12 @@
 
 package unit.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
-import connectors.ThirdPartyDeveloperConnector
+import config.ErrorHandler
 import controllers._
 import domain._
 import org.joda.time.DateTimeZone
-import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito
-import org.mockito.Mockito.verify
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -33,11 +29,9 @@ import play.filters.csrf.CSRF.TokenProvider
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future._
 
 class ManageApplicationsSpec
@@ -69,8 +63,7 @@ class ManageApplicationsSpec
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     given(addApplicationController.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))

@@ -16,12 +16,11 @@
 
 package unit.controllers
 
-import controllers.ErrorFormBuilder
+import controllers.ErrorFormBuilder.GlobalError
+import controllers.{ErrorFormBuilder, _}
 import org.scalatest.Matchers
-import play.api.data.{FormError, Form, Forms}
+import play.api.data.{Form, FormError, Forms}
 import uk.gov.hmrc.play.test.UnitSpec
-import ErrorFormBuilder.GlobalError
-import controllers._
 
 
 class GlobalErrorSpec extends UnitSpec with Matchers {

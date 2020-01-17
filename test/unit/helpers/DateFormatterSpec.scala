@@ -27,11 +27,13 @@ import uk.gov.hmrc.play.test.UnitSpec
 class DateFormatterSpec extends UnitSpec with ScalaFutures with MockitoSugar with BeforeAndAfterAll {
   val FixedTimeNow: DateTime = new DateTime("2019-09-01T00:30:00.000")
   override def beforeAll(): Unit = {
+    super.beforeAll()
     DateTimeUtils.setCurrentMillisFixed(FixedTimeNow.toDate.getTime)
   }
 
   override def afterAll(): Unit = {
     DateTimeUtils.setCurrentMillisSystem()
+    super.afterAll()
   }
 
   "formatDate" should {

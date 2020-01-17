@@ -27,10 +27,11 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 import views.html.deleteApplication
 
-class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig: ApplicationConfig = mock[ApplicationConfig]
   val appId = "1234"

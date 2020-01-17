@@ -32,9 +32,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class Registration @Inject()(override val sessionService: SessionService,
                              val connector: ThirdPartyDeveloperConnector,
                              val errorHandler: ErrorHandler,
-                             val messagesApi: MessagesApi,
-                             implicit val appConfig: ApplicationConfig)
-                            (implicit ec: ExecutionContext)
+                             val messagesApi: MessagesApi
+                             )
+                            (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedOutController {
 
   import ErrorFormBuilder.GlobalError

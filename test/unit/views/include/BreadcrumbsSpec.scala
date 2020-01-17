@@ -24,10 +24,11 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
+import utils.SharedMetricsClearDown
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class BreadcrumbsSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class BreadcrumbsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
 

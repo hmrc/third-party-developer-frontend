@@ -26,9 +26,10 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 
-class ApplicationVerificationSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class ApplicationVerificationSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
 

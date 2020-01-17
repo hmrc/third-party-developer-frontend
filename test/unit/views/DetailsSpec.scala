@@ -31,9 +31,9 @@ import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.TestApplications
+import utils.{SharedMetricsClearDown, TestApplications}
 
-class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with TestApplications {
+class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown with TestApplications {
 
   case class Page(doc: Appendable) {
     lazy val body: Document = Jsoup.parse(doc.body)

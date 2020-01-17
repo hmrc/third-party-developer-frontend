@@ -16,30 +16,23 @@
 
 package unit.controllers
 
-import akka.stream.Materializer
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import controllers.Navigation
 import domain._
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.BDDMockito._
-import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.OK
-import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.WithLoggedInSession._
 
 import scala.concurrent.Future._
 
-class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class NavigationSpec extends BaseControllerSpec {
 
-  implicit val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]
-
-  implicit val materializer: Materializer = fakeApplication.materializer
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
@@ -50,8 +43,7 @@ class NavigationSpec extends UnitSpec with MockitoSugar with WithFakeApplication
   class Setup(loggedInState: Option[LoggedInState]) {
     val underTest = new Navigation(
       mock[SessionService],
-      mock[ErrorHandler],
-      mock[ApplicationConfig]
+      mock[ErrorHandler]
     )
 
     loggedInState.map(loggedInState => {

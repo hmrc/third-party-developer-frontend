@@ -24,9 +24,9 @@ import play.api.i18n.I18nSupport
 import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.HeaderCarrierConverter
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case object AppKey extends RequestAttributeKey[Future[Application]]
 
@@ -40,6 +40,7 @@ trait HeaderEnricher {
 }
 
 abstract class LoggedInController extends BaseController with AuthElement {
+
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
     request match {
@@ -120,11 +121,22 @@ abstract class LoggedOutController()
   }
 }
 
+trait HeaderCarrierConversion
+  extends uk.gov.hmrc.play.bootstrap.controller.BaseController
+    with uk.gov.hmrc.play.bootstrap.controller.Utf8MimeTypes {
+
+  override implicit def hc(implicit rh: RequestHeader): HeaderCarrier =
+    HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
+}
+
 abstract class BaseController()
-  extends AuthConfigImpl with I18nSupport with FrontendController with HeaderEnricher {
+  extends AuthConfigImpl with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
 
   val errorHandler: ErrorHandler
   val sessionService: SessionService
+
+  implicit def ec: ExecutionContext
+
   override implicit val appConfig: ApplicationConfig
 
   def ensureLoggedOut(implicit request: Request[_], hc: HeaderCarrier) = {

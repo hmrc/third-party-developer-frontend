@@ -16,15 +16,15 @@
 
 package unit.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Profile
 import domain._
 import org.jsoup.Jsoup
-import org.mockito.BDDMockito._
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.BDDMockito._
 import org.mockito.Mockito.verify
-import org.mockito.{ArgumentCaptor, Matchers}
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
@@ -34,7 +34,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
@@ -46,8 +45,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mock[ThirdPartyDeveloperConnector],
       mock[ErrorHandler],
-      messagesApi,
-      mock[ApplicationConfig]
+      messagesApi
     )
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")

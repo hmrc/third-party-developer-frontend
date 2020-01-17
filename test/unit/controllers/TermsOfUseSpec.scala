@@ -16,7 +16,6 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import controllers.TermsOfUse
 import domain.Environment._
 import domain.Role._
@@ -36,19 +35,17 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup {
-
     val underTest = new TermsOfUse(
       mockErrorHandler,
       mock[SessionService],
       mock[ApplicationService],
-      messagesApi,
-      mock[ApplicationConfig])
+      messagesApi
+      )
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"

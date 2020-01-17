@@ -33,9 +33,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class Support @Inject()(val deskproService: DeskproService,
                         val sessionService: SessionService,
                         val errorHandler: ErrorHandler,
-                        val messagesApi: MessagesApi,
-                        implicit val appConfig: ApplicationConfig)
-                       (implicit ec: ExecutionContext)
+                        val messagesApi: MessagesApi
+                       )
+                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends BaseController with OptionalAuthElement {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form

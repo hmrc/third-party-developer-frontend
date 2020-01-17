@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import controllers.ApplicationSummary
 import domain._
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits.applicationMessages
@@ -27,12 +28,11 @@ import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, linkExistsWithHref}
 import utils.CSRFTokenHelper._
-import scala.collection.JavaConversions._
-import org.jsoup.nodes.Document
+import utils.SharedMetricsClearDown
+import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 
-class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
@@ -41,7 +41,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with M
 
     val greenButtons = document.select(s"a[href=$href][class=button]")
 
-    greenButtons.nonEmpty
+    !greenButtons.isEmpty
   }
 
   "view all applications page" should {

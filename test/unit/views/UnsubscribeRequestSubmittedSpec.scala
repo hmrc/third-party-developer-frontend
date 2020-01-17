@@ -26,9 +26,10 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
+import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 
-class UnsubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with MockitoSugar {
+class UnsubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
   "Unsubscribe request submitted page" should {
     "render with no errors" in {
 

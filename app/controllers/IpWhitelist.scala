@@ -33,9 +33,9 @@ class IpWhitelist @Inject()(deskproService: DeskproService,
                             val applicationService: ApplicationService,
                             val sessionService: SessionService,
                             val errorHandler: ErrorHandler,
-                            val messagesApi: MessagesApi,
-                            implicit val appConfig: ApplicationConfig)
-                           (implicit ec: ExecutionContext)
+                            val messagesApi: MessagesApi
+                            )
+                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController {
 
   private def canChangeIpWhitelistAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
