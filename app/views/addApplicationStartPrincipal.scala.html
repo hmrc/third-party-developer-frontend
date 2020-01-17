@@ -23,7 +23,7 @@
 @import model.Crumb
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
-@pageHeading = @{"Add an application to the sandbox"}
+@pageHeading = @{"Get production credentials"}
 
 @devMain(
     title = pageHeading,
@@ -40,22 +40,14 @@
         <h1 class="heading-xlarge">@pageHeading</h1>
     </header>
 
-    <p>Add your application to the sandbox so you can test it.</p>
-
-    <p>Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:</p>
-
-    <ul class="list list-bullet">
-        <li>get its sandbox credentials</li>
-        <li>use its credentials for integration testing</li>
-    </ul>
-
-    <h2 class="heading-medium">Terms of use</h2>
-
-    <p>In production, your application will need to comply with the expectations set out in our
-        <a href="/api-documentation/docs/terms-of-use">terms of use.</a>
-    </p>
-
+    <p>Now that you've tested your software you can request production credentials to use live data.</p>
+    <div class="panel panel-border-wide">
+        <p>To do that you must comply with our
+            <a href="/api-documentation/docs/terms-of-use">terms of use</a>.
+        </p>
+    </div>
+    <br/>
     <p>
-        <a id="add" href="@controllers.routes.AddApplication.addApplicationName(Environment.SANDBOX)" class="button">Continue</a>
+        <a id="add" href="@controllers.routes.AddApplication.tenDaysWarning" class="button">Continue</a>
     </p>
 }
