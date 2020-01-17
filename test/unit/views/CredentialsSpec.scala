@@ -17,7 +17,7 @@
 package unit.views
 
 import config.ApplicationConfig
-import controllers.{PageData, VerifyPasswordForm}
+import controllers.VerifyPasswordForm
 import domain._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup

@@ -18,7 +18,7 @@ package unit.views
 
 import config.ApplicationConfig
 import controllers.LoginForm
-import domain.{DeveloperSession, LoggedInState}
+import domain.LoggedInState
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite

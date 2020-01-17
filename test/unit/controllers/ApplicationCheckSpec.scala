@@ -16,14 +16,13 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import controllers.{APISubscriptions, ApiSubscriptionsHelper, ApplicationCheck, GroupedSubscriptions}
 import domain.Role._
 import domain._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer

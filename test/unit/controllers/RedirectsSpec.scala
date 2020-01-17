@@ -16,13 +16,12 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import controllers.Redirects
 import domain._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito.verify
 import play.api.mvc.Result
 import play.api.test.FakeRequest

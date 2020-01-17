@@ -16,11 +16,10 @@
 
 package unit.domain
 
-import domain.DeskproTicket
 import controllers.SupportEnquiryForm
-import uk.gov.hmrc.play.test.UnitSpec
+import domain.DeskproTicket
 import play.api.test.FakeRequest
-import org.scalatest.Matchers
+import uk.gov.hmrc.play.test.UnitSpec
 
 class DeskproTicketSpec extends UnitSpec {
 

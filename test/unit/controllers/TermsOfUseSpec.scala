@@ -16,7 +16,6 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import controllers.TermsOfUse
 import domain.Environment._
 import domain.Role._

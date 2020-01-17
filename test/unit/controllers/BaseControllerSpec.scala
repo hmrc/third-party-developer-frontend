@@ -16,11 +16,9 @@
 
 package unit.controllers
 
-import com.codahale.metrics.SharedMetricRegistries
 import config.{ApplicationConfig, ErrorHandler}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.i18n.MessagesApi

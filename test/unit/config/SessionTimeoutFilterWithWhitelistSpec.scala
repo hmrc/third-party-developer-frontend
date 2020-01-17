@@ -18,14 +18,12 @@ package unit.config
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.codahale.metrics.SharedMetricRegistries
 import config.{SessionTimeoutFilterWithWhitelist, WhitelistedCall}
 import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.mvc._

@@ -16,7 +16,7 @@
 
 package unit.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import controllers.{Support, SupportEnquiryForm}
 import domain.{Developer, LoggedInState, Session, TicketCreated}
 import org.jsoup.Jsoup

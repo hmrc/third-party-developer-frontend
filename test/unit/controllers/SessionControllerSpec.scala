@@ -18,7 +18,7 @@ package unit.controllers
 
 import java.util.UUID
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import controllers.SessionController
 import domain.{Developer, LoggedInState, Session}
@@ -26,8 +26,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import play.api.http.Status._
 import play.api.i18n.MessagesApi
-import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import play.api.test.Helpers.redirectLocation
+import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import play.filters.csrf.CSRF.TokenProvider
 import service.{AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier

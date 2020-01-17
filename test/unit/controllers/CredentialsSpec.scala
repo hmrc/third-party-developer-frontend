@@ -16,7 +16,6 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain.Environment.SANDBOX

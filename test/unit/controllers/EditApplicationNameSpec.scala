@@ -16,7 +16,7 @@
 
 package unit.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import controllers._
 import domain._
 import org.joda.time.DateTimeZone

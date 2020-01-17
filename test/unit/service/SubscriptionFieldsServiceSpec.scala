@@ -22,16 +22,16 @@ import connectors.{ApiSubscriptionFieldsConnector, ThirdPartyApplicationConnecto
 import domain.ApiSubscriptionFields.{SubscriptionField, SubscriptionFields, fields}
 import domain.{Application, Environment}
 import org.joda.time.DateTime
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, anyString, eq => meq}
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import play.api.http.Status.CREATED
 import service.{Connectors, ConnectorsWrapper, SubscriptionFieldsService}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
-import play.api.http.Status.CREATED
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

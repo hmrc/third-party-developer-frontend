@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import controllers.{Password, routes}
 import domain.{ChangePassword, InvalidResetCode, PasswordReset, UnverifiedAccount}
-import org.mockito.ArgumentMatchers.{eq => meq, any}
+import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

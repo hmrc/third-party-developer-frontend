@@ -16,15 +16,15 @@
 
 package unit.controllers
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Profile
 import domain._
 import org.jsoup.Jsoup
-import org.mockito.BDDMockito._
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.BDDMockito._
 import org.mockito.Mockito.verify
-import org.mockito.{ArgumentCaptor, Matchers}
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider

@@ -16,8 +16,8 @@
 
 package unit.views
 
-import domain._
 import domain.Environment.PRODUCTION
+import domain._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatestplus.play.OneServerPerSuite

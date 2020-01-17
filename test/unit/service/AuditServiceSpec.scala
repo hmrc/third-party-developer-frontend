@@ -18,7 +18,7 @@ package unit.service
 
 import config.ApplicationConfig
 import domain.LoggedInState
-import org.mockito.{ArgumentMatcher, ArgumentMatchers}
+import org.mockito.ArgumentMatcher
 import org.mockito.ArgumentMatchers.{any, argThat}
 import org.mockito.Mockito._
 import org.scalatest.Matchers

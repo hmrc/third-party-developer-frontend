@@ -16,7 +16,6 @@
 
 package unit.controllers
 
-import config.ApplicationConfig
 import controllers.{IpWhitelist, SupportEnquiryForm}
 import domain._
 import org.mockito.ArgumentCaptor

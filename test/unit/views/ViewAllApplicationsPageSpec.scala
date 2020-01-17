@@ -27,9 +27,9 @@ import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 import utils.CSRFTokenHelper._
 import utils.SharedMetricsClearDown
+import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 
 class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 

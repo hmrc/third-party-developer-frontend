@@ -20,6 +20,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import connectors.ProxiedHttpClient
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -29,7 +30,6 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.test.UnitSpec
-import org.mockito.ArgumentMatchers.any
 
 class ProxiedHttpClientSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 

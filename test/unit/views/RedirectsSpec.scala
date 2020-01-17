@@ -16,17 +16,17 @@
 
 package unit.views
 
+import config.ApplicationConfig
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
+import org.jsoup.Jsoup
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
+import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
-import play.api.i18n.Messages.Implicits._
-import config.ApplicationConfig
-import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
 import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
 

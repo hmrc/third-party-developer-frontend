@@ -18,7 +18,7 @@ package unit.controllers
 
 import java.net.URI
 
-import config.{ApplicationConfig, ErrorHandler}
+import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import controllers.{ProtectAccount, routes}
 import domain.{Developer, LoggedInState, Session, UpdateLoggedInStateRequest}
