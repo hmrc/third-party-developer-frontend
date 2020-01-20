@@ -154,6 +154,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
+//TODO: Remove this endpoint
   def detailsPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 

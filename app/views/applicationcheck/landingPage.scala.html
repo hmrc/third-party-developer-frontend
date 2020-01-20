@@ -21,34 +21,31 @@
 
 @(app: Application, form: Form[CheckInformationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
+@pageHeading = @{ s"Get production credentials for ${app.name}" }
 
 @devMain(
-    title = "Submit your application for checking",
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-        Crumb("Manage credentials"),
-        Crumb.application(app),
+        Crumb(pageHeading),
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
 
     @errorSummary(form)
     <heading>
         <h1 class="heading-xlarge">
-            Submit your application for checking
+            @pageHeading
         </h1>
     </heading>
 
-    <p>You can submit your application when you have completed all the sections.
-        We’ll take up to 10 working days to check your application and issue production credentials.
-    </p>
     @helper.form(action = controllers.routes.ApplicationCheck.requestCheckAction(app.id), 'class -> "form") {
         @helper.CSRF.formField
         <section class="section">
             <div class="form-group">
+                <h2 class="step-heading-1" style="margin-bottom: 0px">About your application</h2>
                 <table class="task-list">
                     <thead>
                         <tr>
@@ -57,56 +54,27 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="@if(form.errors("confirmedName").nonEmpty){form-group-error}">
-                            <td id="confirmedName" scope="row" class="step-description">
-                                @include.fieldError(form.errors,"confirmedName")
-                                <a id="confirmedNameCompleted" href="@routes.ApplicationCheck.namePage(app.id)">
-                                    Confirm your application's name
-                                </a>
-                            </td>
-                            <td class="numeric">
-                            @if(form("confirmedNameCompleted").value.contains("true")) {
-                                <div id="app-name-status" class="step-status status-completed">Complete</div>
-                            } else {
-                                <div id="app-name-status" class="step-status status-incomplete">Required</div>
-                            }
-                            </td>
-                        </tr>
-                        <tr class="@if(form.errors("applicationDetails").nonEmpty){form-group-error}">
-                            <td id="applicationDetails" scope="row" class="step-description">
-                                @include.fieldError(form.errors,"applicationDetails")
-                                <a id="applicationDetailsCompleted" href="@routes.ApplicationCheck.detailsPage(app.id)">
-                                    Tell us what your application does
-                                </a>
-                            </td>
-                            <td class="numeric">
-                            @if(form("applicationDetailsCompleted").value.contains("true")) {
-                                <div id="app-details-status" class="step-status status-completed">Complete</div>
-                            } else {
-                                <div id="app-details-status" class="step-status status-incomplete">Required</div>
-                            }
-                            </td>
-                        </tr>
                         <tr class="@if(form.errors("apiSubscriptionsConfirmed").nonEmpty) {form-group-error}">
-                        <td id="apiSubscriptions" scope="row" class="step-description">
-                            @include.fieldError(form.errors, "apiSubscriptions")
-                            <a id="apiSubscriptionsCompleted" href="@routes.ApplicationCheck.apiSubscriptionsPage(app.id)">
-                                Confirm the APIs your application uses
-                            </a>
-                        </td>
-                        <td class="numeric">
+                            <td id="apiSubscriptions" scope="row" class="step-description">
+                                @include.fieldError(form.errors, "apiSubscriptions")
+                                <a id="apiSubscriptionsCompleted" href="@routes.ApplicationCheck.apiSubscriptionsPage(app.id)">
+                                    Confirm the APIs your application uses
+                                </a>
+                            </td>
+                            <td class="numeric">
                             @if(form("apiSubscriptionsCompleted").value.contains("true")) {
-                            <div id="api-subscriptions-status" class="step-status status-completed">Complete</div>
+                                <div id="api-subscriptions-status" class="step-status status-completed">Complete</div>
                             } else {
-                            <div id="api-subscriptions-status" class="step-status status-incomplete">Required</div>
+                                <div id="api-subscriptions-status" class="step-status status-incomplete">Required</div>
                             }
-                        </td>
+                            </td>
                         </tr>
+
                         <tr class="@if(form.errors("contactDetails").nonEmpty){form-group-error}">
                             <td id="contactDetails" scope="row" class="step-description">
                                 @include.fieldError(form.errors,"contactDetails")
                                 <a id="contactDetailsCompleted" href="@routes.ApplicationCheck.contactPage(app.id)">
-                                    Provide contact details
+                                    Who to contact about your application
                                 </a>
                             </td>
                             <td class="numeric">
@@ -118,12 +86,45 @@
                             </td>
                         </tr>
 
+                        <tr class="@if(form.errors("confirmedName").nonEmpty){form-group-error}">
+                            <td id="confirmedName" scope="row" class="step-description">
+                                @include.fieldError(form.errors,"confirmedName")
+                                <a id="confirmedNameCompleted" href="@routes.ApplicationCheck.namePage(app.id)">
+                                    Confirm the name of your software
+                                </a>
+                            </td>
+                            <td class="numeric">
+                            @if(form("confirmedNameCompleted").value.contains("true")) {
+                                <div id="app-name-status" class="step-status status-completed">Complete</div>
+                            } else {
+                                <div id="app-name-status" class="step-status status-incomplete">Required</div>
+                            }
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+
+                </br>
+                </br>
+
+                <h2 class="step-heading-1" style="margin-bottom: 0px">Your responsibilities</h2>
+                        <table class="task-list">
+                            <thead>
+                                <tr>
+                                    <th scope="col"><span class="visuallyhidden">Step</span></th>
+                                    <th class="numeric" scope="col"><span class="visuallyhidden">Status</span></th>
+                                </tr>
+                            </thead>
+                        <tbody>
+
                         <tr class="@if(form.errors("providedPolicyURL").nonEmpty){form-group-error}">
 
                             <td id="providedPolicyURL" scope="row" class="step-description">
                                 @include.fieldError(form.errors,"providedPolicyURL")
                                 <a id="providedPolicyURLCompleted" href="@routes.ApplicationCheck.privacyPolicyPage(app.id)">
-                                    Provide a link to your application's privacy policy
+                                    Tell us if your application has a privacy policy
                                 </a>
                             </td>
                             <td class="numeric">
@@ -134,12 +135,12 @@
                             }
                             </td>
                         </tr>
-                        <tr class="@if(form.errors("providedTermsAndConditionsURL").nonEmpty){form-group-error}">
 
+                        <tr class="@if(form.errors("providedTermsAndConditionsURL").nonEmpty){form-group-error}">
                         <td id="providedTermsAndConditionsURL" scope="row" class="step-description">
                             @include.fieldError(form.errors,"providedTermsAndConditionsURL")
                             <a id="providedTermsAndConditionsURLCompleted" href="@routes.ApplicationCheck.termsAndConditionsPage(app.id)">
-                                Provide a link to your application's terms and conditions
+                                Tell us if your application has terms and conditions
                             </a>
                         </td>
                         <td class="numeric">
@@ -152,7 +153,6 @@
                         </tr>
 
                         <tr class="@if(form.errors("agreeTermsOfUse").nonEmpty){form-group-error}">
-
                         <td id="agreeTermsOfUse" scope="row" class="step-description">
                             @include.fieldError(form.errors,"agreeTermsOfUse")
                             <a id="termsOfUseAgreementsCompleted" href="@routes.ApplicationCheck.termsOfUsePage(app.id)">
@@ -173,8 +173,8 @@
             <div class="form-group">
                 <br>
                 <br>
-                <button id="submit" class="button" type="submit">Submit</button>
-                <a href="@routes.Credentials.credentials(app.id, None)" id="cancel" class="secondary-button">Cancel</a>
+                <button id="submit" class="button" type="submit">Check your answers</button>
+                <a href="@routes.Credentials.credentials(app.id, None)" id="cancel" class="secondary-button">Save and come back later</a>
             </div>
         </section>
     }
