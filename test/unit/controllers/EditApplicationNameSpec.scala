@@ -169,7 +169,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
       private val result = await(underTest.addApplicationName( Environment.PRODUCTION)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("What is the name of your software?")
+      bodyOf(result) should include("What&#x27;s the name of your application?")
       bodyOf(result) should include(loggedInUser.displayedName)
       bodyOf(result) should include("We show this name to your users when they authorise your software to interact with HMRC.")
       bodyOf(result) should include("It must comply with our")
