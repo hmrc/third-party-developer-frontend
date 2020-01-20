@@ -30,7 +30,7 @@
     if(environment.isSandbox()) {
         "What's the name of your application?"
     } else {
-        "Add an application to production" }
+        "What is the name of your software?" }
 }
 
 @devMain(
@@ -51,9 +51,9 @@
     </Header>
 
     @if(environment.isProduction()) {
-    <p>Now that you've tested your software you can apply to use live data.</p>
-    <p>To do that you must comply with our
-        <a href="/api-documentation/docs/terms-of-use">terms of use.</a></p>
+    <p>We show this name to your users when they authorise your software to interact with HMRC.</p>
+    <p>It must comply with our
+        <a href="/api-documentation/docs/terms-of-use">naming guidelines (opens in a new tab).</a></p>
     <br>
     }
 
@@ -74,11 +74,7 @@
     </div>
 
     <div class="form-group">
-        @if(environment.isSandbox()){
-            <button id="submit" class="button" type="submit">Continue</button>
-        } else {
-            <button id="submit" class="button" type="submit">Add</button>
-        }
+        <button id="submit" class="button" type="submit">Continue</button>
     </div>
 
     }
