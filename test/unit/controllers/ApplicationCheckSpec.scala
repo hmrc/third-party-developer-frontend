@@ -168,8 +168,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       status(result) shouldBe OK
       private val body = bodyOf(result)
 
-      body should include("Submit your application for check")
-      body should include("Cancel")
+      body should include("Get production credentials")
+      body should include("Save and come back later")
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
@@ -187,7 +187,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -201,7 +200,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepCompleteIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -215,7 +213,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepCompleteIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -229,7 +226,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepCompleteIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -244,7 +240,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepCompleteIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -259,7 +254,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepCompleteIndication("urls-status"))
@@ -274,7 +268,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
