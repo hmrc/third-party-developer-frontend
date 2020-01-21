@@ -43,7 +43,7 @@
 
     <p>We show this name to your users when they authorise your software to interact with HMRC.</p>
     <p>It must comply with our
-        <a href="/api-documentation/docs/terms-of-use" target="_blank">naming guidelines (opens in a new tab).</a></p>
+        <a data-naming-guidelines href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub/name-guidelines" target="_blank" rel="noopener noreferrer">naming guidelines (opens in a new tab).</a></p>
     <br>
 
     @helper.form(action = controllers.routes.ApplicationCheck.nameAction(app.id), 'class -> "form") {
