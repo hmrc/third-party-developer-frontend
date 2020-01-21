@@ -70,6 +70,8 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
+      elementExistsByText(document, "p", "After testing in the sandbox, you can apply for production credentials.") shouldBe true
+
       isGreenAddProductionApplicationButtonVisible(document) shouldBe true
     }
 
@@ -92,6 +94,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
       isGreenAddProductionApplicationButtonVisible(document) shouldBe false
+      elementExistsByText(document, "p", "After testing in the sandbox, you can apply for production credentials.") shouldBe false
     }
   }
 
