@@ -676,7 +676,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val result = await(addToken(underTest.namePage(appId))(loggedInRequest))
       status(result) shouldBe OK
-      bodyOf(result) should include("Confirm your application's name")
+      bodyOf(result) should include("Confirm the name of your application")
     }
 
     "successful name action different names" in new Setup {
