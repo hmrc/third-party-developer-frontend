@@ -37,7 +37,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
   val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
   def isGreenAddProductionApplicationButtonVisible(document: Document) : Boolean ={
-    val href = controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION).url
+    val href = controllers.routes.AddApplication.addApplicationPrincipal.url
 
     val greenButtons = document.select(s"a[href=$href][class=button]")
 
