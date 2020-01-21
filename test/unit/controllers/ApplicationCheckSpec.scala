@@ -1182,7 +1182,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def stepRequiredIndication(id: String) = {
-    s"""<div id="$id" class="step-status status-incomplete">Required</div>"""
+    s"""<div id="$id" class="step-status status-incomplete">To do</div>"""
   }
 
   private def stepCompleteIndication(id: String) = {
