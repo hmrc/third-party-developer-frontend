@@ -817,7 +817,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
       status(result) shouldBe OK
-      bodyOf(result) should include("Where can we find your privacy policy?")
+      bodyOf(result) should include("Does your application have a privacy policy?")
     }
 
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {

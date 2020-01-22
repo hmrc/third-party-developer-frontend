@@ -22,16 +22,16 @@
 @(app: Application, form: Form[PrivacyPolicyForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
+@pageHeading = @{ "Does your application have a privacy policy?" }
+
 @devMain(
-    title = titleError + "Where can we find your privacy policy?",
+    title = titleError + pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-        Crumb("Manage credentials"),
-        Crumb.application(app),
+        Crumb(pageHeading),
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
 
@@ -48,8 +48,11 @@
                     </h1>
                 </legend>
                 <span class="body-text">
-                    If it does, we'll show this link to users. Adding this makes users more confident
-                    in your application and more likely to let you access their data.
+                    We’ll show this link to users when you request access to their data. This should tell your
+                    users how you store their personal information according to GDPR guidelines.
+                </span>
+                <span class="body-text">
+                    You can change this at any time.
                 </span>
 
                 <div id="hasUrl" class="form-group @if(form.errors("hasUrl").nonEmpty) {form-group-error}">
@@ -80,16 +83,9 @@
             </fieldset>
         </div>
 
-        <details>
-            <summary aria-label="Why am I being asked for this?"><span class="summary">Why am I being asked for this?</span></summary>
-            <div class="panel panel-border-narrow">
-                We’ll show this link to users when you request access to their data. Adding this makes them more likely to agree.
-            </div>
-        </details>
-
         <div class="form-group">
             <button id="submit" class="button" type="submit">Save and return</button>
-            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
+            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">I'll do this later</a>
         </div>
         }
 }
