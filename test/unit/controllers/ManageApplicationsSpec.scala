@@ -112,7 +112,7 @@ class ManageApplicationsSpec
 
       status(result) shouldBe OK
       bodyOf(result) should include("We will check your application")
-      bodyOf(result) should include("This takes up to 10 working days and we may ask you to demonstrate it.")
+      bodyOf(result) should include("This takes up to 10 working days, and we may ask you to demonstrate it.")
       bodyOf(result) should not include "Sign in"
     }
 
