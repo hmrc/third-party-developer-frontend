@@ -154,39 +154,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-//TODO: Remove this endpoint
-  def detailsPage(appId: String) = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
-
-    val detailsForm = for {
-      approvalInfo <- app.checkInformation
-      applicationDetails <- approvalInfo.applicationDetails
-    } yield DetailsForm.form.fill(DetailsForm(applicationDetails))
-
-    Future.successful(detailsForm match {
-      case Some(form) => Ok(applicationcheck.applicationDetails(app, form))
-      case _ => Ok(applicationcheck.applicationDetails(app, DetailsForm.form))
-    })
-  }
-
-  def detailsAction(appId: String) = canUseChecksAction(appId) { implicit request =>
-    val requestForm = DetailsForm.form.bindFromRequest
-    val app = request.application
-
-    def withFormErrors(form: Form[DetailsForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.applicationDetails(app, form)))
-    }
-
-    def withValidForm(form: DetailsForm) = {
-      val information = app.checkInformation.getOrElse(CheckInformation())
-      for {
-        _ <- applicationService.updateCheckInformation(app.id, information.copy(applicationDetails = Some(form.applicationDetails)))
-      } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
-    }
-
-    requestForm.fold(withFormErrors, withValidForm)
-  }
-
   def apiSubscriptionsPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
