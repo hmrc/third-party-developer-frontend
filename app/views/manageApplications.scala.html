@@ -52,7 +52,6 @@
 @applicationList(applications: Seq[controllers.ApplicationSummary]) = {
     @defining(applications.partition(_.environment == "Production")) { case (productionApps, sandboxApps) =>
         @applicationTable(productionApps)
-        <br>
         @applicationTable(sandboxApps)
     }
 }
@@ -91,6 +90,7 @@
             }
             </tbody>
         </table>
+        <br>
     }
 }
 
