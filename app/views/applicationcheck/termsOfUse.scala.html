@@ -20,19 +20,13 @@
 @import model.Crumb
 @import org.joda.time.format.DateTimeFormat
 
-@(app: Application, form: Form[TermsOfUseForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(app: Application, form: Form[TermsOfUseForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
     title = titleError + "Agree to our terms of use",
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage credentials"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
 
@@ -63,9 +57,9 @@
             <fieldset>
                 @if(form("termsOfUseAgreed").value.isEmpty || form("termsOfUseAgreed").value.contains("false")) {
                     @defining(DateTimeFormat.longDate) { dateFormatter =>
+                    <hr>
                     <div class="form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
-                        @fieldError(form.errors, "termsOfUseAgreed", true)
-                        <hr>
+                    @fieldError(form.errors, "termsOfUseAgreed", true)
                         <div class="multiple-choice">
                             <input type="checkbox" id="termsOfUseAgreed" name="termsOfUseAgreed" value="true"/>
                             <label for="termsOfUseAgreed">I agree to the terms of use</label>
@@ -82,7 +76,6 @@
                 </div>
             } else {
                 <button id="submit" class="button" type="submit">Save and return</button>
-                <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
             }
         </div>
     }

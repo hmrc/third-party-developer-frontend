@@ -25,12 +25,7 @@
 @devMain(
     title = titleError + "Who is your application review contact?",
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage credentials"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
+    back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
 
@@ -87,7 +82,6 @@
 
         <div class="form-group">
             <button id="submit" class="button" type="submit">Save and return</button>
-            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
         </div>
 
         <script type="text/javascript">
