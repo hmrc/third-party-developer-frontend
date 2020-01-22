@@ -20,19 +20,13 @@
 @import model.Crumb
 @import org.joda.time.format.DateTimeFormat
 
-@(app: Application, form: Form[TermsOfUseForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(app: Application, form: Form[TermsOfUseForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
     title = titleError + "Agree to our terms of use",
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage credentials"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
 
