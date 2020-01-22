@@ -39,12 +39,12 @@
 
         @applicationList(applications)
 
-        </br>
-        <p>After testing in the sandbox, you can apply for production credentials.</p>
-
         @if(noProductionApplications(applications)) {
+            </br>
+            <p>After testing in the sandbox, you can apply for production credentials.</p>
+
             <div>
-               <a class="button" href="@routes.AddApplication.addApplicationName(Environment.PRODUCTION)">Get production credentials</a>
+               <a class="button" href="@routes.AddApplication.addApplicationPrincipal">Get production credentials</a>
             </div>
         }
 }
