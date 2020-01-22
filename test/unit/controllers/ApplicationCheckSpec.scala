@@ -966,7 +966,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
       status(result) shouldBe OK
-      bodyOf(result) should include("Where can we find your terms and conditions?")
+      bodyOf(result) should include("Does your application have terms and conditions?")
     }
 
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {
