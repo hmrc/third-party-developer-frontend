@@ -206,19 +206,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       body should include(stepRequiredIndication("agree-terms-status"))
     }
 
-    "show app details step as complete when it has been done" in new Setup {
-      givenTheApplicationExists(checkInformation = Some(CheckInformation(applicationDetails = Some("blah blah"))))
-
-      private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
-
-      private val body = bodyOf(result)
-      body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("api-subscriptions-status"))
-      body should include(stepRequiredIndication("contact-details-status"))
-      body should include(stepRequiredIndication("urls-status"))
-      body should include(stepRequiredIndication("agree-terms-status"))
-    }
-
     "show api subscription step as complete when it has been done" in new Setup {
       givenTheApplicationExists(checkInformation = Some(CheckInformation(apiSubscriptionsConfirmed = true)))
 
@@ -278,7 +265,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       givenTheApplicationExists(checkInformation =
         Some(CheckInformation(
           confirmedName = true,
-          Some("Details"),
           apiSubscriptionsConfirmed = true,
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
@@ -308,7 +294,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val application = givenTheApplicationExists(checkInformation =
         Some(CheckInformation(
           confirmedName = true,
-          Some("Details"),
           apiSubscriptionsConfirmed = true,
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,

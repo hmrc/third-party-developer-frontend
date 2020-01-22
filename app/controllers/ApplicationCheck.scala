@@ -322,7 +322,6 @@ object ApplicationInformationForm {
   def form: Form[CheckInformationForm] = Form(
     mapping(
       "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
-      "applicationDetailsCompleted" -> boolean.verifying("application.details.required.field", ad => ad),
       "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
       "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
       "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),

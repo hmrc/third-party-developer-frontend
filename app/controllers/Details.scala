@@ -72,7 +72,6 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
     CheckInformation(
       confirmedName = confirmedNameValue(checkInformation),
-      applicationDetails = checkInformation.applicationDetails,
       contactDetails = checkInformation.contactDetails,
       providedPrivacyPolicyURL = providedPrivacyPolicyUrlValue(checkInformation),
       providedTermsAndConditionsURL = providedTermsAndConditionsUrlValue(checkInformation),
