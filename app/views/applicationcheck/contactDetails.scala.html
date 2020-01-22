@@ -19,7 +19,7 @@
 @import include._
 @import model.Crumb
 
-@(app: Application,form: Form[ContactForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(app: Application,form: Form[ContactForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
@@ -31,7 +31,6 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
 
@@ -43,6 +42,14 @@
 
     @helper.form(action = controllers.routes.ApplicationCheck.contactAction(app.id), 'class -> "form") {
         @helper.CSRF.formField
+        <p>This should be the person in your organisation who can answer questions about how your software is built.</p>
+        <fieldset>
+        <div class="form-group">
+            <div class="multiple-choice">
+                <input id="useregistered" type="checkbox" name="useregistered" value="useregistered" onchange="checkboxChange()">
+                <label class="block-label selection-button-checkbox" for="useregistered">Use my details</label>
+            </div>
+        </div>
         <div class="form-group @if(form.errors("fullname").nonEmpty){form-group-error}">
             <label class="form-label-bold" for="fullname" id="fullname-label">Full name</label>
             @fieldError(form.errors, "fullname", true)
@@ -76,10 +83,21 @@
                    aria-labelledby="telephone-label"
                    aria-required="true"/>
         </div>
+        </fieldset>
 
         <div class="form-group">
             <button id="submit" class="button" type="submit">Save and return</button>
             <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
         </div>
+
+        <script type="text/javascript">
+            function checkboxChange(){
+            var checkbox = document.getElementById("useregistered");
+            if (checkbox.checked){
+                document.getElementById("fullname").value = "@loggedIn.loggedInName";
+                document.getElementById("email").value = "@loggedIn.email";
+            }
+        }
+        </script>
     }
 }
