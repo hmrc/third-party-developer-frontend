@@ -27,11 +27,7 @@
 @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
+    back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
     @errorSummary(form)

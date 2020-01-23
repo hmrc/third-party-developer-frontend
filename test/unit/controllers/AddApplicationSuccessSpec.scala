@@ -90,40 +90,6 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     }
   }
 
-  "Add applications production success page" should {
-
-    "return the page with the user is logged in" in new Setup {
-      givenTheApplicationExists(principalApp)
-
-      private val result = await(underTest.addApplicationSuccess(appId, Environment.PRODUCTION)(loggedInRequest))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include(loggedInUser.displayedName)
-      bodyOf(result) should include("You have admin rights over this production application.")
-      bodyOf(result) should include("Before you can get production credentials")
-      bodyOf(result) should include("You must complete the checklist for your application and submit it for checking.")
-      bodyOf(result) should include("We take up to 10 working days to check applications and issue production credentials.")
-      bodyOf(result) should not include "Sign in"
-    }
-
-    "return to the login page when the user is not logged in" in new Setup {
-
-      val request = FakeRequest()
-
-      private val result = await(underTest.addApplicationSubordinate()(request))
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/login")
-    }
-
-    "redirect to the login screen when partly logged" in new Setup {
-      private val result = await(underTest.addApplicationSubordinate()(partLoggedInRequest))
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/login")
-    }
-  }
-
   "Add applications subordinate success page" should {
 
     "return the page with the user is logged in" in new Setup {

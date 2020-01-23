@@ -154,38 +154,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  def detailsPage(appId: String) = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
-
-    val detailsForm = for {
-      approvalInfo <- app.checkInformation
-      applicationDetails <- approvalInfo.applicationDetails
-    } yield DetailsForm.form.fill(DetailsForm(applicationDetails))
-
-    Future.successful(detailsForm match {
-      case Some(form) => Ok(applicationcheck.applicationDetails(app, form))
-      case _ => Ok(applicationcheck.applicationDetails(app, DetailsForm.form))
-    })
-  }
-
-  def detailsAction(appId: String) = canUseChecksAction(appId) { implicit request =>
-    val requestForm = DetailsForm.form.bindFromRequest
-    val app = request.application
-
-    def withFormErrors(form: Form[DetailsForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.applicationDetails(app, form)))
-    }
-
-    def withValidForm(form: DetailsForm) = {
-      val information = app.checkInformation.getOrElse(CheckInformation())
-      for {
-        _ <- applicationService.updateCheckInformation(app.id, information.copy(applicationDetails = Some(form.applicationDetails)))
-      } yield Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
-    }
-
-    requestForm.fold(withFormErrors, withValidForm)
-  }
-
   def apiSubscriptionsPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
@@ -354,7 +322,6 @@ object ApplicationInformationForm {
   def form: Form[CheckInformationForm] = Form(
     mapping(
       "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
-      "applicationDetailsCompleted" -> boolean.verifying("application.details.required.field", ad => ad),
       "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
       "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
       "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),

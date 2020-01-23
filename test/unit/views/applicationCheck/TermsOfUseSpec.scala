@@ -50,7 +50,7 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       implicit val request = FakeRequest().withCSRFToken
 
       val checkInformation = CheckInformation(
-        confirmedName = false, None, apiSubscriptionsConfirmed = false, None, providedPrivacyPolicyURL = false, providedTermsAndConditionsURL = false, Seq.empty)
+        confirmedName = false, apiSubscriptionsConfirmed = false, None, providedPrivacyPolicyURL = false, providedTermsAndConditionsURL = false, Seq.empty)
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
@@ -70,7 +70,6 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       val termsOfUseAgreement = TermsOfUseAgreement("email@example.com", DateTimeUtils.now, "1.0")
       val checkInformation = CheckInformation(
         confirmedName = false,
-        None,
         apiSubscriptionsConfirmed = false,
         None,
         providedPrivacyPolicyURL = false,

@@ -31,8 +31,6 @@ import utils.ViewHelpers._
 
 class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
-  val productionMessage = "We take up to 10 working days to check applications and issue production credentials."
-  val productionButton = "Start the checklist"
   val sandboxMessage = "You can now get your sandbox credentials for testing."
   val sandboxButton = "Manage API subscriptions"
   val appConfig = mock[ApplicationConfig]
@@ -54,17 +52,6 @@ class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite with Sha
       val document = testPage(applicationName, Environment.SANDBOX)
       elementExistsByText(document, "p", sandboxMessage) shouldBe true
       elementExistsByText(document, "a", sandboxButton) shouldBe true
-      elementExistsByText(document, "p", productionMessage) shouldBe false
-      elementExistsByText(document, "a", productionButton) shouldBe false
-    }
-
-    "allow check application process for production application" in {
-      val applicationName = "another application name"
-      val document = testPage(applicationName, Environment.PRODUCTION)
-      elementExistsByText(document, "p", sandboxMessage) shouldBe false
-      elementExistsByText(document, "a", sandboxButton) shouldBe false
-      elementExistsByText(document, "p", productionMessage) shouldBe true
-      elementExistsByText(document, "a", productionButton) shouldBe true
     }
   }
 }

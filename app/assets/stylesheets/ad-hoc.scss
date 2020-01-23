@@ -227,3 +227,24 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
   color: #fff;
   background: #1d70b8;
 }
+
+.step-status {
+  display: inline-block;
+  width: 80px;
+  padding: 0.2em 0.5em 0.1em 0.5em;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+  min-width: 4.5em;
+}
+
+.step-status.status-incomplete {
+  background-color: #dee0e2;
+  color: #0b0c0c;
+}
+
+.step-status.status-completed {
+  background-color: #005ea5;
+  color: #fff;
+}
