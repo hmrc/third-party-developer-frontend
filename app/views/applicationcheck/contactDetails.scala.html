@@ -22,8 +22,10 @@
 @(app: Application,form: Form[ContactForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
+@pageHeading = @{ "Who to contact about your application" }
+
 @devMain(
-    title = titleError + "Who to contact about your application",
+    title = titleError + pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage credentials"),
@@ -37,7 +39,7 @@
     @errorSummary(form)
 
     <heading>
-        <h1 class="heading-xlarge">Who to contact about your application</h1>
+        <h1 class="heading-xlarge">@pageHeading</h1>
     </heading>
 
     @helper.form(action = controllers.routes.ApplicationCheck.contactAction(app.id), 'class -> "form") {
