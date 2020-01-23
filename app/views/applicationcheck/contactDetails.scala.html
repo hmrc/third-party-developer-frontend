@@ -23,7 +23,7 @@
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = titleError + "Who is your application review contact?",
+    title = titleError + "Who to contact about your application",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage credentials"),
@@ -37,7 +37,7 @@
     @errorSummary(form)
 
     <heading>
-        <h1 class="heading-xlarge">Who is your application review contact?</h1>
+        <h1 class="heading-xlarge">Who to contact about your application</h1>
     </heading>
 
     @helper.form(action = controllers.routes.ApplicationCheck.contactAction(app.id), 'class -> "form") {
