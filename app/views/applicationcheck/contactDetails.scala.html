@@ -27,12 +27,7 @@
 @devMain(
     title = titleError + pageHeading,
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage credentials"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
+back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
 
@@ -88,8 +83,7 @@
         </fieldset>
 
         <div class="form-group">
-            <button id="submit" class="button" type="submit">Save and return</button>
-            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
+            <button id="submit" class="button" type="submit">Save and continue</button>
         </div>
 
         <script type="text/javascript">
