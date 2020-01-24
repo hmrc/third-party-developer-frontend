@@ -65,7 +65,6 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
 
       applicationService.fetchByApplicationId(applicationId).map(_.deployedTo).map {
         case SANDBOX => Ok(views.html.addApplicationSubordinateSuccess(request.application.name, applicationId))
-        case PRODUCTION => Ok(views.html.addApplicationPrincipalSuccess(request.application.name, applicationId))
       }.recoverWith {
         case NonFatal(_) =>
           Future.successful(NotFound(errorHandler.notFoundTemplate(request)))
@@ -99,7 +98,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
             case Valid =>
               addApplication(formThatPassesSimpleValidation).map(
                 applicationCreatedResponse => environment match {
-                  case PRODUCTION => Redirect(routes.AddApplication.addApplicationSuccess(applicationCreatedResponse.id, environment))
+                  case PRODUCTION => Redirect(routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
                   case SANDBOX => Redirect(routes.Subscriptions.subscriptions2(applicationCreatedResponse.id, environment))
                 }
               )

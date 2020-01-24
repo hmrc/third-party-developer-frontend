@@ -37,7 +37,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
   val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
   def isGreenAddProductionApplicationButtonVisible(document: Document) : Boolean ={
-    val href = controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION).url
+    val href = controllers.routes.AddApplication.addApplicationPrincipal.url
 
     val greenButtons = document.select(s"a[href=$href][class=button]")
 
@@ -70,6 +70,8 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
+      elementExistsByText(document, "p", "After testing in the sandbox, you can apply for production credentials.") shouldBe true
+
       isGreenAddProductionApplicationButtonVisible(document) shouldBe true
     }
 
@@ -92,6 +94,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
       isGreenAddProductionApplicationButtonVisible(document) shouldBe false
+      elementExistsByText(document, "p", "After testing in the sandbox, you can apply for production credentials.") shouldBe false
     }
   }
 

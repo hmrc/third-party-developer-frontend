@@ -22,34 +22,29 @@
 @(app: Application, form: Form[TermsAndConditionsForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
+@pageHeading = @{ "Does your application have terms and conditions?" }
+
 @devMain(
-    title = titleError + "Where can we find your terms and conditions?",
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage credentials"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
     @errorSummary(form)
+
+    <Header>
+        <h1 class="heading-xlarge">@pageHeading</h1>
+    </Header>
+
+    <p>We'll show this link to users when you request access to their data. We recommend you have this statement in your software.</p>
+
+    <p>You can change this at any time.</p>
 
     @helper.form(action = controllers.routes.ApplicationCheck.termsAndConditionsAction(app.id), 'class -> "form") {
         @helper.CSRF.formField
 
         <div class="form-group">
             <fieldset>
-                <legend>
-                    <h1 class="heading-xlarge">
-                        Does your application have terms and conditions?
-                    </h1>
-                </legend>
-                <span class="body-text">
-                    If it does, we'll show this link to users. Adding this makes users more confident in your application and more likely to let you access their data.
-                </span>
-
                 <div id="hasUrl" class="form-group @if(form.errors("hasUrl").nonEmpty) {form-group-error}">
                     @fieldError(form.errors, "hasUrl")
                     <div class="multiple-choice" data-target="terms-and-conditions">
@@ -78,16 +73,9 @@
             </fieldset>
         </div>
 
-        <details>
-            <summary aria-label="Why am I being asked for this?">Why am I being asked for this?</summary>
-            <div class="panel panel-border-narrow">
-                We’ll show this link to users when you request access to their data. Adding this makes them more likely to agree.
-            </div>
-        </details>
-
         <div class="form-group">
             <button id="submit" class="button" type="submit">Save and return</button>
-            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
+            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">I'll do this later</a>
         </div>
-        }
+    }
 }

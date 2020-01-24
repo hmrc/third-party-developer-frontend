@@ -258,7 +258,6 @@ object TermsOfUseAgreement {
 }
 
 case class CheckInformationForm(confirmedNameComplete: Boolean = false,
-                                applicationDetailsComplete: Boolean = false,
                                 apiSubscriptionsComplete: Boolean = false,
                                 contactDetailsComplete: Boolean = false,
                                 providedPrivacyPolicyURLComplete: Boolean = false,
@@ -266,7 +265,6 @@ case class CheckInformationForm(confirmedNameComplete: Boolean = false,
                                 termsOfUseAgreementComplete: Boolean = false)
 
 case class CheckInformation(confirmedName: Boolean = false,
-                            applicationDetails: Option[String] = None,
                             apiSubscriptionsConfirmed: Boolean = false,
                             contactDetails: Option[ContactDetails] = None,
                             providedPrivacyPolicyURL: Boolean = false,
@@ -281,7 +279,6 @@ object CheckInformationForm {
   def fromCheckInformation(checkInformation: CheckInformation) = {
     CheckInformationForm(
       confirmedNameComplete = checkInformation.confirmedName,
-      applicationDetailsComplete = checkInformation.applicationDetails.isDefined,
       apiSubscriptionsComplete = checkInformation.apiSubscriptionsConfirmed,
       contactDetailsComplete = checkInformation.contactDetails.isDefined,
       providedPrivacyPolicyURLComplete = checkInformation.providedPrivacyPolicyURL,

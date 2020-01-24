@@ -168,8 +168,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       status(result) shouldBe OK
       private val body = bodyOf(result)
 
-      body should include("Submit your application for check")
-      body should include("Cancel")
+      body should include("Get production credentials")
+      body should include("Save and come back later")
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
@@ -187,7 +187,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -201,21 +200,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepCompleteIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
-      body should include(stepRequiredIndication("api-subscriptions-status"))
-      body should include(stepRequiredIndication("contact-details-status"))
-      body should include(stepRequiredIndication("urls-status"))
-      body should include(stepRequiredIndication("agree-terms-status"))
-    }
-
-    "show app details step as complete when it has been done" in new Setup {
-      givenTheApplicationExists(checkInformation = Some(CheckInformation(applicationDetails = Some("blah blah"))))
-
-      private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
-
-      private val body = bodyOf(result)
-      body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepCompleteIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -229,7 +213,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepCompleteIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -244,7 +227,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepCompleteIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -259,7 +241,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepCompleteIndication("urls-status"))
@@ -274,7 +255,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val body = bodyOf(result)
       body should include(stepRequiredIndication("app-name-status"))
-      body should include(stepRequiredIndication("app-details-status"))
       body should include(stepRequiredIndication("api-subscriptions-status"))
       body should include(stepRequiredIndication("contact-details-status"))
       body should include(stepRequiredIndication("urls-status"))
@@ -285,7 +265,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       givenTheApplicationExists(checkInformation =
         Some(CheckInformation(
           confirmedName = true,
-          Some("Details"),
           apiSubscriptionsConfirmed = true,
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
@@ -315,7 +294,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val application = givenTheApplicationExists(checkInformation =
         Some(CheckInformation(
           confirmedName = true,
-          Some("Details"),
           apiSubscriptionsConfirmed = true,
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
@@ -566,109 +544,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
   }
 
-  "details review" should {
-    "return page" in new Setup {
-
-      givenTheApplicationExists()
-      private val result = await(addToken(underTest.detailsPage(appId))(loggedInRequest))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("What does your application do?")
-    }
-
-    "successful details action" in new Setup {
-      givenTheApplicationExists()
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationDetails" -> "Some Details about my tax app")
-
-      private val result = await(addToken(underTest.detailsAction(appId))(requestWithFormBody))
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
-    }
-
-    "Validation failure details missing action" in new Setup {
-      givenTheApplicationExists()
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
-
-      private val result = await(addToken(underTest.detailsAction(appId))(requestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-    }
-
-    "allow details to be up to 3000 characters" in new Setup {
-      givenTheApplicationExists()
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationDetails" -> "S" * 3000)
-
-      private val result = await(addToken(underTest.detailsAction(appId))(requestWithFormBody))
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
-    }
-
-    "fail validation when details longer than 3001 characters" in new Setup {
-      givenTheApplicationExists()
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationDetails" -> "S" * 3001)
-
-      private val result = await(addToken(underTest.detailsAction(appId))(requestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-    }
-
-    "return forbidden when accessing the action without being an admin" in new Setup {
-      givenTheApplicationExists(userRole = DEVELOPER)
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
-
-      private val result = await(addToken(underTest.detailsAction(appId))(requestWithFormBody))
-
-      status(result) shouldBe FORBIDDEN
-    }
-
-    "return forbidden when accessing the page without being an admin" in new Setup {
-      givenTheApplicationExists(userRole = DEVELOPER)
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
-
-      private val result = await(addToken(underTest.detailsPage(appId))(requestWithFormBody))
-
-      status(result) shouldBe FORBIDDEN
-    }
-
-    "return bad request when the app is already approved" in new Setup {
-      givenTheApplicationExists(state = production)
-
-      private val result = await(addToken(underTest.detailsPage(appId))(loggedInRequest))
-
-      status(result) shouldBe BAD_REQUEST
-    }
-
-    "return bad request when the app is pending check" in new Setup {
-      givenTheApplicationExists(state = pendingApproval)
-
-      private val result = await(addToken(underTest.detailsPage(appId))(loggedInRequest))
-
-      status(result) shouldBe BAD_REQUEST
-    }
-
-    "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      givenTheApplicationExists(state = production)
-
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
-
-      private val result = await(addToken(underTest.detailsAction(appId))(requestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-    }
-
-    "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      givenTheApplicationExists(state = pendingApproval)
-
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
-
-      private val result = await(addToken(underTest.detailsAction(appId))(requestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-    }
-  }
-
   "name review" should {
     "return page" in new Setup {
 
@@ -676,7 +551,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val result = await(addToken(underTest.namePage(appId))(loggedInRequest))
       status(result) shouldBe OK
-      bodyOf(result) should include("Confirm your application's name")
+      bodyOf(result) should include("Confirm the name of your application")
     }
 
     "successful name action different names" in new Setup {
@@ -817,7 +692,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
       status(result) shouldBe OK
-      bodyOf(result) should include("Where can we find your privacy policy?")
+      bodyOf(result) should include("Does your application have a privacy policy?")
     }
 
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {
@@ -966,7 +841,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
       status(result) shouldBe OK
-      bodyOf(result) should include("Where can we find your terms and conditions?")
+      bodyOf(result) should include("Does your application have terms and conditions?")
     }
 
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {
@@ -1189,7 +1064,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def stepRequiredIndication(id: String) = {
-    s"""<div id="$id" class="step-status status-incomplete">Required</div>"""
+    s"""<div id="$id" class="step-status status-incomplete">To do</div>"""
   }
 
   private def stepCompleteIndication(id: String) = {

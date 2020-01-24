@@ -22,67 +22,43 @@
 @(app: Application, form: Form[NameForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
+@pageHeading = @{ "Confirm the name of your application" }
+
 @devMain(
-    title = titleError + "Confirm your application's name",
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage credentials"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
 
     @errorSummary(form)
 
+    <Header>
+        <h1 class="heading-xlarge">@pageHeading</h1>
+    </Header>
+
+    <p>We show this name to your users when they authorise your software to interact with HMRC.</p>
+    <p>It must comply with our
+        <a data-naming-guidelines href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub/name-guidelines" target="_blank" rel="noopener noreferrer">naming guidelines (opens in a new tab).</a></p>
+    <br>
+
     @helper.form(action = controllers.routes.ApplicationCheck.nameAction(app.id), 'class -> "form") {
         @helper.CSRF.formField
-        <div class="form-group">
-            <label for="applicationName" id="applicationName-label">
-                <h1 class="heading-xlarge">
-                    Confirm your application's name
-                </h1>
-                <span class="body-text">
-                    <p>We'll show this name to your users. It must meet our
-                    <a data-naming-guidelines href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub/name-guidelines" target="_blank" rel="noopener noreferrer">
-                        naming guidelines (opens in a new window or tab)
-                    </a>
-                    </p>
-                    <p>It must not be:</p>
-                    <ul class="list list-bullet">
-                        <li>trademarked or already registered</li>
-                        <li>offensive</li>
-                        <li>misleading</li>
-                    </ul>
-                </span>
-            </label>
-            <div class="notice">
-                <i class="icon icon-important">
-                    <span class="visually-hidden">Warning</span>
-                </i>
-                <strong class="bold-small">
-                    After you submit this application for checking, you cannot change its name.
-                </strong>
-            </div>
-            <br>
-            <div class="form-group @if(form.errors("applicationName").nonEmpty){form-group-error}">
-                @fieldError(form.errors, "applicationName", true)
-                <label class="form-label-bold" for="applicationName">Application name</label>
-                <input type="text"
-                       id="applicationName"
-                       name="applicationName"
-                       value="@form.data.getOrElse("applicationName", "")"
-                       class="form-control @if(form.errors("applicationName").nonEmpty){form-control-error}"
-                       aria-labelledby="applicationName-label"
-                       aria-required="true"/>
-            </div>
+
+        <div class="form-group @if(form.errors("applicationName").nonEmpty){form-group-error}">
+            @fieldError(form.errors, "applicationName", true)
+            <label class="form-label-bold" for="applicationName">Application name</label>
+            <input type="text"
+                   id="applicationName"
+                   name="applicationName"
+                   value="@form.data.getOrElse("applicationName", "")"
+                   class="form-control @if(form.errors("applicationName").nonEmpty){form-control-error}"
+                   aria-labelledby="applicationName-label"
+                   aria-required="true"/>
         </div>
 
         <div class="form-group">
-            <button id="submit" class="button" type="submit">Save and return</button>
-            <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">Cancel</a>
+            <button id="submit" class="button" type="submit">Save and continue</button>
         </div>
     }
 }

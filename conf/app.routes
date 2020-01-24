@@ -126,8 +126,6 @@ GET         /applications/:id/request-check/contact                             
 POST        /applications/:id/request-check/contact                                     controllers.ApplicationCheck.contactAction(id: String)
 GET         /applications/:id/request-check/name                                        controllers.ApplicationCheck.namePage(id: String)
 POST        /applications/:id/request-check/name                                        controllers.ApplicationCheck.nameAction(id: String)
-GET         /applications/:id/request-check/details                                     controllers.ApplicationCheck.detailsPage(id: String)
-POST        /applications/:id/request-check/details                                     controllers.ApplicationCheck.detailsAction(id: String)
 GET         /applications/:id/request-check/subscriptions                               controllers.ApplicationCheck.apiSubscriptionsPage(id: String)
 POST        /applications/:id/request-check/subscriptions                               controllers.ApplicationCheck.apiSubscriptionsAction(id: String)
 GET         /applications/:id/request-check/privacy-policy                              controllers.ApplicationCheck.privacyPolicyPage(id: String)
