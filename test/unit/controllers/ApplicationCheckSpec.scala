@@ -374,7 +374,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = await(addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Confirm the APIs your application uses")
+      bodyOf(result) should include("Confirm which APIs you want to use")
       bodyOf(result) should include("subscriptionServiceName")
     }
 
