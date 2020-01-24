@@ -22,8 +22,10 @@
 @(app: Application,form: Form[ContactForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
+@pageHeading = @{ "Who to contact about your application" }
+
 @devMain(
-    title = titleError + "Who is your application review contact?",
+    title = titleError + pageHeading,
     userFullName = loggedIn.loggedInName,
     back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
@@ -32,7 +34,7 @@
     @errorSummary(form)
 
     <heading>
-        <h1 class="heading-xlarge">Who is your application review contact?</h1>
+        <h1 class="heading-xlarge">@pageHeading</h1>
     </heading>
 
     @helper.form(action = controllers.routes.ApplicationCheck.contactAction(app.id), 'class -> "form") {
@@ -81,7 +83,7 @@
         </fieldset>
 
         <div class="form-group">
-            <button id="submit" class="button" type="submit">Save and return</button>
+            <button id="submit" class="button" type="submit">Save and continue</button>
         </div>
 
         <script type="text/javascript">

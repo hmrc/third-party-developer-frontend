@@ -464,7 +464,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = await(addToken(underTest.contactPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Who is your application review contact?")
+      bodyOf(result) should include("Who to contact about your application")
       bodyOf(result) should include("tester@example.com")
     }
 
