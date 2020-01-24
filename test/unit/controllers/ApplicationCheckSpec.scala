@@ -165,7 +165,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       status(result) shouldBe OK
       private val body = bodyOf(result)
 
-      body should include("Credentials requested")
+      body should include("Request received")
       body should include("We've sent you a confirmation email")
       body should include("What happens next?")
       body should include("We may ask for a demonstration of your software.")

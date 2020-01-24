@@ -22,25 +22,45 @@
 @(applicationId: String, app: Application)(
         implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "credentials")
 
+@pageHeading = @{s"Request received"}
 @devMain(
-    title = "Application submitted for checking",
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-        Crumb("Application submitted"),
-        Crumb.application(app),
+        Crumb(pageHeading),
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
-    developerSession = Some(loggedIn)
+    developerSession = Some(loggedIn),
+    fullWidthContent = true
 ) {
 
+    <div class="grid-row">
+        <div class="column-three-quarters">
             <div class="govuk-box-highlight">
-                <h1 class="heading-xlarge">Application submitted</h1>
+                <h1 class="heading-xlarge">
+                    @pageHeading
+                </h1>
+                <p class="font-large">
+                    We've sent you a confirmation email
+                </p>
             </div>
+            <h2 class="heading-large">What happens next?</h2>
+            <p>Before we can give you access to live data, we need to check the information you've provided and review your testing.<p/>
+            <p>We may ask for a demonstration of your software.
+            </p>
+            <p>The checking process can take up to 10 working days.</p>
 
-            <h2>What happens next?</h2>
+            <h3 class="heading-medium">New production application</h3>
+            <p>By requesting credentials you've created a new production application called <span class="bold">@{app.name}</span>.<p/>
+            <p>Once your credentials are issued, you can access them in your application. You'll be notified by email.</p>
+            <br>
 
-            <p>We’ll take up to 10 working days to check your application and issue production credentials.</p>
+            <div class="form-group">
+                <button id="submit" class="button" type="submit">View new production application</button>
+            </div>
+        </div>
+
+    </div>
 
 }
