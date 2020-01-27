@@ -67,7 +67,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     def withValidForm(form: CheckInformationForm): Future[Result] = {
       val future = for {
         _ <- applicationService.requestUplift(appId, app.name, request.user)
-      } yield Ok(editapplication.nameSubmitted(appId, app))
+      } yield Redirect(routes.ApplicationCheck.credentialsRequested(app.id))
 
       future recover {
         case e: DeskproTicketCreationFailed => InternalServerError(applicationcheck.landingPage(app, requestForm.withError("submitError", e.displayMessage)))
@@ -80,6 +80,10 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     }
 
     requestForm.fold(withFormErrors, withValidForm)
+  }
+
+  def credentialsRequested(appId: String) = whenTeamMemberOnApp(appId) { implicit request =>
+    Future.successful(Ok(editapplication.nameSubmitted(appId, request.application)))
   }
 
   def contactPage(appId: String) = canUseChecksAction(appId) { implicit request =>

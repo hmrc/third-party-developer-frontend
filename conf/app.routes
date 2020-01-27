@@ -122,6 +122,7 @@ POST        /applications/:id/delete-client-secrets                             
 
 GET         /applications/:id/request-check                                             controllers.ApplicationCheck.requestCheckPage(id: String)
 POST        /applications/:id/request-check                                             controllers.ApplicationCheck.requestCheckAction(id: String)
+GET         /applications/:id/request-check/submitted                                   controllers.ApplicationCheck.credentialsRequested(id: String)
 GET         /applications/:id/request-check/contact                                     controllers.ApplicationCheck.contactPage(id: String)
 POST        /applications/:id/request-check/contact                                     controllers.ApplicationCheck.contactAction(id: String)
 GET         /applications/:id/request-check/name                                        controllers.ApplicationCheck.namePage(id: String)

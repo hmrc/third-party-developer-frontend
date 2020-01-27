@@ -223,9 +223,15 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
 
 .interrupt {
   margin: 1em 0;
-  padding: 1em 26em 1em 2em;
+  padding: 1em 1em 1em 2em;
   color: #fff;
   background: #1d70b8;
+}
+
+@media (min-width: 1000px) {
+  .interrupt {
+    padding: 1em 26em 1em 2em;
+  }
 }
 
 .step-status {
@@ -247,6 +253,24 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
 .step-status.status-completed {
   background-color: #005ea5;
   color: #fff;
+}
+
+.govuk-box-highlight {
+  margin: 1em 0;
+  padding: 1.4em 1em 1em;
+  color: #fff;
+  background: #00703c;
+  text-align: center;
+}
+
+.column-three-quarters {
+  padding: 0 15px;
+  box-sizing: border-box;
+  width: 75%;
+}
+
+.grid-row {
+  margin: 0 -15px;
 }
 
 .client-secrets {

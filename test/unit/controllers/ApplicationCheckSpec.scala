@@ -157,6 +157,29 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       errorMessageElement.text() shouldBe "You must subscribe to at least one API, in addition to optionally subscribing to Hello World"
     }
   }
+  "check request submitted" should {
+    "return credentials requested page" in new Setup{
+      givenTheApplicationExists()
+      private val result = await(underTest.credentialsRequested(appId)(loggedInRequest))
+
+      status(result) shouldBe OK
+      private val body = bodyOf(result)
+
+      body should include("Request received")
+      body should include("We've sent you a confirmation email")
+      body should include("What happens next?")
+      body should include("We may ask for a demonstration of your software.")
+      body should include("The checking process can take up to 10 working days.")
+      body should include("By requesting credentials you've created a new production application")
+    }
+    "return forbidden when not logged in" in new Setup {
+      givenTheApplicationExists()
+      private val result = await(underTest.credentialsRequested(appId)(loggedOutRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/login")
+    }
+  }
 
   "landing page" should {
     "return landing page" in new Setup {
@@ -278,7 +301,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val result = await(addToken(underTest.requestCheckAction(appId))(requestWithFormBody))
 
-      status(result) shouldBe OK
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check/submitted")
     }
 
     "validation failure submit action" in new Setup {
@@ -374,7 +398,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = await(addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Confirm the APIs your application uses")
+      bodyOf(result) should include("Confirm which APIs you want to use")
       bodyOf(result) should include("subscriptionServiceName")
     }
 
@@ -464,7 +488,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = await(addToken(underTest.contactPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Who is your application review contact?")
+      bodyOf(result) should include("Who to contact about your application")
       bodyOf(result) should include("tester@example.com")
     }
 
