@@ -68,9 +68,11 @@ class Credentials @Inject()(val applicationService: ApplicationService,
       }
   }
 
-  def addClientSecret(applicationId: String) = canChangeClientSecrets(applicationId) { implicit request =>
+  def addClientSecret(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
 
-    def result(err: Option[String] = None): Result = Redirect(controllers.routes.Credentials.credentials(applicationId, err))
+    def result(err: Option[String] = None): Result = Redirect(
+      controllers.routes.Credentials.credentials(applicationId, err).withFragment("clientSecretHeading")
+    )
 
     applicationService.addClientSecret(applicationId).map { _ =>
       result()
