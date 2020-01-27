@@ -22,22 +22,18 @@
 
 @(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
+@pageHeading = @{ "Confirm which APIs you want to use" }
+
 @devMain(
-    title = "Confirm the APIs your application uses",
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage credentials"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
 
     @if(errorForm.isDefined) { @errorSummary(errorForm.get) }
 
-    <h1 class="heading-xlarge">Confirm the APIs your application uses</h1>
+    <h1 class="heading-xlarge">@pageHeading</h1>
     <p>You must subscribe to an API so your application can access it. You’ll receive notifications about its lifecycle events, such as new version introductions and old version retirements.</p>
     <div class="notice">
         <i class="icon icon-important">
@@ -55,9 +51,7 @@
             @helper.form(action = controllers.routes.ApplicationCheck.apiSubscriptionsAction(app.id), 'class -> "form") {
                 @helper.CSRF.formField
                 <div class="form-group">
-                    <button id="submit" class="button" type="submit">Save and return</button>
-                    <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="secondary-button">
-                        Cancel</a>
+                    <button id="submit" class="button" type="submit">Save and continue</button>
                 </div>
             }
         }
