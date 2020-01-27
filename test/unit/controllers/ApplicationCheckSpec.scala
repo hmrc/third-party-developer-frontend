@@ -170,6 +170,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       body should include("What happens next?")
       body should include("We may ask for a demonstration of your software.")
       body should include("The checking process can take up to 10 working days.")
+      body should include("By requesting credentials you've created a new production application")
     }
     "return forbidden when not logged in" in new Setup {
       givenTheApplicationExists()
