@@ -120,7 +120,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials")
+      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials#clientSecretHeading")
       verify(underTest.applicationService).addClientSecret(mockEq(appId))(any[HeaderCarrier])
     }
 
@@ -133,7 +133,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials?error=client.secret.limit.exceeded")
+      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials?error=client.secret.limit.exceeded#clientSecretHeading")
     }
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
@@ -145,7 +145,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials?error=client.secret.limit.exceeded")
+      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials?error=client.secret.limit.exceeded#clientSecretHeading")
     }
 
     "display the NotFound page when the application does not exist" in new Setup {

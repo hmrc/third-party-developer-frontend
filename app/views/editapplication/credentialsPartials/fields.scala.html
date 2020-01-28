@@ -17,9 +17,7 @@
 @import domain.EnvironmentToken
 @import uk.gov.hmrc.urls.Link
 @import config.ApplicationConfig
-@import domain.Environment
 @import domain.Application
-@import domain.AccessType
 @import domain.Developer
 @import domain.Capabilities._
 @import include._
@@ -53,7 +51,7 @@
         value = Some("OAuth 2.0")).toHtml journey. Keep them private.
     </p>
     @for((secret, i) <- token.clientSecrets.zipWithIndex) {
-        @maskedContent(secret, accessibleText = s"client secret ${i + 1}", secure = app.deployedTo.isProduction, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
+        @maskedContent(secret, mask = s"•••••••••••••••••••••••••••${secret.secret.takeRight(4)}", accessibleText = s"client secret ${i + 1}", secure = app.deployedTo.isProduction, action = controllers.routes.Credentials.getProductionClientSecret(app.id, i).url)
     }
 
     @if(app.allows(ChangeClientSecret, developer, SandboxOrAdmin)){

@@ -23,8 +23,13 @@ import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.gov.hmrc.time.DateTimeUtils.{daysBetween, now}
 
 object DateFormatter {
+  val shortFormatter: DateTimeFormatter = DateTimeFormat.forPattern("d MMM yyyy")
   val standardFormatter: DateTimeFormatter = DateTimeFormat.forPattern("d MMMM yyyy")
   val initialLastAccessDate = new DateTime(2019, 6, 25, 0, 0) // scalastyle:ignore magic.number
+
+  def formatDateWithShortPattern(dateTime: DateTime): String = {
+    shortFormatter.print(dateTime)
+  }
 
   def formatDate(dateTime: DateTime): String = {
     standardFormatter.print(dateTime)

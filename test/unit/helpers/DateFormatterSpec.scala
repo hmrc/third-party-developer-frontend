@@ -36,6 +36,13 @@ class DateFormatterSpec extends UnitSpec with ScalaFutures with MockitoSugar wit
     super.afterAll()
   }
 
+  "formatDateWithShortPattern" should {
+    "use short date format" in {
+      val dateTime = new DateTime(2019, 1, 1, 0, 0) // scalastyle:ignore magic.number
+      DateFormatter.formatDateWithShortPattern(dateTime) shouldBe "1 Jan 2019"
+    }
+  }
+
   "formatDate" should {
     "use long date format" in {
       val dateTime = new DateTime(2019, 1, 1, 0, 0) // scalastyle:ignore magic.number

@@ -15,23 +15,38 @@
  *@
 
 @import domain.ClientSecret
+@import helpers.DateFormatter.formatDateWithShortPattern
+
 @(secret: ClientSecret,
   secure: Boolean = false,
   action: String = "",
   buttonShowText: String = "Show",
   buttonHideText: String = "Hide",
   accessibleText: String = "",
-  mask: String = "•••••••••••••••••••••••••••••••")
-<div class="js-mask-container row" data-mask-timer="20">
-    <div class="inline-block">
-        <span class="js-visible js-mask-secret" aria-label="@accessibleText is masked"><span aria-hidden="true">@mask</span></span>
-        <input class="js-hidden js-mask-revealed flat-text" aria-label="@accessibleText is revealed" data-clientsecret
-               readonly
-               type="text"
-               size="60"
-               value="@if(!secure) @{secret.secret}" >
-        </div>
-    <div>
+  mask: String = "")
+<div class="js-mask-container row client-secrets" data-mask-timer="20">
+    <table>
+        <thead>
+            <tr><th>Client secret</th><th>Created</th><th>Last used</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <div class="inline-block">
+                        <span class="js-visible js-mask-secret" aria-label="@accessibleText is masked"><span aria-hidden="true">@mask</span></span>
+                        <input class="js-hidden js-mask-revealed flat-text" aria-label="@accessibleText is revealed" data-clientsecret
+                        readonly
+                        type="text"
+                        size="60"
+                        value="@if(!secure) @{secret.secret}" >
+                    </div>
+                </td>
+                <td>@{formatDateWithShortPattern(secret.createdOn)}</td>
+                <td>@{secret.lastAccess.map(formatDateWithShortPattern).getOrElse("Not used")}</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>
         <a href="#"
            role="button"
            class="js-visible js-mask-control action-link"
@@ -58,7 +73,7 @@
            aria-label="Copy @accessibleText to clipboard">
                     Copy
         </a>
-    </div>
+    </p>
     @if(secure) {
         <form method="GET"
               class="js-mask-form js-hidden"
