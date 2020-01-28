@@ -198,7 +198,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
           applicationService.deleteClientSecrets(applicationId, validForm.clientSecretsToDelete.split(",").toSeq)
             .map(_ => Ok(editapplication.deleteClientSecretComplete(application)))
 
-        case _ => Future(Redirect(routes.Credentials.credentials(applicationId, None)))
+        case _ => Future(Redirect(routes.Credentials.credentials(applicationId, None).withFragment("clientSecretHeading")))
       }
     }
 
