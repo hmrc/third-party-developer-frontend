@@ -48,7 +48,7 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with SharedMetr
 
     def renderPage(role: Role = Role.ADMINISTRATOR, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
-      views.html.manageTeam.manageTeam.render(application, role, form, loggedInUser, request, applicationMessages, appConfig, "nav-section")
+      views.html.manageTeamViews.manageTeam.render(application, role, form, loggedInUser, request, applicationMessages, appConfig, "nav-section")
     }
 
     "show Add and Remove buttons for Admin" in {
