@@ -19,6 +19,7 @@
 @import helpers.string._
 @import include._
 @import model.Crumb
+@import manageTeamViews.include._
 
 @(app: Application, role: Role, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
@@ -38,6 +39,8 @@
 ) {
 
     @errorSummary(form)
+
+    @teamList()
 
     <header>
         <h1 class="heading-xlarge">Manage team members</h1>

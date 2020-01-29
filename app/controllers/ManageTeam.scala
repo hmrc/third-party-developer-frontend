@@ -50,12 +50,12 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
   def manageTeam(applicationId: String, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     val application = request.application
-    val view = views.html.manageTeam.manageTeam(application, request.role, AddTeamMemberForm.form, request.user)
+    val view = views.html.manageTeamViews.manageTeam(application, request.role, AddTeamMemberForm.form, request.user)
     Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
   def addTeamMember(applicationId: String) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.manageTeam.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
   }
 
   def addTeamMemberAction(applicationId: String) = canEditTeamMembers(applicationId) { implicit request =>
@@ -64,7 +64,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
         .map(_ => Redirect(controllers.routes.ManageTeam.manageTeam(applicationId, None))) recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
         case _: TeamMemberAlreadyExists =>
-          BadRequest(views.html.manageTeam.addTeamMember(
+          BadRequest(views.html.manageTeamViews.addTeamMember(
             request.application,
             AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"),
             request.user))
@@ -72,7 +72,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     }
 
     def handleInvalidForm(formWithErrors: Form[AddTeamMemberForm]) = {
-      Future.successful(BadRequest(views.html.manageTeam.addTeamMember(request.application, formWithErrors, request.user)))
+      Future.successful(BadRequest(views.html.manageTeamViews.addTeamMember(request.application, formWithErrors, request.user)))
     }
 
     AddTeamMemberForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
@@ -84,7 +84,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
       application.collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash) match {
         case Some(collaborator) =>
-          successful(Ok(views.html.manageTeam.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, collaborator.emailAddress)))
+          successful(Ok(views.html.manageTeamViews.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, collaborator.emailAddress)))
         case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
   }
@@ -102,7 +102,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     }
 
     def handleInvalidForm(form: Form[RemoveTeamMemberConfirmationForm]) =
-      successful(BadRequest(views.html.manageTeam.removeTeamMember(application, form, request.user, form("email").value.getOrElse(""))))
+      successful(BadRequest(views.html.manageTeamViews.removeTeamMember(application, form, request.user, form("email").value.getOrElse(""))))
 
     RemoveTeamMemberConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
