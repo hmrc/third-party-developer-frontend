@@ -137,6 +137,7 @@ GET         /applications/:id/request-check/terms-of-use                        
 POST        /applications/:id/request-check/terms-of-use                                controllers.ApplicationCheck.termsOfUseAction(id: String)
 GET         /applications/:id/request-check/team                                        controllers.ApplicationCheck.team(id: String)
 GET         /applications/:id/request-check/team/add                                    controllers.ApplicationCheck.teamAddMember(id: String)
+GET         /applications/:id/request-check/team/remove-confirmation                    controllers.ApplicationCheck.teamMemberRemoveConfirmation(id: String)
 
 POST        /applications/:id/context/:apiContext/version/:version/subscriptionFields   controllers.Subscriptions.saveSubscriptionFields(id: String, apiContext: String, version: String, subscriptionRedirect: String)
 
