@@ -24,8 +24,6 @@
 
 @(app: Application,role: Role, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (String, String) => Call)(implicit request: play.api.mvc.Request[Any])
 
-<section class="hard--top flush--bottom">
-  <h2 class="heading-large">Team members</h2>
 
 @if(role.isDeveloper) {
  <p class="alert alert--info">You need admin rights to add or remove team members.</p>
@@ -76,4 +74,3 @@
   <a href="@addTeamMemberUrl" @if(addMemberStyle == Button) { class="button" } >Add a team member</a><br/>
 }
 
-</section>

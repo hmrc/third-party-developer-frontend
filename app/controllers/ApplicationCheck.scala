@@ -325,7 +325,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   // TODO: Test me
   // TODO: Should this be in the manageTeam controller
   def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(applicationcheck.team.teamMemberAdd()))
+    Future.successful(Ok(applicationcheck.team.teamMemberAdd(request.user)))
   }
 
   // TODO: Test me

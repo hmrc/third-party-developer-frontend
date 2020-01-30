@@ -14,6 +14,23 @@
  * limitations under the License.
  *@
 
-@()
+@import views.html.include.devMain
+@import domain.DeveloperSession
 
-Add Team Member Page
+@import domain.BackButtonWithJavaScript
+@import config.ApplicationConfig
+@(loggedIn: DeveloperSession)(
+        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
+
+ @pageHeading = @{ "TODO" }
+
+ @devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
+ ) {
+
+  Add Team Member Page
+
+ }
