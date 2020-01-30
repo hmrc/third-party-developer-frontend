@@ -16,6 +16,7 @@
 
 package unit.controllers
 
+import com.codahale.metrics.SharedMetricRegistries
 import config.{ApplicationConfig, ErrorHandler}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -30,6 +31,8 @@ import utils.SharedMetricsClearDown
 import scala.concurrent.ExecutionContext
 
 class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication with SharedMetricsClearDown {
+
+  SharedMetricRegistries.clear()
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
