@@ -319,18 +319,18 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     // TODO : Should we also check for if this app allows team members (which standard ones do).
     // The current manage team members page does
 
-    Future.successful(Ok(applicationcheck.team(request.application, request.role, request.user)))
+    Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
   }
 
   // TODO: Test me
   // TODO: Should this be in the manageTeam controller
   def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(applicationcheck.teamMemberAdd()))
+    Future.successful(Ok(applicationcheck.team.teamMemberAdd()))
   }
 
   // TODO: Test me
   def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String) = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(applicationcheck.teamMemberRemoveConfirmation()))
+    Future.successful(Ok(applicationcheck.team.teamMemberRemoveConfirmation()))
   }
 
   private def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {
