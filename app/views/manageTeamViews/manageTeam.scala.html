@@ -48,6 +48,12 @@
     @appEnvironment(app)
     <br>
 
-    @teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button)
+    @{
+        def createRemoveLink(appId: String, emailAddress: String) = {
+            controllers.routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
+        }
+
+        teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button, createRemoveLink)
+    }
 }
 

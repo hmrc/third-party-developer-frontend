@@ -18,6 +18,7 @@
 @import domain.Role
 @import domain.DeveloperSession
 @import views.html.manageTeamViews.include.teamList
+@import helpers.string._
 
 @import views.html.include.devMain
 @import config.ApplicationConfig
@@ -46,7 +47,12 @@
  Add members of your organisation and give them permissions to access this application.
  </p>
 
- @teamList(app, role, loggedIn, routes.ApplicationCheck.teamAddMember(app.id), Link)
+ @{
+  def createRemoveLink(appId: String, emailAddress: String) = {
+   controllers.routes.ApplicationCheck.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
+  }
+  teamList(app, role, loggedIn, routes.ApplicationCheck.teamAddMember(app.id), Link, createRemoveLink)
+ }
 
  </br>
 
