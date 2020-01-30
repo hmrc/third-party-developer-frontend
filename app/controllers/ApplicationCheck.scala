@@ -313,6 +313,14 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
+  def team(appId: String) = canUseChecksAction(appId) { implicit request =>
+
+    // TODO : Should we also check for if this app allows team members (which standard ones do).
+    // The current manage team members page does
+
+    Future.successful(Ok(applicationcheck.team(request.application, request.role, request.user)))
+  }
+
   private def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {
     (url, hasCheckedUrl) match {
       case (Some(_), _) => Some("true")
