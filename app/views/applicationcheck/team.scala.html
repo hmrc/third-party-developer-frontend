@@ -22,6 +22,7 @@
 @import views.html.include.devMain
 @import config.ApplicationConfig
 @import domain.BackButtonWithJavaScript
+@import domain.Link
 @(app: Application, role: Role, loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 
@@ -45,7 +46,11 @@
  Add members of your organisation and give them permissions to access this application.
  </p>
 
- @teamList(app, role, loggedIn)
+ @teamList(app, role, loggedIn, routes.ApplicationCheck.teamAddMember(app.id), Link)
 
- Save and return here please
+ </br>
+
+ <div class="form-group">
+   <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="button">Save and return</a>
+ </div>
 }

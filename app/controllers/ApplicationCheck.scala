@@ -321,6 +321,12 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(applicationcheck.team(request.application, request.role, request.user)))
   }
 
+  // TODO: Should this be in the manageTeam controller
+  def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
+
+    Future.successful(Ok(applicationcheck.teamAddMember()))
+  }
+
   private def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {
     (url, hasCheckedUrl) match {
       case (Some(_), _) => Some("true")

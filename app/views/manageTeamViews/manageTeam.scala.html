@@ -21,6 +21,7 @@
 @import model.Crumb
 @import manageTeamViews.include._
 
+@import domain.Button
 @(app: Application, role: Role, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -47,6 +48,6 @@
     @appEnvironment(app)
     <br>
 
-    @teamList(app, role, loggedIn)
+    @teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button)
 }
 
