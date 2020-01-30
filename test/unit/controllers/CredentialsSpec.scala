@@ -459,7 +459,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials")
+      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials#clientSecretHeading")
       verify(underTest.applicationService, never()).deleteClientSecrets(any[String], any[Seq[String]])(any[HeaderCarrier])
     }
 
