@@ -19,10 +19,13 @@
 
 @import domain.BackButtonWithJavaScript
 @import config.ApplicationConfig
-@(loggedIn: DeveloperSession)(
+@import views.html.manageTeamViews.include.addTeamMemberPartial
+@import domain.Application
+
+@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 
- @pageHeading = @{ "TODO" }
+ @pageHeading = @{ "Add a team member" }
 
  @devMain(
   title = pageHeading,
@@ -31,6 +34,10 @@
   developerSession = Some(loggedIn)
  ) {
 
-  Add Team Member Page
+  <header>
+   <h1 class="heading-xlarge">@pageHeading</h1>
+  </header>
+
+  @addTeamMemberPartial(app, form, loggedIn)
 
  }
