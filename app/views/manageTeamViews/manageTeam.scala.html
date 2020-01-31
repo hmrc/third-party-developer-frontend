@@ -21,6 +21,7 @@
 @import model.Crumb
 @import manageTeamViews.include._
 
+@import domain.Button
 @(app: Application, role: Role, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -38,6 +39,8 @@
     developerSession = Some(loggedIn)
 ) {
 
+
+
     @errorSummary(form)
 
     <header>
@@ -47,6 +50,18 @@
     @appEnvironment(app)
     <br>
 
-    @teamList(app, role, loggedIn)
+    <section class="hard--top flush--bottom">
+        <h2 class="heading-large">Team members</h2>
+
+
+    @{
+        def createRemoveLink(appId: String, emailAddress: String) = {
+            controllers.routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
+        }
+
+        teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button, createRemoveLink)
+    }
+
+    </section>
 }
 
