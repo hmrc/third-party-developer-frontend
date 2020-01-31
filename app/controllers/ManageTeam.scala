@@ -82,7 +82,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     implicit request =>
       val application = request.application
 
-      application.collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash) match {
+      application.findCollaboratorByHash(teamMemberHash) match {
         case Some(collaborator) =>
           successful(Ok(views.html.manageTeamViews.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, collaborator.emailAddress)))
         case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))

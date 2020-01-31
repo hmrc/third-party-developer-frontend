@@ -33,6 +33,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.{applicationcheck, editapplication}
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -330,7 +331,9 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 
   // TODO: Test me
   def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String) = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(applicationcheck.team.teamMemberRemoveConfirmation()))
+    successful(request.application.findCollaboratorByHash(teamMemberHash)
+      .map(collaborator => Ok(applicationcheck.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
+      .getOrElse(Redirect(routes.ManageTeam.manageTeam(appId, None))))
   }
 
   private def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {

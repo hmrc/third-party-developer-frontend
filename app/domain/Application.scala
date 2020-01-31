@@ -27,6 +27,7 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.time.DateTimeUtils
+import helpers.string._
 
 case class UpliftRequest(applicationName: String, requestedByEmailAddress: String)
 
@@ -376,6 +377,10 @@ case class Application(id: String,
   }
 
   def hasLockedSubscriptions = deployedTo.isProduction && state.name != State.TESTING
+
+  def findCollaboratorByHash(teamMemberHash: String) : Option[Collaborator] = {
+    collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
+  }
 }
 
 object Application {
