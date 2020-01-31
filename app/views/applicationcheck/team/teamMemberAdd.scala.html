@@ -23,8 +23,9 @@
 
 @import domain.Application
 
+@import domain.AddTeamMemberPageMode.ApplicationCheck
 @(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
-        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
+        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 
  @pageHeading = @{ "Add a team member" }
 
@@ -39,6 +40,5 @@
    <h1 class="heading-xlarge">@pageHeading</h1>
   </header>
 
-  @addTeamMemberPartial(app, form, loggedIn)
-
+  @addTeamMemberPartial(app, form, loggedIn, "Add team member", false, ApplicationCheck)
  }

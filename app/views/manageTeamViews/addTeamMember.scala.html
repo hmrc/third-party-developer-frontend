@@ -21,6 +21,7 @@
 
 @import views.html.include.teamMembers.addTeamMemberPartial
 
+@import domain.AddTeamMemberPageMode.ManageTeamMembers
 @(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
 implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -47,6 +48,6 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
 
     <h2 class="heading-large">Team member</h2>
 
-    @addTeamMemberPartial(app, form, loggedIn)
+    @addTeamMemberPartial(app, form, loggedIn, "Add", true, ManageTeamMembers)
 
 }

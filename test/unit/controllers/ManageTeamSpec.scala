@@ -18,6 +18,7 @@ package unit.controllers
 
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
+import domain.AddTeamMemberPageMode.ManageTeamMembers
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import helpers.string._
@@ -131,7 +132,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
     "add a team member when logged in as an admin" in new Setup {
       val application = givenTheApplicationExistWithUserRole(underTest.applicationService, appId, ADMINISTRATOR)
-      val result = await(underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
+      val result = await(underTest.addTeamMemberAction(appId, ManageTeamMembers.toString)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
@@ -144,7 +145,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         underTest.applicationService, appId, ADMINISTRATOR)
       given(underTest.applicationService.addTeamMember(mockEq(application), anyString(), any[Collaborator])(any[HeaderCarrier]))
         .willReturn(Future.failed(new TeamMemberAlreadyExists))
-      val result = await(underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
+      val result = await(underTest.addTeamMemberAction(appId, ManageTeamMembers.toString)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
 
       status(result) shouldBe BAD_REQUEST
       verify(underTest.applicationService).addTeamMember(mockEq(application),
@@ -157,7 +158,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         underTest.applicationService, appId, ADMINISTRATOR)
       given(underTest.applicationService.addTeamMember(mockEq(application), anyString(), any[Collaborator])(any[HeaderCarrier]))
         .willReturn(Future.failed(new ApplicationNotFound))
-      val result = await(underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
+      val result = await(underTest.addTeamMemberAction(appId, ManageTeamMembers.toString)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
 
       status(result) shouldBe NOT_FOUND
       verify(underTest.applicationService).addTeamMember(mockEq(application),
@@ -171,7 +172,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       given(underTest.applicationService.addTeamMember(mockEq(application), anyString(), any[Collaborator])(any[HeaderCarrier]))
         .willReturn(Future.failed(new ApplicationNotFound))
       val result = await(
-        underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString)))
+        underTest.addTeamMemberAction(appId, ManageTeamMembers.toString)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString)))
 
       status(result) shouldBe BAD_REQUEST
       verify(underTest.applicationService, never()).addTeamMember(mockEq(application),
@@ -183,7 +184,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       givenTheApplicationExistWithUserRole(underTest.applicationService, appId, DEVELOPER)
 
       val result = await(
-        underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
+        underTest.addTeamMemberAction(appId, ManageTeamMembers.toString)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
 
       status(result) shouldBe FORBIDDEN
       verify(underTest.applicationService, never()).addTeamMember(any(), any(), any())(any())
@@ -191,7 +192,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
     "redirect to login page when logged out" in new Setup {
       val result = await(
-        underTest.addTeamMemberAction(appId)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
+        underTest.addTeamMemberAction(appId, ManageTeamMembers.toString)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
@@ -242,7 +243,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     "reject invalid email address" in new Setup {
       val application = givenTheApplicationExistWithUserRole(
         underTest.applicationService, appId, ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
-      val result = await(underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress")))
+      val result = await(underTest.addTeamMemberAction(appId, ManageTeamMembers.toString)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress")))
 
       status(result) shouldBe BAD_REQUEST
 

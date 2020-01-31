@@ -18,6 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import domain.AddTeamMemberPageMode.{ApplicationCheck, ManageTeamMembers}
 import domain.Capabilities.SupportsTeamMembers
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain._
@@ -26,6 +27,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
+import play.twirl.api.{BaseScalaTemplate, Format, HtmlFormat}
 import service._
 
 import scala.concurrent.Future.successful
@@ -58,21 +60,47 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
   }
 
-  def addTeamMemberAction(applicationId: String) = canEditTeamMembers(applicationId) { implicit request =>
+  // TODO: Use clever code for parsing the enum in the routing
+  def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: String) = canEditTeamMembers(applicationId) { implicit request =>
+
+    val pageMode: AddTeamMemberPageMode = AddTeamMemberPageMode.from(addTeamMemberPageMode)
+
+    val successRedirect = pageMode match {
+      case ManageTeamMembers => controllers.routes.ManageTeam.manageTeam(applicationId, None)
+      case ApplicationCheck => controllers.routes.ApplicationCheck.team(applicationId)
+    }
+
     def handleValidForm(form: AddTeamMemberForm) = {
       applicationService.addTeamMember(request.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
-        .map(_ => Redirect(controllers.routes.ManageTeam.manageTeam(applicationId, None))) recover {
+        .map(_ => Redirect(successRedirect)) recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
         case _: TeamMemberAlreadyExists =>
-          BadRequest(views.html.manageTeamViews.addTeamMember(
-            request.application,
-            AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"),
-            request.user))
+// TODO: This needs extracting (along with the TODO below)
+          pageMode match {
+            case ManageTeamMembers => BadRequest(views.html.manageTeamViews.addTeamMember(
+              request.application,
+              AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"),
+              request.user))
+            case ApplicationCheck => BadRequest(views.html.applicationcheck.team.teamMemberAdd(
+              request.application,
+              AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"),
+              request.user))
+          }
       }
     }
 
+    // TODO: This needs extracting (along with the TODO above)
     def handleInvalidForm(formWithErrors: Form[AddTeamMemberForm]) = {
-      Future.successful(BadRequest(views.html.manageTeamViews.addTeamMember(request.application, formWithErrors, request.user)))
+      successful(pageMode match {
+        case ManageTeamMembers => BadRequest(views.html.manageTeamViews.addTeamMember(
+          request.application,
+          formWithErrors,
+          request.user))
+        case ApplicationCheck => BadRequest(views.html.applicationcheck.team.teamMemberAdd(
+          request.application,
+          formWithErrors,
+          request.user))
+      })
     }
 
     AddTeamMemberForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
