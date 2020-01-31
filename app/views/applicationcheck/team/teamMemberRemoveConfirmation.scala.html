@@ -14,6 +14,43 @@
  * limitations under the License.
  *@
 
-@()
+@import domain.DeveloperSession
+@import config.ApplicationConfig
+@import views.html.include.devMain
+@import domain.BackButtonWithJavaScript
 
-Remove Team Member Confirmation Page
+@import domain.Application
+@(app: Application, loggedIn: DeveloperSession, email: String)(
+        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
+
+ @pageHeading = @{ "Are you sure you want to remove this team member from you application?" }
+
+ @devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
+ ) {
+
+  <header>
+   <h1 class="heading-xlarge">@pageHeading</h1>
+  </header>
+
+  <section>
+
+  <div>
+   <strong class="bold">Team member:</strong> @email
+  </div>
+
+  <br/>
+
+  @helper.form(action = controllers.routes.ApplicationCheck.teamMemberRemoveAction(app.id)) {
+   @helper.CSRF.formField
+   <input type="hidden" name="email" value="@email">
+
+    <button id="submit" class="button button--padded" type="submit">Delete team member</button>
+    <a href="@routes.ApplicationCheck.team(app.id)" class="secondary-button">Cancel</a>
+  }
+  </section>
+
+ }

@@ -77,7 +77,7 @@ GET         /applications/:id/add/:environment/success                          
 
 GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMember(id: String)
-POST        /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMemberAction(id: String)
+POST        /applications/:id/team-members/add/:addTeamMemberPageMode                   controllers.ManageTeam.addTeamMemberAction(id: String, addTeamMemberPageMode: String)
 GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation          controllers.ManageTeam.removeTeamMember(id: String, teamMemberHash: String)
 POST        /applications/:id/team-members/remove                                       controllers.ManageTeam.removeTeamMemberAction(id: String)
 
@@ -138,6 +138,7 @@ POST        /applications/:id/request-check/terms-of-use                        
 GET         /applications/:id/request-check/team                                        controllers.ApplicationCheck.team(id: String)
 GET         /applications/:id/request-check/team/add                                    controllers.ApplicationCheck.teamAddMember(id: String)
 GET         /applications/:id/request-check/team/remove-confirmation/:teamMemberHash    controllers.ApplicationCheck.teamMemberRemoveConfirmation(id: String, teamMemberHash: String)
+POST        /applications/:id/request-check/team/remove                                 controllers.ApplicationCheck.teamMemberRemoveAction(id: String)
 
 POST        /applications/:id/context/:apiContext/version/:version/subscriptionFields   controllers.Subscriptions.saveSubscriptionFields(id: String, apiContext: String, version: String, subscriptionRedirect: String)
 

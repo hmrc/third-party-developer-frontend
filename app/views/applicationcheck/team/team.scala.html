@@ -17,9 +17,9 @@
 @import domain.Application
 @import domain.Role
 @import domain.DeveloperSession
-@import views.html.manageTeamViews.include.teamList
-@import helpers.string._
+@import views.html.include.teamMembers._
 
+@import helpers.string._
 
 @import views.html.include.devMain
 @import config.ApplicationConfig
@@ -60,6 +60,7 @@
  </section>
 
  <div class="form-group">
+@*  TODO : Post and set the 'team members checked flag on the app *@
    <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="button">Save and return</a>
  </div>
 }
