@@ -36,9 +36,21 @@
    <h1 class="heading-xlarge">@pageHeading</h1>
   </header>
 
+  <section>
+
   <div>
    <strong class="bold">Team member:</strong> @email
   </div>
 
-  Remove Team Member Confirmation Page
+  <br/>
+
+  @helper.form(action = controllers.routes.ApplicationCheck.teamMemberRemoveAction(app.id)) {
+   @helper.CSRF.formField
+   <input type="hidden" name="email" value="@email">
+
+    <button id="submit" class="button button--padded" type="submit">Delete team member</button>
+    <a href="@routes.ApplicationCheck.team(app.id)" class="secondary-button">Cancel</a>
+  }
+  </section>
+
  }

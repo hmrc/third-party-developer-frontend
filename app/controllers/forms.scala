@@ -185,6 +185,19 @@ object RemoveTeamMemberConfirmationForm {
   )
 }
 
+
+final case class RemoveTeamMemberCheckPageConfirmationForm(email: String)
+
+object RemoveTeamMemberCheckPageConfirmationForm {
+  val form: Form[RemoveTeamMemberCheckPageConfirmationForm] = Form(
+    mapping(
+      "email" ->  emailValidator(FormKeys.teamMemberEmailRequired)
+    )(RemoveTeamMemberCheckPageConfirmationForm.apply)(RemoveTeamMemberCheckPageConfirmationForm.unapply)
+  )
+}
+
+
+
 case class AddTeamMemberForm(email: String, role: Option[String])
 
 object AddTeamMemberForm {

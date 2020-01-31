@@ -333,7 +333,24 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String) = canUseChecksAction(appId) { implicit request =>
     successful(request.application.findCollaboratorByHash(teamMemberHash)
       .map(collaborator => Ok(applicationcheck.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
-      .getOrElse(Redirect(routes.ManageTeam.manageTeam(appId, None))))
+      .getOrElse(Redirect(routes.ApplicationCheck.team(appId))))
+  }
+
+  // TODO: Test me
+  def teamMemberRemoveAction(appId: String) = canUseChecksAction(appId) { implicit request => {
+
+    def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
+        applicationService
+          .removeTeamMember(request.application, form.email, request.user.email)
+          .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
+      }
+
+    def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]) : Future[Result] = {
+      successful(BadRequest)
+    }
+
+    RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    }
   }
 
   private def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {
