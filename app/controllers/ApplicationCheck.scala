@@ -314,29 +314,20 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  // TODO: Test me
   def team(appId: String) = canUseChecksAction(appId) { implicit request =>
-
-    // TODO : Should we also check for if this app allows team members (which standard ones do).
-    // The current manage team members page does
-
     Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
   }
 
-  // TODO: Test me
-  // TODO: Should this be in the manageTeam controller
   def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(applicationcheck.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
   }
 
-  // TODO: Test me
   def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String) = canUseChecksAction(appId) { implicit request =>
     successful(request.application.findCollaboratorByHash(teamMemberHash)
       .map(collaborator => Ok(applicationcheck.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
       .getOrElse(Redirect(routes.ApplicationCheck.team(appId))))
   }
 
-  // TODO: Test me
   def teamMemberRemoveAction(appId: String) = canUseChecksAction(appId) { implicit request => {
 
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
