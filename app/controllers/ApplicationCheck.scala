@@ -318,6 +318,13 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
   }
 
+  def teamAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+
+    // TODO: Update teamConfirmed check flag
+
+    Future.successful(Redirect(routes.ApplicationCheck.requestCheckPage(appId)))
+  }
+
   def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(applicationcheck.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
   }

@@ -136,6 +136,7 @@ POST        /applications/:id/request-check/terms-and-conditions                
 GET         /applications/:id/request-check/terms-of-use                                controllers.ApplicationCheck.termsOfUsePage(id: String)
 POST        /applications/:id/request-check/terms-of-use                                controllers.ApplicationCheck.termsOfUseAction(id: String)
 GET         /applications/:id/request-check/team                                        controllers.ApplicationCheck.team(id: String)
+POST        /applications/:id/request-check/team                                        controllers.ApplicationCheck.teamAction(id: String)
 GET         /applications/:id/request-check/team/add                                    controllers.ApplicationCheck.teamAddMember(id: String)
 GET         /applications/:id/request-check/team/remove-confirmation/:teamMemberHash    controllers.ApplicationCheck.teamMemberRemoveConfirmation(id: String, teamMemberHash: String)
 POST        /applications/:id/request-check/team/remove                                 controllers.ApplicationCheck.teamMemberRemoveAction(id: String)
