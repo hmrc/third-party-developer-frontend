@@ -299,6 +299,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
+          teamConfirmed = true,
           Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
       given(underTest.applicationService.requestUplift(mockEq(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
@@ -329,6 +330,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
+          teamConfirmed = true,
           Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
