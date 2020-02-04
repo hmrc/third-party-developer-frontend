@@ -51,21 +51,21 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
       elementExistsById(document, "nav-delete-application") shouldBe true
     }
 
-    "not include links to manage API subscriptions and team members for an app with privileged access" in new Setup {
+    "include links to manage team members but not API subscriptions for an app with privileged access" in new Setup {
       val document = Jsoup.parse(leftHandNav(Some(privilegedApplication), Some("")).body)
 
       elementExistsById(document, "nav-manage-subscriptions") shouldBe false
       elementExistsById(document, "nav-manage-credentials") shouldBe true
-      elementExistsById(document, "nav-manage-team") shouldBe false
+      elementExistsById(document, "nav-manage-team") shouldBe true
       elementExistsById(document, "nav-delete-application") shouldBe false
     }
 
-    "not include links to manage API subscriptions and team members for an app with ROPC access" in new Setup {
+    "include links to manage team members but not API subscriptions for an app with ROPC access" in new Setup {
       val document = Jsoup.parse(leftHandNav(Some(ropcApplication), Some("")).body)
 
       elementExistsById(document, "nav-manage-subscriptions") shouldBe false
       elementExistsById(document, "nav-manage-credentials") shouldBe true
-      elementExistsById(document, "nav-manage-team") shouldBe false
+      elementExistsById(document, "nav-manage-team") shouldBe true
       elementExistsById(document, "nav-delete-application") shouldBe false
     }
   }
