@@ -299,6 +299,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
+          teamConfirmed = true,
           Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
       given(underTest.applicationService.requestUplift(mockEq(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
@@ -329,6 +330,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
+          teamConfirmed = true,
           Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
@@ -1111,6 +1113,28 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/login")
     }
+
+    "team post redirect to check landing page" in new Setup {
+      givenTheApplicationExists(checkInformation = Some(CheckInformation()))
+
+      private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+
+      private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
+      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+    }
+
+    "team post doesn't redirect to the check landing page when not logged in" in new Setup {
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.teamAction(appId))(loggedOutRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/login")
+    }
+
 
     "return add team member page when check page is navigated to" in new Setup{
       givenTheApplicationExists()

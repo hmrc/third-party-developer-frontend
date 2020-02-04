@@ -26,6 +26,6 @@ object AddTeamMemberPageMode extends PlayEnum[AddTeamMemberPageMode] {
   final case object ManageTeamMembers       extends AddTeamMemberPageMode
   final case object ApplicationCheck   extends AddTeamMemberPageMode
 
-  // TODO: Naked get!
-  def from(mode: String) = values.find(e => e.toString == mode).get
+  def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
+
 }

@@ -23,7 +23,7 @@
 @(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean, mode: AddTeamMemberPageMode)(
         implicit request: play.api.mvc.Request[Any], messages: Messages)
 
-@helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id, mode.toString)) {
+@helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id, mode)) {
     @helper.CSRF.formField
 
     <div class="form-group @if(form.errors("email").nonEmpty) {form-group-error}">

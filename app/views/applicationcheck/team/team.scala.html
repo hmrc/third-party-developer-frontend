@@ -59,8 +59,11 @@
 
  </section>
 
- <div class="form-group">
-@*  TODO : Post and set the 'team members checked flag on the app *@
-   <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="button">Save and return</a>
- </div>
+ @helper.form(action = controllers.routes.ApplicationCheck.teamAction(app.id), 'class -> "form") {
+  @helper.CSRF.formField
+
+  <div class="form-group">
+   <button id="submit" class="button" type="submit">Save and return</button>
+  </div>
+ }
 }

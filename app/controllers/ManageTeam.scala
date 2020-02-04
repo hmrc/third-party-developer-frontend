@@ -60,12 +60,9 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
   }
 
-  // TODO: Use clever code for parsing the enum in the routing
-  def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: String) = canEditTeamMembers(applicationId) { implicit request =>
+  def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: AddTeamMemberPageMode) = canEditTeamMembers(applicationId) { implicit request =>
 
-    val pageMode: AddTeamMemberPageMode = AddTeamMemberPageMode.from(addTeamMemberPageMode)
-
-    val successRedirect = pageMode match {
+    val successRedirect = addTeamMemberPageMode match {
       case ManageTeamMembers => controllers.routes.ManageTeam.manageTeam(applicationId, None)
       case ApplicationCheck => controllers.routes.ApplicationCheck.team(applicationId)
     }
@@ -75,8 +72,8 @@ class ManageTeam @Inject()(val sessionService: SessionService,
         .map(_ => Redirect(successRedirect)) recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
         case _: TeamMemberAlreadyExists =>
-// TODO: This needs extracting (along with the TODO below)
-          pageMode match {
+      // TODO: This needs extracting (along with the TODO below)
+          addTeamMemberPageMode match {
             case ManageTeamMembers => BadRequest(views.html.manageTeamViews.addTeamMember(
               request.application,
               AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"),
@@ -91,7 +88,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
     // TODO: This needs extracting (along with the TODO above)
     def handleInvalidForm(formWithErrors: Form[AddTeamMemberForm]) = {
-      successful(pageMode match {
+      successful(addTeamMemberPageMode match {
         case ManageTeamMembers => BadRequest(views.html.manageTeamViews.addTeamMember(
           request.application,
           formWithErrors,

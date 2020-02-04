@@ -86,6 +86,22 @@
                             </td>
                         </tr>
 
+                        <tr class="@if(form.errors("teamConfirmed").nonEmpty){form-group-error}">
+                            <td id="teamConfirmed" scope="row" class="step-description">
+                                @include.fieldError(form.errors,"teamConfirmed")
+                                <a id="teamConfirmedCompleted" href="@routes.ApplicationCheck.team(app.id)">
+                                    Tell us your team members
+                                </a>
+                            </td>
+                            <td class="numeric">
+                            @if(form("teamConfirmedCompleted").value.contains("true")) {
+                                <div id="app-name-status" class="step-status status-completed">Complete</div>
+                            } else {
+                                <div id="app-name-status" class="step-status status-incomplete">To do</div>
+                            }
+                            </td>
+                        </tr>
+
                         <tr class="@if(form.errors("confirmedName").nonEmpty){form-group-error}">
                             <td id="confirmedName" scope="row" class="step-description">
                                 @include.fieldError(form.errors,"confirmedName")

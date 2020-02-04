@@ -318,6 +318,16 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
   }
 
+  def teamAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+
+    // TODO: Naked get!
+    val information: CheckInformation = request.application.checkInformation.get
+
+    for {
+      _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
+    } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
+  }
+
   def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(applicationcheck.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
   }
@@ -361,6 +371,7 @@ object ApplicationInformationForm {
       "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
       "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
       "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
+      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
       "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
     )(CheckInformationForm.apply)(CheckInformationForm.unapply)
   )

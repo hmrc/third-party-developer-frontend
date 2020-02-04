@@ -262,6 +262,7 @@ case class CheckInformationForm(confirmedNameComplete: Boolean = false,
                                 contactDetailsComplete: Boolean = false,
                                 providedPrivacyPolicyURLComplete: Boolean = false,
                                 providedTermsAndConditionsURLComplete: Boolean = false,
+                                teamConfirmedComplete: Boolean = false,
                                 termsOfUseAgreementComplete: Boolean = false)
 
 case class CheckInformation(confirmedName: Boolean = false,
@@ -269,6 +270,7 @@ case class CheckInformation(confirmedName: Boolean = false,
                             contactDetails: Option[ContactDetails] = None,
                             providedPrivacyPolicyURL: Boolean = false,
                             providedTermsAndConditionsURL: Boolean = false,
+                            teamConfirmed: Boolean = false,
                             termsOfUseAgreements: Seq[TermsOfUseAgreement] = Seq.empty)
 
 object CheckInformation {
@@ -283,6 +285,7 @@ object CheckInformationForm {
       contactDetailsComplete = checkInformation.contactDetails.isDefined,
       providedPrivacyPolicyURLComplete = checkInformation.providedPrivacyPolicyURL,
       providedTermsAndConditionsURLComplete = checkInformation.providedTermsAndConditionsURL,
+      teamConfirmedComplete = checkInformation.teamConfirmed,
       termsOfUseAgreementComplete = checkInformation.termsOfUseAgreements.exists(terms => terms.version.nonEmpty)
     )
   }
