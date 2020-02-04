@@ -41,8 +41,9 @@
                             Manage whitelisted IPs</a></li>
                     }
 
+                    <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Manage team members</a></li>
+
                     @if(app.access.accessType.isStandard) {
-                        <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Manage team members</a></li>
                         <li class="side-nav__list @if(section == "delete-application") { side-nav__list--selected }"><a id="nav-delete-application" class="side-nav__link" href="@routes.DeleteApplication.deleteApplication(app.id, None)">Delete application</a></li>
                     }
                 </ul>

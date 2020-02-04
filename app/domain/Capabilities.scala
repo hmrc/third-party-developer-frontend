@@ -50,7 +50,9 @@ object Capabilities {
     def hasCapability(app: Application): Boolean = app.state.name == State.PRODUCTION
   }
 
-  case object SupportsTeamMembers extends StandardAppCapability
+  case object SupportsTeamMembers extends Capability {
+    def hasCapability(app: Application) = true
+  }
 
   case object SupportsSubscriptions extends StandardAppCapability with LikePermission
 
