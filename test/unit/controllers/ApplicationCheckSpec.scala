@@ -1192,6 +1192,18 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       verify(underTest.applicationService).removeTeamMember(mockEq(app),mockEq(anotherCollaboratorEmail), mockEq(loggedInUser.email))(any[HeaderCarrier])
     }
+
+    "team post redirect to check landing page when no check information on application" in new Setup {
+      givenTheApplicationExists(checkInformation = None)
+
+      private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+
+      private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
+      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+    }
   }
 
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))

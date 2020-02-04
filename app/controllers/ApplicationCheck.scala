@@ -319,11 +319,11 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   }
 
   def teamAction(appId: String) = canUseChecksAction(appId) { implicit request =>
-    (for {
-      checkInformation: CheckInformation <- OptionT.fromOption[Future](request.application.checkInformation)
-      _ <- OptionT.liftF(applicationService.updateCheckInformation(appId, checkInformation.copy(teamConfirmed = true)))
-    } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId)))
-      .getOrElse(BadRequest)
+
+    val information = request.application.checkInformation.getOrElse(CheckInformation())
+    for {
+      _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
+    } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
   }
 
   def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
