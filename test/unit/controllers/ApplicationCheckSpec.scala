@@ -1115,12 +1115,15 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "team post redirect to check landing page" in new Setup {
-      givenTheApplicationExists()
+      givenTheApplicationExists(checkInformation = Some(CheckInformation()))
 
       private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+
+      private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
+      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
     }
 
     "team post doesn't redirect to the check landing page when not logged in" in new Setup {

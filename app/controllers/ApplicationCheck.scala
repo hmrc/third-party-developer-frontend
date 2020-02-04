@@ -320,9 +320,12 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 
   def teamAction(appId: String) = canUseChecksAction(appId) { implicit request =>
 
-    // TODO: Update teamConfirmed check flag
+    // TODO: Naked get!
+    val information: CheckInformation = request.application.checkInformation.get
 
-    Future.successful(Redirect(routes.ApplicationCheck.requestCheckPage(appId)))
+    for {
+      _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
+    } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
   }
 
   def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
