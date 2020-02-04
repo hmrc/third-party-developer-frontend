@@ -16,8 +16,8 @@
 
 package controllers
 
-import java.util.UUID
-
+import cats.data.OptionT
+import cats.implicits._
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
 import domain.Capabilities.SupportsAppChecks
@@ -27,7 +27,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, ActionFunction, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.voa.play.form.ConditionalMappings._
@@ -319,13 +319,11 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   }
 
   def teamAction(appId: String) = canUseChecksAction(appId) { implicit request =>
-
-    // TODO: Naked get!
-    val information: CheckInformation = request.application.checkInformation.get
-
-    for {
-      _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
-    } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
+    (for {
+      checkInformation: CheckInformation <- OptionT.fromOption[Future](request.application.checkInformation)
+      _ <- OptionT.liftF(applicationService.updateCheckInformation(appId, checkInformation.copy(teamConfirmed = true)))
+    } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId)))
+      .getOrElse(BadRequest)
   }
 
   def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
