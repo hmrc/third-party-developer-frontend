@@ -127,6 +127,7 @@ contact.details.required.field=Provide contact details
 api.subscriptions.required.field=Confirm the APIs your application uses
 privacy.links.required.field=Provide a link to your application’s privacy policy
 tnc.links.required.field=Provide a link to your application’s terms and conditions
+team.required.field=Tell us the name of your team members
 agree.terms.of.use.required.field=Agree to our terms of use
 
 

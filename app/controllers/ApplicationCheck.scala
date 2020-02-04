@@ -361,6 +361,7 @@ object ApplicationInformationForm {
       "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
       "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
       "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
+      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
       "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
     )(CheckInformationForm.apply)(CheckInformationForm.unapply)
   )
