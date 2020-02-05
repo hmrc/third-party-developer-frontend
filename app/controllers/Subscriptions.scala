@@ -59,7 +59,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     })
   }
 
-  def subscriptions2(applicationId: String,
+  def addAppSubscriptions(applicationId: String,
                      environment: Environment): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
 
     renderSubscriptions(request.application, request.user, (role: Role, data: PageData, form: Form[EditApplicationForm]) => {

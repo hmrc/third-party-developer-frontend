@@ -131,20 +131,20 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   "subscriptions2" should {
     "return the ROPC page for a ROPC app" in new Setup {
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(ropcApplication))
-      val result: Result = await(addToken(underTest.subscriptions2(appId, Environment.PRODUCTION))(loggedInRequest))
+      val result: Result = await(addToken(underTest.addAppSubscriptions(appId, Environment.PRODUCTION))(loggedInRequest))
       status(result) shouldBe FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(privilegedApplication))
-      val result: Result = await(addToken(underTest.subscriptions2(appId, Environment.PRODUCTION))(loggedInRequest))
+      val result: Result = await(addToken(underTest.addAppSubscriptions(appId, Environment.PRODUCTION))(loggedInRequest))
       status(result) shouldBe FORBIDDEN
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(activeApplication))
       given(underTest.apiSubscriptionsHelper.fetchPageDataFor(mockEq(activeApplication))(any[HeaderCarrier])).willReturn(successful(PageData(activeApplication, None)))
-      val result: Result = await(addToken(underTest.subscriptions2(appId, Environment.PRODUCTION))(loggedInRequest))
+      val result: Result = await(addToken(underTest.addAppSubscriptions(appId, Environment.PRODUCTION))(loggedInRequest))
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
     }

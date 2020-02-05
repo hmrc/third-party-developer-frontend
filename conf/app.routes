@@ -71,7 +71,7 @@ GET         /applications/add/production                                        
 
 GET         /applications/add/:environment/name                                        controllers.AddApplication.addApplicationName(environment: domain.Environment)
 POST        /applications/add/:environment/name                                        controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
-GET         /applications/:id/add/:environment/subscriptions                           controllers.Subscriptions.subscriptions2(id: String, environment: domain.Environment)
+GET         /applications/:id/add/:environment/subscriptions                           controllers.Subscriptions.addAppSubscriptions(id: String, environment: domain.Environment)
 
 GET         /applications/:id/add/:environment/success                                 controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
 
