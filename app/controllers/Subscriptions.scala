@@ -53,7 +53,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     capabilityThenPermissionsAction(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
 
-  def subscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+  def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(request.application, request.user, (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
       views.html.subscriptions(role, data, form, request.application, data.subscriptions, data.app.id)
     })
@@ -84,7 +84,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   }
 
   private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
-    case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.subscriptions(applicationId))
+    case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.manageSubscriptions(applicationId))
     case Some(APPLICATION_CHECK_PAGE) => Redirect(routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
     case _ => Redirect(routes.Details.details(applicationId))
   }
