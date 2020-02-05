@@ -21,10 +21,13 @@ import domain.Permissions.SandboxOrAdmin
 import domain._
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
+import helpers.string._
 
 class ApplicationSpec extends FunSpec with Matchers {
 
   val developer = Developer("developerEmail", "DEVELOPER    ", "developerLast")
+  val developerCollaborator = Collaborator(developer.email, Role.DEVELOPER)
+
   val administrator = Developer("administratorEmail", "ADMINISTRATOR", "administratorLast")
 
   val productionApplicationState: ApplicationState = ApplicationState.production(requestedBy = "other email", verificationCode = "123")
@@ -136,9 +139,21 @@ class ApplicationSpec extends FunSpec with Matchers {
     runTableTests(data, testingApplicationState)({ case (app, user) => app.canPerformApprovalProcess(user) })
   }
 
+  describe("Application.findCollaboratorByHash()") {
+    val app = createApp(Environment.PRODUCTION, Standard(), productionApplicationState)
+
+    it("should find when an email sha matches"){
+      app.findCollaboratorByHash(developer.email.toSha256) shouldBe Some(developerCollaborator)
+    }
+
+    it("should not find when an email sha doesn't match"){
+      app.findCollaboratorByHash("not a matching sha") shouldBe None
+    }
+  }
+
   private def createApp(environment: Environment, access: Access, defaultApplicationState: ApplicationState): Application = {
     val collaborators = Set(
-      Collaborator(developer.email, Role.DEVELOPER),
+      developerCollaborator,
       Collaborator(administrator.email, Role.ADMINISTRATOR)
     )
 

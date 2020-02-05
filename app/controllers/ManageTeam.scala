@@ -18,6 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import domain.AddTeamMemberPageMode.{ApplicationCheck, ManageTeamMembers}
 import domain.Capabilities.SupportsTeamMembers
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain._
@@ -26,6 +27,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
+import play.twirl.api.{BaseScalaTemplate, Format, Html, HtmlFormat}
 import service._
 
 import scala.concurrent.Future.successful
@@ -50,29 +52,43 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
   def manageTeam(applicationId: String, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     val application = request.application
-    val view = views.html.manageTeam(application, request.role, AddTeamMemberForm.form, request.user)
+    val view = views.html.manageTeamViews.manageTeam(application, request.role, AddTeamMemberForm.form, request.user)
     Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
   def addTeamMember(applicationId: String) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
   }
 
-  def addTeamMemberAction(applicationId: String) = canEditTeamMembers(applicationId) { implicit request =>
+  def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: AddTeamMemberPageMode) = canEditTeamMembers(applicationId) { implicit request =>
+
+    val successRedirect = addTeamMemberPageMode match {
+      case ManageTeamMembers => controllers.routes.ManageTeam.manageTeam(applicationId, None)
+      case ApplicationCheck => controllers.routes.ApplicationCheck.team(applicationId)
+    }
+
+    def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]) : Result = {
+      val viewFunction: (Application, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
+        case ManageTeamMembers => views.html.manageTeamViews.addTeamMember.apply
+        case ApplicationCheck => views.html.applicationcheck.team.teamMemberAdd.apply
+      }
+
+      BadRequest(viewFunction(
+        request.application,
+        formWithErrors,
+        request.user))
+    }
+
     def handleValidForm(form: AddTeamMemberForm) = {
       applicationService.addTeamMember(request.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
-        .map(_ => Redirect(controllers.routes.ManageTeam.manageTeam(applicationId, None))) recover {
+        .map(_ => Redirect(successRedirect)) recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
-        case _: TeamMemberAlreadyExists =>
-          BadRequest(views.html.addTeamMember(
-            request.application,
-            AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"),
-            request.user))
+        case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
       }
     }
 
     def handleInvalidForm(formWithErrors: Form[AddTeamMemberForm]) = {
-      Future.successful(BadRequest(views.html.addTeamMember(request.application, formWithErrors, request.user)))
+      successful( createBadRequestResult(formWithErrors))
     }
 
     AddTeamMemberForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
@@ -82,9 +98,9 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     implicit request =>
       val application = request.application
 
-      application.collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash) match {
+      application.findCollaboratorByHash(teamMemberHash) match {
         case Some(collaborator) =>
-          successful(Ok(views.html.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, collaborator.emailAddress)))
+          successful(Ok(views.html.manageTeamViews.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, collaborator.emailAddress)))
         case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
   }
@@ -102,7 +118,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     }
 
     def handleInvalidForm(form: Form[RemoveTeamMemberConfirmationForm]) =
-      successful(BadRequest(views.html.removeTeamMember(application, form, request.user, form("email").value.getOrElse(""))))
+      successful(BadRequest(views.html.manageTeamViews.removeTeamMember(application, form, request.user, form("email").value.getOrElse(""))))
 
     RemoveTeamMemberConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }

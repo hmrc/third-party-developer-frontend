@@ -1,0 +1,76 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain.Application
+@import domain.Role
+@import domain.DeveloperSession
+@import helpers.string._
+
+@import domain.AnchorStyle
+@import domain.Button
+
+@(app: Application,role: Role, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (String, String) => Call)(implicit request: play.api.mvc.Request[Any])
+
+
+@if(role.isDeveloper) {
+ <p class="alert alert--info">You need admin rights to add or remove team members.</p>
+}
+<table class="table--spaced-top">
+ <thead>
+  <tr>
+   <th class="hard"><span>Email address</span></th>
+   <th class="hard"><span>Role</span></th>
+   <th class="hard"><span></span></th>
+  </tr>
+ </thead>
+
+ <tbody
+ data-teamMember-list
+ data-teamMember-remove-url="@SpliceCSRFToken(controllers.routes.ManageTeam.removeTeamMemberAction(app.id))" >
+
+ @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress).zipWithIndex) {
+  <tr data-teamMember-row="@teamMember.emailAddress">
+   <td class="table--large">@teamMember.emailAddress</td>
+   <td class="table--large text--left hard--left">
+    @if(teamMember.role.isAdministrator) {
+     <span>Admin</span>
+    }
+    @if(teamMember.role.isDeveloper) {
+     <span>Developer</span>
+    }
+   </td>
+   @if(role.isAdministrator && (teamMember.role.isDeveloper || teamMember.emailAddress != loggedIn.email)) {
+    <td class="text--right hard--right">
+     <a href="@createRemoveLink(app.id, teamMember.emailAddress).url">
+      Remove <span class="visually-hidden">@teamMember.emailAddress</span>
+     </a>
+    </td>
+   } else {
+    <td class="text--right hard--right" aria-hidden="true"></td>
+   }
+
+  </tr>
+ }
+ </tbody>
+</table>
+</section>
+<br>
+<section>
+
+@if(role.isAdministrator) {
+  <a href="@addTeamMemberUrl" @if(addMemberStyle == Button) { class="button" } >Add a team member</a><br/>
+}
+

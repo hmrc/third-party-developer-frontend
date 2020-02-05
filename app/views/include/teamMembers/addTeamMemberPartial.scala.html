@@ -14,48 +14,25 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@import domain.{DeveloperSession, Application, Role}
-@import include._
-@import model.Crumb
+@import domain.Application
+@import domain.DeveloperSession
 
-@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
-implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+@import views.html.include.fieldError
 
-@devMain(
-    title = titleError + "Add a team member",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage team members"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
-    developerSession = Some(loggedIn)
-) {
+@import domain.AddTeamMemberPageMode
+@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean, mode: AddTeamMemberPageMode)(
+        implicit request: play.api.mvc.Request[Any], messages: Messages)
 
-    @errorSummary(form)
-
-    <h1 class="heading-xlarge">Add a team member</h1>
-
-    @appEnvironment(app)
-    <br>
-
-    <h2 class="heading-large">Team member</h2>
-
-
-    @helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id)) {
+@helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id, mode)) {
     @helper.CSRF.formField
 
     <div class="form-group @if(form.errors("email").nonEmpty) {form-group-error}">
         <label class="form-label-bold" for="email" id="email-label">Email address</label>
         @fieldError(form.errors, "email", form.error("submissionError").isEmpty)
         <input type="text"
-               id="email"
-               name="email"
-               value="@form.data.getOrElse("email", "")"
+        id="email"
+        name="email"
+        value="@form.data.getOrElse("email", "")"
         class="form-control @if(form.errors("email").nonEmpty) {form-control-error}"
         aria-labelledby="email-label"/>
     </div>
@@ -69,34 +46,32 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
                 <input id="Developer" type="radio" name="role" value="Developer">
                 <label for="Developer"><strong class="bold">Developer</strong>
                     <span class="form-hint">
-                                            Test an application<br>
-                                            Subscribe to sandbox APIs<br>
-                                            Add redirect URIs<br>
-                                            View team members
-                                         </span>
+                        Test an application<br>
+                        Subscribe to sandbox APIs<br>
+                        Add redirect URIs<br>
+                        View team members
+                    </span>
                 </label>
             </div>
             <div class="multiple-choice">
                 <input id="Admin" type="radio" name="role" value="Administrator">
                 <label for="Admin"><strong class="bold">Administrator</strong>
                     <span class="form-hint">
-                                            Test an application<br>
-                                            Subscribe to sandbox APIs and request to change production APIs<br>
-                                            Change application details<br>
-                                            Add or remove team members
-                                         </span>
+                        Test an application<br>
+                        Subscribe to sandbox APIs and request to change production APIs<br>
+                        Change application details<br>
+                        Add or remove team members
+                    </span>
                 </label>
             </div>
         </fieldset>
     </div>
 
     <div class="form-field">
-        <button id="submit" class="button button--padded" type="submit">Add</button>
-        <a href="@routes.ManageTeam.manageTeam(app.id, None)" class="secondary-button">Cancel</a>
+        <button id="submit" class="button button--padded" type="submit">@submitText</button>
+
+        @if(showCancel) {
+            <a href="@routes.ManageTeam.manageTeam(app.id, None)" class="secondary-button">Cancel</a>
+        }
     </div>
-    }
-
-
-
-
 }
