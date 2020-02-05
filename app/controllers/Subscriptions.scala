@@ -89,7 +89,10 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     case _ => Redirect(routes.Details.details(applicationId))
   }
 
-  def changeApiSubscription(applicationId: String, apiContext: String, apiVersion: String, redirectTo: String) = whenTeamMemberOnApp(applicationId) {
+  def changeApiSubscription(applicationId: String,
+                            apiContext: String,
+                            apiVersion: String,
+                            redirectTo: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
     implicit request =>
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
@@ -116,7 +119,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                   apiName: String,
                                   apiContext: String,
                                   apiVersion: String,
-                                  redirectTo: String) = canManageLockedApiSubscriptionsAction(applicationId) {
+                                  redirectTo: String): Action[AnyContent] = canManageLockedApiSubscriptionsAction(applicationId) {
     implicit request =>
         applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).map(subscribed =>
           Ok(changeSubscriptionConfirmation(
@@ -127,7 +130,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                         apiName: String,
                                         apiContext: String,
                                         apiVersion: String,
-                                        redirectTo: String) = canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
+                                        redirectTo: String): Action[AnyContent] = canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
     def requestChangeSubscription(subscribed: Boolean) = {
       if (subscribed) {
         subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
@@ -151,7 +154,10 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
       ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
   }
 
-  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String) = loggedInAction { implicit request =>
+  def saveSubscriptionFields(applicationId: String,
+                             apiContext: String,
+                             apiVersion: String,
+                             subscriptionRedirect: String): Action[AnyContent] = loggedInAction { implicit request =>
     def handleValidForm(validForm: SubscriptionFieldsForm) = {
       def saveFields(validForm: SubscriptionFieldsForm)(implicit hc: HeaderCarrier): Future[Any] = {
         if (validForm.fields.nonEmpty) {
@@ -213,7 +219,6 @@ class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(i
 
   def fetchPageDataFor(application: Application)(implicit hc: HeaderCarrier): Future[PageData] = {
     for {
-      creds <- applicationService.fetchCredentials(application.id)
       subscriptions <- applicationService.apisWithSubscriptions(application)
     } yield {
       PageData(application, APISubscriptions.groupSubscriptions(subscriptions))
@@ -229,7 +234,7 @@ class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(i
     }
   }
 
-  def roleForApplication(application: Application, email: String) =
+  def roleForApplication(application: Application, email: String): Role =
     application.role(email).getOrElse(throw new ApplicationNotFound)
 }
 
