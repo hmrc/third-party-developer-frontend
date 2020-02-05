@@ -63,6 +63,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     }
   }
 
+  // TODO: Merge with above subscriptions()
   def subscriptions2(applicationId: String, environment: Environment) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
       val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
@@ -207,7 +208,7 @@ class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(i
       creds <- applicationService.fetchCredentials(application.id)
       subscriptions <- applicationService.apisWithSubscriptions(application)
     } yield {
-      PageData(application, creds, APISubscriptions.groupSubscriptions(subscriptions))
+      PageData(application, APISubscriptions.groupSubscriptions(subscriptions))
     }
   }
 

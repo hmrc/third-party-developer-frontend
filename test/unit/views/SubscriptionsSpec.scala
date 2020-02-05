@@ -27,6 +27,7 @@ import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+import play.twirl.api.Html
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
 import utils.SharedMetricsClearDown
@@ -36,7 +37,7 @@ import scala.collection.JavaConversions._
 
 class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
-  val appConfig = mock[ApplicationConfig]
+  val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
   trait Setup {
 
@@ -47,7 +48,7 @@ class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").nonEmpty
   }
 
-  def buildApplication(applicationState: ApplicationState, environment: Environment) = Application(
+  def buildApplication(applicationState: ApplicationState, environment: Environment): Application = Application(
     "Test Application ID",
     "Test Application Client ID",
     "Test Application",
@@ -88,121 +89,121 @@ class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
     }
 
     "render for an Admin with a PRODUCTION app in ACTIVE state" in new Setup {
-      val request = FakeRequest().withCSRFToken
+      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData = PageData(productionApplication, null, None)
+      val pageData: PageData = PageData(productionApplication, None)
 
-      val page = renderPageForApplicationAndRole(productionApplication, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplication, Role.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("For security reasons we must review any API subscription changes.")
 
-      val document = Jsoup.parse(page.body)
+      val document: Document = Jsoup.parse(page.body)
 
       elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
     }
 
     "render for a Developer with a PRODUCTION app in ACTIVE state" in new Setup {
-      val request = FakeRequest().withCSRFToken
+      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData = PageData(productionApplication, null, None)
+      val pageData: PageData = PageData(productionApplication, None)
 
-      val page = renderPageForApplicationAndRole(productionApplication, Role.DEVELOPER, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplication, Role.DEVELOPER, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("You need admin rights to make API subscription changes.")
 
-      val document = Jsoup.parse(page.body)
+      val document: Document = Jsoup.parse(page.body)
 
       elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
     }
 
     "render for an Admin with a PRODUCTION app in CREATED state" in new Setup {
-      val request = FakeRequest().withCSRFToken
+      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData = PageData(productionApplicationTesting, null, None)
+      val pageData: PageData = PageData(productionApplicationTesting, None)
 
-      val page = renderPageForApplicationAndRole(productionApplicationTesting, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, Role.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
 
-      val document = Jsoup.parse(page.body)
+      val document: Document = Jsoup.parse(page.body)
 
       elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
     }
 
     "render for a Develolper with a PRODUCTION app in CREATED state" in new Setup {
-      val request = FakeRequest().withCSRFToken
+      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData = PageData(productionApplicationTesting, null, None)
+      val pageData: PageData = PageData(productionApplicationTesting, None)
 
-      val page = renderPageForApplicationAndRole(productionApplicationTesting, Role.DEVELOPER, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, Role.DEVELOPER, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
 
-      val document = Jsoup.parse(page.body)
+      val document: Document = Jsoup.parse(page.body)
 
       elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
     }
 
     "render for an Admin with a PRODUCTION app in PENDING_GATEKEEPER_APPROVAL state" in new Setup {
-      val request = FakeRequest().withCSRFToken
+      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData = PageData(productionApplicationPendingGatekeeperApproval, null, None)
+      val pageData: PageData = PageData(productionApplicationPendingGatekeeperApproval, None)
 
-      val page = renderPageForApplicationAndRole(productionApplicationPendingGatekeeperApproval, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingGatekeeperApproval, Role.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("For security reasons we must review any API subscription changes.")
 
-      val document = Jsoup.parse(page.body)
+      val document: Document = Jsoup.parse(page.body)
 
       elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
     }
 
     "render for an Admin with a PRODUCTION app in PENDING_REQUESTER_APPROVAL state" in new Setup {
-      val request = FakeRequest().withCSRFToken
+      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData = PageData(productionApplicationPendingRequesterVerification, null, None)
+      val pageData: PageData = PageData(productionApplicationPendingRequesterVerification, None)
 
-      val page = renderPageForApplicationAndRole(productionApplicationPendingRequesterVerification, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingRequesterVerification, Role.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("For security reasons we must review any API subscription changes.")
 
-      val document = Jsoup.parse(page.body)
+      val document: Document = Jsoup.parse(page.body)
 
       elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
     }
 
     "render for an Admin with a SANDBOX app in CREATED state" in new Setup {
-      val request = FakeRequest().withCSRFToken
+      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData = PageData(sandboxApplicationTesting, null, None)
+      val pageData: PageData = PageData(sandboxApplicationTesting, None)
 
-      val page = renderPageForApplicationAndRole(sandboxApplicationTesting, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, Role.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
 
-      val document = Jsoup.parse(page.body)
+      val document: Document = Jsoup.parse(page.body)
 
       elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
     }
 
     "render for a Developer with a SANDBOX app in CREATED state" in new Setup {
-      val request = FakeRequest().withCSRFToken
+      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData = PageData(sandboxApplicationTesting, null, None)
+      val pageData: PageData = PageData(sandboxApplicationTesting, None)
 
-      val page = renderPageForApplicationAndRole(sandboxApplicationTesting, Role.DEVELOPER, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, Role.DEVELOPER, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
 
-      val document = Jsoup.parse(page.body)
+      val document: Document = Jsoup.parse(page.body)
 
       elementExistsByText(document, "h1", "Manage API subscriptions") shouldBe true
     }
