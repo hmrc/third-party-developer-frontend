@@ -31,7 +31,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
 import utils.SharedMetricsClearDown
-import views.html.subscriptions
+import views.html.manageSubscriptions
 
 import scala.collection.JavaConversions._
 
@@ -73,7 +73,7 @@ class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
     val sandboxApplicationTesting = buildApplication(ApplicationState.testing, Environment.SANDBOX)
 
     def renderPageForApplicationAndRole(application: Application, role: Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
-      subscriptions.render(
+      manageSubscriptions.render(
         role,
         pageData,
         EditApplicationForm.withData(productionApplicationTesting),

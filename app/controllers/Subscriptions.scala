@@ -55,7 +55,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
 
   def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(request.application, request.user, (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-      views.html.subscriptions(role, data, form, request.application, data.subscriptions, data.app.id)
+      views.html.manageSubscriptions(role, data, form, request.application, data.subscriptions, data.app.id)
     })
   }
 
@@ -63,7 +63,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                      environment: Environment): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
 
     renderSubscriptions(request.application, request.user, (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-      views.html.subscriptions2(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
+      views.html.addAppSubscriptions(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
     })
   }
 
