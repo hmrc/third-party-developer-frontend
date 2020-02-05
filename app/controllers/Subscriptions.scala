@@ -208,7 +208,7 @@ class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(i
       creds <- applicationService.fetchCredentials(application.id)
       subscriptions <- applicationService.apisWithSubscriptions(application)
     } yield {
-      PageData(application, creds, APISubscriptions.groupSubscriptions(subscriptions))
+      PageData(application, APISubscriptions.groupSubscriptions(subscriptions))
     }
   }
 
