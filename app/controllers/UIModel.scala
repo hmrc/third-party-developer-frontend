@@ -25,6 +25,7 @@ import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
 
+// TODO: Do we use / need tokens here? Or are they not used anymore?
 case class PageData(app: Application, tokens: ApplicationTokens, subscriptions: Option[GroupedSubscriptions])
 
 case class ApplicationSummary(id: String, name: String, environment: String, role: Role,
