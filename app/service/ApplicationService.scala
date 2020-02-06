@@ -19,7 +19,7 @@ package service
 import config.ApplicationConfig
 import connectors._
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionField, SubscriptionFieldsWrapper}
 import domain.Environment.{PRODUCTION, SANDBOX}
 import domain._
 import javax.inject.{Inject, Singleton}
@@ -28,6 +28,7 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -54,13 +55,22 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
   def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] =
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.fetchCredentials(id))
 
-  // TODO: Optomise api-subs-fields calls
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
-    // Replace with a method that finds the subs field from a map (context / version) of all of them
-    def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription): Future[APISubscriptionStatus] = {
-      // TODO: Get from hashmap
-      subscriptionFieldsService.fetchFields(application, api.context, version.version.version).map { fields =>
+    def toApiSubscriptionStatuses(api: APISubscription,
+                                   version: VersionSubscription,
+                                   fieldDefinitions: Map[APIIdentifier, ApiSubscriptionFields.FieldDefinitionsResponse]): Future[APISubscriptionStatus] = {
+      val apiIdentifier = APIIdentifier(api.context, version.version.version)
+
+      val subscriptionFieldsWithOutValues: Seq[SubscriptionField] =
+        fieldDefinitions
+          .get(apiIdentifier)
+          .map((fieldDefinitions: FieldDefinitionsResponse) => fieldDefinitions.fieldDefinitions)
+          .getOrElse(Seq.empty)
+
+      val subscriptionFieldsWithValues: Future[Seq[SubscriptionField]] = subscriptionFieldsService.fetchFieldsValues(application,subscriptionFieldsWithOutValues, apiIdentifier)
+
+      subscriptionFieldsWithValues.map {fields: Seq[ApiSubscriptionFields.SubscriptionField] =>
         APISubscriptionStatus(
           api.name,
           api.serviceName,
@@ -73,21 +83,23 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
       }
     }
 
-    def toApiVersions(api: APISubscription): Seq[Future[APISubscriptionStatus]] = {
+    def toApiVersions(api: APISubscription,
+                      fieldDefinitions: Map[APIIdentifier, ApiSubscriptionFields.FieldDefinitionsResponse])
+                                : Seq[Future[APISubscriptionStatus]] = {
+
       api.versions
         .filterNot(_.version.status == RETIRED)
         .filterNot(s => s.version.status == DEPRECATED && !s.subscribed)
         .sortWith(APIDefinition.descendingVersion)
-        .map(toApiSubscriptionStatuses(api, _))
+        .map(toApiSubscriptionStatuses(api, _, fieldDefinitions))
     }
 
     val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
-    // TODO: Get all subs-definitions here
     for {
       fieldDefinitions <- subscriptionFieldsService.getAllFieldDefinitions(application.deployedTo)
       subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
-      apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions))
+      apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions(_, fieldDefinitions)))
     } yield apiVersions
   }
 
