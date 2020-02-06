@@ -25,10 +25,11 @@ import domain.APIStatus._
 import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionField, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTime
-import org.mockito.ArgumentCaptor
+import org.mockito.{ArgumentCaptor, BDDMockito}
 import org.mockito.ArgumentMatchers.{any, anyString, eq => mockEq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
+import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
@@ -45,14 +46,14 @@ import scala.concurrent.Future._
 class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val mockAppConfig = mock[ApplicationConfig]
-    val mockProductionApplicationConnector = mock[ThirdPartyApplicationProductionConnector]
-    val mockSandboxApplicationConnector = mock[ThirdPartyApplicationSandboxConnector]
+    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+    val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
+    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector = mock[ThirdPartyApplicationSandboxConnector]
 
-    val mockProductionSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsProductionConnector]
-    val mockSandboxSubscriptionFieldsConnector = mock[ApiSubscriptionFieldsSandboxConnector]
+    val mockProductionSubscriptionFieldsConnector: ApiSubscriptionFieldsProductionConnector = mock[ApiSubscriptionFieldsProductionConnector]
+    val mockSandboxSubscriptionFieldsConnector: ApiSubscriptionFieldsSandboxConnector = mock[ApiSubscriptionFieldsSandboxConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
@@ -63,47 +64,45 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       mockSandboxSubscriptionFieldsConnector,
       mockProductionSubscriptionFieldsConnector,
       mockAppConfig)
-    val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector = mock[DeskproConnector]
+    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
+    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
 
-   
     val service = new ApplicationService(connectorsWrapper, mockSubscriptionFieldsService,  mockDeskproConnector, mockAppConfig, mockDeveloperConnector, mockSandboxApplicationConnector, mockProductionApplicationConnector, mockAuditService)
 
-    def theProductionConnectorWillReturnTheApplication(applicationId: String, application: Application) = {
+    def theProductionConnectorWillReturnTheApplication(applicationId: String, application: Application): BDDMockito.BDDMyOngoingStubbing[Future[Option[Application]]] = {
       given(mockProductionApplicationConnector.fetchApplicationById(applicationId)).willReturn(Future.successful(Some(application)))
       given(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).willReturn(Future.successful(None))
     }
 
-    def theSandboxConnectorWillReturnTheApplication(applicationId: String, application: Application) = {
+    def theSandboxConnectorWillReturnTheApplication(applicationId: String, application: Application): BDDMockito.BDDMyOngoingStubbing[Future[Option[Application]]] = {
       given(mockProductionApplicationConnector.fetchApplicationById(applicationId)).willReturn(Future.successful(None))
       given(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).willReturn(Future.successful(Some(application)))
     }
 
-    // TODO: Delete?
-    def theSubscriptionFieldsServiceWillReturn(fields: Seq[ApiSubscriptionFields.SubscriptionField]) = {
+    def theSubscriptionFieldsServiceWillReturn(fields: Seq[ApiSubscriptionFields.SubscriptionField]): BDDMockito.BDDMyOngoingStubbing[Future[Seq[SubscriptionField]]] = {
       given(mockSubscriptionFieldsService.fetchFields(any[Application], anyString(), anyString())(any[HeaderCarrier])).willReturn(Future.successful(fields))
     }
 
-    def theSubscriptionFieldsServiceValuesWillReturn(fields: Seq[ApiSubscriptionFields.SubscriptionField]) = {
+    def theSubscriptionFieldsServiceValuesWillReturn(fields: Seq[ApiSubscriptionFields.SubscriptionField]): BDDMockito.BDDMyOngoingStubbing[Future[Seq[SubscriptionField]]] = {
       given(mockSubscriptionFieldsService.fetchFieldsValues(any[Application], any(), any())(any[HeaderCarrier])).willReturn(Future.successful(fields))
     }
 
-    def theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(allFields: Map[APIIdentifier, FieldDefinitionsResponse]) = {
+    def theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(allFields: Map[APIIdentifier, FieldDefinitionsResponse]): BDDMockito.BDDMyOngoingStubbing[Future[Map[APIIdentifier, FieldDefinitionsResponse]]] = {
 
       given(mockSubscriptionFieldsService.getAllFieldDefinitions(any())(any[HeaderCarrier])).willReturn(successful(allFields))
     }
   }
 
-  def version(version: String, status: APIStatus, subscribed: Boolean) = VersionSubscription(APIVersion(version, status), subscribed)
+  def version(version: String, status: APIStatus, subscribed: Boolean): VersionSubscription = VersionSubscription(APIVersion(version, status), subscribed)
 
-  def api(name: String, context: String, requiresTrust: Option[Boolean], versions: VersionSubscription*) = APISubscription(name, name, context, versions, requiresTrust)
+  def api(name: String, context: String, requiresTrust: Option[Boolean], versions: VersionSubscription*): APISubscription = APISubscription(name, name, context, versions, requiresTrust)
 
   val productionApplicationId = "Application ID"
   val productionClientId = s"client-id-${UUID.randomUUID().toString}"
-  val productionApplication = Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("description"), Set())
+  val productionApplication: Application = Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("description"), Set())
   val sandboxApplicationId = "Application ID"
   val sandboxClientId = "Client ID"
-  val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX, Some("description"))
+  val sandboxApplication: Application = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX, Some("description"))
 
   def subStatus(  appId: String,
                   clientId: String,
@@ -113,7 +112,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
                   status: APIStatus = STABLE,
                   subscribed: Boolean = false,
                   requiresTrust: Boolean = false,
-                  subscriptionFieldWithValues: Seq[SubscriptionField] = Seq.empty) =
+                  subscriptionFieldWithValues: Seq[SubscriptionField] = Seq.empty): APISubscriptionStatus =
     APISubscriptionStatus(name, name, context, APIVersion(version, status), subscribed, requiresTrust, Some(SubscriptionFieldsWrapper(appId, clientId, context, version, subscriptionFieldWithValues)))
 
   "Fetch by teamMember email" should {
@@ -131,7 +130,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
         .thenReturn(successful(sandboxApps))
 
-      val result = await(service.fetchByTeamMemberEmail(emailAddress))
+      val result: Seq[Application] = await(service.fetchByTeamMemberEmail(emailAddress))
       result shouldBe Seq(app3, app2, app1)
     }
 
@@ -139,15 +138,15 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
         .thenReturn(successful(productionApps))
       when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-        .thenReturn(Future.failed(new Upstream5xxResponse("Expected exception", 504, 504)))
+        .thenReturn(Future.failed(Upstream5xxResponse("Expected exception", 504, 504)))
 
-      val result = await(service.fetchByTeamMemberEmail(emailAddress))
+      val result: Seq[Application] = await(service.fetchByTeamMemberEmail(emailAddress))
       result shouldBe Seq(app3, app1)
     }
 
     "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
       when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-        .thenReturn(Future.failed(new Upstream5xxResponse("Expected exception", 504, 504)))
+        .thenReturn(Future.failed(Upstream5xxResponse("Expected exception", 504, 504)))
       when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
         .thenReturn(successful(sandboxApps))
 
@@ -160,13 +159,13 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   "Fetch by ID" should {
     "return the application fetched from the production connector when it exists there" in new Setup {
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-      val result = await(service.fetchByApplicationId(productionApplicationId))
+      val result: Application = await(service.fetchByApplicationId(productionApplicationId))
       result shouldBe productionApplication
     }
 
     "return the application fetched from the sandbox connector when it exists there" in new Setup {
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      val result = await(service.fetchByApplicationId(sandboxApplicationId))
+      val result: Application = await(service.fetchByApplicationId(sandboxApplicationId))
       result shouldBe sandboxApplication
     }
   }
@@ -223,7 +222,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
       theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
 
-      val result = await(service.apisWithSubscriptions(productionApplication))
+      val result: Seq[APISubscriptionStatus] = await(service.apisWithSubscriptions(productionApplication))
 
       result.size shouldBe 4
       result should contain inOrder(
@@ -246,7 +245,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
       theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
 
-      val result = await(service.apisWithSubscriptions(productionApplication))
+      val result: Seq[APISubscriptionStatus] = await(service.apisWithSubscriptions(productionApplication))
 
       result.size shouldBe 3
       result should contain inOrder(
@@ -268,7 +267,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
       theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
 
-      val result = await(service.apisWithSubscriptions(productionApplication))
+      val result: Seq[APISubscriptionStatus] = await(service.apisWithSubscriptions(productionApplication))
 
       result.size shouldBe 3
       result should contain inOrder(
@@ -285,7 +284,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
       theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
 
-      val result = await(service.apisWithSubscriptions(productionApplication))
+      val result: Seq[APISubscriptionStatus] = await(service.apisWithSubscriptions(productionApplication))
 
       result shouldBe empty
     }
@@ -302,7 +301,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
         .willReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      val result = await(service.subscribeToApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
+      val result: Assertion = await(service.subscribeToApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
     }
   }
 
@@ -317,7 +316,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionApplicationId, context, version))
         .willReturn(Future.successful(true))
 
-      val result = await(service.unsubscribeFromApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
+      val result: Assertion = await(service.unsubscribeFromApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
 
 
     }
@@ -330,27 +329,26 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, None)
 
     "truncate the description to 250 characters on update request" in new Setup {
-      val longDescription = "abcde" * 100
-      val editApplicationForm = EditApplicationForm("applicationId", "name", Some(longDescription))
+      val longDescription: String = "abcde" * 100
+      val editApplicationForm: EditApplicationForm = EditApplicationForm("applicationId", "name", Some(longDescription))
 
       UpdateApplicationRequest.from(editApplicationForm, application).description.get.length shouldBe 250
     }
 
     "update application" in new Setup {
-      val user = utils.DeveloperSession("email@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
-      val editApplicationForm = EditApplicationForm(applicationId, "name")
+      val user: DeveloperSession = utils.DeveloperSession("email@example.com", "first", "last", loggedInState = LoggedInState.LOGGED_IN)
+      val editApplicationForm: EditApplicationForm = EditApplicationForm(applicationId, "name")
       given(mockProductionApplicationConnector.update(mockEq(applicationId),
         any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      val updateApplicationRequest = UpdateApplicationRequest.from(editApplicationForm, application)
+      val updateApplicationRequest: UpdateApplicationRequest = UpdateApplicationRequest.from(editApplicationForm, application)
 
-      val result = await(service.update(updateApplicationRequest))
+      val result: ApplicationUpdateSuccessful = await(service.update(updateApplicationRequest))
       result shouldBe ApplicationUpdateSuccessful
     }
   }
 
   "addClientSecret" should {
-    val applicationId = "applicationId"
     val applicationTokens = ApplicationTokens(
       EnvironmentToken("prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken"))
 
@@ -360,7 +358,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
       given(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(""))).willReturn(applicationTokens)
 
-      val updatedToken = await(service.addClientSecret(productionApplicationId))
+      val updatedToken: ApplicationTokens = await(service.addClientSecret(productionApplicationId))
 
       updatedToken shouldBe applicationTokens
     }
@@ -458,7 +456,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val request = AddTeamMemberRequest(adminEmail, teamMember, isRegistered = false, adminsToEmail)
 
     "add teamMember successfully in production app" in new Setup {
-      val response = AddTeamMemberResponse(registeredUser = true)
+      val response: AddTeamMemberResponse = AddTeamMemberResponse(registeredUser = true)
 
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
@@ -488,7 +486,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       }
     }
     "add teamMember successfully in sandbox app" in new Setup {
-      val response = AddTeamMemberResponse(registeredUser = true)
+      val response: AddTeamMemberResponse = AddTeamMemberResponse(registeredUser = true)
 
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
@@ -519,16 +517,16 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
     
     "include correct set of admins to email" in new Setup {
-      val verifiedAdmin = Collaborator("verified@example.com", Role.ADMINISTRATOR)
-      val unverifiedAdmin = Collaborator("unverified@example.com", Role.ADMINISTRATOR)
-      val adderAdmin = Collaborator(adminEmail, Role.ADMINISTRATOR)
-      val verifiedDeveloper = Collaborator("developer@example.com", Role.DEVELOPER)
+      val verifiedAdmin: Collaborator = Collaborator("verified@example.com", Role.ADMINISTRATOR)
+      val unverifiedAdmin: Collaborator = Collaborator("unverified@example.com", Role.ADMINISTRATOR)
+      val adderAdmin: Collaborator = Collaborator(adminEmail, Role.ADMINISTRATOR)
+      val verifiedDeveloper: Collaborator = Collaborator("developer@example.com", Role.DEVELOPER)
       val nonAdderAdmins = Seq(User("verified@example.com", Some(true)), User("unverified@example.com", Some(false)))
       
-      val application = productionApplication.copy(collaborators =
+      val application: Application = productionApplication.copy(collaborators =
         Set(verifiedAdmin, unverifiedAdmin, adderAdmin, verifiedDeveloper))
 
-      val response = AddTeamMemberResponse(registeredUser = true)
+      val response: AddTeamMemberResponse = AddTeamMemberResponse(registeredUser = true)
 
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
       given(mockDeveloperConnector.fetchByEmails(mockEq(Set("verified@example.com", "unverified@example.com")))(any()))
@@ -591,18 +589,18 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "include correct set of admins to email" in new Setup {
 
-      val verifiedAdmin = Collaborator("verified@example.com", Role.ADMINISTRATOR)
-      val unverifiedAdmin = Collaborator("unverified@example.com", Role.ADMINISTRATOR)
-      val removerAdmin = Collaborator("admin.email@example.com", Role.ADMINISTRATOR)
-      val verifiedDeveloper = Collaborator("developer@example.com", Role.DEVELOPER)
-      val teamMemberToRemove = Collaborator("to.remove@example.com", Role.ADMINISTRATOR)
+      val verifiedAdmin: Collaborator = Collaborator("verified@example.com", Role.ADMINISTRATOR)
+      val unverifiedAdmin: Collaborator = Collaborator("unverified@example.com", Role.ADMINISTRATOR)
+      val removerAdmin: Collaborator = Collaborator("admin.email@example.com", Role.ADMINISTRATOR)
+      val verifiedDeveloper: Collaborator = Collaborator("developer@example.com", Role.DEVELOPER)
+      val teamMemberToRemove: Collaborator = Collaborator("to.remove@example.com", Role.ADMINISTRATOR)
 
       val nonRemoverAdmins = Seq(User("verified@example.com", Some(true)), User("unverified@example.com", Some(false)))
 
-      val application = productionApplication.copy(collaborators =
+      val application: Application = productionApplication.copy(collaborators =
         Set(verifiedAdmin, unverifiedAdmin, removerAdmin, verifiedDeveloper, teamMemberToRemove))
 
-      val response = ApplicationUpdateSuccessful
+      val response: ApplicationUpdateSuccessful.type = ApplicationUpdateSuccessful
 
       given(mockDeveloperConnector.fetchByEmails(mockEq(Set("verified@example.com", "unverified@example.com")))(any()))
         .willReturn(Future.successful(nonRemoverAdmins))
@@ -687,9 +685,8 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val invalidROPCApp = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
     val productionApp = productionApplication.copy(collaborators = teamMembers)
-    val adminDeleteApplicationRequest = DeleteApplicationRequest(adminRequester)
 
-    var expectedMessage = "Only standard subordinate applications can be deleted by admins"
+    val expectedMessage = "Only standard subordinate applications can be deleted by admins"
 
     "delete standard subordinate application when requested by an admin" in new Setup {
 
@@ -706,7 +703,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockSandboxApplicationConnector.deleteApplication(any())(any[HeaderCarrier]))
         .willReturn(Future.failed(new ForbiddenException(expectedMessage)))
 
-      val exception = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, sandboxApp)))
+      val exception: ForbiddenException = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, sandboxApp)))
       exception.getMessage shouldBe expectedMessage
     }
 
@@ -715,7 +712,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockSandboxApplicationConnector.deleteApplication(any())(any[HeaderCarrier]))
         .willReturn(Future.failed(new ForbiddenException(expectedMessage)))
 
-      val exception = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, productionApp)))
+      val exception: ForbiddenException = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, productionApp)))
       exception.getMessage shouldBe expectedMessage
     }
 
@@ -724,7 +721,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockSandboxApplicationConnector.deleteApplication(any())(any[HeaderCarrier]))
         .willReturn(Future.failed(new ForbiddenException(expectedMessage)))
 
-      val exception = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, invalidROPCApp)))
+      val exception: ForbiddenException = intercept[ForbiddenException](await(service.deleteSubordinateApplication(developerRequester, invalidROPCApp)))
       exception.getMessage shouldBe expectedMessage
     }
 
@@ -756,7 +753,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       val apiVersion = "3.0"
 
       given(mockProductionApplicationConnector.fetchSubscriptions(mockEq(productionApplication.id))(mockEq(hc))).willReturn(Future.successful(subscriptions))
-      val result = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
+      val result: Boolean = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
 
       result shouldBe false
     }
@@ -767,7 +764,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       val apiVersion = "2.0"
 
       given(mockProductionApplicationConnector.fetchSubscriptions(mockEq(productionApplication.id))(mockEq(hc))).willReturn(Future.successful(subscriptions))
-      val result = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
+      val result: Boolean = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
 
       result shouldBe false
     }
@@ -778,7 +775,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       val apiVersion = "1.0"
 
       given(mockProductionApplicationConnector.fetchSubscriptions(mockEq(productionApplication.id))(mockEq(hc))).willReturn(Future.successful(subscriptions))
-      val result = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
+      val result: Boolean = await(service.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
 
       result shouldBe true
     }
@@ -823,7 +820,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockSandboxApplicationConnector.validateName(any(), any())(any[HeaderCarrier]))
         .willReturn(Valid)
 
-      val result = await (service.isApplicationNameValid(applicationName, Environment.SANDBOX, Some(applicationId)))
+      val result: ApplicationNameValidation = await (service.isApplicationNameValid(applicationName, Environment.SANDBOX, Some(applicationId)))
 
       result shouldBe Valid
 
@@ -837,7 +834,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockProductionApplicationConnector.validateName(any(), any())(any[HeaderCarrier]))
         .willReturn(Valid)
 
-      val result = await (service.isApplicationNameValid(applicationName, Environment.PRODUCTION, Some(applicationId)))
+      val result: ApplicationNameValidation = await (service.isApplicationNameValid(applicationName, Environment.PRODUCTION, Some(applicationId)))
 
       result shouldBe Valid
 
