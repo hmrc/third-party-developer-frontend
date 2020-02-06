@@ -22,7 +22,7 @@ import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionField, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
@@ -105,8 +105,16 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   val sandboxClientId = "Client ID"
   val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX, Some("description"))
 
-  def subStatus(appId: String, clientId: String, name: String, context: String, version: String, status: APIStatus = STABLE, subscribed: Boolean = false, requiresTrust: Boolean = false) =
-    APISubscriptionStatus(name, name, context, APIVersion(version, status), subscribed, requiresTrust, Some(SubscriptionFieldsWrapper(appId, clientId, context, version, Seq.empty)))
+  def subStatus(  appId: String,
+                  clientId: String,
+                  name: String,
+                  context: String,
+                  version: String,
+                  status: APIStatus = STABLE,
+                  subscribed: Boolean = false,
+                  requiresTrust: Boolean = false,
+                  subscriptionFieldWithValues: Seq[SubscriptionField] = Seq.empty) =
+    APISubscriptionStatus(name, name, context, APIVersion(version, status), subscribed, requiresTrust, Some(SubscriptionFieldsWrapper(appId, clientId, context, version, subscriptionFieldWithValues)))
 
   "Fetch by teamMember email" should {
     val emailAddress = "user@example.com"
@@ -166,22 +174,37 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   "Fetch api subscriptions" should {
 
     "identify subscribed apis from available definitions" in new Setup {
+      private val apiIdentifier1 = APIIdentifier("api-1", "1.0")
+
       val apis = Seq(
-        api("api-1", "api-1", None, version("1.0", STABLE, subscribed = true), version("2.0", BETA, subscribed = false)),
+        api("api-1", apiIdentifier1.context, None, version(apiIdentifier1.version, STABLE, subscribed = true), version("2.0", BETA, subscribed = false)),
         api("api-2", "api-2/ctx", None, version("1.0", BETA, subscribed = true), version("1.0-RC", STABLE, subscribed = false)))
+
+      private val subscriptionFieldDefinition1 = SubscriptionField("question1", "description1" , "hint1", "STRING", None)
+      private val subscriptionFieldDefinition2 = SubscriptionField("question2", "description2" , "hint2", "STRING", None)
+
+      val subscriptionFieldsWithOutValues = Seq(subscriptionFieldDefinition1, subscriptionFieldDefinition2)
+      val subscriptionFieldsWithValue = Seq(subscriptionFieldDefinition1.copy(value = Some("value1")), subscriptionFieldDefinition2)
+
+      private val fieldDefinitionsResponse = FieldDefinitionsResponse(subscriptionFieldsWithOutValues.toList, apiIdentifier1.context, apiIdentifier1.version)
 
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
 
-      theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
-      theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
+      theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map(apiIdentifier1 -> fieldDefinitionsResponse))
 
-      val result = await(service.apisWithSubscriptions(productionApplication))
+      given(mockSubscriptionFieldsService.fetchFieldsValues(any[Application], any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.successful(Seq.empty))
+
+      given(mockSubscriptionFieldsService.fetchFieldsValues(mockEq(productionApplication), mockEq(subscriptionFieldsWithOutValues), mockEq(apiIdentifier1))(any[HeaderCarrier]))
+        .willReturn(Future.successful(subscriptionFieldsWithValue))
+
+      val result: Seq[APISubscriptionStatus] = await(service.apisWithSubscriptions(productionApplication))
 
       result.size shouldBe 4
       result should contain inOrder(
         subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "2.0", BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "1.0", STABLE, subscribed = true),
+        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "1.0", STABLE, subscribed = true, subscriptionFieldWithValues = subscriptionFieldsWithValue),
         subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0-RC", STABLE),
         subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0", BETA, subscribed = true)
       )
