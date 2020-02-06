@@ -54,7 +54,8 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
 
   def fetchFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Option[SubscriptionFields]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    Logger.debug(s"fetchFieldValues() - About to call $url in ${environment.toString}")
+    // TODO: Set to debug
+    Logger.warn(s"fetchFieldValues() - About to call $url in ${environment.toString}")
     retry {
       http.GET[SubscriptionFields](url).map(Some(_))
     } recover recovery(None)
@@ -63,14 +64,28 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
 
   def fetchFieldDefinitions(apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
-    Logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
+    // TODO: Set to debug
+    Logger.warn(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
     retry {
       http.GET[FieldDefinitionsResponse](url).map(response => response.fieldDefinitions)
     } recover recovery(Seq.empty[SubscriptionField])
   }
 
+  // TODO: Test AllFieldDefinitionsResponse
+  def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[Seq[FieldDefinitionsResponse]] = {
+    val url = urlSubscriptionFieldDefinitionForAll()
+    // TODO: Set to debug?
+    Logger.warn(s"fetchAllFieldDefinitions() - About to call $url in ${environment.toString}")
+    retry {
+      http.GET[AllFieldDefinitionsResponse](url).map(response => response.apis)
+    } recover recovery(Seq.empty[FieldDefinitionsResponse])
+  }
+
   private def urlSubscriptionFieldDefinition(apiContext: String, apiVersion: String) =
     s"$serviceBaseUrl/definition/context/${urlEncode(apiContext)}/version/${urlEncode(apiVersion)}"
+
+  private def urlSubscriptionFieldDefinitionForAll() = s"$serviceBaseUrl/definition"
+
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = {
     encode(str, encoding)

@@ -54,9 +54,12 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
   def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] =
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.fetchCredentials(id))
 
+  // TODO: Optomise api-subs-fields calls
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
+    // Replace with a method that finds the subs field from a map (context / version) of all of them
     def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription): Future[APISubscriptionStatus] = {
+      // TODO: Get from hashmap
       subscriptionFieldsService.fetchFields(application, api.context, version.version.version).map { fields =>
         APISubscriptionStatus(
           api.name,
@@ -80,7 +83,9 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
 
     val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
+    // TODO: Get all subs-definitions here
     for {
+      fieldDefinitions <- subscriptionFieldsService.getAllFieldDefinitions(application.deployedTo)
       subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
       apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions))
     } yield apiVersions

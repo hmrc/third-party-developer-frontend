@@ -17,7 +17,7 @@
 package service
 
 import domain.ApiSubscriptionFields._
-import domain.{Application, ApplicationNotFound}
+import domain.{Application, ApplicationNotFound, Environment}
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -54,5 +54,18 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
       app <- connector.thirdPartyApplicationConnector.fetchApplicationById(applicationId)
       fields <- connector.apiSubscriptionFieldsConnector.saveFieldValues(app.getOrElse(throw new ApplicationNotFound).clientId, apiContext, apiVersion, fields)
     } yield fields
+  }
+
+  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[(String, String), FieldDefinitionsResponse]] = {
+    // TODO: Create case class for context / version (if there isn't one?)
+    def toMap(definitions : Seq[FieldDefinitionsResponse]): Map[(String, String), FieldDefinitionsResponse] = {
+      definitions.map(definition => ((definition.apiContext, definition.apiVersion), definition)).toMap
+    }
+
+    val apiSubscriptionFieldsConnector = connectorsWrapper.connectorsForEnvironment(environment).apiSubscriptionFieldsConnector
+
+    for {
+      allFieldDefinitions <- apiSubscriptionFieldsConnector.fetchAllFieldDefinitions()
+    } yield toMap(allFieldDefinitions)
   }
 }
