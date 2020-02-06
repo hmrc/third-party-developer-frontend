@@ -47,7 +47,7 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
       SubscriptionField("field1", "desc1", "hint1", "some type"),
       SubscriptionField("field2", "desc2", "hint2", "some other type"))
 
-    val validResponse = FieldDefinitionsResponse(fields)
+    val validResponse = FieldDefinitionsResponse(fields, "context", "version")
     val apiKey: String = UUID.randomUUID().toString
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]

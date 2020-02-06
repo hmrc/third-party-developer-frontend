@@ -153,7 +153,7 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
   "fetchFieldDefinitions" should {
 
     val fields = List(SubscriptionField("field1", "desc1", "hint1", "some type"), SubscriptionField("field2", "desc2", "hint2", "some other type"))
-    val validResponse = FieldDefinitionsResponse(fields)
+    val validResponse = FieldDefinitionsResponse(fields, "context", "version")
     val url = s"/definition/context/$apiContext/version/$apiVersion"
 
     "return subscription fields definition for an API" in new Setup {

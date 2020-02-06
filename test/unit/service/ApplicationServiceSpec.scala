@@ -22,7 +22,7 @@ import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
@@ -79,8 +79,18 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).willReturn(Future.successful(Some(application)))
     }
 
+    // TODO: Delete?
     def theSubscriptionFieldsServiceWillReturn(fields: Seq[ApiSubscriptionFields.SubscriptionField]) = {
       given(mockSubscriptionFieldsService.fetchFields(any[Application], anyString(), anyString())(any[HeaderCarrier])).willReturn(Future.successful(fields))
+    }
+
+    def theSubscriptionFieldsServiceValuesWillReturn(fields: Seq[ApiSubscriptionFields.SubscriptionField]) = {
+      given(mockSubscriptionFieldsService.fetchFieldsValues(any[Application], any(), any())(any[HeaderCarrier])).willReturn(Future.successful(fields))
+    }
+
+    def theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(allFields: Map[APIIdentifier, FieldDefinitionsResponse]) = {
+
+      given(mockSubscriptionFieldsService.getAllFieldDefinitions(any())(any[HeaderCarrier])).willReturn(successful(allFields))
     }
   }
 
@@ -162,7 +172,10 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
-      theSubscriptionFieldsServiceWillReturn(Seq.empty)
+
+      theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
+      theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
+
       val result = await(service.apisWithSubscriptions(productionApplication))
 
       result.size shouldBe 4
@@ -183,6 +196,10 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
       theSubscriptionFieldsServiceWillReturn(Seq.empty)
+
+      theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
+      theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
+
       val result = await(service.apisWithSubscriptions(productionApplication))
 
       result.size shouldBe 4
@@ -203,6 +220,9 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
       theSubscriptionFieldsServiceWillReturn(Seq.empty)
 
+      theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
+      theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
+
       val result = await(service.apisWithSubscriptions(productionApplication))
 
       result.size shouldBe 3
@@ -222,6 +242,9 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
       theSubscriptionFieldsServiceWillReturn(Seq.empty)
 
+      theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
+      theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
+
       val result = await(service.apisWithSubscriptions(productionApplication))
 
       result.size shouldBe 3
@@ -235,6 +258,9 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     "return empty sequence when the connector returns empty sequence" in new Setup {
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(Seq.empty)
+
+      theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
+      theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
 
       val result = await(service.apisWithSubscriptions(productionApplication))
 
