@@ -57,7 +57,7 @@
                         <tr class="@if(form.errors("apiSubscriptionsConfirmed").nonEmpty) {form-group-error}">
                             <td id="apiSubscriptions" scope="row" class="step-description">
                                 @include.fieldError(form.errors, "apiSubscriptions")
-                                <a id="apiSubscriptionsCompleted" href="@routes.ApplicationCheck.apiSubscriptionsPage(app.id)">
+                                <a id="apiSubscriptionsCompleted" href="@routes.ApplicationCheck.apiSubscriptionsPage(app.id, CheckYourAnswersPageMode.RequestCheck)">
                                     Confirm the APIs your application uses
                                 </a>
                             </td>
@@ -73,7 +73,7 @@
                         <tr class="@if(form.errors("contactDetails").nonEmpty){form-group-error}">
                             <td id="contactDetails" scope="row" class="step-description">
                                 @include.fieldError(form.errors,"contactDetails")
-                                <a id="contactDetailsCompleted" href="@routes.ApplicationCheck.contactPage(app.id)">
+                                <a id="contactDetailsCompleted" href="@routes.ApplicationCheck.contactPage(app.id, CheckYourAnswersPageMode.RequestCheck)">
                                     Who to contact about your application
                                 </a>
                             </td>
@@ -89,7 +89,7 @@
                         <tr class="@if(form.errors("confirmedName").nonEmpty){form-group-error}">
                             <td id="confirmedName" scope="row" class="step-description">
                                 @include.fieldError(form.errors,"confirmedName")
-                                <a id="confirmedNameCompleted" href="@routes.ApplicationCheck.namePage(app.id)">
+                                <a id="confirmedNameCompleted" href="@routes.ApplicationCheck.namePage(app.id, CheckYourAnswersPageMode.RequestCheck)">
                                     Confirm the name of your software
                                 </a>
                             </td>
@@ -123,7 +123,7 @@
 
                             <td id="providedPolicyURL" scope="row" class="step-description">
                                 @include.fieldError(form.errors,"providedPolicyURL")
-                                <a id="providedPolicyURLCompleted" href="@routes.ApplicationCheck.privacyPolicyPage(app.id)">
+                                <a id="providedPolicyURLCompleted" href="@routes.ApplicationCheck.privacyPolicyPage(app.id, CheckYourAnswersPageMode.RequestCheck)">
                                     Tell us if your application has a privacy policy
                                 </a>
                             </td>
@@ -139,7 +139,7 @@
                         <tr class="@if(form.errors("providedTermsAndConditionsURL").nonEmpty){form-group-error}">
                         <td id="providedTermsAndConditionsURL" scope="row" class="step-description">
                             @include.fieldError(form.errors,"providedTermsAndConditionsURL")
-                            <a id="providedTermsAndConditionsURLCompleted" href="@routes.ApplicationCheck.termsAndConditionsPage(app.id)">
+                            <a id="providedTermsAndConditionsURLCompleted" href="@routes.ApplicationCheck.termsAndConditionsPage(app.id, CheckYourAnswersPageMode.RequestCheck)">
                                 Tell us if your application has terms and conditions
                             </a>
                         </td>
@@ -155,7 +155,7 @@
                         <tr class="@if(form.errors("agreeTermsOfUse").nonEmpty){form-group-error}">
                         <td id="agreeTermsOfUse" scope="row" class="step-description">
                             @include.fieldError(form.errors,"agreeTermsOfUse")
-                            <a id="termsOfUseAgreementsCompleted" href="@routes.ApplicationCheck.termsOfUsePage(app.id)">
+                            <a id="termsOfUseAgreementsCompleted" href="@routes.ApplicationCheck.termsOfUsePage(app.id, CheckYourAnswersPageMode.RequestCheck)">
                                 Agree to our terms of use
                             </a>
                         </td>
@@ -173,7 +173,7 @@
             <div class="form-group">
                 <br>
                 <br>
-                <button id="submit" class="button" type="submit">Submit</button>
+                <button id="submit" class="button" type="submit">Check Your Answers</button>
                 <a href="@routes.Credentials.credentials(app.id, None)" id="cancel" class="secondary-button">Save and come back later</a>
             </div>
         </section>

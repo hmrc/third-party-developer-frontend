@@ -109,6 +109,16 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield subscription.isDefined
   }
 
+  def fetchAllSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]] = {
+    val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
+
+    for {
+      subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
+      subscription = subscriptions
+        .filter(sub => sub.versions.exists(v => v.subscribed))
+    } yield subscription
+  }
+
   def addClientSecret(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = {
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.addClientSecrets(id, ClientSecretRequest("")))
   }
