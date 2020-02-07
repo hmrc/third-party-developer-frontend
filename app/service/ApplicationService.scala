@@ -40,7 +40,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
                                    productionApplicationConnector: ThirdPartyApplicationProductionConnector,
                                    auditService: AuditService)(implicit val ec: ExecutionContext) {
 
-  def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier) =
+  def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
     connectorWrapper.connectorsForEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
 
   def update(updateApplicationRequest: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
@@ -58,7 +58,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
 
     def toApiSubscriptionStatuses(api: APISubscription,
                                    version: VersionSubscription,
-                                   fieldDefinitions: Map[APIIdentifier, ApiSubscriptionFields.FieldDefinitions]): Future[APISubscriptionStatus] = {
+                                   fieldDefinitions: Map[APIIdentifier, FieldDefinitions]): Future[APISubscriptionStatus] = {
       val apiIdentifier = APIIdentifier(api.context, version.version.version)
 
       val subscriptionFieldsWithOutValues: Seq[SubscriptionField] =
@@ -69,7 +69,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
 
       val subscriptionFieldsWithValues: Future[Seq[SubscriptionField]] = subscriptionFieldsService.fetchFieldsValues(application,subscriptionFieldsWithOutValues, apiIdentifier)
 
-      subscriptionFieldsWithValues.map {fields: Seq[ApiSubscriptionFields.SubscriptionField] =>
+      subscriptionFieldsWithValues.map {fields: Seq[SubscriptionField] =>
         APISubscriptionStatus(
           api.name,
           api.serviceName,
@@ -83,8 +83,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     }
 
     def toApiVersions(api: APISubscription,
-                      fieldDefinitions: Map[APIIdentifier, ApiSubscriptionFields.FieldDefinitions])
-                                : Seq[Future[APISubscriptionStatus]] = {
+                      fieldDefinitions: Map[APIIdentifier, FieldDefinitions]) : Seq[Future[APISubscriptionStatus]] = {
 
       api.versions
         .filterNot(_.version.status == RETIRED)
@@ -295,7 +294,8 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
-
-    if (environment == Some(PRODUCTION)) productionApplicationConnector else sandboxApplicationConnector
-
+    if (environment.contains(PRODUCTION))
+      productionApplicationConnector
+    else
+      sandboxApplicationConnector
 }

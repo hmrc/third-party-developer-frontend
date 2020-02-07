@@ -82,7 +82,6 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
 
   private def urlSubscriptionFieldDefinitionForAll() = s"$serviceBaseUrl/definition"
 
-
   private def urlEncode(str: String, encoding: String = "UTF-8") = {
     encode(str, encoding)
   }

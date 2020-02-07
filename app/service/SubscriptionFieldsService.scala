@@ -32,7 +32,8 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
       defs.map(field => field.withValue(fieldValues.get(field.name)))
     }
 
-    if (fieldDefinitions.isEmpty) Future.successful(Seq.empty)
+    if (fieldDefinitions.isEmpty)
+      Future.successful(Seq.empty)
     else {
       for {
         maybeValues <- connector.fetchFieldValues(application.clientId, apiIdentifier.context, apiIdentifier.version)
