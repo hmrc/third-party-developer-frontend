@@ -27,7 +27,7 @@
     @helper.CSRF.formField
 
     <div class="form-group @if(form.errors("email").nonEmpty) {form-group-error}">
-        <label class="form-label-bold" for="email" id="email-label">Email address</label>
+        <label class="form-label" for="email" id="email-label">Email address</label>
         @fieldError(form.errors, "email", form.error("submissionError").isEmpty)
         <input type="text"
         id="email"
@@ -44,7 +44,7 @@
             <legend><h2 class="heading-large flush--top">What permissions do you want to give them?</h2></legend>
             <div class="multiple-choice">
                 <input id="Developer" type="radio" name="role" value="Developer">
-                <label for="Developer"><strong class="bold">Developer</strong>
+                <label for="Developer"><strong>Developer</strong>
                     <span class="form-hint">
                         Test an application<br>
                         Subscribe to sandbox APIs<br>
@@ -55,7 +55,7 @@
             </div>
             <div class="multiple-choice">
                 <input id="Admin" type="radio" name="role" value="Administrator">
-                <label for="Admin"><strong class="bold">Administrator</strong>
+                <label for="Admin"><strong>Administrator</strong>
                     <span class="form-hint">
                         Test an application<br>
                         Subscribe to sandbox APIs and request to change production APIs<br>
