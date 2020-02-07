@@ -54,8 +54,7 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
 
   def fetchFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Option[SubscriptionFields]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    // TODO: Set to debug
-    Logger.warn(s"fetchFieldValues() - About to call $url in ${environment.toString}")
+    Logger.debug(s"fetchFieldValues() - About to call $url in ${environment.toString}")
     retry {
       http.GET[SubscriptionFields](url).map(Some(_))
     } recover recovery(None)
@@ -64,21 +63,19 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
 
   def fetchFieldDefinitions(apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
-    // TODO: Set to debug
-    Logger.warn(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
+    Logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
     retry {
-      http.GET[FieldDefinitionsResponse](url).map(response => response.fieldDefinitions)
+      http.GET[FieldDefinitions](url).map(response => response.fieldDefinitions)
     } recover recovery(Seq.empty[SubscriptionField])
   }
 
   // TODO: Test AllFieldDefinitionsResponse
-  def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[Seq[FieldDefinitionsResponse]] = {
+  def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[Seq[FieldDefinitions]] = {
     val url = urlSubscriptionFieldDefinitionForAll()
-    // TODO: Set to debug?
-    Logger.warn(s"fetchAllFieldDefinitions() - About to call $url in ${environment.toString}")
+    Logger.debug(s"fetchAllFieldDefinitions() - About to call $url in ${environment.toString}")
     retry {
       http.GET[AllFieldDefinitionsResponse](url).map(response => response.apis)
-    } recover recovery(Seq.empty[FieldDefinitionsResponse])
+    } recover recovery(Seq.empty[FieldDefinitions])
   }
 
   private def urlSubscriptionFieldDefinition(apiContext: String, apiVersion: String) =

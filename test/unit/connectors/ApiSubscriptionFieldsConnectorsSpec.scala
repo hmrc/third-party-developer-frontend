@@ -22,7 +22,7 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import connectors.{ApiSubscriptionFieldsProductionConnector, ApiSubscriptionFieldsSandboxConnector, ProxiedHttpClient}
-import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionField}
+import domain.ApiSubscriptionFields.{FieldDefinitions, SubscriptionField}
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -47,7 +47,7 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
       SubscriptionField("field1", "desc1", "hint1", "some type"),
       SubscriptionField("field2", "desc2", "hint2", "some other type"))
 
-    val validResponse = FieldDefinitionsResponse(fields, "context", "version")
+    val validResponse = FieldDefinitions(fields, "context", "version")
     val apiKey: String = UUID.randomUUID().toString
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]
@@ -77,12 +77,12 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
       val connector = new ApiSubscriptionFieldsSandboxConnector(
         mockHttpClient, mockProxiedHttpClient, actorSystem, mockFutureTimeoutSupport, mockApplicationConfig)
 
-      when(mockProxiedHttpClient.GET[FieldDefinitionsResponse](any())(any(), any(), any())).thenReturn(Future.successful(validResponse))
+      when(mockProxiedHttpClient.GET[FieldDefinitions](any())(any(), any(), any())).thenReturn(Future.successful(validResponse))
 
       await(connector.fetchFieldDefinitions("my-context", "my-version"))
 
       verify(mockProxiedHttpClient).withHeaders(sandboxBearerToken, apiKey)
-      verify(mockProxiedHttpClient).GET[FieldDefinitionsResponse](
+      verify(mockProxiedHttpClient).GET[FieldDefinitions](
         meq("https://api-subs-sandbox/definition/context/my-context/version/my-version"))(any(), any(), any())
     }
   }
@@ -92,11 +92,11 @@ class ApiSubscriptionFieldsConnectorsSpec extends UnitSpec with ScalaFutures wit
       val connector = new ApiSubscriptionFieldsProductionConnector(
         mockHttpClient, mockProxiedHttpClient, actorSystem, mockFutureTimeoutSupport, mockApplicationConfig)
 
-      when(mockHttpClient.GET[FieldDefinitionsResponse](any())(any(), any(), any())).thenReturn(Future.successful(validResponse))
+      when(mockHttpClient.GET[FieldDefinitions](any())(any(), any(), any())).thenReturn(Future.successful(validResponse))
 
       await(connector.fetchFieldDefinitions("my-context", "my-version"))
 
-      verify(mockHttpClient).GET[FieldDefinitionsResponse](
+      verify(mockHttpClient).GET[FieldDefinitions](
         meq("https://api-subs-production/definition/context/my-context/version/my-version"))(any(), any(), any())
     }
   }

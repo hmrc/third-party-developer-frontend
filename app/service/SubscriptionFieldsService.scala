@@ -75,8 +75,8 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     } yield fields
   }
 
-  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[APIIdentifier, FieldDefinitionsResponse]] = {
-    def toMap(definitions : Seq[FieldDefinitionsResponse]): Map[APIIdentifier, FieldDefinitionsResponse] = {
+  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[APIIdentifier, FieldDefinitions]] = {
+    def toMap(definitions : Seq[FieldDefinitions]): Map[APIIdentifier, FieldDefinitions] = {
       definitions.map(definition => APIIdentifier(definition.apiContext, definition.apiVersion) -> definition).toMap
     }
 

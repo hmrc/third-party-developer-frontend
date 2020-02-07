@@ -19,7 +19,7 @@ package service
 import config.ApplicationConfig
 import connectors._
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionField, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{FieldDefinitions, SubscriptionField, SubscriptionFieldsWrapper}
 import domain.Environment.{PRODUCTION, SANDBOX}
 import domain._
 import javax.inject.{Inject, Singleton}
@@ -59,13 +59,13 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
 
     def toApiSubscriptionStatuses(api: APISubscription,
                                    version: VersionSubscription,
-                                   fieldDefinitions: Map[APIIdentifier, ApiSubscriptionFields.FieldDefinitionsResponse]): Future[APISubscriptionStatus] = {
+                                   fieldDefinitions: Map[APIIdentifier, ApiSubscriptionFields.FieldDefinitions]): Future[APISubscriptionStatus] = {
       val apiIdentifier = APIIdentifier(api.context, version.version.version)
 
       val subscriptionFieldsWithOutValues: Seq[SubscriptionField] =
         fieldDefinitions
           .get(apiIdentifier)
-          .map((fieldDefinitions: FieldDefinitionsResponse) => fieldDefinitions.fieldDefinitions)
+          .map((fieldDefinitions: FieldDefinitions) => fieldDefinitions.fieldDefinitions)
           .getOrElse(Seq.empty)
 
       val subscriptionFieldsWithValues: Future[Seq[SubscriptionField]] = subscriptionFieldsService.fetchFieldsValues(application,subscriptionFieldsWithOutValues, apiIdentifier)
@@ -84,7 +84,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     }
 
     def toApiVersions(api: APISubscription,
-                      fieldDefinitions: Map[APIIdentifier, ApiSubscriptionFields.FieldDefinitionsResponse])
+                      fieldDefinitions: Map[APIIdentifier, ApiSubscriptionFields.FieldDefinitions])
                                 : Seq[Future[APISubscriptionStatus]] = {
 
       api.versions

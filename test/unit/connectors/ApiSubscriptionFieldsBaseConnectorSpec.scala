@@ -153,12 +153,12 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
   "fetchFieldDefinitions" should {
 
     val fields = List(SubscriptionField("field1", "desc1", "hint1", "some type"), SubscriptionField("field2", "desc2", "hint2", "some other type"))
-    val validResponse = FieldDefinitionsResponse(fields, "context", "version")
+    val validResponse = FieldDefinitions(fields, "context", "version")
     val url = s"/definition/context/$apiContext/version/$apiVersion"
 
     "return subscription fields definition for an API" in new Setup {
 
-      when(mockHttpClient.GET[FieldDefinitionsResponse](meq(url))(any(), any(), any()))
+      when(mockHttpClient.GET[FieldDefinitions](meq(url))(any(), any(), any()))
         .thenReturn(Future.successful(validResponse))
 
       val result: Seq[SubscriptionField] = await(underTest.fetchFieldDefinitions(apiContext, apiVersion))
@@ -168,7 +168,7 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
 
     "fail when api-subscription-fields returns a 500" in new Setup {
 
-      when(mockHttpClient.GET[FieldDefinitionsResponse](meq(url))(any(), any(), any()))
+      when(mockHttpClient.GET[FieldDefinitions](meq(url))(any(), any(), any()))
         .thenReturn(Future.failed(upstream500Response))
 
       intercept[Upstream5xxResponse] {
@@ -187,8 +187,8 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
 
     "fail when api-subscription-fields returns unexpected response" in new Setup {
 
-      when(mockHttpClient.GET[FieldDefinitionsResponse](meq(url))(any(), any(), any()))
-        .thenReturn(Future.failed(new JsValidationException("", "", FieldDefinitionsResponse.getClass, "")))
+      when(mockHttpClient.GET[FieldDefinitions](meq(url))(any(), any(), any()))
+        .thenReturn(Future.failed(new JsValidationException("", "", FieldDefinitions.getClass, "")))
 
       intercept[JsValidationException] {
         await(underTest.fetchFieldDefinitions(apiContext, apiVersion))
@@ -196,7 +196,7 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
     }
 
     "when retry logic is enabled should retry if call returns 400 Bad Request" in new Setup {
-      when(mockHttpClient.GET[FieldDefinitionsResponse](meq(url))(any(), any(), any()))
+      when(mockHttpClient.GET[FieldDefinitions](meq(url))(any(), any(), any()))
         .thenReturn(
           Future.failed(new BadRequestException("")),
           Future.successful(validResponse)

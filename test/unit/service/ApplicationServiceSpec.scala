@@ -22,7 +22,7 @@ import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{FieldDefinitionsResponse, SubscriptionField, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{FieldDefinitions, SubscriptionField, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTime
 import org.mockito.{ArgumentCaptor, BDDMockito}
@@ -87,7 +87,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockSubscriptionFieldsService.fetchFieldsValues(any[Application], any(), any())(any[HeaderCarrier])).willReturn(Future.successful(fields))
     }
 
-    def theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(allFields: Map[APIIdentifier, FieldDefinitionsResponse]): BDDMockito.BDDMyOngoingStubbing[Future[Map[APIIdentifier, FieldDefinitionsResponse]]] = {
+    def theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(allFields: Map[APIIdentifier, FieldDefinitions]): BDDMockito.BDDMyOngoingStubbing[Future[Map[APIIdentifier, FieldDefinitions]]] = {
 
       given(mockSubscriptionFieldsService.getAllFieldDefinitions(any())(any[HeaderCarrier])).willReturn(successful(allFields))
     }
@@ -185,7 +185,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       val subscriptionFieldsWithOutValues = Seq(subscriptionFieldDefinition1, subscriptionFieldDefinition2)
       val subscriptionFieldsWithValue = Seq(subscriptionFieldDefinition1.copy(value = Some("value1")), subscriptionFieldDefinition2)
 
-      private val fieldDefinitionsResponse = FieldDefinitionsResponse(subscriptionFieldsWithOutValues.toList, apiIdentifier1.context, apiIdentifier1.version)
+      private val fieldDefinitionsResponse = FieldDefinitions(subscriptionFieldsWithOutValues.toList, apiIdentifier1.context, apiIdentifier1.version)
 
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
