@@ -20,11 +20,10 @@ import java.util.UUID
 
 import connectors.{ApiSubscriptionFieldsConnector, ThirdPartyApplicationConnector}
 import domain.ApiSubscriptionFields.{SubscriptionField, SubscriptionFields, fields}
-import domain.{Application, Environment}
+import domain.{APIIdentifier, Application, Environment}
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{any, anyString, eq => meq}
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -65,6 +64,56 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
 
     given(mockThirdPartyApplicationConnector.fetchApplicationById(meq(applicationId))(any[HeaderCarrier]))
       .willReturn(Future.successful(Some(Application(applicationId, clientId, "name", DateTime.now(), DateTime.now(), Environment.PRODUCTION))))
+  }
+
+  "fetchFieldsValues" should {
+    "return empty sequence when there are none" in new Setup {
+      private val subscriptionFieldValues = await(underTest.fetchFieldsValues(application,fieldDefinitions = Seq.empty, APIIdentifier("context", "version-1")))
+
+      subscriptionFieldValues shouldBe Seq.empty
+    }
+
+    "find and return matching values" in new Setup {
+      private val apiIdentifier: APIIdentifier = APIIdentifier("context1", "version-1")
+
+      private val subscriptionFieldDefinition1 = SubscriptionField("name1", "description1", "hint1", "STRING", None)
+      private val subscriptionFieldDefinition2 = SubscriptionField("name2", "description2", "hint2", "STRING", None)
+
+      private val subscriptionFieldValue1: SubscriptionField = subscriptionFieldDefinition1.copy(value = Some("value1"))
+      private val subscriptionFieldValue2: SubscriptionField = subscriptionFieldDefinition2.copy(value = Some("value2"))
+
+      val fieldDefinitions = Seq(subscriptionFieldDefinition1, subscriptionFieldDefinition2)
+
+      private val subscriptionFields = SubscriptionFields(
+        "clientId1",
+        apiIdentifier.context,
+        apiIdentifier.version,
+        fieldsId = UUID.randomUUID(),
+        Map(subscriptionFieldDefinition1.name -> subscriptionFieldValue1.value.get,
+          subscriptionFieldDefinition2.name -> subscriptionFieldValue2.value.get))
+
+      given(mockSubscriptionFieldsConnector.fetchFieldValues(meq(application.clientId), meq(apiIdentifier.context), meq(apiIdentifier.version))(any[HeaderCarrier]))
+        .willReturn(Future.successful(Some(subscriptionFields)))
+
+      private val subscriptionFieldValues = await(underTest.fetchFieldsValues(application,fieldDefinitions, apiIdentifier))
+
+      subscriptionFieldValues shouldBe Seq(subscriptionFieldValue1, subscriptionFieldValue2)
+    }
+
+    "find no matching values" in new Setup {
+      private val apiIdentifier: APIIdentifier = APIIdentifier("context1", "version-1")
+
+      private val subscriptionFieldDefinition: SubscriptionField = SubscriptionField("name1", "description1", "hint1", "STRING", None)
+
+      val fieldDefinitions = Seq(subscriptionFieldDefinition)
+
+      given(mockSubscriptionFieldsConnector.fetchFieldValues(meq(application.clientId), meq(apiIdentifier.context), meq(apiIdentifier.version))(any[HeaderCarrier]))
+        .willReturn(Future.successful(None))
+
+      private val subscriptionFieldValues = await(underTest.fetchFieldsValues(application,fieldDefinitions, apiIdentifier))
+
+      subscriptionFieldValues shouldBe Seq(subscriptionFieldDefinition)
+    }
   }
 
   "saveFields" should {
