@@ -16,8 +16,6 @@
 
 package controllers
 
-import cats.data.OptionT
-import cats.implicits._
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
 import domain.Capabilities.SupportsAppChecks
