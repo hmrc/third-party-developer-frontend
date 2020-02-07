@@ -79,10 +79,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).willReturn(Future.successful(Some(application)))
     }
 
-    def theSubscriptionFieldsServiceWillReturn(fields: Seq[ApiSubscriptionFields.SubscriptionField]): BDDMockito.BDDMyOngoingStubbing[Future[Seq[SubscriptionField]]] = {
-      given(mockSubscriptionFieldsService.fetchFields(any[Application], anyString(), anyString())(any[HeaderCarrier])).willReturn(Future.successful(fields))
-    }
-
     def theSubscriptionFieldsServiceValuesWillReturn(fields: Seq[ApiSubscriptionFields.SubscriptionField]): BDDMockito.BDDMyOngoingStubbing[Future[Seq[SubscriptionField]]] = {
       given(mockSubscriptionFieldsService.fetchFieldsValues(any[Application], any(), any())(any[HeaderCarrier])).willReturn(Future.successful(fields))
     }
@@ -217,7 +213,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
-      theSubscriptionFieldsServiceWillReturn(Seq.empty)
 
       theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
       theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
@@ -240,7 +235,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
-      theSubscriptionFieldsServiceWillReturn(Seq.empty)
 
       theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
       theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)
@@ -262,7 +256,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
-      theSubscriptionFieldsServiceWillReturn(Seq.empty)
 
       theSubscriptionFieldsServiceGetAllDefinitionsWillReturn(Map.empty)
       theSubscriptionFieldsServiceValuesWillReturn(Seq.empty)

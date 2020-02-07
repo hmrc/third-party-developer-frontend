@@ -25,30 +25,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
-
-  // TODO: Delete me!
-  def fetchFields(application: Application, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
-
-    val connector = connectorsWrapper.connectorsForEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
-
-    def addValuesToDefinitions(defs: Seq[SubscriptionField], fieldValues: Fields) = {
-      defs.map(field => field.withValue(fieldValues.get(field.name)))
-    }
-
-    def fetchFieldsValues(fieldDefinitions: Seq[SubscriptionField])(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
-      if (fieldDefinitions.isEmpty) Future.successful(Seq.empty)
-      else {
-        for {
-          maybeValues <- connector.fetchFieldValues(application.clientId, apiContext, apiVersion)
-        } yield maybeValues.fold(fieldDefinitions) { response =>
-          addValuesToDefinitions(fieldDefinitions, response.fields)
-        }
-      }
-    }
-
-    connector.fetchFieldDefinitions(apiContext, apiVersion).flatMap(fetchFieldsValues)
-  }
-
   // TODO: Test me
   def fetchFieldsValues(application: Application, fieldDefinitions: Seq[SubscriptionField], apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
     val connector = connectorsWrapper.connectorsForEnvironment(application.deployedTo).apiSubscriptionFieldsConnector

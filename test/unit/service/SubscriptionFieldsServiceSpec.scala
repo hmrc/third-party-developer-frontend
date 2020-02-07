@@ -67,62 +67,6 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
       .willReturn(Future.successful(Some(Application(applicationId, clientId, "name", DateTime.now(), DateTime.now(), Environment.PRODUCTION))))
   }
 
-  "fetchFields" should {
-
-    "return custom fields for a given application (fields populated)" in new Setup {
-      private val fieldsId = UUID.randomUUID()
-      val fieldValuesResponse: SubscriptionFields =
-        SubscriptionFields(clientId, apiContext, apiVersion, fieldsId,
-          fields("field1" -> "val001", "field2" -> "val002"))
-
-      val fieldDefinitions =
-        List(SubscriptionField("field1", "desc1", "hint1", "some type"),
-          SubscriptionField("field2", "desc2", "hint2", "some other type"))
-
-      val mergedDefValues =
-        List(SubscriptionField("field1", "desc1", "hint1", "some type", Some("val001")),
-          SubscriptionField("field2", "desc2", "hint2", "some other type", Some("val002")))
-
-      given(mockSubscriptionFieldsConnector.fetchFieldValues(clientId, apiContext, apiVersion)).willReturn(Future.successful(Some(fieldValuesResponse)))
-      given(mockSubscriptionFieldsConnector.fetchFieldDefinitions(apiContext, apiVersion)).willReturn(Future.successful(fieldDefinitions))
-
-      val result: Seq[SubscriptionField] = await(underTest.fetchFields(application, apiContext, apiVersion))
-      result shouldBe mergedDefValues
-
-    }
-
-    "return custom fields for a given application (fields not populated)" in new Setup {
-
-      val fieldDefinitions = List(SubscriptionField("field1", "desc1", "hint1", "some type"), SubscriptionField("field2", "desc2", "hint2", "some other type"))
-
-      given(mockSubscriptionFieldsConnector.fetchFieldValues(clientId, apiContext, apiVersion)).willReturn(Future.successful(None))
-      given(mockSubscriptionFieldsConnector.fetchFieldDefinitions(apiContext, apiVersion)).willReturn(Future.successful(fieldDefinitions))
-
-      val result: Seq[SubscriptionField] = await(underTest.fetchFields(application, apiContext, apiVersion))
-      result shouldBe fieldDefinitions
-
-    }
-
-    "return empty sequence if no definitions have been found" in new Setup {
-
-      given(mockSubscriptionFieldsConnector.fetchFieldValues(clientId, apiContext, apiVersion)).willReturn(Future.successful(None))
-      given(mockSubscriptionFieldsConnector.fetchFieldDefinitions(apiContext, apiVersion)).willReturn(Future.successful(Seq.empty))
-
-      val result: Seq[SubscriptionField] = await(underTest.fetchFields(application, apiContext, apiVersion))
-      result shouldBe Seq.empty[SubscriptionField]
-    }
-
-    "not try and get field values if no definitions have been found" in new Setup {
-      given(mockSubscriptionFieldsConnector.fetchFieldDefinitions(apiContext, apiVersion)).willReturn(Future.successful(Seq.empty))
-
-      val result: Seq[SubscriptionField] = await(underTest.fetchFields(application, apiContext, apiVersion))
-      result shouldBe Seq.empty[SubscriptionField]
-
-      verify(mockSubscriptionFieldsConnector, Mockito.times(0))
-        .fetchFieldValues(any(), any(), any())(any())
-    }
-  }
-
   "saveFields" should {
     "save the fields" in new Setup {
       private val fieldsId = UUID.randomUUID()
@@ -137,5 +81,4 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
       verify(mockSubscriptionFieldsConnector).saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
     }
   }
-
 }
