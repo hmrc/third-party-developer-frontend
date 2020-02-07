@@ -207,6 +207,58 @@ class ApiSubscriptionFieldsBaseConnectorSpec extends UnitSpec with ScalaFutures 
     }
   }
 
+  "fetchAllFieldDefinitions" should {
+
+    val allFieldDefinitions = Seq(
+      FieldDefinitions(List(SubscriptionField("field1", "desc1", "hint1", "some type"), SubscriptionField("field2", "desc2", "hint2", "some other type")), "context1", "version1"),
+      FieldDefinitions(List(SubscriptionField("field3", "desc3", "hint3", "some type"), SubscriptionField("field4", "desc4", "hint4", "some other type")), "context2", "version2")
+    )
+
+    val validResponse = AllFieldDefinitionsResponse(allFieldDefinitions)
+    val url = s"/definition"
+
+    "return all subscription fields definitions" in new Setup {
+
+      when(mockHttpClient.GET[AllFieldDefinitionsResponse](meq(url))(any(), any(), any()))
+        .thenReturn(Future.successful(validResponse))
+
+      val result: Seq[FieldDefinitions] = await(underTest.fetchAllFieldDefinitions())
+
+      result shouldBe allFieldDefinitions
+    }
+
+    "fail when api-subscription-fields returns a 500" in new Setup {
+
+      when(mockHttpClient.GET[AllFieldDefinitionsResponse](meq(url))(any(), any(), any()))
+        .thenReturn(Future.failed(upstream500Response))
+
+      intercept[Upstream5xxResponse] {
+        await(underTest.fetchAllFieldDefinitions())
+      }
+    }
+
+    "fail when api-subscription-fields returns unexpected response" in new Setup {
+
+      when(mockHttpClient.GET[AllFieldDefinitionsResponse](meq(url))(any(), any(), any()))
+        .thenReturn(Future.failed(new JsValidationException("", "", FieldDefinitions.getClass, "")))
+
+      intercept[JsValidationException] {
+        await(underTest.fetchAllFieldDefinitions())
+      }
+    }
+
+    "when retry logic is enabled should retry if call returns 400 Bad Request" in new Setup {
+      when(mockHttpClient.GET[AllFieldDefinitionsResponse](meq(url))(any(), any(), any()))
+        .thenReturn(
+          Future.failed(new BadRequestException("")),
+          Future.successful(validResponse)
+        )
+      val result: Seq[FieldDefinitions] = await(underTest.fetchAllFieldDefinitions())
+
+      result shouldBe allFieldDefinitions
+    }
+  }
+
   "saveFieldValues" should {
 
     val fieldsValues = fields("field001" -> "value001", "field002" -> "value002")

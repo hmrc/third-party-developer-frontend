@@ -69,7 +69,6 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
     } recover recovery(Seq.empty[SubscriptionField])
   }
 
-  // TODO: Test AllFieldDefinitionsResponse
   def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[Seq[FieldDefinitions]] = {
     val url = urlSubscriptionFieldDefinitionForAll()
     Logger.debug(s"fetchAllFieldDefinitions() - About to call $url in ${environment.toString}")
