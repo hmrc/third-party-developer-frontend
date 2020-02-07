@@ -53,7 +53,7 @@ object DeskproTicket extends FieldTransformer {
                   |to be subscribed to the API '$apiName'
                   |with version '$apiVersion'""".stripMargin
 
-    DeskproTicket(requestorName, requestorEmail, "Request to subscribe to an API", message, routes.Subscriptions.subscriptions(applicationId).url)
+    DeskproTicket(requestorName, requestorEmail, "Request to subscribe to an API", message, routes.Subscriptions.manageSubscriptions(applicationId).url)
   }
 
   def createForApiUnsubscribe(requestorName: String, requestorEmail: String,
@@ -64,7 +64,7 @@ object DeskproTicket extends FieldTransformer {
                   |to be unsubscribed from the API '$apiName'
                   |with version '$apiVersion'""".stripMargin
 
-    DeskproTicket(requestorName, requestorEmail, "Request to unsubscribe from an API", message, routes.Subscriptions.subscriptions(applicationId).url)
+    DeskproTicket(requestorName, requestorEmail, "Request to unsubscribe from an API", message, routes.Subscriptions.manageSubscriptions(applicationId).url)
   }
 
   def createForPrincipalApplicationDeletion(name: String, requestedByEmail: String, role: Role, environment: Environment,

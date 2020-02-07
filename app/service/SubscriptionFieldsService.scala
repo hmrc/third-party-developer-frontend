@@ -17,7 +17,7 @@
 package service
 
 import domain.ApiSubscriptionFields._
-import domain.{Application, ApplicationNotFound}
+import domain.{APIIdentifier, Application, ApplicationNotFound, Environment}
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -25,27 +25,22 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
-
-  def fetchFields(application: Application, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
-
+  def fetchFieldsValues(application: Application, fieldDefinitions: Seq[SubscriptionField], apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
     val connector = connectorsWrapper.connectorsForEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
 
     def addValuesToDefinitions(defs: Seq[SubscriptionField], fieldValues: Fields) = {
       defs.map(field => field.withValue(fieldValues.get(field.name)))
     }
 
-    def fetchFieldsValues(fieldDefinitions: Seq[SubscriptionField])(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
-      if (fieldDefinitions.isEmpty) Future.successful(Seq.empty)
-      else {
-        for {
-          maybeValues <- connector.fetchFieldValues(application.clientId, apiContext, apiVersion)
-        } yield maybeValues.fold(fieldDefinitions) { response =>
-          addValuesToDefinitions(fieldDefinitions, response.fields)
-        }
+    if (fieldDefinitions.isEmpty)
+      Future.successful(Seq.empty)
+    else {
+      for {
+        maybeValues <- connector.fetchFieldValues(application.clientId, apiIdentifier.context, apiIdentifier.version)
+      } yield maybeValues.fold(fieldDefinitions) { response =>
+        addValuesToDefinitions(fieldDefinitions, response.fields)
       }
     }
-
-    connector.fetchFieldDefinitions(apiContext, apiVersion).flatMap(fetchFieldsValues)
   }
 
   def saveFieldValues(applicationId: String, apiContext: String, apiVersion: String, fields: Fields)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
@@ -54,5 +49,17 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
       app <- connector.thirdPartyApplicationConnector.fetchApplicationById(applicationId)
       fields <- connector.apiSubscriptionFieldsConnector.saveFieldValues(app.getOrElse(throw new ApplicationNotFound).clientId, apiContext, apiVersion, fields)
     } yield fields
+  }
+
+  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[APIIdentifier, FieldDefinitions]] = {
+    def toMap(definitions : Seq[FieldDefinitions]): Map[APIIdentifier, FieldDefinitions] = {
+      definitions.map(definition => APIIdentifier(definition.apiContext, definition.apiVersion) -> definition).toMap
+    }
+
+    val apiSubscriptionFieldsConnector = connectorsWrapper.connectorsForEnvironment(environment).apiSubscriptionFieldsConnector
+
+    for {
+      allFieldDefinitions <- apiSubscriptionFieldsConnector.fetchAllFieldDefinitions()
+    } yield toMap(allFieldDefinitions)
   }
 }

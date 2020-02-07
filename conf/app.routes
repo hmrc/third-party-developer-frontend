@@ -71,7 +71,7 @@ GET         /applications/add/production                                        
 
 GET         /applications/add/:environment/name                                        controllers.AddApplication.addApplicationName(environment: domain.Environment)
 POST        /applications/add/:environment/name                                        controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
-GET         /applications/:id/add/:environment/subscriptions                           controllers.Subscriptions.subscriptions2(id: String, environment: domain.Environment)
+GET         /applications/:id/add/:environment/subscriptions                           controllers.Subscriptions.addAppSubscriptions(id: String, environment: domain.Environment)
 
 GET         /applications/:id/add/:environment/success                                 controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
 
@@ -105,7 +105,7 @@ GET         /applications/:id/ip-whitelist                                      
 GET         /applications/:id/ip-whitelist/change                                       controllers.IpWhitelist.changeIpWhitelist(id: String)
 POST        /applications/:id/ip-whitelist/change                                       controllers.IpWhitelist.changeIpWhitelistAction(id: String)
 
-GET         /applications/:id/subscriptions                                             controllers.Subscriptions.subscriptions(id: String)
+GET         /applications/:id/subscriptions                                             controllers.Subscriptions.manageSubscriptions(id: String)
 
 POST        /applications/:id/change-subscription                                       controllers.Subscriptions.changeApiSubscription(id: String, context: String, version: String, redirectTo: String)
 GET         /applications/:id/change-locked-subscription                                controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: String, version: String, redirectTo: String)
