@@ -20,13 +20,14 @@ import domain.Capabilities.SupportsAppChecks
 import domain.Permissions.AdministratorOnly
 import domain.{Application, ContactDetails, DeskproTicketCreationFailed}
 import javax.inject.{Inject, Singleton}
+import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
 import service.{ApplicationService, SessionService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class CheckAnswersData(
+case class CheckYourAnswersData(
   appId: String,
   softwareName: String,
   fullName: Option[String],
@@ -38,7 +39,21 @@ case class CheckAnswersData(
   subscriptions: Seq[String]
 )
 
-case class CheckYourAnswersForm()
+case class DummyCheckYourAnswersForm(dummy: String = "dummy")
+
+object CheckYourAnswersForm {
+  import play.api.data.Forms.{ignored, mapping}
+
+  def form: Form[DummyCheckYourAnswersForm] = {
+    Form(mapping(
+      "dummy" -> ignored("dummy")
+      )
+      (DummyCheckYourAnswersForm.apply)
+      (DummyCheckYourAnswersForm.unapply)
+    )
+  }
+}
+
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
@@ -55,9 +70,12 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(SupportsAppChecks,AdministratorOnly)(applicationId)(fun)
 
-  private def populateCheckYourAnswersData(application: Application, subscriptions: Seq[String]): CheckAnswersData = {
+  private def populateCheckYourAnswersData(application: Application, subs: Seq[String]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
-    CheckAnswersData(
+
+    println(subs)
+
+    CheckYourAnswersData(
       appId = application.id,
       softwareName = application.name,
 
@@ -68,11 +86,11 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
       privacyPolicyUrl = application.privacyPolicyUrl,
       termsAndConditionsUrl = application.termsAndConditionsUrl,
       acceptedTermsOfUse = application.checkInformation.fold(false)(_.termsOfUseAgreements.nonEmpty),
-      subscriptions
+      subscriptions = subs
     )
   }
 
-  private def populateCheckYourAnswersData(application: Application)(implicit request: ApplicationRequest[AnyContent]): Future[CheckAnswersData] = {
+  private def populateCheckYourAnswersData(application: Application)(implicit request: ApplicationRequest[AnyContent]): Future[CheckYourAnswersData] = {
     applicationService.fetchAllSubscriptions(application).map(_.map(_.name)).map(subscriptions => {
       populateCheckYourAnswersData(application,subscriptions)
     })
@@ -82,11 +100,13 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     for {
       application <- fetchApp(appId)
       checkYourAnswersData <- populateCheckYourAnswersData(application)
-    } yield Ok(views.html.checkYourAnswers(checkYourAnswersData))
+    } yield Ok(views.html.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
   }
 
   def answersPageAction(appId: String) = canUseChecksAction(appId) { implicit request =>
     val application = request.application
+    val requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
+
     val future = for {
       _ <- applicationService.requestUplift(appId, application.name, request.user)
     } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId))
@@ -95,7 +115,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
       case e: DeskproTicketCreationFailed =>
         for {
           checkYourAnswersData <- populateCheckYourAnswersData(application)
-        } yield InternalServerError(views.html.checkYourAnswers(checkYourAnswersData)) // TODO //(app, requestForm.withError("submitError", e.displayMessage)))
+        } yield InternalServerError(views.html.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
     }
   }
 }
