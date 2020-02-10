@@ -55,7 +55,13 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = views.html.applicationcheck.termsOfUse.render(
-        thirdPartyAppplication, TermsOfUseForm.form.fill(termsOfUseForm), request, developer, applicationMessages, appConfig)
+        app = thirdPartyAppplication,
+        form = TermsOfUseForm.form.fill(termsOfUseForm),
+        mode = CheckYourAnswersPageMode.RequestCheck,
+        request,
+        developer,
+        applicationMessages,
+        appConfig)
       page.contentType must include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -79,11 +85,12 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = views.html.applicationcheck.termsOfUse.render(
-        thirdPartyAppplication.copy(checkInformation = Some(checkInformation)),
-        TermsOfUseForm.form.fill(termsOfUseForm),
-        request,
+        app = thirdPartyAppplication.copy(checkInformation = Some(checkInformation)),
+        form = TermsOfUseForm.form.fill(termsOfUseForm),
+        mode = CheckYourAnswersPageMode.RequestCheck,
+        implicitly,
         developer,
-        applicationMessages,
+        implicitly,
         appConfigMock)
       page.contentType must include("text/html")
 

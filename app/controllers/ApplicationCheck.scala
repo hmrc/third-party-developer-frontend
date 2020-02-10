@@ -67,7 +67,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     val app = request.application
     val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(app.checkInformation.getOrElse(CheckInformation())))
 
-
     requestForm.fold(withFormErrors(app), withValidForm(app))
   }
 
