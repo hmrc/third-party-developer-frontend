@@ -18,17 +18,32 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.Capabilities.SupportsAppChecks
 import domain.Permissions.AdministratorOnly
-import domain.{Application, CheckInformation}
+import domain.{Application, ApplicationAlreadyExists, CheckInformation, CheckInformationForm, DeskproTicketCreationFailed}
 import javax.inject.{Inject, Singleton}
+import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
 import service.{ApplicationService, SessionService, SubscriptionsService}
+import views.html.applicationcheck
 
 import scala.concurrent.{ExecutionContext, Future}
+
+case class CheckAnswersData(
+  appId: String,
+  softwareName: String,
+  fullName: Option[String],
+  email: Option[String],
+  telephoneNumber: Option[String],
+  privacyPolicyUrl: Option[String],
+  termsAndConditionsUrl: Option[String],
+  acceptedTermsOfUse: Boolean,
+  subscriptions: Seq[String]
+)
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
                                  val apiSubscriptionsHelper: ApiSubscriptionsHelper,
+                                 val applicationCheck: ApplicationCheck,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
                                  val messagesApi: MessagesApi
@@ -40,6 +55,9 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(SupportsAppChecks,AdministratorOnly)(applicationId)(fun)
 
+  private def populateCheckYourAnswersData(app: Application): CheckAnswersData = {
+
+  }
   def answersPage(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId){ implicit request =>
 
     for {
@@ -55,7 +73,25 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
       telephoneNumber = contactDetails.map(_.telephoneNumber)
 
       subscriptions <- applicationService.fetchAllSubscriptions(application).map(_.map(_.name))
+      formData = CheckAnswersData(appId, softwareName, fullName, email, telephoneNumber, privacyPolicyUrl, termsAndConditionsUrl, acceptedToTermsOfUse, subscriptions)
+    } yield Ok(views.html.checkYourAnswers(formData))
+  }
 
-    } yield Ok(views.html.checkYourAnswers(appId, softwareName, fullName, email, telephoneNumber, privacyPolicyUrl, termsAndConditionsUrl, acceptedToTermsOfUse, subscriptions))
+  def answersPageAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+//    def withValidForm(app: Application, requestForm: Form[String])(form: CheckInformationForm): Future[Result] = {
+    //        case _: ApplicationAlreadyExists =>
+    //          val information = app.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
+    //          applicationService.updateCheckInformation(app.id, information)
+    //          Conflict(applicationcheck.landingPage(app.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
+    //      }
+    //    }
+    val app = request.application
+    val future = for {
+      _ <- applicationService.requestUplift(appId, app.name, request.user)
+    } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId))
+
+    future recover {
+      case e: DeskproTicketCreationFailed => InternalServerError(views.html.checkYourAnswers())//(app, requestForm.withError("submitError", e.displayMessage)))
+    }
   }
 }

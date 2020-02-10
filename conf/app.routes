@@ -137,6 +137,7 @@ GET         /applications/:id/request-check/terms-of-use/:mode                  
 POST        /applications/:id/request-check/terms-of-use/:mode                          controllers.ApplicationCheck.termsOfUseAction(id: String, mode: domain.CheckYourAnswersPageMode)
 
 GET         /applications/:id/check-your-answers                                        controllers.CheckYourAnswers.answersPage(id: String)
+POST        /applications/:id/check-your-answers                                        controllers.CheckYourAnswers.answersPageAction(id: String)
 
 POST        /applications/:id/context/:apiContext/version/:version/subscriptionFields   controllers.Subscriptions.saveSubscriptionFields(id: String, apiContext: String, version: String, subscriptionRedirect: String)
 

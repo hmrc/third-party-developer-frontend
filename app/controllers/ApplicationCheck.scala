@@ -62,26 +62,15 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       Future.successful(BadRequest(applicationcheck.landingPage(app, form)))
     }
 
-    def withValidForm(app: Application, requestForm: Form[CheckInformationForm])(form: CheckInformationForm): Future[Result] = {
-      val future = for {
-        _ <- applicationService.requestUplift(appId, app.name, request.user)
-      } yield Redirect(routes.CheckYourAnswers.answersPage(appId))
-
-      future recover {
-        case e: DeskproTicketCreationFailed => InternalServerError(applicationcheck.landingPage(app, requestForm.withError("submitError", e.displayMessage)))
-        case _: ApplicationAlreadyExists =>
-          val information = app.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
-
-          applicationService.updateCheckInformation(app.id, information)
-          Conflict(applicationcheck.landingPage(app.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
-      }
+    def withValidForm(app: Application)(form: CheckInformationForm): Future[Result] = {
+      Future.successful(Redirect(routes.CheckYourAnswers.answersPage(appId)))
     }
 
     val app = request.application
     val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(app.checkInformation.getOrElse(CheckInformation())))
 
 
-    requestForm.fold(withFormErrors(app), withValidForm(app, requestForm))
+    requestForm.fold(withFormErrors(app), withValidForm(app))
   }
 
   def credentialsRequested(appId: String) = whenTeamMemberOnApp(appId) { implicit request =>
