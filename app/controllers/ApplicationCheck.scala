@@ -16,8 +16,6 @@
 
 package controllers
 
-import java.util.UUID
-
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
 import domain.Capabilities.SupportsAppChecks
@@ -27,7 +25,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, ActionFunction, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.voa.play.form.ConditionalMappings._

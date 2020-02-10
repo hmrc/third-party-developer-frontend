@@ -18,13 +18,11 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.Capabilities.SupportsAppChecks
 import domain.Permissions.AdministratorOnly
-import domain.{Application, ApplicationAlreadyExists, CheckInformation, CheckInformationForm, DeskproTicketCreationFailed}
+import domain.{Application, ContactDetails, DeskproTicketCreationFailed}
 import javax.inject.{Inject, Singleton}
-import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
-import service.{ApplicationService, SessionService, SubscriptionsService}
-import views.html.applicationcheck
+import service.{ApplicationService, SessionService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,6 +37,8 @@ case class CheckAnswersData(
   acceptedTermsOfUse: Boolean,
   subscriptions: Seq[String]
 )
+
+case class CheckYourAnswersForm()
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
@@ -55,43 +55,47 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(SupportsAppChecks,AdministratorOnly)(applicationId)(fun)
 
-  private def populateCheckYourAnswersData(app: Application): CheckAnswersData = {
+  private def populateCheckYourAnswersData(application: Application, subscriptions: Seq[String]): CheckAnswersData = {
+    val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
+    CheckAnswersData(
+      appId = application.id,
+      softwareName = application.name,
 
+      fullName = contactDetails.map(_.fullname),
+      email = contactDetails.map(_.email),
+      telephoneNumber = contactDetails.map(_.telephoneNumber),
+
+      privacyPolicyUrl = application.privacyPolicyUrl,
+      termsAndConditionsUrl = application.termsAndConditionsUrl,
+      acceptedTermsOfUse = application.checkInformation.fold(false)(_.termsOfUseAgreements.nonEmpty),
+      subscriptions
+    )
   }
-  def answersPage(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId){ implicit request =>
 
+  private def populateCheckYourAnswersData(application: Application)(implicit request: ApplicationRequest[AnyContent]): Future[CheckAnswersData] = {
+    applicationService.fetchAllSubscriptions(application).map(_.map(_.name)).map(subscriptions => {
+      populateCheckYourAnswersData(application,subscriptions)
+    })
+  }
+
+  def answersPage(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId){ implicit request =>
     for {
       application <- fetchApp(appId)
-      softwareName = application.name
-      privacyPolicyUrl = application.privacyPolicyUrl
-      termsAndConditionsUrl = application.termsAndConditionsUrl
-      acceptedToTermsOfUse = application.checkInformation.fold(false)(_.termsOfUseAgreements.nonEmpty)
-
-      contactDetails = application.checkInformation.flatMap(_.contactDetails)
-      fullName = contactDetails.map(_.fullname)
-      email = contactDetails.map(_.email)
-      telephoneNumber = contactDetails.map(_.telephoneNumber)
-
-      subscriptions <- applicationService.fetchAllSubscriptions(application).map(_.map(_.name))
-      formData = CheckAnswersData(appId, softwareName, fullName, email, telephoneNumber, privacyPolicyUrl, termsAndConditionsUrl, acceptedToTermsOfUse, subscriptions)
-    } yield Ok(views.html.checkYourAnswers(formData))
+      checkYourAnswersData <- populateCheckYourAnswersData(application)
+    } yield Ok(views.html.checkYourAnswers(checkYourAnswersData))
   }
 
   def answersPageAction(appId: String) = canUseChecksAction(appId) { implicit request =>
-//    def withValidForm(app: Application, requestForm: Form[String])(form: CheckInformationForm): Future[Result] = {
-    //        case _: ApplicationAlreadyExists =>
-    //          val information = app.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
-    //          applicationService.updateCheckInformation(app.id, information)
-    //          Conflict(applicationcheck.landingPage(app.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
-    //      }
-    //    }
-    val app = request.application
+    val application = request.application
     val future = for {
-      _ <- applicationService.requestUplift(appId, app.name, request.user)
+      _ <- applicationService.requestUplift(appId, application.name, request.user)
     } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId))
 
-    future recover {
-      case e: DeskproTicketCreationFailed => InternalServerError(views.html.checkYourAnswers())//(app, requestForm.withError("submitError", e.displayMessage)))
+    future recoverWith {
+      case e: DeskproTicketCreationFailed =>
+        for {
+          checkYourAnswersData <- populateCheckYourAnswersData(application)
+        } yield InternalServerError(views.html.checkYourAnswers(checkYourAnswersData)) // TODO //(app, requestForm.withError("submitError", e.displayMessage)))
     }
   }
 }
