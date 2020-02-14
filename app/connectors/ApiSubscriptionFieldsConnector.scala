@@ -65,12 +65,22 @@ abstract class ApiSubscriptionFieldsConnector(private val environment: Environme
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
     Logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
     retry {
-      http.GET[FieldDefinitionsResponse](url).map(response => response.fieldDefinitions)
+      http.GET[FieldDefinitions](url).map(response => response.fieldDefinitions)
     } recover recovery(Seq.empty[SubscriptionField])
+  }
+
+  def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[Seq[FieldDefinitions]] = {
+    val url = urlSubscriptionFieldDefinitionForAll()
+    Logger.debug(s"fetchAllFieldDefinitions() - About to call $url in ${environment.toString}")
+    retry {
+      http.GET[AllFieldDefinitionsResponse](url).map(response => response.apis)
+    } recover recovery(Seq.empty[FieldDefinitions])
   }
 
   private def urlSubscriptionFieldDefinition(apiContext: String, apiVersion: String) =
     s"$serviceBaseUrl/definition/context/${urlEncode(apiContext)}/version/${urlEncode(apiVersion)}"
+
+  private def urlSubscriptionFieldDefinitionForAll() = s"$serviceBaseUrl/definition"
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = {
     encode(str, encoding)

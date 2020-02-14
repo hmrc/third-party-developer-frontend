@@ -23,16 +23,17 @@ import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.i18n.Messages.Implicits._
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 
 class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
 
-  val appConfig = mock[ApplicationConfig]
+  val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
   "Terms of use view" must {
-    val thirdPartyAppplication =
+    val thirdPartyApplication =
       Application(
         "APPLICATION_ID",
         "CLIENT_ID",
@@ -47,10 +48,10 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       )
 
     "show terms of use agreement page that requires terms of use to be agreed" in {
-      implicit val request = FakeRequest().withCSRFToken
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val checkInformation = CheckInformation(
-        confirmedName = false, apiSubscriptionsConfirmed = false, None, providedPrivacyPolicyURL = false, providedTermsAndConditionsURL = false, Seq.empty)
+      val checkInformation = CheckInformation()
+
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
@@ -70,17 +71,13 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
     }
 
     "show terms of use agreement page that already has the correct terms of use agreed" in {
-      implicit val request = FakeRequest().withCSRFToken
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
       val appConfigMock = mock[ApplicationConfig]
       val termsOfUseAgreement = TermsOfUseAgreement("email@example.com", DateTimeUtils.now, "1.0")
-      val checkInformation = CheckInformation(
-        confirmedName = false,
-        apiSubscriptionsConfirmed = false,
-        None,
-        providedPrivacyPolicyURL = false,
-        providedTermsAndConditionsURL = false,
-        Seq(termsOfUseAgreement))
+
+      val checkInformation = CheckInformation(termsOfUseAgreements = Seq(termsOfUseAgreement))
+
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
@@ -88,7 +85,7 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
         app = thirdPartyAppplication.copy(checkInformation = Some(checkInformation)),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
         mode = CheckYourAnswersPageMode.RequestCheck,
-        implicitly,
+        request,
         developer,
         implicitly,
         appConfigMock)

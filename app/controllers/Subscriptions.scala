@@ -26,7 +26,8 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, Result}
+import play.twirl.api.Html
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.include.{changeSubscriptionConfirmation, subscriptionFields}
@@ -47,40 +48,51 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   extends ApplicationController with ApplicationHelper {
 
   private def canManageLockedApiSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    permissionThenCapabilityAction(AdministratorOnly,ManageLockedSubscriptions)(applicationId)(fun)
+    permissionThenCapabilityAction(AdministratorOnly, ManageLockedSubscriptions)(applicationId)(fun)
 
   private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     capabilityThenPermissionsAction(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
 
-  def subscriptions(applicationId: String) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
-    apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
-      val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
-      val form = EditApplicationForm.withData(data.app)
-      val view = views.html.subscriptions(role, data, form, request.application, data.subscriptions, data.app.id)
-      Ok(view)
-    } recover {
-      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
-    }
+  def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+    renderSubscriptions(request.application, request.user, (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
+      views.html.manageSubscriptions(role, data, form, request.application, data.subscriptions, data.app.id)
+    })
   }
 
-  def subscriptions2(applicationId: String, environment: Environment) = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
-    apiSubscriptionsHelper.fetchPageDataFor(request.application).map { data =>
-      val role = apiSubscriptionsHelper.roleForApplication(data.app, request.user.email)
+  def addAppSubscriptions(applicationId: String,
+                     environment: Environment): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+
+    renderSubscriptions(request.application, request.user, (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
+      views.html.addAppSubscriptions(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
+    })
+  }
+
+  def renderSubscriptions(application: Application,
+                          user : DeveloperSession,
+                          renderHtml : (Role, PageData, Form[EditApplicationForm]) => Html
+                         )(implicit request: ApplicationRequest[AnyContent]) : Future[Result] = {
+    apiSubscriptionsHelper.fetchPageDataFor(application).map { data =>
+      val role = apiSubscriptionsHelper.roleForApplication(data.app, user.email)
       val form = EditApplicationForm.withData(data.app)
-      val view = views.html.subscriptions2(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
-      Ok(view)
+
+      val html = renderHtml(role, data, form)
+
+      Ok(html)
     } recover {
       case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
     }
   }
 
   private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
-    case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.subscriptions(applicationId))
-    case Some(APPLICATION_CHECK_PAGE) => Redirect(routes.ApplicationCheck.apiSubscriptionsPage(applicationId, CheckYourAnswersPageMode.RequestCheck))
+    case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.manageSubscriptions(applicationId))
+    case Some(APPLICATION_CHECK_PAGE) => Redirect(routes.ApplicationCheck.apiSubscriptionsPage(applicationId), CheckYourAnswersPageMode.RequestCheck)
     case _ => Redirect(routes.Details.details(applicationId))
   }
 
-  def changeApiSubscription(applicationId: String, apiContext: String, apiVersion: String, redirectTo: String) = whenTeamMemberOnApp(applicationId) {
+  def changeApiSubscription(applicationId: String,
+                            apiContext: String,
+                            apiVersion: String,
+                            redirectTo: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
     implicit request =>
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
@@ -107,7 +119,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                   apiName: String,
                                   apiContext: String,
                                   apiVersion: String,
-                                  redirectTo: String) = canManageLockedApiSubscriptionsAction(applicationId) {
+                                  redirectTo: String): Action[AnyContent] = canManageLockedApiSubscriptionsAction(applicationId) {
     implicit request =>
         applicationService.isSubscribedToApi(request.application, apiName, apiContext, apiVersion).map(subscribed =>
           Ok(changeSubscriptionConfirmation(
@@ -118,7 +130,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
                                         apiName: String,
                                         apiContext: String,
                                         apiVersion: String,
-                                        redirectTo: String) = canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
+                                        redirectTo: String): Action[AnyContent] = canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
     def requestChangeSubscription(subscribed: Boolean) = {
       if (subscribed) {
         subscriptionsService.requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
@@ -142,7 +154,10 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
       ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
   }
 
-  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String) = loggedInAction { implicit request =>
+  def saveSubscriptionFields(applicationId: String,
+                             apiContext: String,
+                             apiVersion: String,
+                             subscriptionRedirect: String): Action[AnyContent] = loggedInAction { implicit request =>
     def handleValidForm(validForm: SubscriptionFieldsForm) = {
       def saveFields(validForm: SubscriptionFieldsForm)(implicit hc: HeaderCarrier): Future[Any] = {
         if (validForm.fields.nonEmpty) {
@@ -204,10 +219,9 @@ class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(i
 
   def fetchPageDataFor(application: Application)(implicit hc: HeaderCarrier): Future[PageData] = {
     for {
-      creds <- applicationService.fetchCredentials(application.id)
       subscriptions <- applicationService.apisWithSubscriptions(application)
     } yield {
-      PageData(application, creds, APISubscriptions.groupSubscriptions(subscriptions))
+      PageData(application, APISubscriptions.groupSubscriptions(subscriptions))
     }
   }
 
@@ -220,7 +234,7 @@ class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(i
     }
   }
 
-  def roleForApplication(application: Application, email: String) =
+  def roleForApplication(application: Application, email: String): Role =
     application.role(email).getOrElse(throw new ApplicationNotFound)
 }
 

@@ -27,7 +27,7 @@
                     <li class="side-nav__list @if(section == "details") { side-nav__list--selected }"><a id="nav-manage-details" class="side-nav__link" href="@routes.Details.details(app.id)">Manage details</a></li>
 
                     @if(app.access.accessType.isStandard) {
-                        <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }"><a id="nav-manage-subscriptions" class="side-nav__link" href="@routes.Subscriptions.subscriptions(app.id)">Manage API subscriptions</a></li>
+                        <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }"><a id="nav-manage-subscriptions" class="side-nav__link" href="@routes.Subscriptions.manageSubscriptions(app.id)">Manage API subscriptions</a></li>
                     }
                         <li class="side-nav__list @if(section == "credentials") { side-nav__list--selected }"><a id="nav-manage-credentials" class="side-nav__link" href="@routes.Credentials.credentials(app.id, None)">Manage credentials</a></li>
 
@@ -41,8 +41,9 @@
                             Manage whitelisted IPs</a></li>
                     }
 
+                    <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Manage team members</a></li>
+
                     @if(app.access.accessType.isStandard) {
-                        <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Manage team members</a></li>
                         <li class="side-nav__list @if(section == "delete-application") { side-nav__list--selected }"><a id="nav-delete-application" class="side-nav__link" href="@routes.DeleteApplication.deleteApplication(app.id, None)">Delete application</a></li>
                     }
                 </ul>

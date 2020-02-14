@@ -39,7 +39,8 @@ lazy val compile = Seq(
   "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.1.0-play-25",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
-  "com.google.zxing" % "core" % "3.2.1"
+  "com.google.zxing" % "core" % "3.2.1",
+  "org.typelevel" %% "cats-core" % "2.0.0"
 )
 
 lazy val test = Seq(
@@ -131,6 +132,8 @@ lazy val microservice = Project(appName, file("."))
     parallelExecution in ComponentTest := false
   )
   .settings(majorVersion := 0)
+  .settings(scalacOptions ++= Seq("-Ypartial-unification"))
+
 lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
 lazy val IntegrationTest = config("it") extend Test
 lazy val ComponentTest = config("component") extend Test

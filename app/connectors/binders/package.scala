@@ -16,8 +16,7 @@
 
 package connectors
 
-import domain.Environment
-import domain.CheckYourAnswersPageMode
+import domain.{CheckYourAnswersPageMode, AddTeamMemberPageMode, Environment}
 import play.api.mvc.PathBindable
 
 package object binders {
@@ -44,4 +43,18 @@ package object binders {
       mode.toString.toLowerCase
     }
   }
+
+  implicit def addTeamMemberPageModePathBinder(implicit textBinder: PathBindable[String]): PathBindable[AddTeamMemberPageMode] =
+    new PathBindable[AddTeamMemberPageMode] {
+      override def bind(key: String, value: String): Either[String, AddTeamMemberPageMode] = {
+        for {
+          text <- textBinder.bind(key, value).right
+          mode <- AddTeamMemberPageMode.from(text).toRight("Not a valid AddTeamMemberPageMode").right
+        } yield mode
+      }
+
+      override def unbind(key: String, mode: AddTeamMemberPageMode): String = {
+        mode.toString.toLowerCase
+      }
+    }
 }

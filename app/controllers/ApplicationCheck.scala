@@ -31,6 +31,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.{applicationcheck, editapplication}
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -325,6 +326,44 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
+  def team(appId: String) = canUseChecksAction(appId) { implicit request =>
+    Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
+  }
+
+  def teamAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+
+    val information = request.application.checkInformation.getOrElse(CheckInformation())
+    for {
+      _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
+    } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
+  }
+
+  def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
+    Future.successful(Ok(applicationcheck.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
+  }
+
+  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String) = canUseChecksAction(appId) { implicit request =>
+    successful(request.application.findCollaboratorByHash(teamMemberHash)
+      .map(collaborator => Ok(applicationcheck.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
+      .getOrElse(Redirect(routes.ApplicationCheck.team(appId))))
+  }
+
+  def teamMemberRemoveAction(appId: String) = canUseChecksAction(appId) { implicit request => {
+
+    def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
+        applicationService
+          .removeTeamMember(request.application, form.email, request.user.email)
+          .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
+      }
+
+    def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]) : Future[Result] = {
+      successful(BadRequest)
+    }
+
+    RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    }
+  }
+
   private def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {
     (url, hasCheckedUrl) match {
       case (Some(_), _) => Some("true")
@@ -342,6 +381,7 @@ object ApplicationInformationForm {
       "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
       "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
       "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
+      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
       "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
     )(CheckInformationForm.apply)(CheckInformationForm.unapply)
   )

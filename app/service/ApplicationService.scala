@@ -19,7 +19,7 @@ package service
 import config.ApplicationConfig
 import connectors._
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import domain.ApiSubscriptionFields.{FieldDefinitions, SubscriptionField, SubscriptionFieldsWrapper}
 import domain.Environment.{PRODUCTION, SANDBOX}
 import domain._
 import javax.inject.{Inject, Singleton}
@@ -40,7 +40,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
                                    productionApplicationConnector: ThirdPartyApplicationProductionConnector,
                                    auditService: AuditService)(implicit val ec: ExecutionContext) {
 
-  def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier) =
+  def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
     connectorWrapper.connectorsForEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
 
   def update(updateApplicationRequest: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
@@ -56,8 +56,20 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
 
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
-    def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription): Future[APISubscriptionStatus] = {
-      subscriptionFieldsService.fetchFields(application, api.context, version.version.version).map { fields =>
+    def toApiSubscriptionStatuses(api: APISubscription,
+                                   version: VersionSubscription,
+                                   fieldDefinitions: Map[APIIdentifier, FieldDefinitions]): Future[APISubscriptionStatus] = {
+      val apiIdentifier = APIIdentifier(api.context, version.version.version)
+
+      val subscriptionFieldsWithOutValues: Seq[SubscriptionField] =
+        fieldDefinitions
+          .get(apiIdentifier)
+          .map((fieldDefinitions: FieldDefinitions) => fieldDefinitions.fieldDefinitions)
+          .getOrElse(Seq.empty)
+
+      val subscriptionFieldsWithValues: Future[Seq[SubscriptionField]] = subscriptionFieldsService.fetchFieldsValues(application,subscriptionFieldsWithOutValues, apiIdentifier)
+
+      subscriptionFieldsWithValues.map {fields: Seq[SubscriptionField] =>
         APISubscriptionStatus(
           api.name,
           api.serviceName,
@@ -70,19 +82,22 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
       }
     }
 
-    def toApiVersions(api: APISubscription): Seq[Future[APISubscriptionStatus]] = {
+    def toApiVersions(api: APISubscription,
+                      fieldDefinitions: Map[APIIdentifier, FieldDefinitions]) : Seq[Future[APISubscriptionStatus]] = {
+
       api.versions
         .filterNot(_.version.status == RETIRED)
         .filterNot(s => s.version.status == DEPRECATED && !s.subscribed)
         .sortWith(APIDefinition.descendingVersion)
-        .map(toApiSubscriptionStatuses(api, _))
+        .map(toApiSubscriptionStatuses(api, _, fieldDefinitions))
     }
 
     val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
     for {
+      fieldDefinitions <- subscriptionFieldsService.getAllFieldDefinitions(application.deployedTo)
       subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
-      apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions))
+      apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions(_, fieldDefinitions)))
     } yield apiVersions
   }
 
@@ -289,7 +304,8 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
-
-    if (environment == Some(PRODUCTION)) productionApplicationConnector else sandboxApplicationConnector
-
+    if (environment.contains(PRODUCTION))
+      productionApplicationConnector
+    else
+      sandboxApplicationConnector
 }

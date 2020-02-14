@@ -27,6 +27,7 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.time.DateTimeUtils
+import helpers.string._
 
 case class UpliftRequest(applicationName: String, requestedByEmailAddress: String)
 
@@ -261,6 +262,7 @@ case class CheckInformationForm(confirmedNameComplete: Boolean = false,
                                 contactDetailsComplete: Boolean = false,
                                 providedPrivacyPolicyURLComplete: Boolean = false,
                                 providedTermsAndConditionsURLComplete: Boolean = false,
+                                teamConfirmedComplete: Boolean = false,
                                 termsOfUseAgreementComplete: Boolean = false)
 
 case class CheckInformation(confirmedName: Boolean = false,
@@ -268,6 +270,7 @@ case class CheckInformation(confirmedName: Boolean = false,
                             contactDetails: Option[ContactDetails] = None,
                             providedPrivacyPolicyURL: Boolean = false,
                             providedTermsAndConditionsURL: Boolean = false,
+                            teamConfirmed: Boolean = false,
                             termsOfUseAgreements: Seq[TermsOfUseAgreement] = Seq.empty)
 
 object CheckInformation {
@@ -282,6 +285,7 @@ object CheckInformationForm {
       contactDetailsComplete = checkInformation.contactDetails.isDefined,
       providedPrivacyPolicyURLComplete = checkInformation.providedPrivacyPolicyURL,
       providedTermsAndConditionsURLComplete = checkInformation.providedTermsAndConditionsURL,
+      teamConfirmedComplete = checkInformation.teamConfirmed,
       termsOfUseAgreementComplete = checkInformation.termsOfUseAgreements.exists(terms => terms.version.nonEmpty)
     )
   }
@@ -376,6 +380,10 @@ case class Application(id: String,
   }
 
   def hasLockedSubscriptions = deployedTo.isProduction && state.name != State.TESTING
+
+  def findCollaboratorByHash(teamMemberHash: String) : Option[Collaborator] = {
+    collaborators.find(c => c.emailAddress.toSha256 == teamMemberHash)
+  }
 }
 
 object Application {

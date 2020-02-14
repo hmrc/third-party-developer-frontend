@@ -24,11 +24,18 @@ object ApiSubscriptionFields {
 
   type Fields = Map[String, String]
 
-  def fields(tpl: (String, String)*) = Map[String, String](tpl: _*)
+  def fields(tpl: (String, String)*): Map[String, String] = Map[String, String](tpl: _*)
 
-  case class FieldDefinitionsResponse(fieldDefinitions: List[SubscriptionField])
-  object FieldDefinitionsResponse {
-    implicit val format: Format[FieldDefinitionsResponse] = Json.format[FieldDefinitionsResponse]
+  case class FieldDefinitions(fieldDefinitions: List[SubscriptionField], apiContext: String, apiVersion: String)
+
+  object FieldDefinitions {
+    implicit val format: Format[FieldDefinitions] = Json.format[FieldDefinitions]
+  }
+
+  case class AllFieldDefinitionsResponse(apis: Seq[FieldDefinitions])
+
+  object AllFieldDefinitionsResponse {
+    implicit val format: Format[AllFieldDefinitionsResponse] = Json.format[AllFieldDefinitionsResponse]
   }
 
   case class SubscriptionFieldsWrapper(applicationId: String, clientId: String, apiContext: String, apiVersion: String, fields: Seq[SubscriptionField])
