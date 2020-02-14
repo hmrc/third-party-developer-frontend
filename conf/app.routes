@@ -75,11 +75,11 @@ GET         /applications/:id/add/:environment/subscriptions                    
 
 GET         /applications/:id/add/:environment/success                                 controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
 
-GET         /applications/:id/team-members                                              controllers.ManageTeam.manageTeam(id: String, error: Option[String])
-GET         /applications/:id/team-members/add                                          controllers.ManageTeam.addTeamMember(id: String)
-POST        /applications/:id/team-members/add/:addTeamMemberPageMode                   controllers.ManageTeam.addTeamMemberAction(id: String, addTeamMemberPageMode: domain.AddTeamMemberPageMode)
-GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation          controllers.ManageTeam.removeTeamMember(id: String, teamMemberHash: String)
-POST        /applications/:id/team-members/remove                                       controllers.ManageTeam.removeTeamMemberAction(id: String)
+GET         /applications/:id/team-members/:mode                                        controllers.ManageTeam.manageTeam(id: String, mode: domain.CheckYourAnswersPageMode, error: Option[String])
+GET         /applications/:id/team-members/add/:mode                                    controllers.ManageTeam.addTeamMember(id: String, mode: domain.CheckYourAnswersPageMode)
+POST        /applications/:id/team-members/add/:addTeamMemberPageMode/:mode             controllers.ManageTeam.addTeamMemberAction(id: String, addTeamMemberPageMode: domain.AddTeamMemberPageMode, mode: domain.CheckYourAnswersPageMode)
+GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation/:mode    controllers.ManageTeam.removeTeamMember(id: String, teamMemberHash: String, mode: domain.CheckYourAnswersPageMode)
+POST        /applications/:id/team-members/remove/:mode                                 controllers.ManageTeam.removeTeamMemberAction(id: String, mode: domain.CheckYourAnswersPageMode)
 
 GET         /applications/:id/details                                                   controllers.Details.details(id: String)
 GET         /applications/:id/details/change                                            controllers.Details.changeDetails(id: String)
@@ -135,11 +135,11 @@ GET         /applications/:id/request-check/terms-and-conditions/:mode          
 POST        /applications/:id/request-check/terms-and-conditions/:mode                  controllers.ApplicationCheck.termsAndConditionsAction(id: String, mode: domain.CheckYourAnswersPageMode)
 GET         /applications/:id/request-check/terms-of-use/:mode                          controllers.ApplicationCheck.termsOfUsePage(id: String, mode: domain.CheckYourAnswersPageMode)
 POST        /applications/:id/request-check/terms-of-use/:mode                          controllers.ApplicationCheck.termsOfUseAction(id: String, mode: domain.CheckYourAnswersPageMode)
-GET         /applications/:id/request-check/team                                        controllers.ApplicationCheck.team(id: String)
+GET         /applications/:id/request-check/team/:mode                                  controllers.ApplicationCheck.team(id: String, mode: domain.CheckYourAnswersPageMode)
 POST        /applications/:id/request-check/team                                        controllers.ApplicationCheck.teamAction(id: String)
-GET         /applications/:id/request-check/team/add                                    controllers.ApplicationCheck.teamAddMember(id: String)
-GET         /applications/:id/request-check/team/remove-confirmation/:teamMemberHash    controllers.ApplicationCheck.teamMemberRemoveConfirmation(id: String, teamMemberHash: String)
-POST        /applications/:id/request-check/team/remove                                 controllers.ApplicationCheck.teamMemberRemoveAction(id: String)
+GET         /applications/:id/request-check/team/add/:mode                              controllers.ApplicationCheck.teamAddMember(id: String, mode: domain.CheckYourAnswersPageMode)
+GET         /applications/:id/request-check/team/remove-confirmation/:teamMemberHash    controllers.ApplicationCheck.teamMemberRemoveConfirmation(id: String, teamMemberHash: String, mode: domain.CheckYourAnswersPageMode)
+POST        /applications/:id/request-check/team/remove                                 controllers.ApplicationCheck.teamMemberRemoveAction(id: String, mode: domain.CheckYourAnswersPageMode)
 
 GET         /applications/:id/check-your-answers                                        controllers.CheckYourAnswers.answersPage(id: String)
 POST        /applications/:id/check-your-answers                                        controllers.CheckYourAnswers.answersPageAction(id: String)

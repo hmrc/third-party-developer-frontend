@@ -89,7 +89,7 @@
                         <tr class="@if(form.errors("teamConfirmed").nonEmpty){form-group-error}">
                             <td id="teamConfirmed" scope="row" class="step-description">
                                 @include.fieldError(form.errors,"teamConfirmed")
-                                <a id="teamConfirmedCompleted" href="@routes.ApplicationCheck.team(app.id)">
+                                <a id="teamConfirmedCompleted" href="@routes.ApplicationCheck.team(app.id, CheckYourAnswersPageMode.RequestCheck)">
                                     Tell us your team members
                                 </a>
                             </td>

@@ -326,7 +326,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  def team(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def team(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
   }
 
@@ -338,22 +338,22 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
   }
 
-  def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(applicationcheck.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
+  def teamAddMember(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
+    Future.successful(Ok(applicationcheck.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user, mode)))
   }
 
-  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String) = canUseChecksAction(appId) { implicit request =>
+  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
     successful(request.application.findCollaboratorByHash(teamMemberHash)
       .map(collaborator => Ok(applicationcheck.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
-      .getOrElse(Redirect(routes.ApplicationCheck.team(appId))))
+      .getOrElse(Redirect(routes.ApplicationCheck.team(appId, mode))))
   }
 
-  def teamMemberRemoveAction(appId: String) = canUseChecksAction(appId) { implicit request => {
+  def teamMemberRemoveAction(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request => {
 
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
         applicationService
           .removeTeamMember(request.application, form.email, request.user.email)
-          .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
+          .map(_ => Redirect(routes.ApplicationCheck.team(appId, mode)))
       }
 
     def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]) : Future[Result] = {

@@ -15,7 +15,7 @@
  *@
 
 @import views.html.include.devMain
-@import domain.DeveloperSession
+@import domain.{DeveloperSession, CheckYourAnswersPageMode}
 
 @import domain.BackButtonWithJavaScript
 @import config.ApplicationConfig
@@ -24,7 +24,7 @@
 @import domain.Application
 
 @import domain.AddTeamMemberPageMode.ApplicationCheck
-@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
+@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, mode: CheckYourAnswersPageMode)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 
  @pageHeading = @{ "Add a team member" }
@@ -40,5 +40,5 @@
    <h1 class="heading-xlarge">@pageHeading</h1>
   </header>
 
-  @addTeamMemberPartial(app, form, loggedIn, "Add team member", false, ApplicationCheck)
+  @addTeamMemberPartial(app, form, loggedIn, "Add team member", false, ApplicationCheck, mode)
  }

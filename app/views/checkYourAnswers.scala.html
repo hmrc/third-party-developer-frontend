@@ -86,6 +86,20 @@ developerSession = Some(loggedIn)
                             </td>
                         </tr>
 
+                        <tr id="teamMembers">
+                            <th><span strong class="bold-small">Team members</span></th>
+                            <td>
+                                @data.teamMembers.map { teamMember =>
+                                @teamMember<br/>
+                                }
+                            </td>
+                            <td>
+                                <div align="right">
+                                    <a href=""@controllers.routes.ApplicationCheck.team(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)"">Change<span class="visually-hidden">Edit Contact details</span></a>
+                                </div>
+                            </td>
+                        </tr>
+
                         <tr id="softwareName">
                             <th><span strong class="bold-small">Software name</span></th>
                             <td>
