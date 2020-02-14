@@ -22,7 +22,6 @@ import domain._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
-import org.mockito.BDDMockito.`given`
 import org.mockito.Mockito.{verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
@@ -134,7 +133,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
-    def whenTheApplicationExists(appId: String = appId, clientId: String = clientId, userRole: Role = ADMINISTRATOR,
+    def givenTheApplicationExists(appId: String = appId, clientId: String = clientId, userRole: Role = ADMINISTRATOR,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
       access: Access = Standard()): Application = {
@@ -156,15 +155,17 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   }
 
   "validate failure when application name already exists" in new Setup {
-    private val application = whenTheApplicationExists(checkInformation =
-      Some(CheckInformation(
+    private val application = givenTheApplicationExists(
+      checkInformation = Some(CheckInformation(
         confirmedName = true,
         apiSubscriptionsConfirmed = true,
         Some(ContactDetails("Example Name", "name@example.com", "012346789")),
         providedPrivacyPolicyURL = true,
         providedTermsAndConditionsURL = true,
-        Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
-
+        teamConfirmed = true,
+        Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+      ))
+    )
     private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
 
     val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
@@ -189,8 +190,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   "check your answers submitted" should {
     "return credentials requested page" in new Setup {
-      whenTheApplicationExists()
-      mockRequestUplift
+      givenTheApplicationExists()
+      mockRequestUplift()
 
       private val result = await(underTest.answersPageAction(appId)(loggedInRequest))
 
@@ -198,7 +199,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       redirectLocation(result) shouldBe Some(routes.ApplicationCheck.credentialsRequested(appId).url)
     }
     "return forbidden when not logged in" in new Setup {
-      whenTheApplicationExists()
+      givenTheApplicationExists()
       private val result = await(underTest.answersPageAction(appId)(loggedOutRequest))
 
       status(result) shouldBe SEE_OTHER
@@ -209,7 +210,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   "check your answers page" should {
     "return check your answers page" in new Setup {
 
-      whenTheApplicationExists()
+      givenTheApplicationExists()
 
       private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
 
@@ -221,7 +222,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      whenTheApplicationExists(userRole = DEVELOPER)
+      givenTheApplicationExists(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
 
@@ -229,9 +230,9 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "validation failure submit action" in new Setup {
-      mockRequestUplift
+      mockRequestUplift()
 
-      whenTheApplicationExists()
+      givenTheApplicationExists()
 
       private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
 
@@ -239,7 +240,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "return forbidden when accessing action without being an admin" in new Setup {
-      whenTheApplicationExists(userRole = DEVELOPER)
+      givenTheApplicationExists(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
 
@@ -247,7 +248,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "return bad request when the app is already approved" in new Setup {
-      whenTheApplicationExists(state = production)
+      givenTheApplicationExists(state = production)
 
       private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
 
@@ -255,7 +256,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "return bad request when the app is pending check" in new Setup {
-      whenTheApplicationExists(state = pendingApproval)
+      givenTheApplicationExists(state = pendingApproval)
 
       private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
 
@@ -263,7 +264,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      whenTheApplicationExists(state = production)
+      givenTheApplicationExists(state = production)
 
       private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
 
@@ -271,7 +272,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      whenTheApplicationExists(state = pendingApproval)
+      givenTheApplicationExists(state = pendingApproval)
 
       private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
 

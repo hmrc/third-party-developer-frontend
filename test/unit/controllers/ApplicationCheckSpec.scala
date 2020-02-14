@@ -35,6 +35,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import helpers.string._
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.stubbing.Answer
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -317,39 +319,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
-    }
-
-    "validate failure when application name already exists" in new Setup {
-      private val application = givenTheApplicationExists(checkInformation =
-        Some(CheckInformation(
-          confirmedName = true,
-          apiSubscriptionsConfirmed = true,
-          Some(ContactDetails("Example Name", "name@example.com", "012346789")),
-          providedPrivacyPolicyURL = true,
-          providedTermsAndConditionsURL = true,
-          teamConfirmed = true,
-          Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
-
-      private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
-
-      val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
-
-      given(underTest.applicationService.requestUplift(mockEq(appId), mockEq(application.name), mockEq(loggedInUser))(any[HeaderCarrier]))
-        .willAnswer(new Answer[Future[ApplicationUpliftSuccessful]]() {
-          def answer(invocation: InvocationOnMock): Future[ApplicationUpliftSuccessful] = {
-            Future.failed(new ApplicationAlreadyExists)
-          }
-        })
-      given(underTest.applicationService.updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier]))
-        .willReturn(ApplicationUpdateSuccessful)
-
-      private val result = await(addToken(underTest.requestCheckAction(appId))(requestWithFormBody))
-
-      status(result) shouldBe CONFLICT
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
-
-      private val errorMessageElement = Jsoup.parse(bodyOf(result)).select("td#confirmedName span.error-message")
-      errorMessageElement.text() shouldBe "That application name already exists. Enter a unique name for your application."
     }
 
     "return forbidden when accessing action without being an admin" in new Setup {
@@ -738,7 +707,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
       givenTheApplicationExists(checkInformation = Some(checkInformation))
 
-      private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
+      private val result = await(addToken(underTest.privacyPolicyPage(appId, defaultMode))(loggedInRequest))
       status(result) shouldBe OK
       idAttributeOnCheckedInput(result) shouldBe "no"
     }
