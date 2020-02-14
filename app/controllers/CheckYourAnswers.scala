@@ -98,7 +98,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     })
   }
 
-  def answersPage(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
+  def answersPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     for {
       application <- fetchApp(appId)
       checkYourAnswersData <- populateCheckYourAnswersData(application)
@@ -107,11 +107,9 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
   def answersPageAction(appId: String) = canUseChecksAction(appId) { implicit request =>
     val application = request.application
-    val requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
 
     (for {
       _ <- applicationService.requestUplift(appId, application.name, request.user)
-      _ = throw new ApplicationAlreadyExists
     } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId)))
     .recoverWith {
       case e: DeskproTicketCreationFailed =>

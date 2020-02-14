@@ -311,10 +311,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       status(result) shouldBe BAD_REQUEST
     }
 
-// TODO - move this to CheckYourAnswers
-//
-//
-
     "return forbidden when accessing action without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 

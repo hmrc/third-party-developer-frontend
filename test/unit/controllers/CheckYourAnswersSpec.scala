@@ -1,19 +1,32 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package unit.controllers
 
-import config.ErrorHandler
-import controllers.{APISubscriptions, ApiSubscriptionsHelper, ApplicationCheck, CheckYourAnswers, GroupedSubscriptions}
+import controllers._
 import domain.Role._
 import domain._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.{never, verify}
+import org.mockito.BDDMockito.`given`
+import org.mockito.Mockito.{verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
-import org.scalatest.Assertion
-import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
@@ -82,6 +95,36 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       messagesApi
     )
 
+    when(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+      .thenReturn(Some(session))
+
+    when(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
+      .thenReturn(successful(ApplicationUpdateSuccessful))
+
+    when(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
+      .thenReturn(successful(application))
+
+    when(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier]))
+      .thenReturn(tokens)
+
+    when(underTest.applicationService.removeTeamMember(any[Application], any[String], mockEq(loggedInUser.email))(any[HeaderCarrier]))
+      .thenReturn(ApplicationUpdateSuccessful)
+
+    when(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
+      .thenReturn(ApplicationUpdateSuccessful)
+
+    val subscriptions = Seq(
+      APISubscriptions("API1", "ServiceName", "apiContent",
+        Seq(APISubscriptionStatus(
+          "API1", "subscriptionServiceName", "context", APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false))))
+    val groupedSubs = GroupedSubscriptions(Seq.empty,subscriptions)
+    
+    when(underTest.applicationService.fetchAllSubscriptions(any[Application])(any[HeaderCarrier]))
+      .thenReturn(successful(Seq(mock[APISubscription])))
+    
+    when(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
+      .thenReturn(successful(Valid))
+
     val hc = HeaderCarrier()
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
@@ -91,52 +134,148 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
-    def givenTheApplicationExists(appId: String = appId, clientId: String = clientId, userRole: Role = ADMINISTRATOR,
-                                  state: ApplicationState = testing,
-                                  checkInformation: Option[CheckInformation] = None,
-                                  access: Access = Standard()): Application = {
+    def whenTheApplicationExists(appId: String = appId, clientId: String = clientId, userRole: Role = ADMINISTRATOR,
+      state: ApplicationState = testing,
+      checkInformation: Option[CheckInformation] = None,
+      access: Access = Standard()): Application = {
 
       val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), access = access, state = state, checkInformation = checkInformation)
 
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
-      given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq())
+      when(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).thenReturn(application)
+      when(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).thenReturn(tokens)
+      when(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).thenReturn(Seq())
 
       application
+    }
+    def mockRequestUplift() {
+      when(underTest.applicationService.requestUplift (mockEq (appId), any[String], any[DeveloperSession] ) (any[HeaderCarrier] ) )
+      .thenReturn (ApplicationUpliftSuccessful)
     }
 
   }
 
   "validate failure when application name already exists" in new Setup {
-          private val application = givenTheApplicationExists(checkInformation =
-            Some(CheckInformation(
-              confirmedName = true,
-              apiSubscriptionsConfirmed = true,
-              Some(ContactDetails("Example Name", "name@example.com", "012346789")),
-              providedPrivacyPolicyURL = true,
-              providedTermsAndConditionsURL = true,
-              Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
+    private val application = whenTheApplicationExists(checkInformation =
+      Some(CheckInformation(
+        confirmedName = true,
+        apiSubscriptionsConfirmed = true,
+        Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+        providedPrivacyPolicyURL = true,
+        providedTermsAndConditionsURL = true,
+        Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
-          private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
+    private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
 
-          val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
+    val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
 
-          given(underTest.applicationService.requestUplift(mockEq(appId), mockEq(application.name), mockEq(loggedInUser))(any[HeaderCarrier]))
-            .willAnswer(new Answer[Future[ApplicationUpliftSuccessful]]() {
-              def answer(invocation: InvocationOnMock): Future[ApplicationUpliftSuccessful] = {
-                Future.failed(new ApplicationAlreadyExists)
-              }
-            })
-          given(underTest.applicationService.updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier]))
-            .willReturn(ApplicationUpdateSuccessful)
-
-          private val result = await(addToken(underTest.answersPageAction(appId))(requestWithFormBody))
-
-          status(result) shouldBe CONFLICT
-          verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
-
-          private val errorMessageElement = Jsoup.parse(bodyOf(result)).select("td#confirmedName span.error-message")
-          errorMessageElement.text() shouldBe "That application name already exists. Enter a unique name for your application."
+    when(underTest.applicationService.requestUplift(mockEq(appId), mockEq(application.name), mockEq(loggedInUser))(any[HeaderCarrier]))
+      .thenAnswer(new Answer[Future[ApplicationUpliftSuccessful]]() {
+        def answer(invocation: InvocationOnMock): Future[ApplicationUpliftSuccessful] = {
+          Future.failed(new ApplicationAlreadyExists)
         }
+      })
+    when(underTest.applicationService.updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier]))
+      .thenReturn(ApplicationUpdateSuccessful)
+
+    private val result = await(addToken(underTest.answersPageAction(appId))(requestWithFormBody))
+
+    status(result) shouldBe CONFLICT
+    verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+
+    private val errorMessageElement = Jsoup.parse(bodyOf(result)).select("td#confirmedName span.error-message")
+    errorMessageElement.text() shouldBe "That application name already exists. Enter a unique name for your application."
   }
+
+  "check your answers submitted" should {
+    "return credentials requested page" in new Setup {
+      whenTheApplicationExists()
+      mockRequestUplift
+
+      private val result = await(underTest.answersPageAction(appId)(loggedInRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.ApplicationCheck.credentialsRequested(appId).url)
+    }
+    "return forbidden when not logged in" in new Setup {
+      whenTheApplicationExists()
+      private val result = await(underTest.answersPageAction(appId)(loggedOutRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/login")
+    }
+  }
+
+  "check your answers page" should {
+    "return check your answers page" in new Setup {
+
+      whenTheApplicationExists()
+
+      private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
+
+      status(result) shouldBe OK
+      private val body = bodyOf(result)
+
+      body should include("Check your answers before requesting credentials")
+      body should include("About your application")
+    }
+
+    "return forbidden when accessed without being an admin" in new Setup {
+      whenTheApplicationExists(userRole = DEVELOPER)
+
+      private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
+
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "validation failure submit action" in new Setup {
+      mockRequestUplift
+
+      whenTheApplicationExists()
+
+      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
+
+      status(result) shouldBe SEE_OTHER
+    }
+
+    "return forbidden when accessing action without being an admin" in new Setup {
+      whenTheApplicationExists(userRole = DEVELOPER)
+
+      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
+
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "return bad request when the app is already approved" in new Setup {
+      whenTheApplicationExists(state = production)
+
+      private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "return bad request when the app is pending check" in new Setup {
+      whenTheApplicationExists(state = pendingApproval)
+
+      private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
+      whenTheApplicationExists(state = production)
+
+      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
+      whenTheApplicationExists(state = pendingApproval)
+
+      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
+
+      status(result) shouldBe BAD_REQUEST
+    }
+  }
+}
