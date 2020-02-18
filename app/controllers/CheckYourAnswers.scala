@@ -25,8 +25,9 @@ import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
 import service.{ApplicationService, SessionService}
-import views.html.applicationcheck
+import views.html.{applicationcheck,checkyouranswers}
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 case class CheckYourAnswersData(
@@ -105,7 +106,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     for {
       application <- fetchApp(appId)
       checkYourAnswersData <- populateCheckYourAnswersData(application)
-    } yield Ok(views.html.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
+    } yield Ok(views.html.checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
   }
 
   def answersPageAction(appId: String) = canUseChecksAction(appId) { implicit request =>
@@ -119,14 +120,52 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
         for {
           checkYourAnswersData <- populateCheckYourAnswersData(application)
           requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
-        } yield InternalServerError(views.html.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
+        } yield InternalServerError(views.html.checkyouranswers.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
     }
     .recover {
       case _: ApplicationAlreadyExists =>
         val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
         applicationService.updateCheckInformation(application.id, information)
         val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation())))
-        Conflict(applicationcheck.landingPage(application.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
+        Conflict(applicationcheck.landingPage(application.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey))) // TODO where
     }
   }
+
+  def team(appId: String) = canUseChecksAction(appId) { implicit request =>
+    Future.successful(Ok(checkyouranswers.team.team(request.application, request.role, request.user)))
+  }
+
+  def teamAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+
+    val information = request.application.checkInformation.getOrElse(CheckInformation())
+    for {
+      _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
+    } yield Redirect(routes.CheckYourAnswers.answersPage(appId))
+  }
+
+  def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
+    Future.successful(Ok(checkyouranswers.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
+  }
+
+  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String) = canUseChecksAction(appId) { implicit request =>
+    successful(request.application.findCollaboratorByHash(teamMemberHash)
+      .map(collaborator => Ok(checkyouranswers.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
+      .getOrElse(Redirect(routes.CheckYourAnswers.team(appId))))
+  }
+
+  def teamMemberRemoveAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+
+    def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
+      applicationService
+        .removeTeamMember(request.application, form.email, request.user.email)
+        .map(_ => Redirect(routes.CheckYourAnswers.team(appId)))
+    }
+
+    def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]) : Future[Result] = {
+      successful(BadRequest)
+    }
+
+    RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
 }

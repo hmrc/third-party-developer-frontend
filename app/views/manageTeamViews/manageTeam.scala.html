@@ -15,14 +15,14 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{DeveloperSession, Application, Role, CheckYourAnswersPageMode}
+@import domain.{DeveloperSession, Application, Role}
 @import helpers.string._
 @import include._
 @import model.Crumb
 @import include.teamMembers._
 
 @import domain.Button
-@(app: Application, role: Role, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, mode: CheckYourAnswersPageMode)(
+@(app: Application, role: Role, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
@@ -56,10 +56,10 @@
 
     @{
         def createRemoveLink(appId: String, emailAddress: String) = {
-            controllers.routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256, mode)
+            controllers.routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
         }
 
-        teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id, mode), Button, createRemoveLink)
+        teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button, createRemoveLink)
     }
 
     </section>

@@ -52,7 +52,7 @@
   def createRemoveLink(appId: String, emailAddress: String) = {
    controllers.routes.CheckYourAnswers.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
   }
-  teamList(app, role, loggedIn, routes.ApplicationCheck.teamAddMember(app.id), Link, createRemoveLink)
+  teamList(app, role, loggedIn, routes.CheckYourAnswers.teamAddMember(app.id), Link, createRemoveLink)
  }
 
  </br>

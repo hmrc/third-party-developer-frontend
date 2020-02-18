@@ -23,8 +23,9 @@ sealed trait AddTeamMemberPageMode extends EnumEntry
 object AddTeamMemberPageMode extends PlayEnum[AddTeamMemberPageMode] {
   val values = findValues
 
-  final case object ManageTeamMembers       extends AddTeamMemberPageMode
-  final case object ApplicationCheck   extends AddTeamMemberPageMode
+  final case object ManageTeamMembers extends AddTeamMemberPageMode
+  final case object ApplicationCheck  extends AddTeamMemberPageMode
+  final case object CheckYourAnswers  extends AddTeamMemberPageMode
 
   def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
 

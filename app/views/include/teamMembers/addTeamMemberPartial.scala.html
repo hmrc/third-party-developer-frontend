@@ -19,11 +19,11 @@
 
 @import views.html.include.fieldError
 
-@import domain.{AddTeamMemberPageMode, CheckYourAnswersPageMode}
-@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean, addTeamMemberPageMode: AddTeamMemberPageMode, checkYourAnswersPageMode: CheckYourAnswersPageMode)(
+@import domain.AddTeamMemberPageMode
+@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean, addTeamMemberPageMode: AddTeamMemberPageMode)(
         implicit request: play.api.mvc.Request[Any], messages: Messages)
 
-@helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id, addTeamMemberPageMode, checkYourAnswersPageMode)) {
+@helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id, addTeamMemberPageMode)) {
     @helper.CSRF.formField
 
     <div class="form-group @if(form.errors("email").nonEmpty) {form-group-error}">
@@ -71,7 +71,7 @@
         <button id="submit" class="button button--padded" type="submit">@submitText</button>
 
         @if(showCancel) {
-            <a href="@routes.ManageTeam.manageTeam(app.id, checkYourAnswersPageMode, None)" class="secondary-button">Cancel</a>
+            <a href="@routes.ManageTeam.manageTeam(app.id, None)" class="secondary-button">Cancel</a>
         }
     </div>
 }

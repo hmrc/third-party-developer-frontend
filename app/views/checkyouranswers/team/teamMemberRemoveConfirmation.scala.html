@@ -14,20 +14,16 @@
  * limitations under the License.
  *@
 
-@import views.html.include.devMain
 @import domain.DeveloperSession
-
-@import domain.BackButtonWithJavaScript
 @import config.ApplicationConfig
-@import views.html.include.teamMembers.addTeamMemberPartial
+@import views.html.include.devMain
+@import domain.BackButtonWithJavaScript
 
 @import domain.Application
+@(app: Application, loggedIn: DeveloperSession, email: String)(
+        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 
-@import domain.AddTeamMemberPageMode.ApplicationCheck
-@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
-        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig, navSection: String = "manage-team")
-
- @pageHeading = @{ "Add a team member" }
+ @pageHeading = @{ "Are you sure you want to remove this team member from your application?" }
 
  @devMain(
   title = pageHeading,
@@ -40,5 +36,21 @@
    <h1 class="heading-xlarge">@pageHeading</h1>
   </header>
 
-  @addTeamMemberPartial(app, form, loggedIn, "Add team member", false, ApplicationCheck)
+  <section>
+
+  <div>
+   <strong class="bold">Team member:</strong> @email
+  </div>
+
+  <br/>
+
+  @helper.form(action = controllers.routes.CheckYourAnswers.teamMemberRemoveAction(app.id)) {
+   @helper.CSRF.formField
+   <input type="hidden" name="email" value="@email">
+
+    <button id="submit" class="button button--padded" type="submit">Delete team member</button>
+    <a href="@routes.CheckYourAnswers.team(app.id)" class="secondary-button">Cancel</a>
+  }
+  </section>
+
  }
