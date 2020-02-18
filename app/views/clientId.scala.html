@@ -15,39 +15,46 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{DeveloperSession, Application, Role}
+@import domain._
 @import include._
 @import model.Crumb
 
-@import views.html.include.teamMembers.addTeamMemberPartial
-
-@import domain.AddTeamMemberPageMode.ManageTeamMembers
-@(app: Application, form: Form[controllers.AddTeamMemberForm])(
-implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
-@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+@(app: Application)(
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = titleError + "Add a team member",
+    title = "Client ID",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-        Crumb("Manage team members"),
+        Crumb("Client ID"),
         Crumb.application(app),
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
 
-    @errorSummary(form)
+    <h1 class="heading-xlarge">Client ID</h1>
 
-    <h1 class="heading-xlarge">Add a team member</h1>
+    <p>
+        <span class="font-medium">@{app.clientId}</span>
+        <br>
+        <a href="#"
+        class="copy-to-clip"
+        title="Copies client ID into the system clipboard."
+        data-clip-text="@{app.clientId}"
+        aria-live="polite"
+        aria-label="Copy client ID to clipboard">
+            Copy
+        </a>
+    </p>
 
     @appEnvironment(app)
     <br>
 
-    <h2 class="heading-large">Team member</h2>
+    <p>Your client ID is a unique identifier generated when you create your application.</p>
 
-    @addTeamMemberPartial(app, form, loggedIn, "Add", true, ManageTeamMembers)
+    <p>Generate a client secret and use it with your client ID to test your application in the sandbox.</p>
 
+    <p><a id="continue" class="button" href="@routes.Credentials.clientSecrets(app.id)">Continue</a></p>
 }

@@ -18,7 +18,6 @@ package unit.controllers
 
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
-import domain.Environment.SANDBOX
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import org.joda.time.DateTimeZone
@@ -26,12 +25,10 @@ import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify, when}
-import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditAction.{LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount}
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
@@ -81,7 +78,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
     def givenTheApplicationExistWithUserRole(appId: String,
                                              userRole: Role,
-                                             state: ApplicationState = ApplicationState.testing,
+                                             state: ApplicationState = ApplicationState.production("", ""),
                                              access: Access = Standard(),
                                              environment: Environment = Environment.PRODUCTION)
                                                 : BDDMockito.BDDMyOngoingStubbing[Future[Seq[APISubscriptionStatus]]] = {
@@ -102,10 +99,31 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.credentials(appId)(loggedInRequest))
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Manage credentials")
+      bodyOf(result) should include("Credentials")
     }
   }
 
+  "The client ID page" should {
+    "be displayed for an app" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
+
+      val result: Result = await(underTest.clientId(appId)(loggedInRequest))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Client ID")
+    }
+  }
+
+  "The client secrets page" should {
+    "be displayed for an app" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
+
+      val result: Result = await(underTest.clientSecrets(appId)(loggedInRequest.withCSRFToken))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Client secrets")
+    }
+  }
 
   "addClientSecret" should {
     val appId = "1234"
@@ -113,43 +131,37 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
 
     "add the client secret" in new Setup {
-
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
       given(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier])).willReturn(updatedTokens)
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials#clientSecretHeading")
+      redirectLocation(result) shouldBe Some("/developer/applications/1234/client-secrets")
       verify(underTest.applicationService).addClientSecret(mockEq(appId))(any[HeaderCarrier])
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
-
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = Environment.PRODUCTION)
       when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials?error=client.secret.limit.exceeded#clientSecretHeading")
+      status(result) shouldBe UNPROCESSABLE_ENTITY
     }
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
-
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = Environment.SANDBOX)
       when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials?error=client.secret.limit.exceeded#clientSecretHeading")
+      status(result) shouldBe UNPROCESSABLE_ENTITY
     }
 
     "display the NotFound page when the application does not exist" in new Setup {
-
       when(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier]))
         .thenReturn(successful(application))
       when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
@@ -161,7 +173,6 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "display the error page when a user with developer role tries to add production secrets" in new Setup {
-
       givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
@@ -171,7 +182,6 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "return to the login page when the user is not logged in" in new Setup {
-
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedOutRequest))
@@ -182,298 +192,44 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
   }
 
-  "getProductionClientSecret" should {
-
-    "return the client secret when the password is valid" in new Setup {
-      val password = "aPassword"
-
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
-        .willReturn(VerifyPasswordSuccessful)
-
-      val result: Result = await(underTest.getProductionClientSecret(application.id, 1)(loggedInRequest.withHeaders("password" -> password)))
+  "deleteClientSecret" should {
+    "return the confirmation page when the selected client secret exists" in new Setup {
+      val result: Result = await(underTest.deleteClientSecret(appId, "ret2")(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
-      jsonBodyOf(result) shouldBe Json.toJson(ClientSecretResponse(tokens.production.clientSecrets(1).secret))
+      bodyOf(result) should include("Are you sure you want to delete this client secret?")
+      bodyOf(result) should include("client secret ending ret2")
     }
 
-    "return password required when the password is not set" in new Setup {
+    "return 404 when the selected client secret does not exist" in new Setup {
+      val result: Result = await(underTest.deleteClientSecret(appId, "wxyz")(loggedInRequest.withCSRFToken))
 
-      val result: Result = await(underTest.getProductionClientSecret(application.id, 1)(loggedInRequest.withHeaders("password" -> "  ")))
-
-      status(result) shouldBe BAD_REQUEST
-      jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.PASSWORD_REQUIRED, "Password is required"))
-    }
-
-    "return Unauthorized when the password is not valid" in new Setup {
-      val invalidPassword = "invalidPassword"
-
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, invalidPassword)))(any[HeaderCarrier]))
-        .willReturn(failed(new InvalidCredentials))
-
-      val result: Result = await(underTest.getProductionClientSecret(application.id, 0)(loggedInRequest.withHeaders("password" -> invalidPassword)))
-
-      status(result) shouldBe UNAUTHORIZED
-      jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.INVALID_PASSWORD, "Invalid password"))
-    }
-
-    "return Locked when the account is locked" in new Setup {
-      val invalidPassword = "invalidPassword"
-
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, invalidPassword)))(any[HeaderCarrier]))
-        .willReturn(failed(new LockedAccount))
-
-      val result: Result = await(underTest.getProductionClientSecret(application.id, 0)(loggedInRequest.withHeaders("password" -> invalidPassword)))
-
-      status(result) shouldBe LOCKED
-      jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.LOCKED_ACCOUNT, "Locked Account"))
-    }
-
-    "return Forbidden when the user is not an admin" in new Setup {
-      val password = "aPassword"
-      val applicationWithoutAdminRights: Application = application.copy(collaborators = Set(Collaborator(loggedInUser.email, Role.DEVELOPER)))
-
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
-        .willReturn(VerifyPasswordSuccessful)
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(applicationWithoutAdminRights)
-
-      val result: Result = await(underTest.getProductionClientSecret(application.id, 0)(loggedInRequest.withHeaders("password" -> password)))
-
-      status(result) shouldBe FORBIDDEN
-    }
-
-    "return BadRequest when the client secret does not exist for the index" in new Setup {
-      val password = "aPassword"
-
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
-        .willReturn(VerifyPasswordSuccessful)
-
-      val result: Result = await(underTest.getProductionClientSecret(application.id, 2)(loggedInRequest.withHeaders("password" -> password)))
-
-      status(result) shouldBe BAD_REQUEST
-      jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.BAD_REQUEST, "Bad Request"))
-    }
-
-    "return BadRequest when the application is not in Production state" in new Setup {
-      val password = "aPassword"
-      val testingApplication: Application = application.copy(state = ApplicationState.testing)
-
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
-        .willReturn(VerifyPasswordSuccessful)
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(testingApplication)
-
-
-      val result: Result = await(underTest.getProductionClientSecret(testingApplication.id, 0)(loggedInRequest.withHeaders("password" -> password)))
-
-      status(result) shouldBe BAD_REQUEST
-      jsonBodyOf(result) shouldBe Json.toJson(Error(ErrorCode.BAD_REQUEST, "Bad Request"))
-    }
-
-  }
-
-  "select client secrets to delete" should {
-    "return the select client secrets to delete page when the correct password is entered" in new Setup {
-      val password = "aPassword"
-
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
-        .willReturn(Future.successful(VerifyPasswordSuccessful))
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
-
-      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Choose which client secrets to delete")
-      bodyOf(result) should include("secret")
-      bodyOf(result) should include("secret2")
-    }
-
-    "return the select client secrets to delete page for an admin on a sandbox app without password" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = SANDBOX)
-      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(loggedInRequest.withCSRFToken))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Choose which client secrets to delete")
-      bodyOf(result) should include("secret")
-      bodyOf(result) should include("secret2")
-    }
-
-    "return the select client secrets to delete page for a developer on a sandbox app without password" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = SANDBOX)
-
-      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(loggedInRequest.withCSRFToken))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Choose which client secrets to delete")
-      bodyOf(result) should include("secret")
-      bodyOf(result) should include("secret2")
-    }
-
-    "display the appropriate error message and create an audit when the incorrect password is entered once" in new Setup {
-      val incorrectPassword = "anIncorrectPassword"
-
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, incorrectPassword)))(any[HeaderCarrier]))
-        .willReturn(Future.failed(new InvalidCredentials))
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> incorrectPassword)
-
-      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-      bodyOf(result) should include("Invalid password")
-      verify(underTest.auditService).audit(mockEq(LoginFailedDueToInvalidPassword), any())(any[HeaderCarrier])
-    }
-
-    "display the appropriate error message when nothing is entered" in new Setup {
-      val emptyPassword = ""
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> emptyPassword)
-
-      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-      bodyOf(result) should include("Provide your password")
-    }
-
-    "redirect the user to the application locked page and create an audit when the incorrect password is entered a fifth time" in new Setup {
-      val incorrectPassword = "anIncorrectPassword"
-
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, incorrectPassword)))(any[HeaderCarrier]))
-        .willReturn(Future.failed(new LockedAccount))
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> incorrectPassword)
-
-      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/locked")
-      verify(underTest.auditService).audit(mockEq(LoginFailedDueToLockedAccount), any())(any[HeaderCarrier])
-    }
-
-    "not show the select client secrets to delete page to a developer on a production app" in new Setup {
-      val password = "aPassword"
-
-      givenTheApplicationExistWithUserRole(appId, DEVELOPER)
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
-        .willReturn(Future.successful(VerifyPasswordSuccessful))
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
-
-      val result: Result = await(underTest.selectClientSecretsToDelete(appId)(requestWithFormBody))
-
-      status(result) shouldBe FORBIDDEN
-    }
-
-    "Allow deleting client secrets for privileged apps" in new Setup {
-      val privilegedAppId = "privAppId"
-      val password = "aPassword"
-
-      givenTheApplicationExistWithUserRole(privilegedAppId, ADMINISTRATOR, access = Privileged(), state = ApplicationState.production("a","b"))
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
-        .willReturn(Future.successful(VerifyPasswordSuccessful))
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
-
-      val result: Result = await(underTest.selectClientSecretsToDelete(privilegedAppId)(requestWithFormBody))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Choose which client secrets to delete")
-      bodyOf(result) should include("secret")
-      bodyOf(result) should include("secret2")
-    }
-
-    "Allow deleting client secrets for ROPC apps" in new Setup {
-      val ROPCAppId = "ROPCAppId"
-      val password = "aPassword"
-
-      givenTheApplicationExistWithUserRole(ROPCAppId, ADMINISTRATOR, access = ROPC(), state = ApplicationState.production("a","b"))
-      given(underTest.developerConnector.checkPassword(mockEq(PasswordCheckRequest(loggedInUser.email, password)))(any[HeaderCarrier]))
-        .willReturn(Future.successful(VerifyPasswordSuccessful))
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("password" -> password)
-
-      val result: Result = await(underTest.selectClientSecretsToDelete(ROPCAppId)(requestWithFormBody))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Choose which client secrets to delete")
-      bodyOf(result) should include("secret")
-      bodyOf(result) should include("secret2")
+      status(result) shouldBe NOT_FOUND
     }
   }
 
-  "select client secrets to delete action" should {
-    "return the confirmation page when an appropriate amount of client secrets selected" in new Setup {
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("client-secret[]" -> "secret")
-
-      val result: Result = await(underTest.selectClientSecretsToDeleteAction(appId)(requestWithFormBody))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Are you sure you want us to delete these client secrets?")
-      bodyOf(result) should include("secret")
-    }
-
-    "display error when no client secrets selected" in new Setup {
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withCSRFToken.withFormUrlEncodedBody()
-
-      val result: Result = await(underTest.selectClientSecretsToDeleteAction(appId)(requestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-      bodyOf(result) should include("Choose one or more client secrets")
-    }
-
-    "display error when all client secrets selected" in new Setup {
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] =
-        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("client-secret[]" -> "secret", "client-secret[]" -> "secret2")
-
-      val result: Result = await(underTest.selectClientSecretsToDeleteAction(appId)(requestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-      bodyOf(result) should include("You must keep at least one client secret")
-
-    }
-  }
-
-  "confirm delete client secrets" should {
-    "return the complete page when Yes is selected" in new Setup {
-      val secretsToDelete = "secret"
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] =
-        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("deleteConfirm" -> "Yes", "clientSecretsToDelete" -> secretsToDelete)
-
-      given(underTest.applicationService.deleteClientSecrets(mockEq(appId), mockEq(Seq(secretsToDelete)))(any[HeaderCarrier]))
+  "deleteClientSecretAction" should {
+    "delete the selected client secret" in new Setup {
+      val clientSecretToDelete: String = tokens.production.clientSecrets.last.secret
+      val clientSecretLastChars: String = clientSecretToDelete.takeRight(4) // scalastyle:ignore magic.number
+      given(underTest.applicationService.deleteClientSecrets(mockEq(appId), mockEq(Seq(clientSecretToDelete)))(any[HeaderCarrier]))
         .willReturn(successful(ApplicationUpdateSuccessful))
 
-      val result: Result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Client secrets deleted")
-      bodyOf(result) should include("Finish")
-    }
-
-    "redirect to the credentials page when No is selected" in new Setup {
-      val secretsToDelete = "secret"
-
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] =
-        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("deleteConfirm" -> "No", "clientSecretsToDelete" -> secretsToDelete)
-
-      val result: Result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
+      val result: Result = await(underTest.deleteClientSecretAction(appId, clientSecretLastChars)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials#clientSecretHeading")
-      verify(underTest.applicationService, never()).deleteClientSecrets(any[String], any[Seq[String]])(any[HeaderCarrier])
+      redirectLocation(result) shouldBe Some("/developer/applications/1234/client-secrets")
     }
 
-    "display error when neither Yes or No are selected" in new Setup {
-      val secretsToDelete = "secret"
+    "return 404 when the client secret to delete does not exist" in new Setup {
+      val clientSecretToDelete: String = "1234wxyz"
+      val clientSecretLastChars: String = "wxyz"
+      given(underTest.applicationService.deleteClientSecrets(mockEq(appId), mockEq(Seq(clientSecretToDelete)))(any[HeaderCarrier]))
+        .willReturn(successful(ApplicationUpdateSuccessful))
 
-      val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] =
-        loggedInRequest.withCSRFToken.withFormUrlEncodedBody("clientSecretsToDelete" -> secretsToDelete)
+      val result: Result = await(underTest.deleteClientSecretAction(appId, clientSecretLastChars)(loggedInRequest))
 
-      val result: Result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-      bodyOf(result) should include("Tell us if you want us to delete your client secrets")
-
+      status(result) shouldBe NOT_FOUND
     }
   }
 

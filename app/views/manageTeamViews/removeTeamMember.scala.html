@@ -19,8 +19,8 @@
 @import include._
 @import model.Crumb
 
-@(app: Application, form: Form[controllers.RemoveTeamMemberConfirmationForm], loggedIn: DeveloperSession, email: String = "")(
-        implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
+@(app: Application, form: Form[controllers.RemoveTeamMemberConfirmationForm], email: String = "")(
+        implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(

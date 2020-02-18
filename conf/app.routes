@@ -111,14 +111,12 @@ POST        /applications/:id/change-subscription                               
 GET         /applications/:id/change-locked-subscription                                controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: String, version: String, redirectTo: String)
 POST        /applications/:id/change-locked-subscription                                controllers.Subscriptions.changeLockedApiSubscriptionAction(id: String, name: String, context: String, version: String, redirectTo: String)
 
-GET         /applications/:id/credentials                                               controllers.Credentials.credentials(id: String, error: Option[String])
-
+GET         /applications/:id/credentials                                               controllers.Credentials.credentials(id: String)
+GET         /applications/:id/client-id                                                 controllers.Credentials.clientId(id: String)
+GET         /applications/:id/client-secrets                                            controllers.Credentials.clientSecrets(id: String)
+GET         /applications/:id/client-secret/:clientSecretLastChars/delete               controllers.Credentials.deleteClientSecret(id: String, clientSecretLastChars: String)
+POST        /applications/:id/client-secret/:clientSecretLastChars/delete               controllers.Credentials.deleteClientSecretAction(id: String, clientSecretLastChars: String)
 POST        /applications/:id/client-secret-new                                         controllers.Credentials.addClientSecret(id: String)
-GET         /applications/:id/client-secret-new/:index                                  controllers.Credentials.getProductionClientSecret(id: String, index: Integer)
-
-POST        /applications/:id/delete-client-secrets/select                              controllers.Credentials.selectClientSecretsToDelete(id: String)
-POST        /applications/:id/delete-client-secrets/confirm                             controllers.Credentials.selectClientSecretsToDeleteAction(id: String)
-POST        /applications/:id/delete-client-secrets                                     controllers.Credentials.deleteClientSecretsAction(id: String)
 
 GET         /applications/:id/request-check                                             controllers.ApplicationCheck.requestCheckPage(id: String)
 POST        /applications/:id/request-check                                             controllers.ApplicationCheck.requestCheckAction(id: String)
