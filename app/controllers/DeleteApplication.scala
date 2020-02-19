@@ -19,7 +19,6 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.Capabilities.SupportsDeletion
-import domain.CheckYourAnswersPageMode
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
