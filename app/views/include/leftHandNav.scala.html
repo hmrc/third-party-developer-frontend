@@ -30,7 +30,7 @@
                         <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }"><a id="nav-manage-subscriptions" class="side-nav__link" href="@routes.Subscriptions.manageSubscriptions(app.id)">Manage API subscriptions</a></li>
                     }
                     <li class="side-nav__list @if(section == "credentials") { side-nav__list--selected }"><a id="nav-manage-credentials" class="side-nav__link" href="@routes.Credentials.credentials(app.id)">Credentials</a></li>
-                    @if(loggedIn != null && app.canViewClientCredentials(loggedIn.developer)) {
+                    @if(loggedIn != null && app.canChangeClientCredentials(loggedIn.developer)) {
                         <li class="side-nav__list @if(section == "client-id") { side-nav__list--selected }"><a id="nav-manage-client-id" class="side-nav__link" href="@routes.Credentials.clientId(app.id)">
                             Client ID</a></li>
                         <li class="side-nav__list @if(section == "client-secrets") { side-nav__list--selected }"><a id="nav-manage-client-secrets" class="side-nav__link" href="@routes.Credentials.clientSecrets(app.id)">

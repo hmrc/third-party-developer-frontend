@@ -100,6 +100,27 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe OK
       bodyOf(result) should include("Credentials")
+      bodyOf(result) should include("Your credentials are")
+    }
+
+    "inform the user that only admins can access credentials when the user has the developer role and the app is in PROD" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+
+      val result: Result = await(underTest.credentials(appId)(loggedInRequest))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Credentials")
+      bodyOf(result) should include("You cannot view or edit production credentials because you're not an administrator")
+    }
+
+    "inform the user about the state of the application when it has not reached production state" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+
+      val result: Result = await(underTest.credentials(appId)(loggedInRequest))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Credentials")
+      bodyOf(result) should include("Production credentials have been requested")
     }
   }
 
@@ -112,6 +133,22 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       status(result) shouldBe OK
       bodyOf(result) should include("Client ID")
     }
+
+    "return 403 when the user has the developer role and the app is in PROD" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+
+      val result: Result = await(underTest.clientId(appId)(loggedInRequest))
+
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "return 400 when the application has not reached production state" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+
+      val result: Result = await(underTest.clientId(appId)(loggedInRequest))
+
+      status(result) shouldBe BAD_REQUEST
+    }
   }
 
   "The client secrets page" should {
@@ -122,6 +159,22 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe OK
       bodyOf(result) should include("Client secrets")
+    }
+
+    "return 403 when the user has the developer role and the app is in PROD" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+
+      val result: Result = await(underTest.clientSecrets(appId)(loggedInRequest.withCSRFToken))
+
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "return 400 when the application has not reached production state" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+
+      val result: Result = await(underTest.clientSecrets(appId)(loggedInRequest.withCSRFToken))
+
+      status(result) shouldBe BAD_REQUEST
     }
   }
 
@@ -181,6 +234,15 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       verify(underTest.applicationService, never()).addClientSecret(any[String])(any[HeaderCarrier])
     }
 
+    "display the error page when the application has not reached production state" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+
+      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
+
+      status(result) shouldBe BAD_REQUEST
+      verify(underTest.applicationService, never()).addClientSecret(any[String])(any[HeaderCarrier])
+    }
+
     "return to the login page when the user is not logged in" in new Setup {
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
 
@@ -206,6 +268,22 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe NOT_FOUND
     }
+
+    "return 403 when a user with developer role tries do delete production secrets" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+
+      val result: Result = await(underTest.deleteClientSecret(appId, "ret2")(loggedInRequest.withCSRFToken))
+
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "return 400 when the application has not reached production state" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+
+      val result: Result = await(underTest.deleteClientSecret(appId, "ret2")(loggedInRequest.withCSRFToken))
+
+      status(result) shouldBe BAD_REQUEST
+    }
   }
 
   "deleteClientSecretAction" should {
@@ -230,6 +308,22 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.deleteClientSecretAction(appId, clientSecretLastChars)(loggedInRequest))
 
       status(result) shouldBe NOT_FOUND
+    }
+
+    "return 403 when a user with developer role tries do delete production secrets" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+
+      val result: Result = await(underTest.deleteClientSecretAction(appId, "ret2")(loggedInRequest))
+
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "return 400 when the application has not reached production state" in new Setup {
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+
+      val result: Result = await(underTest.deleteClientSecretAction(appId, "ret2")(loggedInRequest))
+
+      status(result) shouldBe BAD_REQUEST
     }
   }
 

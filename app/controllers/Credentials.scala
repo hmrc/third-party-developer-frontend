@@ -53,12 +53,12 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   }
 
   def clientId(applicationId: String): Action[AnyContent] =
-    canViewClientCredentialsPage(applicationId) { implicit request =>
+    canChangeClientSecrets(applicationId) { implicit request =>
       successful(Ok(views.html.clientId(request.application)))
   }
 
   def clientSecrets(applicationId: String): Action[AnyContent] =
-    canViewClientCredentialsPage(applicationId) { implicit request =>
+    canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.fetchCredentials(applicationId).map { tokens =>
         val clientSecrets: Seq[ClientSecret] = request.flash.get("newSecret")
           .map(newSecret => tokens.production.clientSecrets.init :+ tokens.production.clientSecrets.last.copy(name = newSecret))

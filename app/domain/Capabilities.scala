@@ -43,11 +43,7 @@ object Capabilities {
   }
 
   case object ChangeClientSecret extends Capability {
-    def hasCapability(app: Application) = true
-  }
-
-  case object HasReachedProductionState extends Capability {
-    def hasCapability(app: Application): Boolean = app.state.name == State.PRODUCTION
+    def hasCapability(app: Application) = app.state.name == State.PRODUCTION
   }
 
   case object SupportsTeamMembers extends Capability {
