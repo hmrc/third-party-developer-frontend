@@ -34,6 +34,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import helpers.string._
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -50,10 +51,14 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val clientId = "clientIdzzz"
   val sessionId = "sessionId"
 
+
   val developerDto = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
 
   val loggedInUser = DeveloperSession(session)
+
+  val anotherCollaboratorEmail = "collaborator@example.com"
+  val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
 
   val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
@@ -138,8 +143,13 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       checkInformation: Option[CheckInformation] = None,
       access: Access = Standard()): Application = {
 
+      val collaborators = Set(
+        Collaborator(loggedInUser.email, userRole),
+        Collaborator(anotherCollaboratorEmail, Role.DEVELOPER)
+      )
+
       val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
-        collaborators = Set(Collaborator(loggedInUser.email, userRole)), access = access, state = state, checkInformation = checkInformation)
+        collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
 
       when(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).thenReturn(application)
       when(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).thenReturn(tokens)
@@ -150,6 +160,11 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     def mockRequestUplift() {
       when(underTest.applicationService.requestUplift (mockEq (appId), any[String], any[DeveloperSession] ) (any[HeaderCarrier] ) )
       .thenReturn (ApplicationUpliftSuccessful)
+    }
+
+    def failedToCreateDeskproTicket() {
+      when(underTest.applicationService.requestUplift (mockEq (appId), any[String], any[DeveloperSession] ) (any[HeaderCarrier] ) )
+      .thenReturn(Future.failed(new DeskproTicketCreationFailed("Failed")))
     }
 
   }
@@ -229,6 +244,16 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       status(result) shouldBe FORBIDDEN
     }
 
+    "return server error" in new Setup {
+      failedToCreateDeskproTicket()
+
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequest))
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+    }
+
     "validation failure submit action" in new Setup {
       mockRequestUplift()
 
@@ -279,4 +304,116 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       status(result) shouldBe BAD_REQUEST
     }
   }
+
+  "Manage teams checks" should {
+    "return manage team list page when check page is navigated to" in new Setup {
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.team(appId))(loggedInRequest))
+
+      status(result) shouldBe OK
+
+      bodyOf(result) should include("Add members of your organisation and give them permissions to access this application")
+      bodyOf(result) should include(developerDto.email)
+    }
+
+    "not return the manage team list page when not logged in" in new Setup {
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.team(appId))(loggedOutRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/login")
+    }
+
+    "team post redirect to check landing page" in new Setup {
+      givenTheApplicationExists(checkInformation = Some(CheckInformation()))
+
+      private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+
+      private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
+      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+    }
+
+    "team post doesn't redirect to the check landing page when not logged in" in new Setup {
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.teamAction(appId))(loggedOutRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/login")
+    }
+
+
+    "return add team member page when check page is navigated to" in new Setup{
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.teamAddMember(appId))(loggedInRequest))
+
+      status(result) shouldBe OK
+
+      bodyOf(result) should include("Add a team member")
+    }
+
+    "not return the add team member page when not logged in" in new Setup {
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.teamAddMember(appId))(loggedOutRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/login")
+    }
+
+    "return remove team member confirmation page when navigated to" in new Setup{
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedInRequest))
+
+      status(result) shouldBe OK
+
+      bodyOf(result) should include("Are you sure you want to remove this team member from your application?")
+
+      bodyOf(result) should include(anotherCollaboratorEmail)
+    }
+
+    "not return the remove team member confirmation page when not logged in" in new Setup {
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedOutRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/login")
+    }
+
+
+    "redirect to the team member list when the remove confirmation post is executed" in new Setup{
+      val app = givenTheApplicationExists()
+
+      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail)
+
+      private val result = await(addToken(underTest.teamMemberRemoveAction(appId))(request))
+
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers/team")
+
+      verify(underTest.applicationService).removeTeamMember(mockEq(app),mockEq(anotherCollaboratorEmail), mockEq(loggedInUser.email))(any[HeaderCarrier])
+    }
+
+    "team post redirect to check landing page when no check information on application" in new Setup {
+      givenTheApplicationExists(checkInformation = None)
+
+      private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+
+      private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
+      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+    }
+  }
+
 }

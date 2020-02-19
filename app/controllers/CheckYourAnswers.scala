@@ -36,7 +36,7 @@ case class CheckYourAnswersData(
   fullName: Option[String],
   email: Option[String],
   telephoneNumber: Option[String],
-  teamMembers: Seq[String],
+  teamMembers: Set[String],
   privacyPolicyUrl: Option[String],
   termsAndConditionsUrl: Option[String],
   acceptedTermsOfUse: Boolean,
@@ -87,7 +87,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
       email = contactDetails.map(_.email),
       telephoneNumber = contactDetails.map(_.telephoneNumber),
 
-      teamMembers = Seq.empty,
+      teamMembers = application.collaborators.map(_.emailAddress),
 
       privacyPolicyUrl = application.privacyPolicyUrl,
       termsAndConditionsUrl = application.termsAndConditionsUrl,
