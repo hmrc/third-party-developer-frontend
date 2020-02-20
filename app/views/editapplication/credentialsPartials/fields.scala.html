@@ -25,6 +25,7 @@
 
 @isNewSecret = @{flash.get("newSecret").isDefined}
 @allowDeletion = @{clientSecrets.size > 1}
+@rotateLink = @{<a href="/api-documentation/docs/authorisation/credentials#rotate-client-secret">Rotate your client secret</a>}
 
 <div aria-describedby="client-secrets-info">
     @if(clientSecrets.isEmpty) {
@@ -86,7 +87,7 @@
         }
 
         @if(clientSecrets.size < 5) {
-            <p>Rotate your client secret regularly. You can have up to 5 client secrets at any time.</p>
+            <p>@rotateLink regularly. You can have up to 5 client secrets at any time.</p>
             <div>
             @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
                 @helper.CSRF.formField
@@ -94,7 +95,7 @@
             }
             </div>
         } else {
-            <p>Rotate your client secret regularly. You cannot have more than 5 client secrets.</p>
+            <p>@rotateLink regularly. You cannot have more than 5 client secrets.</p>
         }
     }
 </div>
