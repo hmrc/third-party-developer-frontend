@@ -37,5 +37,5 @@ object Crumb {
     Crumb("Sign in",s"${routes.UserLoginAccount.login()}", Some("data-breadcrumb-sign-in"))
 
   def application(application: Application) =
-    Crumb(s"${application.name}", "", Some("data-breadcrumb-app-name"))
+    Crumb(s"${application.name}", s"${routes.Details.details(application.id)}", Some("data-breadcrumb-app-name"))
 }
