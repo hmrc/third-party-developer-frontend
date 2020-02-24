@@ -17,7 +17,7 @@
 @import config.ApplicationConfig
 @import domain._
 @import include._
-@import model.Crumb
+@import controllers.checkpages.PrivacyPolicyForm
 
 @(app: Application, form: Form[PrivacyPolicyForm], mode: CheckYourAnswersPageMode)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -33,7 +33,7 @@
 
     @errorSummary(form)
 
-    @helper.form(action = controllers.routes.ApplicationCheck.privacyPolicyAction(app.id, mode), 'class -> "form") {
+    @helper.form(action = controllers.checkpages.routes.ApplicationCheck.privacyPolicyAction(app.id, mode), 'class -> "form") {
         @helper.CSRF.formField
 
         <div class="form-group">

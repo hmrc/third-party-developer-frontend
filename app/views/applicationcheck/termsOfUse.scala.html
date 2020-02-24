@@ -17,8 +17,8 @@
 @import config.ApplicationConfig
 @import domain._
 @import include._
-@import model.Crumb
 @import org.joda.time.format.DateTimeFormat
+@import controllers.checkpages.TermsOfUseForm
 
 @(app: Application, form: Form[TermsOfUseForm], mode: CheckYourAnswersPageMode)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -32,7 +32,7 @@
 
     @errorSummary(form)
 
-    @helper.form(action = controllers.routes.ApplicationCheck.termsOfUseAction(app.id, mode), 'class -> "form") {
+    @helper.form(action = controllers.checkpages.routes.ApplicationCheck.termsOfUseAction(app.id, mode), 'class -> "form") {
         @helper.CSRF.formField
 
         <h1 class="heading-xlarge">
@@ -72,12 +72,12 @@
         <div class="form-group">
             @if(mode == CheckYourAnswersPageMode.CheckYourAnswers) {
                 <div>
-                    <a href="@routes.CheckYourAnswers.answersPage(app.id)" class="button">Save and return</a>
+                    <a href="@controllers.checkpages.routes.CheckYourAnswers.answersPage(app.id)" class="button">Save and return</a>
                 </div>
             } else {
                 @if(form("termsOfUseAgreed").value.contains("true")) {
                     <div>
-                        <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="button">Save and return</a>
+                        <a href="@controllers.checkpages.routes.ApplicationCheck.requestCheckPage(app.id)" class="button">Save and return</a>
                     </div>
                 } else {
                     <div>

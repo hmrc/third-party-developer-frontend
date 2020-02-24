@@ -20,7 +20,8 @@
 @import config.ApplicationConfig
 @import model.Crumb
 
-@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, mode: CheckYourAnswersPageMode, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@import controllers.checkpages.DummySubscriptionsForm
+@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, submitAction: Call, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
 @pageHeading = @{ "Confirm which APIs you want to use" }
 
@@ -48,7 +49,7 @@
             @subscriptionGroups(role: Role, groupedSubscriptions, app, APPLICATION_CHECK_PAGE)
             <br/>
             <br/>
-            @helper.form(action = controllers.routes.ApplicationCheck.apiSubscriptionsAction(app.id, mode), 'class -> "form") {
+            @helper.form(action = submitAction, 'class -> "form") {
                 @helper.CSRF.formField
                 <div class="form-group">
                     <button id="submit" class="button" type="submit">Save and continue</button>
@@ -58,9 +59,7 @@
         case _ => {
             <p class="panel panel-border-wide">We can’t load your API subscriptions at the moment.<br>
                 Please
-                <a href="@{
-                    routes.ApplicationCheck.apiSubscriptionsPage(app.id, mode)
-                }">try again</a> later</p>
+                <a href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)}">try again</a> later</p>
         }
     }
 }

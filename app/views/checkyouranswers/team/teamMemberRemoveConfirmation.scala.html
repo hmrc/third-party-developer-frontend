@@ -44,12 +44,12 @@
 
   <br/>
 
-  @helper.form(action = controllers.routes.CheckYourAnswers.teamMemberRemoveAction(app.id)) {
+  @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.teamMemberRemoveAction(app.id)) {
    @helper.CSRF.formField
    <input type="hidden" name="email" value="@email">
 
     <button id="submit" class="button button--padded" type="submit">Delete team member</button>
-    <a href="@routes.CheckYourAnswers.team(app.id)" class="secondary-button">Cancel</a>
+    <a href="@controllers.checkpages.routes.CheckYourAnswers.team(app.id)" class="secondary-button">Cancel</a>
   }
   </section>
 

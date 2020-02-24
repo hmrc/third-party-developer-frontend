@@ -19,8 +19,8 @@
 @import include._
 @import model.Crumb
 
-@import controllers.{CheckYourAnswersData, DummyCheckYourAnswersForm}
-
+@import controllers.checkpages.CheckYourAnswersData
+@import controllers.checkpages.DummyCheckYourAnswersForm
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 
 @pageHeading = @{ s"Check your answers before requesting credentials" }
@@ -43,7 +43,7 @@ developerSession = Some(loggedIn)
         </h1>
     </heading>
 
-    @helper.form(action = controllers.routes.CheckYourAnswers.answersPageAction(data.appId), 'class -> "form") {
+    @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.answersPageAction(data.appId), 'class -> "form") {
         @helper.CSRF.formField
         <section class="section">
             <div class="form-group">
@@ -64,7 +64,7 @@ developerSession = Some(loggedIn)
                             </td>
                             <td>
                                 <div align="right">
-                                    <a href="@controllers.routes.ApplicationCheck.apiSubscriptionsPage(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit API subscription</span></a>
+                                    <a href="@controllers.checkpages.routes.CheckYourAnswers.apiSubscriptionsPage(data.appId)">Change<span class="visually-hidden">Edit API subscription</span></a>
                                 </div>
                             </td>
                         </tr>
@@ -81,7 +81,7 @@ developerSession = Some(loggedIn)
                             </td>
                             <td>
                                 <div align="right">
-                                    <a href="@controllers.routes.ApplicationCheck.contactPage(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Contact details</span></a>
+                                    <a href="@controllers.checkpages.routes.CheckYourAnswers.contactPage(data.appId)">Change<span class="visually-hidden">Edit Contact details</span></a>
                                 </div>
                             </td>
                         </tr>
@@ -95,7 +95,7 @@ developerSession = Some(loggedIn)
                             </td>
                             <td>
                                 <div align="right">
-                                    <a href="@controllers.routes.CheckYourAnswers.team(data.appId)">Change<span class="visually-hidden">Edit Team Members</span></a>
+                                    <a href="@controllers.checkpages.routes.CheckYourAnswers.team(data.appId)">Change<span class="visually-hidden">Edit Team Members</span></a>
                                 </div>
                             </td>
                         </tr>
@@ -107,7 +107,7 @@ developerSession = Some(loggedIn)
                             </td>
                             <td>
                                 <div align="right">
-                                    <a href="@controllers.routes.ApplicationCheck.namePage(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Software name</span></a>
+                                    <a href="@controllers.checkpages.routes.CheckYourAnswers.namePage(data.appId)">Change<span class="visually-hidden">Edit Software name</span></a>
                                 </div>
                             </td>
                         </tr>
@@ -135,7 +135,7 @@ developerSession = Some(loggedIn)
                         </td>
                         <td>
                             <div align="right">
-                                <a href="@controllers.routes.ApplicationCheck.privacyPolicyPage(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Privacy policy</span></a>
+                                <a href="@controllers.checkpages.routes.ApplicationCheck.privacyPolicyPage(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Privacy policy</span></a>
                             </div>
                         </td>
                     </tr>
@@ -147,7 +147,7 @@ developerSession = Some(loggedIn)
                         </td>
                         <td>
                             <div align="right">
-                                <a href="@controllers.routes.ApplicationCheck.termsAndConditionsPage(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Terms and conditions</span></a>
+                                <a href="@controllers.checkpages.routes.ApplicationCheck.termsAndConditionsPage(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Terms and conditions</span></a>
                             </div>
                         </td>
                     </tr>
@@ -159,7 +159,7 @@ developerSession = Some(loggedIn)
                         </td>
                         <td>
                             <div align="right">
-                                <a href="@controllers.routes.ApplicationCheck.termsOfUsePage(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Terms of use</span></a>
+                                <a href="@controllers.checkpages.routes.ApplicationCheck.termsOfUsePage(data.appId, CheckYourAnswersPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Terms of use</span></a>
                             </div>
                         </td>
                     </tr>

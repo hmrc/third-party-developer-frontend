@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.checkpages
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
-import domain.Capabilities.SupportsAppChecks
-import domain.Permissions.AdministratorOnly
-import domain._
+import controllers._
+import domain.{ApplicationRequest => _, _}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{AnyContent, Call, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.voa.play.form.ConditionalMappings._
@@ -42,11 +41,12 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                  val messagesApi: MessagesApi
                                  )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController() with ApplicationHelper {
-
-  private def canUseChecksAction(applicationId: String)
-                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(SupportsAppChecks,AdministratorOnly)(applicationId)(fun)
+  extends ApplicationController()
+    with ApplicationHelper
+    with CanUseCheckActions
+    with ConfirmNamePartialController
+    with ContactDetailsPartialController
+    with ApiSubscriptionsPartialController {
 
   def requestCheckPage(appId: String) = canUseChecksAction(appId) { implicit request =>
     val application = request.application
@@ -73,126 +73,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 
   def credentialsRequested(appId: String) = whenTeamMemberOnApp(appId) { implicit request =>
     Future.successful(Ok(editapplication.nameSubmitted(appId, request.application)))
-  }
-
-  def contactPage(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
-
-    val contactForm = for {
-      approvalInfo <- app.checkInformation
-      contactDetails <- approvalInfo.contactDetails
-    } yield ContactForm(contactDetails.fullname, contactDetails.email, contactDetails.telephoneNumber)
-
-
-    Future.successful(contactForm match {
-      case Some(form) => Ok(applicationcheck.contactDetails(app, ContactForm.form.fill(ContactForm(form.fullname, form.email, form.telephone)), mode))
-      case _ => Ok(applicationcheck.contactDetails(app, ContactForm.form, mode))
-    })
-  }
-
-  def contactAction(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val requestForm = ContactForm.form.bindFromRequest
-    val app = request.application
-
-    def withFormErrors(form: Form[ContactForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.contactDetails(app, form, mode)))
-    }
-
-    def withValidForm(form: ContactForm) = {
-      val information = app.checkInformation.getOrElse(CheckInformation())
-      applicationService.updateCheckInformation(app.id, information.copy(contactDetails = Some(ContactDetails(form.fullname, form.email, form.telephone)))) map { _ =>
-        if (mode == CheckYourAnswersPageMode.CheckYourAnswers){
-          Redirect(routes.CheckYourAnswers.answersPage(app.id))
-        } else {
-          Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
-        }
-      }
-    }
-
-    requestForm.fold(withFormErrors, withValidForm)
-  }
-
-  def namePage(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(applicationcheck.confirmName(request.application, NameForm.form.fill(NameForm(request.application.name)), mode)))
-  }
-
-  def nameAction(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val requestForm = NameForm.form.bindFromRequest
-    val app = request.application
-
-    def withFormErrors(form: Form[NameForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.confirmName(app, form, mode)))
-    }
-
-    def updateNameIfChanged(form: NameForm) = {
-      if (app.name != form.applicationName) {
-        applicationService.update(UpdateApplicationRequest(app.id, app.deployedTo, form.applicationName, app.description, app.access))
-      } else {
-        Future.successful(())
-      }
-    }
-
-    def withValidForm(form: NameForm): Future[Result] = {
-      applicationService.isApplicationNameValid(form.applicationName, app.deployedTo, Some(app.id))
-        .flatMap({
-          case Valid =>
-            val information = app.checkInformation.getOrElse(CheckInformation())
-            for {
-              _ <- updateNameIfChanged(form)
-              _ <- applicationService.updateCheckInformation(app.id, information.copy(confirmedName = true))
-            } yield if (mode == CheckYourAnswersPageMode.CheckYourAnswers){
-              Redirect(routes.CheckYourAnswers.answersPage(app.id))
-            } else {
-              Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
-            }
-          case invalid : Invalid =>
-            def invalidNameCheckForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
-
-            Future.successful(BadRequest(views.html.applicationcheck.confirmName(request.application, invalidNameCheckForm, mode)))
-        })
-    }
-
-    requestForm.fold(withFormErrors, withValidForm)
-  }
-
-  def apiSubscriptionsPage(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
-
-    apiSubscriptionsHelper.fetchAllSubscriptions(app, request.user)(hc).flatMap {
-      case Some(subsData) =>
-        Future.successful(Ok(apiSubscriptionsView(app, subsData, mode)))
-      case None =>
-        Future.successful(NotFound(errorHandler.notFoundTemplate))
-    }
-  }
-
-  def apiSubscriptionsAction(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
-    val information = app.checkInformation.getOrElse(CheckInformation())
-
-    def hasNonExampleSubscription(subscriptionData: SubscriptionData) =
-      subscriptionData.subscriptions.fold(false)(subs => subs.apis.exists(_.hasSubscriptions))
-
-    apiSubscriptionsHelper.fetchAllSubscriptions(app, request.user)(hc) flatMap {
-      case None =>
-        Future.successful(NotFound(errorHandler.notFoundTemplate))
-      case Some(subscriptionData) if !hasNonExampleSubscription(subscriptionData) =>
-        val form = DummySubscriptionsForm.form.bind(Map("hasNonExampleSubscription" -> "false"))
-        Future.successful(BadRequest(apiSubscriptionsView(app, subscriptionData, mode, Some(form))))
-      case _ =>
-        for {
-          _ <- applicationService.updateCheckInformation(app.id, information.copy(apiSubscriptionsConfirmed = true))
-        } yield if (mode == CheckYourAnswersPageMode.CheckYourAnswers){
-          Redirect(routes.CheckYourAnswers.answersPage(app.id))
-        } else {
-          Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
-        }
-    }
-  }
-
-  private def apiSubscriptionsView(app: Application, subscriptionData: SubscriptionData, mode: CheckYourAnswersPageMode,
-    form: Option[Form[DummySubscriptionsForm]] = None)(implicit request: ApplicationRequest[AnyContent]) = {
-    views.html.applicationcheck.apiSubscriptions(app, subscriptionData.role, subscriptionData.subscriptions, app.id, mode, form)
   }
 
   def privacyPolicyPage(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
@@ -371,6 +251,12 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       case _ => None
     }
   }
+
+  protected def landingPageRoute(appId: String) = routes.ApplicationCheck.requestCheckPage(appId)
+  protected def nameActionRoute(appId: String) = routes.ApplicationCheck.nameAction(appId)
+  protected def contactActionRoute(appId: String) = routes.ApplicationCheck.contactAction(appId)
+  protected def apiSubscriptionsActionRoute(appId: String): Call = routes.ApplicationCheck.apiSubscriptionsAction(appId)
+
 }
 
 object ApplicationInformationForm {
@@ -390,6 +276,8 @@ object ApplicationInformationForm {
 case class TermsAndConditionsForm(urlPresent: Option[String], termsAndConditionsURL: Option[String])
 
 object TermsAndConditionsForm {
+  import controllers._
+
   def form: Form[TermsAndConditionsForm] = Form(
     mapping(
       "hasUrl" -> optional(text).verifying(tNcUrlNoChoiceKey, s => s.isDefined),
@@ -404,6 +292,8 @@ object TermsAndConditionsForm {
 case class PrivacyPolicyForm(urlPresent: Option[String], privacyPolicyURL: Option[String])
 
 object PrivacyPolicyForm {
+  import controllers._
+
   def form: Form[PrivacyPolicyForm] = Form(
     mapping(
       "hasUrl" -> optional(text).verifying(privacyPolicyUrlNoChoiceKey, s => s.isDefined),
@@ -418,6 +308,8 @@ object PrivacyPolicyForm {
 case class NameForm(applicationName: String)
 
 object NameForm {
+  import controllers._
+
   def form: Form[NameForm] = Form(
     mapping(
       "applicationName" -> applicationNameValidator
@@ -428,6 +320,8 @@ object NameForm {
 case class DetailsForm(applicationDetails: String)
 
 object DetailsForm {
+  import controllers._
+
   def form: Form[DetailsForm] = Form(
     mapping(
       "applicationDetails" -> textValidator(detailsRequiredKey, detailsMaxLengthKey, 3000)
@@ -453,6 +347,7 @@ object TermsOfUseForm {
 case class ContactForm(fullname: String, email: String, telephone: String)
 
 object ContactForm {
+  import controllers._
   def form: Form[ContactForm] = Form(
     mapping(
       "fullname" -> fullnameValidator,

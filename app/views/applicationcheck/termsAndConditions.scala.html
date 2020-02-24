@@ -17,7 +17,7 @@
 @import config.ApplicationConfig
 @import domain._
 @import include._
-@import model.Crumb
+@import controllers.checkpages.TermsAndConditionsForm
 
 @(app: Application, form: Form[TermsAndConditionsForm], mode: CheckYourAnswersPageMode)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
@@ -40,7 +40,7 @@
 
     <p>You can change this at any time.</p>
 
-    @helper.form(action = controllers.routes.ApplicationCheck.termsAndConditionsAction(app.id, mode), 'class -> "form") {
+    @helper.form(action = controllers.checkpages.routes.ApplicationCheck.termsAndConditionsAction(app.id, mode), 'class -> "form") {
         @helper.CSRF.formField
 
         <div class="form-group">

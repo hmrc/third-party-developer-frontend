@@ -65,8 +65,8 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
     val successRedirect = addTeamMemberPageMode match {
       case ManageTeamMembers => controllers.routes.ManageTeam.manageTeam(applicationId, None)
-      case ApplicationCheck => controllers.routes.ApplicationCheck.team(applicationId)
-      case CheckYourAnswers => controllers.routes.CheckYourAnswers.team(applicationId)
+      case ApplicationCheck => controllers.checkpages.routes.ApplicationCheck.team(applicationId)
+      case CheckYourAnswers => controllers.checkpages.routes.CheckYourAnswers.team(applicationId)
     }
 
     def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]) : Result = {

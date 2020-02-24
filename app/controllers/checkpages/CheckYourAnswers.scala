@@ -14,50 +14,21 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.checkpages
+
 import config.{ApplicationConfig, ErrorHandler}
+import controllers.{AddTeamMemberForm, ApiSubscriptionsHelper, ApplicationController, ApplicationHelper, ApplicationRequest, RemoveTeamMemberCheckPageConfirmationForm}
 import controllers.FormKeys.applicationNameAlreadyExistsKey
-import domain.Capabilities.SupportsAppChecks
-import domain.Permissions.AdministratorOnly
 import domain.{Application, ApplicationAlreadyExists, CheckInformation, CheckInformationForm, ContactDetails, DeskproTicketCreationFailed}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, Call, Result}
 import service.{ApplicationService, SessionService}
-import views.html.{applicationcheck,checkyouranswers}
+import views.html.{applicationcheck, checkyouranswers}
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-
-case class CheckYourAnswersData(
-  appId: String,
-  softwareName: String,
-  fullName: Option[String],
-  email: Option[String],
-  telephoneNumber: Option[String],
-  teamMembers: Set[String],
-  privacyPolicyUrl: Option[String],
-  termsAndConditionsUrl: Option[String],
-  acceptedTermsOfUse: Boolean,
-  subscriptions: Seq[String]
-)
-
-case class DummyCheckYourAnswersForm(dummy: String = "dummy")
-
-object CheckYourAnswersForm {
-  import play.api.data.Forms.{ignored, mapping}
-
-  def form: Form[DummyCheckYourAnswersForm] = {
-    Form(mapping(
-      "dummy" -> ignored("dummy")
-      )
-      (DummyCheckYourAnswersForm.apply)
-      (DummyCheckYourAnswersForm.unapply)
-    )
-  }
-}
-
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
@@ -68,16 +39,15 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
                                  val messagesApi: MessagesApi
                                 )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController() with ApplicationHelper {
-
-  private def canUseChecksAction(applicationId: String)
-                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(SupportsAppChecks, AdministratorOnly)(applicationId)(fun)
+  extends ApplicationController()
+    with ApplicationHelper
+    with CanUseCheckActions
+    with ConfirmNamePartialController
+    with ContactDetailsPartialController
+    with ApiSubscriptionsPartialController {
 
   private def populateCheckYourAnswersData(application: Application, subs: Seq[String]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
-
-    println(subs)
 
     CheckYourAnswersData(
       appId = application.id,
@@ -168,4 +138,36 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
+  protected def nameActionRoute(appId: String) =routes.CheckYourAnswers.nameAction(appId)
+  protected def contactActionRoute(appId: String) =routes.CheckYourAnswers.contactAction(appId)
+  protected def landingPageRoute(appId: String) = routes.CheckYourAnswers.answersPage(appId)
+  protected def apiSubscriptionsActionRoute(appId: String): Call = routes.CheckYourAnswers.apiSubscriptionsAction(appId)
+}
+
+case class CheckYourAnswersData(
+                                 appId: String,
+                                 softwareName: String,
+                                 fullName: Option[String],
+                                 email: Option[String],
+                                 telephoneNumber: Option[String],
+                                 teamMembers: Set[String],
+                                 privacyPolicyUrl: Option[String],
+                                 termsAndConditionsUrl: Option[String],
+                                 acceptedTermsOfUse: Boolean,
+                                 subscriptions: Seq[String]
+                               )
+
+case class DummyCheckYourAnswersForm(dummy: String = "dummy")
+
+object CheckYourAnswersForm {
+  import play.api.data.Forms.{ignored, mapping}
+
+  def form: Form[DummyCheckYourAnswersForm] = {
+    Form(mapping(
+      "dummy" -> ignored("dummy")
+    )
+    (DummyCheckYourAnswersForm.apply)
+    (DummyCheckYourAnswersForm.unapply)
+    )
+  }
 }

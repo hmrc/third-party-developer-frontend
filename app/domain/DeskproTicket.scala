@@ -42,7 +42,13 @@ object DeskproTicket extends FieldTransformer {
          |HMRC Developer Hub
          |""".stripMargin
 
-    DeskproTicket(requestorName, requestorEmail, "New application submitted for checking", message, routes.ApplicationCheck.requestCheckPage(applicationId).url)
+    DeskproTicket(
+      requestorName,
+      requestorEmail,
+      "New application submitted for checking",
+      message,
+      controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationId).url
+    )
   }
 
   def createForApiSubscribe(requestorName: String, requestorEmail: String,

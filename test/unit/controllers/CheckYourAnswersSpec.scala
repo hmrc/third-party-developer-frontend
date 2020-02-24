@@ -17,6 +17,7 @@
 package unit.controllers
 
 import controllers._
+import controllers.checkpages.CheckYourAnswers
 import domain.Role._
 import domain._
 import org.joda.time.DateTimeZone

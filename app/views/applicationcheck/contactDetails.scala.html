@@ -17,9 +17,9 @@
 @import config.ApplicationConfig
 @import domain._
 @import include._
-@import model.Crumb
+@import controllers.checkpages.ContactForm
 
-@(app: Application,form: Form[ContactForm], mode: CheckYourAnswersPageMode)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+@(app: Application,form: Form[ContactForm], action: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @pageHeading = @{ "Who to contact about your application" }
@@ -37,7 +37,7 @@
         <h1 class="heading-xlarge">@pageHeading</h1>
     </heading>
 
-    @helper.form(action = controllers.routes.ApplicationCheck.contactAction(app.id, mode), 'class -> "form") {
+    @helper.form(action = action, 'class -> "form") {
         @helper.CSRF.formField
         <p>This should be the person in your organisation who can answer questions about how your software is built.</p>
         <fieldset>
@@ -88,7 +88,7 @@
 
         <script type="text/javascript">
             function checkboxChange(){
-            var checkbox = document.getElementById("useregistered");
+            let checkbox = document.getElementById('useregistered')
             if (checkbox.checked){
                 document.getElementById("fullname").value = "@loggedIn.loggedInName";
                 document.getElementById("email").value = "@loggedIn.email";
