@@ -120,6 +120,17 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
       elementExistsByText(document, "button", "Add another client secret") shouldBe true
     }
 
+    "show a different message when there are no client secrets in the app" in new Setup {
+      val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"))
+      val page = credentials.render(productionApp, emptyTokens, form, request, developer, applicationMessages, appConfig, "credentials")
+
+      page.contentType should include ("text/html")
+
+      val document = Jsoup.parse(page.body)
+      elementExistsByText(document, "button", "Add a client secret") shouldBe true
+      elementExistsByText(document, "p", "To delete a client secret, you must add one first") shouldBe false
+    }
+
     "show delete client secret button in production app if it has more than one client secret" in new Setup {
 
       val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1, clientSecret2), ""))

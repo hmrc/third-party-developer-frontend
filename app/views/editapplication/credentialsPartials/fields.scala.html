@@ -59,9 +59,18 @@
             <div>
             @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
                 @helper.CSRF.formField
-                <button id="submit" class="secondary-button button--small button--flush flush hard" type="submit">Add another client secret</button>
+                <button id="submit" class="secondary-button button--small button--flush flush hard" type="submit">
+                    @if(token.clientSecrets.isEmpty) {
+                        Add a client secret
+                    } else {
+                        Add another client secret
+                    }
+                </button>
             }
             </div>
+        }
+        @if(token.clientSecrets.size == 1) {
+            <p>To delete a client secret, you must add one first.</p>
         }
         @if(token.clientSecrets.size > 1) {
             @if(app.deployedTo.isProduction) {
@@ -109,8 +118,6 @@
                 }
                 </div>
             }
-        } else {
-            <p>To delete a client secret, you must add one first.</p>
         }
     } else {
         <div>&nbsp;</div>
