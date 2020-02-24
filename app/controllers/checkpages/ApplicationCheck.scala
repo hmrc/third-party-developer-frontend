@@ -19,14 +19,14 @@ package controllers.checkpages
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
 import controllers._
+import controllers.checkpages.HasUrl._
 import domain.{ApplicationRequest => _, _}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, Call, Result}
+import play.api.mvc.{Action, AnyContent, Call, Result}
 import service.{ApplicationService, SessionService}
-import uk.gov.hmrc.time.DateTimeUtils
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.{applicationcheck, editapplication}
 
@@ -46,16 +46,20 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     with CanUseCheckActions
     with ConfirmNamePartialController
     with ContactDetailsPartialController
-    with ApiSubscriptionsPartialController {
+    with ApiSubscriptionsPartialController
+    with PrivacyPolicyPartialController
+    with TermsAndConditionsPartialController
+    with TermsOfUsePartialController
+    {
 
-  def requestCheckPage(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val application = request.application
 
     Future.successful(Ok(applicationcheck.landingPage(application,
       ApplicationInformationForm.form.fill(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))))))
   }
 
-  def requestCheckAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
     def withFormErrors(app: Application)(form: Form[CheckInformationForm]): Future[Result] = {
       Future.successful(BadRequest(applicationcheck.landingPage(app, form)))
@@ -71,146 +75,16 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors(app), withValidForm(app))
   }
 
-  def credentialsRequested(appId: String) = whenTeamMemberOnApp(appId) { implicit request =>
+  def credentialsRequested(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     Future.successful(Ok(editapplication.nameSubmitted(appId, request.application)))
   }
 
-  def privacyPolicyPage(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
 
-    Future.successful(app.access match {
-      case std: Standard =>
-        val form = PrivacyPolicyForm(
-          hasUrl(std.privacyPolicyUrl, app.checkInformation.map(_.providedPrivacyPolicyURL)),
-          std.privacyPolicyUrl)
-        Ok(applicationcheck.privacyPolicy(app, PrivacyPolicyForm.form.fill(form), mode))
-      case _ => Ok(applicationcheck.privacyPolicy(app, PrivacyPolicyForm.form, mode))
-    })
-  }
-
-  def privacyPolicyAction(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val requestForm = PrivacyPolicyForm.form.bindFromRequest
-    val app = request.application
-
-    def withFormErrors(form: Form[PrivacyPolicyForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.privacyPolicy(app, form, mode)))
-    }
-
-    def updateUrl(form: PrivacyPolicyForm) = {
-      val access = app.access match {
-        case s: Standard => s.copy(privacyPolicyUrl = form.privacyPolicyURL, overrides = Set.empty)
-        case other => other
-      }
-
-      applicationService.update(UpdateApplicationRequest(app.id, app.deployedTo, app.name, app.description, access))
-    }
-
-    def withValidForm(form: PrivacyPolicyForm) = {
-      val information = app.checkInformation.getOrElse(CheckInformation())
-      for {
-        _ <- updateUrl(form)
-        _ <- applicationService.updateCheckInformation(app.id, information.copy(providedPrivacyPolicyURL = true))
-      } yield if (mode == CheckYourAnswersPageMode.CheckYourAnswers){
-        Redirect(routes.CheckYourAnswers.answersPage(app.id))
-      } else {
-        Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
-      }
-    }
-
-    requestForm.fold(withFormErrors, withValidForm)
-  }
-
-  def termsAndConditionsPage(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
-
-    Future.successful(app.access match {
-      case std: Standard =>
-        val form = TermsAndConditionsForm(
-          hasUrl(std.termsAndConditionsUrl, app.checkInformation.map(_.providedTermsAndConditionsURL)),
-          std.termsAndConditionsUrl)
-        Ok(applicationcheck.termsAndConditions(app, TermsAndConditionsForm.form.fill(form), mode))
-      case _ => Ok(applicationcheck.termsAndConditions(app, TermsAndConditionsForm.form, mode))
-    })
-  }
-
-  def termsAndConditionsAction(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val requestForm = TermsAndConditionsForm.form.bindFromRequest
-    val app = request.application
-
-    def withFormErrors(form: Form[TermsAndConditionsForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.termsAndConditions(app, form, mode)))
-    }
-
-    def updateUrl(form: TermsAndConditionsForm) = {
-      val access = app.access match {
-        case s: Standard => s.copy(termsAndConditionsUrl = form.termsAndConditionsURL, overrides = Set.empty)
-        case other => other
-      }
-
-      applicationService.update(UpdateApplicationRequest(app.id, app.deployedTo, app.name, app.description, access))
-    }
-
-    def withValidForm(form: TermsAndConditionsForm) = {
-      val information = app.checkInformation.getOrElse(CheckInformation())
-      for {
-        _ <- updateUrl(form)
-        _ <- applicationService.updateCheckInformation(app.id, information.copy(providedTermsAndConditionsURL = true))
-      } yield if (mode == CheckYourAnswersPageMode.CheckYourAnswers){
-        Redirect(routes.CheckYourAnswers.answersPage(app.id))
-      } else {
-        Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
-      }
-    }
-
-    requestForm.fold(withFormErrors, withValidForm)
-  }
-
-  def termsOfUsePage(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
-    val checkInformation = app.checkInformation.getOrElse(CheckInformation())
-    val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
-
-    Future.successful(Ok(applicationcheck.termsOfUse(app, TermsOfUseForm.form.fill(termsOfUseForm), mode)))
-  }
-
-  def termsOfUseAction(appId: String, mode: CheckYourAnswersPageMode) = canUseChecksAction(appId) { implicit request =>
-
-    val version = appConfig.currentTermsOfUseVersion
-    val app = request.application
-
-    val requestForm = TermsOfUseForm.form.bindFromRequest
-
-    def withFormErrors(form: Form[TermsOfUseForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.termsOfUse(app, form, mode)))
-    }
-
-    def withValidForm(form: TermsOfUseForm) = {
-      val information = app.checkInformation.getOrElse(CheckInformation())
-
-      val updatedInformation = if (information.termsOfUseAgreements.exists(terms => terms.version == version)) {
-        information
-      }
-      else {
-        information.copy(termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.user.email, DateTimeUtils.now, version))
-      }
-
-      for {
-        _ <- applicationService.updateCheckInformation(app.id, updatedInformation)
-      } yield if (mode == CheckYourAnswersPageMode.CheckYourAnswers){
-        Redirect(routes.CheckYourAnswers.answersPage(app.id))
-      } else {
-        Redirect(routes.ApplicationCheck.requestCheckPage(app.id))
-      }
-    }
-
-    requestForm.fold(withFormErrors, withValidForm)
-  }
-
-  def team(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
   }
 
-  def teamAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def teamAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
@@ -218,17 +92,17 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
   }
 
-  def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def teamAddMember(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(applicationcheck.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
   }
 
-  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String) = canUseChecksAction(appId) { implicit request =>
+  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     successful(request.application.findCollaboratorByHash(teamMemberHash)
       .map(collaborator => Ok(applicationcheck.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
       .getOrElse(Redirect(routes.ApplicationCheck.team(appId))))
   }
 
-  def teamMemberRemoveAction(appId: String) = canUseChecksAction(appId) { implicit request => {
+  def teamMemberRemoveAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request => {
 
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
         applicationService
@@ -244,19 +118,13 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  private def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {
-    (url, hasCheckedUrl) match {
-      case (Some(_), _) => Some("true")
-      case (None, Some(true)) => Some("false")
-      case _ => None
-    }
-  }
-
-  protected def landingPageRoute(appId: String) = routes.ApplicationCheck.requestCheckPage(appId)
-  protected def nameActionRoute(appId: String) = routes.ApplicationCheck.nameAction(appId)
-  protected def contactActionRoute(appId: String) = routes.ApplicationCheck.contactAction(appId)
+  protected def landingPageRoute(appId: String): Call = routes.ApplicationCheck.requestCheckPage(appId)
+  protected def nameActionRoute(appId: String): Call = routes.ApplicationCheck.nameAction(appId)
+  protected def contactActionRoute(appId: String): Call = routes.ApplicationCheck.contactAction(appId)
   protected def apiSubscriptionsActionRoute(appId: String): Call = routes.ApplicationCheck.apiSubscriptionsAction(appId)
-
+  protected def privacyPolicyActionRoute(appId: String): Call = routes.ApplicationCheck.privacyPolicyAction(appId)
+  protected def termsAndConditionsActionRoute(appId: String): Call = routes.ApplicationCheck.termsAndConditionsAction(appId)
+  protected def termsOfUseActionRoute(appId: String): Call = routes.ApplicationCheck.termsOfUseAction(appId)
 }
 
 object ApplicationInformationForm {

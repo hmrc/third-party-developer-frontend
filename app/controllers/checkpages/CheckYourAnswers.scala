@@ -44,7 +44,11 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     with CanUseCheckActions
     with ConfirmNamePartialController
     with ContactDetailsPartialController
-    with ApiSubscriptionsPartialController {
+    with ApiSubscriptionsPartialController
+    with PrivacyPolicyPartialController
+    with TermsAndConditionsPartialController
+    with TermsOfUsePartialController
+    {
 
   private def populateCheckYourAnswersData(application: Application, subs: Seq[String]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
@@ -79,7 +83,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     } yield Ok(views.html.checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
   }
 
-  def answersPageAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def answersPageAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val application = request.application
 
     (for {
@@ -101,11 +105,11 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def team(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(checkyouranswers.team.team(request.application, request.role, request.user)))
   }
 
-  def teamAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def teamAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
@@ -113,17 +117,17 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     } yield Redirect(routes.CheckYourAnswers.answersPage(appId))
   }
 
-  def teamAddMember(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def teamAddMember(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(checkyouranswers.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
   }
 
-  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String) = canUseChecksAction(appId) { implicit request =>
+  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     successful(request.application.findCollaboratorByHash(teamMemberHash)
       .map(collaborator => Ok(checkyouranswers.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
       .getOrElse(Redirect(routes.CheckYourAnswers.team(appId))))
   }
 
-  def teamMemberRemoveAction(appId: String) = canUseChecksAction(appId) { implicit request =>
+  def teamMemberRemoveAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
       applicationService
@@ -138,10 +142,13 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  protected def nameActionRoute(appId: String) =routes.CheckYourAnswers.nameAction(appId)
-  protected def contactActionRoute(appId: String) =routes.CheckYourAnswers.contactAction(appId)
-  protected def landingPageRoute(appId: String) = routes.CheckYourAnswers.answersPage(appId)
+  protected def nameActionRoute(appId: String): Call =routes.CheckYourAnswers.nameAction(appId)
+  protected def contactActionRoute(appId: String): Call =routes.CheckYourAnswers.contactAction(appId)
+  protected def landingPageRoute(appId: String): Call = routes.CheckYourAnswers.answersPage(appId)
   protected def apiSubscriptionsActionRoute(appId: String): Call = routes.CheckYourAnswers.apiSubscriptionsAction(appId)
+  protected def privacyPolicyActionRoute(appId: String): Call = routes.CheckYourAnswers.privacyPolicyAction(appId)
+  protected def termsAndConditionsActionRoute(appId: String): Call = routes.CheckYourAnswers.termsAndConditionsAction(appId)
+  protected def termsOfUseActionRoute(appId: String): Call = routes.CheckYourAnswers.termsOfUseAction(appId)
 }
 
 case class CheckYourAnswersData(

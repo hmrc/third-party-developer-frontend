@@ -139,7 +139,7 @@
 
                             <td id="providedPolicyURL" scope="row" class="step-description">
                                 @include.fieldError(form.errors,"providedPolicyURL")
-                                <a id="providedPolicyURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.privacyPolicyPage(app.id, CheckYourAnswersPageMode.RequestCheck)">
+                                <a id="providedPolicyURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.privacyPolicyPage(app.id)">
                                     Tell us if your application has a privacy policy
                                 </a>
                             </td>
@@ -155,7 +155,7 @@
                         <tr class="@if(form.errors("providedTermsAndConditionsURL").nonEmpty){form-group-error}">
                         <td id="providedTermsAndConditionsURL" scope="row" class="step-description">
                             @include.fieldError(form.errors,"providedTermsAndConditionsURL")
-                            <a id="providedTermsAndConditionsURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsAndConditionsPage(app.id, CheckYourAnswersPageMode.RequestCheck)">
+                            <a id="providedTermsAndConditionsURLCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsAndConditionsPage(app.id)">
                                 Tell us if your application has terms and conditions
                             </a>
                         </td>
@@ -171,7 +171,7 @@
                         <tr class="@if(form.errors("agreeTermsOfUse").nonEmpty){form-group-error}">
                         <td id="agreeTermsOfUse" scope="row" class="step-description">
                             @include.fieldError(form.errors,"agreeTermsOfUse")
-                            <a id="termsOfUseAgreementsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsOfUsePage(app.id, CheckYourAnswersPageMode.RequestCheck)">
+                            <a id="termsOfUseAgreementsCompleted" href="@controllers.checkpages.routes.ApplicationCheck.termsOfUsePage(app.id)">
                                 Agree to our terms of use
                             </a>
                         </td>
