@@ -27,7 +27,6 @@ import play.api.mvc.{Action, AnyContent, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import views.html.partials
-import controllers.checkpages.TermsOfUseForm
 
 import scala.concurrent.{ExecutionContext, Future}
 

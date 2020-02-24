@@ -16,9 +16,11 @@
 
 package unit.controllers
 
-import controllers.{APISubscriptions, ApiSubscriptionsHelper, ApplicationCheck, GroupedSubscriptions}
+import controllers.checkpages.ApplicationCheck
+import controllers.{APISubscriptions, ApiSubscriptionsHelper, GroupedSubscriptions}
 import domain.Role._
 import domain._
+import helpers.string._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
@@ -34,9 +36,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import helpers.string._
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -156,7 +155,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       givenTheApplicationExists()
 
-      val result = await(addToken(underTest.apiSubscriptionsAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
       verify(underTest.applicationService, never).updateCheckInformation(mockEq(appId), any())(any[HeaderCarrier])
@@ -365,7 +364,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
   "api subscriptions review" should {
     "return page" in new Setup {
       givenTheApplicationExists()
-      private val result = await(addToken(underTest.apiSubscriptionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Confirm which APIs you want to use")
@@ -375,7 +374,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "success action" in new Setup {
       givenTheApplicationExists()
 
-      private val result = await(addToken(underTest.apiSubscriptionsAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
@@ -384,7 +383,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return forbidden when accessed without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.apiSubscriptionsAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -392,7 +391,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.apiSubscriptionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -400,7 +399,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.apiSubscriptionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -408,7 +407,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when an attempt is made to submit and the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.apiSubscriptionsAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -416,7 +415,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when an attempt is made to submit and the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.apiSubscriptionsAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -425,7 +424,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(successful(None))
 
-      private val result = await(addToken(underTest.apiSubscriptionsAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -450,7 +449,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       givenTheApplicationExists(checkInformation = Some(defaultCheckInformation))
 
-      private val result = await(addToken(underTest.contactPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.contactPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Who to contact about your application")
@@ -463,7 +462,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val requestWithFormBody = loggedInRequest
         .withFormUrlEncodedBody("email" -> "email@example.com", "telephone" -> "0000", "fullname" -> "john smith")
 
-      private val result = await(addToken(underTest.contactAction(appId, defaultMode))(requestWithFormBody))
+      private val result = await(addToken(underTest.contactAction(appId))(requestWithFormBody))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
@@ -472,7 +471,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "Validation failure contact action" in new Setup {
       givenTheApplicationExists()
 
-      private val result = await(addToken(underTest.contactAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -480,7 +479,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return forbidden when accessing the action without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.contactAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -488,7 +487,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return forbidden when accessing the page without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.contactPage(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.contactPage(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -496,7 +495,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return bad request when the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.contactPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.contactPage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -504,7 +503,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return bad request when the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.contactPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.contactPage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -512,7 +511,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.contactAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -520,7 +519,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.contactAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -666,7 +665,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return page" in new Setup {
       givenTheApplicationExists()
 
-      private val result = await(addToken(underTest.privacyPolicyPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Does your application have a privacy policy?")
@@ -675,7 +674,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {
       givenTheApplicationExists()
 
-      private val result = await(addToken(underTest.privacyPolicyPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       idAttributeOnCheckedInput(result) shouldBe ""
@@ -686,7 +685,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val access = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
       givenTheApplicationExists(access = access, checkInformation = Some(checkInformation))
 
-      private val result = await(addToken(underTest.privacyPolicyPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       idAttributeOnCheckedInput(result) shouldBe "yes"
@@ -697,7 +696,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val access = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
       givenTheApplicationExists(access = access, checkInformation = Some(checkInformation))
 
-      private val result = await(addToken(underTest.privacyPolicyPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       idAttributeOnCheckedInput(result) shouldBe "yes"
@@ -707,7 +706,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
       givenTheApplicationExists(checkInformation = Some(checkInformation))
 
-      private val result = await(addToken(underTest.privacyPolicyPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
       status(result) shouldBe OK
       idAttributeOnCheckedInput(result) shouldBe "no"
     }
@@ -717,7 +716,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "privacyPolicyURL" -> "http://privacypolicy.example.com")
 
-      private val result = await(addToken(underTest.privacyPolicyAction(appId, defaultMode))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls))
       private val standardAccess = Standard(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
@@ -733,7 +732,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
-      private val result = await(addToken(underTest.privacyPolicyAction(appId, defaultMode))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls))
       private val standardAccess: Standard = Standard(privacyPolicyUrl = None)
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
@@ -749,7 +748,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       givenTheApplicationExists()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "privacyPolicyURL" -> "invalid url")
 
-      private val result = await(addToken(underTest.privacyPolicyAction(appId, defaultMode))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls))
       status(result) shouldBe BAD_REQUEST
     }
 
@@ -757,14 +756,14 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       givenTheApplicationExists()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true")
 
-      private val result = await(addToken(underTest.privacyPolicyAction(appId, defaultMode))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls))
       status(result) shouldBe BAD_REQUEST
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.privacyPolicyAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -772,7 +771,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return forbidden when accessing the page without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.privacyPolicyPage(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -780,7 +779,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.privacyPolicyPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -788,7 +787,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.privacyPolicyPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -796,7 +795,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when an attempt is made to submit and the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.privacyPolicyAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -804,7 +803,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when an attempt is made to submit and the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.privacyPolicyAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -814,7 +813,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return page" in new Setup {
       givenTheApplicationExists()
 
-      private val result = await(addToken(underTest.termsAndConditionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Does your application have terms and conditions?")
@@ -823,7 +822,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {
       givenTheApplicationExists()
 
-      private val result = await(addToken(underTest.termsAndConditionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       idAttributeOnCheckedInput(result) shouldBe ""
@@ -834,7 +833,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val access = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
       givenTheApplicationExists(access = access, checkInformation = Some(checkInformation))
 
-      private val result = await(addToken(underTest.termsAndConditionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       idAttributeOnCheckedInput(result) shouldBe "yes"
@@ -845,7 +844,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val access = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
       givenTheApplicationExists(access = access, checkInformation = Some(checkInformation))
 
-      private val result = await(addToken(underTest.termsAndConditionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       idAttributeOnCheckedInput(result) shouldBe "yes"
@@ -855,7 +854,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
       givenTheApplicationExists(checkInformation = Some(checkInformation))
 
-      private val result = await(addToken(underTest.termsAndConditionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       idAttributeOnCheckedInput(result) shouldBe "no"
@@ -867,7 +866,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val loggedInRequestWithUrls =
         loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "termsAndConditionsURL" -> "http://termsAndConditionsURL.example.com")
 
-      private val result = await(addToken(underTest.termsAndConditionsAction(appId, defaultMode))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls))
       private val standardAccess = Standard(termsAndConditionsUrl = Some("http://termsAndConditionsURL.example.com"))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
@@ -883,7 +882,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
-      private val result = await(addToken(underTest.termsAndConditionsAction(appId, defaultMode))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls))
       private val standardAccess = Standard(termsAndConditionsUrl = None)
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
@@ -898,7 +897,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       givenTheApplicationExists()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "termsAndConditionsURL" -> "invalid url")
 
-      private val result = await(addToken(underTest.termsAndConditionsAction(appId, defaultMode))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls))
       status(result) shouldBe BAD_REQUEST
     }
 
@@ -906,14 +905,14 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       givenTheApplicationExists()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true")
 
-      private val result = await(addToken(underTest.termsAndConditionsAction(appId, defaultMode))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls))
       status(result) shouldBe BAD_REQUEST
     }
 
     "action unavailable when accessed without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.termsAndConditionsAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -921,7 +920,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "page unavailable when accessed without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.termsAndConditionsPage(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -929,7 +928,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "redirect to the application credentials tab when the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.termsAndConditionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -937,7 +936,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "redirect to the application credentials tab when the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.termsAndConditionsPage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -945,7 +944,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "redirect to the application credentials tab when an attempt is made to submit and the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.termsAndConditionsAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -953,7 +952,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "redirect to the application credentials tab when an attempt is made to submit and the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.termsAndConditionsAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -963,7 +962,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return page" in new Setup {
 
       givenTheApplicationExists()
-      private val result = await(addToken(underTest.termsOfUsePage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsOfUsePage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Agree to our terms of use")
@@ -972,7 +971,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "be forbidden when accessed without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.termsOfUsePage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsOfUsePage(appId))(loggedInRequest))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -980,7 +979,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "action is forbidden when accessed without being an admin" in new Setup {
       givenTheApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.termsOfUseAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -988,7 +987,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.termsOfUsePage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsOfUsePage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -996,7 +995,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.termsOfUsePage(appId, defaultMode))(loggedInRequest))
+      private val result = await(addToken(underTest.termsOfUsePage(appId))(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -1004,7 +1003,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when an attempt is made to submit and the app is already approved" in new Setup {
       givenTheApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.termsOfUseAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -1012,7 +1011,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return a bad request when an attempt is made to submit and the app is pending check" in new Setup {
       givenTheApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.termsOfUseAction(appId, defaultMode))(loggedInRequestWithFormBody))
+      private val result = await(addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -1021,7 +1020,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       givenTheApplicationExists()
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
 
-      private val result = await(addToken(underTest.termsOfUseAction(appId, defaultMode))(requestWithFormBody))
+      private val result = await(addToken(underTest.termsOfUseAction(appId))(requestWithFormBody))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")

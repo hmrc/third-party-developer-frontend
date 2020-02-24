@@ -17,7 +17,7 @@
 package unit.controllers
 
 import controllers._
-import controllers.checkpages.CheckYourAnswers
+import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
 import domain.Role._
 import domain._
 import org.joda.time.DateTimeZone
@@ -212,7 +212,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = await(underTest.answersPageAction(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ApplicationCheck.credentialsRequested(appId).url)
+      // TODO - really ???
+      redirectLocation(result) shouldBe Some(checkpages.routes.ApplicationCheck.credentialsRequested(appId).url)
     }
     "return forbidden when not logged in" in new Setup {
       givenTheApplicationExists()

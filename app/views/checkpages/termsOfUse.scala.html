@@ -18,7 +18,7 @@
 @import domain._
 @import include._
 @import org.joda.time.format.DateTimeFormat
-@import controllers.checkpages.TermsOfUseForm
+@import controllers.TermsOfUseForm
 
 @(app: Application, form: Form[TermsOfUseForm], submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}

@@ -21,7 +21,7 @@
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
 @import org.joda.time.format.DateTimeFormat
-@import controllers.checkpages.TermsOfUseForm
+@import controllers.TermsOfUseForm
 
 @(app: Application, form: Form[TermsOfUseForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
