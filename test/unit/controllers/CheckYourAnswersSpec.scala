@@ -45,8 +45,6 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
-  val defaultMode: CheckYourAnswersPageMode = CheckYourAnswersPageMode.RequestCheck
-
   val appId = "1234"
   val appName: String = "app"
   val clientId = "clientIdzzz"

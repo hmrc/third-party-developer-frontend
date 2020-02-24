@@ -42,8 +42,6 @@ import scala.concurrent.Future.successful
 
 class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  val defaultMode: CheckYourAnswersPageMode = CheckYourAnswersPageMode.RequestCheck
-
   val appId = "1234"
   val appName: String = "app"
   val clientId = "clientIdzzz"
