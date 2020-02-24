@@ -21,7 +21,7 @@ import domain._
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import uk.gov.hmrc.time.DateTimeUtils
-import views.html.applicationcheck
+import views.html.checkpages.termsOfUse
 
 import scala.concurrent.Future
 
@@ -33,7 +33,7 @@ trait TermsOfUsePartialController {
     val checkInformation = app.checkInformation.getOrElse(CheckInformation())
     val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
 
-    Future.successful(Ok(applicationcheck.termsOfUse(app, TermsOfUseForm.form.fill(termsOfUseForm), termsOfUseActionRoute(app.id), landingPageRoute(app.id))))
+    Future.successful(Ok(termsOfUse(app, TermsOfUseForm.form.fill(termsOfUseForm), termsOfUseActionRoute(app.id), landingPageRoute(app.id))))
   }
 
   def termsOfUseAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -44,7 +44,7 @@ trait TermsOfUsePartialController {
     val requestForm = TermsOfUseForm.form.bindFromRequest
 
     def withFormErrors(form: Form[TermsOfUseForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.termsOfUse(app, form, termsOfUseActionRoute(app.id), landingPageRoute(app.id))))
+      Future.successful(BadRequest(termsOfUse(app, form, termsOfUseActionRoute(app.id), landingPageRoute(app.id))))
     }
 
     def withValidForm(form: TermsOfUseForm) = {

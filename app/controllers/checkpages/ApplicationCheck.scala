@@ -19,7 +19,6 @@ package controllers.checkpages
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
 import controllers._
-import controllers.checkpages.HasUrl._
 import domain.{ApplicationRequest => _, _}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
@@ -28,7 +27,8 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Call, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.voa.play.form.ConditionalMappings._
-import views.html.{applicationcheck, editapplication}
+import views.html.editapplication
+import views.html.checkpages.applicationcheck
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -70,7 +70,9 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     }
 
     val app = request.application
-    val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(app.checkInformation.getOrElse(CheckInformation())))
+    val requestForm = ApplicationInformationForm.form.fillAndValidate(
+      CheckInformationForm.fromCheckInformation(app.checkInformation.getOrElse(CheckInformation()))
+    )
 
     requestForm.fold(withFormErrors(app), withValidForm(app))
   }

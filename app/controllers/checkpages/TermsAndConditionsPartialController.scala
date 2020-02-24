@@ -21,7 +21,7 @@ import controllers.checkpages.HasUrl._
 import domain._
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
-import views.html.applicationcheck
+import views.html.checkpages.termsAndConditions
 
 import scala.concurrent.Future
 
@@ -36,8 +36,8 @@ trait TermsAndConditionsPartialController {
         val form = TermsAndConditionsForm(
           hasUrl(std.termsAndConditionsUrl, app.checkInformation.map(_.providedTermsAndConditionsURL)),
           std.termsAndConditionsUrl)
-        Ok(applicationcheck.termsAndConditions(app, TermsAndConditionsForm.form.fill(form), termsAndConditionsActionRoute(app.id)))
-      case _ => Ok(applicationcheck.termsAndConditions(app, TermsAndConditionsForm.form, termsAndConditionsActionRoute(app.id)))
+        Ok(termsAndConditions(app, TermsAndConditionsForm.form.fill(form), termsAndConditionsActionRoute(app.id)))
+      case _ => Ok(termsAndConditions(app, TermsAndConditionsForm.form, termsAndConditionsActionRoute(app.id)))
     })
   }
 
@@ -46,7 +46,7 @@ trait TermsAndConditionsPartialController {
     val app = request.application
 
     def withFormErrors(form: Form[TermsAndConditionsForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.termsAndConditions(app, form, termsAndConditionsActionRoute(app.id))))
+      Future.successful(BadRequest(termsAndConditions(app, form, termsAndConditionsActionRoute(app.id))))
     }
 
     def updateUrl(form: TermsAndConditionsForm) = {

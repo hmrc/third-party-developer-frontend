@@ -20,7 +20,7 @@ import controllers.ApplicationController
 import domain._
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
-import views.html.applicationcheck
+import views.html.checkpages.contactDetails
 
 import scala.concurrent.Future
 
@@ -38,9 +38,9 @@ trait ContactDetailsPartialController {
     Future.successful(contactForm match {
       case Some(form) =>
         val filledContactForm = ContactForm.form.fill(ContactForm(form.fullname, form.email, form.telephone))
-        Ok(applicationcheck.contactDetails(app, filledContactForm, contactActionRoute(app.id)))
+        Ok(contactDetails(app, filledContactForm, contactActionRoute(app.id)))
       case _ =>
-        Ok(applicationcheck.contactDetails(app, ContactForm.form, contactActionRoute(app.id)))
+        Ok(contactDetails(app, ContactForm.form, contactActionRoute(app.id)))
     })
   }
 
@@ -49,7 +49,7 @@ trait ContactDetailsPartialController {
     val app = request.application
 
     def withFormErrors(form: Form[ContactForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.contactDetails(app, form, contactActionRoute(app.id))))
+      Future.successful(BadRequest(contactDetails(app, form, contactActionRoute(app.id))))
     }
 
     def withValidForm(form: ContactForm) = {

@@ -72,8 +72,8 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]) : Result = {
       val viewFunction: (Application, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
         case ManageTeamMembers => views.html.manageTeamViews.addTeamMember.apply
-        case ApplicationCheck => views.html.applicationcheck.team.teamMemberAdd.apply
-        case CheckYourAnswers => views.html.checkyouranswers.team.teamMemberAdd.apply
+        case ApplicationCheck => views.html.checkpages.applicationcheck.team.teamMemberAdd.apply
+        case CheckYourAnswers => views.html.checkpages.checkyouranswers.team.teamMemberAdd.apply
 
       }
 

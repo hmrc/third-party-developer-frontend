@@ -21,7 +21,7 @@ import controllers.FormKeys.appNameField
 import domain._
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call, Result}
-import views.html.applicationcheck
+import views.html.checkpages.confirmName
 
 import scala.concurrent.Future
 
@@ -29,7 +29,7 @@ trait ConfirmNamePartialController {
   self: ApplicationController with CanUseCheckActions =>
 
   def namePage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(applicationcheck.confirmName(request.application, NameForm.form.fill(NameForm(request.application.name)), nameActionRoute(appId))))
+    Future.successful(Ok(confirmName(request.application, NameForm.form.fill(NameForm(request.application.name)), nameActionRoute(appId))))
   }
 
   def nameAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -37,7 +37,7 @@ trait ConfirmNamePartialController {
     val app = request.application
 
     def withFormErrors(form: Form[NameForm]) = {
-      Future.successful(BadRequest(views.html.applicationcheck.confirmName(app, form, nameActionRoute(appId))))
+      Future.successful(BadRequest(confirmName(app, form, nameActionRoute(appId))))
     }
 
     def updateNameIfChanged(form: NameForm) = {
@@ -60,7 +60,7 @@ trait ConfirmNamePartialController {
           case invalid : Invalid =>
             def invalidNameCheckForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-            Future.successful(BadRequest(views.html.applicationcheck.confirmName(request.application, invalidNameCheckForm, nameActionRoute(appId))))
+            Future.successful(BadRequest(confirmName(request.application, invalidNameCheckForm, nameActionRoute(appId))))
         })
     }
 

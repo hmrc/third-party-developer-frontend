@@ -17,7 +17,14 @@
 package controllers.checkpages
 
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.{AddTeamMemberForm, ApiSubscriptionsHelper, ApplicationController, ApplicationHelper, ApplicationRequest, RemoveTeamMemberCheckPageConfirmationForm}
+import controllers.{
+  AddTeamMemberForm,
+  ApiSubscriptionsHelper,
+  ApplicationController,
+  ApplicationHelper,
+  ApplicationRequest,
+  RemoveTeamMemberCheckPageConfirmationForm
+}
 import controllers.FormKeys.applicationNameAlreadyExistsKey
 import domain.{Application, ApplicationAlreadyExists, CheckInformation, CheckInformationForm, ContactDetails, DeskproTicketCreationFailed}
 import javax.inject.{Inject, Singleton}
@@ -25,7 +32,8 @@ import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Call, Result}
 import service.{ApplicationService, SessionService}
-import views.html.{applicationcheck, checkyouranswers}
+import views.html.checkpages.checkyouranswers
+import views.html.checkpages.applicationcheck
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -80,7 +88,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     for {
       application <- fetchApp(appId)
       checkYourAnswersData <- populateCheckYourAnswersData(application)
-    } yield Ok(views.html.checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
+    } yield Ok(checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
   }
 
   def answersPageAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -94,7 +102,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
         for {
           checkYourAnswersData <- populateCheckYourAnswersData(application)
           requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
-        } yield InternalServerError(views.html.checkyouranswers.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
+        } yield InternalServerError(checkyouranswers.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
     }
     .recover {
       case _: ApplicationAlreadyExists =>

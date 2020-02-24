@@ -64,7 +64,7 @@ trait ApiSubscriptionsPartialController  {
     subscriptionData: SubscriptionData,
     form: Option[Form[DummySubscriptionsForm]] = None
     )(implicit request: ApplicationRequest[AnyContent]) = {
-      views.html.applicationcheck.apiSubscriptions(
+      views.html.checkpages.apiSubscriptions(
         app,
         subscriptionData.role,
         subscriptionData.subscriptions,
