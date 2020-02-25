@@ -1,0 +1,180 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import model.Crumb
+
+@import controllers.checkpages.CheckYourAnswersData
+@import controllers.checkpages.DummyCheckYourAnswersForm
+@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+
+@pageHeading = @{ s"Check your answers before requesting credentials" }
+
+@devMain(
+    title = pageHeading,
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.viewAllApplications,
+    Crumb.home
+),
+developerSession = Some(loggedIn)
+) {
+
+    @errorSummary(form)
+    <heading>
+        <h1 class="heading-xlarge">
+            @pageHeading
+        </h1>
+    </heading>
+
+    @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.answersPageAction(data.appId), 'class -> "form") {
+        @helper.CSRF.formField
+        <section class="section">
+            <div class="form-group">
+                <h2 class="step-heading-1" style="margin-bottom: 0px">About your application</h2>
+                <table class="task-list">
+                    <thead>
+                    <tr>
+                        <br/>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="apiSubscriptions">
+                            <th class="col-40"><span strong class="bold-small">API subscriptions</span></th>
+                            <td>
+                                @data.subscriptions.map { sub =>
+                                @sub<br/>
+                                }
+                            </td>
+                            <td>
+                                <div align="right">
+                                    <a href="@controllers.checkpages.routes.CheckYourAnswers.apiSubscriptionsPage(data.appId)">Change<span class="visually-hidden">Edit API subscription</span></a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr id="contactDetails">
+                            <th><span strong class="bold-small">Contact details</span></th>
+                            <td>
+                                @data.fullName
+                                <br/>
+                                @data.email
+                                <br/>
+                                @data.telephoneNumber
+                                <br/>
+                            </td>
+                            <td>
+                                <div align="right">
+                                    <a href="@controllers.checkpages.routes.CheckYourAnswers.contactPage(data.appId)">Change<span class="visually-hidden">Edit Contact details</span></a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr id="teamMembers">
+                            <th><span strong class="bold-small">Team members</span></th>
+                            <td>
+                                @data.teamMembers.map { teamMember =>
+                                @teamMember<br/>
+                                }
+                            </td>
+                            <td>
+                                <div align="right">
+                                    <a href="@controllers.checkpages.routes.CheckYourAnswers.team(data.appId)">Change<span class="visually-hidden">Edit Team Members</span></a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr id="softwareName">
+                            <th><span strong class="bold-small">Software name</span></th>
+                            <td>
+                                @data.softwareName
+                            </td>
+                            <td>
+                                <div align="right">
+                                    <a href="@controllers.checkpages.routes.CheckYourAnswers.namePage(data.appId)">Change<span class="visually-hidden">Edit Software name</span></a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+
+                </br>
+                </br>
+
+                <h2 class="step-heading-1" style="margin-bottom: 0px">Your responsibilities</h2>
+                <table class="task-list">
+                    <thead>
+                        <tr>
+                           <br/>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    <tr id="providedPolicyURL">
+                        <th class="col-40"><span strong class="bold-small">Privacy policy</span></th>
+                        <td>
+                            @data.privacyPolicyUrl.getOrElse("None")
+                        </td>
+                        <td>
+                            <div align="right">
+                                <a href="@controllers.checkpages.routes.CheckYourAnswers.privacyPolicyPage(data.appId)">Change<span class="visually-hidden">Edit Privacy policy</span></a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr id="providedTermsAndConditionsURL">
+                        <th><span strong class="bold-small">Terms and conditions</span></th>
+                        <td>
+                            @data.termsAndConditionsUrl.getOrElse("None")
+                        </td>
+                        <td>
+                            <div align="right">
+                                <a href="@controllers.checkpages.routes.CheckYourAnswers.termsAndConditionsPage(data.appId)">Change<span class="visually-hidden">Edit Terms and conditions</span></a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr id="agreeTermsOfUse">
+                        <th><span strong class="bold-small">Terms of use</span></th>
+                        <td>
+                            @if(data.acceptedTermsOfUse) { Accepted } else { Not Accepted }
+                        </td>
+                        <td>
+                            <div align="right">
+                                <a href="@controllers.checkpages.routes.CheckYourAnswers.termsOfUsePage(data.appId)">Change<span class="visually-hidden">Edit Terms of use</span></a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="form-group">
+                <h2>Now request production credentials</h2>
+                <p>By submitting your request you are confirming that, to the best your knowledge, the details you are providing are correct.</p>
+                <button id="submit" class="button" type="submit">Accept and send</button>
+                <a href="@routes.Credentials.credentials(data.appId, None)" id="cancel" class="secondary-button">Save and come back later</a>
+            </div>
+        </section>
+    }
+}
+

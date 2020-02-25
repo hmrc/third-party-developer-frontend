@@ -18,7 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import domain.AddTeamMemberPageMode.{ApplicationCheck, ManageTeamMembers}
+import domain.AddTeamMemberPageMode.{ApplicationCheck, CheckYourAnswers, ManageTeamMembers}
 import domain.Capabilities.SupportsTeamMembers
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain._
@@ -60,23 +60,28 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
   }
 
-  def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: AddTeamMemberPageMode) = canEditTeamMembers(applicationId) { implicit request =>
+  def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: AddTeamMemberPageMode) =
+    canEditTeamMembers(applicationId) { implicit request =>
 
     val successRedirect = addTeamMemberPageMode match {
       case ManageTeamMembers => controllers.routes.ManageTeam.manageTeam(applicationId, None)
-      case ApplicationCheck => controllers.routes.ApplicationCheck.team(applicationId)
+      case ApplicationCheck => controllers.checkpages.routes.ApplicationCheck.team(applicationId)
+      case CheckYourAnswers => controllers.checkpages.routes.CheckYourAnswers.team(applicationId)
     }
 
     def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]) : Result = {
       val viewFunction: (Application, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
         case ManageTeamMembers => views.html.manageTeamViews.addTeamMember.apply
-        case ApplicationCheck => views.html.applicationcheck.team.teamMemberAdd.apply
+        case ApplicationCheck => views.html.checkpages.applicationcheck.team.teamMemberAdd.apply
+        case CheckYourAnswers => views.html.checkpages.checkyouranswers.team.teamMemberAdd.apply
+
       }
 
       BadRequest(viewFunction(
         request.application,
         formWithErrors,
-        request.user))
+        request.user
+        ))
     }
 
     def handleValidForm(form: AddTeamMemberForm) = {

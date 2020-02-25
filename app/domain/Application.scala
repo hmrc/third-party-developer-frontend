@@ -310,7 +310,7 @@ case class Application(id: String,
 
   def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
 
-  def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
+  def termsOfUseAgreements: Seq[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
   def hasCapability(capability: Capability): Boolean = capability.hasCapability(this)
 

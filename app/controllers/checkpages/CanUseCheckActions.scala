@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package domain
+package controllers.checkpages
 
-import enumeratum.{EnumEntry, PlayEnum}
+import controllers.{ApplicationController, ApplicationRequest}
+import domain.Capabilities.SupportsAppChecks
+import domain.Permissions.AdministratorOnly
+import play.api.mvc.{Action, AnyContent, Result}
 
-sealed trait AddTeamMemberPageMode extends EnumEntry
+import scala.concurrent.Future
 
-object AddTeamMemberPageMode extends PlayEnum[AddTeamMemberPageMode] {
-  val values = findValues
+trait CanUseCheckActions {
+  self: ApplicationController =>
 
-  final case object ManageTeamMembers extends AddTeamMemberPageMode
-  final case object ApplicationCheck  extends AddTeamMemberPageMode
-  final case object CheckYourAnswers  extends AddTeamMemberPageMode
-
-  def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
-
+  private[controllers] def canUseChecksAction(applicationId: String)
+                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    capabilityThenPermissionsAction(SupportsAppChecks,AdministratorOnly)(applicationId)(fun)
 }
+

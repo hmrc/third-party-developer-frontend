@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package domain
+package controllers.checkpages
 
-import enumeratum.{EnumEntry, PlayEnum}
-
-sealed trait AddTeamMemberPageMode extends EnumEntry
-
-object AddTeamMemberPageMode extends PlayEnum[AddTeamMemberPageMode] {
-  val values = findValues
-
-  final case object ManageTeamMembers extends AddTeamMemberPageMode
-  final case object ApplicationCheck  extends AddTeamMemberPageMode
-  final case object CheckYourAnswers  extends AddTeamMemberPageMode
-
-  def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
-
+object HasUrl {
+  def hasUrl(url: Option[String], hasCheckedUrl: Option[Boolean]) = {
+    (url, hasCheckedUrl) match {
+      case (Some(_), _) => Some("true")
+      case (None, Some(true)) => Some("false")
+      case _ => None
+    }
+  }
 }

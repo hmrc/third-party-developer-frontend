@@ -20,10 +20,10 @@
 @import views.html.include.fieldError
 
 @import domain.AddTeamMemberPageMode
-@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean, mode: AddTeamMemberPageMode)(
+@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean, addTeamMemberPageMode: AddTeamMemberPageMode)(
         implicit request: play.api.mvc.Request[Any], messages: Messages)
 
-@helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id, mode)) {
+@helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id, addTeamMemberPageMode)) {
     @helper.CSRF.formField
 
     <div class="form-group @if(form.errors("email").nonEmpty) {form-group-error}">

@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package domain
+package controllers
 
-import enumeratum.{EnumEntry, PlayEnum}
+import controllers.FormKeys.termsOfUseAgreeKey
+import domain.CheckInformation
+import play.api.data.Form
+import play.api.data.Forms.{boolean, mapping}
 
-sealed trait AddTeamMemberPageMode extends EnumEntry
+case class TermsOfUseForm(termsOfUseAgreed: Boolean)
 
-object AddTeamMemberPageMode extends PlayEnum[AddTeamMemberPageMode] {
-  val values = findValues
+object TermsOfUseForm {
+  def form: Form[TermsOfUseForm] = Form(
+    mapping(
+      "termsOfUseAgreed" -> boolean.verifying(termsOfUseAgreeKey, b => b)
+    )(TermsOfUseForm.apply)(TermsOfUseForm.unapply)
+  )
 
-  final case object ManageTeamMembers extends AddTeamMemberPageMode
-  final case object ApplicationCheck  extends AddTeamMemberPageMode
-  final case object CheckYourAnswers  extends AddTeamMemberPageMode
-
-  def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
-
+  def fromCheckInformation(checkInformation: CheckInformation) = {
+    TermsOfUseForm(checkInformation.termsOfUseAgreements.nonEmpty)
+  }
 }
