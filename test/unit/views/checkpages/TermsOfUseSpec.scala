@@ -59,6 +59,7 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       val page = termsOfUse.render(
         app = thirdPartyApplication,
         form = TermsOfUseForm.form.fill(termsOfUseForm),
+        submitButtonLabel = "A Label",
         submitAction = mock[Call],
         landingPageRoute = mock[Call],
         request,
@@ -86,6 +87,7 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       val page = termsOfUse.render(
         app = thirdPartyApplication.copy(checkInformation = Some(checkInformation)),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
+        submitButtonLabel =  "A Label",
         submitAction = mock[Call],
         landingPageRoute = mock[Call],
         request,

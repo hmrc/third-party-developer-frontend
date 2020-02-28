@@ -28,12 +28,22 @@ import scala.concurrent.Future
 trait TermsOfUsePartialController {
   self: ApplicationController with CanUseCheckActions =>
 
+  private def createTermsOfUse(app: Application, form: Form[TermsOfUseForm], appId: String)(implicit request: controllers.ApplicationRequest[AnyContent]) = {
+    termsOfUse(
+      app,
+      form,
+      submitButtonLabel = submitButtonLabel,
+      submitAction = termsOfUseActionRoute(app.id),
+      landingPageRoute = landingPageRoute(app.id)
+    )
+  }
+
   def termsOfUsePage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
     val checkInformation = app.checkInformation.getOrElse(CheckInformation())
     val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
 
-    Future.successful(Ok(termsOfUse(app, TermsOfUseForm.form.fill(termsOfUseForm), termsOfUseActionRoute(app.id), landingPageRoute(app.id))))
+    Future.successful(Ok(createTermsOfUse(app,TermsOfUseForm.form.fill(termsOfUseForm),appId)))
   }
 
   def termsOfUseAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -44,7 +54,7 @@ trait TermsOfUsePartialController {
     val requestForm = TermsOfUseForm.form.bindFromRequest
 
     def withFormErrors(form: Form[TermsOfUseForm]) = {
-      Future.successful(BadRequest(termsOfUse(app, form, termsOfUseActionRoute(app.id), landingPageRoute(app.id))))
+      Future.successful(BadRequest(createTermsOfUse(app, form, app.id)))
     }
 
     def withValidForm(form: TermsOfUseForm) = {
@@ -67,5 +77,6 @@ trait TermsOfUsePartialController {
 
   protected def landingPageRoute(appId: String): Call
   protected def termsOfUseActionRoute(appId: String): Call
+  protected def submitButtonLabel: String
 
 }

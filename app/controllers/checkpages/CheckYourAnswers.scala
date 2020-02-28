@@ -55,8 +55,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     with ApiSubscriptionsPartialController
     with PrivacyPolicyPartialController
     with TermsAndConditionsPartialController
-    with TermsOfUsePartialController
-    {
+    with TermsOfUsePartialController {
 
   private def populateCheckYourAnswersData(application: Application, subs: Seq[String]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
@@ -97,20 +96,20 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     (for {
       _ <- applicationService.requestUplift(appId, application.name, request.user)
     } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId)))
-    .recoverWith {
-      case e: DeskproTicketCreationFailed =>
-        for {
-          checkYourAnswersData <- populateCheckYourAnswersData(application)
-          requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
-        } yield InternalServerError(checkyouranswers.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
-    }
-    .recover {
-      case _: ApplicationAlreadyExists =>
-        val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
-        applicationService.updateCheckInformation(application.id, information)
-        val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation())))
-        Conflict(applicationcheck.landingPage(application.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey))) // TODO where
-    }
+      .recoverWith {
+        case e: DeskproTicketCreationFailed =>
+          for {
+            checkYourAnswersData <- populateCheckYourAnswersData(application)
+            requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
+          } yield InternalServerError(checkyouranswers.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
+      }
+      .recover {
+        case _: ApplicationAlreadyExists =>
+          val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
+          applicationService.updateCheckInformation(application.id, information)
+          val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation())))
+          Conflict(applicationcheck.landingPage(application.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey))) // TODO where
+      }
   }
 
   def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -129,7 +128,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(checkyouranswers.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
   }
 
-  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def teamMemberRemoveConfirmation(appId: String, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     successful(request.application.findCollaboratorByHash(teamMemberHash)
       .map(collaborator => Ok(checkyouranswers.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
       .getOrElse(Redirect(routes.CheckYourAnswers.team(appId))))
@@ -137,13 +136,13 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
   def teamMemberRemoveAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
-    def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
+    def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
       applicationService
         .removeTeamMember(request.application, form.email, request.user.email)
         .map(_ => Redirect(routes.CheckYourAnswers.team(appId)))
     }
 
-    def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]) : Future[Result] = {
+    def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]): Future[Result] = {
       successful(BadRequest)
     }
 
@@ -151,12 +150,20 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
   }
 
   protected def landingPageRoute(appId: String): Call = routes.CheckYourAnswers.answersPage(appId)
-  protected def nameActionRoute(appId: String): Call =routes.CheckYourAnswers.nameAction(appId)
-  protected def contactActionRoute(appId: String): Call =routes.CheckYourAnswers.contactAction(appId)
+
+  protected def nameActionRoute(appId: String): Call = routes.CheckYourAnswers.nameAction(appId)
+
+  protected def contactActionRoute(appId: String): Call = routes.CheckYourAnswers.contactAction(appId)
+
   protected def apiSubscriptionsActionRoute(appId: String): Call = routes.CheckYourAnswers.apiSubscriptionsAction(appId)
+
   protected def privacyPolicyActionRoute(appId: String): Call = routes.CheckYourAnswers.privacyPolicyAction(appId)
+
   protected def termsAndConditionsActionRoute(appId: String): Call = routes.CheckYourAnswers.termsAndConditionsAction(appId)
+
   protected def termsOfUseActionRoute(appId: String): Call = routes.CheckYourAnswers.termsOfUseAction(appId)
+
+  protected def submitButtonLabel = "Continue"
 }
 
 case class CheckYourAnswersData(

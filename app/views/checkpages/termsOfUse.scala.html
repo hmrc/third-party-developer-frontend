@@ -20,7 +20,7 @@
 @import org.joda.time.format.DateTimeFormat
 @import controllers.TermsOfUseForm
 
-@(app: Application, form: Form[TermsOfUseForm], submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+@(app: Application, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
@@ -72,11 +72,11 @@
         <div class="form-group">
             @if(form("termsOfUseAgreed").value.contains("true")) {
                 <div>
-                    <a href="@landingPageRoute" class="button">Save and return</a>
+                    <a href="@landingPageRoute" class="button">@submitButtonLabel</a>
                 </div>
             } else {
                 <div>
-                    <button id="submit" class="button" type="submit">Save and return</button>
+                    <button id="submit" class="button" type="submit">@submitButtonLabel</button>
                 </div>
             }
         </div>
