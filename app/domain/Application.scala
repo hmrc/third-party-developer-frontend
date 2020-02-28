@@ -69,15 +69,6 @@ object ClientSecret {
   implicit val format = Json.format[ClientSecret]
 }
 
-case class EnvironmentToken(clientId: String,
-                            clientSecrets: Seq[ClientSecret],
-                            accessToken: String)
-
-object EnvironmentToken {
-  implicit val format1 = Json.format[ClientSecret]
-  implicit val format2 = Json.format[EnvironmentToken]
-}
-
 case class ClientSecretRequest(name: String)
 
 object ClientSecretRequest {
@@ -90,10 +81,13 @@ object DeleteClientSecretsRequest {
   implicit val format = Json.format[DeleteClientSecretsRequest]
 }
 
-case class ApplicationTokens(production: EnvironmentToken)
+case class ApplicationToken(clientId: String,
+                            clientSecrets: Seq[ClientSecret],
+                            accessToken: String)
 
-object ApplicationTokens {
-  implicit val format = Json.format[ApplicationTokens]
+object ApplicationToken {
+  implicit val format = Json.format[ApplicationToken]
+  implicit val format1 = Json.format[ClientSecret]
 }
 
 case class OverrideFlag(overrideType: String)

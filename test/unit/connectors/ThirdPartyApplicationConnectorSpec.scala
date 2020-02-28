@@ -247,12 +247,12 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
   }
 
   "fetch credentials for application" should {
-    val tokens = ApplicationTokens(EnvironmentToken("pId", Seq(aSecret("pSecret")), "pToken"))
+    val tokens = ApplicationToken("pId", Seq(aSecret("pSecret")), "pToken")
     val url = baseUrl + s"/application/$applicationId/credentials"
 
     "return credentials" in new Setup {
 
-      when(mockHttpClient.GET[ApplicationTokens](meq(url))(any(), any(), any()))
+      when(mockHttpClient.GET[ApplicationToken](meq(url))(any(), any(), any()))
         .thenReturn(Future.successful(tokens))
 
       val result = await(connector.fetchCredentials(applicationId))
@@ -262,7 +262,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
 
-      when(mockHttpClient.GET[ApplicationTokens](meq(url))(any(), any(), any()))
+      when(mockHttpClient.GET[ApplicationToken](meq(url))(any(), any(), any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](
@@ -272,7 +272,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "when retry logic is enabled should retry on failure" in new Setup {
       when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[ApplicationTokens](meq(url))(any(), any(), any())).thenReturn(
+      when(mockHttpClient.GET[ApplicationToken](meq(url))(any(), any(), any())).thenReturn(
         Future.failed(new BadRequestException("")),
         Future.successful(tokens)
       )
@@ -556,14 +556,14 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
   "addClientSecret" should {
     val applicationId = "applicationId"
-    val applicationTokens = ApplicationTokens(
-      EnvironmentToken("prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken"))
+    val applicationTokens = ApplicationToken(
+      "prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken")
     val clientSecretRequest = ClientSecretRequest("")
     val url = s"$baseUrl/application/$applicationId/client-secret"
 
     "generate the client secret" in new Setup {
       when(mockHttpClient
-        .POST[ClientSecretRequest, ApplicationTokens](meq(url), meq(clientSecretRequest), any())(any(), any(), any(), any()))
+        .POST[ClientSecretRequest, ApplicationToken](meq(url), meq(clientSecretRequest), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(applicationTokens))
 
       val result = await(connector.addClientSecrets(applicationId, clientSecretRequest))
@@ -573,7 +573,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "throw an ApplicationNotFound exception when the application does not exist" in new Setup {
       when(mockHttpClient
-        .POST[ClientSecretRequest, ApplicationTokens](meq(url), meq(clientSecretRequest), any())(any(), any(), any(), any()))
+        .POST[ClientSecretRequest, ApplicationToken](meq(url), meq(clientSecretRequest), any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound] {
@@ -583,7 +583,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "throw a ClientSecretLimitExceeded exception when the max number of client secret has been exceeded" in new Setup {
       when(mockHttpClient
-        .POST[ClientSecretRequest, ApplicationTokens](meq(url), meq(clientSecretRequest), any())(any(), any(), any(), any()))
+        .POST[ClientSecretRequest, ApplicationToken](meq(url), meq(clientSecretRequest), any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
 
       intercept[ClientSecretLimitExceeded] {

@@ -365,8 +365,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   }
 
   "addClientSecret" should {
-    val applicationTokens = ApplicationTokens(
-      EnvironmentToken("prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken"))
+    val applicationTokens = ApplicationToken("prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken")
 
     "add a client secret for app in production environment" in new Setup {
 
