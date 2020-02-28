@@ -146,7 +146,7 @@ object ApplicationStub {
     stubResponse(Environment.SANDBOX, sandboxApps)
   }
 
-  def configureApplicationCredentials(tokens: Map[String, ApplicationTokens], status: Int = OK) = {
+  def configureApplicationCredentials(tokens: Map[String, ApplicationToken], status: Int = OK) = {
     tokens.foreach { entry =>
       stubFor(get(urlEqualTo(s"/application/${entry._1}/credentials"))
         .willReturn(aResponse().withStatus(status).withBody(Json.toJson(entry._2).toString()).withHeader("content-type", "application/json")))

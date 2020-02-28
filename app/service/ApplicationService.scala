@@ -51,7 +51,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     connectorWrapper.fetchApplicationById(id)
   }
 
-  def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] =
+  def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.fetchCredentials(id))
 
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
@@ -134,7 +134,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield subscription
   }
 
-  def addClientSecret(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = {
+  def addClientSecret(id: String)(implicit hc: HeaderCarrier): Future[ApplicationToken] = {
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.addClientSecrets(id, ClientSecretRequest("")))
   }
 

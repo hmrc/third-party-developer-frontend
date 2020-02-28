@@ -80,7 +80,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   val developerSubmittedSandboxApplication: Application = developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production(loggedInDeveloper.email, ""))
   val devloperCreatedSandboxApplication: Application = developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
 
-  val tokens: ApplicationTokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
+  val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
 
   trait Setup {
     val underTest = new Subscriptions(

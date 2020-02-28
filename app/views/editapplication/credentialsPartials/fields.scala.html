@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import domain.EnvironmentToken
 @import uk.gov.hmrc.urls.Link
 @import config.ApplicationConfig
 @import domain.Application
@@ -23,7 +22,8 @@
 @import include._
 
 @import domain.Permissions.SandboxOrAdmin
-@(app: Application, developer: Developer, token: EnvironmentToken, form: Form[VerifyPasswordForm])(
+@import domain.ApplicationToken
+@(app: Application, developer: Developer, token: ApplicationToken, form: Form[VerifyPasswordForm])(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 <div class="credentials-section" aria-describedby="client-id-info">

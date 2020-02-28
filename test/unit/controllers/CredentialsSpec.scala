@@ -55,7 +55,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-  val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
+  val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
 
   trait Setup {
     val underTest = new Credentials(
@@ -109,8 +109,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   "addClientSecret" should {
     val appId = "1234"
-    val updatedTokens = ApplicationTokens(
-      EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
+    val updatedTokens = ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
 
     "add the client secret" in new Setup {
 
@@ -193,7 +192,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.getProductionClientSecret(application.id, 1)(loggedInRequest.withHeaders("password" -> password)))
 
       status(result) shouldBe OK
-      jsonBodyOf(result) shouldBe Json.toJson(ClientSecretResponse(tokens.production.clientSecrets(1).secret))
+      jsonBodyOf(result) shouldBe Json.toJson(ClientSecretResponse(tokens.clientSecrets(1).secret))
     }
 
     "return password required when the password is not set" in new Setup {

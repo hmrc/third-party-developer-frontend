@@ -90,7 +90,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
       val future = for {
         _ <- developerConnector.checkPassword(PasswordCheckRequest(request.user.email, password))
         result <- applicationService.fetchCredentials(applicationId)
-      } yield result.production.clientSecrets.zipWithIndex.find(_._2 == index).map(_._1)
+      } yield result.clientSecrets.zipWithIndex.find(_._2 == index).map(_._1)
 
       future map {
         case Some(clientSecret) => Ok(Json.toJson(ClientSecretResponse(clientSecret.secret)))
@@ -129,8 +129,8 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
 
     def showClientSecretsToDelete = {
-      applicationService.fetchCredentials(applicationId).map { tokens =>
-        val clientSecrets = tokens.production.clientSecrets.map(_.secret)
+      applicationService.fetchCredentials(applicationId).map { token =>
+        val clientSecrets = token.clientSecrets.map(_.secret)
         Ok(editapplication.selectClientSecretsToDelete(application, clientSecrets, SelectClientSecretsToDeleteForm.form))
       } recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
@@ -168,7 +168,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
 
     def handleValidForm(validForm: SelectClientSecretsToDeleteForm): Future[Result] = {
       applicationService.fetchCredentials(applicationId).map { credentials =>
-        val clientSecrets = credentials.production.clientSecrets.map(_.secret)
+        val clientSecrets = credentials.clientSecrets.map(_.secret)
         validForm.clientSecretsToDelete match {
           case Nil =>
             val errorForm = SelectClientSecretsToDeleteForm.form.fill(validForm).withError(FormKeys.deleteSelectField, FormKeys.selectAClientSecretKey)

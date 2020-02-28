@@ -150,9 +150,9 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
+  protected def landingPageRoute(appId: String): Call = routes.CheckYourAnswers.answersPage(appId)
   protected def nameActionRoute(appId: String): Call =routes.CheckYourAnswers.nameAction(appId)
   protected def contactActionRoute(appId: String): Call =routes.CheckYourAnswers.contactAction(appId)
-  protected def landingPageRoute(appId: String): Call = routes.CheckYourAnswers.answersPage(appId)
   protected def apiSubscriptionsActionRoute(appId: String): Call = routes.CheckYourAnswers.apiSubscriptionsAction(appId)
   protected def privacyPolicyActionRoute(appId: String): Call = routes.CheckYourAnswers.privacyPolicyAction(appId)
   protected def termsAndConditionsActionRoute(appId: String): Call = routes.CheckYourAnswers.termsAndConditionsAction(appId)

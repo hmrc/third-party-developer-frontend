@@ -82,9 +82,9 @@ trait TestApplications {
 
   def tokens(clientId: String = randomString(28),
              clientSecret: String = randomString(28),
-             accessToken: String = randomString(28)): ApplicationTokens = {
+             accessToken: String = randomString(28)): ApplicationToken = {
 
-    ApplicationTokens(EnvironmentToken(clientId, Seq(aClientSecret(clientSecret)), accessToken))
+    ApplicationToken(clientId, Seq(aClientSecret(clientSecret)), accessToken)
   }
 
   private def aClientSecret(secret: String = randomString(28)) =

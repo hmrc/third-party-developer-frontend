@@ -55,7 +55,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     val clientSecret2 = ClientSecret("", "clientSecret2Content", DateTimeUtils.now)
 
-    val emptyTokens = ApplicationTokens(EnvironmentToken("", Seq.empty, ""))
+    val emptyTokens = ApplicationToken("", Seq.empty, "")
 
     val application = Application(
       "Test Application ID",
@@ -88,7 +88,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     "show add client secret button for a standard app" in new Setup {
 
-      val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
+      val tokensWithTwoClientSecrets = ApplicationToken("", Seq(clientSecret1), "")
       val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"))
       val page = credentials.render(productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
 
@@ -99,7 +99,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
     }
 
     "show add client secret button for an ROPC app" in new Setup {
-      val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
+      val tokensWithTwoClientSecrets = ApplicationToken("", Seq(clientSecret1), "")
       val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"), access = ROPC())
       val page = credentials.render(productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
 
@@ -110,7 +110,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
     }
 
     "show add client secret button for a Privileged app" in new Setup {
-      val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
+      val tokensWithTwoClientSecrets = ApplicationToken("", Seq(clientSecret1), "")
       val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"), access = Privileged())
       val page = credentials.render(productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
 
@@ -133,7 +133,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     "show delete client secret button in production app if it has more than one client secret" in new Setup {
 
-      val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1, clientSecret2), ""))
+      val tokensWithTwoClientSecrets = ApplicationToken("", Seq(clientSecret1, clientSecret2), "")
       val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"))
       val page = credentials.render(productionApp, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
 
@@ -146,7 +146,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     "not show delete client secret button in production app if it has only one client secret" in new Setup {
 
-      val tokensWithOneClientSecret = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
+      val tokensWithOneClientSecret = ApplicationToken("", Seq(clientSecret1), "")
       val productionApp = application.copy(state = ApplicationState.production("requester", "verificationCode"))
       val page = credentials.render(productionApp, tokensWithOneClientSecret, form, request, developer, applicationMessages, appConfig, "credentials")
 
@@ -159,7 +159,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     "show delete client secret button in Sandbox app if it has more than one client secret" in new Setup {
 
-      val tokensWithTwoClientSecrets = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1, clientSecret2), ""))
+      val tokensWithTwoClientSecrets = ApplicationToken("", Seq(clientSecret1, clientSecret2), "")
 
       val page = credentials.render(sandboxApplication, tokensWithTwoClientSecrets, form, request, developer, applicationMessages, appConfig, "credentials")
 
@@ -172,7 +172,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     "not show delete client secret button in Sandbox app if it has only one client secret" in new Setup {
 
-      val tokensWithOneClientSecret = emptyTokens.copy(production = EnvironmentToken("", Seq(clientSecret1), ""))
+      val tokensWithOneClientSecret = ApplicationToken("", Seq(clientSecret1), "")
 
       val page = credentials.render(sandboxApplication, tokensWithOneClientSecret, form, request, developer, applicationMessages, appConfig, "credentials")
 
