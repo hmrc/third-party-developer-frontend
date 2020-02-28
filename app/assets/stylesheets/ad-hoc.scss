@@ -293,3 +293,15 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
     }
   }
 }
+
+tr.apiSubscriptions, th {
+  vertical-align: text-top;
+}
+
+tr.contactDetails, th {
+  vertical-align: text-top;
+}
+
+tr.teamMembers, th {
+    vertical-align: text-top;
+}
