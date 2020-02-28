@@ -104,7 +104,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       .getOrElse(Redirect(routes.ApplicationCheck.team(appId))))
   }
 
-  def teamMemberRemoveAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request => {
+  def teamMemberRemoveAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
         applicationService
@@ -117,7 +117,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     }
 
     RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
-    }
   }
 
   protected def landingPageRoute(appId: String): Call = routes.ApplicationCheck.requestCheckPage(appId)
@@ -127,6 +126,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   protected def privacyPolicyActionRoute(appId: String): Call = routes.ApplicationCheck.privacyPolicyAction(appId)
   protected def termsAndConditionsActionRoute(appId: String): Call = routes.ApplicationCheck.termsAndConditionsAction(appId)
   protected def termsOfUseActionRoute(appId: String): Call = routes.ApplicationCheck.termsOfUseAction(appId)
+  protected def submitButtonLabel = "Save and return"
 }
 
 object ApplicationInformationForm {

@@ -56,7 +56,9 @@ developerSession = Some(loggedIn)
                     </thead>
                     <tbody>
                         <tr id="apiSubscriptions">
-                            <th class="col-40"><span strong class="bold-small">API subscriptions</span></th>
+                            <th class="col-40">
+                                <span strong class="bold-small">API subscriptions</span>
+                            </th>
                             <td>
                                 @data.subscriptions.map { sub =>
                                 @sub<br/>
@@ -159,7 +161,7 @@ developerSession = Some(loggedIn)
                         </td>
                         <td>
                             <div align="right">
-                                <a href="@controllers.checkpages.routes.CheckYourAnswers.termsOfUsePage(data.appId)">Change<span class="visually-hidden">Edit Terms of use</span></a>
+                                <a href="@controllers.checkpages.routes.CheckYourAnswers.termsOfUsePage(data.appId)">View<span class="visually-hidden">View Terms of use</span></a>
                             </div>
                         </td>
                     </tr>
