@@ -22,10 +22,10 @@ import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{FieldDefinitions, SubscriptionField, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{FieldDefinitions, Fields, SubscriptionField, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTime
-import org.mockito.{ArgumentCaptor}
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
@@ -322,7 +322,34 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
       await(applicationService.subscribeToApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
     }
+
+    "with subscription fields definitions" should {
+      "but no values" in new Setup {
+        private val context = "api1"
+        private val version = "1.0"
+
+        private val subscription = APIIdentifier(context, version)
+
+        private val fields: Fields = Map("" -> "")
+
+        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+
+        given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
+          .willReturn(Future.successful(ApplicationUpdateSuccessful))
+
+        await(applicationService.subscribeToApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
+
+        verify(mockProductionApplicationConnector).subscribeToApi(productionApplicationId, subscription)
+        verify(mockProductionSubscriptionFieldsConnector).saveFieldValues(
+          mockEq(productionApplication.clientId), mockEq(context), mockEq(version), mockEq(fields)
+        )(any[HeaderCarrier])
+      }
+
+      "with values" in new Setup {
+      }
+    }
   }
+
 
   "Unsubscribe from API" should {
     "unsubscribe application from an API version" in new Setup {
