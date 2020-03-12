@@ -174,7 +174,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
-        given(underTest.applicationService.subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        given(underTest.applicationService.subscribeToApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
@@ -182,7 +182,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(underTest.applicationService).subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
+        verify(underTest.applicationService).subscribeToApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
       }
 
@@ -193,7 +193,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
-        given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        given(underTest.applicationService.unsubscribeFromApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
@@ -201,7 +201,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(underTest.applicationService).unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
+        verify(underTest.applicationService).unsubscribeFromApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
       }
 
@@ -212,14 +212,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
-        given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        given(underTest.applicationService.unsubscribeFromApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(underTest.applicationService, never).unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
+        verify(underTest.applicationService, never).unsubscribeFromApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
       }
     }
@@ -232,7 +232,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
-        given(underTest.applicationService.subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        given(underTest.applicationService.subscribeToApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
@@ -240,7 +240,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(underTest.applicationService).subscribeToApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
+        verify(underTest.applicationService).subscribeToApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
       }
 
@@ -251,7 +251,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
-        given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        given(underTest.applicationService.unsubscribeFromApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
@@ -259,7 +259,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(underTest.applicationService).unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
+        verify(underTest.applicationService).unsubscribeFromApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
       }
 
@@ -270,14 +270,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         given(underTest.applicationService.fetchByApplicationId(mockEq(app.id))(any[HeaderCarrier])).willReturn(successful(app))
-        given(underTest.applicationService.unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        given(underTest.applicationService.unsubscribeFromApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
         given(underTest.applicationService.updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(underTest.applicationService, never).unsubscribeFromApi(mockEq(app.id), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
+        verify(underTest.applicationService, never).unsubscribeFromApi(mockEq(app), mockEq(apiContext), mockEq(apiVersion))(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(app.id), any[CheckInformation])(any[HeaderCarrier])
       }
     }

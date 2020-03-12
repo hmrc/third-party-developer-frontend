@@ -320,7 +320,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
         .willReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      await(applicationService.subscribeToApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
+      await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
     }
 
     "with subscription fields definitions" should {
@@ -337,7 +337,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
           .willReturn(Future.successful(ApplicationUpdateSuccessful))
 
-        await(applicationService.subscribeToApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
+        await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
 
         verify(mockProductionApplicationConnector).subscribeToApi(productionApplicationId, subscription)
         verify(mockProductionSubscriptionFieldsConnector).saveFieldValues(
@@ -362,7 +362,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionApplicationId, context, version))
         .willReturn(Future.successful(true))
 
-      await(applicationService.unsubscribeFromApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
+      await(applicationService.unsubscribeFromApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
     }
   }
 

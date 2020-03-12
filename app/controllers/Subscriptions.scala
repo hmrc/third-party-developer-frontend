@@ -98,7 +98,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
         case Some(subscribe) =>
           def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
 
-          service(applicationId, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.application) }
+          service(request.application, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.application) }
         case _ =>
           Future.successful(redirect(redirectTo, applicationId))
       }
