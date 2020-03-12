@@ -114,11 +114,16 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     val apiIdentifier = APIIdentifier(context, version)
 
     for {
-      fieldDefinitions: Seq[SubscriptionField] <- subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
-      emptyFieldValues = createEmptyFieldValues(fieldDefinitions)
-      subscribeResponse: ApplicationUpdateSuccessful <- connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
-      _ <- subscriptionFieldsService.saveFieldValues(application.id, context, version, emptyFieldValues)
-    } yield subscribeResponse
+      subscribeResponse <- connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
+      fieldDefinitions <- subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
+      fieldDefinitionValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
+    } yield {
+      if(!fieldDefinitionValues.exists(field => field.value.isDefined)) {
+        subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+      }
+
+      subscribeResponse
+    }
   }
 
   def unsubscribeFromApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {

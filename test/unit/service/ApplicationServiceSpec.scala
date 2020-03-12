@@ -28,7 +28,7 @@ import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
+import org.mockito.Mockito.{never, times, verify, verifyZeroInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
@@ -41,6 +41,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
+import scala.util.Random
 
 class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
@@ -310,19 +311,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   }
 
   "Subscribe to API" should {
-    "subscribe application to an API version" in new Setup {
-      private val context = "api1"
-      private val version = "1.0"
-
-      private val subscription = APIIdentifier(context, version)
-
-      theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-      given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
-        .willReturn(Future.successful(ApplicationUpdateSuccessful))
-
-      await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
-    }
-
     "with subscription fields definitions" should {
       "but no values" in new Setup {
         private val context = "api1"
@@ -330,7 +318,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
         private val subscription = APIIdentifier(context, version)
 
-        private val fieldDefinitions = Seq(SubscriptionField("name", "description", "hint", "type", None))
+        private val fieldDefinitions = Seq(SubscriptionField("name", "description", "hint", "type"))
 
         private val fields: Fields = fieldDefinitions.map(definition => (definition.name, "") ).toMap
 
@@ -354,6 +342,33 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       }
 
       "with values" in new Setup {
+        private val context = "api1"
+        private val version = "1.0"
+
+        private val subscription = APIIdentifier(context, version)
+
+        private val fieldDefinitions = Seq(SubscriptionField("name", "description", "hint", "type"))
+
+        private val fieldDefinitionsWithValues = fieldDefinitions.map(d => d.withValue(Some(Random.nextString(10))))
+
+        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+
+        given(mockSubscriptionFieldsService.getFieldDefinitions(productionApplication, subscription))
+          .willReturn(Future.successful(fieldDefinitions))
+
+        given(mockSubscriptionFieldsService.fetchFieldsValues(productionApplication, fieldDefinitions, subscription))
+            .willReturn(Future.successful(fieldDefinitionsWithValues))
+
+        given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
+          .willReturn(Future.successful(ApplicationUpdateSuccessful))
+
+        given(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]))
+          .willReturn(Future.successful(mock[HttpResponse]))
+
+        await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
+
+        verify(mockProductionApplicationConnector).subscribeToApi(productionApplicationId, subscription)
+        verify(mockSubscriptionFieldsService, never()).saveFieldValues(any[String], any[String], any[String], any[Fields])(any[HeaderCarrier])
       }
     }
   }
