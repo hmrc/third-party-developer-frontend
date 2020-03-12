@@ -121,11 +121,11 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
         for {
           fieldDefinitionValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
         } yield {
-          if (!fieldDefinitionValues.exists(field => field.value.isDefined)) {
+          if (fieldDefinitionValues.isEmpty)
             subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
           }
         }
-      }
+
       subscribeResponse
     }
   }
