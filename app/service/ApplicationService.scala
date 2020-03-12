@@ -24,7 +24,7 @@ import domain.ApiSubscriptionFields.{FieldDefinitions, SubscriptionField, Subscr
 import domain.Environment.{PRODUCTION, SANDBOX}
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
@@ -101,8 +101,25 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield apiVersions
   }
 
-  def subscribeToApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector.subscribeToApi(application.id, APIIdentifier(context, version))
+  // TODO: Return Future[Unit]?
+  def subscribeToApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val connectors = connectorWrapper.connectorsForEnvironment(application.deployedTo)
+
+    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionField]) = {
+      fieldDefinitions
+        .map(d => (d.name, ""))
+        .toMap
+    }
+
+    val apiIdentifier = APIIdentifier(context, version)
+
+    for {
+      fieldDefinitions: Seq[SubscriptionField] <- subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
+      emptyFieldValues = createEmptyFieldValues(fieldDefinitions)
+      subscribeResponse: ApplicationUpdateSuccessful <- connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
+      _ <- subscriptionFieldsService.saveFieldValues(application.id, context, version, emptyFieldValues)
+    } yield subscribeResponse
+  }
 
   def unsubscribeFromApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val connectors = connectorWrapper.connectorsForEnvironment(application.deployedTo)
@@ -203,6 +220,12 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     }
   }
 
+  private def roleForApplication(application: Application, email: String) =
+    application.role(email).getOrElse(throw new ApplicationNotFound)
+
+  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector =
+    if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
+
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationSuccessful] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
   }
@@ -261,9 +284,6 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield (productionApplications ++ sandboxApplications).sorted
   }
 
-  private def roleForApplication(application: Application, email: String) =
-    application.role(email).getOrElse(throw new ApplicationNotFound)
-
   def requestDeveloperAccountDeletion(name: String, email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     val deleteDeveloperTicket = DeskproTicket.deleteDeveloperAccount(name, email)
 
@@ -300,9 +320,6 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
       "improvementSuggestions" -> improvementSuggestions,
       "timestamp" -> DateTimeUtils.now.toString))
   }
-
-  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector =
-    if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
     if (environment.contains(PRODUCTION))

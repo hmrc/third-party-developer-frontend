@@ -33,7 +33,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service._
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
@@ -330,18 +330,26 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
         private val subscription = APIIdentifier(context, version)
 
-        private val fields: Fields = Map("" -> "")
+        private val fieldDefinitions = Seq(SubscriptionField("name", "description", "hint", "type", None))
+
+        private val fields: Fields = fieldDefinitions.map(definition => (definition.name, "") ).toMap
 
         theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+
+        given(mockSubscriptionFieldsService.getFieldDefinitions(productionApplication, subscription))
+          .willReturn(Future.successful(fieldDefinitions))
 
         given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
           .willReturn(Future.successful(ApplicationUpdateSuccessful))
 
+        given(mockSubscriptionFieldsService.saveFieldValues(mockEq(productionApplicationId), mockEq(context), mockEq(version), mockEq(fields))(any[HeaderCarrier]))
+          .willReturn(Future.successful(mock[HttpResponse]))
+
         await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
 
         verify(mockProductionApplicationConnector).subscribeToApi(productionApplicationId, subscription)
-        verify(mockProductionSubscriptionFieldsConnector).saveFieldValues(
-          mockEq(productionApplication.clientId), mockEq(context), mockEq(version), mockEq(fields)
+        verify(mockSubscriptionFieldsService).saveFieldValues(
+          mockEq(productionApplicationId), mockEq(context), mockEq(version), mockEq(fields)
         )(any[HeaderCarrier])
       }
 

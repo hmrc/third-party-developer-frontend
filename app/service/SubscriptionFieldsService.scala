@@ -43,6 +43,7 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     }
   }
 
+  // TODO: Pass the application in here
   def saveFieldValues(applicationId: String, apiContext: String, apiVersion: String, fields: Fields)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     for {
       connector <- connectorsWrapper.forApplication(applicationId)
@@ -61,5 +62,12 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     for {
       allFieldDefinitions <- apiSubscriptionFieldsConnector.fetchAllFieldDefinitions()
     } yield toMap(allFieldDefinitions)
+  }
+
+  // TODO: Test me
+  def getFieldDefinitions(application: Application, apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
+    val connector = connectorsWrapper.connectorsForEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+
+    connector.fetchFieldDefinitions(apiIdentifier.context, apiIdentifier.version)
   }
 }
