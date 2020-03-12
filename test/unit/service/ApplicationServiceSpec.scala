@@ -320,12 +320,17 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
         private val fieldDefinitions = Seq(SubscriptionField("name", "description", "hint", "type"))
 
+        private val fieldDefinitionsWithValues = Seq.empty
+
         private val fields: Fields = fieldDefinitions.map(definition => (definition.name, "") ).toMap
 
         theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
 
         given(mockSubscriptionFieldsService.getFieldDefinitions(productionApplication, subscription))
           .willReturn(Future.successful(fieldDefinitions))
+
+        given(mockSubscriptionFieldsService.fetchFieldsValues(productionApplication, fieldDefinitions, subscription))
+          .willReturn(Future.successful(fieldDefinitionsWithValues))
 
         given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
           .willReturn(Future.successful(ApplicationUpdateSuccessful))
