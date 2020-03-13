@@ -378,7 +378,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
   }
 
-
   "Unsubscribe from API" should {
     "unsubscribe application from an API version" in new Setup {
       private val context = "api1"

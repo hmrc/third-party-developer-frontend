@@ -116,16 +116,12 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     for {
       subscribeResponse <- connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
       fieldDefinitions <- subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
+      if fieldDefinitions.nonEmpty
+      fieldDefinitionValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
     } yield {
-      if (fieldDefinitions.nonEmpty) {
-        for {
-          fieldDefinitionValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
-        } yield {
-          if (fieldDefinitionValues.isEmpty)
-            subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
-          }
-        }
-
+      if (fieldDefinitionValues.isEmpty) {
+        subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+      }
       subscribeResponse
     }
   }
