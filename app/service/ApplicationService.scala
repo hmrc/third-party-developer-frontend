@@ -119,7 +119,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
       if fieldDefinitions.nonEmpty
       fieldDefinitionValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
     } yield {
-      if (fieldDefinitionValues.isEmpty) {
+      if(!fieldDefinitionValues.exists(field => field.value.isDefined)) {
         subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
       }
       subscribeResponse
