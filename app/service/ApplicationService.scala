@@ -101,9 +101,13 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield apiVersions
   }
 
+
+
   // TODO: Return Future[Unit]?
   def subscribeToApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val connectors = connectorWrapper.connectorsForEnvironment(application.deployedTo)
+
+    val apiIdentifier = APIIdentifier(context, version)
 
     def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionField]) = {
       fieldDefinitions
@@ -111,17 +115,25 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
         .toMap
     }
 
-    val apiIdentifier = APIIdentifier(context, version)
+    def ifNoSubscriptionValuesSaveEmptyValues(fieldDefinitions: Seq[SubscriptionField]) = {
+      subscriptionFieldsService
+        .fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
+        .map(fieldDefinitionValues => {
+          // TODO - Write test for this better.
+          if(!fieldDefinitionValues.exists(field => field.value.isDefined)) {
+            subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+          }
+        })
+    }
 
     for {
       subscribeResponse <- connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
       fieldDefinitions <- subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
-      if fieldDefinitions.nonEmpty
-      fieldDefinitionValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
     } yield {
-      if(!fieldDefinitionValues.exists(field => field.value.isDefined)) {
-        subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+      if (fieldDefinitions.nonEmpty){
+        ifNoSubscriptionValuesSaveEmptyValues(fieldDefinitions)
       }
+
       subscribeResponse
     }
   }

@@ -311,6 +311,31 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   }
 
   "Subscribe to API" should {
+    "with no subscription fields definitions" in new Setup {
+
+        private val context = "api1"
+        private val version = "1.0"
+
+        private val subscription = APIIdentifier(context, version)
+
+        private val fieldDefinitions = Seq.empty
+
+        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+
+        given(mockSubscriptionFieldsService.getFieldDefinitions(productionApplication, subscription))
+          .willReturn(Future.successful(fieldDefinitions))
+
+        given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
+          .willReturn(Future.successful(ApplicationUpdateSuccessful))
+
+        await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
+
+        verify(mockProductionApplicationConnector).subscribeToApi(productionApplicationId, subscription)
+        verify(mockSubscriptionFieldsService,never()).saveFieldValues(
+          any(), any(), any(), any()
+        )(any[HeaderCarrier])
+    }
+
     "with subscription fields definitions" should {
       "but no values" in new Setup {
         private val context = "api1"
