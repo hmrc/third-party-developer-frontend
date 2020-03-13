@@ -345,7 +345,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
         private val fieldDefinitions = Seq(SubscriptionField("name", "description", "hint", "type"))
 
-        private val fieldDefinitionsWithValues = Seq.empty
+        private val fieldDefinitionsWithValues = fieldDefinitions.map(d => d.withValue(None))
 
         private val fields: Fields = fieldDefinitions.map(definition => (definition.name, "") ).toMap
 
@@ -360,15 +360,10 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
           .willReturn(Future.successful(ApplicationUpdateSuccessful))
 
-        given(mockSubscriptionFieldsService.saveFieldValues(mockEq(productionApplicationId), mockEq(context), mockEq(version), mockEq(fields))(any[HeaderCarrier]))
-          .willReturn(Future.successful(mock[HttpResponse]))
-
         await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
 
         verify(mockProductionApplicationConnector).subscribeToApi(productionApplicationId, subscription)
-        verify(mockSubscriptionFieldsService).saveFieldValues(
-          mockEq(productionApplicationId), mockEq(context), mockEq(version), mockEq(fields)
-        )(any[HeaderCarrier])
+        verify(mockSubscriptionFieldsService, never()).saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier])
       }
 
       "with values" in new Setup {
