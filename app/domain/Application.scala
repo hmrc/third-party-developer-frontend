@@ -69,13 +69,13 @@ object ClientSecret {
   implicit val format = Json.format[ClientSecret]
 }
 
-case class ClientSecretRequest(name: String)
+case class ClientSecretRequest(actorEmailAddress: String)
 
 object ClientSecretRequest {
   implicit val format2 = Json.format[ClientSecretRequest]
 }
 
-case class DeleteClientSecretsRequest(secrets: Seq[String])
+case class DeleteClientSecretsRequest(actorEmailAddress: String, secrets: Seq[String])
 
 object DeleteClientSecretsRequest {
   implicit val format = Json.format[DeleteClientSecretsRequest]
