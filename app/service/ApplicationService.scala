@@ -101,9 +101,6 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield apiVersions
   }
 
-
-
-  // TODO: Return Future[Unit]?
   def subscribeToApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val connectors = connectorWrapper.connectorsForEnvironment(application.deployedTo)
 
@@ -119,9 +116,8 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
       subscriptionFieldsService
         .fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
         .map(fieldDefinitionValues => {
-          // TODO - Write test for this better.
           if(!fieldDefinitionValues.exists(field => field.value.isDefined)) {
-            subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+            subscriptionFieldsService.saveFieldValues(application, context, version, createEmptyFieldValues(fieldDefinitions))
           }
         })
     }

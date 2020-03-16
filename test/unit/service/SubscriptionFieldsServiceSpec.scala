@@ -125,7 +125,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
       given(mockSubscriptionFieldsConnector.saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
         .willReturn(Future.successful(HttpResponse(CREATED)))
 
-      await(underTest.saveFieldValues(applicationId, apiContext, apiVersion, fieldsValues))
+      await(underTest.saveFieldValues(application, apiContext, apiVersion, fieldsValues))
 
       verify(mockSubscriptionFieldsConnector).saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
     }

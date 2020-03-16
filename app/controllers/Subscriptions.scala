@@ -157,12 +157,12 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   def saveSubscriptionFields(applicationId: String,
                              apiContext: String,
                              apiVersion: String,
-                             subscriptionRedirect: String): Action[AnyContent] = loggedInAction { implicit request =>
+                             subscriptionRedirect: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     def handleValidForm(validForm: SubscriptionFieldsForm) = {
       def saveFields(validForm: SubscriptionFieldsForm)(implicit hc: HeaderCarrier): Future[Any] = {
         if (validForm.fields.nonEmpty) {
           subFieldsService.saveFieldValues(
-            applicationId,
+            request.application,
             apiContext,
             apiVersion,
             Map(validForm.fields.map(f => f.name -> f.value.getOrElse("")): _ *))
@@ -216,7 +216,6 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
 }
 
 class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(implicit ec: ExecutionContext) {
-
   def fetchPageDataFor(application: Application)(implicit hc: HeaderCarrier): Future[PageData] = {
     for {
       subscriptions <- applicationService.apisWithSubscriptions(application)
