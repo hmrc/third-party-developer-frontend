@@ -157,12 +157,12 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   def saveSubscriptionFields(applicationId: String,
                              apiContext: String,
                              apiVersion: String,
-                             subscriptionRedirect: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
+                             subscriptionRedirect: String): Action[AnyContent] = loggedInAction { implicit request =>
     def handleValidForm(validForm: SubscriptionFieldsForm) = {
       def saveFields(validForm: SubscriptionFieldsForm)(implicit hc: HeaderCarrier): Future[Any] = {
         if (validForm.fields.nonEmpty) {
           subFieldsService.saveFieldValues(
-            request.application,
+            applicationId,
             apiContext,
             apiVersion,
             Map(validForm.fields.map(f => f.name -> f.value.getOrElse("")): _ *))

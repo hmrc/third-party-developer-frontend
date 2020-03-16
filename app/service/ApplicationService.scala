@@ -117,7 +117,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
         .fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
         .map(fieldDefinitionValues => {
           if(!fieldDefinitionValues.exists(field => field.value.isDefined)) {
-            subscriptionFieldsService.saveFieldValues(application, context, version, createEmptyFieldValues(fieldDefinitions))
+            subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
           }
         })
     }
