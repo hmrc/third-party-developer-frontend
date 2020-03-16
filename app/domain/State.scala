@@ -18,7 +18,14 @@ package domain
 
 import enumeratum.{EnumEntry, PlayEnum}
 
-sealed trait State extends EnumEntry
+sealed trait State extends EnumEntry{
+  def isApproved: Boolean = this == State.PRODUCTION
+
+  def isPendingApproval: Boolean = (this == State.PENDING_REQUESTER_VERIFICATION
+                          || this == State.PENDING_GATEKEEPER_APPROVAL)
+
+  def isInTesting: Boolean = (this == State.TESTING)
+}
 
 object State extends PlayEnum[State] {
   val values = findValues

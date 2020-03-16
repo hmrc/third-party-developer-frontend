@@ -59,6 +59,12 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       ApplicationInformationForm.form.fill(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))))))
   }
 
+  def unauthorisedAppDetails(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
+    val application = request.application
+
+    Future.successful(Ok(applicationcheck.unauthorisedAppDetails(application.name, application.adminEmails)))
+  }
+
   def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
     def withFormErrors(app: Application)(form: Form[CheckInformationForm]): Future[Result] = {
@@ -69,12 +75,12 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       Future.successful(Redirect(routes.CheckYourAnswers.answersPage(appId)))
     }
 
-    val app = request.application
+    val application = request.application
     val requestForm = ApplicationInformationForm.form.fillAndValidate(
-      CheckInformationForm.fromCheckInformation(app.checkInformation.getOrElse(CheckInformation()))
+      CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
     )
 
-    requestForm.fold(withFormErrors(app), withValidForm(app))
+    requestForm.fold(withFormErrors(application), withValidForm(application))
   }
 
   def credentialsRequested(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
