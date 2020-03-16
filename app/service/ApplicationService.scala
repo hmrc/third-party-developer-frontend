@@ -18,13 +18,13 @@ package service
 
 import config.ApplicationConfig
 import connectors._
+import domain._
 import domain.APIStatus._
 import domain.ApiSubscriptionFields.{FieldDefinitions, SubscriptionField, SubscriptionFieldsWrapper}
 import domain.Environment.{PRODUCTION, SANDBOX}
-import domain._
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
@@ -57,8 +57,8 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
     def toApiSubscriptionStatuses(api: APISubscription,
-                                   version: VersionSubscription,
-                                   fieldDefinitions: Map[APIIdentifier, FieldDefinitions]): Future[APISubscriptionStatus] = {
+                                  version: VersionSubscription,
+                                  fieldDefinitions: Map[APIIdentifier, FieldDefinitions]): Future[APISubscriptionStatus] = {
       val apiIdentifier = APIIdentifier(api.context, version.version.version)
 
       val subscriptionFieldsWithOutValues: Seq[SubscriptionField] =
@@ -67,9 +67,9 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
           .map((fieldDefinitions: FieldDefinitions) => fieldDefinitions.fieldDefinitions)
           .getOrElse(Seq.empty)
 
-      val subscriptionFieldsWithValues: Future[Seq[SubscriptionField]] = subscriptionFieldsService.fetchFieldsValues(application,subscriptionFieldsWithOutValues, apiIdentifier)
+      val subscriptionFieldsWithValues: Future[Seq[SubscriptionField]] = subscriptionFieldsService.fetchFieldsValues(application, subscriptionFieldsWithOutValues, apiIdentifier)
 
-      subscriptionFieldsWithValues.map {fields: Seq[SubscriptionField] =>
+      subscriptionFieldsWithValues.map { fields: Seq[SubscriptionField] =>
         APISubscriptionStatus(
           api.name,
           api.serviceName,
@@ -83,7 +83,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     }
 
     def toApiVersions(api: APISubscription,
-                      fieldDefinitions: Map[APIIdentifier, FieldDefinitions]) : Seq[Future[APISubscriptionStatus]] = {
+                      fieldDefinitions: Map[APIIdentifier, FieldDefinitions]): Seq[Future[APISubscriptionStatus]] = {
 
       api.versions
         .filterNot(_.version.status == RETIRED)
@@ -101,18 +101,49 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield apiVersions
   }
 
-  def subscribeToApi(id: String, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.subscribeToApi(id, APIIdentifier(context, version)))
+  def subscribeToApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val connectors = connectorWrapper.connectorsForEnvironment(application.deployedTo)
 
-  def unsubscribeFromApi(id: String, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    connectorWrapper.forApplication(id).flatMap { connectors =>
-      for {
-        unsubscribeResult <- connectors.thirdPartyApplicationConnector.unsubscribeFromApi(id, context, version)
-        _ <- connectors.apiSubscriptionFieldsConnector.deleteFieldValues(id, context, version)
-      } yield {
-        unsubscribeResult
-      }
+    val apiIdentifier = APIIdentifier(context, version)
+
+    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionField]) = {
+      fieldDefinitions
+        .map(d => (d.name, ""))
+        .toMap
     }
+
+    def ifNoSubscriptionValuesSaveEmptyValues(fieldDefinitions: Seq[SubscriptionField]) = {
+      subscriptionFieldsService
+        .fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
+        .map(fieldDefinitionValues => {
+          if(!fieldDefinitionValues.exists(field => field.value.isDefined)) {
+            subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+          }
+        })
+    }
+
+    for {
+      subscribeResponse <- connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
+      fieldDefinitions <- subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
+    } yield {
+      if (fieldDefinitions.nonEmpty){
+        ifNoSubscriptionValuesSaveEmptyValues(fieldDefinitions)
+      }
+
+      subscribeResponse
+    }
+  }
+
+  def unsubscribeFromApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    val connectors = connectorWrapper.connectorsForEnvironment(application.deployedTo)
+
+    for {
+      unsubscribeResult <- connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, context, version)
+      _ <- connectors.apiSubscriptionFieldsConnector.deleteFieldValues(application.id, context, version)
+    } yield {
+      unsubscribeResult
+    }
+  }
 
   def isSubscribedToApi(application: Application, apiName: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
@@ -193,7 +224,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     val requesterRole = roleForApplication(application, requesterEmail)
 
 
-    if (environment == Environment.SANDBOX && requesterRole == Role.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD ) {
+    if (environment == Environment.SANDBOX && requesterRole == Role.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
       applicationConnectorFor(application).deleteApplication(application.id)
 
@@ -201,6 +232,12 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
       Future.failed(new ForbiddenException("Only standard subordinate applications can be deleted by admins"))
     }
   }
+
+  private def roleForApplication(application: Application, email: String) =
+    application.role(email).getOrElse(throw new ApplicationNotFound)
+
+  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector =
+    if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationSuccessful] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
@@ -260,9 +297,6 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield (productionApplications ++ sandboxApplications).sorted
   }
 
-  private def roleForApplication(application: Application, email: String) =
-    application.role(email).getOrElse(throw new ApplicationNotFound)
-
   def requestDeveloperAccountDeletion(name: String, email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     val deleteDeveloperTicket = DeskproTicket.deleteDeveloperAccount(name, email)
 
@@ -299,9 +333,6 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
       "improvementSuggestions" -> improvementSuggestions,
       "timestamp" -> DateTimeUtils.now.toString))
   }
-
-  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector =
-    if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
     if (environment.contains(PRODUCTION))

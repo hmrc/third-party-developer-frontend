@@ -22,18 +22,18 @@ import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{FieldDefinitions, SubscriptionField, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{FieldDefinitions, Fields, SubscriptionField, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTime
-import org.mockito.{ArgumentCaptor}
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
+import org.mockito.Mockito.{never, times, verify, verifyZeroInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service._
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
@@ -41,6 +41,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
+import scala.util.Random
 
 class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
@@ -310,17 +311,90 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   }
 
   "Subscribe to API" should {
-    "subscribe application to an API version" in new Setup {
-      private val context = "api1"
-      private val version = "1.0"
+    "with no subscription fields definitions" in new Setup {
 
-      private val subscription = APIIdentifier(context, version)
+        private val context = "api1"
+        private val version = "1.0"
 
-      theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-      given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
-        .willReturn(Future.successful(ApplicationUpdateSuccessful))
+        private val subscription = APIIdentifier(context, version)
 
-      await(applicationService.subscribeToApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
+        private val fieldDefinitions = Seq.empty
+
+        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+
+        given(mockSubscriptionFieldsService.getFieldDefinitions(productionApplication, subscription))
+          .willReturn(Future.successful(fieldDefinitions))
+
+        given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
+          .willReturn(Future.successful(ApplicationUpdateSuccessful))
+
+        await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
+
+        verify(mockProductionApplicationConnector).subscribeToApi(productionApplicationId, subscription)
+        verify(mockSubscriptionFieldsService,never()).saveFieldValues(
+          any(), any(), any(), any()
+        )(any[HeaderCarrier])
+    }
+
+    "with subscription fields definitions" should {
+      "but no values" in new Setup {
+        private val context = "api1"
+        private val version = "1.0"
+
+        private val subscription = APIIdentifier(context, version)
+
+        private val fieldDefinitions = Seq(SubscriptionField("name", "description", "hint", "type"))
+
+        private val fieldDefinitionsWithValues = fieldDefinitions.map(d => d.withValue(None))
+
+        private val fields: Fields = fieldDefinitions.map(definition => (definition.name, "") ).toMap
+
+        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+
+        given(mockSubscriptionFieldsService.getFieldDefinitions(productionApplication, subscription))
+          .willReturn(Future.successful(fieldDefinitions))
+
+        given(mockSubscriptionFieldsService.fetchFieldsValues(productionApplication, fieldDefinitions, subscription))
+          .willReturn(Future.successful(fieldDefinitionsWithValues))
+
+        given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
+          .willReturn(Future.successful(ApplicationUpdateSuccessful))
+
+        await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
+
+        verify(mockProductionApplicationConnector).subscribeToApi(productionApplicationId, subscription)
+        verify(mockSubscriptionFieldsService, never()).saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier])
+      }
+
+      "with values" in new Setup {
+        private val context = "api1"
+        private val version = "1.0"
+
+        private val subscription = APIIdentifier(context, version)
+
+        private val fieldDefinitions = Seq(SubscriptionField("name", "description", "hint", "type"))
+
+        private val fieldDefinitionsWithValues = fieldDefinitions.map(d => d.withValue(Some(Random.nextString(10))))
+
+        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+
+        given(mockSubscriptionFieldsService.getFieldDefinitions(productionApplication, subscription))
+          .willReturn(Future.successful(fieldDefinitions))
+
+        given(mockSubscriptionFieldsService.fetchFieldsValues(productionApplication, fieldDefinitions, subscription))
+            .willReturn(Future.successful(fieldDefinitionsWithValues))
+
+        given(mockProductionApplicationConnector.subscribeToApi(productionApplicationId, subscription))
+          .willReturn(Future.successful(ApplicationUpdateSuccessful))
+
+        given(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]))
+          .willReturn(Future.successful(mock[HttpResponse]))
+
+        await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
+
+        verify(mockProductionApplicationConnector).subscribeToApi(productionApplicationId, subscription)
+        verify(mockSubscriptionFieldsService, never()).saveFieldValues(any[String], any[String], any[String], any[Fields])(any[HeaderCarrier])
+      }
     }
   }
 
@@ -335,7 +409,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionApplicationId, context, version))
         .willReturn(Future.successful(true))
 
-      await(applicationService.unsubscribeFromApi(productionApplicationId, context, version)) shouldBe ApplicationUpdateSuccessful
+      await(applicationService.unsubscribeFromApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
     }
   }
 
