@@ -76,7 +76,7 @@
                 <tr>
                     <td>
                         @if((app.environment == "Production") && app.state.isInTesting) {
-                            @if(app.role == ADMINISTRATOR) {
+                            @if(app.role.isAdministrator) {
                                 <a href="@{controllers.checkpages.routes.ApplicationCheck.requestCheckPage(app.id)}" data-app-name>@app.name</a>
                             } else {
                                 <a href="@{controllers.checkpages.routes.ApplicationCheck.unauthorisedAppDetails(app.id)}" data-app-name>@app.name</a>

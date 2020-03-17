@@ -41,7 +41,7 @@
 
     @if(adminEmails.size == 1){
         <p>
-            Ask the administrator <a href="mailto:joe.bloggs@@test.com">@adminEmails.head</a> to remove you from the application and add you as an administrator.
+            Ask the administrator <a href="mailto:@{adminEmails.head}">@{adminEmails.head}</a> to remove you from the application and add you as an administrator.
         </p>
     } else {
         <p>
@@ -49,7 +49,7 @@
         </p>
         <ul class="list list-bullet">
             @for(email<-adminEmails) {
-                <li><a href="mailto:@@email">@email</a></li>
+                <li><a href="mailto:@{email}">@email</a></li>
             }
         </ul>
     }
