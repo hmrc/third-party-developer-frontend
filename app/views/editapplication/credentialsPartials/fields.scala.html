@@ -25,7 +25,6 @@
 
 @isNewSecret = @{flash.get("newSecret").isDefined}
 @allowDeletion = @{clientSecrets.size > 1}
-@rotateLink = @{<a href="/api-documentation/docs/authorisation/credentials#rotate-client-secret">Rotate your client secret</a>}
 
 <div aria-describedby="client-secrets-info">
     @if(clientSecrets.isEmpty) {
@@ -38,6 +37,12 @@
             <button id="submit" class="button" type="submit">Generate a client secret</button>
         }
     } else {
+        <div class="panel panel-border-wide">
+            <p>
+                We only show you a new client secret once to help keep your data secure.<br>
+                Copy the client secret immediately.
+            </p>
+        </div>
         <table>
             <thead>
                 <tr>
@@ -46,8 +51,9 @@
                     <th>Created</th>
                     <th>Last used</th>
                     @if(allowDeletion) {
-                        <th>Remove</th></tr>
+                        <th></th>
                     }
+                    </tr>
             </thead>
             <tbody>
                 @for((secret, i) <- clientSecrets.zipWithIndex) {
@@ -59,7 +65,7 @@
                             <td>
                             @if(isNewSecret && (i + 1) == clientSecrets.size){
                                 <a href="#"
-                                class="copy-to-clip"
+                                class="copy-to-clip button"
                                 title="Copies @accessibleText into the system clipboard."
                                 data-clip-text="@{secret.name}"
                                 aria-live="polite"
@@ -71,31 +77,47 @@
                             <td>@{formatDateWithShortPattern(secret.createdOn)}</td>
                             <td>@{secret.lastAccess.map(formatDateWithShortPattern).getOrElse("Not used")}</td>
                             @if(allowDeletion) {
-                                <td><a id="delete-client-secret" href="@routes.Credentials.deleteClientSecret(app.id, secret.name.takeRight(4))">Delete</a></td>
+                                <td><a id="delete-client-secret" href="@routes.Credentials.deleteClientSecret(app.id, secret.id)">Delete</a></td>
                             }
                         </tr>
                     }
                 }
             </tbody>
         </table>
-        <br>
-        @if(isNewSecret) {
-            <div class="panel panel-border-wide">
-                <p>We show you a new client secret only once. Copy it immediately.
-                </p>
-            </div>
-        }
+
+        <div class="rotate-client-secrets">
+            <h2 class="heading-medium">Rotate your client secret regularly</h2>
+            <p>Rotate your application’s client secret to shorten the period an access key is active, reducing the impact to your business if it is compromised.
+            </p>
+            <p>To rotate your client secret:
+            </p>
+            <ol class="list list-number">
+                <li>
+                    Generate a new client secret, in addition to the one used by your application
+                </li>
+                <li>
+                    Update your application to use the new client secret
+                </li>
+                <li>
+                    Check that your application is working with the new client secret
+                </li>
+                <li>
+                    Delete the inactive client secret
+                </li>
+            </ol>
+        </div>
 
         @if(clientSecrets.size < 5) {
-            <p>@rotateLink regularly. You can have up to 5 client secrets at any time.</p>
+            <p>You can have up to 5 client secrets at any time.</p>
             <div>
             @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
                 @helper.CSRF.formField
-                <button id="submit" class="button" type="submit">Generate another client secret</button>
+                <p><button id="generate-another-client-secret" class="secondary-button" type="submit">Generate another client secret</button></p>
             }
             </div>
         } else {
-            <p>@rotateLink regularly. You cannot have more than 5 client secrets.</p>
+            <p>You cannot have more than 5 client secrets.</p>
         }
+        <p><a href="@routes.Details.details(app.id)">View your application details</a></p>
     }
 </div>

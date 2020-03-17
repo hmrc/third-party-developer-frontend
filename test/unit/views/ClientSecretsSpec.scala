@@ -16,6 +16,8 @@
 
 package unit.views
 
+import java.util.UUID.randomUUID
+
 import config.ApplicationConfig
 import domain._
 import org.joda.time.DateTime
@@ -49,11 +51,11 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
     val request = FakeRequest().withCSRFToken
     val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
-    val clientSecret1 = ClientSecret("", "clientSecret1Content", DateTimeUtils.now)
-    val clientSecret2 = ClientSecret("", "clientSecret2Content", DateTimeUtils.now)
-    val clientSecret3 = ClientSecret("", "clientSecret3Content", DateTimeUtils.now)
-    val clientSecret4 = ClientSecret("", "clientSecret4Content", DateTimeUtils.now)
-    val clientSecret5 = ClientSecret("", "clientSecret5Content", DateTimeUtils.now)
+    val clientSecret1 = ClientSecret(randomUUID.toString, "", "clientSecret1Content", DateTimeUtils.now)
+    val clientSecret2 = ClientSecret(randomUUID.toString, "", "clientSecret2Content", DateTimeUtils.now)
+    val clientSecret3 = ClientSecret(randomUUID.toString, "", "clientSecret3Content", DateTimeUtils.now)
+    val clientSecret4 = ClientSecret(randomUUID.toString, "", "clientSecret4Content", DateTimeUtils.now)
+    val clientSecret5 = ClientSecret(randomUUID.toString, "", "clientSecret5Content", DateTimeUtils.now)
 
     val application = Application(
       "Test Application ID",
@@ -122,7 +124,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
 
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate another client secret") shouldBe false
-      elementExistsByText(document, "p", "Rotate your client secret regularly. You cannot have more than 5 client secrets.") shouldBe true
+      elementExistsByText(document, "p", "You cannot have more than 5 client secrets.") shouldBe true
       elementExistsByText(document, "a", "Delete") shouldBe true
     }
   }

@@ -61,8 +61,8 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.fetchCredentials(applicationId).map { tokens =>
         val clientSecrets: Seq[ClientSecret] = request.flash.get("newSecret")
-          .map(newSecret => tokens.production.clientSecrets.init :+ tokens.production.clientSecrets.last.copy(name = newSecret))
-          .getOrElse(tokens.production.clientSecrets)
+          .map(newSecret => tokens.clientSecrets.init :+ tokens.clientSecrets.last.copy(name = newSecret))
+          .getOrElse(tokens.clientSecrets)
         Ok(views.html.clientSecrets(request.application, clientSecrets))
       }
   }
@@ -70,7 +70,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   def addClientSecret(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
     applicationService.addClientSecret(applicationId, request.user.email).map { tokens =>
       Redirect(controllers.routes.Credentials.clientSecrets(applicationId))
-        .flashing("newSecret" -> tokens.production.clientSecrets.last.name)
+        .flashing("newSecret" -> tokens.clientSecrets.last.secret)
     } recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
         case _: ForbiddenException => Forbidden(errorHandler.badRequestTemplate)
@@ -78,14 +78,14 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def deleteClientSecret(applicationId: String, clientSecretLastChars: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
+  def deleteClientSecret(applicationId: String, clientSecretId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
     applicationService.fetchCredentials(applicationId).map { tokens =>
-      tokens.production.clientSecrets.find(_.name.takeRight(clientSecretLastChars.length) == clientSecretLastChars)
+      tokens.clientSecrets.find(_.id == clientSecretId)
         .fold(NotFound(errorHandler.notFoundTemplate))(secret => Ok(views.html.editapplication.deleteClientSecret(request.application, secret)))
     }
   }
 
-  def deleteClientSecretAction(applicationId: String, clientSecretLastChars: String): Action[AnyContent] =
+  def deleteClientSecretAction(applicationId: String, clientSecretId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       def deleteClientSecret(clientSecretToDelete: String): Future[Result] = {
         applicationService.deleteClientSecrets(applicationId, request.user.email, Seq(clientSecretToDelete))
@@ -93,7 +93,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
       }
 
       applicationService.fetchCredentials(applicationId).flatMap { tokens =>
-        tokens.production.clientSecrets.find(_.name.takeRight(clientSecretLastChars.length) == clientSecretLastChars)
+        tokens.clientSecrets.find(_.id == clientSecretId)
           .fold(successful(NotFound(errorHandler.notFoundTemplate)))(secret => deleteClientSecret(secret.secret))
       }
   }

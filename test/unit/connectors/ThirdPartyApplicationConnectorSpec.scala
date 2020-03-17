@@ -17,7 +17,7 @@
 package unit.connectors
 
 import java.net.URLEncoder.encode
-import java.util.UUID
+import java.util.UUID.randomUUID
 
 import akka.actor.ActorSystem
 import config.ApplicationConfig
@@ -247,7 +247,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
   }
 
   "fetch credentials for application" should {
-    val tokens = ApplicationToken("pId", Seq(aSecret("pSecret")), "pToken")
+    val tokens = ApplicationToken("pId", Seq(aClientSecret("pSecret")), "pToken")
     val url = baseUrl + s"/application/$applicationId/credentials"
 
     "return credentials" in new Setup {
@@ -626,7 +626,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     "returns a valid response" in new Setup {
 
       val applicationName = "my valid application name"
-      val appId = UUID.randomUUID().toString
+      val appId = randomUUID().toString
 
       when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(ApplicationNameValidationResult(None)))
@@ -661,7 +661,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "when retry logic is enabled should retry on failure" in new Setup {
       val applicationName = "my valid application name"
-      val appId = UUID.randomUUID().toString
+      val appId = randomUUID().toString
 
       when(mockAppConfig.retryCount).thenReturn(1)
 
@@ -726,9 +726,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
-
-  private def aSecret(value: String) = ClientSecret(value, value, DateTimeUtils.now)
+  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def createApiSubscription(context: String, version: String, subscribed: Boolean) = {
     APISubscription(

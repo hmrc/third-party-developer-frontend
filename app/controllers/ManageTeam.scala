@@ -22,12 +22,11 @@ import domain.AddTeamMemberPageMode.{ApplicationCheck, CheckYourAnswers, ManageT
 import domain.Capabilities.SupportsTeamMembers
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain._
-import helpers.string._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
-import play.twirl.api.{BaseScalaTemplate, Format, Html, HtmlFormat}
+import play.twirl.api.Html
 import service._
 
 import scala.concurrent.Future.successful
@@ -57,7 +56,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
   }
 
   def addTeamMember(applicationId: String) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.application, AddTeamMemberForm.form)))
+    Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
   }
 
   def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: AddTeamMemberPageMode) =
@@ -70,7 +69,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     }
 
     def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]) : Result = {
-      val viewFunction: (Application, Form[AddTeamMemberForm]) => Html = addTeamMemberPageMode match {
+      val viewFunction: (Application, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
         case ManageTeamMembers => views.html.manageTeamViews.addTeamMember.apply
         case ApplicationCheck => views.html.checkpages.applicationcheck.team.teamMemberAdd.apply
         case CheckYourAnswers => views.html.checkpages.checkyouranswers.team.teamMemberAdd.apply
@@ -79,7 +78,9 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
       BadRequest(viewFunction(
         request.application,
-        formWithErrors))
+        formWithErrors,
+        request.user
+      ))
     }
 
     def handleValidForm(form: AddTeamMemberForm) = {

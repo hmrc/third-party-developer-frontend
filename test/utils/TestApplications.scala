@@ -16,7 +16,7 @@
 
 package utils
 
-import java.util.UUID
+import java.util.UUID.randomUUID
 
 import domain._
 import org.joda.time.DateTimeZone
@@ -28,7 +28,7 @@ trait TestApplications {
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
-  def aSandboxApplication(appId: String = UUID.randomUUID().toString,
+  def aSandboxApplication(appId: String = randomUUID().toString,
                           clientId: String = randomString(28),
                           adminEmail: String = "admin@example.com",
                           developerEmail: String = "developer@example.com"): Application = {
@@ -41,7 +41,7 @@ trait TestApplications {
       developerEmail = developerEmail)
   }
 
-  def anApplication(appId: String = UUID.randomUUID().toString,
+  def anApplication(appId: String = randomUUID().toString,
                     clientId: String = randomString(28),
                     environment: Environment = Environment.PRODUCTION,
                     state: ApplicationState = ApplicationState.testing,
@@ -88,7 +88,7 @@ trait TestApplications {
   }
 
   private def aClientSecret(secret: String = randomString(28)) =
-    ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+    ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
    implicit class AppAugment(val app: Application) {
     final def withName(name: String): Application = app.copy(name = name)
