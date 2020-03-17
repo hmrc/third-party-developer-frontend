@@ -112,26 +112,36 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
         .toMap
     }
 
-    def ifNoSubscriptionValuesSaveEmptyValues(fieldDefinitions: Seq[SubscriptionField]) = {
-      subscriptionFieldsService
-        .fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
-        .map(fieldDefinitionValues => {
-          if(!fieldDefinitionValues.exists(field => field.value.isDefined)) {
-            subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+    trait HasSucceeded
+    object HasSucceeded extends HasSucceeded
+
+    def ensureEmptyValuesWhenNoneExists(fieldDefinitions: Seq[SubscriptionField]): Future[HasSucceeded] = {
+      subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
+        .flatMap(values => {
+          if (!values.exists(field => field.value.isDefined)) {
+            val x = subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+            x.map(_ => HasSucceeded)
+          }
+          else {
+            Future.successful(HasSucceeded)
           }
         })
     }
 
-    for {
-      subscribeResponse <- connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
-      fieldDefinitions <- subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
-    } yield {
-      if (fieldDefinitions.nonEmpty){
-        ifNoSubscriptionValuesSaveEmptyValues(fieldDefinitions)
+    def ensureSavedValuesForAnyDefinitions(defns: Seq[SubscriptionField]): Future[HasSucceeded] = {
+      if (defns.nonEmpty){
+        ensureEmptyValuesWhenNoneExists(defns)
+      } else {
+        Future.successful(HasSucceeded)
       }
-
-      subscribeResponse
     }
+
+    val subscribeResponse: Future[ApplicationUpdateSuccessful] = connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
+    val fieldDefinitions: Future[Seq[SubscriptionField]] = subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
+
+    fieldDefinitions
+      .flatMap(ensureSavedValuesForAnyDefinitions)
+      .flatMap(_ => subscribeResponse)
   }
 
   def unsubscribeFromApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
