@@ -165,12 +165,14 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     } yield subscription
   }
 
-  def addClientSecret(id: String)(implicit hc: HeaderCarrier): Future[ApplicationToken] = {
-    connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.addClientSecrets(id, ClientSecretRequest("")))
+  def addClientSecret(id: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationToken] = {
+    connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.addClientSecrets(id, ClientSecretRequest(actorEmailAddress)))
   }
 
-  def deleteClientSecrets(appId: String, clientSecrets: Seq[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    connectorWrapper.forApplication(appId).flatMap(_.thirdPartyApplicationConnector.deleteClientSecrets(appId, DeleteClientSecretsRequest(clientSecrets)))
+  def deleteClientSecrets(appId: String, actorEmailAddress: String, clientSecrets: Seq[String])
+                         (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    connectorWrapper.forApplication(appId)
+      .flatMap(_.thirdPartyApplicationConnector.deleteClientSecrets(appId, DeleteClientSecretsRequest(actorEmailAddress, clientSecrets)))
   }
 
   def updateCheckInformation(id: String, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {

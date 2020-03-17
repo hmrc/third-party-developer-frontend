@@ -74,7 +74,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
       controllers.routes.Credentials.credentials(applicationId, err).withFragment("clientSecretHeading")
     )
 
-    applicationService.addClientSecret(applicationId).map { _ =>
+    applicationService.addClientSecret(applicationId, request.user.email).map { _ =>
       result()
     } recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
@@ -195,7 +195,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     def handleValidForm(validForm: DeleteClientSecretsConfirmForm) = {
       validForm.deleteConfirm match {
         case Some("Yes") =>
-          applicationService.deleteClientSecrets(applicationId, validForm.clientSecretsToDelete.split(",").toSeq)
+          applicationService.deleteClientSecrets(applicationId, request.user.email, validForm.clientSecretsToDelete.split(",").toSeq)
             .map(_ => Ok(editapplication.deleteClientSecretComplete(application)))
 
         case _ => Future(Redirect(routes.Credentials.credentials(applicationId, None).withFragment("clientSecretHeading")))
