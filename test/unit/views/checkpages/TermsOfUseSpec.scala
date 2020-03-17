@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unit.views.applicationCheck
+package views.checkpages
 
 import config.ApplicationConfig
 import controllers.TermsOfUseForm
@@ -23,10 +23,11 @@ import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.AnyContentAsEmpty
+import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
+import views.html.checkpages.termsOfUse
 
 class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
 
@@ -55,8 +56,16 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
-      val page = views.html.applicationcheck.termsOfUse.render(
-        thirdPartyApplication, TermsOfUseForm.form.fill(termsOfUseForm), request, developer, applicationMessages, appConfig)
+      val page = termsOfUse.render(
+        app = thirdPartyApplication,
+        form = TermsOfUseForm.form.fill(termsOfUseForm),
+        submitButtonLabel = "A Label",
+        submitAction = mock[Call],
+        landingPageRoute = mock[Call],
+        request,
+        developer,
+        applicationMessages,
+        appConfig)
       page.contentType must include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -75,12 +84,15 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
-      val page = views.html.applicationcheck.termsOfUse.render(
-        thirdPartyApplication.copy(checkInformation = Some(checkInformation)),
-        TermsOfUseForm.form.fill(termsOfUseForm),
+      val page = termsOfUse.render(
+        app = thirdPartyApplication.copy(checkInformation = Some(checkInformation)),
+        form = TermsOfUseForm.form.fill(termsOfUseForm),
+        submitButtonLabel =  "A Label",
+        submitAction = mock[Call],
+        landingPageRoute = mock[Call],
         request,
         developer,
-        applicationMessages,
+        implicitly,
         appConfigMock)
       page.contentType must include("text/html")
 

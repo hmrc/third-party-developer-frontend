@@ -52,7 +52,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-  val tokens = ApplicationTokens(EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
+  val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
 
   trait Setup {
     val underTest = new Credentials(
@@ -180,23 +180,22 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   "addClientSecret" should {
     val appId = "1234"
-    val updatedTokens = ApplicationTokens(
-      EnvironmentToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token"))
+    val updatedTokens = ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
 
     "add the client secret" in new Setup {
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      given(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier])).willReturn(updatedTokens)
+      given(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier])).willReturn(updatedTokens)
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/client-secrets")
-      verify(underTest.applicationService).addClientSecret(mockEq(appId))(any[HeaderCarrier])
+      verify(underTest.applicationService).addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier])
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = Environment.PRODUCTION)
-      when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
+      when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
@@ -206,7 +205,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = Environment.SANDBOX)
-      when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
+      when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
@@ -217,7 +216,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "display the NotFound page when the application does not exist" in new Setup {
       when(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier]))
         .thenReturn(successful(application))
-      when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
+      when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ApplicationNotFound))
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
@@ -231,7 +230,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe FORBIDDEN
-      verify(underTest.applicationService, never()).addClientSecret(any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).addClientSecret(any[String], any[String])(any[HeaderCarrier])
     }
 
     "display the error page when the application has not reached production state" in new Setup {
@@ -250,7 +249,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      verify(underTest.applicationService, never()).addClientSecret(any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).addClientSecret(any[String], any[String])(any[HeaderCarrier])
     }
   }
 

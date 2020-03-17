@@ -41,7 +41,7 @@ import scala.collection.JavaConverters._
 object AppWorld {
 
   var userApplicationsOnBackend: List[Application] = Nil
-  var tokens: Map[String, ApplicationTokens] = Map.empty
+  var tokens: Map[String, ApplicationToken] = Map.empty
 }
 
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar {
@@ -92,8 +92,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   And( """^applications have the credentials:$""") { (data: DataTable) =>
     val creds = data.asMaps(classOf[String], classOf[String]).asScala.toList
     val tuples = creds.map { c =>
-      c.get("id") -> ApplicationTokens(
-        EnvironmentToken(c.get("prodClientId"), splitToSecrets(c.get("prodClientSecrets")), c.get("prodAccessToken")))
+      c.get("id") -> ApplicationToken(c.get("prodClientId"), splitToSecrets(c.get("prodClientSecrets")), c.get("prodAccessToken"))
     }
     AppWorld.tokens = tuples.toMap
     ApplicationStub.configureApplicationCredentials(AppWorld.tokens)

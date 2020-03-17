@@ -17,10 +17,10 @@
 @import config.ApplicationConfig
 @import domain._
 @import include._
-@import model.Crumb
 @import org.joda.time.format.DateTimeFormat
+@import controllers.TermsOfUseForm
 
-@(app: Application, form: Form[TermsOfUseForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+@(app: Application, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
@@ -32,7 +32,7 @@
 
     @errorSummary(form)
 
-    @helper.form(action = controllers.routes.ApplicationCheck.termsOfUseAction(app.id), 'class -> "form") {
+    @helper.form(action = submitAction, 'class -> "form") {
         @helper.CSRF.formField
 
         <h1 class="heading-xlarge">
@@ -72,10 +72,12 @@
         <div class="form-group">
             @if(form("termsOfUseAgreed").value.contains("true")) {
                 <div>
-                    <a href="@routes.ApplicationCheck.requestCheckPage(app.id)" class="button">Save and return</a>
+                    <a href="@landingPageRoute" class="button">@submitButtonLabel</a>
                 </div>
             } else {
-                <button id="submit" class="button" type="submit">Save and return</button>
+                <div>
+                    <button id="submit" class="button" type="submit">@submitButtonLabel</button>
+                </div>
             }
         </div>
     }

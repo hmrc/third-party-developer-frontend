@@ -153,9 +153,9 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } recover recovery
   }
 
-  def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = metrics.record(api) {
+  def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationToken] = metrics.record(api) {
     retry {
-      http.GET[ApplicationTokens](s"$serviceBaseUrl/application/$id/credentials") recover recovery
+      http.GET[ApplicationToken](s"$serviceBaseUrl/application/$id/credentials") recover recovery
     }
   }
 
@@ -184,8 +184,8 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def addClientSecrets(id: String,
-                       clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[ApplicationTokens] = metrics.record(api) {
-    http.POST[ClientSecretRequest, ApplicationTokens](s"$serviceBaseUrl/application/$id/client-secret", clientSecretRequest) recover {
+                       clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[ApplicationToken] = metrics.record(api) {
+    http.POST[ClientSecretRequest, ApplicationToken](s"$serviceBaseUrl/application/$id/client-secret", clientSecretRequest) recover {
       case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => throw new ClientSecretLimitExceeded
     } recover recovery
   }

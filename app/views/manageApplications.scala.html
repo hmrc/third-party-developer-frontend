@@ -14,13 +14,14 @@
  * limitations under the License.
  *@
 
-@import domain.{DeveloperSession, Role, TermsOfUseStatus, Environment, Developer}
+@import domain.{DeveloperSession, Developer}
 @import helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import model.Crumb
 @import controllers.ApplicationSummary.noProductionApplications
-
 @import uk.gov.hmrc.auth.core.Admin
+@import domain.State
+
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 
 @devMain(
@@ -74,7 +75,11 @@
             @for(app<-applications) {
                 <tr>
                     <td>
+                        @if((app.environment == "Production") && (app.state == State.TESTING)) {
+                            <a href="@{controllers.checkpages.routes.ApplicationCheck.requestCheckPage(app.id)}" data-app-name>@app.name</a>
+                        } else {
                         <a href="@{routes.Details.details(app.id)}" data-app-name>@app.name</a>
+                        }
                     </td>
                     <td data-app-user-role>
                         @if(app.role.isAdministrator) {Admin}

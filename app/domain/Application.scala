@@ -69,31 +69,25 @@ object ClientSecret {
   implicit val format = Json.format[ClientSecret]
 }
 
-case class EnvironmentToken(clientId: String,
-                            clientSecrets: Seq[ClientSecret],
-                            accessToken: String)
-
-object EnvironmentToken {
-  implicit val format1 = Json.format[ClientSecret]
-  implicit val format2 = Json.format[EnvironmentToken]
-}
-
-case class ClientSecretRequest(name: String)
+case class ClientSecretRequest(actorEmailAddress: String)
 
 object ClientSecretRequest {
   implicit val format2 = Json.format[ClientSecretRequest]
 }
 
-case class DeleteClientSecretsRequest(secrets: Seq[String])
+case class DeleteClientSecretsRequest(actorEmailAddress: String, secrets: Seq[String])
 
 object DeleteClientSecretsRequest {
   implicit val format = Json.format[DeleteClientSecretsRequest]
 }
 
-case class ApplicationTokens(production: EnvironmentToken)
+case class ApplicationToken(clientId: String,
+                            clientSecrets: Seq[ClientSecret],
+                            accessToken: String)
 
-object ApplicationTokens {
-  implicit val format = Json.format[ApplicationTokens]
+object ApplicationToken {
+  implicit val format = Json.format[ApplicationToken]
+  implicit val format1 = Json.format[ClientSecret]
 }
 
 case class OverrideFlag(overrideType: String)
@@ -310,7 +304,7 @@ case class Application(id: String,
 
   def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
 
-  def termsOfUseAgreements = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
+  def termsOfUseAgreements: Seq[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
 
   def hasCapability(capability: Capability): Boolean = capability.hasCapability(this)
 

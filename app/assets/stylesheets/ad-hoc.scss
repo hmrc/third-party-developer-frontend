@@ -268,6 +268,10 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
   margin: 0 -15px;
 }
 
+.col-40 {
+  width: 40%;
+}
+
 .client-secrets {
   table {
     th:nth-of-type(1) {
@@ -277,4 +281,16 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
       width: 20%;
     }
   }
+}
+
+tr.apiSubscriptions, th {
+  vertical-align: text-top;
+}
+
+tr.contactDetails, th {
+  vertical-align: text-top;
+}
+
+tr.teamMembers, th {
+    vertical-align: text-top;
 }

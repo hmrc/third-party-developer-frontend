@@ -85,7 +85,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
 
   private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
     case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.manageSubscriptions(applicationId))
-    case Some(APPLICATION_CHECK_PAGE) => Redirect(routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
+    case Some(APPLICATION_CHECK_PAGE) => Redirect(controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
     case _ => Redirect(routes.Details.details(applicationId))
   }
 
@@ -98,7 +98,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
         case Some(subscribe) =>
           def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
 
-          service(applicationId, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.application) }
+          service(request.application, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.application) }
         case _ =>
           Future.successful(redirect(redirectTo, applicationId))
       }
@@ -216,7 +216,6 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
 }
 
 class ApiSubscriptionsHelper @Inject()(applicationService: ApplicationService)(implicit ec: ExecutionContext) {
-
   def fetchPageDataFor(application: Application)(implicit hc: HeaderCarrier): Future[PageData] = {
     for {
       subscriptions <- applicationService.apisWithSubscriptions(application)
