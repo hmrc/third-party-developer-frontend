@@ -24,7 +24,6 @@ import cucumber.api.{CucumberOptions, SnippetType}
 import cucumber.api.junit.Cucumber
 import org.junit.runner.RunWith
 import org.junit.{AfterClass, BeforeClass}
-import play.api.Logger
 
 import scala.collection.JavaConverters._
 
@@ -88,5 +87,3 @@ object FeatureSuite {
     new net.masterthought.cucumber.ReportBuilder(jsonReportList.asJava, configuration).generateReports()
   }
 }
-
-
