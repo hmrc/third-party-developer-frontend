@@ -62,7 +62,11 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   def unauthorisedAppDetails(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     val application = request.application
 
-    Future.successful(Ok(applicationcheck.unauthorisedAppDetails(application.name, application.adminEmails)))
+    if(request.role.isAdministrator) {
+      Future.successful(Redirect(routes.ApplicationCheck.requestCheckPage(appId)))
+    } else {
+      Future.successful(Ok(applicationcheck.unauthorisedAppDetails(application.name, application.adminEmails)))
+    }
   }
 
   def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
