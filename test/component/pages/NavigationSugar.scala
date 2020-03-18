@@ -19,8 +19,7 @@ package component.pages
 import config.ApplicationConfig
 import connectors.{EncryptedJson, LocalCrypto, PayloadEncryption}
 import org.mockito.Mockito.when
-import org.openqa.selenium.support.ui.{ExpectedCondition, WebDriverWait}
-import org.openqa.selenium.{By, WebDriver, WebElement}
+import org.openqa.selenium.WebDriver
 import org.scalatest._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.mockito.MockitoSugar
@@ -46,7 +45,7 @@ trait NavigationSugar extends WebBrowser with Eventually with Assertions with Ma
 
   def on(page: WebPage)(implicit webDriver: WebDriver) = {
     eventually {
-      webDriver.findElement(By.tagName("body"))
+      find(tagName("body"))
     }
     withClue(s"Currently in page: $currentUrl " + find(tagName("h1")).map(_.text).fold(" - ")(h1 => s", with title '$h1' - ")) {
       assert(page.isCurrentPage, s"Page was not loaded: ${page.url}")
