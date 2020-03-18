@@ -123,6 +123,8 @@ POST        /applications/:id/delete-client-secrets                             
 GET         /applications/:id/request-check                                                 controllers.checkpages.ApplicationCheck.requestCheckPage(id: String)
 POST        /applications/:id/request-check                                                 controllers.checkpages.ApplicationCheck.requestCheckAction(id: String)
 GET         /applications/:id/request-check/submitted                                       controllers.checkpages.ApplicationCheck.credentialsRequested(id: String)
+GET         /applications/:id/request-check/appDetails                                      controllers.checkpages.ApplicationCheck.unauthorisedAppDetails(id: String)
+
 
 GET         /applications/:id/request-check/name                                            controllers.checkpages.ApplicationCheck.namePage(id: String)
 POST        /applications/:id/request-check/name                                            controllers.checkpages.ApplicationCheck.nameAction(id: String)
