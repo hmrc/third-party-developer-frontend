@@ -114,19 +114,19 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "add the client secret" in new Setup {
 
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      given(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier])).willReturn(updatedTokens)
+      given(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier])).willReturn(updatedTokens)
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials#clientSecretHeading")
-      verify(underTest.applicationService).addClientSecret(mockEq(appId))(any[HeaderCarrier])
+      verify(underTest.applicationService).addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier])
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
 
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = Environment.PRODUCTION)
-      when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
+      when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
@@ -138,7 +138,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
 
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = Environment.SANDBOX)
-      when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
+      when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
@@ -151,7 +151,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       when(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier]))
         .thenReturn(successful(application))
-      when(underTest.applicationService.addClientSecret(mockEq(appId))(any[HeaderCarrier]))
+      when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ApplicationNotFound))
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
@@ -166,7 +166,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
       status(result) shouldBe FORBIDDEN
-      verify(underTest.applicationService, never()).addClientSecret(any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).addClientSecret(any[String], any[String])(any[HeaderCarrier])
     }
 
     "return to the login page when the user is not logged in" in new Setup {
@@ -177,7 +177,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      verify(underTest.applicationService, never()).addClientSecret(any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).addClientSecret(any[String], any[String])(any[HeaderCarrier])
     }
   }
 
@@ -439,7 +439,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val requestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] =
         loggedInRequest.withCSRFToken.withFormUrlEncodedBody("deleteConfirm" -> "Yes", "clientSecretsToDelete" -> secretsToDelete)
 
-      given(underTest.applicationService.deleteClientSecrets(mockEq(appId), mockEq(Seq(secretsToDelete)))(any[HeaderCarrier]))
+      given(underTest.applicationService.deleteClientSecrets(mockEq(appId), mockEq(loggedInUser.email), mockEq(Seq(secretsToDelete)))(any[HeaderCarrier]))
         .willReturn(successful(ApplicationUpdateSuccessful))
 
       val result: Result = await(underTest.deleteClientSecretsAction(appId)(requestWithFormBody))
@@ -459,7 +459,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/credentials#clientSecretHeading")
-      verify(underTest.applicationService, never()).deleteClientSecrets(any[String], any[Seq[String]])(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).deleteClientSecrets(any[String], any[String], any[Seq[String]])(any[HeaderCarrier])
     }
 
     "display error when neither Yes or No are selected" in new Setup {

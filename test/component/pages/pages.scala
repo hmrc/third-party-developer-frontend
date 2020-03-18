@@ -163,6 +163,11 @@ case object ProtectAccountCompletePage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/protect-account/enable"
 }
 
+case object PasswordResetConfirmationPage extends FormPage {
+  override val pageHeading: String = "Password reset email sent"
+  override val url: String = s"${Env.host}/developer/developer/forgot-password"
+}
+
 case object SignOutSurveyPage extends FormPage {
   override val pageHeading = "Are you sure you want to sign out?"
   override val url: String = s"${Env.host}/developer/logout/survey"

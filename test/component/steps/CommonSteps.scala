@@ -53,7 +53,8 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
     "Protect Account" -> ProtectAccountPage,
     "Setup 2SV QR" -> Setup2svQrPage,
     "Setup 2SV Enter Access Code" -> Setup2svEnterAccessCodePage,
-    "Protect Account Complete" -> ProtectAccountCompletePage
+    "Protect Account Complete" -> ProtectAccountCompletePage,
+    "Password reset confirmation" -> PasswordResetConfirmationPage
   )
 
   Given( """^I navigate to the '(.*)' page$""") { (pageName: String) =>

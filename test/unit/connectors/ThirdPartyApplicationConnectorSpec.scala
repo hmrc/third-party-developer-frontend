@@ -558,7 +558,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     val applicationId = "applicationId"
     val applicationTokens = ApplicationToken(
       "prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken")
-    val clientSecretRequest = ClientSecretRequest("")
+    val actorEmailAddress = "john.requestor@example.com"
+    val clientSecretRequest = ClientSecretRequest(actorEmailAddress)
     val url = s"$baseUrl/application/$applicationId/client-secret"
 
     "generate the client secret" in new Setup {
@@ -594,7 +595,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
   "deleteClientSecrets" should {
     val applicationId = "applicationId"
-    val deleteClientSecretsRequest = DeleteClientSecretsRequest(Seq("secret1"))
+    val actorEmailAddress = "john.requestor@example.com"
+    val deleteClientSecretsRequest = DeleteClientSecretsRequest(actorEmailAddress, Seq("secret1"))
     val url = s"$baseUrl/application/$applicationId/revoke-client-secrets"
 
     "delete a client secret" in new Setup {

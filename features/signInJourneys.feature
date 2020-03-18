@@ -45,4 +45,5 @@ Feature: Sign in
     And I enter all the fields:
       | email address | john.smith@example.com |
     When I click on the button with id 'submit'
+    Then I am on the 'Password reset confirmation' page
     Then I should be sent an email with a link to reset for 'john.smith@example.com'
