@@ -16,10 +16,13 @@
 
 package unit.controllers
 
+import java.util.UUID.randomUUID
+
 import controllers._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
 import domain.Role._
 import domain._
+import helpers.string._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
@@ -35,7 +38,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import helpers.string._
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -43,7 +45,7 @@ import scala.concurrent.Future.successful
 
 class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   val appId = "1234"
   val appName: String = "app"

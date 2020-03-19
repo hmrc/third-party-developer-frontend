@@ -22,12 +22,11 @@ import domain.AddTeamMemberPageMode.{ApplicationCheck, CheckYourAnswers, ManageT
 import domain.Capabilities.SupportsTeamMembers
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain._
-import helpers.string._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
-import play.twirl.api.{BaseScalaTemplate, Format, Html, HtmlFormat}
+import play.twirl.api.Html
 import service._
 
 import scala.concurrent.Future.successful
@@ -52,7 +51,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
   def manageTeam(applicationId: String, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     val application = request.application
-    val view = views.html.manageTeamViews.manageTeam(application, request.role, AddTeamMemberForm.form, request.user)
+    val view = views.html.manageTeamViews.manageTeam(application, request.role, AddTeamMemberForm.form)
     Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
@@ -81,7 +80,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
         request.application,
         formWithErrors,
         request.user
-        ))
+      ))
     }
 
     def handleValidForm(form: AddTeamMemberForm) = {
@@ -105,7 +104,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
       application.findCollaboratorByHash(teamMemberHash) match {
         case Some(collaborator) =>
-          successful(Ok(views.html.manageTeamViews.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, request.user, collaborator.emailAddress)))
+          successful(Ok(views.html.manageTeamViews.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
         case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
   }
@@ -123,7 +122,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     }
 
     def handleInvalidForm(form: Form[RemoveTeamMemberConfirmationForm]) =
-      successful(BadRequest(views.html.manageTeamViews.removeTeamMember(application, form, request.user, form("email").value.getOrElse(""))))
+      successful(BadRequest(views.html.manageTeamViews.removeTeamMember(application, form, form("email").value.getOrElse(""))))
 
     RemoveTeamMemberConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }

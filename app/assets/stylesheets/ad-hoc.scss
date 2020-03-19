@@ -67,7 +67,7 @@ a.secondary-button, button.secondary-button {
 }
 
 input.secondary-button {
-    border: 0px;
+    border: 0;
 }
 
 input.flat-text {
@@ -153,11 +153,6 @@ form.subscription-toggle {
 
 form.inline-controls {
     display: inline-block;
-}
-
-.credentials-section {
-    padding-top: 1em;
-    border-bottom: 1px solid #bfc1c3;
 }
 
 #proposition-menu {
@@ -278,18 +273,18 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
 }
 
 .client-secrets {
+  #generate-another-client-secret {
+    padding: 0;
+  }
+  .rotate-client-secrets {
+    width: 75%;
+  }
   table {
     th:nth-of-type(1) {
-      width: 60%;
+      width: 41%;
     }
     th:nth-of-type(2) {
       width: 20%;
-    }
-    th:nth-of-type(3) {
-      width: 20%;
-    }
-    input {
-      width: 100%;
     }
   }
 }

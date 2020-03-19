@@ -18,21 +18,16 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import controllers.FormKeys.clientSecretLimitExceeded
-import domain.Capabilities.{ChangeClientSecret, HasReachedProductionState, ViewCredentials}
+import domain.Capabilities.{ChangeClientSecret, ViewCredentials}
 import domain.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import domain._
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
-import play.api.data.Form
 import play.api.i18n.MessagesApi
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Result}
-import service.AuditAction.{LoginFailedDueToInvalidPassword, LoginFailedDueToLockedAccount}
 import service._
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
-import views.html._
+import uk.gov.hmrc.http.ForbiddenException
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -46,166 +41,60 @@ class Credentials @Inject()(val applicationService: ApplicationService,
                            (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController {
 
-
   private def canViewClientCredentialsPage(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(ViewCredentials, TeamMembersOnly)(applicationId)(fun)
 
   private def canChangeClientSecrets(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(ChangeClientSecret, SandboxOrAdmin)(applicationId)(fun)
 
-  private def canViewClientSecrets(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(HasReachedProductionState, SandboxOrAdmin)(applicationId)(fun)
-
-
-
-  def credentials(applicationId: String, error: Option[String] = None) =
+  def credentials(applicationId: String): Action[AnyContent] =
     canViewClientCredentialsPage(applicationId) { implicit request =>
+      successful(Ok(views.html.credentials(request.application)))
+  }
+
+  def clientId(applicationId: String): Action[AnyContent] =
+    canChangeClientSecrets(applicationId) { implicit request =>
+      successful(Ok(views.html.clientId(request.application)))
+  }
+
+  def clientSecrets(applicationId: String): Action[AnyContent] =
+    canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.fetchCredentials(applicationId).map { tokens =>
-        val view = views.html.credentials(request.application, tokens, VerifyPasswordForm.form.fill(VerifyPasswordForm("")))
-        error.map(_ => BadRequest(view)).getOrElse(Ok(view))
-      } recover {
-        case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+        val clientSecrets: Seq[ClientSecret] = request.flash.get("newSecret")
+          .map(newSecret => tokens.clientSecrets.init :+ tokens.clientSecrets.last.copy(name = newSecret))
+          .getOrElse(tokens.clientSecrets)
+        Ok(views.html.clientSecrets(request.application, clientSecrets))
       }
   }
 
   def addClientSecret(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
-
-    def result(err: Option[String] = None): Result = Redirect(
-      controllers.routes.Credentials.credentials(applicationId, err).withFragment("clientSecretHeading")
-    )
-
-    applicationService.addClientSecret(applicationId, request.user.email).map { _ =>
-      result()
+    applicationService.addClientSecret(applicationId, request.user.email).map { tokens =>
+      Redirect(controllers.routes.Credentials.clientSecrets(applicationId))
+        .flashing("newSecret" -> tokens.clientSecrets.last.secret)
     } recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
         case _: ForbiddenException => Forbidden(errorHandler.badRequestTemplate)
-        case _: ClientSecretLimitExceeded => result(Some(clientSecretLimitExceeded))
+        case _: ClientSecretLimitExceeded => UnprocessableEntity(errorHandler.badRequestTemplate)
     }
   }
 
-  def getProductionClientSecret(applicationId: String, index: Integer) =
-    canViewClientSecrets(applicationId) { implicit request =>
-
-    def fetchClientSecret(password: String) = {
-      val future = for {
-        _ <- developerConnector.checkPassword(PasswordCheckRequest(request.user.email, password))
-        result <- applicationService.fetchCredentials(applicationId)
-      } yield result.clientSecrets.zipWithIndex.find(_._2 == index).map(_._1)
-
-      future map {
-        case Some(clientSecret) => Ok(Json.toJson(ClientSecretResponse(clientSecret.secret)))
-        case None => BadRequest(Json.toJson(BadRequestError))
-      } recover {
-        case _: InvalidCredentials => Unauthorized(Json.toJson(InvalidPasswordError))
-        case _: LockedAccount => Locked(Json.toJson(LockedAccountError))
-        case e: Throwable =>
-          Logger.error(s"Could not fetch client secret for application $applicationId", e)
-          BadRequest(Json.toJson(BadRequestError))
-      }
-    }
-
-    if (request.application.state.name != State.PRODUCTION) {
-      Logger.warn(s"Application $applicationId is not in production")
-      Future.successful(BadRequest(Json.toJson(BadRequestError)))
-    } else {
-      request.headers.get("password").map(_.trim) match {
-        case None | Some("") => Future(BadRequest(Json.toJson(PasswordRequiredError)))
-        case Some(pwd) => fetchClientSecret(pwd)
-      }
+  def deleteClientSecret(applicationId: String, clientSecretId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
+    applicationService.fetchCredentials(applicationId).map { tokens =>
+      tokens.clientSecrets.find(_.id == clientSecretId)
+        .fold(NotFound(errorHandler.notFoundTemplate))(secret => Ok(views.html.editapplication.deleteClientSecret(request.application, secret)))
     }
   }
 
-  def selectClientSecretsToDelete(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
-
-    val application = request.application
-
-    def showCredentials(form: Form[VerifyPasswordForm]) = {
-      applicationService.fetchCredentials(applicationId).map { tokens =>
-        val view = views.html.credentials(application, tokens, form)
-        if (form.hasErrors) BadRequest(view) else Ok(view)
-      } recover {
-        case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+  def deleteClientSecretAction(applicationId: String, clientSecretId: String): Action[AnyContent] =
+    canChangeClientSecrets(applicationId) { implicit request =>
+      def deleteClientSecret(clientSecretToDelete: String): Future[Result] = {
+        applicationService.deleteClientSecrets(applicationId, request.user.email, Seq(clientSecretToDelete))
+          .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId)))
       }
-    }
 
-    def showClientSecretsToDelete = {
-      applicationService.fetchCredentials(applicationId).map { token =>
-        val clientSecrets = token.clientSecrets.map(_.secret)
-        Ok(editapplication.selectClientSecretsToDelete(application, clientSecrets, SelectClientSecretsToDeleteForm.form))
-      } recover {
-        case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+      applicationService.fetchCredentials(applicationId).flatMap { tokens =>
+        tokens.clientSecrets.find(_.id == clientSecretId)
+          .fold(successful(NotFound(errorHandler.notFoundTemplate)))(secret => deleteClientSecret(secret.secret))
       }
-    }
-
-    def handleValidForm(form: VerifyPasswordForm): Future[Result] = {
-      developerConnector.checkPassword(PasswordCheckRequest(request.user.email, form.password)).flatMap { _ =>
-        showClientSecretsToDelete
-      } recoverWith {
-        case _: InvalidCredentials =>
-          audit(LoginFailedDueToInvalidPassword, request.user)
-          showCredentials(VerifyPasswordForm.form.fill(form).withError(FormKeys.passwordField, FormKeys.verifyPasswordInvalidKey))
-
-        case _: LockedAccount =>
-          audit(LoginFailedDueToLockedAccount, request.user)
-          Future(Redirect(controllers.routes.UserLoginAccount.accountLocked()))
-      }
-    }
-
-    def handleInvalidForm(form: Form[VerifyPasswordForm]): Future[Result] = showCredentials(form)
-
-    if (application.deployedTo.isSandbox) showClientSecretsToDelete
-    else VerifyPasswordForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
-  }
-
-  def selectClientSecretsToDeleteAction(applicationId: String, error: Option[String] = None)
-    = canChangeClientSecrets(applicationId) { implicit request =>
-
-    val application = request.application
-
-    def handleInvalidForm(formWithErrors: Form[SelectClientSecretsToDeleteForm]) = {
-      Future(BadRequest(editapplication.selectClientSecretsToDelete(application, Seq.empty,  formWithErrors)))
-    }
-
-    def handleValidForm(validForm: SelectClientSecretsToDeleteForm): Future[Result] = {
-      applicationService.fetchCredentials(applicationId).map { credentials =>
-        val clientSecrets = credentials.clientSecrets.map(_.secret)
-        validForm.clientSecretsToDelete match {
-          case Nil =>
-            val errorForm = SelectClientSecretsToDeleteForm.form.fill(validForm).withError(FormKeys.deleteSelectField, FormKeys.selectAClientSecretKey)
-            BadRequest(editapplication.selectClientSecretsToDelete(application, clientSecrets, errorForm))
-          case toDelete if toDelete.length == clientSecrets.length =>
-            val errorForm = SelectClientSecretsToDeleteForm.form.fill(validForm).withError(FormKeys.deleteSelectField, FormKeys.selectFewerClientSecretsKey)
-              BadRequest(editapplication.selectClientSecretsToDelete(application, clientSecrets, errorForm))
-          case secrets =>
-            Ok(editapplication.deleteClientSecretConfirm(application, DeleteClientSecretsConfirmForm.form.fill(DeleteClientSecretsConfirmForm(None, secrets.mkString(",")))))
-        }
-      }
-    }
-
-    SelectClientSecretsToDeleteForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
-  }
-
-  def deleteClientSecretsAction(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
-
-    val application = request.application
-
-    def handleInvalidForm(formWithErrors: Form[DeleteClientSecretsConfirmForm]) =
-      Future(BadRequest(editapplication.deleteClientSecretConfirm(application, formWithErrors)))
-
-    def handleValidForm(validForm: DeleteClientSecretsConfirmForm) = {
-      validForm.deleteConfirm match {
-        case Some("Yes") =>
-          applicationService.deleteClientSecrets(applicationId, request.user.email, validForm.clientSecretsToDelete.split(",").toSeq)
-            .map(_ => Ok(editapplication.deleteClientSecretComplete(application)))
-
-        case _ => Future(Redirect(routes.Credentials.credentials(applicationId, None).withFragment("clientSecretHeading")))
-      }
-    }
-
-    DeleteClientSecretsConfirmForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
-  }
-
-  private def audit(auditAction: AuditAction, developer: DeveloperSession)(implicit hc: HeaderCarrier) = {
-    auditService.audit(auditAction, Map("developerEmail" -> developer.email, "developerFullName" -> developer.displayedName))
   }
 }

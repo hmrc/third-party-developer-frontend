@@ -29,11 +29,11 @@ import play.twirl.api.Html
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CSRFTokenHelper._
 import utils.SharedMetricsClearDown
-import views.html.credentials
+import views.html.clientId
 
 import scala.collection.JavaConversions._
 
-class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class ClientIdSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
   trait Setup {
     val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
@@ -42,7 +42,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
     }
   }
 
-  "Credentials page" should {
+  "Client ID page" should {
     val request = FakeRequest().withCSRFToken
     val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
@@ -56,40 +56,16 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
       Some("Test Application"),
       collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR)),
       access = Standard(),
-      state = ApplicationState.production("", ""),
+      state = ApplicationState.testing,
       checkInformation = None
     )
 
-    val sandboxApplication = application.copy(deployedTo = Environment.SANDBOX)
-
-    "display the credentials page for admins" in new Setup {
-      val page: Html = credentials.render(application, request, developer, applicationMessages, appConfig)
+    "render" in new Setup {
+      val page: Html = clientId.render(application, request, developer, applicationMessages, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
-      elementExistsByText(document, "h1", "Credentials") shouldBe true
-      elementExistsByText(document, "a", "Continue") shouldBe true
-    }
-
-    "display the credentials page for non admins if the app is in sandbox" in new Setup {
-      val developerApp: Application = sandboxApplication.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER)))
-      val page: Html = credentials.render(developerApp, request, developer, applicationMessages, appConfig)
-
-      page.contentType should include("text/html")
-      val document: Document = Jsoup.parse(page.body)
-      elementExistsByText(document, "h1", "Credentials") shouldBe true
-      elementExistsByText(document, "a", "Continue") shouldBe true
-    }
-
-    "tell the user they don't have access to credentials when the logged in user is not an admin and the app is not in sandbox" in new Setup {
-      val developerApp: Application = application.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER)))
-      val page: Html = credentials.render(developerApp, request, developer, applicationMessages, appConfig)
-
-      page.contentType should include("text/html")
-      val document: Document = Jsoup.parse(page.body)
-      elementExistsByText(document, "h1", "Credentials") shouldBe true
-      elementExistsByText(document, "a", "Continue") shouldBe false
-      elementExistsByText(document, "p", "You cannot view or edit production credentials because you're not an administrator.") shouldBe true
+      elementExistsByText(document, "h1", "Client ID") shouldBe true
     }
   }
 }

@@ -18,7 +18,7 @@ package domain
 
 import controllers._
 import domain.AccessType.STANDARD
-import domain.Capabilities.{HasReachedProductionState, SupportsDetails}
+import domain.Capabilities.{ChangeClientSecret, SupportsDetails}
 import domain.Environment.{PRODUCTION, SANDBOX}
 import domain.Permissions._
 import domain.Role.ADMINISTRATOR
@@ -63,7 +63,7 @@ object Collaborator {
   implicit val format = Json.format[Collaborator]
 }
 
-case class ClientSecret(name: String, secret: String, createdOn: DateTime, lastAccess: Option[DateTime] = None)
+case class ClientSecret(id: String, name: String, secret: String, createdOn: DateTime, lastAccess: Option[DateTime] = None)
 
 object ClientSecret {
   implicit val format = Json.format[ClientSecret]
@@ -343,7 +343,7 @@ case class Application(id: String,
   /*
   Allows access to at least one of (client id, client secrets and server token) (where appropriate)
    */
-  def canViewClientCredentials(developer: Developer): Boolean = allows(HasReachedProductionState, developer, SandboxOrAdmin)
+  def canChangeClientCredentials(developer: Developer): Boolean = allows(ChangeClientSecret, developer, SandboxOrAdmin)
 
   def canPerformApprovalProcess(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {

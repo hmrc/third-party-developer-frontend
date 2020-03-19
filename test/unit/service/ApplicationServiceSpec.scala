@@ -16,7 +16,7 @@
 
 package unit.service
 
-import java.util.UUID
+import java.util.UUID.randomUUID
 
 import config.ApplicationConfig
 import connectors._
@@ -28,7 +28,7 @@ import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.{never, times, verify, verifyZeroInteractions, when}
+import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
@@ -103,7 +103,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   def api(name: String, context: String, requiresTrust: Option[Boolean], versions: VersionSubscription*): APISubscription = APISubscription(name, name, context, versions, requiresTrust)
 
   val productionApplicationId = "Application ID"
-  val productionClientId = s"client-id-${UUID.randomUUID().toString}"
+  val productionClientId = s"client-id-${randomUUID().toString}"
   val productionApplication: Application = Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("description"), Set())
   val sandboxApplicationId = "Application ID"
   val sandboxClientId = "Client ID"
@@ -914,7 +914,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   "validate application name" should {
     "call the application connector validate method in sandbox" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId = UUID.randomUUID().toString
+      private val applicationId = randomUUID().toString
 
       given(mockSandboxApplicationConnector.validateName(any(), any())(any[HeaderCarrier]))
         .willReturn(Valid)
@@ -928,7 +928,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "call the application connector validate method in production" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId = UUID.randomUUID().toString
+      private val applicationId = randomUUID().toString
 
       given(mockProductionApplicationConnector.validateName(any(), any())(any[HeaderCarrier]))
         .willReturn(Valid)
@@ -941,5 +941,5 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now)
+  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now)
 }

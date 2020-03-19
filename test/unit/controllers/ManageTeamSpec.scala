@@ -16,6 +16,8 @@
 
 package unit.controllers
 
+import java.util.UUID.randomUUID
+
 import connectors.ThirdPartyDeveloperConnector
 import controllers._
 import domain.AddTeamMemberPageMode.ManageTeamMembers
@@ -342,6 +344,6 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     application
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
 }

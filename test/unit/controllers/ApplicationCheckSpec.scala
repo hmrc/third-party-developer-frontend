@@ -16,6 +16,8 @@
 
 package unit.controllers
 
+import java.util.UUID.randomUUID
+
 import controllers.checkpages.ApplicationCheck
 import controllers.{APISubscriptions, ApiSubscriptionsHelper, GroupedSubscriptions}
 import domain.Role._
@@ -1196,7 +1198,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       body should include(yetAnotherCollaboratorEmail)
     }
   }
-    private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+    private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def stepRequiredIndication(id: String) = {
     s"""<div id="$id" class="step-status status-incomplete">To do</div>"""

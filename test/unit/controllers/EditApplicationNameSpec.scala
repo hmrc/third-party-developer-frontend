@@ -16,6 +16,8 @@
 
 package unit.controllers
 
+import java.util.UUID.randomUUID
+
 import config.ErrorHandler
 import controllers._
 import domain._
@@ -249,5 +251,5 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 }
