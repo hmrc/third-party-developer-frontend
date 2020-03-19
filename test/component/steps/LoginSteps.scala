@@ -60,7 +60,9 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     webDriver.navigate().refresh()
     Form.populate(mutable.Map("email address" -> email, "password" -> password))
     click on id("submit")
+    on(RecommendMfaPage)
     click on waitForElement(By.id("skip")) // Skip the 2SV reminder screen
+    on(RecommendMfaSkipAcknowledgePage)
     click on waitForElement(By.id("submit")) // Continue past confirmation of skipping 2SV setup
   }
 
