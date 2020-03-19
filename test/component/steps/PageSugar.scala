@@ -19,8 +19,6 @@ package steps
 import org.openqa.selenium._
 import org.openqa.selenium.support.ui.{ExpectedCondition, WebDriverWait}
 
-import scala.annotation.tailrec
-
 trait PageSugar {
 
   implicit val webDriver: WebDriver
@@ -28,23 +26,7 @@ trait PageSugar {
 
   def waitForElement(by: By): WebElement = new WebDriverWait(webDriver, seconds).until(
     new ExpectedCondition[WebElement] {
-      override def apply(d: WebDriver) = {
-        @tailrec
-        def attempt(remaining: Int): WebElement = {
-          if (remaining == 0) {
-            throw new RuntimeException(s"Retries exhausted whilst trying to find element by $by")
-          } else {
-            try {
-              d.findElement(by)
-            }
-            catch {
-              case _: org.openqa.selenium.StaleElementReferenceException => attempt(remaining - 1)
-            }
-          }
-        }
-
-        attempt(remaining = 5)
-      }
+      override def apply(d: WebDriver): WebElement = d.findElement(by)
     }
   )
 }
