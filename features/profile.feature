@@ -6,6 +6,7 @@ Feature: Developer views/updates profile
       | john.smith@example.com | StrongPassword1! | John       | Smith     |
     And I have no application assigned to my email 'john.smith@example.com'
     And I am successfully logged in with 'john.smith@example.com' and 'StrongPassword1!'
+    Then I am on the 'Add an application to the sandbox empty nest' page
     When I click on the 'John Smith' link
     Then I am on the 'Manage profile' page
     And I see text in fields:
