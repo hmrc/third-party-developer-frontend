@@ -54,8 +54,8 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     id = applicationId,
     clientId = clientId,
     name = name,
-    DateTimeUtils.now,
-    DateTimeUtils.now,
+    createdOn = DateTimeUtils.now,
+    lastAccess = DateTimeUtils.now,
     Environment.from(environment).getOrElse(PRODUCTION),
     description = None,
     collaborators = Set(Collaborator("john.smith@example.com", Role.ADMINISTRATOR))

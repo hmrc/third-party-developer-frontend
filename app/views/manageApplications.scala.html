@@ -20,8 +20,8 @@
 @import model.Crumb
 @import controllers.ApplicationSummary.noProductionApplications
 @import uk.gov.hmrc.auth.core.Admin
-@import domain.State
 
+@import domain.Role.ADMINISTRATOR
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 
 @devMain(
@@ -75,10 +75,14 @@
             @for(app<-applications) {
                 <tr>
                     <td>
-                        @if((app.environment == "Production") && (app.state == State.TESTING)) {
-                            <a href="@{controllers.checkpages.routes.ApplicationCheck.requestCheckPage(app.id)}" data-app-name>@app.name</a>
+                        @if((app.environment == "Production") && app.state.isInTesting) {
+                            @if(app.role.isAdministrator) {
+                                <a href="@{controllers.checkpages.routes.ApplicationCheck.requestCheckPage(app.id)}" data-app-name>@app.name</a>
+                            } else {
+                                <a href="@{controllers.checkpages.routes.ApplicationCheck.unauthorisedAppDetails(app.id)}" data-app-name>@app.name</a>
+                            }
                         } else {
-                        <a href="@{routes.Details.details(app.id)}" data-app-name>@app.name</a>
+                            <a href="@{routes.Details.details(app.id)}" data-app-name>@app.name</a>
                         }
                     </td>
                     <td data-app-user-role>

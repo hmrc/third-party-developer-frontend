@@ -52,6 +52,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val developerDto: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session: Session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
   val anotherCollaboratorEmail = "collaborator@example.com"
+  val yetAnotherCollaboratorEmail = "collaborator2@example.com"
 
   val loggedInUser: DeveloperSession = DeveloperSession(session)
 
@@ -128,11 +129,23 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
                                   state: ApplicationState = testing,
                                   checkInformation: Option[CheckInformation] = None,
                                   access: Access = Standard()): Application = {
+      // this is to ensure we always have one ADMINISTRATOR
+      val anotherRole = if(userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
 
       val collaborators = Set(
         Collaborator(loggedInUser.email, userRole),
-        Collaborator(anotherCollaboratorEmail, Role.DEVELOPER)
+        Collaborator(anotherCollaboratorEmail, anotherRole)
       )
+
+      givenTheApplicationExistsWithCollaborators(collaborators, appId, clientId, state, checkInformation, access)
+    }
+
+
+    def givenTheApplicationExistsWithCollaborators(collaborators: Set[Collaborator],
+                                                   appId: String = appId, clientId: String = clientId,
+                                                   state: ApplicationState = testing,
+                                                   checkInformation: Option[CheckInformation] = None,
+                                                   access: Access = Standard()): Application = {
 
       val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
         collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
@@ -1139,7 +1152,53 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  "unauthorised App details" should {
+    "redirect to landing page when Admin" in new Setup {
+
+      givenTheApplicationExists()
+
+      private val result = await(addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+    }
+    "return unauthorised App details page with one Admin" in new Setup {
+
+      givenTheApplicationExists(userRole = DEVELOPER)
+
+      private val result = await(addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest))
+
+      status(result) shouldBe OK
+      private val body = bodyOf(result)
+
+      body should include("Production application")
+      body should include("You cannot view this application because you're not an administrator.")
+      body should include("Ask the administrator")
+      body should include(anotherCollaboratorEmail)
+    }
+    "return unauthorised App details page with 2 Admins " in new Setup {
+
+      val collaborators = Set(
+        Collaborator(loggedInUser.email, DEVELOPER),
+        Collaborator(anotherCollaboratorEmail, ADMINISTRATOR),
+        Collaborator(yetAnotherCollaboratorEmail, ADMINISTRATOR)
+      )
+
+      givenTheApplicationExistsWithCollaborators(collaborators = collaborators)
+
+      private val result = await(addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest))
+
+      status(result) shouldBe OK
+      private val body = bodyOf(result)
+
+      body should include("Production application")
+      body should include("You cannot view this application because you're not an administrator.")
+      body should include("Ask an administrator")
+      body should include(anotherCollaboratorEmail)
+      body should include(yetAnotherCollaboratorEmail)
+    }
+  }
+    private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def stepRequiredIndication(id: String) = {
     s"""<div id="$id" class="step-status status-incomplete">To do</div>"""
