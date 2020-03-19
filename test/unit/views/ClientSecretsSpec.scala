@@ -44,6 +44,10 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
       doc.select(elementType).exists(node => node.text.trim == elementText)
     }
 
+    def elementContainsText(doc: Document, elementType: String, elementText: String): Boolean = {
+      doc.select(elementType).exists(node => node.text.trim.contains(elementText))
+    }
+
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").nonEmpty
   }
 
@@ -103,6 +107,21 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
 
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "a", "Copy") shouldBe true
+      elementContainsText(document, "p", "Copy the client secret immediately.") shouldBe true
+      elementContainsText(document, "p", "We only show you a new client secret once to help keep your data secure.") shouldBe true
+    }
+
+    "not show copy button when a new client secret has not just been added" in new Setup {
+      val oneClientSecret = Seq(clientSecret1)
+
+      val page = clientSecrets.render(application, oneClientSecret, request, developer, applicationMessages, appConfig, Flash())
+
+      page.contentType should include("text/html")
+
+      val document: Document = Jsoup.parse(page.body)
+      elementExistsByText(document, "a", "Copy") shouldBe false
+      elementContainsText(document, "p", "Copy the client secret immediately.") shouldBe false
+      elementExistsByText(document, "p", "We only show you a new client secret once to help keep your data secure.") shouldBe true
     }
 
     "show generate another client secret button and delete button when the app has more than one client secret" in new Setup {

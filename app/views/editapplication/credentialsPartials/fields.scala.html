@@ -37,12 +37,14 @@
             <button id="submit" class="button" type="submit">Generate a client secret</button>
         }
     } else {
-        <div class="panel panel-border-wide">
-            <p>
-                We only show you a new client secret once to help keep your data secure.<br>
-                Copy the client secret immediately.
-            </p>
-        </div>
+        @if(isNewSecret) {
+            <div class="panel panel-border-wide">
+                <p>
+                    We only show you a new client secret once to help keep your data secure.<br>
+                    Copy the client secret immediately.
+                </p>
+            </div>
+        }
         <table>
             <thead>
                 <tr>
@@ -84,6 +86,11 @@
                 }
             </tbody>
         </table>
+
+        @if(!isNewSecret) {
+            <br>
+            <p>We only show you a new client secret once to help keep your data secure.</p>
+        }
 
         <div class="rotate-client-secrets">
             <h2 class="heading-medium">Rotate your client secret regularly</h2>
