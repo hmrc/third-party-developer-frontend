@@ -17,6 +17,7 @@
 @import config.ApplicationConfig
 @import domain.{BackButtonWithJavaScript, DeveloperSession}
 @import include._
+@import model.Crumb
 @(appName: String, adminEmails: Set[String])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
