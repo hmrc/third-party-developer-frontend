@@ -23,7 +23,11 @@
 @devMain(
     title = "Production application",
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
+    breadcrumbs = Seq(
+        Crumb("Production application"),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
     developerSession = Some(loggedIn)
 ) {
 
