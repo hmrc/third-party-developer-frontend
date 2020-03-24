@@ -22,10 +22,41 @@ import play.api.libs.json.{Format, Json}
 
 object ApiSubscriptionFields {
 
+  case class SubscriptionFieldDefinition(name: String, description: String, hint: String, `type`: String)
+
+  case class SubscriptionFieldValue(definition : SubscriptionFieldDefinition, value: String)
+
+  object SubscriptionFieldValue {
+    def fromFormValues(name: String, description: String, hint: String, `type`: String, value: String) = {
+      SubscriptionFieldValue(SubscriptionFieldDefinition(name, description, hint, `type`), value)
+    }
+
+    def toFormValues(subscriptionFieldValue: SubscriptionFieldValue): Option[(String, String, String, String, String)] = {
+      Some((subscriptionFieldValue.definition.name,
+        subscriptionFieldValue.definition.description,
+        subscriptionFieldValue.definition.hint,
+        subscriptionFieldValue.definition.`type`,
+        subscriptionFieldValue.value))
+    }
+  }
+
   type Fields = Map[String, String]
 
+  object Fields {
+    val empty = Map.empty[String, String]
+  }
+
+  sealed trait FieldsDeleteResult
+  case object FieldsDeleteSuccessResult extends FieldsDeleteResult
+  case object FieldsDeleteFailureResult extends FieldsDeleteResult
+
+
+
+
+  // TODO: Remove this (not sure it's used?)
   def fields(tpl: (String, String)*): Map[String, String] = Map[String, String](tpl: _*)
 
+  // TODO: Replace SubscriptionField with SubscriptionFieldDefinition
   case class FieldDefinitions(fieldDefinitions: List[SubscriptionField], apiContext: String, apiVersion: String)
 
   object FieldDefinitions {
@@ -38,13 +69,16 @@ object ApiSubscriptionFields {
     implicit val format: Format[AllFieldDefinitionsResponse] = Json.format[AllFieldDefinitionsResponse]
   }
 
-  case class SubscriptionFieldsWrapper(applicationId: String, clientId: String, apiContext: String, apiVersion: String, fields: Seq[SubscriptionField])
+  case class SubscriptionFieldsWrapper(applicationId: String, clientId: String, apiContext: String, apiVersion: String, fields: Seq[SubscriptionFieldValue])
 
+  // TODO: Remove me
   case class SubscriptionField(name: String, description: String, hint: String, `type`: String, value: Option[String] = None) {
     def withValue(updatedValue: Option[String]): SubscriptionField = {
       copy(name, description, hint, `type`, updatedValue)
     }
   }
+
+  // TODO: Remove me
   object SubscriptionField {
     implicit val format: Format[SubscriptionField] = Json.format[SubscriptionField]
   }

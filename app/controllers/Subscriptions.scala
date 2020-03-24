@@ -165,7 +165,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
             applicationId,
             apiContext,
             apiVersion,
-            Map(validForm.fields.map(f => f.name -> f.value.getOrElse("")): _ *))
+            Map(validForm.fields.map(f => f.definition.name  -> f.value): _ *))
         } else {
           Future.successful(())
         }

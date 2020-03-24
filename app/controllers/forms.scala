@@ -16,7 +16,7 @@
 
 package controllers
 
-import domain.ApiSubscriptionFields.SubscriptionField
+import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import domain.{Application, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
@@ -372,7 +372,7 @@ object ChangeSubscriptionConfirmationForm {
     )(ChangeSubscriptionConfirmationForm.apply)(ChangeSubscriptionConfirmationForm.unapply))
 }
 
-case class SubscriptionFieldsForm(fields: Seq[SubscriptionField])
+case class SubscriptionFieldsForm(fields: Seq[SubscriptionFieldValue])
 
 object SubscriptionFieldsForm {
   val form = Form(
@@ -383,7 +383,7 @@ object SubscriptionFieldsForm {
           "description" -> text,
           "hint" -> text,
           "type" -> text,
-          "value" -> optional(text))(SubscriptionField.apply)(SubscriptionField.unapply))
+          "value" -> text)(SubscriptionFieldValue.fromFormValues)(SubscriptionFieldValue.toFormValues))
     )(SubscriptionFieldsForm.apply)(SubscriptionFieldsForm.unapply)
   )
 }

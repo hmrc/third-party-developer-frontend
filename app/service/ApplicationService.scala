@@ -20,11 +20,12 @@ import config.ApplicationConfig
 import connectors._
 import domain._
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{FieldDefinitions, SubscriptionField, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import domain.Environment.{PRODUCTION, SANDBOX}
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse}
+import service.SubscriptionFieldsService.DefinitionsByApiVersion
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
@@ -58,18 +59,15 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
 
     def toApiSubscriptionStatuses(api: APISubscription,
                                   version: VersionSubscription,
-                                  fieldDefinitions: Map[APIIdentifier, FieldDefinitions]): Future[APISubscriptionStatus] = {
+                                  fieldDefinitions: DefinitionsByApiVersion): Future[APISubscriptionStatus] = {
       val apiIdentifier = APIIdentifier(api.context, version.version.version)
 
-      val subscriptionFieldsWithOutValues: Seq[SubscriptionField] =
-        fieldDefinitions
-          .get(apiIdentifier)
-          .map((fieldDefinitions: FieldDefinitions) => fieldDefinitions.fieldDefinitions)
-          .getOrElse(Seq.empty)
+      val subscriptionFieldsWithOutValues: Seq[SubscriptionFieldDefinition] =
+        fieldDefinitions.getOrElse(apiIdentifier, Seq.empty)
 
-      val subscriptionFieldsWithValues: Future[Seq[SubscriptionField]] = subscriptionFieldsService.fetchFieldsValues(application, subscriptionFieldsWithOutValues, apiIdentifier)
+      val subscriptionFieldsWithValues: Future[Seq[SubscriptionFieldValue]] = subscriptionFieldsService.fetchFieldsValues(application, subscriptionFieldsWithOutValues, apiIdentifier)
 
-      subscriptionFieldsWithValues.map { fields: Seq[SubscriptionField] =>
+      subscriptionFieldsWithValues.map { fields: Seq[SubscriptionFieldValue] =>
         APISubscriptionStatus(
           api.name,
           api.serviceName,
@@ -83,7 +81,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     }
 
     def toApiVersions(api: APISubscription,
-                      fieldDefinitions: Map[APIIdentifier, FieldDefinitions]): Seq[Future[APISubscriptionStatus]] = {
+                      fieldDefinitions: DefinitionsByApiVersion): Seq[Future[APISubscriptionStatus]] = {
 
       api.versions
         .filterNot(_.version.status == RETIRED)
@@ -95,8 +93,8 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
     for {
-      fieldDefinitions <- subscriptionFieldsService.getAllFieldDefinitions(application.deployedTo)
-      subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
+      fieldDefinitions: DefinitionsByApiVersion <- subscriptionFieldsService.getAllFieldDefinitions(application.deployedTo)
+      subscriptions: Seq[APISubscription] <- thirdPartyAppConnector.fetchSubscriptions(application.id)
       apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions(_, fieldDefinitions)))
     } yield apiVersions
   }
@@ -106,7 +104,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
 
     val apiIdentifier = APIIdentifier(context, version)
 
-    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionField]) = {
+    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionFieldDefinition]) = {
       fieldDefinitions
         .map(d => (d.name, ""))
         .toMap
@@ -115,10 +113,10 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     trait HasSucceeded
     object HasSucceeded extends HasSucceeded
 
-    def ensureEmptyValuesWhenNoneExists(fieldDefinitions: Seq[SubscriptionField]): Future[HasSucceeded] = {
+    def ensureEmptyValuesWhenNoneExists(fieldDefinitions: Seq[SubscriptionFieldDefinition]): Future[HasSucceeded] = {
       subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
         .flatMap(values => {
-          if (!values.exists(field => field.value.isDefined)) {
+          if (!values.exists(field => field.value != "")) {
             val x = subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
             x.map(_ => HasSucceeded)
           }
@@ -128,7 +126,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
         })
     }
 
-    def ensureSavedValuesForAnyDefinitions(defns: Seq[SubscriptionField]): Future[HasSucceeded] = {
+    def ensureSavedValuesForAnyDefinitions(defns: Seq[SubscriptionFieldDefinition]): Future[HasSucceeded] = {
       if (defns.nonEmpty){
         ensureEmptyValuesWhenNoneExists(defns)
       } else {
@@ -137,7 +135,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
     }
 
     val subscribeResponse: Future[ApplicationUpdateSuccessful] = connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
-    val fieldDefinitions: Future[Seq[SubscriptionField]] = subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
+    val fieldDefinitions: Future[Seq[SubscriptionFieldDefinition]] = subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
 
     fieldDefinitions
       .flatMap(ensureSavedValuesForAnyDefinitions)
