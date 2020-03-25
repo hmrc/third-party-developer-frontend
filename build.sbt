@@ -43,29 +43,30 @@ lazy val compile = Seq(
   "org.typelevel" %% "cats-core" % "2.0.0"
 )
 
+val testScope = "test, it"
 lazy val test = Seq(
-  "info.cukes" %% "cucumber-scala" % cucumberVersion % "test",
-  "info.cukes" % "cucumber-junit" % cucumberVersion % "test",
-  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-25" % "test",
-  "junit" % "junit" % "4.12" % "test",
-  "org.jsoup" % "jsoup" % "1.10.2" % "test",
-  "org.pegdown" % "pegdown" % "1.6.0" % "test",
-  "com.typesafe.play" %% "play-test" % PlayVersion.current % "test",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % "test",
-  "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % "test",
-  "com.github.tomakehurst" % "wiremock" % "1.58" % "test",
-  "org.mockito" % "mockito-core" % "2.23.0" % "test",
-  "jp.t2v" %% "play2-auth-test" % t2vVersion % "test",
-  "org.scalaj" %% "scalaj-http" % "2.3.0" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.13.5" % "test",
-  "com.github.mkolisnyk" % "cucumber-runner" % "1.0.9" % "test",
-  "net.masterthought" % "cucumber-reporting" % "3.3.0" % "test",
-  "net.masterthought" % "cucumber-sandwich" % "3.3.0" % "test",
-  "com.assertthat" % "selenium-shutterbug" % "0.2" % "test"
+  "info.cukes" %% "cucumber-scala" % cucumberVersion % testScope,
+  "info.cukes" % "cucumber-junit" % cucumberVersion % testScope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-25" % testScope,
+  "junit" % "junit" % "4.12" % testScope,
+  "org.jsoup" % "jsoup" % "1.10.2" % testScope,
+  "org.pegdown" % "pegdown" % "1.6.0" % testScope,
+  "com.typesafe.play" %% "play-test" % PlayVersion.current % testScope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % testScope,
+  "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
+  "com.github.tomakehurst" % "wiremock" % "1.58" % testScope,
+  "org.mockito" % "mockito-core" % "2.23.0" % testScope,
+  "jp.t2v" %% "play2-auth-test" % t2vVersion % testScope,
+  "org.scalaj" %% "scalaj-http" % "2.3.0" % testScope,
+  "org.scalacheck" %% "scalacheck" % "1.13.5" % testScope,
+  "com.github.mkolisnyk" % "cucumber-runner" % "1.0.9" % testScope,
+  "net.masterthought" % "cucumber-reporting" % "3.3.0" % testScope,
+  "net.masterthought" % "cucumber-sandwich" % "3.3.0" % testScope,
+  "com.assertthat" % "selenium-shutterbug" % "0.2" % testScope
 )
 lazy val overrideDependencies = Set(
-  "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % "test",
-  "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % "test"
+  "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
+  "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % testScope
 )
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
@@ -109,22 +110,22 @@ lazy val microservice = Project(appName, file("."))
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
   .settings(
-    unmanagedSourceDirectories in Test := (baseDirectory in Test) (base => Seq(base / "test" / "unit", base / "test" / "utils")).value,
-    testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
+    unmanagedSourceDirectories in Test := (baseDirectory in Test) (base => Seq(base / "test", base / "test" / "utils")).value,
+    testOptions in Test := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
-    testOptions in IntegrationTest := Seq(Tests.Filter(integrationTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test" / "it", base / "test" / "utils")).value,
+    testOptions in IntegrationTest := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it", base / "test" / "utils")).value,
     unmanagedResourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
     parallelExecution in IntegrationTest := false
   )
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
-    testOptions in ComponentTest := Seq(Tests.Filter(componentTestFilter), Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test" / "component", base / "test" / "utils")).value,
+    testOptions in ComponentTest := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "component", base / "test" / "utils")).value,
     unmanagedResourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
     unmanagedResourceDirectories in ComponentTest += baseDirectory(_ / "target/web/public/test").value,
     testOptions in ComponentTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
@@ -147,9 +148,6 @@ lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
 ) ++
   publishAllArtefacts
 
-def unitFilter(name: String): Boolean = name startsWith "unit"
-def integrationTestFilter(name: String): Boolean = name startsWith "it"
-def componentTestFilter(name: String): Boolean = name startsWith "component.js"
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
   tests map { test =>
     Group(
