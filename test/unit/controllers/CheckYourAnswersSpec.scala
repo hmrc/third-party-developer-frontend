@@ -211,9 +211,9 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = await(underTest.answersPageAction(appId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
-      // TODO - really ???
       redirectLocation(result) shouldBe Some(checkpages.routes.ApplicationCheck.credentialsRequested(appId).url)
     }
+
     "return forbidden when not logged in" in new Setup {
       givenTheApplicationExists()
       private val result = await(underTest.answersPageAction(appId)(loggedOutRequest))

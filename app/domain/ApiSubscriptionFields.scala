@@ -50,38 +50,7 @@ object ApiSubscriptionFields {
   case object FieldsDeleteSuccessResult extends FieldsDeleteResult
   case object FieldsDeleteFailureResult extends FieldsDeleteResult
 
-
-
-
-  // TODO: Remove this (not sure it's used?)
-  def fields(tpl: (String, String)*): Map[String, String] = Map[String, String](tpl: _*)
-
-  // TODO: Replace SubscriptionField with SubscriptionFieldDefinition
-  case class FieldDefinitions(fieldDefinitions: List[SubscriptionField], apiContext: String, apiVersion: String)
-
-  object FieldDefinitions {
-    implicit val format: Format[FieldDefinitions] = Json.format[FieldDefinitions]
-  }
-
-  case class AllFieldDefinitionsResponse(apis: Seq[FieldDefinitions])
-
-  object AllFieldDefinitionsResponse {
-    implicit val format: Format[AllFieldDefinitionsResponse] = Json.format[AllFieldDefinitionsResponse]
-  }
-
   case class SubscriptionFieldsWrapper(applicationId: String, clientId: String, apiContext: String, apiVersion: String, fields: Seq[SubscriptionFieldValue])
-
-  // TODO: Remove me
-  case class SubscriptionField(name: String, description: String, hint: String, `type`: String, value: Option[String] = None) {
-    def withValue(updatedValue: Option[String]): SubscriptionField = {
-      copy(name, description, hint, `type`, updatedValue)
-    }
-  }
-
-  // TODO: Remove me
-  object SubscriptionField {
-    implicit val format: Format[SubscriptionField] = Json.format[SubscriptionField]
-  }
 
   case class SubscriptionFields(clientId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Map[String, String])
   object SubscriptionFields {

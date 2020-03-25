@@ -22,7 +22,7 @@ import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{FieldDefinitions, Fields, FieldsDeleteResult, FieldsDeleteSuccessResult, SubscriptionField, SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{Fields, FieldsDeleteResult, FieldsDeleteSuccessResult, SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor

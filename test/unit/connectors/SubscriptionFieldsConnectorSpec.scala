@@ -21,7 +21,6 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import connectors.{AbstractSubscriptionFieldsConnector, ProxiedHttpClient}
 import connectors.SubscriptionFieldsConnector._
 import domain.ApiSubscriptionFields.{FieldsDeleteFailureResult, FieldsDeleteSuccessResult, SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsPutRequest}
 import domain.{APIIdentifier, Environment}

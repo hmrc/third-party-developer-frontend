@@ -108,7 +108,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
           val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
           applicationService.updateCheckInformation(application.id, information)
           val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation())))
-          Conflict(applicationcheck.landingPage(application.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey))) // TODO where
+          Conflict(applicationcheck.landingPage(application.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
       }
   }
 
