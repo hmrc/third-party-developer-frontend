@@ -25,10 +25,10 @@ import helpers.Retries
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
@@ -46,14 +46,18 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
       }
     }
 
+    private val app = new GuiceApplicationBuilder().configure("metrics.jvm"-> false).build()
+    implicit val actorSystem: ActorSystem = app.actorSystem
+    implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+
     def underTest = new RetryTestConnector(mockFutureTimeoutSupport, mockAppConfig)
   }
 
   class RetryTestConnector(val futureTimeout: FutureTimeoutSupport,
-                           val appConfig: ApplicationConfig) extends Retries {
-    implicit val ec: ExecutionContext = global
+                           val appConfig: ApplicationConfig)
+                           (implicit val ec : ExecutionContext, val actorSystem: ActorSystem)
+   extends Retries {
 
-    override protected def actorSystem: ActorSystem = ActorSystem("test-actor-system")
   }
 
   "Retries" should {

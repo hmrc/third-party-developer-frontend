@@ -20,7 +20,6 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import config.ApplicationConfig
-import connectors.{AbstractSubscriptionFieldsConnector, ProxiedHttpClient}
 import domain.Environment
 import org.mockito.ArgumentMatchers.any
 import helpers.FutureTimeoutSupportImpl
