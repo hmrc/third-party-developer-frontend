@@ -18,8 +18,10 @@ package config
 
 import akka.pattern.FutureTimeoutSupport
 import com.google.inject.AbstractModule
-import connectors.{ConnectorMetrics, ConnectorMetricsImpl}
+import com.google.inject.name.Names
+import connectors.{ConnectorMetrics, ConnectorMetricsImpl, ProductionSubscriptionFieldsConnector, SandboxSubscriptionFieldsConnector}
 import helpers.FutureTimeoutSupportImpl
+import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
 
 class ConfigurationModule extends AbstractModule {
@@ -27,5 +29,13 @@ class ConfigurationModule extends AbstractModule {
     bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
     bind(classOf[SessionTimeoutFilter]).to(classOf[SessionTimeoutFilterWithWhitelist])
     bind(classOf[FutureTimeoutSupport]).to(classOf[FutureTimeoutSupportImpl])
+
+    bind(classOf[SubscriptionFieldsConnector])
+      .annotatedWith(Names.named("SANDBOX"))
+      .to(classOf[SandboxSubscriptionFieldsConnector])
+
+    bind(classOf[SubscriptionFieldsConnector])
+      .annotatedWith(Names.named("PRODUCTION"))
+      .to(classOf[ProductionSubscriptionFieldsConnector])
   }
 }

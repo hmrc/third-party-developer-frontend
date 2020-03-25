@@ -23,6 +23,7 @@ import org.mockito.BDDMockito.given
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
+import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import service.{Connectors, ConnectorsWrapper}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -41,8 +42,8 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
     val connectors = new ConnectorsWrapper (
       mock[ThirdPartyApplicationSandboxConnector],
       mock[ThirdPartyApplicationProductionConnector],
-      mock[ApiSubscriptionFieldsSandboxConnector],
-      mock[ApiSubscriptionFieldsProductionConnector],
+      mock[SubscriptionFieldsConnector],
+      mock[SubscriptionFieldsConnector],
       mockAppConfig
     )
 

@@ -16,6 +16,7 @@
 
 package service
 
+import com.google.inject.name.Named
 import config.ApplicationConfig
 import connectors._
 import domain.Environment.PRODUCTION
@@ -29,8 +30,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
                                   val productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-                                  val sandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector,
-                                  val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+                                  @Named("SANDBOX") val sandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+                                  @Named("PRODUCTION") val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
                                   applicationConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
 
   def forApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Connectors] = {
