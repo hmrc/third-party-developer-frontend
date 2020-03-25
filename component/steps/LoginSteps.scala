@@ -29,7 +29,6 @@ import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import steps.PageSugar
 
 import scala.collection.mutable
 

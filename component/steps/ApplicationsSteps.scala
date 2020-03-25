@@ -30,7 +30,6 @@ import org.openqa.selenium.By
 import org.scalatest.Matchers
 import play.api.http.Status._
 import play.api.libs.json.Json
-import steps.PageSugar
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.collection.JavaConversions._

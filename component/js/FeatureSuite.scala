@@ -30,7 +30,7 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[Cucumber])
   @CucumberOptions(
     features = Array("features"),
-    glue = Array("component/steps"),
+    glue = Array("steps"),
     dryRun= false,snippets= SnippetType.CAMELCASE,
     strict = true,
     plugin = Array("pretty",
