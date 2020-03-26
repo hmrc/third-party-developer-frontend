@@ -22,7 +22,15 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.ApiSubscriptionFields.{Fields, FieldsDeleteFailureResult, FieldsDeleteResult, FieldsDeleteSuccessResult, SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsPutRequest}
+import domain.ApiSubscriptionFields.{
+  Fields,
+  FieldsDeleteFailureResult,
+  FieldsDeleteResult,
+  FieldsDeleteSuccessResult,
+  SubscriptionFieldDefinition,
+  SubscriptionFieldValue,
+  SubscriptionFieldsPutRequest
+}
 import domain.{APIIdentifier, Environment}
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
@@ -35,7 +43,9 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries {
+abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext)
+    extends SubscriptionFieldsConnector
+    with Retries {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
   val environment: Environment
@@ -47,39 +57,48 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   import SubscriptionFieldsConnector.JsonFormatters._
   import SubscriptionFieldsConnector._
 
-  def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
+  def http: HttpClient =
+    if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
 
-  def fetchFieldsValuesWithPrefetchedDefinitions(clientId: String, apiIdentifier: APIIdentifier, definitionsCache: DefinitionsByApiVersion)
-                                                (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]] = {
+  def fetchFieldsValuesWithPrefetchedDefinitions(
+      clientId: String,
+      apiIdentifier: APIIdentifier,
+      definitionsCache: DefinitionsByApiVersion
+  )(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]] = {
 
-    def getDefinitions() =
-      Future.successful(definitionsCache.getOrElse(apiIdentifier, Seq.empty))
+    def getDefinitions() = Future.successful(definitionsCache.getOrElse(apiIdentifier, Seq.empty))
 
     internalFetchFieldValues(getDefinitions)(clientId, apiIdentifier)
   }
 
-  def fetchFieldValues(clientId: String, context: String, version: String)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]] = {
+  def fetchFieldValues(clientId: String, context: String, version: String)(
+      implicit hc: HeaderCarrier
+  ): Future[Seq[SubscriptionFieldValue]] = {
 
-    def getDefinitions() =
-      fetchFieldDefinitions(context, version)
+    def getDefinitions() = fetchFieldDefinitions(context, version)
 
     internalFetchFieldValues(getDefinitions)(clientId, APIIdentifier(context, version))
   }
 
-  private def internalFetchFieldValues(getDefinitions: () => Future[Seq[SubscriptionFieldDefinition]])
-                                      (clientId: String,
-                                       apiIdentifier: APIIdentifier)
-                                      (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]] = {
+  private def internalFetchFieldValues(
+      getDefinitions: () => Future[Seq[SubscriptionFieldDefinition]]
+  )(clientId: String, apiIdentifier: APIIdentifier)(
+      implicit hc: HeaderCarrier
+  ): Future[Seq[SubscriptionFieldValue]] = {
 
-    def joinFieldValuesToDefinitions(defs: Seq[SubscriptionFieldDefinition], fieldValues: Fields): Seq[SubscriptionFieldValue] = {
+    def joinFieldValuesToDefinitions(
+        defs: Seq[SubscriptionFieldDefinition],
+        fieldValues: Fields
+    ): Seq[SubscriptionFieldValue] = {
       defs.map(field => SubscriptionFieldValue(field, fieldValues.getOrElse(field.name, "")))
     }
 
-    def ifDefinitionsGetValues(definitions: Seq[SubscriptionFieldDefinition]): Future[Option[ApplicationApiFieldValues]] = {
+    def ifDefinitionsGetValues(
+        definitions: Seq[SubscriptionFieldDefinition]
+    ): Future[Option[ApplicationApiFieldValues]] = {
       if (definitions.isEmpty) {
         Future.successful(None)
-      }
-      else {
+      } else {
         fetchApplicationApiValues(clientId, apiIdentifier.context, apiIdentifier.version)
       }
     }
@@ -88,10 +107,12 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
       definitions: Seq[SubscriptionFieldDefinition] <- getDefinitions()
       subscriptionFields <- ifDefinitionsGetValues(definitions)
       fieldValues = subscriptionFields.fold(Fields.empty)(_.fields)
-    }  yield joinFieldValuesToDefinitions(definitions, fieldValues)
+    } yield joinFieldValuesToDefinitions(definitions, fieldValues)
   }
 
-  def fetchFieldDefinitions(apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]] = {
+  def fetchFieldDefinitions(apiContext: String, apiVersion: String)(
+      implicit hc: HeaderCarrier
+  ): Future[Seq[SubscriptionFieldDefinition]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
     Logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
     retry {
@@ -109,26 +130,34 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     } recover recovery(DefinitionsByApiVersion.empty)
   }
 
-  def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)(
+      implicit hc: HeaderCarrier
+  ): Future[HttpResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields))
+    http.PUT[SubscriptionFieldsPutRequest, HttpResponse](
+      url,
+      SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)
+    )
   }
 
-  def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult] = {
+  def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(
+      implicit hc: HeaderCarrier
+  ): Future[FieldsDeleteResult] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
     http.DELETE[HttpResponse](url).map { response =>
       response.status match {
         case NO_CONTENT => FieldsDeleteSuccessResult
-        case _ => FieldsDeleteFailureResult
+        case _          => FieldsDeleteFailureResult
       }
     } recover {
       case _: NotFoundException => FieldsDeleteSuccessResult
-      case _ => FieldsDeleteFailureResult
+      case _                    => FieldsDeleteFailureResult
     }
   }
 
-  private def fetchApplicationApiValues(clientId: String, apiContext: String, apiVersion: String)
-                                       (implicit hc: HeaderCarrier): Future[Option[ApplicationApiFieldValues]] = {
+  private def fetchApplicationApiValues(clientId: String, apiContext: String, apiVersion: String)(
+      implicit hc: HeaderCarrier
+  ): Future[Option[ApplicationApiFieldValues]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
     retry {
       http.GET[ApplicationApiFieldValues](url).map(Some(_))
@@ -160,35 +189,53 @@ object SubscriptionFieldsConnector {
   }
 
   def toDomain(fs: AllApiFieldDefinitions): DefinitionsByApiVersion = {
-    fs.apis.map( fd =>
-      APIIdentifier(fd.apiContext, fd.apiVersion) -> fd.fieldDefinitions.map(toDomain)
-    )
+    fs.apis
+      .map(fd => APIIdentifier(fd.apiContext, fd.apiVersion) -> fd.fieldDefinitions.map(toDomain))
       .toMap
   }
 
-  private[connectors] case class ApplicationApiFieldValues(clientId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Map[String, String])
+  private[connectors] case class ApplicationApiFieldValues(
+      clientId: String,
+      apiContext: String,
+      apiVersion: String,
+      fieldsId: UUID,
+      fields: Map[String, String]
+  )
 
-  private[connectors] case class FieldDefinition(name: String, description: String, hint: String, `type`: String)
+  private[connectors] case class FieldDefinition(
+      name: String,
+      description: String,
+      hint: String,
+      `type`: String
+  )
 
-  private[connectors] case class ApiFieldDefinitions(apiContext: String, apiVersion: String, fieldDefinitions: List[FieldDefinition])
+  private[connectors] case class ApiFieldDefinitions(
+      apiContext: String,
+      apiVersion: String,
+      fieldDefinitions: List[FieldDefinition]
+  )
 
   private[connectors] case class AllApiFieldDefinitions(apis: Seq[ApiFieldDefinitions])
 
   object JsonFormatters {
     implicit val format: Format[ApplicationApiFieldValues] = Json.format[ApplicationApiFieldValues]
     implicit val formatFieldDefinition: Format[FieldDefinition] = Json.format[FieldDefinition]
-    implicit val formatApiFieldDefinitionsResponse: Format[ApiFieldDefinitions] = Json.format[ApiFieldDefinitions]
-    implicit val formatAllApiFieldDefinitionsResponse: Format[AllApiFieldDefinitions] = Json.format[AllApiFieldDefinitions]
+    implicit val formatApiFieldDefinitionsResponse: Format[ApiFieldDefinitions] =
+      Json.format[ApiFieldDefinitions]
+    implicit val formatAllApiFieldDefinitionsResponse: Format[AllApiFieldDefinitions] =
+      Json.format[AllApiFieldDefinitions]
   }
 }
 
 @Singleton
-class SandboxSubscriptionFieldsConnector @Inject()(val appConfig: ApplicationConfig,
-                                                   val httpClient: HttpClient,
-                                                   val proxiedHttpClient: ProxiedHttpClient,
-                                                   val actorSystem: ActorSystem,
-                                                   val futureTimeout: FutureTimeoutSupport)(implicit val ec: ExecutionContext)
-  extends AbstractSubscriptionFieldsConnector {
+class SandboxSubscriptionFieldsConnector @Inject() (
+    val appConfig: ApplicationConfig,
+    val httpClient: HttpClient,
+    val proxiedHttpClient: ProxiedHttpClient,
+    val actorSystem: ActorSystem,
+    val futureTimeout: FutureTimeoutSupport
+)(implicit val ec: ExecutionContext)
+    extends AbstractSubscriptionFieldsConnector {
 
   val environment: Environment = Environment.SANDBOX
   val serviceBaseUrl: String = appConfig.apiSubscriptionFieldsSandboxUrl
@@ -198,12 +245,14 @@ class SandboxSubscriptionFieldsConnector @Inject()(val appConfig: ApplicationCon
 }
 
 @Singleton
-class ProductionSubscriptionFieldsConnector @Inject()(val appConfig: ApplicationConfig,
-                                                      val httpClient: HttpClient,
-                                                      val proxiedHttpClient: ProxiedHttpClient,
-                                                      val actorSystem: ActorSystem,
-                                                      val futureTimeout: FutureTimeoutSupport)(implicit val ec: ExecutionContext)
-  extends AbstractSubscriptionFieldsConnector {
+class ProductionSubscriptionFieldsConnector @Inject() (
+    val appConfig: ApplicationConfig,
+    val httpClient: HttpClient,
+    val proxiedHttpClient: ProxiedHttpClient,
+    val actorSystem: ActorSystem,
+    val futureTimeout: FutureTimeoutSupport
+)(implicit val ec: ExecutionContext)
+    extends AbstractSubscriptionFieldsConnector {
 
   val environment: Environment = Environment.PRODUCTION
   val serviceBaseUrl: String = appConfig.apiSubscriptionFieldsProductionUrl
