@@ -23,16 +23,16 @@
                     messages: Messages,
                     applicationConfig: config.ApplicationConfig)
 
-@main(title = applicationConfig.title,
-    navTitle = Some(applicationConfig.title),
-    navTitleLink = None,
+@pageHeading = @{ "API metadata" }
+
+@devMain(
+    title = pageHeading,
+    userFullName = loggedIn.loggedInName,
+    developerSession = Some(loggedIn),
     breadcrumbs = Seq(
       Crumb("API metadata"),
       Crumb.viewAllApplications
-    ),
-    headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
-    serviceInfoContent = Some(HtmlFormat.empty),
-    developerSession = Some(loggedIn)
+    )
 ) {
     <header>
         <h1 class="heading-xlarge">API metadata</h1>
@@ -44,5 +44,5 @@
 
     <p>You can submit metadata with each API request for these APIs.</p>
 
-    <p>List of api versions here please</p>
+    <p>[List of api versions here please]</p>
 }
