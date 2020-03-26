@@ -103,7 +103,7 @@ lazy val microservice = Project(appName, file("."))
     fork in Test := false,
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
-    scalaVersion := "2.11.11",
+    scalaVersion := "2.11.12",
     resolvers += Resolver.jcenterRepo,
     routesImport += "connectors.binders._"
   )
