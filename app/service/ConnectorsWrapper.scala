@@ -16,11 +16,13 @@
 
 package service
 
+import com.google.inject.name.Named
 import config.ApplicationConfig
 import connectors._
 import domain.Environment.PRODUCTION
 import domain._
 import javax.inject.{Inject, Singleton}
+import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -28,8 +30,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
                                   val productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-                                  val sandboxSubscriptionFieldsConnector: ApiSubscriptionFieldsSandboxConnector,
-                                  val productionSubscriptionFieldsConnector: ApiSubscriptionFieldsProductionConnector,
+                                  @Named("SANDBOX") val sandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+                                  @Named("PRODUCTION") val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
                                   applicationConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
 
   def forApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Connectors] = {
@@ -59,4 +61,4 @@ class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApp
 
 }
 
-case class Connectors(thirdPartyApplicationConnector: ThirdPartyApplicationConnector, apiSubscriptionFieldsConnector: ApiSubscriptionFieldsConnector)
+case class Connectors(thirdPartyApplicationConnector: ThirdPartyApplicationConnector, apiSubscriptionFieldsConnector: SubscriptionFieldsConnector)

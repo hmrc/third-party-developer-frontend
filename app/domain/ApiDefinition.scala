@@ -16,7 +16,7 @@
 
 package domain
 
-import domain.ApiSubscriptionFields.{SubscriptionField, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import play.api.libs.json.Json
 
 import scala.util.Try
@@ -76,5 +76,4 @@ object DefinitionFormats {
   implicit val formatVersionSubscription = Json.format[VersionSubscription]
   implicit val formatAPISubscription = Json.format[APISubscription]
   implicit val formatAPIIdentifier = Json.format[APIIdentifier]
-  implicit val formatSubscriptionField = Json.format[SubscriptionField]
 }
