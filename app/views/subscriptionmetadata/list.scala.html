@@ -14,4 +14,35 @@
  * limitations under the License.
  *@
 
-<p>Hello</p>
+@import include._
+@import domain._
+@import model.Crumb
+
+@(app: Application)(implicit request: play.api.mvc.Request[Any],
+                    loggedIn: DeveloperSession,
+                    messages: Messages,
+                    applicationConfig: config.ApplicationConfig)
+
+@main(title = applicationConfig.title,
+    navTitle = Some(applicationConfig.title),
+    navTitleLink = None,
+    breadcrumbs = Seq(
+      Crumb("API metadata"),
+      Crumb.viewAllApplications
+    ),
+    headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
+    serviceInfoContent = Some(HtmlFormat.empty),
+    developerSession = Some(loggedIn)
+) {
+    <header>
+        <h1 class="heading-xlarge">API metadata</h1>
+    </header>
+
+    @appEnvironment(app)
+
+    <br>
+
+    <p>You can submit metadata with each API request for these APIs.</p>
+
+    <p>List of api versions here please</p>
+}

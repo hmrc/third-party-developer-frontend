@@ -40,7 +40,7 @@ class ManageSubscriptions @Inject() (
 
   def showMetadataPage(applicationId: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
-      successful(Ok(views.html.subscriptionmetadata.list()))
+      successful(Ok(views.html.subscriptionmetadata.list(request.application)))
     }
 
 }
