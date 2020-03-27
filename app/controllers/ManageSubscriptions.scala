@@ -38,9 +38,8 @@ class ManageSubscriptions @Inject() (
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController {
 
-  def showMetadataPage(applicationId: String): Action[AnyContent] =
+  def listApiSubscriptions(applicationId: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
-      successful(Ok(views.html.subscriptionmetadata.list(request.application)))
+      successful(Ok(views.html.manageSubscriptionsViews.listApiSubscriptions(request.application)))
     }
-
 }

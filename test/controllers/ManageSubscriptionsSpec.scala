@@ -94,7 +94,7 @@ class ManageSubscriptionSpec extends BaseControllerSpec with WithCSRFAddToken {
       given(mockApplicationService.fetchByTeamMemberEmail(any())(any[HeaderCarrier]))
           .willReturn(successful(List(application)))
 
-      private val result = await(manageSubscriptionController.showMetadataPage(appId)(loggedInRequest))
+      private val result = await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include(loggedInUser.displayedName)
@@ -102,15 +102,15 @@ class ManageSubscriptionSpec extends BaseControllerSpec with WithCSRFAddToken {
       bodyOf(result) should include("You can submit metadata with each API request for these APIs.")
     }
 
-    // "return to the login page when the user is not logged in" in new ManageSubscriptionsSetup {
+    "return to the login page when the user is not logged in" in new ManageSubscriptionsSetup {
 
-    //   val request = FakeRequest()
+      val request = FakeRequest()
 
-    //   private val result = await(manageSubscriptionController.showMetadataPage(appId)(request))
+      private val result = await(manageSubscriptionController.listApiSubscriptions(appId)(request))
 
-    //   status(result) shouldBe SEE_OTHER
-    //   redirectLocation(result) shouldBe Some("/developer/login")
-    // }
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+    }
   }
   private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 }
