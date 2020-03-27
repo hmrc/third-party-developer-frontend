@@ -27,6 +27,30 @@ import service.SessionService
 import config.ApplicationConfig
 import service.ApplicationService
 import service.AuditService
+import domain.APISubscriptionStatus
+import domain.ApiSubscriptionFields.SubscriptionFieldValue
+import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+
+object ManageSubscriptions {
+  case class SubscriptionDetails(shortDescription: String, value: String)
+  case class ApiDetails(name: String, version: String, subsValues: Seq[SubscriptionDetails])
+
+  def toDetails(in: SubscriptionFieldValue): SubscriptionDetails = {
+    SubscriptionDetails(in.definition.description, in.value)
+  }
+
+  def toDetails(in: SubscriptionFieldsWrapper): Seq[SubscriptionDetails] = {
+    in.fields.map(toDetails)
+  }
+
+  def toDetails(in: APISubscriptionStatus): ApiDetails = {
+    ApiDetails(
+      name = in.name,
+      version = in.apiVersion.version,
+      subsValues = in.fields.map(toDetails).getOrElse(Seq.empty)
+    )
+  }
+}
 
 @Singleton
 class ManageSubscriptions @Inject() (
@@ -38,8 +62,19 @@ class ManageSubscriptions @Inject() (
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController {
 
+  import ManageSubscriptions._
+
   def listApiSubscriptions(applicationId: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
-      successful(Ok(views.html.manageSubscriptionsViews.listApiSubscriptions(request.application)))
+      val futureDetails =
+        for {
+          subs <- applicationService.apisWithSubscriptions(request.application)
+          filteredSubs = subs.filter(_.subscribed)
+          details = filteredSubs.map(toDetails)
+        } yield details
+
+      futureDetails map { details =>
+        Ok(views.html.managesubscriptions.listApiSubscriptions(request.application, details))
+      }
     }
 }
