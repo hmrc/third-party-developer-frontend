@@ -22,43 +22,81 @@ import play.api.libs.json.{Format, Json}
 
 object ApiSubscriptionFields {
 
-  case class SubscriptionFieldDefinition(name: String, description: String, hint: String, `type`: String)
+  case class SubscriptionFieldDefinition(
+      name: String,
+      description: String,
+      hint: String,
+      `type`: String
+  )
 
-  case class SubscriptionFieldValue(definition : SubscriptionFieldDefinition, value: String)
+  case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: String)
 
   object SubscriptionFieldValue {
-    def fromFormValues(name: String, description: String, hint: String, `type`: String, value: String) = {
+    def fromFormValues(
+        name: String,
+        description: String,
+        hint: String,
+        `type`: String,
+        value: String
+    ) = {
       SubscriptionFieldValue(SubscriptionFieldDefinition(name, description, hint, `type`), value)
     }
 
-    def toFormValues(subscriptionFieldValue: SubscriptionFieldValue): Option[(String, String, String, String, String)] = {
-      Some((subscriptionFieldValue.definition.name,
-        subscriptionFieldValue.definition.description,
-        subscriptionFieldValue.definition.hint,
-        subscriptionFieldValue.definition.`type`,
-        subscriptionFieldValue.value))
+    def toFormValues(
+        subscriptionFieldValue: SubscriptionFieldValue
+    ): Option[(String, String, String, String, String)] = {
+      Some(
+        (
+          subscriptionFieldValue.definition.name,
+          subscriptionFieldValue.definition.description,
+          subscriptionFieldValue.definition.hint,
+          subscriptionFieldValue.definition.`type`,
+          subscriptionFieldValue.value
+        )
+      )
     }
   }
 
   type Fields = Map[String, String]
 
-  object Fields {
-    val empty = Map.empty[String, String]
-  }
-
   sealed trait FieldsDeleteResult
   case object FieldsDeleteSuccessResult extends FieldsDeleteResult
   case object FieldsDeleteFailureResult extends FieldsDeleteResult
 
-  case class SubscriptionFieldsWrapper(applicationId: String, clientId: String, apiContext: String, apiVersion: String, fields: Seq[SubscriptionFieldValue])
+  case class SubscriptionFieldsWrapper(
+      applicationId: String,
+      clientId: String,
+      apiContext: String,
+      apiVersion: String,
+      fields: Seq[SubscriptionFieldValue]
+  )
 
-  case class SubscriptionFields(clientId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Map[String, String])
+  // TODO : Probably needs deleting
+  object Fields {
+    val empty = Map.empty[String, String]
+  }
+
+  // TODO : Probably needs deleting
+  case class SubscriptionFields(
+      clientId: String,
+      apiContext: String,
+      apiVersion: String,
+      fieldsId: UUID,
+      fields: Map[String, String]
+  )
+
   object SubscriptionFields {
     implicit val format: Format[SubscriptionFields] = Json.format[SubscriptionFields]
   }
 
-  case class SubscriptionFieldsPutRequest(clientId: String, apiContext: String, apiVersion: String, fields: Map[String, String])
+  case class SubscriptionFieldsPutRequest(
+      clientId: String,
+      apiContext: String,
+      apiVersion: String,
+      fields: Map[String, String]
+  )
   object SubscriptionFieldsPutRequest {
-    implicit val format: Format[SubscriptionFieldsPutRequest] = Json.format[SubscriptionFieldsPutRequest]
+    implicit val format: Format[SubscriptionFieldsPutRequest] =
+      Json.format[SubscriptionFieldsPutRequest]
   }
 }

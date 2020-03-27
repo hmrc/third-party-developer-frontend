@@ -69,7 +69,7 @@ class ManageSubscriptions @Inject() (
       val futureDetails =
         for {
           subs <- applicationService.apisWithSubscriptions(request.application)
-          filteredSubs = subs.filter(_.subscribed)
+          filteredSubs = subs.filter(s => s.subscribed && s.fields.isDefined)
           details = filteredSubs.map(toDetails)
         } yield details
 
