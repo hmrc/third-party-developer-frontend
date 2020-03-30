@@ -114,6 +114,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       SubscriptionFieldDefinition(
         name = generateName(prefix),
         description = s"${prefix}-description",
+        shortDescription = s"${prefix}-short-description",
         hint = "",
         `type` = "STRING"
       )

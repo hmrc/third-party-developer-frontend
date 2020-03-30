@@ -35,15 +35,21 @@ case class LoginForm(emailaddress: String, password: String)
 object LoginForm {
 
   def invalidCredentials(form: Form[LoginForm], attemptedEmailAddress: String): Form[LoginForm] = {
-    form.withError("submissionError", "true")
+    form
+      .withError("submissionError", "true")
       .copy(data = Map("emailaddress" -> attemptedEmailAddress))
       .withError("invalidCredentials", FormKeys.invalidCredentialsKey)
       .withGlobalError(FormKeys.invalidCredentialsGlobalKey)
   }
 
   def accountUnverified(form: Form[LoginForm], email: String) = {
-    form.withError("submissionError", "true")
-      .withError(FormKeys.emailaddressField, FormKeys.accountUnverifiedKey, controllers.routes.Registration.resendVerification())
+    form
+      .withError("submissionError", "true")
+      .withError(
+        FormKeys.emailaddressField,
+        FormKeys.accountUnverifiedKey,
+        controllers.routes.Registration.resendVerification()
+      )
       .withGlobalError(FormKeys.accountUnverifiedGlobalKey)
   }
 
@@ -56,14 +62,18 @@ object LoginForm {
 
 }
 
-
 case class PasswordResetForm(password: String, confirmPassword: String) extends ConfirmPassword
 
 object PasswordResetForm {
 
   def accountUnverified[T](form: Form[T], email: String) = {
-    form.withError("submissionError", "true")
-      .withError(FormKeys.passwordField, FormKeys.accountUnverifiedKey, controllers.routes.Registration.resendVerification())
+    form
+      .withError("submissionError", "true")
+      .withError(
+        FormKeys.passwordField,
+        FormKeys.accountUnverifiedKey,
+        controllers.routes.Registration.resendVerification()
+      )
       .withGlobalError(FormKeys.accountUnverifiedGlobalKey)
   }
 
@@ -76,12 +86,14 @@ object PasswordResetForm {
 
 }
 
-case class RegisterForm(firstName: String,
-                        lastName: String,
-                        emailaddress: String,
-                        password: String,
-                        confirmPassword: String,
-                        organisation: Option[String] = None) extends ConfirmPassword
+case class RegisterForm(
+    firstName: String,
+    lastName: String,
+    emailaddress: String,
+    password: String,
+    confirmPassword: String,
+    organisation: Option[String] = None
+) extends ConfirmPassword
 
 object RegistrationForm {
 
@@ -103,7 +115,8 @@ final case class DeleteProfileForm(confirmation: Option[String])
 object DeleteProfileForm {
   lazy val form = Form(
     mapping(
-      "confirmation" -> optional(text).verifying(FormKeys.accountDeleteConfirmationRequiredKey, selection => selection.isDefined)
+      "confirmation" -> optional(text)
+        .verifying(FormKeys.accountDeleteConfirmationRequiredKey, selection => selection.isDefined)
     )(DeleteProfileForm.apply)(DeleteProfileForm.unapply)
   )
 }
@@ -125,8 +138,13 @@ case class ForgotPasswordForm(emailaddress: String)
 object ForgotPasswordForm {
 
   def accountUnverified(form: Form[ForgotPasswordForm], email: String) = {
-    form.withError("submissionError", "true")
-      .withError(FormKeys.emailaddressField, FormKeys.accountUnverifiedKey, controllers.routes.Registration.resendVerification())
+    form
+      .withError("submissionError", "true")
+      .withError(
+        FormKeys.emailaddressField,
+        FormKeys.accountUnverifiedKey,
+        controllers.routes.Registration.resendVerification()
+      )
       .withGlobalError(FormKeys.accountUnverifiedGlobalKey)
   }
 
@@ -138,18 +156,25 @@ object ForgotPasswordForm {
 
 }
 
-case class ChangePasswordForm(currentPassword: String, password: String, confirmPassword: String) extends ConfirmPassword
+case class ChangePasswordForm(currentPassword: String, password: String, confirmPassword: String)
+    extends ConfirmPassword
 
 object ChangePasswordForm {
 
   def accountUnverified[T](form: Form[T], email: String) = {
-    form.withError("submissionError", "true")
-      .withError(FormKeys.passwordField, FormKeys.accountUnverifiedKey, controllers.routes.Registration.resendVerification())
+    form
+      .withError("submissionError", "true")
+      .withError(
+        FormKeys.passwordField,
+        FormKeys.accountUnverifiedKey,
+        controllers.routes.Registration.resendVerification()
+      )
       .withGlobalError(FormKeys.accountUnverifiedGlobalKey)
   }
 
   def invalidCredentials(form: Form[ChangePasswordForm]) = {
-    form.withError("submissionError", "true")
+    form
+      .withError("submissionError", "true")
       .withError(FormKeys.currentPasswordField, FormKeys.currentPasswordInvalidKey)
       .withGlobalError(FormKeys.currentPasswordInvalidGlobalKey)
   }
@@ -180,23 +205,23 @@ object RemoveTeamMemberConfirmationForm {
   val form: Form[RemoveTeamMemberConfirmationForm] = Form(
     mapping(
       "email" -> emailValidator(FormKeys.teamMemberEmailRequired),
-      "confirm" -> optional(text).verifying(FormKeys.removeTeamMemberConfirmNoChoiceKey, s => s.isDefined)
+      "confirm" -> optional(text)
+        .verifying(FormKeys.removeTeamMemberConfirmNoChoiceKey, s => s.isDefined)
     )(RemoveTeamMemberConfirmationForm.apply)(RemoveTeamMemberConfirmationForm.unapply)
   )
 }
-
 
 final case class RemoveTeamMemberCheckPageConfirmationForm(email: String)
 
 object RemoveTeamMemberCheckPageConfirmationForm {
   val form: Form[RemoveTeamMemberCheckPageConfirmationForm] = Form(
     mapping(
-      "email" ->  emailValidator(FormKeys.teamMemberEmailRequired)
-    )(RemoveTeamMemberCheckPageConfirmationForm.apply)(RemoveTeamMemberCheckPageConfirmationForm.unapply)
+      "email" -> emailValidator(FormKeys.teamMemberEmailRequired)
+    )(RemoveTeamMemberCheckPageConfirmationForm.apply)(
+      RemoveTeamMemberCheckPageConfirmationForm.unapply
+    )
   )
 }
-
-
 
 case class AddTeamMemberForm(email: String, role: Option[String])
 
@@ -204,7 +229,8 @@ object AddTeamMemberForm {
   def form: Form[AddTeamMemberForm] = Form(
     mapping(
       "email" -> emailValidator(FormKeys.teamMemberEmailRequired),
-      "role" -> optional(text).verifying(FormKeys.teamMemberRoleRequired, selection => selection.isDefined)
+      "role" -> optional(text)
+        .verifying(FormKeys.teamMemberRoleRequired, selection => selection.isDefined)
     )(AddTeamMemberForm.apply)(AddTeamMemberForm.unapply)
   )
 }
@@ -220,11 +246,13 @@ object AddApplicationNameForm {
   )
 }
 
-case class EditApplicationForm(applicationId: String,
-                               applicationName: String,
-                               description: Option[String] = None,
-                               privacyPolicyUrl: Option[String] = None,
-                               termsAndConditionsUrl: Option[String] = None)
+case class EditApplicationForm(
+    applicationId: String,
+    applicationName: String,
+    description: Option[String] = None,
+    privacyPolicyUrl: Option[String] = None,
+    termsAndConditionsUrl: Option[String] = None
+)
 
 object EditApplicationForm {
 
@@ -240,12 +268,23 @@ object EditApplicationForm {
 
   def withData(app: Application) = {
     val appAccess = app.access.asInstanceOf[Standard]
-    form.fillAndValidate(EditApplicationForm(app.id, app.name, app.description,
-      appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl))
+    form.fillAndValidate(
+      EditApplicationForm(
+        app.id,
+        app.name,
+        app.description,
+        appAccess.privacyPolicyUrl,
+        appAccess.termsAndConditionsUrl
+      )
+    )
   }
 }
 
-case class SubmitApplicationNameForm(applicationName: String, originalApplicationName: String, password: String = "") extends PasswordConfirmation
+case class SubmitApplicationNameForm(
+    applicationName: String,
+    originalApplicationName: String,
+    password: String = ""
+) extends PasswordConfirmation
 
 object SubmitApplicationNameForm {
 
@@ -258,8 +297,13 @@ object SubmitApplicationNameForm {
   )
 }
 
-case class SignOutSurveyForm(rating: Option[Int], improvementSuggestions: String,
-                             name: String, email: String, isJavascript: Boolean)
+case class SignOutSurveyForm(
+    rating: Option[Int],
+    improvementSuggestions: String,
+    name: String,
+    email: String,
+    isJavascript: Boolean
+)
 
 object SignOutSurveyForm {
   val form: Form[SignOutSurveyForm] = Form(
@@ -285,14 +329,14 @@ object SupportEnquiryForm {
   )
 }
 
-
 final case class DeletePrincipalApplicationForm(deleteConfirm: Option[String] = Some(""))
 
 object DeletePrincipalApplicationForm {
 
   def form: Form[DeletePrincipalApplicationForm] = Form(
     mapping(
-      "deleteConfirm" -> optional(text).verifying(FormKeys.deleteApplicationConfirmNoChoiceKey, s => s.isDefined)
+      "deleteConfirm" -> optional(text)
+        .verifying(FormKeys.deleteApplicationConfirmNoChoiceKey, s => s.isDefined)
     )(DeletePrincipalApplicationForm.apply)(DeletePrincipalApplicationForm.unapply)
   )
 }
@@ -308,13 +352,17 @@ object SelectClientSecretsToDeleteForm {
   )
 }
 
-final case class DeleteClientSecretsConfirmForm(deleteConfirm: Option[String] = Some(""), clientSecretsToDelete: String)
+final case class DeleteClientSecretsConfirmForm(
+    deleteConfirm: Option[String] = Some(""),
+    clientSecretsToDelete: String
+)
 
 object DeleteClientSecretsConfirmForm {
 
   def form: Form[DeleteClientSecretsConfirmForm] = Form(
     mapping(
-      "deleteConfirm" -> optional(text).verifying(FormKeys.deleteClientSecretsConfirmNoChoiceKey, s => s.isDefined),
+      "deleteConfirm" -> optional(text)
+        .verifying(FormKeys.deleteClientSecretsConfirmNoChoiceKey, s => s.isDefined),
       "clientSecretsToDelete" -> text
     )(DeleteClientSecretsConfirmForm.apply)(DeleteClientSecretsConfirmForm.unapply)
   )
@@ -337,7 +385,8 @@ object SubscriptionConfirmationForm {
 
   def form: Form[SubscriptionConfirmationForm] = Form(
     mapping(
-      "subscribeConfirm" -> optional(text).verifying(FormKeys.subscriptionConfirmationNoChoiceKey, s => s.isDefined)
+      "subscribeConfirm" -> optional(text)
+        .verifying(FormKeys.subscriptionConfirmationNoChoiceKey, s => s.isDefined)
     )(SubscriptionConfirmationForm.apply)(SubscriptionConfirmationForm.unapply)
   )
 }
@@ -348,7 +397,8 @@ object UnsubscribeConfirmationForm {
 
   def form: Form[UnsubscribeConfirmationForm] = Form(
     mapping(
-      "unsubscribeConfirm" -> optional(text).verifying(FormKeys.unsubscribeConfirmationNoChoiceKey, s => s.isDefined)
+      "unsubscribeConfirm" -> optional(text)
+        .verifying(FormKeys.unsubscribeConfirmationNoChoiceKey, s => s.isDefined)
     )(UnsubscribeConfirmationForm.apply)(UnsubscribeConfirmationForm.unapply)
   )
 }
@@ -356,20 +406,26 @@ object UnsubscribeConfirmationForm {
 final case class ChangeSubscriptionForm(subscribed: Option[Boolean])
 
 object ChangeSubscriptionForm {
-  def form: Form[ChangeSubscriptionForm] = Form(
-    mapping(
-      "subscribed" -> optional(boolean).verifying(FormKeys.changeSubscriptionNoChoiceKey, _.isDefined)
-    )(ChangeSubscriptionForm.apply)(ChangeSubscriptionForm.unapply))
+  def form: Form[ChangeSubscriptionForm] =
+    Form(
+      mapping(
+        "subscribed" -> optional(boolean)
+          .verifying(FormKeys.changeSubscriptionNoChoiceKey, _.isDefined)
+      )(ChangeSubscriptionForm.apply)(ChangeSubscriptionForm.unapply)
+    )
 }
 
 final case class ChangeSubscriptionConfirmationForm(subscribed: Boolean, confirm: Option[Boolean])
 
 object ChangeSubscriptionConfirmationForm {
-  def form: Form[ChangeSubscriptionConfirmationForm] = Form(
-    mapping(
-      "subscribed" -> boolean,
-      "confirm" -> optional(boolean).verifying(FormKeys.subscriptionConfirmationNoChoiceKey, _.isDefined)
-    )(ChangeSubscriptionConfirmationForm.apply)(ChangeSubscriptionConfirmationForm.unapply))
+  def form: Form[ChangeSubscriptionConfirmationForm] =
+    Form(
+      mapping(
+        "subscribed" -> boolean,
+        "confirm" -> optional(boolean)
+          .verifying(FormKeys.subscriptionConfirmationNoChoiceKey, _.isDefined)
+      )(ChangeSubscriptionConfirmationForm.apply)(ChangeSubscriptionConfirmationForm.unapply)
+    )
 }
 
 case class SubscriptionFieldsForm(fields: Seq[SubscriptionFieldValue])
@@ -381,9 +437,12 @@ object SubscriptionFieldsForm {
         mapping(
           "name" -> text,
           "description" -> text,
+          "shortDescription" -> text,
           "hint" -> text,
           "type" -> text,
-          "value" -> text)(SubscriptionFieldValue.fromFormValues)(SubscriptionFieldValue.toFormValues))
+          "value" -> text
+        )(SubscriptionFieldValue.fromFormValues)(SubscriptionFieldValue.toFormValues)
+      )
     )(SubscriptionFieldsForm.apply)(SubscriptionFieldsForm.unapply)
   )
 }
@@ -404,14 +463,18 @@ object DeleteRedirectForm {
   )
 }
 
-final case class DeleteRedirectConfirmationForm(redirectUri: String, deleteRedirectConfirm: Option[String] = Some(""))
+final case class DeleteRedirectConfirmationForm(
+    redirectUri: String,
+    deleteRedirectConfirm: Option[String] = Some("")
+)
 
 object DeleteRedirectConfirmationForm {
 
   def form: Form[DeleteRedirectConfirmationForm] = Form(
     mapping(
       "redirectUri" -> text,
-      "deleteRedirectConfirm" -> optional(text).verifying(FormKeys.deleteRedirectConfirmationNoChoiceKey, s => s.isDefined)
+      "deleteRedirectConfirm" -> optional(text)
+        .verifying(FormKeys.deleteRedirectConfirmationNoChoiceKey, s => s.isDefined)
     )(DeleteRedirectConfirmationForm.apply)(DeleteRedirectConfirmationForm.unapply)
   )
 }
@@ -433,7 +496,8 @@ object Remove2SVConfirmForm {
 
   def form: Form[Remove2SVConfirmForm] = Form(
     mapping(
-      "removeConfirm" -> optional(text).verifying(FormKeys.remove2SVConfirmNoChoiceKey, s => s.isDefined)
+      "removeConfirm" -> optional(text)
+        .verifying(FormKeys.remove2SVConfirmNoChoiceKey, s => s.isDefined)
     )(Remove2SVConfirmForm.apply)(Remove2SVConfirmForm.unapply)
   )
 }
@@ -442,6 +506,8 @@ final case class ChangeIpWhitelistForm(description: String)
 
 object ChangeIpWhitelistForm {
   val form: Form[ChangeIpWhitelistForm] = Form(
-    mapping("description" -> whitelistedIpsValidator)(ChangeIpWhitelistForm.apply)(ChangeIpWhitelistForm.unapply)
+    mapping("description" -> whitelistedIpsValidator)(ChangeIpWhitelistForm.apply)(
+      ChangeIpWhitelistForm.unapply
+    )
   )
 }

@@ -183,6 +183,7 @@ object SubscriptionFieldsConnector {
     SubscriptionFieldDefinition(
       name = f.name,
       description = f.description,
+      shortDescription = f.shortDescription,
       `type` = f.`type`,
       hint = f.hint
     )
@@ -205,6 +206,7 @@ object SubscriptionFieldsConnector {
   private[connectors] case class FieldDefinition(
       name: String,
       description: String,
+      shortDescription: String,
       hint: String,
       `type`: String
   )

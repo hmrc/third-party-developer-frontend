@@ -36,7 +36,7 @@ object ManageSubscriptions {
   case class ApiDetails(name: String, version: String, subsValues: Seq[SubscriptionDetails])
 
   def toDetails(in: SubscriptionFieldValue): SubscriptionDetails = {
-    SubscriptionDetails(in.definition.description, in.value)
+    SubscriptionDetails(in.definition.shortDescription, in.value)
   }
 
   def toDetails(in: SubscriptionFieldsWrapper): Seq[SubscriptionDetails] = {

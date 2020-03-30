@@ -25,6 +25,7 @@ object ApiSubscriptionFields {
   case class SubscriptionFieldDefinition(
       name: String,
       description: String,
+      shortDescription: String,
       hint: String,
       `type`: String
   )
@@ -35,20 +36,25 @@ object ApiSubscriptionFields {
     def fromFormValues(
         name: String,
         description: String,
+        shortDescription: String,
         hint: String,
         `type`: String,
         value: String
     ) = {
-      SubscriptionFieldValue(SubscriptionFieldDefinition(name, description, hint, `type`), value)
+      SubscriptionFieldValue(
+        SubscriptionFieldDefinition(name, description, shortDescription, hint, `type`),
+        value
+      )
     }
 
     def toFormValues(
         subscriptionFieldValue: SubscriptionFieldValue
-    ): Option[(String, String, String, String, String)] = {
+    ): Option[(String, String, String, String, String, String)] = {
       Some(
         (
           subscriptionFieldValue.definition.name,
           subscriptionFieldValue.definition.description,
+          subscriptionFieldValue.definition.shortDescription,
           subscriptionFieldValue.definition.hint,
           subscriptionFieldValue.definition.`type`,
           subscriptionFieldValue.value

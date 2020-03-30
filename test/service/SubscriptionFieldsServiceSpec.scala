@@ -42,7 +42,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
   val applicationName: String = "third-party-application"
   val applicationId: String = "application-id"
   val clientId = "clientId"
-  val application = Application(applicationId, clientId, applicationName, DateTime.now(), DateTime.now(), Environment.PRODUCTION)
+  val application =
+    Application(applicationId, clientId, applicationName, DateTime.now(), DateTime.now(), Environment.PRODUCTION)
 
   trait Setup {
 
@@ -57,18 +58,36 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
     val underTest = new SubscriptionFieldsService(mockConnectorsWrapper)
 
     given(mockConnectorsWrapper.forApplication(anyString())(any[HeaderCarrier]))
-      .willReturn(Future.successful(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector)))
+      .willReturn(
+        Future.successful(
+          Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector)
+        )
+      )
 
     given(mockConnectorsWrapper.connectorsForEnvironment(application.deployedTo))
       .willReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector))
 
-    given(mockThirdPartyApplicationConnector.fetchApplicationById(meq(applicationId))(any[HeaderCarrier]))
-      .willReturn(Future.successful(Some(Application(applicationId, clientId, "name", DateTime.now(), DateTime.now(), Environment.PRODUCTION))))
+    given(
+      mockThirdPartyApplicationConnector
+        .fetchApplicationById(meq(applicationId))(any[HeaderCarrier])
+    ).willReturn(
+      Future.successful(
+        Some(
+          Application(applicationId, clientId, "name", DateTime.now(), DateTime.now(), Environment.PRODUCTION)
+        )
+      )
+    )
   }
 
   "fetchFieldsValues" should {
     "return empty sequence when there are none" in new Setup {
-      private val subscriptionFieldValues = await(underTest.fetchFieldsValues(application,fieldDefinitions = Seq.empty, APIIdentifier("context", "version-1")))
+      private val subscriptionFieldValues = await(
+        underTest.fetchFieldsValues(
+          application,
+          fieldDefinitions = Seq.empty,
+          APIIdentifier("context", "version-1")
+        )
+      )
 
       subscriptionFieldValues shouldBe Seq.empty
     }
@@ -76,20 +95,29 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
     "find and return matching values" in new Setup {
       private val apiIdentifier: APIIdentifier = APIIdentifier("context1", "version-1")
 
-      private val subscriptionFieldDefinition1 = SubscriptionFieldDefinition("name1", "description1", "hint1", "STRING")
-      private val subscriptionFieldDefinition2 = SubscriptionFieldDefinition("name2", "description2", "hint2", "STRING")
+      private val subscriptionFieldDefinition1 =
+        SubscriptionFieldDefinition("name1", "description1", "short-description", "hint1", "STRING")
+      private val subscriptionFieldDefinition2 =
+        SubscriptionFieldDefinition("name2", "description2", "short-description2", "hint2", "STRING")
 
       private val subscriptionFieldValue1 = SubscriptionFieldValue(subscriptionFieldDefinition1, "value1")
       private val subscriptionFieldValue2 = SubscriptionFieldValue(subscriptionFieldDefinition2, "value2")
 
       val fieldDefinitions = Seq(subscriptionFieldDefinition1, subscriptionFieldDefinition2)
 
-      private val subscriptionFields: Seq[SubscriptionFieldValue] = Seq(subscriptionFieldValue1, subscriptionFieldValue2)
+      private val subscriptionFields: Seq[SubscriptionFieldValue] =
+        Seq(subscriptionFieldValue1, subscriptionFieldValue2)
 
-      given(mockSubscriptionFieldsConnector.fetchFieldValues(meq(application.clientId), meq(apiIdentifier.context), meq(apiIdentifier.version))(any[HeaderCarrier]))
-        .willReturn(Future.successful(subscriptionFields))
+      given(
+        mockSubscriptionFieldsConnector.fetchFieldValues(
+          meq(application.clientId),
+          meq(apiIdentifier.context),
+          meq(apiIdentifier.version)
+        )(any[HeaderCarrier])
+      ).willReturn(Future.successful(subscriptionFields))
 
-      private val subscriptionFieldValues = await(underTest.fetchFieldsValues(application,fieldDefinitions, apiIdentifier))
+      private val subscriptionFieldValues =
+        await(underTest.fetchFieldsValues(application, fieldDefinitions, apiIdentifier))
 
       subscriptionFieldValues shouldBe Seq(subscriptionFieldValue1, subscriptionFieldValue2)
     }
@@ -97,16 +125,24 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
     "find no matching values" in new Setup {
       private val apiIdentifier: APIIdentifier = APIIdentifier("context1", "version-1")
 
-      private val subscriptionFieldDefinition = SubscriptionFieldDefinition("name1", "description1", "hint1", "STRING")
+      private val subscriptionFieldDefinition =
+        SubscriptionFieldDefinition("name1", "description1", "short-description", "hint1", "STRING")
 
-      private val subscriptionFieldValues: Seq[SubscriptionFieldValue] = Seq(SubscriptionFieldValue(subscriptionFieldDefinition, ""))
+      private val subscriptionFieldValues: Seq[SubscriptionFieldValue] =
+        Seq(SubscriptionFieldValue(subscriptionFieldDefinition, ""))
 
       val fieldDefinitions = Seq(subscriptionFieldDefinition)
 
-      given(mockSubscriptionFieldsConnector.fetchFieldValues(meq(application.clientId), meq(apiIdentifier.context), meq(apiIdentifier.version))(any[HeaderCarrier]))
-        .willReturn(Future.successful(subscriptionFieldValues))
+      given(
+        mockSubscriptionFieldsConnector.fetchFieldValues(
+          meq(application.clientId),
+          meq(apiIdentifier.context),
+          meq(apiIdentifier.version)
+        )(any[HeaderCarrier])
+      ).willReturn(Future.successful(subscriptionFieldValues))
 
-      private val result = await(underTest.fetchFieldsValues(application,fieldDefinitions, apiIdentifier))
+      private val result =
+        await(underTest.fetchFieldsValues(application, fieldDefinitions, apiIdentifier))
 
       result shouldBe subscriptionFieldValues
     }
@@ -116,14 +152,22 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
     "save the fields" in new Setup {
       private val fieldsId = UUID.randomUUID()
       private val fieldsValues = Map("field1" -> "val001", "field2" -> "val002")
-      val fieldValuesResponse: SubscriptionFields = SubscriptionFields(clientId, apiContext, apiVersion, fieldsId, fieldsValues)
+      val fieldValuesResponse: SubscriptionFields =
+        SubscriptionFields(clientId, apiContext, apiVersion, fieldsId, fieldsValues)
 
-      given(mockSubscriptionFieldsConnector.saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
-        .willReturn(Future.successful(HttpResponse(CREATED)))
+      given(
+        mockSubscriptionFieldsConnector
+          .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
+      ).willReturn(Future.successful(HttpResponse(CREATED)))
 
       await(underTest.saveFieldValues(applicationId, apiContext, apiVersion, fieldsValues))
 
-      verify(mockSubscriptionFieldsConnector).saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
+      verify(mockSubscriptionFieldsConnector).saveFieldValues(
+        clientId,
+        apiContext,
+        apiVersion,
+        fieldsValues
+      )
     }
   }
 }
