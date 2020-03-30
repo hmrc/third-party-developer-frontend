@@ -221,8 +221,6 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           "You can submit metadata with each API request for these APIs."
         )
 
-        // TODO - check we are using shortDescription from connector
-
         bodyOf(result) should include(generateName("api1"))
         bodyOf(result) should include(generateValueName("api1", 1))
         bodyOf(result) should include(generateValueName("api1", 2))

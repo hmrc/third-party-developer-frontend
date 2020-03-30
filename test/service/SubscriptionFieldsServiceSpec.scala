@@ -19,7 +19,7 @@ package service
 import java.util.UUID
 
 import connectors.ThirdPartyApplicationConnector
-import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFields}
+import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue}
 import domain.{APIIdentifier, Application, Environment}
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{any, anyString, eq => meq}
@@ -150,10 +150,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
 
   "saveFields" should {
     "save the fields" in new Setup {
-      private val fieldsId = UUID.randomUUID()
       private val fieldsValues = Map("field1" -> "val001", "field2" -> "val002")
-      val fieldValuesResponse: SubscriptionFields =
-        SubscriptionFields(clientId, apiContext, apiVersion, fieldsId, fieldsValues)
 
       given(
         mockSubscriptionFieldsConnector

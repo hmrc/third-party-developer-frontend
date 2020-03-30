@@ -63,8 +63,6 @@ object ApiSubscriptionFields {
     }
   }
 
-  type Fields = Map[String, String]
-
   sealed trait FieldsDeleteResult
   case object FieldsDeleteSuccessResult extends FieldsDeleteResult
   case object FieldsDeleteFailureResult extends FieldsDeleteResult
@@ -77,22 +75,10 @@ object ApiSubscriptionFields {
       fields: Seq[SubscriptionFieldValue]
   )
 
-  // TODO : Probably needs deleting
+  type Fields = Map[String, String]
+
   object Fields {
     val empty = Map.empty[String, String]
-  }
-
-  // TODO : Probably needs deleting
-  case class SubscriptionFields(
-      clientId: String,
-      apiContext: String,
-      apiVersion: String,
-      fieldsId: UUID,
-      fields: Map[String, String]
-  )
-
-  object SubscriptionFields {
-    implicit val format: Format[SubscriptionFields] = Json.format[SubscriptionFields]
   }
 
   case class SubscriptionFieldsPutRequest(
