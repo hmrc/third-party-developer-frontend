@@ -37,7 +37,7 @@ object ManageSubscriptions {
   case class ApiDetails(name: String, version: String, subsValues: NonEmptyList[SubscriptionDetails])
 
   def toDetails(value: String): String = {
-    if (value == "") "None" else value
+    if (value.isEmpty) "None" else value
   }
 
   def toDetails(in: SubscriptionFieldValue): SubscriptionDetails = {
