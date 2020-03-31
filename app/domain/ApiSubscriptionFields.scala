@@ -19,6 +19,7 @@ package domain
 import java.util.UUID
 
 import play.api.libs.json.{Format, Json}
+import cats.data.NonEmptyList
 
 object ApiSubscriptionFields {
 
@@ -72,7 +73,7 @@ object ApiSubscriptionFields {
       clientId: String,
       apiContext: String,
       apiVersion: String,
-      fields: Seq[SubscriptionFieldValue]
+      fields: NonEmptyList[SubscriptionFieldValue]
   )
 
   type Fields = Map[String, String]

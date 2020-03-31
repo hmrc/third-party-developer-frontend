@@ -37,6 +37,7 @@ import scala.concurrent.Future._
 import domain.ApiSubscriptionFields.SubscriptionFieldDefinition
 import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import cats.data.NonEmptyList
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -131,14 +132,20 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     val WHO_CARES = "who cares"
 
-    def generateWrapper(prefix: String, count: Int): SubscriptionFieldsWrapper =
-      SubscriptionFieldsWrapper(
-        applicationId = WHO_CARES,
-        clientId = WHO_CARES,
-        apiContext = WHO_CARES,
-        apiVersion = WHO_CARES,
-        fields = (1 to count).map(i => generateFieldValue(prefix, i))
+    def generateWrapper(prefix: String, count: Int): Option[SubscriptionFieldsWrapper] = {
+      val rawFields = (1 to count).map(i => generateFieldValue(prefix, i)).toList
+      val nelFields = NonEmptyList.fromList(rawFields)
+
+      nelFields.map(fs =>
+        SubscriptionFieldsWrapper(
+          applicationId = WHO_CARES,
+          clientId = WHO_CARES,
+          apiContext = WHO_CARES,
+          apiVersion = WHO_CARES,
+          fields = fs
+        )
       )
+    }
 
     def noMetaDataSubscription(prefix: String) =
       APISubscriptionStatus(
@@ -153,7 +160,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       )
 
     def metaDataSubscription(prefix: String, count: Int) =
-      noMetaDataSubscription(prefix).copy(fields = Some(generateWrapper(prefix, count)))
+      noMetaDataSubscription(prefix).copy(fields = generateWrapper(prefix, count))
   }
 
   "manageSubscriptions" should {

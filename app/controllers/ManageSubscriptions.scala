@@ -30,25 +30,31 @@ import service.AuditService
 import domain.APISubscriptionStatus
 import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import cats.data.NonEmptyList
 
 object ManageSubscriptions {
   case class SubscriptionDetails(shortDescription: String, value: String)
-  case class ApiDetails(name: String, version: String, subsValues: Seq[SubscriptionDetails])
+  case class ApiDetails(name: String, version: String, subsValues: NonEmptyList[SubscriptionDetails])
 
-  def toDetails(in: SubscriptionFieldValue): SubscriptionDetails = {
-    SubscriptionDetails(in.definition.shortDescription, in.value)
+  def toDetails(value: String): String = {
+    if (value == "") "None" else value
   }
 
-  def toDetails(in: SubscriptionFieldsWrapper): Seq[SubscriptionDetails] = {
+  def toDetails(in: SubscriptionFieldValue): SubscriptionDetails = {
+    SubscriptionDetails(in.definition.shortDescription, toDetails(in.value))
+  }
+
+  def toDetails(in: SubscriptionFieldsWrapper): NonEmptyList[SubscriptionDetails] = {
     in.fields.map(toDetails)
   }
 
-  def toDetails(in: APISubscriptionStatus): ApiDetails = {
-    ApiDetails(
-      name = in.name,
-      version = in.apiVersion.version,
-      subsValues = in.fields.map(toDetails).getOrElse(Seq.empty)
-    )
+  def toDetails(in: APISubscriptionStatus): Option[ApiDetails] = {
+    for {
+      wrapper <- in.fields
+      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
+      nelDetails = nelSFV.map(toDetails)
+
+    } yield ApiDetails(name = in.name, version = in.apiVersion.version, subsValues = nelDetails)
   }
 }
 
@@ -69,12 +75,10 @@ class ManageSubscriptions @Inject() (
       val futureDetails =
         for {
           subs <- applicationService.apisWithSubscriptions(request.application)
-          filteredSubs = subs.filter(s => s.subscribed && s.fields.isDefined)
-          details = filteredSubs.map(toDetails)
+          filteredSubs = subs.filter(s => s.subscribed)
+          details = filteredSubs.map(toDetails).foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
         } yield details
 
-      futureDetails map { details =>
-        Ok(views.html.managesubscriptions.listApiSubscriptions(request.application, details))
-      }
+      futureDetails map { details => Ok(views.html.managesubscriptions.listApiSubscriptions(request.application, details)) }
     }
 }
