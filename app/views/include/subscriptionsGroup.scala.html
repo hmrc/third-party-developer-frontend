@@ -25,7 +25,7 @@
         implicit messages: Messages, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
 
 <ul class="subscriptions-group">
-    @apisSubscriptions.map { case (apiSubscription) =>
+    @apisSubscriptions.map { case apiSubscription =>
         <li class="accordion accordion--stacked @if(apiSubscription.isExpanded) {accordion--expanded}"
             data-accordion
             data-accordion-animate
@@ -48,7 +48,7 @@
 
             <div class="accordion__body conditionallyHide" data-accordion-body @if(apiSubscription.isExpanded) {aria-hidden="false"} else {aria-hidden="true"}>
                 <ul>
-                    @apiSubscription.subscriptions.map { case (api) =>
+                    @apiSubscription.subscriptions.map { case api =>
                         @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
                             <li class="accordion__body__row api-subscriber">
                                 <div class="accordion__body__row accordion__body__row--no-border ">
@@ -93,10 +93,10 @@
                                     </div>
                                 </div>
 
-                                @if(api.fields.isDefined && api.fields.get.fields.nonEmpty) {
+                                @if(api.fields.isDefined) {
                                     <div class="conditionallyHide fieldsContainer" id="subscription-fields-@IdFormatter.identifier(api.context, api.apiVersion.version)" @if(!apiSubscription.isExpanded) {
                                         data-hide="true"}>
-                                        @api.fields.map(f => subscriptionFields(SubscriptionFieldsViewModel(f.applicationId, f.apiContext, f.apiVersion, SubscriptionFieldsForm.form.fill(SubscriptionFieldsForm.apply(f.fields))), afterSubscriptionRedirectTo))
+                                        @api.fields.map(f => subscriptionFields(SubscriptionFieldsViewModel(f.applicationId, f.apiContext, f.apiVersion, SubscriptionFieldsForm.form.fill(SubscriptionFieldsForm.apply(f.fields.toList))), afterSubscriptionRedirectTo))
                                     </div>
                                 }
 

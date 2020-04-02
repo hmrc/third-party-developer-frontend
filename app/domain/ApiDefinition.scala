@@ -21,8 +21,7 @@ import play.api.libs.json.Json
 
 import scala.util.Try
 
-case class APISubscription(name: String, serviceName: String, context: String, versions: Seq[VersionSubscription],
-                           requiresTrust: Option[Boolean], isTestSupport: Boolean = false)
+case class APISubscription(name: String, serviceName: String, context: String, versions: Seq[VersionSubscription], requiresTrust: Option[Boolean], isTestSupport: Boolean = false)
 
 object APIDefinition {
   private val nonNumericOrPeriodRegex = "[^\\d^.]*"
@@ -47,11 +46,11 @@ case class VersionSubscription(version: APIVersion, subscribed: Boolean)
 case class APIVersion(version: String, status: APIStatus, access: Option[APIAccess] = None) {
   val displayedStatus = {
     status match {
-      case APIStatus.ALPHA => "Alpha"
-      case APIStatus.BETA => "Beta"
-      case APIStatus.STABLE => "Stable"
+      case APIStatus.ALPHA      => "Alpha"
+      case APIStatus.BETA       => "Beta"
+      case APIStatus.STABLE     => "Stable"
       case APIStatus.DEPRECATED => "Deprecated"
-      case APIStatus.RETIRED => "Retired"
+      case APIStatus.RETIRED    => "Retired"
     }
   }
 
@@ -62,9 +61,16 @@ case class APIAccess(`type`: APIAccessType)
 
 case class APIIdentifier(context: String, version: String)
 
-case class APISubscriptionStatus(name: String, serviceName: String, context: String,
-                                 apiVersion: APIVersion, subscribed: Boolean, requiresTrust: Boolean,
-                                 fields: Option[SubscriptionFieldsWrapper] = None, isTestSupport: Boolean = false) {
+case class APISubscriptionStatus(
+    name: String,
+    serviceName: String,
+    context: String,
+    apiVersion: APIVersion,
+    subscribed: Boolean,
+    requiresTrust: Boolean,
+    fields: Option[SubscriptionFieldsWrapper] = None,
+    isTestSupport: Boolean = false
+) {
   def canUnsubscribe = {
     apiVersion.status != APIStatus.DEPRECATED
   }

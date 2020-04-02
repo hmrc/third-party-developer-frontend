@@ -165,6 +165,8 @@ POST        /applications/:id/check-your-answers                                
 
 POST        /applications/:id/context/:apiContext/version/:version/subscriptionFields       controllers.Subscriptions.saveSubscriptionFields(id: String, apiContext: String, version: String, subscriptionRedirect: String)
 
+GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: String)
+
 GET         /application-verification                                                       controllers.ApplicationVerification.verifyUplift(code: String)
 GET         /user-navlinks                                                                  controllers.Navigation.navLinks
 

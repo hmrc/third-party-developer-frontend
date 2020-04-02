@@ -1,0 +1,70 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import domain._
+@import model.Crumb
+@import controllers.ManageSubscriptions.{ApiDetails, SubscriptionDetails}
+
+@(app: Application, details: Seq[ApiDetails])(
+  implicit request: play.api.mvc.Request[Any],
+  loggedIn: DeveloperSession,
+  messages: Messages,
+  applicationConfig: config.ApplicationConfig)
+
+@pageHeading = @{ "API metadata" }
+
+@devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  breadcrumbs = Seq(
+  Crumb("API metadata"),
+  Crumb.viewAllApplications
+)
+) {
+  <header>
+    <h1 class="heading-xlarge">API metadata</h1>
+  </header>
+
+  @appEnvironment(app)
+
+  <br>
+
+  <p>You can submit metadata with each API request for these APIs.</p>
+
+  @for(api <- details) {
+    <h2>@{api.name} @{api.version}</h2>
+    <table>
+      <thead>
+        <tr>
+        <th class="col-35">Name</th>
+        <th class="col-60">Metadata</th>
+        <td><a href="edit" class="numeric">Edit</a></td>
+        </tr>
+      </thead>
+      <tbody>
+        @for(field <- api.subsValues) {
+          <tr>
+            <td>@{field.shortDescription}</td>
+            <td>@{field.value}</td>
+            <td></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+}

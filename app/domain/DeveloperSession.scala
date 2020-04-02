@@ -27,7 +27,8 @@ case class DeveloperSession(session: Session) {
   val loggedInState: LoggedInState = session.loggedInState
 
   val displayedName: String = s"${developer.firstName} ${developer.lastName}"
-  val displayedNameEncoded: String = URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
+  val displayedNameEncoded: String =
+    URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
 
   val loggedInName: Option[String] =
     if (loggedInState.isLoggedIn) {
@@ -40,19 +41,24 @@ case class DeveloperSession(session: Session) {
 object DeveloperSession {
   implicit val format: Format[DeveloperSession] = Json.format[DeveloperSession]
 
-  def apply(loggedInState: LoggedInState,
-            sessionId: String,
-            developer: Developer): DeveloperSession = {
+  def apply(
+      loggedInState: LoggedInState,
+      sessionId: String,
+      developer: Developer
+  ): DeveloperSession = {
     new DeveloperSession(
-      Session(sessionId = sessionId, developer = developer, loggedInState = loggedInState))
+      Session(sessionId = sessionId, developer = developer, loggedInState = loggedInState)
+    )
   }
 }
 
-case class Developer(email: String,
-                     firstName: String,
-                     lastName: String,
-                     organisation: Option[String] = None,
-                     mfaEnabled: Option[Boolean] = None)
+case class Developer(
+    email: String,
+    firstName: String,
+    lastName: String,
+    organisation: Option[String] = None,
+    mfaEnabled: Option[Boolean] = None
+)
 
 object Developer {
   implicit val format: Format[Developer] = Json.format[Developer]
