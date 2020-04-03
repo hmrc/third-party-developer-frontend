@@ -57,7 +57,7 @@
         </tr>
       </thead>
       <tbody>
-        @for(field <- api.subsValues) {
+        @for(field <- api.subsValues.toList) {
           <tr>
             <td>@{field.shortDescription}</td>
             <td>@{field.value}</td>
