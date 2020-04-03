@@ -59,7 +59,11 @@ lazy val test = Seq(
   "jp.t2v" %% "play2-auth-test" % t2vVersion % testScope,
   "org.scalaj" %% "scalaj-http" % "2.3.0" % testScope,
   "org.scalacheck" %% "scalacheck" % "1.13.5" % testScope,
-  "com.github.mkolisnyk" % "cucumber-runner" % "1.0.9" % testScope,
+  // batik-bridge has a circular dependency on itself via transitive batik-script. Avoid that to work with updated build tools
+  //[warn] circular dependency found: batik#batik-bridge;1.6-1->batik#batik-script;1.6-1->...
+  //[warn] circular dependency found: batik#batik-script;1.6-1->batik#batik-bridge;1.6-1->...
+    "com.github.mkolisnyk" % "cucumber-runner" % "1.0.9" % testScope exclude("batik", "batik-script"),
+    "batik" % "batik-script" % "1.6-1" % testScope exclude("batik", "batik-bridge"),
   "net.masterthought" % "cucumber-reporting" % "3.3.0" % testScope,
   "net.masterthought" % "cucumber-sandwich" % "3.3.0" % testScope,
   "com.assertthat" % "selenium-shutterbug" % "0.2" % testScope
