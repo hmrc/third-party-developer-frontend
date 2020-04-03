@@ -34,7 +34,7 @@ import cats.data.NonEmptyList
 
 object ManageSubscriptions {
   case class SubscriptionDetails(shortDescription: String, value: String)
-  case class ApiDetails(name: String, version: String, subsValues: NonEmptyList[SubscriptionDetails])
+  case class ApiDetails(name: String, context: String, version: String, subsValues: NonEmptyList[SubscriptionDetails])
 
   def toDetails(value: String): String = {
     if (value.isEmpty) "None" else value
@@ -54,7 +54,7 @@ object ManageSubscriptions {
       nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
       nelDetails = nelSFV.map(toDetails)
 
-    } yield ApiDetails(name = in.name, version = in.apiVersion.version, subsValues = nelDetails)
+    } yield ApiDetails(name = in.name, context = in.context, version = in.apiVersion.version, subsValues = nelDetails)
   }
 }
 
@@ -80,5 +80,19 @@ class ManageSubscriptions @Inject() (
         } yield details
 
       futureDetails map { details => Ok(views.html.managesubscriptions.listApiSubscriptions(request.application, details)) }
+    }
+
+  def editApiMetadataPage(applicationId: String, context: String, version: String) =
+    whenTeamMemberOnApp(applicationId) { implicit request =>
+      val futureDetail =
+        for {
+          subs <- applicationService.apisWithSubscriptions(request.application)
+          filteredSubs = subs.filter(s => s.context == context && s.apiVersion.version == version)
+          details = filteredSubs.map(toDetails).foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+        } yield details.headOption
+
+      futureDetail.map {
+        _.map(detail => Ok(views.html.managesubscriptions.editApiMetadata(request.application, detail))).getOrElse(BadRequest)
+      }
     }
 }

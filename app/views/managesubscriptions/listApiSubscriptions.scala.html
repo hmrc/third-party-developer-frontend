@@ -20,10 +20,10 @@
 @import controllers.ManageSubscriptions.{ApiDetails, SubscriptionDetails}
 
 @(app: Application, details: Seq[ApiDetails])(
-  implicit request: play.api.mvc.Request[Any],
-  loggedIn: DeveloperSession,
-  messages: Messages,
-  applicationConfig: config.ApplicationConfig)
+implicit request: play.api.mvc.Request[Any],
+loggedIn: DeveloperSession,
+messages: Messages,
+applicationConfig: config.ApplicationConfig)
 
 @pageHeading = @{ "API metadata" }
 
@@ -32,19 +32,19 @@
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn),
   breadcrumbs = Seq(
-  Crumb("API metadata"),
-  Crumb.viewAllApplications
-)
+    Crumb("API metadata"),
+    Crumb.viewAllApplications
+  )
 ) {
-  <header>
-    <h1 class="heading-xlarge">API metadata</h1>
-  </header>
+<header>
+  <h1 class="heading-xlarge">API metadata</h1>
+</header>
 
-  @appEnvironment(app)
+@appEnvironment(app)
 
-  <br>
+<br>
 
-  <p>You can submit metadata with each API request for these APIs.</p>
+<p>You can submit metadata with each API request for these APIs.</p>
 
   @for(api <- details) {
     <h2>@{api.name} @{api.version}</h2>
@@ -53,11 +53,11 @@
         <tr>
         <th class="col-35">Name</th>
         <th class="col-60">Metadata</th>
-        <td><a href="edit" class="numeric">Edit</a></td>
+        <td><a href="@{routes.ManageSubscriptions.editApiMetadataPage(app.id, api.context, api.version)}" class="numeric">Edit</a></td>
         </tr>
       </thead>
       <tbody>
-        @for(field <- api.subsValues) {
+        @for(field <- api.subsValues.toList) {
           <tr>
             <td>@{field.shortDescription}</td>
             <td>@{field.value}</td>
