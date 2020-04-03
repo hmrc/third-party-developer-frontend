@@ -28,7 +28,7 @@
   messages: Messages,
   applicationConfig: config.ApplicationConfig)
 
-@pageHeading = @{ "API metadata" }
+@pageHeading = @{ s"${vm.name} ${vm.apiVersion}" }
 
 @devMain(
 title = pageHeading,
@@ -41,40 +41,39 @@ Crumb.viewAllApplications
 )
 ) {
 <header>
-  <h1 class="heading-xlarge">API metadata</h1>
+  <span class="govuk-caption-xl">API metadata</span>
+  <h1 class="heading-xlarge">@{pageHeading}</h1>
 </header>
 
 @appEnvironment(app)
 
 <br>
 
-<p>@{vm.name}&nbsp@{vm.apiVersion}</p>
+@helper.form(action = routes.Subscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion, API_MANAGE_METADATA_PAGE.toString), 'class -> "fields-subscription") {
+  <div class="form-field-group">
+      @helper.CSRF.formField
+      @helper.repeatWithIndex(vm.fieldsForm("fields")) { (field, idx) =>
+      <input type="hidden" name="fields[@idx].name" value="@field("name").value.getOrElse("")">
+      <input type="hidden" name="fields[@idx].description" value="@field("description").value.getOrElse("")">
+      <input type="hidden" name="fields[@idx].shortDescription" value="@field("shortDescription").value.getOrElse("")">
+      <input type="hidden" name="fields[@idx].hint" value="@field("hint").value.getOrElse("")">
+      <input type="hidden" name="fields[@idx].type" value="@field("type").value.getOrElse("")">
 
-        @helper.form(action = routes.Subscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion, API_MANAGE_METADATA_PAGE.toString), 'class -> "fields-subscription") {
-        <div class="form-field-group">
-            @helper.CSRF.formField
-            @helper.repeatWithIndex(vm.fieldsForm("fields")) { (field, idx) =>
-            <input type="hidden" name="fields[@idx].name" value="@field("name").value.getOrElse("")">
-            <input type="hidden" name="fields[@idx].description" value="@field("description").value.getOrElse("")">
-            <input type="hidden" name="fields[@idx].shortDescription" value="@field("shortDescription").value.getOrElse("")">
-            <input type="hidden" name="fields[@idx].hint" value="@field("hint").value.getOrElse("")">
-            <input type="hidden" name="fields[@idx].type" value="@field("type").value.getOrElse("")">
+      <div class="form-field">
+          <label class="form-label" for="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-@{field("name").value.getOrElse("")}">
+            @{field("description").value.getOrElse("")}
+          </label>
+          <span class="form-hint">@{field("hint").value.getOrElse("")}</span>
 
-            <div class="form-field">
-                <label class="label--full-length" for="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-@{field("name").value.getOrElse("")}">
-                 <strong class="bold">@{field("description").value.getOrElse("")}</strong>
-                    <p>@{field("hint").value.getOrElse("")}</p>
-                </label>
+          <input type="text" name="fields[@idx].value" value="@{field("value").value.getOrElse("")}" class="form-input input--medium" id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-@{field("name").value.getOrElse("")}">
+      </div>
+      }
 
-                <input type="text" name="fields[@idx].value" value="@{field("value").value.getOrElse("")}" class="form-input input--medium" id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-@{field("name").value.getOrElse("")}">
-            </div>
-            }
-
-            <div class="form-field form-field--submit">
-                <button id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
-            </div>
-        </div>
-        }
+      <div class="form-field form-field--submit">
+          <button id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
+      </div>
+  </div>
+}
 
 
 }
