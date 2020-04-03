@@ -17,7 +17,7 @@
 @import include._
 @import domain._
 @import model.Crumb
-@import controllers.ManageSubscriptions.{ApiDetails, SubscriptionDetails}
+@import controllers.ManageSubscriptions.ApiDetails
 
 @(app: Application, details: Seq[ApiDetails])(
 implicit request: play.api.mvc.Request[Any],
@@ -59,7 +59,7 @@ applicationConfig: config.ApplicationConfig)
       <tbody>
         @for(field <- api.subsValues.toList) {
           <tr>
-            <td>@{field.shortDescription}</td>
+            <td>@{field.definition.shortDescription}</td>
             <td>@{field.value}</td>
             <td></td>
           </tr>

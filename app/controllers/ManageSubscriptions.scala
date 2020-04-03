@@ -31,31 +31,57 @@ import domain.APISubscriptionStatus
 import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import cats.data.NonEmptyList
+import play.api.data.Form
+import play.api.data.Forms._
+import domain.Application
 
 object ManageSubscriptions {
-  case class SubscriptionDetails(shortDescription: String, value: String)
-  case class ApiDetails(name: String, context: String, version: String, subsValues: NonEmptyList[SubscriptionDetails])
+  case class ApiDetails(name: String, context: String, version: String, subsValues: NonEmptyList[SubscriptionFieldValue])
 
-  def toDetails(value: String): String = {
-    if (value.isEmpty) "None" else value
+  case class EditApiMetadata(fields: List[SubscriptionFieldValue])
+
+  object EditApiMetadata {
+    val form = Form(
+      mapping(
+        "fields" -> list(
+          mapping(
+            "name" -> text,
+            "description" -> text,
+            "shortDescription" -> text,
+            "hint" -> text,
+            "type" -> text,
+            "value" -> text
+          )(SubscriptionFieldValue.fromFormValues)(SubscriptionFieldValue.toFormValues)
+        )
+      )(EditApiMetadata.apply)(EditApiMetadata.unapply)
+    )
   }
 
-  def toDetails(in: SubscriptionFieldValue): SubscriptionDetails = {
-    SubscriptionDetails(in.definition.shortDescription, toDetails(in.value))
-  }
-
-  def toDetails(in: SubscriptionFieldsWrapper): NonEmptyList[SubscriptionDetails] = {
-    in.fields.map(toDetails)
-  }
+  case class EditApiMetadataViewModel(
+      name: String,
+      apiContext: String,
+      apiVersion: String,
+      fieldsForm: Form[EditApiMetadata]
+  )
 
   def toDetails(in: APISubscriptionStatus): Option[ApiDetails] = {
     for {
       wrapper <- in.fields
       nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
-      nelDetails = nelSFV.map(toDetails)
-
-    } yield ApiDetails(name = in.name, context = in.context, version = in.apiVersion.version, subsValues = nelDetails)
+    } yield ApiDetails(name = in.name, context = in.context, version = in.apiVersion.version, subsValues = nelSFV)
   }
+
+  def toForm(in: APISubscriptionStatus): Option[EditApiMetadata] = {
+    for {
+      wrapper <- in.fields
+      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
+    } yield EditApiMetadata(fields = nelSFV.toList)
+  }
+
+  def toViewModel(in: APISubscriptionStatus): Option[EditApiMetadataViewModel] = {
+    toForm(in).map(data => EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data)))
+  }
+
 }
 
 @Singleton
@@ -84,15 +110,13 @@ class ManageSubscriptions @Inject() (
 
   def editApiMetadataPage(applicationId: String, context: String, version: String) =
     whenTeamMemberOnApp(applicationId) { implicit request =>
-      val futureDetail =
+      val futureViewModel =
         for {
           subs <- applicationService.apisWithSubscriptions(request.application)
           filteredSubs = subs.filter(s => s.context == context && s.apiVersion.version == version)
-          details = filteredSubs.map(toDetails).foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
-        } yield details.headOption
+          oViewModel = filteredSubs.headOption.flatMap(toViewModel)
+        } yield oViewModel
 
-      futureDetail.map {
-        _.map(detail => Ok(views.html.managesubscriptions.editApiMetadata(request.application, detail))).getOrElse(BadRequest)
-      }
+      futureViewModel.map(_.fold[Result](BadRequest)(vm => Ok(views.html.managesubscriptions.editApiMetadata(request.application, vm))))
     }
 }
