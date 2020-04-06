@@ -39,6 +39,7 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi,
 
     ex match {
       case _: domain.ApplicationNotFound => play.api.mvc.Results.NotFound(notFoundTemplate)
+      case _: domain.ApiContextVersionNotFound => play.api.mvc.Results.NotFound(notFoundTemplate)
       case _ => super.resolveError(rh, ex)
     }
   }
