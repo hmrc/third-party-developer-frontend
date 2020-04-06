@@ -36,7 +36,7 @@ userFullName = loggedIn.loggedInName,
 developerSession = Some(loggedIn),
 breadcrumbs = Seq(
 Crumb(s"${vm.name} ${vm.apiVersion}"),
-Crumb("API metadata"),
+Crumb.applicationMetadata(app),
 Crumb.viewAllApplications
 )
 ) {
