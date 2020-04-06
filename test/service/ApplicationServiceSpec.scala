@@ -18,11 +18,12 @@ package service
 
 import java.util.UUID.randomUUID
 
+import cats.data.NonEmptyList
 import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{Fields, FieldsDeleteResult, FieldsDeleteSuccessResult, SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields._
 import domain._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
@@ -31,6 +32,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import play.api.http.Status.OK
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, Upstream5xxResponse}
@@ -42,7 +44,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
 import scala.util.Random
-import cats.data.NonEmptyList
 
 class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
@@ -599,14 +600,15 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   "add teamMember" should {
     val email = "email@testuser.com"
     val teamMember = Collaborator(email, Role.ADMINISTRATOR)
+    val developer = Developer(teamMember.emailAddress, "name", "surname")
     val adminEmail = "admin.email@example.com"
     val adminsToEmail = Set.empty[String]
-    val request = AddTeamMemberRequest(adminEmail, teamMember, isRegistered = false, adminsToEmail)
+    val request = AddTeamMemberRequest(adminEmail, teamMember, isRegistered = true, adminsToEmail)
 
     "add teamMember successfully in production app" in new Setup {
       private val response = AddTeamMemberResponse(registeredUser = true)
 
-      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
+      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(successful(Some(developer)))
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request)).willReturn(response)
@@ -614,8 +616,33 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       await(applicationService.addTeamMember(productionApplication, adminEmail, teamMember)) shouldBe response
     }
 
-    "propagate TeamMemberAlreadyExists from connector in production app" in new Setup {
+    "create unregistered user when developer is not registered" in new Setup {
       given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
+      given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
+      theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+      given(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request.copy(isRegistered = false)))
+        .willReturn(AddTeamMemberResponse(registeredUser = false))
+      given(mockDeveloperConnector.createUnregisteredUser(teamMember.emailAddress)).willReturn(successful(OK))
+
+      await(applicationService.addTeamMember(productionApplication, adminEmail, teamMember))
+
+      verify(mockDeveloperConnector, times(1)).createUnregisteredUser(eqTo(teamMember.emailAddress))(any())
+    }
+
+    "not create unregistered user when developer is already registered" in new Setup {
+      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(successful(Some(Developer(teamMember.emailAddress, "name", "surname"))))
+      given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
+      theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+      given(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request))
+        .willReturn(AddTeamMemberResponse(registeredUser = true))
+
+      await(applicationService.addTeamMember(productionApplication, adminEmail, teamMember))
+
+      verify(mockDeveloperConnector, times(0)).createUnregisteredUser(eqTo(teamMember.emailAddress))(any())
+    }
+
+    "propagate TeamMemberAlreadyExists from connector in production app" in new Setup {
+      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(successful(Some(developer)))
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request))
@@ -627,7 +654,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate ApplicationNotFound from connector in production app" in new Setup {
-      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
+      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(successful(Some(developer)))
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request))
@@ -639,7 +666,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     "add teamMember successfully in sandbox app" in new Setup {
       private val response = AddTeamMemberResponse(registeredUser = true)
 
-      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
+      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(successful(Some(developer)))
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
       given(mockSandboxApplicationConnector.addTeamMember(sandboxApplicationId, request)).willReturn(response)
@@ -648,7 +675,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate TeamMemberAlreadyExists from connector in sandbox app" in new Setup {
-      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
+      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(successful(Some(developer)))
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
       given(mockSandboxApplicationConnector.addTeamMember(sandboxApplicationId, request))
@@ -659,7 +686,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
 
     "propagate ApplicationNotFound from connector in sandbox app" in new Setup {
-      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
+      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(successful(Some(developer)))
       given(mockDeveloperConnector.fetchByEmails(any())(any())).willReturn(Future.successful(Seq.empty))
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
       given(mockSandboxApplicationConnector.addTeamMember(sandboxApplicationId, request))
@@ -680,7 +707,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
       private val response = AddTeamMemberResponse(registeredUser = true)
 
-      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(None)
+      given(mockDeveloperConnector.fetchDeveloper(email)).willReturn(successful(Some(developer)))
       given(mockDeveloperConnector.fetchByEmails(eqTo(Set("verified@example.com", "unverified@example.com")))(any()))
         .willReturn(Future.successful(nonAdderAdmins))
       theProductionConnectorWillReturnTheApplication(productionApplicationId, application)

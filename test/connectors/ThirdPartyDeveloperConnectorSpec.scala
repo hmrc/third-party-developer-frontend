@@ -17,6 +17,8 @@
 package connectors
 
 import config.ApplicationConfig
+import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
+import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
 import domain.Session._
 import domain.{UpdateLoggedInStateRequest, _}
 import org.mockito.ArgumentMatchers.{any, eq => meq}
@@ -98,6 +100,30 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
       connector.verify(code).futureValue shouldBe Status.OK
 
       verify(mockHttp).GET(endpoint(s"verification?code=$code"))
+    }
+  }
+
+  "createUnregisteredUser" should {
+    val email = "john.smith@example.com"
+
+    "successfully create an unregistered user" in new Setup {
+      when(mockHttp.POST(endpoint("unregistered-developer"), encryptedBody, Seq("Content-Type" -> "application/json")))
+        .thenReturn(Future.successful(HttpResponse(Status.OK)))
+
+      val result = await(connector.createUnregisteredUser(email))
+
+      result shouldBe Status.OK
+      verify(mockPayloadEncryption).encrypt(Json.toJson(UnregisteredUserCreationRequest(email)))
+      verify(mockHttp).POST(endpoint("unregistered-developer"), encryptedBody, Seq("Content-Type" -> "application/json"))
+    }
+
+    "propagate error when the request fails" in new Setup {
+      when(mockHttp.POST(endpoint("unregistered-developer"), encryptedBody, Seq("Content-Type" -> "application/json")))
+        .thenReturn(Future.failed(Upstream5xxResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
+
+      intercept[Upstream5xxResponse] {
+        await(connector.createUnregisteredUser(email))
+      }
     }
   }
 

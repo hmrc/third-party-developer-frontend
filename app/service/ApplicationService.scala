@@ -255,6 +255,7 @@ class ApplicationService @Inject() (
       otherAdmins <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email)
       developer <- developerConnector.fetchDeveloper(teamMember.emailAddress)
+      _ <- if (developer.isEmpty) developerConnector.createUnregisteredUser(teamMember.emailAddress) else Future.successful(())
       request = AddTeamMemberRequest(requestingEmail, teamMember, developer.isDefined, adminsToEmail.toSet)
       connector <- connectorWrapper.forApplication(app.id)
       appConnector = connector.thirdPartyApplicationConnector
