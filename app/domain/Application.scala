@@ -398,6 +398,8 @@ class ApplicationAlreadyExists extends RuntimeException
 
 class ApplicationNotFound extends RuntimeException
 
+class ApiContextVersionNotFound extends RuntimeException
+
 class ClientSecretLimitExceeded extends RuntimeException
 
 class CannotDeleteOnlyClientSecret extends RuntimeException

@@ -38,6 +38,7 @@ import domain.ApiSubscriptionFields.SubscriptionFieldDefinition
 import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import cats.data.NonEmptyList
+import org.omg.CosNaming.NamingContextPackage.NotFound
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -174,15 +175,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
 
-        status(result) shouldBe OK
-
-        // Test logged in
-        bodyOf(result) should include(loggedInUser.displayedName)
-        bodyOf(result) should include("Sign out")
-
-        bodyOf(result) should include(
-          "You can submit metadata with each API request for these APIs."
-        )
+        status(result) shouldBe NOT_FOUND
       }
 
       "return the list subscription metadata page with several subscriptions without metadata" in new ManageSubscriptionsSetup {
@@ -195,15 +188,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
 
-        status(result) shouldBe OK
-        bodyOf(result) should include(loggedInUser.displayedName)
-        bodyOf(result) should include("Sign out")
-        bodyOf(result) should include(
-          "You can submit metadata with each API request for these APIs."
-        )
-
-        bodyOf(result) should not include (generateName("api1"))
-        bodyOf(result) should not include (generateName("api2"))
+        status(result) shouldBe NOT_FOUND
       }
 
       "return the list subscription metadata page with several subscriptions, some with metadata" in new ManageSubscriptionsSetup {
@@ -244,7 +229,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "when the user is not logged in" should {
-      "return to the login page when the user is not logged in" in new ManageSubscriptionsSetup {
+      "return to the login page when the user attempts to list metadata" in new ManageSubscriptionsSetup {
 
         val request = FakeRequest()
 
@@ -254,8 +239,23 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
       }
+
+      "return to the login page when the user attempts to edit metadata" in new ManageSubscriptionsSetup {
+
+        val request = FakeRequest()
+
+        val fakeContext = "FAKE"
+        val fakeVersion = "1.0"
+
+        private val result =
+          await(manageSubscriptionController.editApiMetadataPage(appId, fakeContext, fakeVersion)(request))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/login")
+      }
     }
   }
+
   private def aClientSecret(secret: String) =
     ClientSecret(
       randomUUID.toString,
