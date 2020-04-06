@@ -60,6 +60,21 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
     }
   }
 
+  "createUnregisteredUser" should {
+    "send request with encrypted payload" in new Setup {
+      stubFor(post(urlEqualTo("/unregistered-developer"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withHeader("Content-Type", "application/json")
+        ))
+      val result = await(underTest.createUnregisteredUser("email@example.com"))
+      verify(1, postRequestedFor(urlMatching("/unregistered-developer"))
+        .withRequestBody(equalTo(
+          """{"data":"k7hutBek3t8KfWDBIKTCQxRDepB7R40FnmKK2Adpzfg="}""")))
+    }
+  }
+
   "reset-password" should {
     "send request with encrypted payload" in new Setup {
       stubFor(post(urlEqualTo("/reset-password"))

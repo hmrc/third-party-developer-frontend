@@ -17,12 +17,14 @@
 package connectors
 
 import config.ApplicationConfig
+import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
+import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
 import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
@@ -57,6 +59,13 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
         } recover {
           case Upstream4xxResponse(_, CONFLICT, _, _) => EmailAlreadyInUse
         }
+      })
+  }
+
+  def createUnregisteredUser(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+    encryptedJson.secretRequestJson[Int](
+      Json.toJson(UnregisteredUserCreationRequest(email)), { secretRequestJson =>
+        http.POST(s"$serviceBaseUrl/unregistered-developer", secretRequestJson, Seq(CONTENT_TYPE -> JSON)) map status
       })
   }
 
@@ -229,5 +238,13 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
         case _: BadRequestException => throw new InvalidCredentials
         case _: NotFoundException => throw new InvalidEmail
       }
+  }
+}
+
+object ThirdPartyDeveloperConnector {
+  private[connectors] case class UnregisteredUserCreationRequest(email: String)
+
+  object JsonFormatters {
+    implicit val formatUnregisteredUserCreationRequest: Format[UnregisteredUserCreationRequest] = Json.format[UnregisteredUserCreationRequest]
   }
 }
