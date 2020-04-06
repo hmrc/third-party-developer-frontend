@@ -60,17 +60,14 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   def clientSecrets(applicationId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.fetchCredentials(applicationId).map { tokens =>
-        val clientSecrets: Seq[ClientSecret] = request.flash.get("newSecret")
-          .map(newSecret => tokens.clientSecrets.init :+ tokens.clientSecrets.last.copy(name = newSecret))
-          .getOrElse(tokens.clientSecrets)
-        Ok(views.html.clientSecrets(request.application, clientSecrets))
+        Ok(views.html.clientSecrets(request.application, tokens.clientSecrets))
       }
   }
 
   def addClientSecret(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
-    applicationService.addClientSecret(applicationId, request.user.email).map { tokens =>
+    applicationService.addClientSecret(applicationId, request.user.email).map { response =>
       Redirect(controllers.routes.Credentials.clientSecrets(applicationId))
-        .flashing("newSecret" -> tokens.clientSecrets.last.secret)
+        .flashing("newSecretId" -> response._1, "newSecret" -> response._2)
     } recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
         case _: ForbiddenException => Forbidden(errorHandler.badRequestTemplate)

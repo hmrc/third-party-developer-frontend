@@ -16,6 +16,7 @@
 
 package service
 
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 import config.ApplicationConfig
@@ -439,18 +440,21 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   }
 
   "addClientSecret" should {
-    val applicationTokens = ApplicationToken("prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken")
+    val newClientSecretId = UUID.randomUUID().toString
+    val newClientSecret = UUID.randomUUID().toString
     val actorEmailAddress = "john.requestor@example.com"
 
     "add a client secret for app in production environment" in new Setup {
 
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
 
-      given(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actorEmailAddress))).willReturn(applicationTokens)
+      given(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actorEmailAddress)))
+        .willReturn((newClientSecretId, newClientSecret))
 
       private val updatedToken = await(applicationService.addClientSecret(productionApplicationId, actorEmailAddress))
 
-      updatedToken shouldBe applicationTokens
+      updatedToken._1 shouldBe newClientSecretId
+      updatedToken._2 shouldBe newClientSecret
     }
 
     "propagate exceptions from connector" in new Setup {

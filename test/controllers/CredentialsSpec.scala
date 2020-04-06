@@ -16,6 +16,7 @@
 
 package controllers
 
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
@@ -181,11 +182,13 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   "addClientSecret" should {
     val appId = "1234"
-    val updatedTokens = ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
+    val newSecretId = UUID.randomUUID().toString
+    val newSecret = UUID.randomUUID().toString
 
     "add the client secret" in new Setup {
       givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      given(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier])).willReturn(updatedTokens)
+      given(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
+        .willReturn((newSecretId, newSecret))
 
       val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
 
