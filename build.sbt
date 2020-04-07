@@ -114,14 +114,14 @@ lazy val microservice = Project(appName, file("."))
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
   .settings(
-    unmanagedSourceDirectories in Test := (baseDirectory in Test) (base => Seq(base / "test", base / "test" / "utils")).value,
+    unmanagedSourceDirectories in Test := (baseDirectory in Test) (base => Seq(base / "test", base / "test-utils")).value,
     testOptions in Test := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
     testOptions in IntegrationTest := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it", base / "test" / "utils")).value,
+    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it", base / "test-utils")).value,
     unmanagedResourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
     parallelExecution in IntegrationTest := false
   )
@@ -129,7 +129,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
     testOptions in ComponentTest := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "component", base / "test" / "utils")).value,
+    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "component", base / "test-utils")).value,
     unmanagedResourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
     unmanagedResourceDirectories in ComponentTest += baseDirectory(_ / "target/web/public/test").value,
     testOptions in ComponentTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
