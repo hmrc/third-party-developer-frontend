@@ -19,21 +19,48 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatus, ApiContextVersionNotFound, ApplicationNotFound}
+import domain.APISubscriptionStatus
 import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
-import play.api.mvc.Results._
+import play.api.mvc.Results.NotFound
 import play.api.mvc._
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future.{failed, successful}
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future.successful
 
 object ManageSubscriptions {
-  case class ApiDetails(name: String, context: String, version: String, subsValues: NonEmptyList[SubscriptionFieldValue])
+  case class Field(name: String, value: String)
+  case class ApiDetails(name: String, context: String, version: String, subsValues: NonEmptyList[Field])
+
+  def toField(sfv: SubscriptionFieldValue): Field = {
+    def default(in:String, default: String) = if(in.isEmpty) default else in
+
+    Field(sfv.definition.shortDescription, default(sfv.value, "None"))
+  }
+
+  def toDetails(in: APISubscriptionStatus): Option[ApiDetails] = {
+    for {
+      wrapper <- in.fields
+      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
+      nelFields = nelSFV.map(toField)
+    } yield ApiDetails(
+        name = in.name,
+        context = in.context,
+        version = in.apiVersion.version,
+        subsValues = nelFields
+      )
+  }
+
+  def toForm(in: APISubscriptionStatus): Option[EditApiMetadata] = {
+    for {
+      wrapper <- in.fields
+      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
+    } yield EditApiMetadata(fields = nelSFV.toList)
+  }
 
   case class EditApiMetadata(fields: List[SubscriptionFieldValue])
 
@@ -55,31 +82,17 @@ object ManageSubscriptions {
   }
 
   case class EditApiMetadataViewModel(
-      name: String,
-      apiContext: String,
-      apiVersion: String,
-      fieldsForm: Form[EditApiMetadata]
-  )
-
-  def toDetails(in: APISubscriptionStatus): Option[ApiDetails] = {
-    for {
-      wrapper <- in.fields
-      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
-    } yield ApiDetails(name = in.name, context = in.context, version = in.apiVersion.version, subsValues = nelSFV)
-  }
-
-  def toForm(in: APISubscriptionStatus): Option[EditApiMetadata] = {
-    for {
-      wrapper <- in.fields
-      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
-    } yield EditApiMetadata(fields = nelSFV.toList)
-  }
+                                       name: String,
+                                       apiContext: String,
+                                       apiVersion: String,
+                                       fieldsForm: Form[EditApiMetadata]
+                                     )
 
   def toViewModel(in: APISubscriptionStatus): Option[EditApiMetadataViewModel] = {
     toForm(in).map(data => EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data)))
   }
 
-  class SubscriptionFieldDefinitionsAction(applicationService: ApplicationService)(implicit hc: HeaderCarrier, ec: ExecutionContext)
+  class SubscriptionFieldDefinitionsAction(errorHandler: ErrorHandler, applicationService: ApplicationService)(implicit hc: HeaderCarrier, ec: ExecutionContext)
     extends ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
 
     def refine[A](input: ApplicationRequest[A]) = {
@@ -92,7 +105,8 @@ object ManageSubscriptions {
             .toList
         maybeNel = NonEmptyList.fromList(filteredSubs)
       } yield {
-        maybeNel.map(nel => ApplicationWithFieldDefinitionsRequest(nel, input)).toRight(NotFound)
+        maybeNel.map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
+          .toRight(NotFound(errorHandler.notFoundTemplate(input)))
       }
     }
   }
@@ -114,7 +128,7 @@ class ManageSubscriptions @Inject() (
   import ManageSubscriptions._
 
   private def appfunc(implicit hc: HeaderCarrier): ActionFunction[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
-    = new SubscriptionFieldDefinitionsAction(applicationService)
+    = new SubscriptionFieldDefinitionsAction(errorHandler, applicationService)
 
   def listApiSubscriptions(applicationId: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit applicationRequest =>
@@ -125,7 +139,7 @@ class ManageSubscriptions @Inject() (
 
         successful(Ok(views.html.managesubscriptions.listApiSubscriptions(applicationRequest.application, details)))
         }
-      ).recover(recovery)
+      )
     }
 
   def editApiMetadataPage(applicationId: String, context: String, version: String): Action[AnyContent] =
@@ -136,13 +150,8 @@ class ManageSubscriptions @Inject() (
           .headOption
           .flatMap(toViewModel)
           .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(applicationRequest.application, vm))))
-          .getOrElse(failed(new ApiContextVersionNotFound))
+          .getOrElse(successful(NotFound(errorHandler.notFoundTemplate(Request(applicationRequest, applicationRequest.user)))))
         }
-      ).recover(recovery)
-    }
-
-  private def recovery: PartialFunction[Throwable, Result] = {
-    case _: ApplicationNotFound       => NotFound("There is no such application")
-    case _: ApiContextVersionNotFound => NotFound("The application does not support metadata")
+      )
     }
 }
