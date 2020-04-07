@@ -99,7 +99,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
 
     "show copy button when a new client secret has just been added" in new Setup {
       val oneClientSecret = Seq(clientSecret1)
-      val flash = Flash(Map("newSecret" -> clientSecret1.secret))
+      val flash = Flash(Map("newSecretId" -> clientSecret1.id, "newSecret" -> clientSecret1.secret))
 
       val page = clientSecrets.render(application, oneClientSecret, request, developer, applicationMessages, appConfig, flash)
 

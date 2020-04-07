@@ -571,8 +571,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val response =
         AddClientSecretResponse(
           UUID.randomUUID().toString,
-          Seq(tpaClientSecret("old-secret-1"), tpaClientSecret("old-secret-2"), newClientSecret),
-          UUID.randomUUID().toString)
+          UUID.randomUUID().toString,
+          List(tpaClientSecret("old-secret-1"), tpaClientSecret("old-secret-2"), newClientSecret))
 
       when(mockHttpClient
         .POST[ClientSecretRequest, AddClientSecretResponse](meq(url), meq(clientSecretRequest), any())(any(), any(), any(), any()))

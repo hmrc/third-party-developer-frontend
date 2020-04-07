@@ -291,41 +291,34 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   }
 
   "deleteClientSecretAction" should {
-    val clientSecretToDelete: ClientSecret = tokens.clientSecrets.last
+    val applicationId: UUID = UUID.randomUUID()
+    val clientSecretId: String = UUID.randomUUID().toString
+
     "delete the selected client secret" in new Setup {
+      givenTheApplicationExistWithUserRole(applicationId.toString, ADMINISTRATOR)
+
       given(underTest.applicationService
-        .deleteClientSecrets(mockEq(appId), mockEq(loggedInUser.email), mockEq(Seq(clientSecretToDelete.secret)))(any[HeaderCarrier]))
+        .deleteClientSecret(mockEq(applicationId), mockEq(clientSecretId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(ApplicationUpdateSuccessful))
 
-      val result: Result = await(underTest.deleteClientSecretAction(appId, clientSecretToDelete.id)(loggedInRequest))
+      val result: Result = await(underTest.deleteClientSecretAction(applicationId.toString, clientSecretId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/client-secrets")
-    }
-
-    "return 404 when the client secret to delete does not exist" in new Setup {
-      val clientSecretToDelete: ClientSecret = aClientSecret("nonexisting")
-      given(underTest.applicationService
-        .deleteClientSecrets(mockEq(appId), mockEq(loggedInUser.email), mockEq(Seq(clientSecretToDelete.secret)))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
-
-      val result: Result = await(underTest.deleteClientSecretAction(appId, clientSecretToDelete.id)(loggedInRequest))
-
-      status(result) shouldBe NOT_FOUND
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.toString}/client-secrets")
     }
 
     "return 403 when a user with developer role tries do delete production secrets" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+      givenTheApplicationExistWithUserRole(applicationId.toString, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result: Result = await(underTest.deleteClientSecretAction(appId, clientSecretToDelete.id)(loggedInRequest))
+      val result: Result = await(underTest.deleteClientSecretAction(applicationId.toString, clientSecretId)(loggedInRequest))
 
       status(result) shouldBe FORBIDDEN
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId.toString, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
 
-      val result: Result = await(underTest.deleteClientSecretAction(appId, clientSecretToDelete.id)(loggedInRequest))
+      val result: Result = await(underTest.deleteClientSecretAction(applicationId.toString, clientSecretId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }

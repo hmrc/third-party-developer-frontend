@@ -16,6 +16,8 @@
 
 package controllers
 
+import java.util.UUID
+
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.Capabilities.{ChangeClientSecret, ViewCredentials}
@@ -82,16 +84,10 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def deleteClientSecretAction(applicationId: String, clientSecretId: String): Action[AnyContent] =
-    canChangeClientSecrets(applicationId) { implicit request =>
-      def deleteClientSecret(clientSecretToDelete: String): Future[Result] = {
-        applicationService.deleteClientSecrets(applicationId, request.user.email, Seq(clientSecretToDelete))
-          .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId)))
-      }
-
-      applicationService.fetchCredentials(applicationId).flatMap { tokens =>
-        tokens.clientSecrets.find(_.id == clientSecretId)
-          .fold(successful(NotFound(errorHandler.notFoundTemplate)))(secret => deleteClientSecret(secret.secret))
-      }
+  def deleteClientSecretAction(appId: String, clientSecretId: String): Action[AnyContent] =
+    canChangeClientSecrets(appId) { implicit request =>
+      val applicationId: UUID = UUID.fromString(appId)
+      applicationService.deleteClientSecret(applicationId, clientSecretId, request.user.email)
+        .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId.toString)))
   }
 }

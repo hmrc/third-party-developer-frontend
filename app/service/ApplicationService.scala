@@ -175,13 +175,12 @@ class ApplicationService @Inject() (
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.addClientSecrets(id, ClientSecretRequest(actorEmailAddress)))
   }
 
-  def deleteClientSecrets(appId: String,
-                          actorEmailAddress: String,
-                          clientSecrets: Seq[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def deleteClientSecret(applicationId: UUID,
+                         clientSecretId: String,
+                         actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper
-      .forApplication(appId)
-      .flatMap(_.thirdPartyApplicationConnector.deleteClientSecrets(appId, DeleteClientSecretsRequest(actorEmailAddress, clientSecrets)))
-  }
+      .forApplication(applicationId.toString)
+      .flatMap(_.thirdPartyApplicationConnector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
 
   def updateCheckInformation(id: String, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.updateApproval(id, checkInformation))
@@ -292,14 +291,12 @@ class ApplicationService @Inject() (
       }
     }
 
-    System.out.println("Fetching applications...")
     val productionApplicationsFuture = fetchProductionApplications
     val sandboxApplicationsFuture = fetchSandboxApplications
 
     for {
       productionApplications <- productionApplicationsFuture
       sandboxApplications <- sandboxApplicationsFuture
-      _ = System.out.println(s"Got ${productionApplications.size} Production Applications and ${sandboxApplications.size} Sandbox Applications")
     } yield (productionApplications ++ sandboxApplications).sorted
   }
 
