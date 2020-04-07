@@ -62,18 +62,18 @@
                     @defining(s"client secret ending with ${secret.name.takeRight(4)}") { accessibleText =>
                         <tr>
                             <td>
-                                @if(isNewSecret && (i + 1) == clientSecrets.size){
-                                    <span aria-label="@accessibleText">@{secret.secret}</span>
+                                @if(isNewSecret && secret.id == flash.get("newSecretId").getOrElse("")){
+                                    <span aria-label="@accessibleText">@{flash.get("newSecret").get}</span>
                                 } else {
                                     <span aria-label="@accessibleText">••••••••••••••••••••••••••••••••@{secret.name.takeRight(4)}</span>
                                 }
                                 </td>
                             <td>
-                            @if(isNewSecret && (i + 1) == clientSecrets.size){
+                            @if(isNewSecret && secret.id == flash.get("newSecretId").getOrElse("")){
                                 <a href="#"
                                 class="copy-to-clip button"
                                 title="Copies @accessibleText into the system clipboard."
-                                data-clip-text="@{secret.secret}"
+                                data-clip-text="@{flash.get("newSecret").get}"
                                 aria-live="polite"
                                 aria-label="Copy @accessibleText to clipboard">
                                     Copy

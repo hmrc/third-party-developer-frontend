@@ -193,7 +193,9 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def addClientSecrets(id: String,
                        clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
     http.POST[ClientSecretRequest, AddClientSecretResponse](s"$serviceBaseUrl/application/$id/client-secret", clientSecretRequest) map { response =>
-      val newSecret: TPAClientSecret = response.clientSecrets.find(_.secret.isDefined).getOrElse(throw new NotFoundException("New Client Secret Not Found"))
+      // API-4275: Once actual secret is only returned by TPA for new ones, will be able to find based on 'secret' field being defined
+//      val newSecret: TPAClientSecret = response.clientSecrets.find(_.secret.isDefined).getOrElse(throw new NotFoundException("New Client Secret Not Found"))
+      val newSecret: TPAClientSecret = response.clientSecrets.last
       (newSecret.id, newSecret.secret.get)
     } recover {
       case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => throw new ClientSecretLimitExceeded
@@ -249,13 +251,13 @@ object ApplicationConnector {
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
     ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.secret.getOrElse(""), tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
 
-  private[connectors] case class AddClientSecretResponse(clientId: String, clientSecrets: Seq[TPAClientSecret], accessToken: String)
+  private[connectors] case class AddClientSecretResponse(clientId: String, accessToken: String, clientSecrets: List[TPAClientSecret])
   private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
   private[connectors] case class DeleteClientSecretRequest(actorEmailAddress: String)
 
   object JsonFormatters {
-    implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]
     implicit val formatTPAClientSecret: Format[TPAClientSecret] = Json.format[TPAClientSecret]
+    implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]
     implicit val formatDeleteClientSecretRequest: Format[DeleteClientSecretRequest] = Json.format[DeleteClientSecretRequest]
   }
 }
