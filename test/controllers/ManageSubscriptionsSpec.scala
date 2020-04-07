@@ -51,6 +51,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
+  val apiContext = "test"
+  val apiVersion = "1.0"
+
   val loggedInUser = DeveloperSession(session)
 
   val partLoggedInSessionId = "partLoggedInSessionId"
@@ -166,8 +169,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       noMetaDataSubscription(prefix).copy(fields = generateWrapper(prefix, count))
   }
 
-  "manageSubscriptions" should {
-    "when the user is logged in" should {
+  "ManageSubscriptions" when {
+    "a user is logged in" should {
       "return the list subscription metadata page with no subscriptions and therefore no subscription field definitions" in new ManageSubscriptionsSetup {
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
@@ -233,6 +236,15 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
+
+        status(result) shouldBe NOT_FOUND
+      }
+
+      "return not found when trying to edit api metadata for an api the application is not subscribed to" in new ManageSubscriptionsSetup {
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(Seq.empty))
+
+        private val result = await(manageSubscriptionController.editApiMetadataPage(appId, apiContext, apiVersion)(loggedInRequest))
 
         status(result) shouldBe NOT_FOUND
       }
