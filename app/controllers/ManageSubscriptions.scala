@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatus, ApiContextVersionNotFound}
+import domain.{APISubscriptionStatus, ApiContextVersionNotFound, ApplicationNotFound}
 import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import play.api.data.Form
 import play.api.data.Forms._
@@ -28,7 +28,8 @@ import play.api.mvc.Results._
 import play.api.mvc._
 import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.Future.{successful,failed}
+
+import scala.concurrent.Future.{failed, successful}
 import scala.concurrent.ExecutionContext
 
 object ManageSubscriptions {
@@ -123,7 +124,8 @@ class ManageSubscriptions @Inject() (
           .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
 
         successful(Ok(views.html.managesubscriptions.listApiSubscriptions(applicationRequest.application, details)))
-      })
+        }
+      ).recover(recovery)
     }
 
   def editApiMetadataPage(applicationId: String, context: String, version: String): Action[AnyContent] =
@@ -135,6 +137,12 @@ class ManageSubscriptions @Inject() (
           .flatMap(toViewModel)
           .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(applicationRequest.application, vm))))
           .getOrElse(failed(new ApiContextVersionNotFound))
-      })
+        }
+      ).recover(recovery)
+    }
+
+  private def recovery: PartialFunction[Throwable, Result] = {
+    case _: ApplicationNotFound       => NotFound("There is no such application")
+    case _: ApiContextVersionNotFound => NotFound("The application does not support metadata")
     }
 }

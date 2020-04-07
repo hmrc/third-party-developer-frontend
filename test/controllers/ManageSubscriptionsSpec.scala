@@ -22,8 +22,8 @@ import config.ErrorHandler
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.BDDMockito.given
 import play.api.mvc.AnyContentAsEmpty
+import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -34,13 +34,15 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
 import scala.concurrent.Future._
-import domain.ApiSubscriptionFields.SubscriptionFieldDefinition
-import domain.ApiSubscriptionFields.SubscriptionFieldValue
-import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import domain.ApiSubscriptionFields._
 import cats.data.NonEmptyList
-import org.omg.CosNaming.NamingContextPackage.NotFound
+
+import scala.concurrent.Future
+
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
+
+  val failedNoApp = Future.failed(new ApplicationNotFound)
 
   val appId = "1234"
   val clientId = "clientId123"
@@ -93,14 +95,14 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       messagesApi
     )
 
-    given(mockSessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
-      .willReturn(Some(session))
+    when(mockSessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
+      .thenReturn(Some(session))
 
-    given(mockApplicationService.fetchByApplicationId(eqTo(appId))(any[HeaderCarrier]))
-      .willReturn(successful(application))
+    when(mockApplicationService.fetchByApplicationId(eqTo(appId))(any[HeaderCarrier]))
+      .thenReturn(successful(application))
 
-    given(mockApplicationService.fetchByTeamMemberEmail(any())(any[HeaderCarrier]))
-      .willReturn(successful(List(application)))
+    when(mockApplicationService.fetchByTeamMemberEmail(any())(any[HeaderCarrier]))
+      .thenReturn(successful(List(application)))
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(manageSubscriptionController, implicitly)(sessionId)
@@ -169,8 +171,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return the list subscription metadata page with no subscriptions" in new ManageSubscriptionsSetup {
 
-        given(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .willReturn(successful(List()))
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(List()))
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -182,8 +184,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         val subsData = Seq(noMetaDataSubscription("api1"), noMetaDataSubscription("api2"))
 
-        given(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .willReturn(successful(subsData))
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -200,8 +202,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           metaDataSubscription("api4", 1).copy(subscribed = false)
         )
 
-        given(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .willReturn(successful(subsData))
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -224,6 +226,16 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         bodyOf(result) should not include (generateName("api3"))
         bodyOf(result) should not include (generateName("api4"))
+      }
+
+      "return not found if app has no subscription field definitions" in new ManageSubscriptionsSetup {
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(Seq.empty))
+
+        private val result =
+          await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
+
+        status(result) shouldBe NOT_FOUND
       }
 
     }
