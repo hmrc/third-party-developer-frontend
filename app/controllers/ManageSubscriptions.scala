@@ -24,35 +24,35 @@ import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
-import play.api.mvc.Results.NotFound
 import play.api.mvc._
 import service.{ApplicationService, AuditService, SessionService}
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
 
 object ManageSubscriptions {
-  case class Field(name: String, value: String)
-  case class ApiDetails(name: String, context: String, version: String, subsValues: NonEmptyList[Field])
 
-  def toField(sfv: SubscriptionFieldValue): Field = {
-    def default(in:String, default: String) = if(in.isEmpty) default else in
+  case class FieldValue(name: String, value: String)
 
-    Field(sfv.definition.shortDescription, default(sfv.value, "None"))
+  case class ApiDetails(name: String, context: String, version: String, subsValues: NonEmptyList[FieldValue])
+
+  def toFieldValue(sfv: SubscriptionFieldValue): FieldValue = {
+    def default(in: String, default: String) = if (in.isEmpty) default else in
+
+    FieldValue(sfv.definition.shortDescription, default(sfv.value, "None"))
   }
 
   def toDetails(in: APISubscriptionStatus): Option[ApiDetails] = {
     for {
       wrapper <- in.fields
       nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
-      nelFields = nelSFV.map(toField)
+      nelFields = nelSFV.map(toFieldValue)
     } yield ApiDetails(
-        name = in.name,
-        context = in.context,
-        version = in.apiVersion.version,
-        subsValues = nelFields
-      )
+      name = in.name,
+      context = in.context,
+      version = in.apiVersion.version,
+      subsValues = nelFields
+    )
   }
 
   def toForm(in: APISubscriptionStatus): Option[EditApiMetadata] = {
@@ -91,29 +91,7 @@ object ManageSubscriptions {
   def toViewModel(in: APISubscriptionStatus): Option[EditApiMetadataViewModel] = {
     toForm(in).map(data => EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data)))
   }
-
-  class SubscriptionFieldDefinitionsAction(errorHandler: ErrorHandler, applicationService: ApplicationService)(implicit hc: HeaderCarrier, ec: ExecutionContext)
-    extends ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
-
-    def refine[A](input: ApplicationRequest[A]) = {
-      implicit val rq = input.request
-
-      for {
-          subs <- applicationService.apisWithSubscriptions(input.application)
-          filteredSubs = subs
-            .filter(s => s.subscribed && s.fields.isDefined)
-            .toList
-        maybeNel = NonEmptyList.fromList(filteredSubs)
-      } yield {
-        maybeNel.map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
-          .toRight(NotFound(errorHandler.notFoundTemplate(input)))
-      }
-    }
-  }
 }
-
-case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
-  extends WrappedRequest[A](applicationRequest)
 
 @Singleton
 class ManageSubscriptions @Inject() (
@@ -127,31 +105,28 @@ class ManageSubscriptions @Inject() (
 
   import ManageSubscriptions._
 
-  private def appfunc(implicit hc: HeaderCarrier): ActionFunction[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
-    = new SubscriptionFieldDefinitionsAction(errorHandler, applicationService)
-
   def listApiSubscriptions(applicationId: String): Action[AnyContent] =
-    whenTeamMemberOnApp(applicationId) { implicit applicationRequest =>
-      appfunc.invokeBlock(applicationRequest, { definitionsRequest: ApplicationWithFieldDefinitionsRequest[_] =>
-        val details = definitionsRequest.fieldDefinitions
-          .map(toDetails)
-          .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+      implicit val rq = definitionsRequest.applicationRequest.request
+      implicit val appRQ = definitionsRequest.applicationRequest
 
-        successful(Ok(views.html.managesubscriptions.listApiSubscriptions(applicationRequest.application, details)))
-        }
-      )
+      val details = definitionsRequest.fieldDefinitions
+        .map(toDetails)
+        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+
+      successful(Ok(views.html.managesubscriptions.listApiSubscriptions(definitionsRequest.applicationRequest.application, details)))
     }
 
   def editApiMetadataPage(applicationId: String, context: String, version: String): Action[AnyContent] =
-    whenTeamMemberOnApp(applicationId) { implicit applicationRequest =>
-      appfunc.invokeBlock(applicationRequest, { definitionsRequest: ApplicationWithFieldDefinitionsRequest[_] =>
-        definitionsRequest.fieldDefinitions
-          .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
-          .headOption
-          .flatMap(toViewModel)
-          .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(applicationRequest.application, vm))))
-          .getOrElse(successful(NotFound(errorHandler.notFoundTemplate(Request(applicationRequest, applicationRequest.user)))))
-        }
-      )
+    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+      implicit val rq = definitionsRequest.applicationRequest.request
+      implicit val appRQ = definitionsRequest.applicationRequest
+
+      definitionsRequest.fieldDefinitions
+        .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
+        .headOption
+        .flatMap(toViewModel)
+      .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, vm))))
+        .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
 }

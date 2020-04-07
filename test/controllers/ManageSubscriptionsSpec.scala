@@ -82,10 +82,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait ManageSubscriptionsSetup {
 
-    val mockSessionService = mock[SessionService]
+    val mockSessionService = mock[SessionService](org.mockito.Mockito.withSettings().verboseLogging())
     val mockAuditService = mock[AuditService]
-    val mockApplicationService = mock[ApplicationService]
-    val mockErrorHandler = mock[ErrorHandler]
+    val mockApplicationService = mock[ApplicationService](org.mockito.Mockito.withSettings().verboseLogging())
+    val mockErrorHandler = fakeApplication.injector.instanceOf[ErrorHandler]
 
     val manageSubscriptionController = new ManageSubscriptions(
       mockSessionService,
@@ -168,8 +168,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   "manageSubscriptions" should {
     "when the user is logged in" should {
-
-      "return the list subscription metadata page with no subscriptions" in new ManageSubscriptionsSetup {
+      "return the list subscription metadata page with no subscriptions and therefore no subscription field definitions" in new ManageSubscriptionsSetup {
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(List()))
