@@ -82,9 +82,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait ManageSubscriptionsSetup {
 
-    val mockSessionService = mock[SessionService](org.mockito.Mockito.withSettings().verboseLogging())
+    val mockSessionService = mock[SessionService]
     val mockAuditService = mock[AuditService]
-    val mockApplicationService = mock[ApplicationService](org.mockito.Mockito.withSettings().verboseLogging())
+    val mockApplicationService = mock[ApplicationService]
     val mockErrorHandler = fakeApplication.injector.instanceOf[ErrorHandler]
 
     val manageSubscriptionController = new ManageSubscriptions(
