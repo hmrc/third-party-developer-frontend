@@ -19,6 +19,7 @@ package views.include
 import config.ApplicationConfig
 import controllers.ChangeSubscriptionConfirmationForm
 import domain.{SubscriptionRedirect, _}
+import model.ApplicationView
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -52,7 +53,7 @@ class ChangeSubscriptionConfirmationSpec extends UnitSpec with OneServerPerSuite
 
   def renderPage(form: Form[ChangeSubscriptionConfirmationForm], subscribed: Boolean) = {
     views.html.include.changeSubscriptionConfirmation.render(
-      application,
+      ApplicationView(application,hasSubscriptions = false),
       form,
       apiName,
       apiContext,

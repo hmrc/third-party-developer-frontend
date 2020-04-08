@@ -19,6 +19,7 @@ package views
 import config.ApplicationConfig
 import controllers.EditApplicationForm
 import domain._
+import model.ApplicationView
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.mockito.MockitoSugar
@@ -44,7 +45,14 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
       val form = EditApplicationForm.form.fill(EditApplicationForm(application.id, application.name, application.description,
         application.privacyPolicyUrl, application.termsAndConditionsUrl))
 
-      views.html.changeDetails.render(form, application, request, loggedIn, applicationMessages, appConfig, "nav-section")
+      views.html.changeDetails.render(
+        form,
+        ApplicationView(application, hasSubscriptions = false),
+        request,
+        loggedIn,
+        applicationMessages,
+        appConfig,
+        "nav-section")
     }
 
     def formGroupWithLabelIsPrepopulated(doc: Document, labelText: String, inputValue: String) = {
