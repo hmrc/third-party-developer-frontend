@@ -68,8 +68,7 @@ abstract class LoggedInController extends BaseController with AuthElement {
   }
 }
 
-// TODO: Remove root applicaiton
-case class ApplicationRequest[A](application: Application, applicationView: ApplicationView, role: Role, user: DeveloperSession, request: Request[A])
+case class ApplicationRequest[A](applicationView: ApplicationView, role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
