@@ -23,6 +23,7 @@ import domain.Capabilities.SupportsDetails
 import domain.Permissions.SandboxOrAdmin
 import domain._
 import javax.inject.{Inject, Singleton}
+import model.ApplicationView
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc._
@@ -45,16 +46,13 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(SupportsDetails,SandboxOrAdmin)(applicationId)(fun)
 
-  def details(applicationId: String): Action[AnyContent] =
-    checkSubscriptionFieldsExistAction(applicationId) { appWithSubsFlagRequest: ApplicationRequestWithSubsFlag[AnyContent] =>
-      implicit val request = appWithSubsFlagRequest.applicationRequest.request
-      implicit val developerSession = appWithSubsFlagRequest.applicationRequest.user
 
-      Future.successful(Ok(views.html.details(appWithSubsFlagRequest.applicationRequest.application, appWithSubsFlagRequest.hasSubs)))
+  def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
+    Future.successful(Ok(views.html.details(request.applicationView)))
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), request.application)))
+    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), request.applicationView)))
   }
 
   private def buildCheckInformation(updateRequest: UpdateApplicationRequest, application: Application): CheckInformation = {
@@ -90,7 +88,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
   def changeDetailsAction(applicationId: String): Action[AnyContent] =
     canChangeDetailsAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
-      val application = request.application
+      val application = request.applicationView.application
 
       def updateCheckInformation(updateRequest: UpdateApplicationRequest): Future[ApplicationUpdateSuccessful] = {
         if (application.deployedTo.isProduction()) {
@@ -117,18 +115,18 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
               def invalidNameCheckForm: Form[EditApplicationForm] =
                 requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-              Future.successful(BadRequest(views.html.changeDetails(invalidNameCheckForm, request.application)))
+              Future.successful(BadRequest(views.html.changeDetails(invalidNameCheckForm, request.applicationView)))
           })
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
-        errorView(application.id, formWithErrors, application)
+        errorView(application.id, formWithErrors, request.applicationView)
 
       EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
     }
 
   private def errorView(id: String,
-                        form: Form[EditApplicationForm], application: Application)
+                        form: Form[EditApplicationForm], applicationView: ApplicationView)
                        (implicit request: ApplicationRequest[_]): Future[Result] =
-    Future.successful(BadRequest(views.html.changeDetails(form, application)))
+    Future.successful(BadRequest(views.html.changeDetails(form, applicationView)))
 }

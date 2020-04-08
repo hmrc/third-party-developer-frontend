@@ -23,6 +23,7 @@ import domain.Capabilities.SupportsTeamMembers
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain._
 import javax.inject.{Inject, Singleton}
+import model.ApplicationView
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
@@ -50,13 +51,12 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     capabilityThenPermissionsAction(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
 
   def manageTeam(applicationId: String, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    val application = request.application
-    val view = views.html.manageTeamViews.manageTeam(application, request.role, AddTeamMemberForm.form)
+    val view = views.html.manageTeamViews.manageTeam(request.applicationView, request.role, AddTeamMemberForm.form)
     Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
   def addTeamMember(applicationId: String) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.application, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.applicationView, AddTeamMemberForm.form, request.user)))
   }
 
   def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: AddTeamMemberPageMode) =
@@ -69,7 +69,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     }
 
     def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]) : Result = {
-      val viewFunction: (Application, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
+      val viewFunction: (ApplicationView, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
         case ManageTeamMembers => views.html.manageTeamViews.addTeamMember.apply
         case ApplicationCheck => views.html.checkpages.applicationcheck.team.teamMemberAdd.apply
         case CheckYourAnswers => views.html.checkpages.checkyouranswers.team.teamMemberAdd.apply
@@ -77,7 +77,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
       }
 
       BadRequest(viewFunction(
-        request.application,
+        request.applicationView,
         formWithErrors,
         request.user
       ))
@@ -104,7 +104,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
       application.findCollaboratorByHash(teamMemberHash) match {
         case Some(collaborator) =>
-          successful(Ok(views.html.manageTeamViews.removeTeamMember(application, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
+          successful(Ok(views.html.manageTeamViews.removeTeamMember(request.applicationView, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
         case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
   }
@@ -122,7 +122,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     }
 
     def handleInvalidForm(form: Form[RemoveTeamMemberConfirmationForm]) =
-      successful(BadRequest(views.html.manageTeamViews.removeTeamMember(application, form, form("email").value.getOrElse(""))))
+      successful(BadRequest(views.html.manageTeamViews.removeTeamMember(request.applicationView, form, form("email").value.getOrElse(""))))
 
     RemoveTeamMemberConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }

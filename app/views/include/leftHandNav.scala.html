@@ -14,53 +14,56 @@
  * limitations under the License.
  *@
 
-@import domain.Application
 @import domain.DeveloperSession
-@import controllers.ManageSubscriptions.ApiDetails
+@import model.ApplicationView
 
-@(application: Option[Application] = None, navSection: Option[String], hasSubs: Boolean= false)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession)
+@(application: Option[ApplicationView] = None, navSection: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession)
 
     @(application, navSection) match {
-        case (Some(app), Some(section)) => {
-            <div class="side-nav" role="navigation" aria-labelledby="nav1">
-                <span class="heading-small" id="nav1">@app.name</span>
-                <ul>
-                    <li class="side-nav__list @if(section == "details") { side-nav__list--selected }"><a id="nav-manage-details" class="side-nav__link" href="@routes.Details.details(app.id)">Manage details</a></li>
+        case (Some(applicationView), Some(section)) => {
 
-                    @if(app.access.accessType.isStandard) {
-                        <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }"><a id="nav-manage-subscriptions" class="side-nav__link" href="@routes.Subscriptions.manageSubscriptions(app.id)">Manage API subscriptions</a></li>
-                    }
+            @defining(applicationView.application) { app =>
 
-                    @if(hasSubs) {
-                        <li class="side-nav__list @if(section == "metadata") { side-nav__list--selected }"><a id="nav-manage-metadata" class="side-nav__link" href="@routes.ManageSubscriptions.listApiSubscriptions(app.id)">Manage API metadata</a></li>
-                    }
+                <div class="side-nav" role="navigation" aria-labelledby="nav1">
+                    <span class="heading-small" id="nav1">@app.name</span>
+                    <ul>
+                        <li class="side-nav__list @if(section == "details") { side-nav__list--selected }"><a id="nav-manage-details" class="side-nav__link" href="@routes.Details.details(app.id)">Manage details</a></li>
 
-                    <li class="side-nav__list @if(section == "credentials") { side-nav__list--selected }"><a id="nav-manage-credentials" class="side-nav__link" href="@routes.Credentials.credentials(app.id)">Credentials</a></li>
-                    @if(loggedIn != null && app.canChangeClientCredentials(loggedIn.developer)) {
-                        <li class="side-nav__list @if(section == "client-id") { side-nav__list--selected }"><a id="nav-manage-client-id" class="side-nav__link" href="@routes.Credentials.clientId(app.id)">
-                            Client ID</a></li>
-                        <li class="side-nav__list @if(section == "client-secrets") { side-nav__list--selected }"><a id="nav-manage-client-secrets" class="side-nav__link" href="@routes.Credentials.clientSecrets(app.id)">
-                            Client secrets</a></li>
-                    }
+                        @if(app.access.accessType.isStandard) {
+                            <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }"><a id="nav-manage-subscriptions" class="side-nav__link" href="@routes.Subscriptions.manageSubscriptions(app.id)">Manage API subscriptions</a></li>
+                        }
 
-                    @if(app.access.accessType.isStandard) {
-                        <li class="side-nav__list @if(section == "redirects") { side-nav__list--selected }"><a id="nav-manage-redirects" class="side-nav__link" href="@routes.Redirects.redirects(app.id)">
-                            Manage redirect URIs</a></li>
-                    }
+                        @if(applicationView.hasSubscriptions) {
+                            <li class="side-nav__list @if(section == "metadata") { side-nav__list--selected }"><a id="nav-manage-metadata" class="side-nav__link" href="@routes.ManageSubscriptions.listApiSubscriptions(app.id)">Manage API metadata</a></li>
+                        }
 
-                    @if(app.ipWhitelist.nonEmpty) {
-                        <li class="side-nav__list @if(section == "manage-ip-whitelist") { side-nav__list--selected }"><a id="nav-manage-ip-whitelist" class="side-nav__link" href="@routes.IpWhitelist.manageIpWhitelist(app.id)">
-                            Manage whitelisted IPs</a></li>
-                    }
+                        <li class="side-nav__list @if(section == "credentials") { side-nav__list--selected }"><a id="nav-manage-credentials" class="side-nav__link" href="@routes.Credentials.credentials(app.id)">Credentials</a></li>
+                        @if(loggedIn != null && app.canChangeClientCredentials(loggedIn.developer)) {
+                            <li class="side-nav__list @if(section == "client-id") { side-nav__list--selected }"><a id="nav-manage-client-id" class="side-nav__link" href="@routes.Credentials.clientId(app.id)">
+                                Client ID</a></li>
+                            <li class="side-nav__list @if(section == "client-secrets") { side-nav__list--selected }"><a id="nav-manage-client-secrets" class="side-nav__link" href="@routes.Credentials.clientSecrets(app.id)">
+                                Client secrets</a></li>
+                        }
 
-                    <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Manage team members</a></li>
+                        @if(app.access.accessType.isStandard) {
+                            <li class="side-nav__list @if(section == "redirects") { side-nav__list--selected }"><a id="nav-manage-redirects" class="side-nav__link" href="@routes.Redirects.redirects(app.id)">
+                                Manage redirect URIs</a></li>
+                        }
 
-                    @if(app.access.accessType.isStandard) {
-                        <li class="side-nav__list @if(section == "delete-application") { side-nav__list--selected }"><a id="nav-delete-application" class="side-nav__link" href="@routes.DeleteApplication.deleteApplication(app.id, None)">Delete application</a></li>
-                    }
-                </ul>
-                <br>
-            </div>
+                        @if(app.ipWhitelist.nonEmpty) {
+                            <li class="side-nav__list @if(section == "manage-ip-whitelist") { side-nav__list--selected }"><a id="nav-manage-ip-whitelist" class="side-nav__link" href="@routes.IpWhitelist.manageIpWhitelist(app.id)">
+                                Manage whitelisted IPs</a></li>
+                        }
+
+                        <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Manage team members</a></li>
+
+                        @if(app.access.accessType.isStandard) {
+                            <li class="side-nav__list @if(section == "delete-application") { side-nav__list--selected }"><a id="nav-delete-application" class="side-nav__link" href="@routes.DeleteApplication.deleteApplication(app.id, None)">Delete application</a></li>
+                        }
+                    </ul>
+                    <br>
+                </div>
+            }
         }
         case (_, _) => {}
     }

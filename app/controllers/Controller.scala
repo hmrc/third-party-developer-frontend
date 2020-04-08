@@ -21,6 +21,7 @@ import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
 import domain._
 import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
 import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
+import model.ApplicationView
 import play.api.i18n.I18nSupport
 import play.api.mvc.Results.NotFound
 import play.api.mvc._
@@ -67,8 +68,11 @@ abstract class LoggedInController extends BaseController with AuthElement {
   }
 }
 
-case class ApplicationRequest[A](application: Application, role: Role, user: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
+// TODO: Remove root applicaiton
+case class ApplicationRequest[A](application: Application, applicationView: ApplicationView, role: Role, user: DeveloperSession, request: Request[A])
+  extends WrappedRequest[A](request)
 
+// TODO: get rid
 case class ApplicationRequestWithSubsFlag[A](applicationRequest: ApplicationRequest[A], hasSubs: Boolean) extends WrappedRequest[A](applicationRequest)
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])

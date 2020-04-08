@@ -24,8 +24,11 @@
 @import domain.Application
 
 @import domain.AddTeamMemberPageMode.ApplicationCheck
-@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
+@import model.ApplicationView
+@(applicationView: ApplicationView, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig, navSection: String = "manage-team")
+
+@app = @{applicationView.application}
 
  @pageHeading = @{ "Add a team member" }
 

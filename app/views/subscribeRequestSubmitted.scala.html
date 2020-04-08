@@ -19,8 +19,11 @@
 @import include._
 @import model.Crumb
 
-@(app: Application, name: String, version: String)(
+@import model.ApplicationView
+@(applicationView: ApplicationView, name: String, version: String)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "subscriptions")
+
+@app = @{applicationView.application}
 
 @devMain(
     title = "API Subscriptions",
@@ -31,7 +34,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
     <div class="govuk-box-highlight">
