@@ -57,24 +57,6 @@ trait ActionBuilders {
     }
   }
 
-  def fieldSubscriptionsExistAction(applicationId: String)(
-    implicit ec: ExecutionContext): ActionTransformer[ApplicationRequest, ApplicationRequestWithSubsFlag] =
-      new ActionTransformer[ApplicationRequest, ApplicationRequestWithSubsFlag] {
-
-        override def transform[A](applicationRequest: ApplicationRequest[A]): Future[ApplicationRequestWithSubsFlag[A]] = {
-          implicit val implicitRequest: Request[A] = applicationRequest.request
-
-          for {
-            subs <- applicationService.apisWithSubscriptions(applicationRequest.application)
-            filteredSubs = subs
-              .filter(s => s.subscribed && s.fields.isDefined)
-              .toList
-          } yield {
-            ApplicationRequestWithSubsFlag(applicationRequest, hasSubs = filteredSubs.nonEmpty)
-          }
-        }
-  }
-
   def fieldDefinitionsExistRefiner(implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
       = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
 
