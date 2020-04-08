@@ -22,7 +22,12 @@
 @import org.joda.time.format.DateTimeFormat
 
 @(app: Application)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
+        implicit request: play.api.mvc.Request[Any],
+        loggedIn: DeveloperSession,
+        messages: Messages,
+        appConfig: ApplicationConfig,
+        navSection: String = "details"
+)
 
 @devMain(
     title = "Manage details",
