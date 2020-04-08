@@ -22,9 +22,12 @@
 @import include.teamMembers._
 
 @import domain.Button
-@(app: Application, role: Role, form: Form[controllers.AddTeamMemberForm])(
+@import model.ApplicationView
+@(applicationView: ApplicationView, role: Role, form: Form[controllers.AddTeamMemberForm])(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
+@app = @{applicationView.application}
 
 @devMain(
     title = titleError + "Manage team members",
@@ -35,7 +38,7 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
 

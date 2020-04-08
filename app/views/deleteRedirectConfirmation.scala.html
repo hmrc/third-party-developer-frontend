@@ -21,8 +21,11 @@
 @import uk.gov.hmrc.urls.Link
 @import controllers.AddRedirectForm
 
-@(application: Application, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@import model.ApplicationView
+@(applicationView: ApplicationView, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
+@application = @{applicationView.application}
 
 @devMain(
     title = titleError + "Delete a redirect URI",
@@ -33,7 +36,7 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(application), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
     @errorSummary(form)

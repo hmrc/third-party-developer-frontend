@@ -19,6 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import domain._
+import model.ApplicationView
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -43,12 +44,16 @@ trait ActionBuilders {
     override def refine[A](request: Request[A]): Future[Either[Result, ApplicationRequest[A]]] = {
       implicit val implicitRequest: Request[A] = request
 
-      applicationService.fetchByApplicationId(applicationId)
-        .map { application =>
-          application.role(developerSession.developer.email)
-            .map(role => ApplicationRequest(application, role, developerSession, request))
-            .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession))))
-        }
+      for {
+        application <- applicationService.fetchByApplicationId(applicationId)
+        subs <- applicationService.apisWithSubscriptions(application)
+        hasSubs = subs.exists(s => s.subscribed && s.fields.isDefined)
+      } yield {
+        application
+          .role(developerSession.developer.email)
+          .map(role => ApplicationRequest(application, ApplicationView(application, hasSubs), role, developerSession, request))
+          .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession))))
+      }
     }
   }
 

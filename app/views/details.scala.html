@@ -21,24 +21,26 @@
 @import model.Crumb
 @import org.joda.time.format.DateTimeFormat
 
-@(app: Application, hasSubs: Boolean)(
+@import model.ApplicationView
+@(applicationView : ApplicationView)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,
         messages: Messages,
         appConfig: ApplicationConfig,
         navSection: String = "details"
 )
+@app = @{applicationView.application}
 
 @devMain(
     title = "Manage details",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage details"),
-        Crumb.application(app),
+        Crumb.application(applicationView.application),
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection), hasSubs)),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
     <header>

@@ -22,9 +22,12 @@
 @import views.html.include.teamMembers.addTeamMemberPartial
 
 @import domain.AddTeamMemberPageMode.ManageTeamMembers
-@(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
+@import model.ApplicationView
+@(applicationView: ApplicationView, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
 implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
+@app = @{applicationView.application}
 
 @devMain(
     title = titleError + "Add a team member",
@@ -35,7 +38,7 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))(request, loggedIn)),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))(request, loggedIn)),
     developerSession = Some(loggedIn)
 ) {
 

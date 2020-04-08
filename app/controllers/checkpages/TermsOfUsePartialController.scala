@@ -18,6 +18,7 @@ package controllers.checkpages
 
 import controllers.{ApplicationController, TermsOfUseForm}
 import domain._
+import model.ApplicationView
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import uk.gov.hmrc.time.DateTimeUtils
@@ -28,33 +29,33 @@ import scala.concurrent.Future
 trait TermsOfUsePartialController {
   self: ApplicationController with CanUseCheckActions =>
 
-  private def createTermsOfUse(app: Application, form: Form[TermsOfUseForm], appId: String)(implicit request: controllers.ApplicationRequest[AnyContent]) = {
+  private def createTermsOfUse(applicationView: ApplicationView, form: Form[TermsOfUseForm], appId: String)(implicit request: controllers.ApplicationRequest[AnyContent]) = {
     termsOfUse(
-      app,
+      applicationView,
       form,
       submitButtonLabel = submitButtonLabel,
-      submitAction = termsOfUseActionRoute(app.id),
-      landingPageRoute = landingPageRoute(app.id)
+      submitAction = termsOfUseActionRoute(applicationView.application.id),
+      landingPageRoute = landingPageRoute(applicationView.application.id)
     )
   }
 
   def termsOfUsePage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.application
+    val app = request.applicationView.application
     val checkInformation = app.checkInformation.getOrElse(CheckInformation())
     val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
 
-    Future.successful(Ok(createTermsOfUse(app,TermsOfUseForm.form.fill(termsOfUseForm),appId)))
+    Future.successful(Ok(createTermsOfUse(request.applicationView,TermsOfUseForm.form.fill(termsOfUseForm),appId)))
   }
 
   def termsOfUseAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
     val version = appConfig.currentTermsOfUseVersion
-    val app = request.application
+    val app = request.applicationView.application
 
     val requestForm = TermsOfUseForm.form.bindFromRequest
 
     def withFormErrors(form: Form[TermsOfUseForm]) = {
-      Future.successful(BadRequest(createTermsOfUse(app, form, app.id)))
+      Future.successful(BadRequest(createTermsOfUse(request.applicationView, form, app.id)))
     }
 
     def withValidForm(form: TermsOfUseForm) = {

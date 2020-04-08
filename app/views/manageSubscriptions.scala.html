@@ -20,8 +20,11 @@
 @import include._
 @import uk.gov.hmrc.urls.Link
 
-@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, subscriptions: Option[GroupedSubscriptions], id: String)(
+@import model.ApplicationView
+@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], applicationView: ApplicationView, subscriptions: Option[GroupedSubscriptions], id: String)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
+
+@app = @{applicationView.application}
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
     application.deployedTo.isProduction && (
@@ -39,7 +42,7 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
 
