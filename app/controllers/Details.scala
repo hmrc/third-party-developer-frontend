@@ -46,11 +46,11 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
     capabilityThenPermissionsAction(SupportsDetails,SandboxOrAdmin)(applicationId)(fun)
 
   def details(applicationId: String): Action[AnyContent] =
-    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
-      implicit val request = definitionsRequest.applicationRequest.request
-      implicit val developerSession = definitionsRequest.applicationRequest.user
+    checkSubscriptionFieldsExistAction(applicationId) { appWithSubsFlagRequest: ApplicationRequestWithSubsFlag[AnyContent] =>
+      implicit val request = appWithSubsFlagRequest.applicationRequest.request
+      implicit val developerSession = appWithSubsFlagRequest.applicationRequest.user
 
-      Future.successful(Ok(views.html.details(definitionsRequest.applicationRequest.application)))
+      Future.successful(Ok(views.html.details(appWithSubsFlagRequest.applicationRequest.application, appWithSubsFlagRequest.hasSubs)))
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>

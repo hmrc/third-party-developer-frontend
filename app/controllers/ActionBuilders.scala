@@ -20,8 +20,8 @@ import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import play.api.libs.json.Json
+import play.api.mvc._
 import play.api.mvc.Results._
-import play.api.mvc.{ActionFilter, ActionRefiner, Request, Result}
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -50,6 +50,24 @@ trait ActionBuilders {
             .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession))))
         }
     }
+  }
+
+  def fieldSubscriptionsExistAction(applicationId: String)(
+    implicit ec: ExecutionContext): ActionTransformer[ApplicationRequest, ApplicationRequestWithSubsFlag] =
+      new ActionTransformer[ApplicationRequest, ApplicationRequestWithSubsFlag] {
+
+        override def transform[A](applicationRequest: ApplicationRequest[A]): Future[ApplicationRequestWithSubsFlag[A]] = {
+          implicit val implicitRequest: Request[A] = applicationRequest.request
+
+          for {
+            subs <- applicationService.apisWithSubscriptions(applicationRequest.application)
+            filteredSubs = subs
+              .filter(s => s.subscribed && s.fields.isDefined)
+              .toList
+          } yield {
+            ApplicationRequestWithSubsFlag(applicationRequest, hasSubs = filteredSubs.nonEmpty)
+          }
+        }
   }
 
   def fieldDefinitionsExistRefiner(implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]

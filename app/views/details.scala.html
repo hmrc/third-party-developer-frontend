@@ -21,7 +21,7 @@
 @import model.Crumb
 @import org.joda.time.format.DateTimeFormat
 
-@(app: Application)(
+@(app: Application, hasSubs: Boolean)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,
         messages: Messages,
@@ -38,7 +38,7 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(app), Option(navSection), hasSubs)),
     developerSession = Some(loggedIn)
 ) {
     <header>
