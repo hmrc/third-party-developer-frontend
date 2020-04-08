@@ -287,8 +287,6 @@ object CheckInformationForm {
 
 case class SubscriptionData(role: Role, application: Application, subscriptions: Option[GroupedSubscriptions])
 
-
-
 case class Application(id: String,
                        clientId: String,
                        name: String,
