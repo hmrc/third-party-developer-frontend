@@ -44,7 +44,7 @@ class Redirects @Inject()(val applicationService: ApplicationService,
     capabilityThenPermissionsAction(SupportsRedirects, SandboxOrAdmin)(applicationId)(fun)
 
   def redirects(applicationId: String) = capabilityThenPermissionsAction(SupportsRedirects, TeamMembersOnly)(applicationId) { implicit request =>
-    val appAccess = request.application.access.asInstanceOf[Standard]
+    val appAccess = request.applicationView.application.access.asInstanceOf[Standard]
     successful(Ok(views.html.redirects(request.applicationView, appAccess.redirectUris)))
   }
 
@@ -109,12 +109,12 @@ class Redirects @Inject()(val applicationService: ApplicationService,
   def changeRedirectAction(applicationId: String) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     def handleValidForm(form: ChangeRedirectForm) = {
       def updateUris() = {
-        applicationService.update(UpdateApplicationRequest.from(request.application, form)).map(_ => Redirect(routes.Redirects.redirects(applicationId)))
+        applicationService.update(UpdateApplicationRequest.from(request.applicationView.application, form)).map(_ => Redirect(routes.Redirects.redirects(applicationId)))
       }
 
       if (form.originalRedirectUri == form.newRedirectUri) successful(Redirect(routes.Redirects.redirects(applicationId)))
       else {
-        request.application.access match {
+        request.applicationView.application.access match {
           case app: Standard => if (app.redirectUris.contains(form.newRedirectUri)) handleInvalidForm(ChangeRedirectForm.form.fill(form)
             .withError("newRedirectUri", "redirect.uri.duplicate"))
           else updateUris()

@@ -84,7 +84,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     }
 
     def handleValidForm(form: AddTeamMemberForm) = {
-      applicationService.addTeamMember(request.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
+      applicationService.addTeamMember(request.applicationView.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
         .map(_ => Redirect(successRedirect)) recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
         case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
@@ -100,7 +100,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
   def removeTeamMember(applicationId: String, teamMemberHash: String) = whenAppSupportsTeamMembers(applicationId) {
     implicit request =>
-      val application = request.application
+      val application = request.applicationView.application
 
       application.findCollaboratorByHash(teamMemberHash) match {
         case Some(collaborator) =>
@@ -110,12 +110,12 @@ class ManageTeam @Inject()(val sessionService: SessionService,
   }
 
   def removeTeamMemberAction(applicationId: String) = canEditTeamMembers(applicationId) { implicit request =>
-    val application = request.application
+    val application = request.applicationView.application
 
     def handleValidForm(form: RemoveTeamMemberConfirmationForm) = {
       form.confirm match {
         case Some("Yes") => applicationService
-          .removeTeamMember(request.application, form.email, request.user.email)
+          .removeTeamMember(request.applicationView.application, form.email, request.user.email)
           .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
         case _ => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }

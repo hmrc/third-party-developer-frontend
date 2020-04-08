@@ -52,7 +52,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), request.applicationView)))
+    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.applicationView.application), request.applicationView)))
   }
 
   private def buildCheckInformation(updateRequest: UpdateApplicationRequest, application: Application): CheckInformation = {
