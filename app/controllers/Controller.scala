@@ -72,9 +72,6 @@ abstract class LoggedInController extends BaseController with AuthElement {
 case class ApplicationRequest[A](application: Application, applicationView: ApplicationView, role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
 
-// TODO: get rid
-case class ApplicationRequestWithSubsFlag[A](applicationRequest: ApplicationRequest[A], hasSubs: Boolean) extends WrappedRequest[A](applicationRequest)
-
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
@@ -104,14 +101,6 @@ abstract class ApplicationController()
                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
-      stackedActions.async(fun)(request)
-    }
-  }
-
-  def checkSubscriptionFieldsExistAction(applicationId: String)
-                                        (fun: ApplicationRequestWithSubsFlag[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen fieldSubscriptionsExistAction(applicationId)
       stackedActions.async(fun)(request)
     }
   }
