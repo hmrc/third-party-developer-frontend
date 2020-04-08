@@ -79,6 +79,6 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
 
     TermsOfUseForm.form.bindFromRequest.fold(
       invalidForm => handleInvalidForm(request.applicationView, invalidForm),
-      validForm => handleValidForm(request.application, validForm))
+      validForm => handleValidForm(request.applicationView.application, validForm))
   }
 }
