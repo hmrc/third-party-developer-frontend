@@ -16,6 +16,7 @@
 
 package controllers
 
+import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import play.api.libs.json.Json
@@ -50,6 +51,28 @@ trait ActionBuilders {
         }
     }
   }
+
+  def fieldDefinitionsExistRefiner(implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
+      = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
+
+    def refine[A](input: ApplicationRequest[A]): Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]] = {
+      implicit val implicitRequest: Request[A] = input.request
+
+      for {
+        subs <- applicationService.apisWithSubscriptions(input.application)
+        filteredSubs = subs
+          .filter(s => s.subscribed && s.fields.isDefined)
+          .toList
+        maybeNel = NonEmptyList.fromList(filteredSubs)
+      } yield {
+        maybeNel
+          .map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
+          .toRight(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
+      }
+    }
+  }
+
+
 
   private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
     if (cond) {
