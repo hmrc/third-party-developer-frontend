@@ -249,7 +249,7 @@ object ApplicationConnector {
     ApplicationToken(addClientSecretResponse.clientId, addClientSecretResponse.clientSecrets.map(toDomain), addClientSecretResponse.accessToken)
 
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
-    ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.secret.getOrElse(""), tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
+    ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
 
   private[connectors] case class AddClientSecretResponse(clientId: String, accessToken: String, clientSecrets: List[TPAClientSecret])
   private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])

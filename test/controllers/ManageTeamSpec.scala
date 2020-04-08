@@ -51,7 +51,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
   val loggedInUser = DeveloperSession(session)
 
-  val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
+  val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
   trait Setup {
     val underTest = new ManageTeam(
@@ -343,6 +343,6 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     application
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
 }

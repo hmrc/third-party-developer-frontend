@@ -248,7 +248,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
   }
 
   "fetch credentials for application" should {
-    val tokens = ApplicationToken("pId", Seq(aClientSecret("pSecret")), "pToken")
+    val tokens = ApplicationToken("pId", Seq(aClientSecret()), "pToken")
     val url = baseUrl + s"/application/$applicationId/credentials"
 
     "return credentials" in new Setup {
@@ -766,7 +766,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def createApiSubscription(context: String, version: String, subscribed: Boolean) = {
     APISubscription(

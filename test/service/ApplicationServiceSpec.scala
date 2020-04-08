@@ -1069,5 +1069,4 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now)
 }

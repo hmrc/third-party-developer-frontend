@@ -84,11 +84,10 @@ trait TestApplications {
              clientSecret: String = randomString(28),
              accessToken: String = randomString(28)): ApplicationToken = {
 
-    ApplicationToken(clientId, Seq(aClientSecret(clientSecret)), accessToken)
+    ApplicationToken(clientId, Seq(aClientSecret()), accessToken)
   }
 
-  private def aClientSecret(secret: String = randomString(28)) =
-    ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
    implicit class AppAugment(val app: Application) {
     final def withName(name: String): Application = app.copy(name = name)

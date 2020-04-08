@@ -96,9 +96,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     ApplicationStub.configureApplicationCredentials(AppWorld.tokens)
   }
 
-  def splitToSecrets(input: String): Seq[ClientSecret] = {
-    input.split(",").map(_.trim).map(s => ClientSecret(randomUUID.toString, s, s, DateTimeUtils.now))
-  }
+  def splitToSecrets(input: String): Seq[ClientSecret] = input.split(",").map(_.trim).map(s => ClientSecret(randomUUID.toString, s, DateTimeUtils.now))
 
   Given( """^I have the following applications assigned to my email '(.*)':$""") { (email: String, data: DataTable) =>
     val applications = data.asMaps(classOf[String], classOf[String]).asScala.toList

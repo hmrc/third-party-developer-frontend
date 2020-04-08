@@ -81,7 +81,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   val developerSubmittedSandboxApplication: Application = developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production(loggedInDeveloper.email, ""))
   val devloperCreatedSandboxApplication: Application = developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
 
-  val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
+  val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
   trait Setup {
     val underTest = new Subscriptions(
@@ -493,10 +493,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   }
 
   "Authorization" should {
-    val apiName = "api-1"
     val apiContext = "api/test"
     val apiVersion = "1.0"
-    val apiStatus = "STABLE"
     val apiAccessType = "PUBLIC"
 
     "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
@@ -521,15 +519,6 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     title.get
   }
 
-  private def givenTheApplicationExistWithUserRole(applicationService: ApplicationService, appId: String, userRole: Role, state: ApplicationState = ApplicationState.testing) = {
-    val application = Application(appId, clientId, "app", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
-      collaborators = Set(Collaborator(loggedInDeveloper.email, userRole)), state = state)
-
-    given(applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(application)
-    given(applicationService.fetchCredentials(mockEq(appId))(any[HeaderCarrier])).willReturn(tokens)
-    given(applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty)
-  }
-
-  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
 }

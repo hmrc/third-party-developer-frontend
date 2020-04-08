@@ -54,7 +54,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-  val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
+  val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
   trait Setup {
     val underTest = new Credentials(
@@ -324,6 +324,6 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret(secretName: String) = ClientSecret(randomUUID.toString, secretName, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
 }
