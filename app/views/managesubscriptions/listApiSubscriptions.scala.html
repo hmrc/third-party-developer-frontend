@@ -33,7 +33,9 @@ applicationConfig: config.ApplicationConfig)
   developerSession = Some(loggedIn),
   breadcrumbs = Seq(
     Crumb("API metadata"),
-    Crumb.viewAllApplications
+    Crumb.application(app),
+    Crumb.viewAllApplications,
+    Crumb.home
   )
 ) {
 <header>
@@ -59,7 +61,7 @@ applicationConfig: config.ApplicationConfig)
       <tbody>
         @for(field <- api.subsValues.toList) {
           <tr>
-            <td>@{field.definition.shortDescription}</td>
+            <td>@{field.name}</td>
             <td>@{field.value}</td>
             <td></td>
           </tr>

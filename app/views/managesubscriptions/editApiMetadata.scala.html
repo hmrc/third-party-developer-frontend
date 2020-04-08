@@ -31,14 +31,16 @@
 @pageHeading = @{ s"${vm.name} ${vm.apiVersion}" }
 
 @devMain(
-title = pageHeading,
-userFullName = loggedIn.loggedInName,
-developerSession = Some(loggedIn),
-breadcrumbs = Seq(
-Crumb(s"${vm.name} ${vm.apiVersion}"),
-Crumb.applicationMetadata(app),
-Crumb.viewAllApplications
-)
+    title = pageHeading,
+    userFullName = loggedIn.loggedInName,
+    developerSession = Some(loggedIn),
+    breadcrumbs = Seq(
+        Crumb(s"${vm.name} ${vm.apiVersion}"),
+        Crumb.applicationMetadata(app),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    )
 ) {
 <header>
   <span class="govuk-caption-xl">API metadata</span>
