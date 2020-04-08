@@ -45,8 +45,12 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsAction(SupportsDetails,SandboxOrAdmin)(applicationId)(fun)
 
-  def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.details(request.application)))
+  def details(applicationId: String): Action[AnyContent] =
+    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+      implicit val request = definitionsRequest.applicationRequest.request
+      implicit val developerSession = definitionsRequest.applicationRequest.user
+
+      Future.successful(Ok(views.html.details(definitionsRequest.applicationRequest.application)))
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
