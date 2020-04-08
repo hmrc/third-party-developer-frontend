@@ -19,6 +19,7 @@ package views
 import config.ApplicationConfig
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
+import model.ApplicationView
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -66,7 +67,14 @@ class RedirectsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsCl
         loggedInDev
       }
 
-      views.html.redirects.render(applicationWithRedirects, redirects, request, user, applicationMessages, appConfig, "redirects")
+      views.html.redirects.render(
+        ApplicationView(applicationWithRedirects,hasSubscriptions = false),
+        redirects,
+        request,
+        user,
+        applicationMessages,
+        appConfig,
+        "redirects")
     }
 
     def renderPageForStandardApplicationAsAdminWithRedirectUris(numberOfRedirectUris: Int) = {

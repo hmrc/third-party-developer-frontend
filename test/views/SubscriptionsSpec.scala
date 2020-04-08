@@ -19,6 +19,7 @@ package views
 import config.ApplicationConfig
 import controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
 import domain._
+import model.ApplicationView
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -77,7 +78,7 @@ class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
         role,
         pageData,
         EditApplicationForm.withData(productionApplicationTesting),
-        application,
+        ApplicationView(application, false),
         Some(GroupedSubscriptions(Seq.empty, Seq.empty)),
         "",
         request,

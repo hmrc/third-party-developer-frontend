@@ -17,6 +17,7 @@
 package views.include
 
 import domain._
+import model.ApplicationView
 import org.jsoup.Jsoup
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.test.FakeRequest
@@ -42,7 +43,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
     "render with no errors" in {
-      val page = views.html.include.leftHandNav.render(Some(application), Some("details"), request, loggedInUser)
+      val page = views.html.include.leftHandNav.render(Some(ApplicationView(application,hasSubscriptions = false)), Some("details"), request, loggedInUser)
 
       page.contentType should include("text/html")
 

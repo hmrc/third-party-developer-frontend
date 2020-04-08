@@ -18,6 +18,7 @@ package views
 
 import config.ApplicationConfig
 import domain._
+import model.ApplicationView
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -45,7 +46,16 @@ class SubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with
         Set(Collaborator(developer.email, Role.ADMINISTRATOR)), state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-      val page = views.html.subscribeRequestSubmitted.render(application, apiName, apiVersion, request, developer, applicationMessages, appConfig, "subscriptions")
+      val page = views.html.subscribeRequestSubmitted.render(
+        ApplicationView(application,hasSubscriptions = false),
+        apiName,
+        apiVersion,
+        request,
+        developer,
+        applicationMessages,
+        appConfig,
+        "subscriptions")
+
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
