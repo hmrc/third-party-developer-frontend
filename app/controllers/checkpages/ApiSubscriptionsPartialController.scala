@@ -29,7 +29,7 @@ trait ApiSubscriptionsPartialController  {
   protected def apiSubscriptionsHelper: ApiSubscriptionsHelper
 
   def apiSubscriptionsPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.applicationView.application
+    val app = request.applicationViewModel.application
 
     apiSubscriptionsHelper.fetchAllSubscriptions(app, request.user)(hc).flatMap {
       case Some(subsData) =>
@@ -40,7 +40,7 @@ trait ApiSubscriptionsPartialController  {
   }
 
   def apiSubscriptionsAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.applicationView.application
+    val app = request.applicationViewModel.application
     val information = app.checkInformation.getOrElse(CheckInformation())
 
     def hasNonExampleSubscription(subscriptionData: SubscriptionData) =

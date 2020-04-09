@@ -23,8 +23,8 @@
 @import org.joda.time.format.DateTimeFormat
 @import controllers.TermsOfUseForm
 
-@import model.ApplicationView
-@(applicationView: ApplicationView, form: Form[TermsOfUseForm])(
+@import model.ApplicationViewModel
+@(applicationView: ApplicationViewModel, form: Form[TermsOfUseForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 
 @app = @{applicationView.application}

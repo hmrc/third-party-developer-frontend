@@ -23,7 +23,7 @@ import domain.Capabilities.SupportsDetails
 import domain.Permissions.SandboxOrAdmin
 import domain._
 import javax.inject.{Inject, Singleton}
-import model.ApplicationView
+import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc._
@@ -48,11 +48,11 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
 
   def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.details(request.applicationView)))
+    Future.successful(Ok(views.html.details(request.applicationViewModel)))
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.applicationView.application), request.applicationView)))
+    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.applicationViewModel.application), request.applicationViewModel)))
   }
 
   private def buildCheckInformation(updateRequest: UpdateApplicationRequest, application: Application): CheckInformation = {
@@ -88,7 +88,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
   def changeDetailsAction(applicationId: String): Action[AnyContent] =
     canChangeDetailsAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
-      val application = request.applicationView.application
+      val application = request.applicationViewModel.application
 
       def updateCheckInformation(updateRequest: UpdateApplicationRequest): Future[ApplicationUpdateSuccessful] = {
         if (application.deployedTo.isProduction()) {
@@ -115,18 +115,17 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
               def invalidNameCheckForm: Form[EditApplicationForm] =
                 requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-              Future.successful(BadRequest(views.html.changeDetails(invalidNameCheckForm, request.applicationView)))
+              Future.successful(BadRequest(views.html.changeDetails(invalidNameCheckForm, request.applicationViewModel)))
           })
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
-        errorView(application.id, formWithErrors, request.applicationView)
+        errorView(application.id, formWithErrors, request.applicationViewModel)
 
       EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
     }
 
-  private def errorView(id: String,
-                        form: Form[EditApplicationForm], applicationView: ApplicationView)
+  private def errorView(id: String, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)
                        (implicit request: ApplicationRequest[_]): Future[Result] =
-    Future.successful(BadRequest(views.html.changeDetails(form, applicationView)))
+    Future.successful(BadRequest(views.html.changeDetails(form, applicationViewModel)))
 }

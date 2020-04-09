@@ -114,7 +114,7 @@ class ManageSubscriptions @Inject() (
         .map(toDetails)
         .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
 
-      successful(Ok(views.html.managesubscriptions.listApiSubscriptions(definitionsRequest.applicationRequest.applicationView.application, details)))
+      successful(Ok(views.html.managesubscriptions.listApiSubscriptions(definitionsRequest.applicationRequest.applicationViewModel.application, details)))
     }
 
   def editApiMetadataPage(applicationId: String, context: String, version: String): Action[AnyContent] =
@@ -126,7 +126,7 @@ class ManageSubscriptions @Inject() (
         .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
         .headOption
         .flatMap(toViewModel)
-      .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.applicationView.application, vm))))
+      .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.applicationViewModel.application, vm))))
         .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
 }

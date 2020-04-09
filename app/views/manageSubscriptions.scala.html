@@ -20,8 +20,8 @@
 @import include._
 @import uk.gov.hmrc.urls.Link
 
-@import model.ApplicationView
-@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], applicationView: ApplicationView, subscriptions: Option[GroupedSubscriptions], id: String)(
+@import model.ApplicationViewModel
+@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], applicationView: ApplicationViewModel, subscriptions: Option[GroupedSubscriptions], id: String)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
 
 @app = @{applicationView.application}

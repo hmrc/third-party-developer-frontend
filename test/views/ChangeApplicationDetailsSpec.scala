@@ -19,7 +19,7 @@ package views
 import config.ApplicationConfig
 import controllers.EditApplicationForm
 import domain._
-import model.ApplicationView
+import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.mockito.MockitoSugar
@@ -47,7 +47,7 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
 
       views.html.changeDetails.render(
         form,
-        ApplicationView(application, hasSubscriptions = false),
+        ApplicationViewModel(application, hasSubscriptions = false),
         request,
         loggedIn,
         applicationMessages,

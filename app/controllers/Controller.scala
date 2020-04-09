@@ -21,7 +21,7 @@ import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
 import domain._
 import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
 import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
-import model.ApplicationView
+import model.ApplicationViewModel
 import play.api.i18n.I18nSupport
 import play.api.mvc.Results.NotFound
 import play.api.mvc._
@@ -68,7 +68,7 @@ abstract class LoggedInController extends BaseController with AuthElement {
   }
 }
 
-case class ApplicationRequest[A](applicationView: ApplicationView, role: Role, user: DeveloperSession, request: Request[A])
+case class ApplicationRequest[A](applicationViewModel: ApplicationViewModel, role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])

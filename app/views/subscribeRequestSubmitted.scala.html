@@ -19,8 +19,8 @@
 @import include._
 @import model.Crumb
 
-@import model.ApplicationView
-@(applicationView: ApplicationView, name: String, version: String)(
+@import model.ApplicationViewModel
+@(applicationView: ApplicationViewModel, name: String, version: String)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "subscriptions")
 
 @app = @{applicationView.application}

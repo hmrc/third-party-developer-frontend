@@ -18,5 +18,4 @@ package model
 
 import domain.Application
 
-// TODO: Rename. ApplicationModel?
-case class ApplicationView(application: Application, hasSubscriptions: Boolean)
+case class ApplicationViewModel(application: Application, hasSubscriptions: Boolean)

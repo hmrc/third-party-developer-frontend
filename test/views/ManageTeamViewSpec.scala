@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import controllers.AddTeamMemberForm
 import domain._
 import helpers.string._
-import model.ApplicationView
+import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -50,7 +50,7 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with SharedMetr
     def renderPage(role: Role = Role.ADMINISTRATOR, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
       views.html.manageTeamViews.manageTeam.render(
-        ApplicationView(application, hasSubscriptions = false),
+        ApplicationViewModel(application, hasSubscriptions = false),
         role,
         form,
         request,

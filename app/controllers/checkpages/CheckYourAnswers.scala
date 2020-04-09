@@ -91,7 +91,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
   }
 
   def answersPageAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val application = request.applicationView.application
+    val application = request.applicationViewModel.application
 
     (for {
       _ <- applicationService.requestUplift(appId, application.name, request.user)
@@ -113,24 +113,24 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
   }
 
   def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(checkyouranswers.team.team(request.applicationView.application, request.role, request.user)))
+    Future.successful(Ok(checkyouranswers.team.team(request.applicationViewModel.application, request.role, request.user)))
   }
 
   def teamAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
-    val information = request.applicationView.application.checkInformation.getOrElse(CheckInformation())
+    val information = request.applicationViewModel.application.checkInformation.getOrElse(CheckInformation())
     for {
       _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
     } yield Redirect(routes.CheckYourAnswers.answersPage(appId))
   }
 
   def teamAddMember(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(checkyouranswers.team.teamMemberAdd(request.applicationView, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(checkyouranswers.team.teamMemberAdd(request.applicationViewModel, AddTeamMemberForm.form, request.user)))
   }
 
   def teamMemberRemoveConfirmation(appId: String, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    successful(request.applicationView.application.findCollaboratorByHash(teamMemberHash)
-      .map(collaborator => Ok(checkyouranswers.team.teamMemberRemoveConfirmation(request.applicationView.application, request.user, collaborator.emailAddress)))
+    successful(request.applicationViewModel.application.findCollaboratorByHash(teamMemberHash)
+      .map(collaborator => Ok(checkyouranswers.team.teamMemberRemoveConfirmation(request.applicationViewModel.application, request.user, collaborator.emailAddress)))
       .getOrElse(Redirect(routes.CheckYourAnswers.team(appId))))
   }
 
@@ -138,7 +138,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
       applicationService
-        .removeTeamMember(request.applicationView.application, form.email, request.user.email)
+        .removeTeamMember(request.applicationViewModel.application, form.email, request.user.email)
         .map(_ => Redirect(routes.CheckYourAnswers.team(appId)))
     }
 

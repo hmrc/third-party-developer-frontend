@@ -48,18 +48,18 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
 
   def deleteApplication(applicationId: String, error: Option[String] = None) =
     canViewDeleteApplicationAction(applicationId) { implicit request =>
-      val view = views.html.deleteApplication(request.applicationView.application, request.role)
+      val view = views.html.deleteApplication(request.applicationViewModel.application, request.role)
       Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
     }
 
   def deletePrincipalApplicationConfirm(applicationId: String, error: Option[String] = None) =
     canDeleteApplicationAction(applicationId) { implicit request =>
-      val view = views.html.deletePrincipalApplicationConfirm(request.applicationView.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
+      val view = views.html.deletePrincipalApplicationConfirm(request.applicationViewModel.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
       Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
     }
 
   def deletePrincipalApplicationAction(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
-    val application = request.applicationView.application
+    val application = request.applicationViewModel.application
 
     def handleInvalidForm(formWithErrors: Form[DeletePrincipalApplicationForm]) =
       Future(BadRequest(views.html.deletePrincipalApplicationConfirm(application, formWithErrors)))
@@ -76,11 +76,11 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
   }
 
   def deleteSubordinateApplicationConfirm(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
-    Future(Ok(views.html.deleteSubordinateApplicationConfirm(request.applicationView.application)))
+    Future(Ok(views.html.deleteSubordinateApplicationConfirm(request.applicationViewModel.application)))
   }
 
   def deleteSubordinateApplicationAction(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
-    val application = request.applicationView.application
+    val application = request.applicationViewModel.application
 
     applicationService.deleteSubordinateApplication(request.user, application)
       .map(_ => Ok(views.html.deleteSubordinateApplicationComplete(application)))

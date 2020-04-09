@@ -30,7 +30,7 @@ trait PrivacyPolicyPartialController {
 
 
   def privacyPolicyPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.applicationView.application
+    val app = request.applicationViewModel.application
 
     Future.successful(app.access match {
       case std: Standard =>
@@ -44,7 +44,7 @@ trait PrivacyPolicyPartialController {
 
   def privacyPolicyAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = PrivacyPolicyForm.form.bindFromRequest
-    val app = request.applicationView.application
+    val app = request.applicationViewModel.application
 
     def withFormErrors(form: Form[PrivacyPolicyForm]) = {
       Future.successful(BadRequest(privacyPolicy(app, form, privacyPolicyActionRoute(app.id))))

@@ -20,11 +20,11 @@
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
 @import controllers.ChangeRedirectForm
+@import model.ApplicationViewModel
 
-@import model.ApplicationView
-@(applicationView: ApplicationView, form: Form[ChangeRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@(applicationViewModel: ApplicationViewModel, form: Form[ChangeRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
-  @application = @{applicationView.application}
+  @application = @{applicationViewModel.application}
 
 @devMain(
     title = "Change a redirect URI",
@@ -35,7 +35,7 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
     @errorSummary(form)

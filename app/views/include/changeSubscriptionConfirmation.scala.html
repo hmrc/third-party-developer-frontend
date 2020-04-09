@@ -19,8 +19,8 @@
 @import model.Crumb
 @import include._
 
-@import model.ApplicationView
-@(applicationView: ApplicationView, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
+@import model.ApplicationViewModel
+@(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messages: Messages,

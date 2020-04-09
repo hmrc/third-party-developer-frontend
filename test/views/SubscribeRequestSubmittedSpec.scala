@@ -18,7 +18,7 @@ package views
 
 import config.ApplicationConfig
 import domain._
-import model.ApplicationView
+import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -47,7 +47,7 @@ class SubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
       val page = views.html.subscribeRequestSubmitted.render(
-        ApplicationView(application,hasSubscriptions = false),
+        ApplicationViewModel(application,hasSubscriptions = false),
         apiName,
         apiVersion,
         request,

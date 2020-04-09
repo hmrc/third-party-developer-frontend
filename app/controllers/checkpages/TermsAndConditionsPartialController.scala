@@ -29,7 +29,7 @@ trait TermsAndConditionsPartialController {
   self: ApplicationController with CanUseCheckActions =>
 
   def termsAndConditionsPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.applicationView.application
+    val app = request.applicationViewModel.application
 
     Future.successful(app.access match {
       case std: Standard =>
@@ -43,7 +43,7 @@ trait TermsAndConditionsPartialController {
 
   def termsAndConditionsAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = TermsAndConditionsForm.form.bindFromRequest
-    val app = request.applicationView.application
+    val app = request.applicationViewModel.application
 
     def withFormErrors(form: Form[TermsAndConditionsForm]) = {
       Future.successful(BadRequest(termsAndConditions(app, form, termsAndConditionsActionRoute(app.id))))

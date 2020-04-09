@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import domain._
-import model.ApplicationView
+import model.ApplicationViewModel
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -51,7 +51,7 @@ trait ActionBuilders {
       } yield {
         application
           .role(developerSession.developer.email)
-          .map(role => ApplicationRequest(ApplicationView(application, hasSubs), role, developerSession, request))
+          .map(role => ApplicationRequest(ApplicationViewModel(application, hasSubs), role, developerSession, request))
           .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession))))
       }
     }
@@ -64,7 +64,7 @@ trait ActionBuilders {
       implicit val implicitRequest: Request[A] = input.request
 
       for {
-        subs <- applicationService.apisWithSubscriptions(input.applicationView.application)
+        subs <- applicationService.apisWithSubscriptions(input.applicationViewModel.application)
         filteredSubs = subs
           .filter(s => s.subscribed && s.fields.isDefined)
           .toList
@@ -112,7 +112,7 @@ trait ActionBuilders {
   }
 
   def capabilityFilter(capability: Capability) = {
-    val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.applicationView.application)
+    val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.applicationViewModel.application)
     capability match {
       case c : LikePermission => forbiddenWhenNotFilter(capabilityCheck)
       case c : Capability => badRequestWhenNotFilter(capabilityCheck)
@@ -123,7 +123,7 @@ trait ActionBuilders {
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
-      (request.applicationView.application.deployedTo, request.role) match {
+      (request.applicationViewModel.application.deployedTo, request.role) match {
         case (Environment.SANDBOX, _) => None
         case (_, Role.ADMINISTRATOR) => None
         case _ => Some(Forbidden(errorHandler.badRequestTemplate))
@@ -145,12 +145,12 @@ trait ActionBuilders {
     override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
       implicit val implicitRequest = request
 
-      if (request.applicationView.application.deployedTo == Environment.SANDBOX) None
+      if (request.applicationViewModel.application.deployedTo == Environment.SANDBOX) None
       else Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
 
   def permissionFilter(permission: Permission) =
-    forbiddenWhenNotFilter(req => permission.hasPermissions(req.applicationView.application, req.user.developer))
+    forbiddenWhenNotFilter(req => permission.hasPermissions(req.applicationViewModel.application, req.user.developer))
 
 }

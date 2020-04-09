@@ -20,11 +20,11 @@
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
 @import domain.Permissions.SandboxOrAdmin
+@import model.ApplicationViewModel
 
-@import model.ApplicationView
-@(applicationView: ApplicationView, redirectUris: Seq[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@(applicationViewModel: ApplicationViewModel, redirectUris: Seq[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
-    @application = @{applicationView.application}
+@application = @{applicationViewModel.application}
 
 @devMain(
     title = "Manage redirect URIs",
@@ -35,7 +35,7 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
     <h1 class="heading-xlarge">Manage redirect URIs</h1>

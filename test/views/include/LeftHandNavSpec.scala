@@ -17,7 +17,7 @@
 package views.include
 
 import domain._
-import model.ApplicationView
+import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.test.FakeRequest
@@ -43,8 +43,8 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
       Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-    val applicationViewModelWithApiSubscriptions = ApplicationView(application,hasSubscriptions = true)
-    val applicationViewModelWithNoApiSubscriptions = ApplicationView(application,hasSubscriptions = false)
+    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application,hasSubscriptions = true)
+    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application,hasSubscriptions = false)
   }
 
   "Left Hand Nav" when {

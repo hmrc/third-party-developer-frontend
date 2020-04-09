@@ -15,9 +15,9 @@
  *@
 
 @import domain.DeveloperSession
-@import model.ApplicationView
+@import model.ApplicationViewModel
 
-@(application: Option[ApplicationView] = None, navSection: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession)
+@(application: Option[ApplicationViewModel] = None, navSection: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession)
 
     @(application, navSection) match {
         case (Some(applicationView), Some(section)) => {

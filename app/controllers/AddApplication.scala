@@ -64,7 +64,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     whenTeamMemberOnApp(applicationId) { implicit request =>
 
       applicationService.fetchByApplicationId(applicationId).map(_.deployedTo).map {
-        case SANDBOX => Ok(views.html.addApplicationSubordinateSuccess(request.applicationView.application.name, applicationId))
+        case SANDBOX => Ok(views.html.addApplicationSubordinateSuccess(request.applicationViewModel.application.name, applicationId))
       }.recoverWith {
         case NonFatal(_) =>
           Future.successful(NotFound(errorHandler.notFoundTemplate(request)))
