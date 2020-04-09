@@ -63,7 +63,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
     val clientSecret5 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
 
     val application = Application(
-      "Test Application ID",
+      UUID.randomUUID().toString,
       "Test Application Client ID",
       "Test Application",
       DateTime.now(),

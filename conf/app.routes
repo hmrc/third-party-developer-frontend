@@ -114,8 +114,8 @@ POST        /applications/:id/change-locked-subscription                        
 GET         /applications/:id/credentials                                                   controllers.Credentials.credentials(id: String)
 GET         /applications/:id/client-id                                                     controllers.Credentials.clientId(id: String)
 GET         /applications/:id/client-secrets                                                controllers.Credentials.clientSecrets(id: String)
-GET         /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecret(id: String, clientSecretId: String)
-POST        /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecretAction(id: String, clientSecretId: String)
+GET         /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecret(id: java.util.UUID, clientSecretId: String)
+POST        /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecretAction(id: java.util.UUID, clientSecretId: String)
 POST        /applications/:id/client-secret-new                                             controllers.Credentials.addClientSecret(id: String)
 
 GET         /applications/:id/request-check                                                 controllers.checkpages.ApplicationCheck.requestCheckPage(id: String)

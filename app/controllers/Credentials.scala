@@ -77,16 +77,15 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def deleteClientSecret(applicationId: String, clientSecretId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
-    applicationService.fetchCredentials(applicationId).map { tokens =>
+  def deleteClientSecret(applicationId: UUID, clientSecretId: String): Action[AnyContent] = canChangeClientSecrets(applicationId.toString) { implicit request =>
+    applicationService.fetchCredentials(applicationId.toString).map { tokens =>
       tokens.clientSecrets.find(_.id == clientSecretId)
         .fold(NotFound(errorHandler.notFoundTemplate))(secret => Ok(views.html.editapplication.deleteClientSecret(request.application, secret)))
     }
   }
 
-  def deleteClientSecretAction(appId: String, clientSecretId: String): Action[AnyContent] =
-    canChangeClientSecrets(appId) { implicit request =>
-      val applicationId: UUID = UUID.fromString(appId)
+  def deleteClientSecretAction(applicationId: UUID, clientSecretId: String): Action[AnyContent] =
+    canChangeClientSecrets(applicationId.toString) { implicit request =>
       applicationService.deleteClientSecret(applicationId, clientSecretId, request.user.email)
         .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId.toString)))
   }

@@ -20,6 +20,7 @@
 @import domain.Developer
 @import helpers.DateFormatter.formatDateWithShortPattern
 
+@import java.util.UUID
 @(app: Application, developer: Developer, clientSecrets: Seq[ClientSecret])(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash)
 
@@ -83,7 +84,7 @@
                             <td>@{formatDateWithShortPattern(secret.createdOn)}</td>
                             <td>@{secret.lastAccess.map(formatDateWithShortPattern).getOrElse("Not used")}</td>
                             @if(allowDeletion) {
-                                <td><a id="delete-client-secret" href="@routes.Credentials.deleteClientSecret(app.id, secret.id)">Delete</a></td>
+                                <td><a id="delete-client-secret" href="@routes.Credentials.deleteClientSecret(UUID.fromString(app.id), secret.id)">Delete</a></td>
                             }
                         </tr>
                     }

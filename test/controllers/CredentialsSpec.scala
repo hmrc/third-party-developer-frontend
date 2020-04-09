@@ -48,9 +48,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   val loggedInUser = DeveloperSession(session)
 
-  val appId = "1234"
+  val applicationId = UUID.randomUUID()
   val clientId = "clientId123"
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val application = Application(applicationId.toString, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
@@ -78,27 +78,27 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest,implicitly)(sessionId).withSession(sessionParams: _*)
 
-    def givenTheApplicationExistWithUserRole(appId: String,
+    def givenTheApplicationExistWithUserRole(applicationId: UUID,
                                              userRole: Role,
                                              state: ApplicationState = ApplicationState.production("", ""),
                                              access: Access = Standard(),
                                              environment: Environment = Environment.PRODUCTION)
                                                 : BDDMockito.BDDMyOngoingStubbing[Future[Seq[APISubscriptionStatus]]] = {
 
-      val application = Application(appId, clientId, "app", DateTimeUtils.now, DateTimeUtils.now, environment,
+      val application = Application(applicationId.toString, clientId, "app", DateTimeUtils.now, DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), state = state, access = access)
 
-      given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(application)
-      given(underTest.applicationService.fetchCredentials(mockEq(appId))(any[HeaderCarrier])).willReturn(tokens)
+      given(underTest.applicationService.fetchByApplicationId(mockEq(applicationId.toString))(any[HeaderCarrier])).willReturn(application)
+      given(underTest.applicationService.fetchCredentials(mockEq(applicationId.toString))(any[HeaderCarrier])).willReturn(tokens)
       given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty)
     }
   }
 
   "The credentials page" should {
     "be displayed for an app" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
 
-      val result: Result = await(underTest.credentials(appId)(loggedInRequest))
+      val result: Result = await(underTest.credentials(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Credentials")
@@ -106,9 +106,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "inform the user that only admins can access credentials when the user has the developer role and the app is in PROD" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+      givenTheApplicationExistWithUserRole(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result: Result = await(underTest.credentials(appId)(loggedInRequest))
+      val result: Result = await(underTest.credentials(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Credentials")
@@ -116,9 +116,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "inform the user about the state of the application when it has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
 
-      val result: Result = await(underTest.credentials(appId)(loggedInRequest))
+      val result: Result = await(underTest.credentials(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Credentials")
@@ -128,26 +128,26 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   "The client ID page" should {
     "be displayed for an app" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
 
-      val result: Result = await(underTest.clientId(appId)(loggedInRequest))
+      val result: Result = await(underTest.clientId(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Client ID")
     }
 
     "return 403 when the user has the developer role and the app is in PROD" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+      givenTheApplicationExistWithUserRole(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result: Result = await(underTest.clientId(appId)(loggedInRequest))
+      val result: Result = await(underTest.clientId(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe FORBIDDEN
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
 
-      val result: Result = await(underTest.clientId(appId)(loggedInRequest))
+      val result: Result = await(underTest.clientId(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -155,101 +155,101 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   "The client secrets page" should {
     "be displayed for an app" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
 
-      val result: Result = await(underTest.clientSecrets(appId)(loggedInRequest.withCSRFToken))
+      val result: Result = await(underTest.clientSecrets(applicationId.toString)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Client secrets")
     }
 
     "return 403 when the user has the developer role and the app is in PROD" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+      givenTheApplicationExistWithUserRole(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result: Result = await(underTest.clientSecrets(appId)(loggedInRequest.withCSRFToken))
+      val result: Result = await(underTest.clientSecrets(applicationId.toString)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe FORBIDDEN
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
 
-      val result: Result = await(underTest.clientSecrets(appId)(loggedInRequest.withCSRFToken))
+      val result: Result = await(underTest.clientSecrets(applicationId.toString)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe BAD_REQUEST
     }
   }
 
   "addClientSecret" should {
-    val appId = "1234"
+    val applicationId = UUID.randomUUID()
     val newSecretId = UUID.randomUUID().toString
     val newSecret = UUID.randomUUID().toString
 
     "add the client secret" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      given(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
+      given(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn((newSecretId, newSecret))
 
-      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/applications/1234/client-secrets")
-      verify(underTest.applicationService).addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier])
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.toString}/client-secrets")
+      verify(underTest.applicationService).addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier])
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = Environment.PRODUCTION)
-      when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, environment = Environment.PRODUCTION)
+      when(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
-      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe UNPROCESSABLE_ENTITY
     }
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, environment = Environment.SANDBOX)
-      when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, environment = Environment.SANDBOX)
+      when(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ClientSecretLimitExceeded))
 
-      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe UNPROCESSABLE_ENTITY
     }
 
     "display the NotFound page when the application does not exist" in new Setup {
-      when(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier]))
+      when(underTest.applicationService.fetchByApplicationId(mockEq(applicationId.toString))(any[HeaderCarrier]))
         .thenReturn(successful(application))
-      when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
+      when(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ApplicationNotFound))
 
-      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe NOT_FOUND
     }
 
     "display the error page when a user with developer role tries to add production secrets" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+      givenTheApplicationExistWithUserRole(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe FORBIDDEN
       verify(underTest.applicationService, never()).addClientSecret(any[String], any[String])(any[HeaderCarrier])
     }
 
     "display the error page when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
 
-      val result: Result = await(underTest.addClientSecret(appId)(loggedInRequest))
+      val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
       verify(underTest.applicationService, never()).addClientSecret(any[String], any[String])(any[HeaderCarrier])
     }
 
     "return to the login page when the user is not logged in" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
 
-      val result: Result = await(underTest.addClientSecret(appId)(loggedOutRequest))
+      val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedOutRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -260,7 +260,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   "deleteClientSecret" should {
     val clientSecretToDelete: ClientSecret = tokens.clientSecrets.last
     "return the confirmation page when the selected client secret exists" in new Setup {
-      val result: Result = await(underTest.deleteClientSecret(appId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken))
+      val result: Result = await(underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Are you sure you want to delete this client secret?")
@@ -268,23 +268,23 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "return 404 when the selected client secret does not exist" in new Setup {
-      val result: Result = await(underTest.deleteClientSecret(appId, "wxyz")(loggedInRequest.withCSRFToken))
+      val result: Result = await(underTest.deleteClientSecret(applicationId, "wxyz")(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe NOT_FOUND
     }
 
     "return 403 when a user with developer role tries do delete production secrets" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, DEVELOPER, environment = Environment.PRODUCTION)
+      givenTheApplicationExistWithUserRole(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result: Result = await(underTest.deleteClientSecret(appId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken))
+      val result: Result = await(underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe FORBIDDEN
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
 
-      val result: Result = await(underTest.deleteClientSecret(appId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken))
+      val result: Result = await(underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -295,30 +295,30 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     val clientSecretId: String = UUID.randomUUID().toString
 
     "delete the selected client secret" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId.toString, ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
 
       given(underTest.applicationService
         .deleteClientSecret(mockEq(applicationId), mockEq(clientSecretId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(ApplicationUpdateSuccessful))
 
-      val result: Result = await(underTest.deleteClientSecretAction(applicationId.toString, clientSecretId)(loggedInRequest))
+      val result: Result = await(underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.toString}/client-secrets")
     }
 
     "return 403 when a user with developer role tries do delete production secrets" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId.toString, DEVELOPER, environment = Environment.PRODUCTION)
+      givenTheApplicationExistWithUserRole(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result: Result = await(underTest.deleteClientSecretAction(applicationId.toString, clientSecretId)(loggedInRequest))
+      val result: Result = await(underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest))
 
       status(result) shouldBe FORBIDDEN
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId.toString, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
 
-      val result: Result = await(underTest.deleteClientSecretAction(applicationId.toString, clientSecretId)(loggedInRequest))
+      val result: Result = await(underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
     }
