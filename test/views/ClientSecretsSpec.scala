@@ -16,6 +16,7 @@
 
 package views
 
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 import config.ApplicationConfig
@@ -55,14 +56,14 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
     val request = FakeRequest().withCSRFToken
     val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
-    val clientSecret1 = ClientSecret(randomUUID.toString, "", "clientSecret1Content", DateTimeUtils.now)
-    val clientSecret2 = ClientSecret(randomUUID.toString, "", "clientSecret2Content", DateTimeUtils.now)
-    val clientSecret3 = ClientSecret(randomUUID.toString, "", "clientSecret3Content", DateTimeUtils.now)
-    val clientSecret4 = ClientSecret(randomUUID.toString, "", "clientSecret4Content", DateTimeUtils.now)
-    val clientSecret5 = ClientSecret(randomUUID.toString, "", "clientSecret5Content", DateTimeUtils.now)
+    val clientSecret1 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
+    val clientSecret2 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
+    val clientSecret3 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
+    val clientSecret4 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
+    val clientSecret5 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
 
     val application = Application(
-      "Test Application ID",
+      UUID.randomUUID().toString,
       "Test Application Client ID",
       "Test Application",
       DateTime.now(),
@@ -99,7 +100,8 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
 
     "show copy button when a new client secret has just been added" in new Setup {
       val oneClientSecret = Seq(clientSecret1)
-      val flash = Flash(Map("newSecret" -> clientSecret1.secret))
+      val newClientSecretValue = UUID.randomUUID().toString
+      val flash = Flash(Map("newSecretId" -> clientSecret1.id, "newSecret" -> newClientSecretValue))
 
       val page = clientSecrets.render(application, oneClientSecret, request, developer, applicationMessages, appConfig, flash)
 

@@ -16,6 +16,8 @@
 
 package service
 
+import java.util.UUID
+
 import config.ApplicationConfig
 import connectors._
 import domain._
@@ -172,15 +174,16 @@ class ApplicationService @Inject() (
     } yield subscription
   }
 
-  def addClientSecret(id: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationToken] = {
+  def addClientSecret(id: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[(String, String)] = {
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.addClientSecrets(id, ClientSecretRequest(actorEmailAddress)))
   }
 
-  def deleteClientSecrets(appId: String, actorEmailAddress: String, clientSecrets: Seq[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def deleteClientSecret(applicationId: UUID,
+                         clientSecretId: String,
+                         actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper
-      .forApplication(appId)
-      .flatMap(_.thirdPartyApplicationConnector.deleteClientSecrets(appId, DeleteClientSecretsRequest(actorEmailAddress, clientSecrets)))
-  }
+      .forApplication(applicationId.toString)
+      .flatMap(_.thirdPartyApplicationConnector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
 
   def updateCheckInformation(id: String, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.updateApproval(id, checkInformation))
@@ -344,4 +347,33 @@ class ApplicationService @Inject() (
       productionApplicationConnector
     else
       sandboxApplicationConnector
+}
+
+object ApplicationService {
+  trait ApplicationConnector {
+    def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
+    def update(applicationId: String, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]]
+    def addTeamMember(applicationId: String, teamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse]
+    def removeTeamMember(applicationId: String,
+                         teamMemberToDelete: String,
+                         requestingEmail: String,
+                         adminsToEmail: Seq[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]]
+    def fetchSubscriptions(id: String)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]]
+    def subscribeToApi(applicationId: String, apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def unsubscribeFromApi(applicationId: String, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationToken]
+    def requestUplift(applicationId: String, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful]
+    def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationSuccessful]
+    def updateApproval(id: String, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def addClientSecrets(id: String, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)]
+    def deleteClientSecrets(appId: String,
+                            deleteClientSecretsRequest: DeleteClientSecretsRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def deleteClientSecret(applicationId: UUID,
+                           clientSecretId: String,
+                           actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def validateName(name: String, selfApplicationId: Option[String])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
+    def deleteApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Unit]
+  }
 }

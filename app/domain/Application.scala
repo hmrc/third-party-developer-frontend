@@ -63,7 +63,7 @@ object Collaborator {
   implicit val format = Json.format[Collaborator]
 }
 
-case class ClientSecret(id: String, name: String, secret: String, createdOn: DateTime, lastAccess: Option[DateTime] = None)
+case class ClientSecret(id: String, name: String, createdOn: DateTime, lastAccess: Option[DateTime] = None)
 
 object ClientSecret {
   implicit val format = Json.format[ClientSecret]

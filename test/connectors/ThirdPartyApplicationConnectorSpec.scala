@@ -17,10 +17,12 @@
 package connectors
 
 import java.net.URLEncoder.encode
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 import akka.actor.ActorSystem
 import config.ApplicationConfig
+import connectors.ApplicationConnector.{AddClientSecretResponse, DeleteClientSecretRequest, TPAClientSecret}
 import domain.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain._
 import helpers.FutureTimeoutSupportImpl
@@ -246,7 +248,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
   }
 
   "fetch credentials for application" should {
-    val tokens = ApplicationToken("pId", Seq(aClientSecret("pSecret")), "pToken")
+    val tokens = ApplicationToken("pId", Seq(aClientSecret()), "pToken")
     val url = baseUrl + s"/application/$applicationId/credentials"
 
     "return credentials" in new Setup {
@@ -554,21 +556,32 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
   }
 
   "addClientSecret" should {
+    def tpaClientSecret(clientSecretId: String, clientSecretValue: Option[String] = None): TPAClientSecret =
+      TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, DateTimeUtils.now, None)
+
     val applicationId = "applicationId"
-    val applicationTokens = ApplicationToken(
-      "prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken")
     val actorEmailAddress = "john.requestor@example.com"
     val clientSecretRequest = ClientSecretRequest(actorEmailAddress)
     val url = s"$baseUrl/application/$applicationId/client-secret"
 
     "generate the client secret" in new Setup {
+      val newClientSecretId = UUID.randomUUID().toString
+      val newClientSecretValue = UUID.randomUUID().toString
+      val newClientSecret = tpaClientSecret(newClientSecretId, Some(newClientSecretValue))
+      val response =
+        AddClientSecretResponse(
+          UUID.randomUUID().toString,
+          UUID.randomUUID().toString,
+          List(tpaClientSecret("old-secret-1"), tpaClientSecret("old-secret-2"), newClientSecret))
+
       when(mockHttpClient
-        .POST[ClientSecretRequest, ApplicationToken](meq(url), meq(clientSecretRequest), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(applicationTokens))
+        .POST[ClientSecretRequest, AddClientSecretResponse](meq(url), meq(clientSecretRequest), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(response))
 
       val result = await(connector.addClientSecrets(applicationId, clientSecretRequest))
 
-      result shouldEqual applicationTokens
+      result._1 shouldEqual newClientSecretId
+      result._2 shouldEqual newClientSecretValue
     }
 
     "throw an ApplicationNotFound exception when the application does not exist" in new Setup {
@@ -598,7 +611,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     val deleteClientSecretsRequest = DeleteClientSecretsRequest(actorEmailAddress, Seq("secret1"))
     val url = s"$baseUrl/application/$applicationId/revoke-client-secrets"
 
-    "delete a client secret" in new Setup {
+    "delete client secrets in seqence" in new Setup {
       when(mockHttpClient
         .POST[DeleteClientSecretsRequest, HttpResponse](meq(url), meq(deleteClientSecretsRequest), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
@@ -615,6 +628,34 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
       intercept[ApplicationNotFound] {
         await(connector.deleteClientSecrets(applicationId, deleteClientSecretsRequest))
+      }
+    }
+  }
+
+  "deleteClientSecret" should {
+    val applicationId = UUID.randomUUID()
+    val clientSecretId = UUID.randomUUID().toString
+    val actorEmailAddress = "john.requestor@example.com"
+    val expectedDeleteClientSecretRequest = DeleteClientSecretRequest(actorEmailAddress)
+    val url = s"$baseUrl/application/${applicationId.toString}/client-secret/$clientSecretId"
+
+    "delete a client secret" in new Setup {
+      when(mockHttpClient
+        .POST[DeleteClientSecretRequest, HttpResponse](meq(url), meq(expectedDeleteClientSecretRequest), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+
+      val result = await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
+
+      result shouldEqual ApplicationUpdateSuccessful
+    }
+
+    "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
+      when(mockHttpClient
+        .POST[DeleteClientSecretRequest, HttpResponse](meq(url), meq(expectedDeleteClientSecretRequest), any())(any(), any(), any(), any()))
+        .thenReturn(Future.failed(new NotFoundException("")))
+
+      intercept[ApplicationNotFound] {
+        await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
       }
     }
   }
@@ -725,7 +766,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def createApiSubscription(context: String, version: String, subscribed: Boolean) = {
     APISubscription(

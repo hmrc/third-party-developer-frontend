@@ -19,6 +19,7 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
+import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -77,7 +78,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
   )
 
   val tokens =
-    ApplicationToken("clientId", Seq(aClientSecret("secret"), aClientSecret("secret2")), "token")
+    ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
   private val sessionParams = Seq(
     "csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken
@@ -279,11 +280,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
   }
 
-  private def aClientSecret(secret: String) =
+  private def aClientSecret() =
     ClientSecret(
       randomUUID.toString,
-      secret,
-      secret,
+      randomUUID.toString,
       DateTimeUtils.now.withZone(DateTimeZone.getDefault)
     )
 }
