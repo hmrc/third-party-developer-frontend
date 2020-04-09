@@ -18,6 +18,7 @@ package views
 
 import domain.Environment.PRODUCTION
 import domain._
+import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatestplus.play.OneServerPerSuite
@@ -44,7 +45,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
   "Left Hand Nav" should {
 
     "include links to manage API subscriptions, credentials and team members for an app with standard access" in new Setup {
-      val document: Document = Jsoup.parse(leftHandNav(Some(standardApplication), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNav(Some(ApplicationViewModel(standardApplication, hasSubscriptionsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-subscriptions") shouldBe true
       elementExistsById(document, "nav-manage-credentials") shouldBe true
@@ -55,7 +56,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
     }
 
     "include links to manage team members but not API subscriptions for an app with privileged access" in new Setup {
-      val document: Document = Jsoup.parse(leftHandNav(Some(privilegedApplication), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNav(Some(ApplicationViewModel(privilegedApplication, hasSubscriptionsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-subscriptions") shouldBe false
       elementExistsById(document, "nav-manage-credentials") shouldBe true
@@ -66,7 +67,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
     }
 
     "include links to manage team members but not API subscriptions for an app with ROPC access" in new Setup {
-      val document: Document = Jsoup.parse(leftHandNav(Some(ropcApplication), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNav(Some(ApplicationViewModel(ropcApplication, hasSubscriptionsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-subscriptions") shouldBe false
       elementExistsById(document, "nav-manage-credentials") shouldBe true
@@ -81,7 +82,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
         collaborators = Set(Collaborator(loggedIn.email, Role.ADMINISTRATOR)),
         state = ApplicationState.production("", ""))
 
-      val document: Document = Jsoup.parse(leftHandNav(Some(application), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNav(Some(ApplicationViewModel(application, hasSubscriptionsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-client-id") shouldBe true
       elementExistsById(document, "nav-manage-client-secrets") shouldBe true
@@ -93,7 +94,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
         collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER)),
         state = ApplicationState.production("", ""))
 
-      val document: Document = Jsoup.parse(leftHandNav(Some(application), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNav(Some(ApplicationViewModel(application, hasSubscriptionsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-client-id") shouldBe true
       elementExistsById(document, "nav-manage-client-secrets") shouldBe true

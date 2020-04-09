@@ -72,6 +72,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
     given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
+    given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
     given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
@@ -222,6 +223,8 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
         .thenReturn(successful(application))
       when(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ApplicationNotFound))
+      when(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier]))
+        .thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
       val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 

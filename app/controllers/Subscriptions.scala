@@ -60,7 +60,7 @@ class Subscriptions @Inject() (
       request.application,
       request.user,
       (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-        views.html.manageSubscriptions(role, data, form, request.application, data.subscriptions, data.app.id)
+        views.html.manageSubscriptions(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.app.id)
       }
     )
   }
@@ -126,7 +126,7 @@ class Subscriptions @Inject() (
       applicationService
         .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)
         .map(subscribed =>
-          Ok(changeSubscriptionConfirmation(request.application, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo))
+          Ok(changeSubscriptionConfirmation(applicationViewModelFromApplicationRequest, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo))
         )
     }
 
@@ -136,11 +136,11 @@ class Subscriptions @Inject() (
         if (subscribed) {
           subscriptionsService
             .requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
-            .map(_ => Ok(views.html.unsubscribeRequestSubmitted(request.application, apiName, apiVersion)))
+            .map(_ => Ok(views.html.unsubscribeRequestSubmitted(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
         } else {
           subscriptionsService
             .requestApiSubscription(request.user, request.application, apiName, apiVersion)
-            .map(_ => Ok(views.html.subscribeRequestSubmitted(request.application, apiName, apiVersion)))
+            .map(_ => Ok(views.html.subscribeRequestSubmitted(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
         }
       }
 
@@ -150,7 +150,7 @@ class Subscriptions @Inject() (
       }
 
       def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
-        Future.successful(BadRequest(changeSubscriptionConfirmation(request.application, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
+        Future.successful(BadRequest(changeSubscriptionConfirmation(applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
 
       applicationService
         .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)

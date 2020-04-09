@@ -19,9 +19,12 @@
 @import include._
 @import org.joda.time.format.DateTimeFormat
 @import controllers.TermsOfUseForm
+@import model.ApplicationViewModel
 
-@(app: Application, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+@(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
+@app = @{applicationViewModel.application}
 
 @devMain(
     title = titleError + "Agree to our terms of use",

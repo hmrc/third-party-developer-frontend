@@ -21,6 +21,7 @@ import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
 import domain._
 import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
 import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
+import model.ApplicationViewModel
 import play.api.i18n.I18nSupport
 import play.api.mvc.Results.NotFound
 import play.api.mvc._
@@ -67,7 +68,8 @@ abstract class LoggedInController extends BaseController with AuthElement {
   }
 }
 
-case class ApplicationRequest[A](application: Application, role: Role, user: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
+case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
+  extends WrappedRequest[A](request)
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
@@ -76,6 +78,9 @@ abstract class ApplicationController()
   extends LoggedInController with ActionBuilders {
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): User = request.user
+
+  def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
+    ApplicationViewModel(request.application, request.subscriptions.exists(s => s.subscribed && s.fields.isDefined))
 
   def whenTeamMemberOnApp(applicationId: String)
                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =

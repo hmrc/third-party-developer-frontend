@@ -83,7 +83,7 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
     val application = request.application
 
     applicationService.deleteSubordinateApplication(request.user, application)
-      .map(_ => Ok(views.html.deleteSubordinateApplicationComplete(request.application)))
+      .map(_ => Ok(views.html.deleteSubordinateApplicationComplete(application)))
 
   }
 

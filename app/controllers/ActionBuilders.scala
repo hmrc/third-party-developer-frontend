@@ -20,8 +20,8 @@ import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import play.api.libs.json.Json
+import play.api.mvc._
 import play.api.mvc.Results._
-import play.api.mvc.{ActionFilter, ActionRefiner, Request, Result}
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -43,12 +43,15 @@ trait ActionBuilders {
     override def refine[A](request: Request[A]): Future[Either[Result, ApplicationRequest[A]]] = {
       implicit val implicitRequest: Request[A] = request
 
-      applicationService.fetchByApplicationId(applicationId)
-        .map { application =>
-          application.role(developerSession.developer.email)
-            .map(role => ApplicationRequest(application, role, developerSession, request))
-            .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession))))
-        }
+      for {
+        application <- applicationService.fetchByApplicationId(applicationId)
+        subs <- applicationService.apisWithSubscriptions(application)
+      } yield {
+        application
+          .role(developerSession.developer.email)
+          .map(role => ApplicationRequest(application, subs, role, developerSession, request))
+          .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession))))
+      }
     }
   }
 
@@ -58,21 +61,17 @@ trait ActionBuilders {
     def refine[A](input: ApplicationRequest[A]): Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]] = {
       implicit val implicitRequest: Request[A] = input.request
 
-      for {
-        subs <- applicationService.apisWithSubscriptions(input.application)
-        filteredSubs = subs
-          .filter(s => s.subscribed && s.fields.isDefined)
-          .toList
-        maybeNel = NonEmptyList.fromList(filteredSubs)
-      } yield {
-        maybeNel
-          .map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
-          .toRight(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
-      }
+      Future.successful(
+        NonEmptyList.fromList(
+          input.subscriptions.filter(
+            s => s.subscribed && s.fields.isDefined
+          ).toList
+        )
+        .map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
+        .toRight(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
+      )
     }
   }
-
-
 
   private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
     if (cond) {

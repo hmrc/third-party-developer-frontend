@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import controllers.AddTeamMemberForm
 import domain._
 import helpers.string._
+import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -48,7 +49,15 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with SharedMetr
 
     def renderPage(role: Role = Role.ADMINISTRATOR, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
-      views.html.manageTeamViews.manageTeam.render(application, role, form, request, applicationMessages, appConfig, "nav-section", loggedInUser)
+      views.html.manageTeamViews.manageTeam.render(
+        ApplicationViewModel(application, hasSubscriptionsFields = false),
+        role,
+        form,
+        request,
+        applicationMessages,
+        appConfig,
+        "nav-section",
+        loggedInUser)
     }
 
     "show Add and Remove buttons for Admin" in {

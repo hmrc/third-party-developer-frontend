@@ -125,7 +125,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
   }
 
   def teamAddMember(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(checkyouranswers.team.teamMemberAdd(request.application, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(checkyouranswers.team.teamMemberAdd(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
   }
 
   def teamMemberRemoveConfirmation(appId: String, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>

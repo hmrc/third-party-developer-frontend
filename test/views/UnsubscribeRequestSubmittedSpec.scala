@@ -18,6 +18,7 @@ package views
 
 import config.ApplicationConfig
 import domain._
+import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
@@ -45,7 +46,7 @@ class UnsubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite wi
         Set(Collaborator(developer.email, Role.ADMINISTRATOR)), state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-      val page = views.html.unsubscribeRequestSubmitted.render(application, apiName, apiVersion, request, developer, applicationMessages, appConfig, "subscriptions")
+      val page = views.html.unsubscribeRequestSubmitted.render(ApplicationViewModel(application, false), apiName, apiVersion, request, developer, applicationMessages, appConfig, "subscriptions")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

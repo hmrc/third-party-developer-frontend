@@ -15,15 +15,17 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment, DeveloperSession, State}
+@import domain.DeveloperSession
 @import include._
 @import model.Crumb
-@import uk.gov.hmrc.urls.Link
 @import domain.Capabilities.SupportChangingAppDetails
 
-@(form: Form[controllers.EditApplicationForm], app: Application)(
+@import model.ApplicationViewModel
+@(form: Form[controllers.EditApplicationForm], applicationViewModel: ApplicationViewModel)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
+@app = @{applicationViewModel.application}
 
 @devMain(
     title = titleError + "Change application details",
@@ -34,7 +36,7 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
     @errorSummary(form)

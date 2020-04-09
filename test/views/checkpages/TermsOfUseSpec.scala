@@ -19,6 +19,7 @@ package views.checkpages
 import config.ApplicationConfig
 import controllers.TermsOfUseForm
 import domain._
+import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
@@ -63,7 +64,7 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
-        app = thirdPartyApplication,
+        ApplicationViewModel(thirdPartyApplication,false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
         submitButtonLabel = "A Label",
         submitAction = mock[Call],
@@ -91,7 +92,7 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
-        app = thirdPartyApplication.copy(checkInformation = Some(checkInformation)),
+        ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
         submitButtonLabel =  "A Label",
         submitAction = mock[Call],

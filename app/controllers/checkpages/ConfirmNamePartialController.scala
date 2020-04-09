@@ -29,7 +29,9 @@ trait ConfirmNamePartialController {
   self: ApplicationController with CanUseCheckActions =>
 
   def namePage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(confirmName(request.application, NameForm.form.fill(NameForm(request.application.name)), nameActionRoute(appId))))
+    val app = request.application
+
+    Future.successful(Ok(confirmName(app, NameForm.form.fill(NameForm(app.name)), nameActionRoute(appId))))
   }
 
   def nameAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>

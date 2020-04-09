@@ -23,9 +23,14 @@
 @import org.joda.time.format.DateTimeFormat
 @import controllers.TermsOfUseForm
 
-@(app: Application, form: Form[TermsOfUseForm])(
+@import model.ApplicationViewModel
+@(applicationView: ApplicationViewModel, form: Form[TermsOfUseForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
+
+@app = @{applicationView.application}
+
 @title = { @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) { Agree to our terms of use } else { Terms of use } }
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
@@ -37,7 +42,7 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
 

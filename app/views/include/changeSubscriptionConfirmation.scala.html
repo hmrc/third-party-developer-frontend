@@ -19,13 +19,16 @@
 @import model.Crumb
 @import include._
 
-@(app: Application, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
+@import model.ApplicationViewModel
+@(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messages: Messages,
     applicationConfig: ApplicationConfig,
     navSection: String = "subscriptions"
 )
+
+@app = @{applicationView.application}
 
 @test(section: String) = {
     @if(section == "credentials") {
@@ -48,7 +51,7 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
 

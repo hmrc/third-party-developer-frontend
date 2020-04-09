@@ -21,6 +21,7 @@ import domain.Capabilities.SupportsTermsOfUse
 import domain.Permissions.SandboxOrAdmin
 import domain.{Application, CheckInformation, TermsOfUseAgreement, TermsOfUseStatus}
 import javax.inject.{Inject, Singleton}
+import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
@@ -52,7 +53,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
     if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
       Future.successful(BadRequest(errorHandler.badRequestTemplate))
     } else {
-      Future.successful(Ok(views.html.termsOfUse(request.application, TermsOfUseForm.form)))
+      Future.successful(Ok(views.html.termsOfUse(applicationViewModelFromApplicationRequest, TermsOfUseForm.form)))
     }
   }
 
@@ -72,12 +73,12 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
       }
     }
 
-    def handleInvalidForm(app: Application, form: Form[TermsOfUseForm]) = {
-      Future.successful(BadRequest(views.html.termsOfUse(app, form)))
+    def handleInvalidForm(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm]) = {
+      Future.successful(BadRequest(views.html.termsOfUse(applicationViewModel, form)))
     }
 
     TermsOfUseForm.form.bindFromRequest.fold(
-      invalidForm => handleInvalidForm(request.application, invalidForm),
+      invalidForm => handleInvalidForm(applicationViewModelFromApplicationRequest, invalidForm),
       validForm => handleValidForm(request.application, validForm))
   }
 }

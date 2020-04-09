@@ -59,6 +59,7 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     val anApplicationWithIpWhitelist: Application = anApplicationWithoutIpWhitelist.copy(ipWhitelist = Set("1.1.1.0/24"))
     def givenTheApplicationExists(application: Application) = {
       given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
+      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty[APISubscriptionStatus])
     }
 
     val supportEnquiryFormCaptor: ArgumentCaptor[SupportEnquiryForm] = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])

@@ -15,25 +15,32 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, DeveloperSession, TermsOfUseStatus}
+@import domain.{DeveloperSession, TermsOfUseStatus}
 @import helpers.DateFormatter.{formatDate, formatLastAccessDate}
 @import include._
 @import model.Crumb
 @import org.joda.time.format.DateTimeFormat
+@import model.ApplicationViewModel
 
-@(app: Application)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
+@(applicationViewModel: ApplicationViewModel)(
+        implicit request: play.api.mvc.Request[Any],
+        loggedIn: DeveloperSession,
+        messages: Messages,
+        appConfig: ApplicationConfig,
+        navSection: String = "details"
+)
+@app = @{applicationViewModel.application}
 
 @devMain(
     title = "Manage details",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("Manage details"),
-        Crumb.application(app),
+        Crumb.application(applicationViewModel.application),
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(app), Option(navSection))),
+    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
     <header>
