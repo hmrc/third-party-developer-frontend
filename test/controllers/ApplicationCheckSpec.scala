@@ -102,6 +102,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
       .willReturn(successful(application))
 
+    given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier]))
+      .willReturn(successful(Seq.empty[APISubscriptionStatus]))
+
     given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier]))
       .willReturn(tokens)
 
