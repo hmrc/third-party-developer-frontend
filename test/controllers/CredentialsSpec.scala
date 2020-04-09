@@ -89,7 +89,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(application)
       given(underTest.applicationService.fetchCredentials(mockEq(appId))(any[HeaderCarrier])).willReturn(tokens)
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty)
+      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty[APISubscriptionStatus])
     }
   }
 
@@ -217,6 +217,8 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "display the NotFound page when the application does not exist" in new Setup {
       when(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier]))
         .thenReturn(successful(application))
+      when(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier]))
+          .thenReturn(successful(Seq.empty[APISubscriptionStatus]))
       when(underTest.applicationService.addClientSecret(mockEq(appId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ApplicationNotFound))
 
