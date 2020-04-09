@@ -19,7 +19,6 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import domain._
-import model.ApplicationViewModel
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -47,11 +46,10 @@ trait ActionBuilders {
       for {
         application <- applicationService.fetchByApplicationId(applicationId)
         subs <- applicationService.apisWithSubscriptions(application)
-        hasSubs = subs.exists(s => s.subscribed && s.fields.isDefined)
       } yield {
         application
           .role(developerSession.developer.email)
-          .map(role => ApplicationRequest(ApplicationViewModel(application, hasSubs), role, developerSession, request))
+          .map(role => ApplicationRequest(application, subs, role, developerSession, request))
           .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession))))
       }
     }
@@ -63,21 +61,17 @@ trait ActionBuilders {
     def refine[A](input: ApplicationRequest[A]): Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]] = {
       implicit val implicitRequest: Request[A] = input.request
 
-      for {
-        subs <- applicationService.apisWithSubscriptions(input.applicationViewModel.application)
-        filteredSubs = subs
-          .filter(s => s.subscribed && s.fields.isDefined)
-          .toList
-        maybeNel = NonEmptyList.fromList(filteredSubs)
-      } yield {
-        maybeNel
-          .map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
-          .toRight(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
-      }
+      Future.successful(
+        NonEmptyList.fromList(
+          input.subscriptions.filter(
+            s => s.subscribed && s.fields.isDefined
+          ).toList
+        )
+        .map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
+        .toRight(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
+      )
     }
   }
-
-
 
   private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
     if (cond) {
@@ -112,7 +106,7 @@ trait ActionBuilders {
   }
 
   def capabilityFilter(capability: Capability) = {
-    val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.applicationViewModel.application)
+    val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
     capability match {
       case c : LikePermission => forbiddenWhenNotFilter(capabilityCheck)
       case c : Capability => badRequestWhenNotFilter(capabilityCheck)
@@ -123,7 +117,7 @@ trait ActionBuilders {
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
-      (request.applicationViewModel.application.deployedTo, request.role) match {
+      (request.application.deployedTo, request.role) match {
         case (Environment.SANDBOX, _) => None
         case (_, Role.ADMINISTRATOR) => None
         case _ => Some(Forbidden(errorHandler.badRequestTemplate))
@@ -145,12 +139,12 @@ trait ActionBuilders {
     override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
       implicit val implicitRequest = request
 
-      if (request.applicationViewModel.application.deployedTo == Environment.SANDBOX) None
+      if (request.application.deployedTo == Environment.SANDBOX) None
       else Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
 
   def permissionFilter(permission: Permission) =
-    forbiddenWhenNotFilter(req => permission.hasPermissions(req.applicationViewModel.application, req.user.developer))
+    forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.user.developer))
 
 }

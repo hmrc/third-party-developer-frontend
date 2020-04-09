@@ -50,10 +50,10 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
   }
 
   def termsOfUse(id: String) = canChangeTermsOfUseAction(id) { implicit request =>
-    if (request.applicationViewModel.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
+    if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
       Future.successful(BadRequest(errorHandler.badRequestTemplate))
     } else {
-      Future.successful(Ok(views.html.termsOfUse(request.applicationViewModel, TermsOfUseForm.form)))
+      Future.successful(Ok(views.html.termsOfUse(applicationViewModelFromApplicationRequest, TermsOfUseForm.form)))
     }
   }
 
@@ -78,7 +78,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
     }
 
     TermsOfUseForm.form.bindFromRequest.fold(
-      invalidForm => handleInvalidForm(request.applicationViewModel, invalidForm),
-      validForm => handleValidForm(request.applicationViewModel.application, validForm))
+      invalidForm => handleInvalidForm(applicationViewModelFromApplicationRequest, invalidForm),
+      validForm => handleValidForm(request.application, validForm))
   }
 }

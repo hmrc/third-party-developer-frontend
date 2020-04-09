@@ -29,14 +29,14 @@ trait ConfirmNamePartialController {
   self: ApplicationController with CanUseCheckActions =>
 
   def namePage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.applicationViewModel.application
+    val app = request.application
 
     Future.successful(Ok(confirmName(app, NameForm.form.fill(NameForm(app.name)), nameActionRoute(appId))))
   }
 
   def nameAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = NameForm.form.bindFromRequest
-    val app = request.applicationViewModel.application
+    val app = request.application
 
     def withFormErrors(form: Form[NameForm]) = {
       Future.successful(BadRequest(confirmName(app, form, nameActionRoute(appId))))
@@ -62,7 +62,7 @@ trait ConfirmNamePartialController {
           case invalid : Invalid =>
             def invalidNameCheckForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-            Future.successful(BadRequest(confirmName(request.applicationViewModel.application, invalidNameCheckForm, nameActionRoute(appId))))
+            Future.successful(BadRequest(confirmName(request.application, invalidNameCheckForm, nameActionRoute(appId))))
         })
     }
 

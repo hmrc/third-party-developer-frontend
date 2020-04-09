@@ -53,14 +53,14 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     {
 
   def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val application = request.applicationViewModel.application
+    val application = request.application
 
     Future.successful(Ok(applicationcheck.landingPage(application,
       ApplicationInformationForm.form.fill(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))))))
   }
 
   def unauthorisedAppDetails(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
-    val application = request.applicationViewModel.application
+    val application = request.application
 
     if(request.role.isAdministrator) {
       Future.successful(Redirect(routes.ApplicationCheck.requestCheckPage(appId)))
@@ -79,7 +79,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       Future.successful(Redirect(routes.CheckYourAnswers.answersPage(appId)))
     }
 
-    val application = request.applicationViewModel.application
+    val application = request.application
     val requestForm = ApplicationInformationForm.form.fillAndValidate(
       CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
     )
@@ -88,29 +88,29 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   }
 
   def credentialsRequested(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
-    Future.successful(Ok(editapplication.nameSubmitted(appId, request.applicationViewModel.application)))
+    Future.successful(Ok(editapplication.nameSubmitted(appId, request.application)))
   }
 
 
   def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(applicationcheck.team.team(request.applicationViewModel.application, request.role, request.user)))
+    Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
   }
 
   def teamAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
-    val information = request.applicationViewModel.application.checkInformation.getOrElse(CheckInformation())
+    val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
       _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
     } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
   }
 
   def teamAddMember(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(applicationcheck.team.teamMemberAdd(request.applicationViewModel, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(applicationcheck.team.teamMemberAdd(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
   }
 
   def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    successful(request.applicationViewModel.application.findCollaboratorByHash(teamMemberHash)
-      .map(collaborator => Ok(applicationcheck.team.teamMemberRemoveConfirmation(request.applicationViewModel.application, request.user, collaborator.emailAddress)))
+    successful(request.application.findCollaboratorByHash(teamMemberHash)
+      .map(collaborator => Ok(applicationcheck.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
       .getOrElse(Redirect(routes.ApplicationCheck.team(appId))))
   }
 
@@ -118,7 +118,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
         applicationService
-          .removeTeamMember(request.applicationViewModel.application, form.email, request.user.email)
+          .removeTeamMember(request.application, form.email, request.user.email)
           .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
       }
 

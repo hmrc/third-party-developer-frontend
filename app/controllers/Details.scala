@@ -48,11 +48,11 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
 
   def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.details(request.applicationViewModel)))
+    Future.successful(Ok(views.html.details(applicationViewModelFromApplicationRequest)))
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.applicationViewModel.application), request.applicationViewModel)))
+    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
   }
 
   private def buildCheckInformation(updateRequest: UpdateApplicationRequest, application: Application): CheckInformation = {
@@ -88,7 +88,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
   def changeDetailsAction(applicationId: String): Action[AnyContent] =
     canChangeDetailsAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
-      val application = request.applicationViewModel.application
+      val application = request.application
 
       def updateCheckInformation(updateRequest: UpdateApplicationRequest): Future[ApplicationUpdateSuccessful] = {
         if (application.deployedTo.isProduction()) {
@@ -115,12 +115,12 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
               def invalidNameCheckForm: Form[EditApplicationForm] =
                 requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-              Future.successful(BadRequest(views.html.changeDetails(invalidNameCheckForm, request.applicationViewModel)))
+              Future.successful(BadRequest(views.html.changeDetails(invalidNameCheckForm, applicationViewModelFromApplicationRequest)))
           })
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
-        errorView(application.id, formWithErrors, request.applicationViewModel)
+        errorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest)
 
       EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
     }

@@ -64,7 +64,7 @@ class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneSe
         val version = "1.0"
         val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(emailAddress, timeStamp, version)))
         val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(views.html.termsOfUse(ApplicationViewModel(application,hasSubscriptions = false), TermsOfUseForm.form))
+        val page: Page = Page(views.html.termsOfUse(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {
@@ -89,7 +89,7 @@ class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneSe
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
         val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(views.html.termsOfUse(ApplicationViewModel(application,hasSubscriptions = false), TermsOfUseForm.form))
+        val page: Page = Page(views.html.termsOfUse(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {

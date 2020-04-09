@@ -18,4 +18,4 @@ package model
 
 import domain.Application
 
-case class ApplicationViewModel(application: Application, hasSubscriptions: Boolean)
+case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean)

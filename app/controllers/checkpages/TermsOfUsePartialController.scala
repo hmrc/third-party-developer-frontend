@@ -40,22 +40,22 @@ trait TermsOfUsePartialController {
   }
 
   def termsOfUsePage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.applicationViewModel.application
+    val app = request.application
     val checkInformation = app.checkInformation.getOrElse(CheckInformation())
     val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
 
-    Future.successful(Ok(createTermsOfUse(request.applicationViewModel,TermsOfUseForm.form.fill(termsOfUseForm),appId)))
+    Future.successful(Ok(createTermsOfUse(applicationViewModelFromApplicationRequest, TermsOfUseForm.form.fill(termsOfUseForm),appId)))
   }
 
   def termsOfUseAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
     val version = appConfig.currentTermsOfUseVersion
-    val app = request.applicationViewModel.application
+    val app = request.application
 
     val requestForm = TermsOfUseForm.form.bindFromRequest
 
     def withFormErrors(form: Form[TermsOfUseForm]) = {
-      Future.successful(BadRequest(createTermsOfUse(request.applicationViewModel, form, app.id)))
+      Future.successful(BadRequest(createTermsOfUse(applicationViewModelFromApplicationRequest, form, app.id)))
     }
 
     def withValidForm(form: TermsOfUseForm) = {

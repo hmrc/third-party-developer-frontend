@@ -47,7 +47,7 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
 
       views.html.changeDetails.render(
         form,
-        ApplicationViewModel(application, hasSubscriptions = false),
+        ApplicationViewModel(application, hasSubscriptionsFields = false),
         request,
         loggedIn,
         applicationMessages,

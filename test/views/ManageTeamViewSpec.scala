@@ -50,7 +50,7 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with SharedMetr
     def renderPage(role: Role = Role.ADMINISTRATOR, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
       views.html.manageTeamViews.manageTeam.render(
-        ApplicationViewModel(application, hasSubscriptions = false),
+        ApplicationViewModel(application, hasSubscriptionsFields = false),
         role,
         form,
         request,

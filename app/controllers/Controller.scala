@@ -68,7 +68,7 @@ abstract class LoggedInController extends BaseController with AuthElement {
   }
 }
 
-case class ApplicationRequest[A](applicationViewModel: ApplicationViewModel, role: Role, user: DeveloperSession, request: Request[A])
+case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
@@ -78,6 +78,9 @@ abstract class ApplicationController()
   extends LoggedInController with ActionBuilders {
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): User = request.user
+
+  def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
+    ApplicationViewModel(request.application, request.subscriptions.exists(s => s.subscribed && s.fields.isDefined))
 
   def whenTeamMemberOnApp(applicationId: String)
                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =

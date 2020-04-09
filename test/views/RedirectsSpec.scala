@@ -68,7 +68,7 @@ class RedirectsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsCl
       }
 
       views.html.redirects.render(
-        ApplicationViewModel(applicationWithRedirects,hasSubscriptions = false),
+        ApplicationViewModel(applicationWithRedirects,hasSubscriptionsFields = false),
         redirects,
         request,
         user,

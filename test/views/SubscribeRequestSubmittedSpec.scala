@@ -47,7 +47,7 @@ class SubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
       val page = views.html.subscribeRequestSubmitted.render(
-        ApplicationViewModel(application,hasSubscriptions = false),
+        ApplicationViewModel(application,hasSubscriptionsFields = false),
         apiName,
         apiVersion,
         request,

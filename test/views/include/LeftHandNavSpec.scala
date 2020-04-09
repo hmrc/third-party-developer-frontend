@@ -43,8 +43,8 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
       Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application,hasSubscriptions = true)
-    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application,hasSubscriptions = false)
+    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application,hasSubscriptionsFields = true)
+    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application,hasSubscriptionsFields = false)
   }
 
   "Left Hand Nav" when {

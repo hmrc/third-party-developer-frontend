@@ -57,20 +57,20 @@ class Subscriptions @Inject() (
 
   def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
-      request.applicationViewModel.application,
+      request.application,
       request.user,
       (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-        views.html.manageSubscriptions(role, data, form, request.applicationViewModel, data.subscriptions, data.app.id)
+        views.html.manageSubscriptions(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.app.id)
       }
     )
   }
 
   def addAppSubscriptions(applicationId: String, environment: Environment): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
-      request.applicationViewModel.application,
+      request.application,
       request.user,
       (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-        views.html.addAppSubscriptions(role, data, form, request.applicationViewModel.application, request.applicationViewModel.application.deployedTo, data.subscriptions)
+        views.html.addAppSubscriptions(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
       }
     )
   }
@@ -104,13 +104,13 @@ class Subscriptions @Inject() (
         case Some(subscribe) =>
           def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
 
-          service(request.applicationViewModel.application, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.applicationViewModel.application) }
+          service(request.application, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.application) }
         case _ =>
           Future.successful(redirect(redirectTo, applicationId))
       }
 
       def handleValidForm(form: ChangeSubscriptionForm) =
-        if (request.applicationViewModel.application.hasLockedSubscriptions) {
+        if (request.application.hasLockedSubscriptions) {
           Future.successful(Forbidden(errorHandler.badRequestTemplate))
         } else {
           updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
@@ -124,9 +124,9 @@ class Subscriptions @Inject() (
   def changeLockedApiSubscription(applicationId: String, apiName: String, apiContext: String, apiVersion: String, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
       applicationService
-        .isSubscribedToApi(request.applicationViewModel.application, apiName, apiContext, apiVersion)
+        .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)
         .map(subscribed =>
-          Ok(changeSubscriptionConfirmation(request.applicationViewModel, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo))
+          Ok(changeSubscriptionConfirmation(applicationViewModelFromApplicationRequest, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo))
         )
     }
 
@@ -135,12 +135,12 @@ class Subscriptions @Inject() (
       def requestChangeSubscription(subscribed: Boolean) = {
         if (subscribed) {
           subscriptionsService
-            .requestApiUnsubscribe(request.user, request.applicationViewModel.application, apiName, apiVersion)
-            .map(_ => Ok(views.html.unsubscribeRequestSubmitted(request.applicationViewModel, apiName, apiVersion)))
+            .requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
+            .map(_ => Ok(views.html.unsubscribeRequestSubmitted(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
         } else {
           subscriptionsService
-            .requestApiSubscription(request.user, request.applicationViewModel.application, apiName, apiVersion)
-            .map(_ => Ok(views.html.subscribeRequestSubmitted(request.applicationViewModel, apiName, apiVersion)))
+            .requestApiSubscription(request.user, request.application, apiName, apiVersion)
+            .map(_ => Ok(views.html.subscribeRequestSubmitted(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
         }
       }
 
@@ -150,10 +150,10 @@ class Subscriptions @Inject() (
       }
 
       def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
-        Future.successful(BadRequest(changeSubscriptionConfirmation(request.applicationViewModel, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
+        Future.successful(BadRequest(changeSubscriptionConfirmation(applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
 
       applicationService
-        .isSubscribedToApi(request.applicationViewModel.application, apiName, apiContext, apiVersion)
+        .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
 

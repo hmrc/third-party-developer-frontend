@@ -28,7 +28,7 @@ trait ContactDetailsPartialController {
   self: ApplicationController with CanUseCheckActions =>
 
   def contactPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val app = request.applicationViewModel.application
+    val app = request.application
 
     val contactForm = for {
       approvalInfo <- app.checkInformation
@@ -46,7 +46,7 @@ trait ContactDetailsPartialController {
 
   def contactAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = ContactForm.form.bindFromRequest
-    val app = request.applicationViewModel.application
+    val app = request.application
 
     def withFormErrors(form: Form[ContactForm]) = {
       Future.successful(BadRequest(contactDetails(app, form, contactActionRoute(app.id))))

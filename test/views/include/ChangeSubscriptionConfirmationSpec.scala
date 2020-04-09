@@ -53,7 +53,7 @@ class ChangeSubscriptionConfirmationSpec extends UnitSpec with OneServerPerSuite
 
   def renderPage(form: Form[ChangeSubscriptionConfirmationForm], subscribed: Boolean) = {
     views.html.include.changeSubscriptionConfirmation.render(
-      ApplicationViewModel(application,hasSubscriptions = false),
+      ApplicationViewModel(application,hasSubscriptionsFields = false),
       form,
       apiName,
       apiContext,

@@ -51,12 +51,12 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     capabilityThenPermissionsAction(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
 
   def manageTeam(applicationId: String, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    val view = views.html.manageTeamViews.manageTeam(request.applicationViewModel, request.role, AddTeamMemberForm.form)
+    val view = views.html.manageTeamViews.manageTeam(applicationViewModelFromApplicationRequest, request.role, AddTeamMemberForm.form)
     Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
   def addTeamMember(applicationId: String) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.manageTeamViews.addTeamMember(request.applicationViewModel, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(views.html.manageTeamViews.addTeamMember(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
   }
 
   def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: AddTeamMemberPageMode) =
@@ -77,14 +77,14 @@ class ManageTeam @Inject()(val sessionService: SessionService,
       }
 
       BadRequest(viewFunction(
-        request.applicationViewModel,
+        applicationViewModelFromApplicationRequest,
         formWithErrors,
         request.user
       ))
     }
 
     def handleValidForm(form: AddTeamMemberForm) = {
-      applicationService.addTeamMember(request.applicationViewModel.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
+      applicationService.addTeamMember(request.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
         .map(_ => Redirect(successRedirect)) recover {
         case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
         case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
@@ -100,29 +100,29 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
   def removeTeamMember(applicationId: String, teamMemberHash: String) = whenAppSupportsTeamMembers(applicationId) {
     implicit request =>
-      val application = request.applicationViewModel.application
+      val application = request.application
 
       application.findCollaboratorByHash(teamMemberHash) match {
         case Some(collaborator) =>
-          successful(Ok(views.html.manageTeamViews.removeTeamMember(request.applicationViewModel, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
+          successful(Ok(views.html.manageTeamViews.removeTeamMember(applicationViewModelFromApplicationRequest, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
         case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
   }
 
   def removeTeamMemberAction(applicationId: String) = canEditTeamMembers(applicationId) { implicit request =>
-    val application = request.applicationViewModel.application
+    val application = request.application
 
     def handleValidForm(form: RemoveTeamMemberConfirmationForm) = {
       form.confirm match {
         case Some("Yes") => applicationService
-          .removeTeamMember(request.applicationViewModel.application, form.email, request.user.email)
+          .removeTeamMember(request.application, form.email, request.user.email)
           .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
         case _ => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
     }
 
     def handleInvalidForm(form: Form[RemoveTeamMemberConfirmationForm]) =
-      successful(BadRequest(views.html.manageTeamViews.removeTeamMember(request.applicationViewModel, form, form("email").value.getOrElse(""))))
+      successful(BadRequest(views.html.manageTeamViews.removeTeamMember(applicationViewModelFromApplicationRequest, form, form("email").value.getOrElse(""))))
 
     RemoveTeamMemberConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
