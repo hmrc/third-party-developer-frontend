@@ -99,9 +99,12 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     val hc: HeaderCarrier = HeaderCarrier()
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-    given(underTest.applicationService.fetchByApplicationId(mockEq(activeApplication.id))(any[HeaderCarrier])).willReturn(successful(activeApplication))
-    given(underTest.applicationService.apisWithSubscriptions(mockEq(activeApplication))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
+    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
+      .willReturn(successful(ApplicationUpdateSuccessful))
+    given(underTest.applicationService.fetchByApplicationId(mockEq(activeApplication.id))(any[HeaderCarrier]))
+      .willReturn(successful(activeApplication))
+    given(underTest.applicationService.apisWithSubscriptions(mockEq(activeApplication))(any[HeaderCarrier]))
+      .willReturn(successful(Seq.empty[APISubscriptionStatus]))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
@@ -523,10 +526,13 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     val apiAccessType = "PUBLIC"
 
     "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
+      val alteredActiveApplication = activeApplication.copy(collaborators = Set(Collaborator("randomEmail", Role.ADMINISTRATOR)))
+      
       given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier]))
-        .willReturn(successful(activeApplication.copy(collaborators = Set(Collaborator("randomEmail", Role.ADMINISTRATOR)))))
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(activeApplication))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
+        .willReturn(successful(alteredActiveApplication))
+      given(underTest.applicationService.apisWithSubscriptions(mockEq(alteredActiveApplication))(any[HeaderCarrier]))
+        .willReturn(successful(Seq.empty[APISubscriptionStatus]))
 
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET",
         s"developer/applications/$appId/subscribe?context=$apiContext&version=$apiVersion&accessType=$apiAccessType&tab=subscriptions"
