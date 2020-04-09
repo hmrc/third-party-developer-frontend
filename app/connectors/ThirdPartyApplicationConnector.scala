@@ -17,6 +17,7 @@
 package connectors
 
 import java.net.URLEncoder.encode
+import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
@@ -26,11 +27,13 @@ import domain.DefinitionFormats._
 import domain._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
+import org.joda.time.DateTime
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status.NO_CONTENT
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
+import service.ApplicationService.ApplicationConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
@@ -38,7 +41,11 @@ import uk.gov.hmrc.play.http.metrics.API
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
-abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends Retries {
+abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
+
+  import ApplicationConnector.JsonFormatters._
+  import ApplicationConnector._
+
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
   implicit val ec: ExecutionContext
@@ -184,15 +191,28 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def addClientSecrets(id: String,
-                       clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[ApplicationToken] = metrics.record(api) {
-    http.POST[ClientSecretRequest, ApplicationToken](s"$serviceBaseUrl/application/$id/client-secret", clientSecretRequest) recover {
+                       clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
+    http.POST[ClientSecretRequest, AddClientSecretResponse](s"$serviceBaseUrl/application/$id/client-secret", clientSecretRequest) map { response =>
+      // API-4275: Once actual secret is only returned by TPA for new ones, will be able to find based on 'secret' field being defined
+//      val newSecret: TPAClientSecret = response.clientSecrets.find(_.secret.isDefined).getOrElse(throw new NotFoundException("New Client Secret Not Found"))
+      val newSecret: TPAClientSecret = response.clientSecrets.last
+      (newSecret.id, newSecret.secret.get)
+    } recover {
       case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => throw new ClientSecretLimitExceeded
     } recover recovery
   }
 
   def deleteClientSecrets(appId: String,
-                          deleteClientSecretsRequest: DeleteClientSecretsRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+                          deleteClientSecretsRequest: DeleteClientSecretsRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST(s"$serviceBaseUrl/application/$appId/revoke-client-secrets", deleteClientSecretsRequest) map { _ =>
+      ApplicationUpdateSuccessful
+    } recover recovery
+  }
+
+  def deleteClientSecret(applicationId: UUID,
+                         clientSecretId: String,
+                         actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+    http.POST(s"$serviceBaseUrl/application/${applicationId.toString}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
   }
@@ -221,6 +241,24 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         case NO_CONTENT => ()
         case _ => throw new Exception("error deleting subordinate application")
       })
+  }
+}
+
+object ApplicationConnector {
+  def toDomain(addClientSecretResponse: AddClientSecretResponse): ApplicationToken =
+    ApplicationToken(addClientSecretResponse.clientId, addClientSecretResponse.clientSecrets.map(toDomain), addClientSecretResponse.accessToken)
+
+  def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
+    ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
+
+  private[connectors] case class AddClientSecretResponse(clientId: String, accessToken: String, clientSecrets: List[TPAClientSecret])
+  private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
+  private[connectors] case class DeleteClientSecretRequest(actorEmailAddress: String)
+
+  object JsonFormatters {
+    implicit val formatTPAClientSecret: Format[TPAClientSecret] = Json.format[TPAClientSecret]
+    implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]
+    implicit val formatDeleteClientSecretRequest: Format[DeleteClientSecretRequest] = Json.format[DeleteClientSecretRequest]
   }
 }
 

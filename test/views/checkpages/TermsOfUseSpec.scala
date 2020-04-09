@@ -23,6 +23,7 @@ import org.jsoup.Jsoup
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.i18n.Messages.Implicits._
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
@@ -30,6 +31,11 @@ import utils.CSRFTokenHelper._
 import views.html.checkpages.termsOfUse
 
 class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
+
+  override def fakeApplication(): play.api.Application =
+    GuiceApplicationBuilder()
+      .configure(("metrics.jvm", false))
+      .build()
 
   val appConfig: ApplicationConfig = mock[ApplicationConfig]
 

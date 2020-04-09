@@ -16,6 +16,7 @@
 
 package service
 
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 import cats.data.NonEmptyList
@@ -488,7 +489,8 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   }
 
   "addClientSecret" should {
-    val applicationTokens = ApplicationToken("prodId", Seq(aClientSecret("prodSecret1"), aClientSecret("prodSecret2")), "prodToken")
+    val newClientSecretId = UUID.randomUUID().toString
+    val newClientSecret = UUID.randomUUID().toString
     val actorEmailAddress = "john.requestor@example.com"
 
     "add a client secret for app in production environment" in new Setup {
@@ -496,11 +498,12 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
 
       given(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actorEmailAddress)))
-        .willReturn(applicationTokens)
+        .willReturn((newClientSecretId, newClientSecret))
 
       private val updatedToken = await(applicationService.addClientSecret(productionApplicationId, actorEmailAddress))
 
-      updatedToken shouldBe applicationTokens
+      updatedToken._1 shouldBe newClientSecretId
+      updatedToken._2 shouldBe newClientSecret
     }
 
     "propagate exceptions from connector" in new Setup {
@@ -516,18 +519,19 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
   }
 
-  "deleteClientSecrets" should {
-    val applicationId = "applicationId"
+  "deleteClientSecret" should {
+    val applicationId = UUID.randomUUID()
     val actorEmailAddress = "john.requestor@example.com"
-    val secretsToDelete = Seq("secret")
+    val secretToDelete = UUID.randomUUID().toString
 
     "delete a client secret" in new Setup {
 
-      theProductionConnectorWillReturnTheApplication(applicationId, productionApplication.copy(id = applicationId))
+      theProductionConnectorWillReturnTheApplication(applicationId.toString, productionApplication.copy(id = applicationId.toString))
 
-      given(mockProductionApplicationConnector.deleteClientSecrets(any(), any[DeleteClientSecretsRequest])(any[HeaderCarrier])).willReturn(ApplicationUpdateSuccessful)
+      given(mockProductionApplicationConnector.deleteClientSecret(eqTo(applicationId), eqTo(secretToDelete), eqTo(actorEmailAddress))(any[HeaderCarrier]))
+        .willReturn(ApplicationUpdateSuccessful)
 
-      await(applicationService.deleteClientSecrets(applicationId, actorEmailAddress, secretsToDelete)) shouldBe ApplicationUpdateSuccessful
+      await(applicationService.deleteClientSecret(applicationId, secretToDelete, actorEmailAddress)) shouldBe ApplicationUpdateSuccessful
     }
   }
 
@@ -1065,5 +1069,4 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     }
   }
 
-  private def aClientSecret(secret: String) = ClientSecret(randomUUID.toString, secret, secret, DateTimeUtils.now)
 }
