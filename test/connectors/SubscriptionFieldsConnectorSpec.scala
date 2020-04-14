@@ -22,27 +22,20 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import connectors.SubscriptionFieldsConnector._
-import domain.ApiSubscriptionFields.{
-  FieldsDeleteFailureResult,
-  FieldsDeleteSuccessResult,
-  SubscriptionFieldDefinition,
-  SubscriptionFieldValue,
-  SubscriptionFieldsPutRequest
-}
 import domain.{APIIdentifier, Environment}
+import domain.ApiSubscriptionFields._
 import helpers.FutureTimeoutSupportImpl
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
+import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpResponse, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import org.mockito.verification.VerificationMode
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
   def fields(tpl: (String, String)*): Map[String, String] =
@@ -451,9 +444,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   }
 
   "saveFieldValues" should {
-
-    val fieldsValues =
-      fields("field001" -> "value001", "field002" -> "value002")
+    val fieldsValues = fields("field001" -> "value001", "field002" -> "value002")
     val subFieldsPutRequest = SubscriptionFieldsPutRequest(
       clientId,
       apiContext,
@@ -461,16 +452,14 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
       fieldsValues
     )
 
-    val putUrl =
-      s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
+    val putUrl = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
 
     "save the fields" in new Setup {
-
       when(
         mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](
           eqTo(putUrl),
           eqTo(subFieldsPutRequest),
-          any()
+          any[Seq[(String, String)]]
         )(any(), any(), any(), any())
       ).thenReturn(Future.successful(HttpResponse(OK)))
 
@@ -482,17 +471,16 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
       verify(mockHttpClient).PUT[SubscriptionFieldsPutRequest, HttpResponse](
         eqTo(putUrl),
         eqTo(subFieldsPutRequest),
-        any()
+        any[Seq[(String, String)]]
       )(any(), any(), any(), any())
     }
 
     "fail when api-subscription-fields returns a 500" in new Setup {
-
       when(
         mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](
           eqTo(putUrl),
           eqTo(subFieldsPutRequest),
-          any()
+          any[Seq[(String, String)]]
         )(any(), any(), any(), any())
       ).thenReturn(Future.failed(upstream500Response))
 
@@ -505,12 +493,11 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     }
 
     "fail when api-subscription-fields returns a 404" in new Setup {
-
       when(
         mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](
           eqTo(putUrl),
           eqTo(subFieldsPutRequest),
-          any()
+          any[Seq[(String, String)]]
         )(any(), any(), any(), any())
       ).thenReturn(Future.failed(new NotFoundException("")))
 

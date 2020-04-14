@@ -22,20 +22,12 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.ApiSubscriptionFields.{
-  Fields,
-  FieldsDeleteFailureResult,
-  FieldsDeleteResult,
-  FieldsDeleteSuccessResult,
-  SubscriptionFieldDefinition,
-  SubscriptionFieldValue,
-  SubscriptionFieldsPutRequest
-}
 import domain.{APIIdentifier, Environment}
+import domain.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.http.Status.NO_CONTENT
+import play.api.http.Status.{BAD_REQUEST, NO_CONTENT, OK}
 import play.api.libs.json.{Format, Json}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
@@ -54,8 +46,8 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   val bearerToken: String
   val apiKey: String
 
-  import SubscriptionFieldsConnector.JsonFormatters._
   import SubscriptionFieldsConnector._
+  import SubscriptionFieldsConnector.JsonFormatters._
 
   def http: HttpClient =
     if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
@@ -130,14 +122,16 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     } recover recovery(DefinitionsByApiVersion.empty)
   }
 
-  def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)(
-      implicit hc: HeaderCarrier
-  ): Future[HttpResponse] = {
+  def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
+                     (implicit hc: HeaderCarrier): Future[SubscriptionFieldsPutResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    http.PUT[SubscriptionFieldsPutRequest, HttpResponse](
-      url,
-      SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)
-    )
+
+    http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)).map { response =>
+      response.status match {
+        case BAD_REQUEST => SubscriptionFieldsPutFailureResponse
+        case OK => SubscriptionFieldsPutSuccessResponse
+      }
+    }
   }
 
   def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(

@@ -88,8 +88,13 @@ object ApiSubscriptionFields {
       apiVersion: String,
       fields: Map[String, String]
   )
+
   object SubscriptionFieldsPutRequest {
     implicit val format: Format[SubscriptionFieldsPutRequest] =
       Json.format[SubscriptionFieldsPutRequest]
   }
+
+  sealed trait SubscriptionFieldsPutResponse
+  case object SubscriptionFieldsPutSuccessResponse extends SubscriptionFieldsPutResponse
+  case object SubscriptionFieldsPutFailureResponse extends SubscriptionFieldsPutResponse
 }
