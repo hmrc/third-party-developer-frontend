@@ -75,12 +75,6 @@ object ClientSecretRequest {
   implicit val format2 = Json.format[ClientSecretRequest]
 }
 
-case class DeleteClientSecretsRequest(actorEmailAddress: String, secrets: Seq[String])
-
-object DeleteClientSecretsRequest {
-  implicit val format = Json.format[DeleteClientSecretsRequest]
-}
-
 case class ApplicationToken(clientId: String,
                             clientSecrets: Seq[ClientSecret],
                             accessToken: String)
