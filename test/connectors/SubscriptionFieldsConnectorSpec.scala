@@ -516,6 +516,14 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
       when(response.status)
         .thenReturn(BAD_REQUEST)
 
+      val errorJson =
+        """{
+          |    "field1": "error1"
+          |}""".stripMargin
+
+      when(response.body)
+        .thenReturn(errorJson)
+
       when(
         mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](
           eqTo(putUrl),
@@ -527,9 +535,8 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
       val result = await(subscriptionFieldsConnector
         .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
 
-      result shouldBe SubscriptionFieldsPutFailureResponse
+      result shouldBe SubscriptionFieldsPutFailureResponse(Map("field1" -> "error1"))
     }
-
   }
 
   "deleteFieldValues" should {

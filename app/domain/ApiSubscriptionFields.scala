@@ -96,5 +96,5 @@ object ApiSubscriptionFields {
 
   sealed trait SubscriptionFieldsPutResponse
   case object SubscriptionFieldsPutSuccessResponse extends SubscriptionFieldsPutResponse
-  case object SubscriptionFieldsPutFailureResponse extends SubscriptionFieldsPutResponse
+  case class SubscriptionFieldsPutFailureResponse(fieldErrors : Map[String, String]) extends SubscriptionFieldsPutResponse
 }

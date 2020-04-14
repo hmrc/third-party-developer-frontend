@@ -128,8 +128,8 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
     http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)).map { response =>
       response.status match {
-        case BAD_REQUEST => SubscriptionFieldsPutFailureResponse
-        case OK => SubscriptionFieldsPutSuccessResponse
+        case BAD_REQUEST => SubscriptionFieldsPutFailureResponse(Map.empty) // TODO : Parse the body
+        case OK => SubscriptionFieldsPutSuccessResponse // TODO: The subs API returns either 200 or 201
       }
     }
   }
