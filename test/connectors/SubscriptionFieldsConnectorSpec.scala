@@ -463,10 +463,12 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
         )(any(), any(), any(), any())
       ).thenReturn(Future.successful(HttpResponse(OK)))
 
-      await(
+      var result = await(
         subscriptionFieldsConnector
           .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
       )
+
+      result shouldBe SubscriptionFieldsPutSuccessResponse
 
       verify(mockHttpClient).PUT[SubscriptionFieldsPutRequest, HttpResponse](
         eqTo(putUrl),
@@ -508,6 +510,26 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
         )
       }
     }
+
+    "fail when api-subscription-fields returns a 400 with validation error messages" in new Setup {
+      val response = mock[HttpResponse]
+      when(response.status)
+        .thenReturn(BAD_REQUEST)
+
+      when(
+        mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](
+          eqTo(putUrl),
+          eqTo(subFieldsPutRequest),
+          any[Seq[(String, String)]]
+        )(any(), any(), any(), any())
+      ).thenReturn(Future.successful(response))
+
+      val result = await(subscriptionFieldsConnector
+        .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
+
+      result shouldBe SubscriptionFieldsPutFailureResponse
+    }
+
   }
 
   "deleteFieldValues" should {
