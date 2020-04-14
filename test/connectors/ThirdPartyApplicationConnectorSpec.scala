@@ -605,33 +605,6 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
   }
 
-  "deleteClientSecrets" should {
-    val applicationId = "applicationId"
-    val actorEmailAddress = "john.requestor@example.com"
-    val deleteClientSecretsRequest = DeleteClientSecretsRequest(actorEmailAddress, Seq("secret1"))
-    val url = s"$baseUrl/application/$applicationId/revoke-client-secrets"
-
-    "delete client secrets in seqence" in new Setup {
-      when(mockHttpClient
-        .POST[DeleteClientSecretsRequest, HttpResponse](meq(url), meq(deleteClientSecretsRequest), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
-
-      val result = await(connector.deleteClientSecrets(applicationId, deleteClientSecretsRequest))
-
-      result shouldEqual ApplicationUpdateSuccessful
-    }
-
-    "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      when(mockHttpClient
-        .POST[DeleteClientSecretsRequest, HttpResponse](meq(url), meq(deleteClientSecretsRequest), any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
-
-      intercept[ApplicationNotFound] {
-        await(connector.deleteClientSecrets(applicationId, deleteClientSecretsRequest))
-      }
-    }
-  }
-
   "deleteClientSecret" should {
     val applicationId = UUID.randomUUID()
     val clientSecretId = UUID.randomUUID().toString

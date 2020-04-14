@@ -368,8 +368,6 @@ object ApplicationService {
     def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationSuccessful]
     def updateApproval(id: String, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def addClientSecrets(id: String, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)]
-    def deleteClientSecrets(appId: String,
-                            deleteClientSecretsRequest: DeleteClientSecretsRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def deleteClientSecret(applicationId: UUID,
                            clientSecretId: String,
                            actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]

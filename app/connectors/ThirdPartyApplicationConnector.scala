@@ -202,13 +202,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } recover recovery
   }
 
-  def deleteClientSecrets(appId: String,
-                          deleteClientSecretsRequest: DeleteClientSecretsRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/$appId/revoke-client-secrets", deleteClientSecretsRequest) map { _ =>
-      ApplicationUpdateSuccessful
-    } recover recovery
-  }
-
   def deleteClientSecret(applicationId: UUID,
                          clientSecretId: String,
                          actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
