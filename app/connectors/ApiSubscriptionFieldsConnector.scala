@@ -27,10 +27,10 @@ import domain.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.http.Status.{BAD_REQUEST, NO_CONTENT, OK}
+import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
 import play.api.libs.json.{Format, Json}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -126,10 +126,14 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
                      (implicit hc: HeaderCarrier): Future[SubscriptionFieldsPutResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
 
+    implicit val responseHandler: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
+      override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
+    }
+
     http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)).map { response =>
       response.status match {
         case BAD_REQUEST => SubscriptionFieldsPutFailureResponse(Map.empty) // TODO : Parse the body
-        case OK => SubscriptionFieldsPutSuccessResponse // TODO: The subs API returns either 200 or 201
+        case OK | CREATED => SubscriptionFieldsPutSuccessResponse
       }
     }
   }
