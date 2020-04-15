@@ -63,14 +63,15 @@ object ManageSubscriptions {
     for {
       wrapper <- in.fields
       nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
-    } yield EditApiMetadata(fields = nelSFV.toList)
+    } yield EditApiMetadata(in.name, fields = nelSFV.toList)
   }
 
-  case class EditApiMetadata(fields: List[SubscriptionFieldValue])
+  case class EditApiMetadata(apiName: String, fields: List[SubscriptionFieldValue])
 
   object EditApiMetadata {
     val form = Form(
       mapping(
+        "apiName" -> text,
         "fields" -> list(
           mapping(
             "name" -> text,
@@ -148,8 +149,8 @@ class ManageSubscriptions @Inject() (
 
       saveFields(validForm) map {
         case SaveSubscriptionFieldsSuccessResponse => Redirect(routes.ManageSubscriptions.listApiSubscriptions(applicationId))
-        case SaveSubscriptionFieldsFailureResponse(fieldErrors) => // TODO: Missing api name and form errors
-          Ok(editApiMetadata(request.application, EditApiMetadataViewModel("", apiContext, apiVersion, EditApiMetadata.form.fill(validForm))))
+        case SaveSubscriptionFieldsFailureResponse(fieldErrors) => // TODO: Missing form errors
+          Ok(editApiMetadata(request.application, EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, EditApiMetadata.form.fill(validForm))))
       }
     }
 

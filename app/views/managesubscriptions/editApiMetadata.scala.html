@@ -59,6 +59,8 @@
 @helper.form(action = routes.ManageSubscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion, subscriptionRedirect.toString), 'class -> "fields-subscription") {
   <div class="form-field-group">
       @helper.CSRF.formField
+      <input type="hidden" name="apiName" value="@vm.name">
+
       @helper.repeatWithIndex(vm.fieldsForm("fields")) { (field, idx) =>
       <input type="hidden" name="fields[@idx].name" value="@field("name").value.getOrElse("")">
       <input type="hidden" name="fields[@idx].description" value="@field("description").value.getOrElse("")">
