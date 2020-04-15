@@ -17,7 +17,7 @@
 @import include._
 @import domain._
 @import model.Crumb
-@import controllers.ManageSubscriptions.{EditApiMetadata, EditApiMetadataViewModel}
+@import controllers.ManageSubscriptions.EditApiMetadataViewModel
 @import domain.SubscriptionRedirect.API_MANAGE_METADATA_PAGE
 
 @import views.helper.IdFormatter
@@ -69,7 +69,7 @@
 
             <p>formFieldId: @formFieldId</p>
 
-        @fieldError(vm.fieldsForm.errors, formFieldId, true)
+        @fieldError(vm.fieldsForm.errors, formFieldId)
 
         <input type="hidden" name="fields[@idx].name" value="@field("name").value.getOrElse("")">
         <input type="hidden" name="fields[@idx].description" value="@field("description").value.getOrElse("")">
@@ -78,7 +78,7 @@
         <input type="hidden" name="fields[@idx].type" value="@field("type").value.getOrElse("")">
 
         <div class="form-field">
-            <label class="form-label" for="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-@{field("name").value.getOrElse("")}">
+            <label class="form-label" for="@formFieldId">
               @{field("description").value.getOrElse("")}
             </label>
             <span class="form-hint">@{field("hint").value.getOrElse("")}</span>
@@ -86,7 +86,7 @@
             <input  type="text"
                     name="fields[@idx].value"
                     value="@{field("value").value.getOrElse("")}"
-                    class="form-input input--medium @if(vm.fieldsForm.errors(s"fields[$idx].name").nonEmpty){form-control-error}"
+                    class="form-input input--medium @if(vm.fieldsForm.errors(formFieldId).nonEmpty){form-control-error}"
                     id="@formFieldId"
             />
         </div>

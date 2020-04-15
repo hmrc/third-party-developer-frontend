@@ -18,6 +18,7 @@
 @import domain._
 @import model.Crumb
 @import controllers.ManageSubscriptions.ApiDetails
+@import views.helper.IdFormatter
 
 @(app: Application, details: Seq[ApiDetails])(
 implicit request: play.api.mvc.Request[Any],
@@ -55,7 +56,9 @@ applicationConfig: config.ApplicationConfig)
         <tr>
         <th class="col-35">Name</th>
         <th class="col-60">Metadata</th>
-        <td><a href="@{routes.ManageSubscriptions.editApiMetadataPage(app.id, api.context, api.version)}" class="numeric">Edit</a></td>
+        <td>
+            <a href="@{routes.ManageSubscriptions.editApiMetadataPage(app.id, api.context, api.version)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-submit">Edit</a>
+        </td>
         </tr>
       </thead>
       <tbody>
