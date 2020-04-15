@@ -22,11 +22,16 @@
 
 @import views.helper.IdFormatter
 
-@(app: Application, vm: EditApiMetadataViewModel, subscriptionRedirect: SubscriptionRedirect = API_MANAGE_METADATA_PAGE)(
-  implicit request: play.api.mvc.Request[Any],
-  loggedIn: DeveloperSession,
-  messages: Messages,
-  applicationConfig: config.ApplicationConfig)
+@(
+    app: Application,
+    vm: EditApiMetadataViewModel,
+    subscriptionRedirect: SubscriptionRedirect = API_MANAGE_METADATA_PAGE
+)(
+    implicit request: play.api.mvc.Request[Any],
+    loggedIn: DeveloperSession,
+    messages: Messages,
+    applicationConfig: config.ApplicationConfig
+)
 
 @pageHeading = @{ s"${vm.name} ${vm.apiVersion}" }
 
@@ -51,7 +56,7 @@
 
 <br>
 
-@helper.form(action = routes.Subscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion, subscriptionRedirect.toString), 'class -> "fields-subscription") {
+@helper.form(action = routes.ManageSubscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion, subscriptionRedirect.toString), 'class -> "fields-subscription") {
   <div class="form-field-group">
       @helper.CSRF.formField
       @helper.repeatWithIndex(vm.fieldsForm("fields")) { (field, idx) =>

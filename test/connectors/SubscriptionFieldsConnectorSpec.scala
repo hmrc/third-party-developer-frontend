@@ -468,7 +468,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
           .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
       )
 
-      result shouldBe SubscriptionFieldsPutSuccessResponse
+      result shouldBe SaveSubscriptionFieldsSuccessResponse
 
       verify(mockHttpClient).PUT[SubscriptionFieldsPutRequest, HttpResponse](
         eqTo(putUrl),
@@ -535,7 +535,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
       val result = await(subscriptionFieldsConnector
         .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
 
-      result shouldBe SubscriptionFieldsPutFailureResponse(Map("field1" -> "error1"))
+      result shouldBe SaveSubscriptionFieldsFailureResponse(Map("field1" -> "error1"))
     }
   }
 

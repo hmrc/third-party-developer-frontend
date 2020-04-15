@@ -39,7 +39,7 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
   }
 
   def saveFieldValues(applicationId: String, apiContext: String, apiVersion: String, fields: Fields)
-                     (implicit hc: HeaderCarrier): Future[SubscriptionFieldsPutResponse] = {
+                     (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
     for {
       connector <- connectorsWrapper.forApplication(applicationId)
       application <- connector.thirdPartyApplicationConnector.fetchApplicationById(applicationId)
@@ -76,7 +76,7 @@ object SubscriptionFieldsService {
                              (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
     def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
-                       (implicit hc: HeaderCarrier): Future[SubscriptionFieldsPutResponse]
+                       (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse]
 
     def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
   }

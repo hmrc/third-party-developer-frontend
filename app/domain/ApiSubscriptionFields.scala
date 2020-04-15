@@ -16,10 +16,8 @@
 
 package domain
 
-import java.util.UUID
-
-import play.api.libs.json.{Format, Json}
 import cats.data.NonEmptyList
+import play.api.libs.json.{Format, Json}
 
 object ApiSubscriptionFields {
 
@@ -94,7 +92,7 @@ object ApiSubscriptionFields {
       Json.format[SubscriptionFieldsPutRequest]
   }
 
-  sealed trait SubscriptionFieldsPutResponse
-  case object SubscriptionFieldsPutSuccessResponse extends SubscriptionFieldsPutResponse
-  case class SubscriptionFieldsPutFailureResponse(fieldErrors : Map[String, String]) extends SubscriptionFieldsPutResponse
+  sealed trait SaveSubscriptionFieldsResponse
+  case object SaveSubscriptionFieldsSuccessResponse extends SaveSubscriptionFieldsResponse
+  case class SaveSubscriptionFieldsFailureResponse(fieldErrors : Map[String, String]) extends SaveSubscriptionFieldsResponse
 }

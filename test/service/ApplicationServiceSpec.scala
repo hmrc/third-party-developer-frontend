@@ -408,7 +408,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         given(mockProductionApplicationConnector.subscribeToApi(eqTo(productionApplicationId), any())(any[HeaderCarrier]))
           .willReturn(Future.successful(ApplicationUpdateSuccessful))
         given(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]))
-          .willReturn(Future.successful(mock[SubscriptionFieldsPutResponse]))
+          .willReturn(Future.successful(mock[SaveSubscriptionFieldsResponse]))
 
         await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
 

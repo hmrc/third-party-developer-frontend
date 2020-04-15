@@ -19,15 +19,19 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.APISubscriptionStatus
-import domain.ApiSubscriptionFields.SubscriptionFieldValue
+import domain.{APISubscriptionStatus, Application}
+import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
+import play.api.libs.json.Json
 import play.api.mvc._
-import service.{ApplicationService, AuditService, SessionService}
+import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
+import uk.gov.hmrc.http.HeaderCarrier
+import views.html.include.subscriptionFields
+import views.html.managesubscriptions.editApiMetadata
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 
 object ManageSubscriptions {
@@ -99,9 +103,11 @@ class ManageSubscriptions @Inject() (
     val auditService: AuditService,
     val applicationService: ApplicationService,
     val errorHandler: ErrorHandler,
-    val messagesApi: MessagesApi
+    val messagesApi: MessagesApi,
+    val subFieldsService: SubscriptionFieldsService
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController {
+    extends ApplicationController
+      with ApplicationHelper {
 
   import ManageSubscriptions._
 
@@ -129,4 +135,28 @@ class ManageSubscriptions @Inject() (
       .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, vm))))
         .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
+
+  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
+    def handleValidForm(validForm: EditApiMetadata) = {
+      def saveFields(validForm: EditApiMetadata)(implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
+        if (validForm.fields.nonEmpty) {
+          subFieldsService.saveFieldValues(applicationId, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
+        } else {
+          Future.successful(SaveSubscriptionFieldsSuccessResponse)
+        }
+      }
+
+      saveFields(validForm) map {
+        case SaveSubscriptionFieldsSuccessResponse => Redirect(routes.ManageSubscriptions.listApiSubscriptions(applicationId))
+        case SaveSubscriptionFieldsFailureResponse(fieldErrors) => // TODO: Missing api name and form errors
+          Ok(editApiMetadata(request.application, EditApiMetadataViewModel("", apiContext, apiVersion, EditApiMetadata.form.fill(validForm))))
+      }
+    }
+
+    def handleInvalidForm(formWithErrors: Form[EditApiMetadata]) = {
+      Future.successful(BadRequest(editApiMetadata(request.application, EditApiMetadataViewModel(applicationId, apiContext, apiVersion, formWithErrors))))
+    }
+
+    EditApiMetadata.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
 }
