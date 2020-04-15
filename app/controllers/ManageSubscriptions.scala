@@ -21,7 +21,8 @@ import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
 import domain.{APISubscriptionStatus, Application}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
-import play.api.data.Form
+import play.api.data
+import play.api.data.{Form, FormError}
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
@@ -150,7 +151,14 @@ class ManageSubscriptions @Inject() (
       saveFields(validForm) map {
         case SaveSubscriptionFieldsSuccessResponse => Redirect(routes.ManageSubscriptions.listApiSubscriptions(applicationId))
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) => // TODO: Missing form errors
-          Ok(editApiMetadata(request.application, EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, EditApiMetadata.form.fill(validForm))))
+
+          val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
+
+          // TODO:
+          val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
+//            .withError("fields[0].name", "My Error")
+
+          Ok(editApiMetadata(request.application, EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)))
       }
     }
 
