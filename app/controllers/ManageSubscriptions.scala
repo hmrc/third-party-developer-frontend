@@ -150,13 +150,9 @@ class ManageSubscriptions @Inject() (
 
       saveFields(validForm) map {
         case SaveSubscriptionFieldsSuccessResponse => Redirect(routes.ManageSubscriptions.listApiSubscriptions(applicationId))
-        case SaveSubscriptionFieldsFailureResponse(fieldErrors) => // TODO: Missing form errors
-
+        case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
-
-          // TODO:
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
-//            .withError("fields[0].name", "My Error")
 
           Ok(editApiMetadata(request.application, EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)))
       }
