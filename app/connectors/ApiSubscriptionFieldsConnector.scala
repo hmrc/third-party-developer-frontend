@@ -22,23 +22,15 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.ApiSubscriptionFields.{
-  Fields,
-  FieldsDeleteFailureResult,
-  FieldsDeleteResult,
-  FieldsDeleteSuccessResult,
-  SubscriptionFieldDefinition,
-  SubscriptionFieldValue,
-  SubscriptionFieldsPutRequest
-}
 import domain.{APIIdentifier, Environment}
+import domain.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.http.Status.NO_CONTENT
-import play.api.libs.json.{Format, Json}
+import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
+import play.api.libs.json.{Format, Json, JsSuccess}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -54,8 +46,8 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   val bearerToken: String
   val apiKey: String
 
-  import SubscriptionFieldsConnector.JsonFormatters._
   import SubscriptionFieldsConnector._
+  import SubscriptionFieldsConnector.JsonFormatters._
 
   def http: HttpClient =
     if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
@@ -130,14 +122,22 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     } recover recovery(DefinitionsByApiVersion.empty)
   }
 
-  def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)(
-      implicit hc: HeaderCarrier
-  ): Future[HttpResponse] = {
+  def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
+                     (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    http.PUT[SubscriptionFieldsPutRequest, HttpResponse](
-      url,
-      SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)
-    )
+
+    import CustomResponseHandlers.permissiveBadRequestResponseHandler
+
+    http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)).map { response =>
+      response.status match {
+        case BAD_REQUEST =>
+          Json.parse(response.body).validate[Map[String, String]] match {
+            case s: JsSuccess[Map[String, String]] => SaveSubscriptionFieldsFailureResponse(s.get)
+            case _ => SaveSubscriptionFieldsFailureResponse(Map.empty)
+          }
+        case OK | CREATED => SaveSubscriptionFieldsSuccessResponse
+      }
+    }
   }
 
   def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(

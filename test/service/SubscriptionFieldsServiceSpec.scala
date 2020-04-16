@@ -19,7 +19,7 @@ package service
 import java.util.UUID
 
 import connectors.ThirdPartyApplicationConnector
-import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue}
+import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import domain.{APIIdentifier, Application, Environment}
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{any, anyString, eq => meq}
@@ -155,7 +155,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
       given(
         mockSubscriptionFieldsConnector
           .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
-      ).willReturn(Future.successful(HttpResponse(CREATED)))
+      ).willReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       await(underTest.saveFieldValues(applicationId, apiContext, apiVersion, fieldsValues))
 

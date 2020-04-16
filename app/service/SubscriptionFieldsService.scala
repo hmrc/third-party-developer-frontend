@@ -16,11 +16,11 @@
 
 package service
 
-import domain.ApiSubscriptionFields._
 import domain.{APIIdentifier, Application, ApplicationNotFound, Environment}
+import domain.ApiSubscriptionFields._
 import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.DefinitionsByApiVersion
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,11 +38,14 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     }
   }
 
-  def saveFieldValues(applicationId: String, apiContext: String, apiVersion: String, fields: Fields)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def saveFieldValues(applicationId: String, apiContext: String, apiVersion: String, fields: Fields)
+                     (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
     for {
       connector <- connectorsWrapper.forApplication(applicationId)
       application <- connector.thirdPartyApplicationConnector.fetchApplicationById(applicationId)
-      fields <- connector.apiSubscriptionFieldsConnector.saveFieldValues(application.getOrElse(throw new ApplicationNotFound).clientId, apiContext, apiVersion, fields)
+      fields <- connector.apiSubscriptionFieldsConnector.saveFieldValues(
+        application.getOrElse(throw new ApplicationNotFound).clientId, apiContext, apiVersion, fields
+      )
     } yield fields
   }
 
@@ -72,7 +75,8 @@ object SubscriptionFieldsService {
     def fetchFieldDefinitions(apiContext: String, apiVersion: String)
                              (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
-    def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)(implicit hc: HeaderCarrier): Future[HttpResponse]
+    def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
+                       (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse]
 
     def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
   }

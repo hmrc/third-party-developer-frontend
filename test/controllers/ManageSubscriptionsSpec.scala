@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -28,7 +28,7 @@ import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, AuditService, SessionService}
+import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
@@ -89,6 +89,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     val mockSessionService = mock[SessionService]
     val mockAuditService = mock[AuditService]
     val mockApplicationService = mock[ApplicationService]
+    val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
     val mockErrorHandler = fakeApplication.injector.instanceOf[ErrorHandler]
 
     val manageSubscriptionController = new ManageSubscriptions(
@@ -96,7 +97,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       mockAuditService,
       mockApplicationService,
       mockErrorHandler,
-      messagesApi
+      messagesApi,
+      mockSubscriptionFieldsService
     )
 
     when(mockSessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
