@@ -30,6 +30,7 @@ import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status._
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpResponse, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.test.UnitSpec
@@ -49,8 +50,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   private val apiIdentifier = APIIdentifier(apiContext, apiVersion)
   private val fieldsId = UUID.randomUUID()
   private val urlPrefix = "/field"
-  private val upstream500Response =
-    Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
+  private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
   private val actorSystem = ActorSystem("test-actor-system")
 
@@ -455,15 +455,17 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     val putUrl = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
 
     "save the fields" in new Setup {
+      val response = HttpResponse(OK)
+
       when(
         mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](
           eqTo(putUrl),
           eqTo(subFieldsPutRequest),
           any[Seq[(String, String)]]
         )(any(), any(), any(), any())
-      ).thenReturn(Future.successful(HttpResponse(OK)))
+      ).thenReturn(Future.successful(response))
 
-      var result = await(
+      val result = await(
         subscriptionFieldsConnector
           .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
       )
@@ -512,17 +514,15 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     }
 
     "fail when api-subscription-fields returns a 400 with validation error messages" in new Setup {
-      val response = mock[HttpResponse]
-      when(response.status)
-        .thenReturn(BAD_REQUEST)
-
       val errorJson =
         """{
           |    "field1": "error1"
           |}""".stripMargin
 
-      when(response.body)
-        .thenReturn(errorJson)
+      val response = HttpResponse(
+        responseStatus = BAD_REQUEST,
+        responseJson = Some(Json.parse(errorJson))
+      )
 
       when(
         mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](
@@ -532,8 +532,10 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
         )(any(), any(), any(), any())
       ).thenReturn(Future.successful(response))
 
-      val result = await(subscriptionFieldsConnector
-        .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
+      val result = await(
+        subscriptionFieldsConnector
+          .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
+      )
 
       result shouldBe SaveSubscriptionFieldsFailureResponse(Map("field1" -> "error1"))
     }

@@ -28,15 +28,16 @@ import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
-import play.api.libs.json.{Format, Json, JsSuccess}
+import play.api.libs.json.{Format, Json}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext)
     extends SubscriptionFieldsConnector
+    with HttpErrorFunctions
     with Retries {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
@@ -126,9 +127,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
                      (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
 
-    implicit val responseHandler: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
-      override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
-    }
+    import CustomResponseHandlers.permissiveBadRequestResponseHandler
 
     http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)).map { response =>
       response.status match {
