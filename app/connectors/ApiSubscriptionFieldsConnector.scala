@@ -37,7 +37,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext)
     extends SubscriptionFieldsConnector
-    with HttpErrorFunctions
     with Retries {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
