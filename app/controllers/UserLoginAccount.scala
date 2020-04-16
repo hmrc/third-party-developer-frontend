@@ -91,6 +91,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
+  def test : Action[AnyContent] = UserAction { implicit request =>
+    Ok("Hello " + request.username)
+  }
+
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
     val requestForm = loginForm.bindFromRequest
 

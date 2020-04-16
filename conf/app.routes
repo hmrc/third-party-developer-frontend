@@ -8,6 +8,7 @@ GET         /verification                                                       
 GET         /resend-verification                                                            controllers.Registration.resendVerification
 GET         /resend-confirmation                                                            controllers.Registration.resendConfirmation
 
+GET         /test                                                                           controllers.UserLoginAccount.test
 GET         /login                                                                          controllers.UserLoginAccount.login
 GET         /login/2sv-recommendation                                                       controllers.ProtectAccount.get2svRecommendationPage
 POST        /login                                                                          controllers.UserLoginAccount.authenticate
