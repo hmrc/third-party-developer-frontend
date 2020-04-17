@@ -91,8 +91,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
-  def test : Action[AnyContent] = UserAction { implicit request =>
-    Ok("Hello " + request.username)
+  def test : Action[AnyContent] = UserAction.async { implicit request =>
+    successful(Ok("Hello " + request.username))
   }
 
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
