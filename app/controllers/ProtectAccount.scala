@@ -103,7 +103,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   }
 
   // TODO: Remove me
-  def test2 : Action[AnyContent] = loggedInAction2 { implicit request: UserRequest[_] => {
+  def test2 : Action[AnyContent] = loggedInAction2 { implicit request: UserRequest[AnyContent] => {
       successful(Ok(test()))
     }
   }

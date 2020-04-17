@@ -18,8 +18,9 @@ package controllers
 
 import java.security.MessageDigest
 
-import domain.DeveloperSession
+import domain.{DeveloperSession, LoggedInState}
 import jp.t2v.lab.play2.auth.AuthElement
+import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.libs.Crypto
 import play.api.mvc._
 import service.SessionService
@@ -35,10 +36,20 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
     req.developerSession
   }
 
-  def loggedInAction2(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
-    implicit request: Request[AnyContent] =>
+  def atLeastPartLoggedInEnablingMfa2(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+    loadSessionAndValidate(_ => true)(body)
+  }
 
-      // TODO: Probably load from config?
+  def loggedInAction2(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext) : Action[AnyContent] = {
+    loadSessionAndValidate(developerSession => {
+      developerSession.loggedInState == LoggedInState.LOGGED_IN
+    })(body)
+  }
+
+  private def loadSessionAndValidate(isValid : DeveloperSession => Boolean)(body: UserRequest[AnyContent] => Future[Result])
+                                    (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+
+    implicit request: Request[AnyContent] =>
       val cookieName = "PLAY2AUTH_SESS_ID"
 
       val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
@@ -52,7 +63,12 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
           .flatMap(maybeSession => {
             maybeSession.fold(Future.successful(loginRedirect))(session => {
               val developerSession = DeveloperSession(session)
-              body(UserRequest(developerSession, request))
+              if (isValid(developerSession)){
+                body(UserRequest(developerSession, request))
+              } else {
+                // TODO: Should be forbidden
+                Future.successful(loginRedirect)
+              }
             })
           })
       }).getOrElse(Future.successful(loginRedirect))
