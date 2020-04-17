@@ -103,13 +103,9 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   }
 
   // TODO: Remove me
-//  // Legacy auth with migration
-  def test2 : Action[AnyContent] = loggedInAction2 { implicit request: UserRequest[_] =>
-
-//    val x: DeveloperSession = request
-
-//    successful(Ok("Hello " + x.displayedName))
-    successful(Ok(test()))
+  def test2 : Action[AnyContent] = loggedInAction2 { implicit request: UserRequest[_] => {
+      successful(Ok(test()))
+    }
   }
 
   def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction2 { implicit request =>
