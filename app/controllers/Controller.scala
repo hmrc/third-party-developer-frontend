@@ -54,13 +54,6 @@ abstract class LoggedInController extends BaseController with AuthElement with D
     }
 
   }
-
-  // TODO: Get rid Play2-auth
-  def atLeastPartLoggedInEnablingMfa(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack(AuthorityKey -> AtLeastPartLoggedInEnablingMfa) {
-      f
-    }
-  }
 }
 
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
