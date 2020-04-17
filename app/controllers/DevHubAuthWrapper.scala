@@ -35,7 +35,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
     req.developerSession
   }
 
-  def loggedInAction2(body: UserRequest[_] => Future[Result])(implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+  def loggedInAction2(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] =>
 
       // TODO: Probably load from config?

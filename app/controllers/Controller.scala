@@ -23,12 +23,10 @@ import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
 import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
 import model.ApplicationViewModel
 import play.api.i18n.I18nSupport
-import play.api.mvc.Results.NotFound
 import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import views.html.helper.input
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,13 +56,6 @@ abstract class LoggedInController extends BaseController with AuthElement with D
   }
 
   // TODO: Get rid Play2-auth
-  def loggedInAction(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack(AuthorityKey -> LoggedInUser) {
-      f
-    }
-  }
-
-  // TODO: Get rid Play2-auth
   def atLeastPartLoggedInEnablingMfa(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
     AsyncStack(AuthorityKey -> AtLeastPartLoggedInEnablingMfa) {
       f
@@ -81,23 +72,23 @@ case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyL
 abstract class ApplicationController()
   extends LoggedInController with ActionBuilders {
 
-  implicit def userFromRequest(implicit request: ApplicationRequest[_]): User = request.user
+  implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, request.subscriptions.exists(s => s.subscribed && s.fields.isDefined))
 
   def whenTeamMemberOnApp(applicationId: String)
                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn)
+    loggedInAction2 { implicit request =>
+      val stackedActions = Action andThen applicationAction(applicationId, loggedIn2)
       stackedActions.async(fun)(request)
     }
   
   def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
+    loggedInAction2 { implicit request =>
+      val stackedActions = Action andThen applicationAction(applicationId, loggedIn2) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
       stackedActions.async(fun)(request)
     }
   }
@@ -105,17 +96,17 @@ abstract class ApplicationController()
   def permissionThenCapabilityAction(permissions: Permission, capability: Capability)
                                     (applicationId: String)
                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
+    loggedInAction2 { implicit request =>
+      val stackedActions = Action andThen applicationAction(applicationId, loggedIn2) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
       stackedActions.async(fun)(request)
     }
   }
 
   def subFieldsDefinitionsExistAction(applicationId: String)
                                     (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
+    loggedInAction2 { implicit request =>
       val stackedActions =
-        Action andThen applicationAction(applicationId, loggedIn) andThen fieldDefinitionsExistRefiner
+        Action andThen applicationAction(applicationId, loggedIn2) andThen fieldDefinitionsExistRefiner
       stackedActions.async(fun)(request)
     }
   }
