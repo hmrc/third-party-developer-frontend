@@ -19,8 +19,6 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
 import domain._
-import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
-import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
 import model.ApplicationViewModel
 import play.api.i18n.I18nSupport
 import play.api.mvc._
@@ -29,8 +27,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
-
-case object AppKey extends RequestAttributeKey[Future[Application]]
 
 trait HeaderEnricher {
 
@@ -42,7 +38,7 @@ trait HeaderEnricher {
 }
 
 // TODO : Remove AuthElement
-abstract class LoggedInController extends BaseController with AuthElement with DevHubAuthWrapper
+abstract class LoggedInController extends BaseController with DevHubAuthWrapper
 
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
@@ -95,7 +91,12 @@ abstract class ApplicationController()
 
 
 abstract class LoggedOutController()
-  extends BaseController() with OptionalAuthElement {
+
+  extends BaseController() with jp.t2v.lab.play2.auth.OptionalAuthElement {
+
+  import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
+  import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
+
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
