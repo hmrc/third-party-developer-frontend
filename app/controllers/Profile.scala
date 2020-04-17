@@ -48,34 +48,34 @@ class Profile @Inject()(
   val passwordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
-  private def changeProfileView(developerSession: DeveloperSession)(implicit req: RequestWithAttributes[_]) = {
+  private def changeProfileView(developerSession: DeveloperSession)(implicit req: UserRequest[_]) = {
     views.html.changeProfile(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
   }
 
-  def showProfile(): Action[AnyContent] = loggedInAction { implicit request =>
+  def showProfile(): Action[AnyContent] = loggedInAction2 { implicit request =>
     Future.successful(Ok(views.html.profile()))
   }
 
-  def changeProfile(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(changeProfileView(loggedIn)))
+  def changeProfile(): Action[AnyContent] = loggedInAction2 { implicit request =>
+    Future.successful(Ok(changeProfileView(loggedIn2)))
   }
 
-  def updateProfile(): Action[AnyContent] = loggedInAction { implicit request =>
+  def updateProfile(): Action[AnyContent] = loggedInAction2 { implicit request =>
     val requestForm = profileForm.bindFromRequest
     requestForm.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.changeProfile(formWithErrors.firstnameGlobal().lastnameGlobal())))
       },
-      profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
+      profile => connector.updateProfile(loggedIn2.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ => {
 
-          val updatedDeveloper = loggedIn.developer.copy(
+          val updatedDeveloper = loggedIn2.developer.copy(
               firstName = profile.firstName,
               lastName = profile.lastName,
               organisation = profile.organisation)
 
-          val updatedLoggedIn = loggedIn.copy(
-            session = loggedIn.session.copy(developer = updatedDeveloper)
+          val updatedLoggedIn = loggedIn2.copy(
+            session = loggedIn2.session.copy(developer = updatedDeveloper)
           )
 
           Ok(profileUpdated("profile updated", "Manage profile", "manage-profile", updatedLoggedIn))
@@ -84,21 +84,21 @@ class Profile @Inject()(
     )
   }
 
-  def showPasswordPage(): Action[AnyContent] = loggedInAction { implicit request =>
+  def showPasswordPage(): Action[AnyContent] = loggedInAction2 { implicit request =>
     Future.successful(Ok(changeProfilePassword(passwordForm)))
   }
 
-  def updatePassword(): Action[AnyContent] = loggedInAction { implicit request =>
-    processPasswordChange(loggedIn.email,
+  def updatePassword(): Action[AnyContent] = loggedInAction2 { implicit request =>
+    processPasswordChange(loggedIn2.email,
       Ok(passwordUpdated("password changed", "Password changed", "change-password")),
       changeProfilePassword(_))
   }
 
-  def requestDeletion(): Action[AnyContent] = loggedInAction { implicit request =>
+  def requestDeletion(): Action[AnyContent] = loggedInAction2 { implicit request =>
     Future.successful(Ok(profileDeleteConfirmation(DeleteProfileForm.form)))
   }
 
-  def deleteAccount(): Action[AnyContent] = loggedInAction { implicit request =>
+  def deleteAccount(): Action[AnyContent] = loggedInAction2 { implicit request =>
     val form = deleteProfileForm.bindFromRequest
 
     form.fold(
@@ -108,10 +108,10 @@ class Profile @Inject()(
       validForm => {
         validForm.confirmation match {
           case Some("true") => applicationService
-            .requestDeveloperAccountDeletion(loggedIn.displayedName, loggedIn.email)
+            .requestDeveloperAccountDeletion(loggedIn2.displayedName, loggedIn2.email)
             .map(_ => Ok(profileDeleteSubmitted()))
 
-          case _ => Future.successful(Ok(changeProfileView(loggedIn)))
+          case _ => Future.successful(Ok(changeProfileView(loggedIn2)))
         }
       }
     )

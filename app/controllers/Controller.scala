@@ -43,8 +43,10 @@ trait HeaderEnricher {
     }
 }
 
-abstract class LoggedInController extends BaseController with AuthElement {
+// TODO : Remove AuthElement
+abstract class LoggedInController extends BaseController with AuthElement with DevHubAuthWrapper {
 
+  // TODO: Get rid Play2-auth
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
     request match {
@@ -55,12 +57,14 @@ abstract class LoggedInController extends BaseController with AuthElement {
 
   }
 
+  // TODO: Get rid Play2-auth
   def loggedInAction(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
     AsyncStack(AuthorityKey -> LoggedInUser) {
       f
     }
   }
 
+  // TODO: Get rid Play2-auth
   def atLeastPartLoggedInEnablingMfa(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
     AsyncStack(AuthorityKey -> AtLeastPartLoggedInEnablingMfa) {
       f

@@ -19,6 +19,7 @@ package controllers
 import java.security.MessageDigest
 
 import domain.DeveloperSession
+import jp.t2v.lab.play2.auth.AuthElement
 import play.api.libs.Crypto
 import play.api.mvc._
 import service.SessionService

@@ -157,7 +157,7 @@ class Subscriptions @Inject() (
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
 
-  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String): Action[AnyContent] = loggedInAction { implicit request =>
+  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String): Action[AnyContent] = loggedInAction2 { implicit request =>
     def handleValidForm(validForm: SubscriptionFieldsForm) = {
       def saveFields(validForm: SubscriptionFieldsForm)(implicit hc: HeaderCarrier): Future[Any] = {
         if (validForm.fields.nonEmpty) {

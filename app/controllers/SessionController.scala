@@ -35,7 +35,7 @@ class SessionController @Inject()(val auditService: AuditService,
                          (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController with PasswordChange {
 
-  def keepAlive(): Action[AnyContent] = loggedInAction { implicit request =>
+  def keepAlive(): Action[AnyContent] = loggedInAction2 { implicit request =>
     successful(NoContent)
   }
 }

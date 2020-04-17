@@ -112,7 +112,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
     Future.successful(Ok(protectAccountRemovalConfirmation(Remove2SVConfirmForm.form)))
   }
 
-  def confirm2SVRemoval: Action[AnyContent] = loggedInAction { implicit request =>
+  def confirm2SVRemoval: Action[AnyContent] = loggedInAction2 { implicit request =>
     Remove2SVConfirmForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountRemovalConfirmation(form)))
     },
@@ -124,16 +124,16 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       })
   }
 
-  def get2SVRemovalAccessCodePage(): Action[AnyContent] = loggedInAction { implicit request =>
+  def get2SVRemovalAccessCodePage(): Action[AnyContent] = loggedInAction2 { implicit request =>
     Future.successful(Ok(protectAccountRemovalAccessCode(ProtectAccountForm.form)))
   }
 
-  def remove2SV(): Action[AnyContent] = loggedInAction { implicit request =>
+  def remove2SV(): Action[AnyContent] = loggedInAction2 { implicit request =>
     ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountRemovalAccessCode(form)))
     },
       form => {
-        mfaService.removeMfa(loggedIn.email, form.accessCode).map(r =>
+        mfaService.removeMfa(loggedIn2.email, form.accessCode).map(r =>
           r.totpVerified match {
             case true => Redirect(routes.ProtectAccount.get2SVRemovalCompletePage())
             case _ =>
@@ -146,19 +146,19 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       })
   }
 
-  def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
+  def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction2 { implicit request =>
     Future.successful(Ok(protectAccountRemovalComplete()))
   }
 
-  def get2SVNotSetPage(): Action[AnyContent] = loggedInAction { implicit request =>
+  def get2SVNotSetPage(): Action[AnyContent] = loggedInAction2 { implicit request =>
     successful(Ok(userDidNotAdd2SV()))
   }
   
-  def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
+  def get2svRecommendationPage(): Action[AnyContent] = loggedInAction2 {
     implicit request => {
 
       for {
-        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn.email)
+        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn2.email)
         mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
       }  yield (Ok(add2SV(mfaMandateDetails)))
     }
