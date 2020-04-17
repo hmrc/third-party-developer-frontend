@@ -16,36 +16,54 @@
 
 package controllers
 
-import java.security.MessageDigest
-
-import play.api.libs.Crypto
-import play.api.mvc
-import play.api.mvc.{ActionBuilder, ActionTransformer, Request, Result, WrappedRequest}
+import domain.{Developer, DeveloperSession, LoggedInState, Session}
+import play.api.mvc._
 
 import scala.concurrent.Future
 
-case class UserRequest[A](username: Option[String], request: Request[A]) extends WrappedRequest[A](request)
+trait DevHubAuthWrapper extends Results {
 
-object UserAction extends ActionBuilder[UserRequest] with ActionTransformer[Request, UserRequest] {
-  private def decodeCookie(token : String) : Option[String] = {
-    val (hmac, value) = token.splitAt(40)
-
-    val signedValue = Crypto.sign(value)
-
-    if (MessageDigest.isEqual(signedValue.getBytes, hmac.getBytes)) {
-      Some(value)
-    } else {
-      None
-    }
+  // TODO: Name :(
+  implicit def loggedIn2(implicit req : UserRequest[_]) : DeveloperSession = {
+    req.developerSession
   }
 
-  def transform[A](request: Request[A]) = Future.successful {
-    request.headers.get("test") match {
-      case Some(value) => UserRequest(decodeCookie(value), request)
-      case None => UserRequest(None, request)
-    }
+  def loggedInAction2(body: UserRequest[_] => Future[Result]): Action[AnyContent] = Action.async {
+    implicit request: Request[AnyContent] =>
+
+      val developer = Developer("my-email","bob", "bobson")
+      val session = Session("my-session-id", developer, LoggedInState.LOGGED_IN)
+      val developerSession = DeveloperSession(session)
+
+      body(UserRequest(developerSession, request))
+
+//      val login = controllers.routes.UserLoginAccount.login()
+//      Future.successful(Redirect(login))
   }
 }
+
+case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
+
+//object UserAction extends ActionBuilder[UserRequest] with ActionTransformer[Request, UserRequest] {
+//  private def decodeCookie(token : String) : Option[String] = {
+//    val (hmac, value) = token.splitAt(40)
+//
+//    val signedValue = Crypto.sign(value)
+//
+//    if (MessageDigest.isEqual(signedValue.getBytes, hmac.getBytes)) {
+//      Some(value)
+//    } else {
+//      None
+//    }
+//  }
+//
+//  def transform[A](request: Request[A]) = Future.successful {
+//    request.headers.get("test") match {
+//      case Some(value) => UserRequest(decodeCookie(value), request)
+//      case None => UserRequest(None, request)
+//    }
+//  }
+//}
 
 //object LoggingAction extends ActionBuilder[Request] {
 //  override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[mvc.Result]): Future[Result] = {

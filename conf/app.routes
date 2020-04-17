@@ -8,7 +8,10 @@ GET         /verification                                                       
 GET         /resend-verification                                                            controllers.Registration.resendVerification
 GET         /resend-confirmation                                                            controllers.Registration.resendConfirmation
 
-GET         /test                                                                           controllers.UserLoginAccount.test
+#TODO - Remove these
+GET         /test
+GET         /test2
+                                                                        controllers.ProtectAccount.test2
 GET         /login                                                                          controllers.UserLoginAccount.login
 GET         /login/2sv-recommendation                                                       controllers.ProtectAccount.get2svRecommendationPage
 POST        /login                                                                          controllers.UserLoginAccount.authenticate

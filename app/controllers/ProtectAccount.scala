@@ -42,7 +42,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
                                val errorHandler: ErrorHandler,
                                val mfaMandateService: MfaMandateService)
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController {
+  extends LoggedInController with DevHubAuthWrapper{
 
   private val scale = 4
   val qrCode = QRCode(scale)
@@ -102,7 +102,17 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       })
   }
 
-  def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction { implicit request =>
+  // TODO: Remove me
+//  // Legacy auth with migration
+  def test2 : Action[AnyContent] = loggedInAction2 { implicit request: UserRequest[_] =>
+
+//    val x: DeveloperSession = request
+
+//    successful(Ok("Hello " + x.displayedName))
+    successful(Ok(test()))
+  }
+
+  def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction2 { implicit request =>
     Future.successful(Ok(protectAccountRemovalConfirmation(Remove2SVConfirmForm.form)))
   }
 

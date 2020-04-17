@@ -52,7 +52,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val messagesApi: MessagesApi,
                                  val mfaMandateService: MfaMandateService)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController with LoginLogout with Auditing {
+  extends LoggedOutController with LoginLogout with Auditing with DevHubAuthWrapper {
 
   import play.api.data._
 
@@ -91,8 +91,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
-  def test : Action[AnyContent] = UserAction.async { implicit request =>
-    successful(Ok("Hello " + request.username))
+  // TODO: Remove me
+  def test : Action[AnyContent] = loggedInAction2 { implicit request =>
+    successful(Ok("Hello " + request.developerSession.developer.firstName))
   }
 
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
