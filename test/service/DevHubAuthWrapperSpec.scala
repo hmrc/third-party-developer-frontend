@@ -16,35 +16,21 @@
 
 package service
 
-import java.security.MessageDigest
-
 import connectors.{ConnectorMetrics, NoopConnectorMetrics}
+import controllers.DevHubAuthWrapper
 import org.scalatest.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Configuration, Mode}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.Crypto
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import play.api.{Application, Mode}
+import uk.gov.hmrc.play.test.UnitSpec
 
-class DevHubSessionSpec extends UnitSpec with Matchers with GuiceOneAppPerSuite  {
+class DevHubAuthWrapperSpec extends UnitSpec with Matchers with GuiceOneAppPerSuite  {
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
       .in(Mode.Test)
       .build()
-
-  def decodeCookie(token : String) : Option[String] = {
-    val (hmac, value) = token.splitAt(40)
-
-    val signedValue = Crypto.sign(value)
-
-    if (MessageDigest.isEqual(signedValue.getBytes, hmac.getBytes)) {
-      Some(value)
-    } else {
-      None
-    }
-  }
 
   "decode cookie" should {
     "return session id when it is a valid cookie" in {
@@ -52,7 +38,7 @@ class DevHubSessionSpec extends UnitSpec with Matchers with GuiceOneAppPerSuite 
 
       val expectedSessionId = "ed777b3a-774f-4ecf-b7ac-d4f9751b0465"
 
-      val decoded = decodeCookie(cookieValue)
+      val decoded = DevHubAuthWrapper.decodeCookie(cookieValue)
 
       decoded shouldBe Some(expectedSessionId)
     }
@@ -60,7 +46,7 @@ class DevHubSessionSpec extends UnitSpec with Matchers with GuiceOneAppPerSuite 
     "return none when it is not valid cookie" in {
       val invalidCookie = "6ff9370ed10c6a1c9c12d6aa984cade22c407d22ed777b3a-774f-4ecf-b7ac-d4f9751b0465"
 
-      val decoded = decodeCookie(invalidCookie)
+      val decoded = DevHubAuthWrapper.decodeCookie(invalidCookie)
 
       decoded shouldBe None
     }
@@ -68,10 +54,20 @@ class DevHubSessionSpec extends UnitSpec with Matchers with GuiceOneAppPerSuite 
     "return none when it is very not valid cookie" in {
       val invalidCookie = ""
 
-      val decoded = decodeCookie(invalidCookie)
+      val decoded = DevHubAuthWrapper.decodeCookie(invalidCookie)
 
       decoded shouldBe None
     }
+  }
+
+  "encode cookie" in {
+    val expectedCookieValue = "5ff9370ed10c6a1c9c12d6aa984cade22c407d22ed777b3a-774f-4ecf-b7ac-d4f9751b0465"
+
+    val sessionId = "ed777b3a-774f-4ecf-b7ac-d4f9751b0465"
+
+    val cookie = DevHubAuthWrapper.encodeCookie(sessionId)
+
+    cookie shouldBe expectedCookieValue
   }
 }
 

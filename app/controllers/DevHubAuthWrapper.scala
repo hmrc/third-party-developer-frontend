@@ -19,8 +19,6 @@ package controllers
 import java.security.MessageDigest
 
 import domain.{DeveloperSession, LoggedInState}
-import jp.t2v.lab.play2.auth.AuthElement
-import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.libs.Crypto
 import play.api.mvc._
 import service.SessionService
@@ -40,6 +38,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
     loadSessionAndValidate(_ => true)(body)
   }
 
+  // TODO: Rename back to loggedInAction (and any other XXX2 methods / classes)
   def loggedInAction2(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext) : Action[AnyContent] = {
     loadSessionAndValidate(developerSession => {
       developerSession.loggedInState == LoggedInState.LOGGED_IN
@@ -50,13 +49,13 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
                                     (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
 
     implicit request: Request[AnyContent] =>
-      val cookieName = "PLAY2AUTH_SESS_ID"
+
 
       val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
 
       (for {
-        cookie <- request.cookies.get(cookieName)
-        sessionId <- decodeCookie(cookie.value)
+        cookie <- request.cookies.get(DevHubAuthWrapper.cookieName)
+        sessionId <- DevHubAuthWrapper.decodeCookie(cookie.value)
       } yield {
         sessionService
           .fetch(sessionId)
@@ -74,7 +73,28 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
       }).getOrElse(Future.successful(loginRedirect))
   }
 
-  private def decodeCookie(token : String) : Option[String] = {
+
+}
+
+case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
+
+// TODO: Probably promote to injectable object
+object DevHubAuthWrapper {
+  val cookieName = "PLAY2AUTH_SESS_ID"
+  protected val cookieSecureOption: Boolean = false // TODO: Load from config (MUST be true in prod.
+  protected val cookieHttpOnlyOption: Boolean = true
+  protected val cookieDomainOption: Option[String] = None
+  protected val cookiePathOption: String = "/"
+  protected val cookieMaxAge = Some(900) // 15 mins // TODO: Load from config
+
+  def withSessionCookie(result : Result, sessionId: String) = {
+    val c = Cookie(cookieName,  encodeCookie(sessionId), cookieMaxAge, cookiePathOption, cookieDomainOption, cookieSecureOption, cookieHttpOnlyOption)
+    result.withCookies(c)
+  }
+
+  def encodeCookie(token : String) : String = Crypto.sign(token) + token
+
+  def decodeCookie(token : String) : Option[String] = {
     val (hmac, value) = token.splitAt(40)
 
     val signedValue = Crypto.sign(value)
@@ -86,5 +106,3 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
     }
   }
 }
-
-case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
