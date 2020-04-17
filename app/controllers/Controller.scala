@@ -42,19 +42,7 @@ trait HeaderEnricher {
 }
 
 // TODO : Remove AuthElement
-abstract class LoggedInController extends BaseController with AuthElement with DevHubAuthWrapper {
-
-  // TODO: Get rid Play2-auth
-  implicit def hc(implicit request: Request[_]): HeaderCarrier = {
-    val carrier = super.hc
-    request match {
-      case x: RequestWithAttributes[_] => enrichHeaders(carrier, Some(loggedIn(x)))
-      case x: ApplicationRequest[_] => enrichHeaders(carrier, Some(x.user))
-      case _ => carrier
-    }
-
-  }
-}
+abstract class LoggedInController extends BaseController with AuthElement with DevHubAuthWrapper
 
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
