@@ -22,6 +22,7 @@ import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc.{Session => PlaySession}
 import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -74,21 +75,34 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   private def routeToLoginOr2SV(login: LoginForm,
                                 userAuthenticationResponse: UserAuthenticationResponse,
-                                playSession: play.api.mvc.Session)(implicit request: Request[AnyContent]): Future[Result] = {
+                                playSession: PlaySession)(implicit request: Request[AnyContent]): Future[Result] = {
 
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     userAuthenticationResponse.session match {
       case Some(session) if session.loggedInState.isLoggedIn => audit(LoginSucceeded, DeveloperSession.apply(session))
-        val result = Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER)
-        Future.successful(DevHubAuthWrapper.withSessionCookie(result, session.sessionId))
+        successful(
+          DevHubAuthWrapper.withSessionCookie(
+            Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
+            session.sessionId
+          )
+        )
 
-      case None => successful(Redirect(routes.UserLoginAccount.enterTotp(), SEE_OTHER)
-        .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+      case None =>
+        successful(
+          Redirect(
+            routes.UserLoginAccount.enterTotp(), SEE_OTHER
+          ).withSession(
+            playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)
+          )
+        )
 
       case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA =>
-        // TODO Replace gotoLoginSucceeded with above non-play2 auth.
-        gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.getProtectAccount().url)
-          .withSession(playSession)))
+        successful(
+          DevHubAuthWrapper.withSessionCookie(
+            Redirect(routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
+            session.sessionId
+          )
+        )
     }
   }
 

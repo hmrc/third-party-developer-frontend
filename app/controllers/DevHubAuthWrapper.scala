@@ -72,8 +72,6 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
           })
       }).getOrElse(Future.successful(loginRedirect))
   }
-
-
 }
 
 case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
