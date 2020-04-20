@@ -24,6 +24,7 @@ import play.api.mvc._
 import play.api.Logger
 import play.api.mvc.Results.Redirect
 import service.SessionService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -47,12 +48,21 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
     })(body)
   }
 
+  private def fetchDeveloperSession[A](sessionId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[DeveloperSession]] = {
+    sessionService.fetch(sessionId).map(maybeSession => maybeSession.map(DeveloperSession(_)))
+  }
+
+  def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
+    (for {
+      cookie <- request.cookies.get(DevHubAuthWrapper.cookieName)
+      sessionId <- DevHubAuthWrapper.decodeCookie(cookie.value)
+    } yield fetchDeveloperSession(sessionId)).getOrElse(Future.successful(None))
+  }
+
   private def loadSessionAndValidate(isValid : DeveloperSession => Boolean)(body: UserRequest[AnyContent] => Future[Result])
                                     (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
 
     implicit request: Request[AnyContent] =>
-
-
       val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
 
       (for {

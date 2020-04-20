@@ -45,6 +45,7 @@ trait AuthConfigImpl extends AuthConfig {
 
   val dummyHeader = HeaderCarrier()
 
+  // TODO: Unused
   def resolveUser(id: Id)(implicit ctx: ExecutionContext): Future[Option[User]] =
     sessionService
       .fetch(id)(dummyHeader)
@@ -62,6 +63,7 @@ trait AuthConfigImpl extends AuthConfig {
     Future.successful(Redirect(sslMatchedUrl))
   }
 
+  // TODO: Unused
   def authenticationFailed(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
     Logger.info(s"authenticationFailed - request_uri: ${request.uri} access_uri: ${request.session.get("access_uri")}")
     val result: Result =
@@ -78,6 +80,7 @@ trait AuthConfigImpl extends AuthConfig {
     Future.successful(result)
   }
 
+  // TODO: Unused
   // Access page while not logged in (e.g. part logged in) redirect to logon page.
   override def authorizationFailed(request: RequestHeader, user: User,
                                    authority: Option[Authority])(implicit context: ExecutionContext): Future[Result] = {

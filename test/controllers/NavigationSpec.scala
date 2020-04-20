@@ -22,9 +22,10 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.BDDMockito._
 import play.api.http.Status.OK
+import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import service.SessionService
+import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 
@@ -42,6 +43,8 @@ class NavigationSpec extends BaseControllerSpec {
   class Setup(loggedInState: Option[LoggedInState]) {
     val underTest = new Navigation(
       mock[SessionService],
+      mock[ApplicationService],
+      mock[MessagesApi],
       mock[ErrorHandler]
     )
 

@@ -94,9 +94,7 @@ abstract class LoggedOutController()
 
   extends BaseController() with jp.t2v.lab.play2.auth.OptionalAuthElement {
 
-  import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
-  import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
-
+  import jp.t2v.lab.play2.stackc.RequestWithAttributes
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc

@@ -16,7 +16,6 @@
 
 package config
 
-import com.codahale.metrics.SharedMetricRegistries
 import domain.{AtLeastPartLoggedInEnablingMfa, LoggedInState, LoggedInUser}
 import org.mockito.BDDMockito.given
 import org.scalatest.mockito.MockitoSugar

@@ -16,37 +16,31 @@
 
 package controllers
 
-import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler}
 import domain.LoggedInState.{LOGGED_IN, PART_LOGGED_IN_ENABLING_MFA}
-import domain.{DeveloperSession, UserNavLinks}
+import domain.UserNavLinks
 import javax.inject.{Inject, Singleton}
-import jp.t2v.lab.play2.auth.OptionalAuthElement
+import play.api.i18n.MessagesApi
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
-import service.SessionService
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import service.{ApplicationService, SessionService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Navigation @Inject()(val sessionService: SessionService,
+                           val applicationService: ApplicationService,
+                           val messagesApi: MessagesApi,
                            val errorHandler: ErrorHandler)
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends FrontendController with AuthConfigImpl with HeaderEnricher with OptionalAuthElement {
+  extends ApplicationController with DevHubAuthWrapper {
 
-  def navLinks(): Action[AnyContent] = AsyncStack {
-    implicit request => {
-      val username =
-        loggedIn.flatMap {
-          session: DeveloperSession => {
-            session.loggedInState match {
-              case LOGGED_IN => session.loggedInName
-              case PART_LOGGED_IN_ENABLING_MFA => None
-            }
-          }
-        }
-
-      Future.successful(Ok(Json.toJson(UserNavLinks(username))))
+  def navLinks: Action[AnyContent] = Action.async { implicit request =>
+    val usernameF = loadSession.map {
+      case Some(developerSession) if(developerSession.loggedInState == LOGGED_IN) => developerSession.loggedInName
+      case _ => None
     }
+
+    usernameF.map(username => Ok(Json.toJson(UserNavLinks(username))))
   }
 }
