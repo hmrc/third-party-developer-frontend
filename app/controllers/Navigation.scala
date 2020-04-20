@@ -24,7 +24,9 @@ import play.api.i18n.MessagesApi
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import service.{ApplicationService, SessionService}
+import views.html.protectaccount.test
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -43,4 +45,11 @@ class Navigation @Inject()(val sessionService: SessionService,
 
     usernameF.map(username => Ok(Json.toJson(UserNavLinks(username))))
   }
+
+  def navLinks2 : Action[AnyContent] = maybeLoggedInAction2 { implicit request: MaybeUserRequest[AnyContent] =>
+    val username = request.developerSession.flatMap(d=>d.loggedInName)
+
+    Future.successful(Ok(Json.toJson(UserNavLinks(username))))
+  }
 }
+

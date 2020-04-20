@@ -38,14 +38,20 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
   }
 
   def atLeastPartLoggedInEnablingMfa2(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
-    loadSessionAndValidate(_ => true)(body)
+    loadSessionAndValidate(_ => true)(UserRequest.apply)(body)
   }
 
   // TODO: Rename back to loggedInAction (and any other XXX2 methods / classes)
   def loggedInAction2(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext) : Action[AnyContent] = {
     loadSessionAndValidate(developerSession => {
       developerSession.loggedInState == LoggedInState.LOGGED_IN
-    })(body)
+    })(UserRequest.apply)(body)
+  }
+
+  def maybeLoggedInAction2(body: MaybeUserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext) : Action[AnyContent] = {
+    loadSessionAndValidate(developerSession => {
+      developerSession.loggedInState == LoggedInState.LOGGED_IN
+    })((developerSession, request) => MaybeUserRequest.apply(Some(developerSession),request))(body)
   }
 
   private def fetchDeveloperSession[A](sessionId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[DeveloperSession]] = {
@@ -59,8 +65,11 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
     } yield fetchDeveloperSession(sessionId)).getOrElse(Future.successful(None))
   }
 
-  private def loadSessionAndValidate(isValid : DeveloperSession => Boolean)(body: UserRequest[AnyContent] => Future[Result])
-                                    (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+  private def loadSessionAndValidate[A](isValid : DeveloperSession => Boolean)
+                                       (toRequest : (DeveloperSession, Request[AnyContent]) => A)
+                                       (body: A => Future[Result])
+                                       (implicit ec: ExecutionContext) : Action[AnyContent]
+    = Action.async {
 
     implicit request: Request[AnyContent] =>
       val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
@@ -68,7 +77,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
       loadSession.flatMap(maybeSession => {
         maybeSession.fold(Future.successful(loginRedirect))(developerSession => {
           if (isValid(developerSession)){
-            body(UserRequest(developerSession, request))
+            body(toRequest(developerSession, request))
           } else {
             // TODO: Should be forbidden
             Future.successful(loginRedirect)
@@ -79,6 +88,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
 }
 
 case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
+case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A]) extends WrappedRequest[A](request)
 
 // TODO: Probably promote to injectable object
 object DevHubAuthWrapper {
