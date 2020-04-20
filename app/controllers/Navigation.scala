@@ -17,16 +17,13 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.LoggedInState.{LOGGED_IN, PART_LOGGED_IN_ENABLING_MFA}
 import domain.UserNavLinks
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import service.{ApplicationService, SessionService}
-import views.html.protectaccount.test
 
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -37,19 +34,9 @@ class Navigation @Inject()(val sessionService: SessionService,
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController with DevHubAuthWrapper {
 
-  def navLinks: Action[AnyContent] = Action.async { implicit request =>
-    val usernameF = loadSession.map {
-      case Some(developerSession) if(developerSession.loggedInState == LOGGED_IN) => developerSession.loggedInName
-      case _ => None
-    }
-
-    usernameF.map(username => Ok(Json.toJson(UserNavLinks(username))))
-  }
-
-  def navLinks2 : Action[AnyContent] = maybeLoggedInAction2 { implicit request: MaybeUserRequest[AnyContent] =>
-    val username = request.developerSession.flatMap(d=>d.loggedInName)
+  def navLinks: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa2 { implicit request: MaybeUserRequest[AnyContent] =>
+    val username = request.developerSession.flatMap(_.loggedInName)
 
     Future.successful(Ok(Json.toJson(UserNavLinks(username))))
   }
 }
-

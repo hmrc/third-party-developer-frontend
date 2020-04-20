@@ -32,58 +32,56 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
 
   val sessionService : SessionService
 
+
   // TODO: Name :(
   implicit def loggedIn2(implicit req : UserRequest[_]) : DeveloperSession = {
     req.developerSession
   }
 
-  def atLeastPartLoggedInEnablingMfa2(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
-    loadSessionAndValidate(_ => true)(UserRequest.apply)(body)
-  }
+  def atLeastPartLoggedInEnablingMfa2(body: UserRequest[AnyContent] => Future[Result])
+                                     (implicit ec: ExecutionContext): Action[AnyContent] =
+    loggedInActionWithFilter(body)(_ => true)
+
 
   // TODO: Rename back to loggedInAction (and any other XXX2 methods / classes)
-  def loggedInAction2(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext) : Action[AnyContent] = {
-    loadSessionAndValidate(developerSession => {
-      developerSession.loggedInState == LoggedInState.LOGGED_IN
-    })(UserRequest.apply)(body)
+  def loggedInAction2(body: UserRequest[AnyContent] => Future[Result])
+                     (implicit ec: ExecutionContext) : Action[AnyContent] =
+    loggedInActionWithFilter(body)(_.loggedInState == LoggedInState.LOGGED_IN)
+
+  private def loggedInActionWithFilter(body: UserRequest[AnyContent] => Future[Result])
+                                      (filter : DeveloperSession => Boolean)
+                                      (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+
+    val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
+
+    implicit request: Request[AnyContent] =>
+      loadSession.flatMap(maybeSession => {
+        maybeSession
+          .filter(filter)
+          .fold(Future.successful(loginRedirect))(developerSession => body(UserRequest(developerSession,request)))
+      })
   }
 
-  def maybeLoggedInAction2(body: MaybeUserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext) : Action[AnyContent] = {
-    loadSessionAndValidate(developerSession => {
-      developerSession.loggedInState == LoggedInState.LOGGED_IN
-    })((developerSession, request) => MaybeUserRequest.apply(Some(developerSession),request))(body)
+  def maybeAtLeastPartLoggedInEnablingMfa2(body: MaybeUserRequest[AnyContent] => Future[Result])
+                          (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+    implicit request: Request[AnyContent] =>
+      loadSession.flatMap(
+        maybeDeveloperSession => body(MaybeUserRequest(maybeDeveloperSession, request))
+      )
   }
 
   private def fetchDeveloperSession[A](sessionId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[DeveloperSession]] = {
-    sessionService.fetch(sessionId).map(maybeSession => maybeSession.map(DeveloperSession(_)))
+    sessionService
+      .fetch(sessionId)
+      .map(maybeSession => maybeSession.map(DeveloperSession(_)))
   }
 
-  def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
+  private def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
     (for {
       cookie <- request.cookies.get(DevHubAuthWrapper.cookieName)
       sessionId <- DevHubAuthWrapper.decodeCookie(cookie.value)
-    } yield fetchDeveloperSession(sessionId)).getOrElse(Future.successful(None))
-  }
-
-  private def loadSessionAndValidate[A](isValid : DeveloperSession => Boolean)
-                                       (toRequest : (DeveloperSession, Request[AnyContent]) => A)
-                                       (body: A => Future[Result])
-                                       (implicit ec: ExecutionContext) : Action[AnyContent]
-    = Action.async {
-
-    implicit request: Request[AnyContent] =>
-      val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
-
-      loadSession.flatMap(maybeSession => {
-        maybeSession.fold(Future.successful(loginRedirect))(developerSession => {
-          if (isValid(developerSession)){
-            body(toRequest(developerSession, request))
-          } else {
-            // TODO: Should be forbidden
-            Future.successful(loginRedirect)
-          }
-        })
-      })
+    } yield fetchDeveloperSession(sessionId))
+      .getOrElse(Future.successful(None))
   }
 }
 
