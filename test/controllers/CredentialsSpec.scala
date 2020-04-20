@@ -20,9 +20,10 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
+import domain.ApplicationState.pendingGatekeeperApproval
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
-import org.joda.time.DateTimeZone
+import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito
 import org.mockito.BDDMockito.given
@@ -83,10 +84,10 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
                                              userRole: Role,
                                              state: ApplicationState = ApplicationState.production("", ""),
                                              access: Access = Standard(),
-                                             environment: Environment = Environment.PRODUCTION)
+                                             environment: Environment = Environment.PRODUCTION, createdOn: DateTime = DateTimeUtils.now)
                                                 : BDDMockito.BDDMyOngoingStubbing[Future[Seq[APISubscriptionStatus]]] = {
 
-      val application = Application(applicationId.toString, clientId, "app", DateTimeUtils.now, DateTimeUtils.now, environment,
+      val application = Application(applicationId.toString, clientId, "app", createdOn, DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), state = state, access = access)
 
       given(underTest.applicationService.fetchByApplicationId(mockEq(applicationId.toString))(any[HeaderCarrier])).willReturn(application)
@@ -117,7 +118,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "inform the user about the state of the application when it has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
 
       val result: Result = await(underTest.credentials(applicationId.toString)(loggedInRequest))
 
@@ -146,7 +147,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
 
       val result: Result = await(underTest.clientId(applicationId.toString)(loggedInRequest))
 
@@ -173,7 +174,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
 
       val result: Result = await(underTest.clientSecrets(applicationId.toString)(loggedInRequest.withCSRFToken))
 
@@ -182,8 +183,10 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   }
 
   "The server token page" should {
+    val dateBeforeCutoff = Credentials.serverTokenCutoffDate.minusDays(1)
+
     "be displayed for an app" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, createdOn = dateBeforeCutoff)
 
       val result: Result = await(underTest.serverToken(applicationId.toString)(loggedInRequest))
 
@@ -191,8 +194,16 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       bodyOf(result) should include("Server token")
     }
 
+    "return 404 for new apps" in new Setup {
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, createdOn = DateTimeUtils.now)
+
+      val result: Result = await(underTest.serverToken(applicationId.toString)(loggedInRequest))
+
+      status(result) shouldBe NOT_FOUND
+    }
+
     "return 403 when the user has the developer role and the app is in PROD" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
+      givenTheApplicationExistWithUserRole(applicationId, DEVELOPER, environment = Environment.PRODUCTION, createdOn = dateBeforeCutoff)
 
       val result: Result = await(underTest.serverToken(applicationId.toString)(loggedInRequest))
 
@@ -200,7 +211,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, createdOn = dateBeforeCutoff, state = pendingGatekeeperApproval(""))
 
       val result: Result = await(underTest.serverToken(applicationId.toString)(loggedInRequest))
 
@@ -268,7 +279,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "display the error page when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
 
       val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
@@ -312,7 +323,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
 
       val result: Result = await(underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken))
 
@@ -346,7 +357,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
 
       val result: Result = await(underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest))
 
