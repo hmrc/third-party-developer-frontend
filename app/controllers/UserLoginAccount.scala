@@ -149,7 +149,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         val email = request.session.get("emailAddress").get
         sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
           audit(LoginSucceeded, DeveloperSession.apply(session))
-          gotoLoginSucceeded(session.sessionId)
+          // TODO: Replace this
+          DevHubAuthWrapper.loginSucceeded(request).map(r => DevHubAuthWrapper.withSessionCookie(r, session.sessionId))
+//          gotoLoginSucceeded(session.sessionId)
         } recover {
           case _: InvalidCredentials =>
             audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))

@@ -21,6 +21,8 @@ import java.security.MessageDigest
 import domain.{DeveloperSession, LoggedInState}
 import play.api.libs.Crypto
 import play.api.mvc._
+import play.api.Logger
+import play.api.mvc.Results.Redirect
 import service.SessionService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -102,5 +104,11 @@ object DevHubAuthWrapper {
     } else {
       None
     }
+  }
+
+  def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
+    Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
+    val uri = request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps().url)
+    Future.successful(Redirect(uri).withNewSession)
   }
 }
