@@ -19,11 +19,9 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.TicketId
 import javax.inject.{Inject, Singleton}
-import jp.t2v.lab.play2.auth.LoginLogout
-import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.Logger
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request}
+import play.api.mvc.{Action, AnyContent, DiscardingCookie, Request}
 import service.{ApplicationService, DeskproService, SessionService}
 import views.html.signoutSurvey
 
@@ -36,7 +34,7 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val errorHandler: ErrorHandler,
                                   val messagesApi: MessagesApi)
                                  (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController with LoginLogout {
+  extends LoggedInController {
 
   def logoutSurvey = atLeastPartLoggedInEnablingMfa2 { implicit request =>
     val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)
@@ -46,29 +44,26 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
 
   def logoutSurveyAction = atLeastPartLoggedInEnablingMfa2 { implicit request =>
     SignOutSurveyForm.form.bindFromRequest.value match {
-      case Some(form) => {
+      case Some(form) =>
         val res: Future[TicketId] = deskproService.submitSurvey(form)
         res.onFailure {
           case _ => Logger.error(s"Failed to create deskpro ticket")
         }
+
         applicationService.userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions).flatMap(_ => {
           Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
         })
-      }
-      case None => {
+      case None =>
         Logger.error(s"Survey form invalid.")
         Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
-      }
     }
   }
 
   def logout = Action.async { implicit request: Request[AnyContent] =>
-    gotoLogoutSucceeded {
-      for {
-        _ <- tokenAccessor.extract(request)
-          .map(sessionService.destroy)
-          .getOrElse(Future.successful(()))
-      } yield Ok(views.html.logoutConfirmation()).withNewSession
-    }
+    DevHubAuthWrapper.extractSessionIdFromCookie(request)
+      .map(sessionId => sessionService.destroy(sessionId))
+      .getOrElse(Future.successful(()))
+      .map(_ => Ok(views.html.logoutConfirmation()).withNewSession)
+      .map(result => result.discardingCookies(DiscardingCookie(DevHubAuthWrapper.cookieName)))
   }
 }

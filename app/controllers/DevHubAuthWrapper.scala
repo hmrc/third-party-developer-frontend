@@ -106,6 +106,13 @@ object DevHubAuthWrapper {
     }
   }
 
+  def extractSessionIdFromCookie(request: RequestHeader): Option[String] = {
+    request.cookies.get(DevHubAuthWrapper.cookieName) match {
+      case Some(cookie) => decodeCookie(cookie.value)
+      case _ => None
+    }
+  }
+
   def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
     Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
     val uri = request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps().url)
