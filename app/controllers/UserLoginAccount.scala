@@ -19,7 +19,6 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import javax.inject.{Inject, Singleton}
-import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.api.mvc.{Session => PlaySession}
@@ -53,7 +52,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val messagesApi: MessagesApi,
                                  val mfaMandateService: MfaMandateService)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController with LoginLogout with Auditing with DevHubAuthWrapper {
+  extends LoggedOutController with Auditing with DevHubAuthWrapper {
 
   import play.api.data._
 
@@ -149,9 +148,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         val email = request.session.get("emailAddress").get
         sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
           audit(LoginSucceeded, DeveloperSession.apply(session))
-          // TODO: Replace this
           DevHubAuthWrapper.loginSucceeded(request).map(r => DevHubAuthWrapper.withSessionCookie(r, session.sessionId))
-//          gotoLoginSucceeded(session.sessionId)
         } recover {
           case _: InvalidCredentials =>
             audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
@@ -172,5 +169,4 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
     applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeComplete()))
   }
-
 }
