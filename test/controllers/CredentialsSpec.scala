@@ -181,6 +181,33 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
   }
 
+  "The server token page" should {
+    "be displayed for an app" in new Setup {
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
+
+      val result: Result = await(underTest.serverToken(applicationId.toString)(loggedInRequest))
+
+      status(result) shouldBe OK
+      bodyOf(result) should include("Server token")
+    }
+
+    "return 403 when the user has the developer role and the app is in PROD" in new Setup {
+      givenTheApplicationExistWithUserRole(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
+
+      val result: Result = await(underTest.serverToken(applicationId.toString)(loggedInRequest))
+
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "return 400 when the application has not reached production state" in new Setup {
+      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, state = ApplicationState.pendingGatekeeperApproval(""))
+
+      val result: Result = await(underTest.serverToken(applicationId.toString)(loggedInRequest))
+
+      status(result) shouldBe BAD_REQUEST
+    }
+  }
+
   "addClientSecret" should {
     val applicationId = UUID.randomUUID()
     val newSecretId = UUID.randomUUID().toString
