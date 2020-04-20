@@ -92,6 +92,7 @@ abstract class ApplicationController()
 
 abstract class LoggedOutController()
 
+// TODO: Replace OptionalAuthElement with DevHubAuthWrapper
   extends BaseController() with jp.t2v.lab.play2.auth.OptionalAuthElement {
 
   import jp.t2v.lab.play2.stackc.RequestWithAttributes
