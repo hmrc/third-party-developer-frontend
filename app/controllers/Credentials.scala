@@ -66,6 +66,13 @@ class Credentials @Inject()(val applicationService: ApplicationService,
       }
   }
 
+  def serverToken(applicationId: String): Action[AnyContent] =
+    canChangeClientSecrets(applicationId) { implicit request =>
+      applicationService.fetchCredentials(applicationId).map { tokens =>
+        Ok(views.html.serverToken(request.application, tokens.accessToken))
+      }
+    }
+
   def addClientSecret(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
     applicationService.addClientSecret(applicationId, request.user.email).map { response =>
       Redirect(controllers.routes.Credentials.clientSecrets(applicationId))
