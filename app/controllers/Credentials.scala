@@ -20,10 +20,12 @@ import java.util.UUID
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import controllers.Credentials.serverTokenCutoffDate
 import domain.Capabilities.{ChangeClientSecret, ViewCredentials}
 import domain.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import domain._
 import javax.inject.{Inject, Singleton}
+import org.joda.time.DateTime
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
 import service._
@@ -68,8 +70,12 @@ class Credentials @Inject()(val applicationService: ApplicationService,
 
   def serverToken(applicationId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      applicationService.fetchCredentials(applicationId).map { tokens =>
-        Ok(views.html.serverToken(request.application, tokens.accessToken))
+      if (request.application.createdOn.isBefore(serverTokenCutoffDate)) {
+        applicationService.fetchCredentials(applicationId).map { tokens =>
+          Ok(views.html.serverToken(request.application, tokens.accessToken))
+        }
+      } else {
+        successful(NotFound(errorHandler.notFoundTemplate))
       }
     }
 
@@ -96,4 +102,8 @@ class Credentials @Inject()(val applicationService: ApplicationService,
       applicationService.deleteClientSecret(applicationId, clientSecretId, request.user.email)
         .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId.toString)))
   }
+}
+
+object Credentials {
+  val serverTokenCutoffDate = new DateTime(2020, 4, 1, 0, 0) // scalastyle:ignore magic.number
 }

@@ -16,6 +16,7 @@
 
 @import domain.DeveloperSession
 @import model.ApplicationViewModel
+@import controllers.Credentials.serverTokenCutoffDate
 
 @(application: Option[ApplicationViewModel] = None, navSection: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession)
 
@@ -43,8 +44,10 @@
                                 Client ID</a></li>
                             <li class="side-nav__list @if(section == "client-secrets") { side-nav__list--selected }"><a id="nav-manage-client-secrets" class="side-nav__link" href="@routes.Credentials.clientSecrets(app.id)">
                                 Client secrets</a></li>
-                            <li class="side-nav__list @if(section == "server-token") { side-nav__list--selected }"><a id="nav-manage-server-token" class="side-nav__link" href="@routes.Credentials.serverToken(app.id)">
-                                Server token</a></li>
+                            @if(app.createdOn.isBefore(serverTokenCutoffDate)) {
+                                <li class="side-nav__list @if(section == "server-token") { side-nav__list--selected }"><a id="nav-manage-server-token" class="side-nav__link" href="@routes.Credentials.serverToken(app.id)">
+                                    Server token</a></li>
+                            }
                         }
 
                         @if(app.access.accessType.isStandard) {
