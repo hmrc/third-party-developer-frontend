@@ -65,24 +65,16 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
     implicit request: Request[AnyContent] =>
       val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
 
-      (for {
-        cookie <- request.cookies.get(DevHubAuthWrapper.cookieName)
-        sessionId <- DevHubAuthWrapper.decodeCookie(cookie.value)
-      } yield {
-        sessionService
-          .fetch(sessionId)
-          .flatMap(maybeSession => {
-            maybeSession.fold(Future.successful(loginRedirect))(session => {
-              val developerSession = DeveloperSession(session)
-              if (isValid(developerSession)){
-                body(UserRequest(developerSession, request))
-              } else {
-                // TODO: Should be forbidden
-                Future.successful(loginRedirect)
-              }
-            })
-          })
-      }).getOrElse(Future.successful(loginRedirect))
+      loadSession.flatMap(maybeSession => {
+        maybeSession.fold(Future.successful(loginRedirect))(developerSession => {
+          if (isValid(developerSession)){
+            body(UserRequest(developerSession, request))
+          } else {
+            // TODO: Should be forbidden
+            Future.successful(loginRedirect)
+          }
+        })
+      })
   }
 }
 
