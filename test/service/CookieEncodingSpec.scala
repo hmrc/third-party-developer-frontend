@@ -17,7 +17,7 @@
 package service
 
 import connectors.{ConnectorMetrics, NoopConnectorMetrics}
-import controllers.DevHubAuthWrapper
+import controllers.CookieEncoding
 import org.scalatest.Matchers
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -26,7 +26,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Mode}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class DevHubAuthWrapperSpec extends UnitSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite  {
+class CookieEncodingSpec extends UnitSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite  {
+
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
@@ -34,9 +35,7 @@ class DevHubAuthWrapperSpec extends UnitSpec with Matchers with MockitoSugar wit
       .build()
 
 
-  private val wrapper = new DevHubAuthWrapper {
-    override val sessionService: SessionService = mock[SessionService]
-  }
+  private val wrapper = new CookieEncoding { }
 
   "decode cookie" should {
     "return session id when it is a valid cookie" in {
