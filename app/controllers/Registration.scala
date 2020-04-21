@@ -21,6 +21,7 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.{EmailAlreadyInUse, RegistrationSuccessful}
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
+import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Action
 import service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, NotFoundException}
@@ -32,7 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class Registration @Inject()(override val sessionService: SessionService,
                              val connector: ThirdPartyDeveloperConnector,
                              val errorHandler: ErrorHandler,
-                             val messagesApi: MessagesApi
+                             val messagesApi: MessagesApi,
+                             val cookieSigner : CookieSigner
                              )
                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedOutController {
@@ -42,7 +44,7 @@ class Registration @Inject()(override val sessionService: SessionService,
 
   val regForm: Form[RegisterForm] = RegistrationForm.form
 
-  def registration() = loggedOutAction { implicit request =>
+  def registration() = loggedOutAction2 { implicit request =>
     Future.successful(Ok(views.html.registration(regForm)))
   }
 

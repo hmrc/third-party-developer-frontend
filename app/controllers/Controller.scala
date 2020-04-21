@@ -93,7 +93,7 @@ abstract class ApplicationController()
 abstract class LoggedOutController()
 
 // TODO: Replace OptionalAuthElement with DevHubAuthWrapper
-  extends BaseController() with jp.t2v.lab.play2.auth.OptionalAuthElement {
+  extends BaseController() with jp.t2v.lab.play2.auth.OptionalAuthElement with DevHubAuthWrapper {
 
   import jp.t2v.lab.play2.stackc.RequestWithAttributes
 
@@ -103,16 +103,6 @@ abstract class LoggedOutController()
       case x: RequestWithAttributes[_] => implicit val req = x
         enrichHeaders(carrier, loggedIn)
       case _ => carrier
-    }
-  }
-
-  def loggedOutAction(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack {
-      implicit request =>
-        loggedIn match {
-          case Some(session) if session.loggedInState.isLoggedIn => loginSucceeded(request)
-          case Some(_) | None => f(request)
-        }
     }
   }
 }

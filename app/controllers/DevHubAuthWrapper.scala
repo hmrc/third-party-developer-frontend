@@ -19,6 +19,7 @@ package controllers
 import java.security.MessageDigest
 
 import domain.{DeveloperSession, LoggedInState}
+import play.api.Logger
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.SessionService
@@ -75,6 +76,21 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
       loadSession.flatMap(
         maybeDeveloperSession => body(MaybeUserRequest(maybeDeveloperSession, request))
       )
+  }
+
+  def loggedOutAction2(body: Request[AnyContent] => Future[Result])
+                      (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+    implicit request: Request[AnyContent] =>
+      loadSession.flatMap{
+        case Some(developerSession) if developerSession.loggedInState.isLoggedIn => loginSucceeded(request)
+        case _ => body(request)
+      }
+  }
+
+  private def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
+    Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
+    val uri = request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps().url)
+    Future.successful(Redirect(uri).withNewSession)
   }
 
   private def fetchDeveloperSession[A](sessionId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[DeveloperSession]] = {
