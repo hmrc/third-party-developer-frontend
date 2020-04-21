@@ -21,8 +21,6 @@ import java.security.MessageDigest
 import domain.{DeveloperSession, LoggedInState}
 import play.api.libs.Crypto
 import play.api.mvc._
-import play.api.Logger
-import play.api.mvc.Results.Redirect
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -32,6 +30,14 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
 
   val sessionService : SessionService
 
+  // TODO: Can / should we make private
+  val cookieName2 = "PLAY2AUTH_SESS_ID"
+
+  private val cookieSecureOption: Boolean = false // TODO: Load from config (MUST be true in prod.
+  private val cookieHttpOnlyOption: Boolean = true
+  private val cookieDomainOption: Option[String] = None
+  private val cookiePathOption: String = "/"
+  private val cookieMaxAge = Some(900) // 15 mins // TODO: Load from config
 
   // TODO: Name :(
   implicit def loggedIn2(implicit req : UserRequest[_]) : DeveloperSession = {
@@ -78,32 +84,21 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
 
   private def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
     (for {
-      cookie <- request.cookies.get(DevHubAuthWrapper.cookieName)
-      sessionId <- DevHubAuthWrapper.decodeCookie(cookie.value)
+      cookie <- request.cookies.get(cookieName2)
+      sessionId <- decodeCookie(cookie.value)
     } yield fetchDeveloperSession(sessionId))
       .getOrElse(Future.successful(None))
   }
-}
 
-case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
-case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A]) extends WrappedRequest[A](request)
-
-// TODO: Probably promote to injectable object
-object DevHubAuthWrapper {
-  val cookieName = "PLAY2AUTH_SESS_ID"
-  protected val cookieSecureOption: Boolean = false // TODO: Load from config (MUST be true in prod.
-  protected val cookieHttpOnlyOption: Boolean = true
-  protected val cookieDomainOption: Option[String] = None
-  protected val cookiePathOption: String = "/"
-  protected val cookieMaxAge = Some(900) // 15 mins // TODO: Load from config
-
-  def withSessionCookie(result : Result, sessionId: String) = {
-    val c = Cookie(cookieName,  encodeCookie(sessionId), cookieMaxAge, cookiePathOption, cookieDomainOption, cookieSecureOption, cookieHttpOnlyOption)
+  def withSessionCookie(result : Result, sessionId: String): Result = {
+    val c = Cookie(cookieName2,  encodeCookie(sessionId), cookieMaxAge, cookiePathOption, cookieDomainOption, cookieSecureOption, cookieHttpOnlyOption)
     result.withCookies(c)
   }
 
+  // TODO : Make private, and move code to seperate class (for testing)?
   def encodeCookie(token : String) : String = Crypto.sign(token) + token
 
+  // TODO : Make private, and move code to seperate class (for testing)?
   def decodeCookie(token : String) : Option[String] = {
     val (hmac, value) = token.splitAt(40)
 
@@ -117,15 +112,12 @@ object DevHubAuthWrapper {
   }
 
   def extractSessionIdFromCookie(request: RequestHeader): Option[String] = {
-    request.cookies.get(DevHubAuthWrapper.cookieName) match {
+    request.cookies.get(cookieName2) match {
       case Some(cookie) => decodeCookie(cookie.value)
       case _ => None
     }
   }
-
-  def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
-    Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
-    val uri = request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps().url)
-    Future.successful(Redirect(uri).withNewSession)
-  }
 }
+
+case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
+case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A]) extends WrappedRequest[A](request)

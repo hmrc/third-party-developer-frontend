@@ -59,11 +59,12 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
     }
   }
 
+  // TODO: Move some of this logic should be in DebHubAuthWrapper?
   def logout = Action.async { implicit request: Request[AnyContent] =>
-    DevHubAuthWrapper.extractSessionIdFromCookie(request)
+    extractSessionIdFromCookie(request)
       .map(sessionId => sessionService.destroy(sessionId))
       .getOrElse(Future.successful(()))
       .map(_ => Ok(views.html.logoutConfirmation()).withNewSession)
-      .map(result => result.discardingCookies(DiscardingCookie(DevHubAuthWrapper.cookieName)))
+      .map(result => result.discardingCookies(DiscardingCookie(cookieName2)))
   }
 }

@@ -80,7 +80,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     userAuthenticationResponse.session match {
       case Some(session) if session.loggedInState.isLoggedIn => audit(LoginSucceeded, DeveloperSession.apply(session))
         successful(
-          DevHubAuthWrapper.withSessionCookie(
+          withSessionCookie(
             Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
             session.sessionId
           )
@@ -97,7 +97,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
       case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA =>
         successful(
-          DevHubAuthWrapper.withSessionCookie(
+          withSessionCookie(
             Redirect(routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
             session.sessionId
           )
@@ -148,7 +148,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         val email = request.session.get("emailAddress").get
         sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
           audit(LoginSucceeded, DeveloperSession.apply(session))
-          DevHubAuthWrapper.loginSucceeded(request).map(r => DevHubAuthWrapper.withSessionCookie(r, session.sessionId))
+          loginSucceeded(request).map(r => withSessionCookie(r, session.sessionId))
         } recover {
           case _: InvalidCredentials =>
             audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
