@@ -45,7 +45,8 @@ class NavigationSpec extends BaseControllerSpec {
       mock[SessionService],
       mock[ApplicationService],
       mock[MessagesApi],
-      mock[ErrorHandler]
+      mock[ErrorHandler],
+      cookieSigner
     )
 
     loggedInState.map(loggedInState => {

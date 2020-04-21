@@ -25,6 +25,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
+import play.api.libs.crypto.CookieSigner
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, MfaMandateService, SessionService}
 import views.html.protectaccount._
@@ -40,7 +41,8 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
                                val sessionService: SessionService,
                                val messagesApi: MessagesApi,
                                val errorHandler: ErrorHandler,
-                               val mfaMandateService: MfaMandateService)
+                               val mfaMandateService: MfaMandateService,
+                               val cookieSigner : CookieSigner)
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController with DevHubAuthWrapper{
 

@@ -19,14 +19,15 @@ package controllers
 import java.security.MessageDigest
 
 import domain.{DeveloperSession, LoggedInState}
-import play.api.libs.Crypto
+import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
+// TODO : Add some test for this please.
+trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with CookieEncoding {
 
   val sessionService : SessionService
 
@@ -95,21 +96,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
     result.withCookies(c)
   }
 
-  // TODO : Make private, and move code to seperate class (for testing)?
-  def encodeCookie(token : String) : String = Crypto.sign(token) + token
 
-  // TODO : Make private, and move code to seperate class (for testing)?
-  def decodeCookie(token : String) : Option[String] = {
-    val (hmac, value) = token.splitAt(40)
-
-    val signedValue = Crypto.sign(value)
-
-    if (MessageDigest.isEqual(signedValue.getBytes, hmac.getBytes)) {
-      Some(value)
-    } else {
-      None
-    }
-  }
 
   def extractSessionIdFromCookie(request: RequestHeader): Option[String] = {
     request.cookies.get(cookieName2) match {
@@ -121,3 +108,24 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion {
 
 case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
 case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A]) extends WrappedRequest[A](request)
+
+trait CookieEncoding {
+
+  val cookieSigner : CookieSigner
+
+  def encodeCookie(token : String) : String = {
+    cookieSigner.sign(token) + token
+  }
+
+  def decodeCookie(token : String) : Option[String] = {
+    val (hmac, value) = token.splitAt(40)
+
+    val signedValue = cookieSigner.sign(value)
+
+    if (MessageDigest.isEqual(signedValue.getBytes, hmac.getBytes)) {
+      Some(value)
+    } else {
+      None
+    }
+  }
+}

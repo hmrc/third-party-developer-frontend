@@ -61,7 +61,8 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
-      messagesApi
+      messagesApi,
+      cookieSigner
     )
 
     val hc = HeaderCarrier()

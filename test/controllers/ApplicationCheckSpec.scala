@@ -88,7 +88,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       mock[ApiSubscriptionsHelper],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi
+      messagesApi,
+      cookieSigner
     )
 
     val hc: HeaderCarrier = HeaderCarrier()

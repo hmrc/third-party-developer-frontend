@@ -42,7 +42,8 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout{
     mockSessionService,
     mock[ThirdPartyDeveloperConnector],
     mock[ErrorHandler],
-    mock[MessagesApi]
+    mock[MessagesApi],
+    cookieSigner
   )
 
   "keepAlive" should {

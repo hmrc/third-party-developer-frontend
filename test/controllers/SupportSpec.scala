@@ -40,7 +40,8 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[DeskproService],
       mock[SessionService],
       mock[ErrorHandler],
-      messagesApi
+      messagesApi,
+      cookieSigner
       )
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)

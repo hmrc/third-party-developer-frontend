@@ -24,6 +24,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.i18n.MessagesApi
+import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, Call, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.voa.play.form.ConditionalMappings._
@@ -38,7 +39,8 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                  val apiSubscriptionsHelper: ApiSubscriptionsHelper,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
-                                 val messagesApi: MessagesApi
+                                 val messagesApi: MessagesApi,
+                                 val cookieSigner : CookieSigner
                                  )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController()

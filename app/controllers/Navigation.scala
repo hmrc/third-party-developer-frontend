@@ -22,6 +22,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
+import play.api.libs.crypto.CookieSigner
 import service.{ApplicationService, SessionService}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,7 +31,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class Navigation @Inject()(val sessionService: SessionService,
                            val applicationService: ApplicationService,
                            val messagesApi: MessagesApi,
-                           val errorHandler: ErrorHandler)
+                           val errorHandler: ErrorHandler,
+                           val cookieSigner : CookieSigner)
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController with DevHubAuthWrapper {
 

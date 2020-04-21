@@ -64,7 +64,8 @@ class ManageApplicationsSpec
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
-      messagesApi
+      messagesApi,
+      cookieSigner
     )
 
     given(addApplicationController.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))

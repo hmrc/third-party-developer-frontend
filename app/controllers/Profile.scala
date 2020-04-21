@@ -23,6 +23,7 @@ import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
+import play.api.libs.crypto.CookieSigner
 import service.{ApplicationService, AuditService, SessionService}
 import views.html._
 
@@ -36,7 +37,8 @@ class Profile @Inject()(
   val sessionService: SessionService,
   val connector: ThirdPartyDeveloperConnector,
   val errorHandler: ErrorHandler,
-  val messagesApi: MessagesApi
+  val messagesApi: MessagesApi,
+  val cookieSigner : CookieSigner
 )
 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController with PasswordChange {

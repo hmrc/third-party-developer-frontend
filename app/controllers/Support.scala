@@ -21,6 +21,7 @@ import domain.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
+import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent}
 import service.{DeskproService, SessionService}
 import views.html.{supportEnquiry, supportThankyou}
@@ -31,7 +32,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class Support @Inject()(val deskproService: DeskproService,
                         val sessionService: SessionService,
                         val errorHandler: ErrorHandler,
-                        val messagesApi: MessagesApi
+                        val messagesApi: MessagesApi,
+                        val cookieSigner : CookieSigner
                        )
                        (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends BaseController with DevHubAuthWrapper {

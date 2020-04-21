@@ -20,6 +20,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
+import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.api.mvc.{Session => PlaySession}
 import service.AuditAction._
@@ -50,7 +51,8 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val sessionService: SessionService,
                                  val applicationService: ApplicationService,
                                  val messagesApi: MessagesApi,
-                                 val mfaMandateService: MfaMandateService)
+                                 val mfaMandateService: MfaMandateService,
+                                 val cookieSigner : CookieSigner)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedOutController with Auditing with DevHubAuthWrapper {
 

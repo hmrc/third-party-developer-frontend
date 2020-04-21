@@ -24,6 +24,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Mode}
+import play.api.libs.crypto.CookieSigner
 import uk.gov.hmrc.play.test.UnitSpec
 
 class CookieEncodingSpec extends UnitSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite  {
@@ -34,8 +35,9 @@ class CookieEncodingSpec extends UnitSpec with Matchers with MockitoSugar with G
       .in(Mode.Test)
       .build()
 
-
-  private val wrapper = new CookieEncoding { }
+  private val wrapper = new CookieEncoding{
+    override val cookieSigner: CookieSigner = fakeApplication().injector.instanceOf[CookieSigner]
+  }
 
   "decode cookie" should {
     "return session id when it is a valid cookie" in {

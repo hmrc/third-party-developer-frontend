@@ -22,14 +22,13 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain.{APISubscriptionStatus, Application}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import play.api.data
-import play.api.data.{Form, FormError}
+import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
-import play.api.libs.json.Json
 import play.api.mvc._
+import play.api.libs.crypto.CookieSigner
 import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
-import views.html.include.subscriptionFields
 import views.html.managesubscriptions.editApiMetadata
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -106,7 +105,8 @@ class ManageSubscriptions @Inject() (
     val applicationService: ApplicationService,
     val errorHandler: ErrorHandler,
     val messagesApi: MessagesApi,
-    val subFieldsService: SubscriptionFieldsService
+    val subFieldsService: SubscriptionFieldsService,
+    val cookieSigner : CookieSigner
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController
       with ApplicationHelper {

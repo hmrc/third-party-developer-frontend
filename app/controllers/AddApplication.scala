@@ -24,6 +24,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
+import play.api.libs.crypto.CookieSigner
 import service._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,7 +35,8 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
                                val sessionService: SessionService,
                                val auditService: AuditService,
                                val errorHandler: ErrorHandler,
-                               val messagesApi: MessagesApi
+                               val messagesApi: MessagesApi,
+                               val cookieSigner : CookieSigner
                                )
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController {
 

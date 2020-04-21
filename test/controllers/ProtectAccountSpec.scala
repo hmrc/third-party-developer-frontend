@@ -60,7 +60,8 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       messagesApi,
       mock[ErrorHandler],
-      mock[MfaMandateService]) {
+      mock[MfaMandateService],
+      cookieSigner) {
       override val qrCode: QRCode = mock[QRCode]
     }
 

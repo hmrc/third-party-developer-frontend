@@ -48,7 +48,8 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mock[ApplicationService],
       mock[config.ErrorHandler],
-      messagesApi)
+      messagesApi,
+      cookieSigner)
 
     given(underTest.sessionService.destroy(meq(session.sessionId))(any[HeaderCarrier]))
         .willReturn(Future.successful(NO_CONTENT))

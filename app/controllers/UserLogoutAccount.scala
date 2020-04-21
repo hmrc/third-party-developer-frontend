@@ -21,6 +21,7 @@ import domain.TicketId
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.MessagesApi
+import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, DiscardingCookie, Request}
 import service.{ApplicationService, DeskproService, SessionService}
 import views.html.signoutSurvey
@@ -32,7 +33,8 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val sessionService: SessionService,
                                   val applicationService: ApplicationService,
                                   val errorHandler: ErrorHandler,
-                                  val messagesApi: MessagesApi)
+                                  val messagesApi: MessagesApi,
+                                  val cookieSigner : CookieSigner)
                                  (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController {
 
