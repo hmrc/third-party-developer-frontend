@@ -107,11 +107,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     }
   }
 
-  // TODO: Remove me
-  def test : Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok("Hello " + request.developerSession.developer.firstName))
-  }
-
   def authenticate: Action[AnyContent] = Action.async { implicit request =>
     val requestForm = loginForm.bindFromRequest
 

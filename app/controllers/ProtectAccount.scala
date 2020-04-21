@@ -104,12 +104,6 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       })
   }
 
-  // TODO: Remove me
-  def test2 : Action[AnyContent] = loggedInAction { implicit request: UserRequest[AnyContent] => {
-      successful(Ok(test()))
-    }
-  }
-
   def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalConfirmation(Remove2SVConfirmForm.form)))
   }
