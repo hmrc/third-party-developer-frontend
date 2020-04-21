@@ -30,11 +30,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait HeaderEnricher {
 
-  def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]) =
+  def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]) : HeaderCarrier =
     user match {
-      case Some(dev) => hc.withExtraHeaders("X-email-address" -> dev.email, "X-name" -> dev.displayedNameEncoded)
+      case Some(dev) => enrichHeaders(hc, dev)
       case _ => hc
     }
+
+  def enrichHeaders(hc: HeaderCarrier, user: DeveloperSession) : HeaderCarrier =
+     hc.withExtraHeaders("X-email-address" -> user.email, "X-name" -> user.displayedNameEncoded)
 }
 
 // TODO : Remove AuthElement
@@ -93,15 +96,19 @@ abstract class ApplicationController()
 abstract class LoggedOutController()
 
 // TODO: Replace OptionalAuthElement with DevHubAuthWrapper
-  extends BaseController() with jp.t2v.lab.play2.auth.OptionalAuthElement with DevHubAuthWrapper {
-
-  import jp.t2v.lab.play2.stackc.RequestWithAttributes
+  extends BaseController() with DevHubAuthWrapper {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
     request match {
-      case x: RequestWithAttributes[_] => implicit val req = x
-        enrichHeaders(carrier, loggedIn)
+      case x: MaybeUserRequest[_] => {
+        implicit val req: MaybeUserRequest[_] = x
+        enrichHeaders(carrier, x.developerSession)
+      }
+      case x: UserRequest[_] => {
+        implicit val req: UserRequest[_] = x
+        enrichHeaders(carrier, x.developerSession)
+      }
       case _ => carrier
     }
   }
