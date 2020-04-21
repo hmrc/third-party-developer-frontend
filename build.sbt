@@ -20,7 +20,6 @@ lazy val appName = "third-party-developer-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test
 
-lazy val t2vVersion = "0.14.2"
 lazy val cucumberVersion = "1.2.5"
 lazy val seleniumVersion = "2.53.1"
 lazy val enumeratumVersion = "1.5.11"
@@ -33,7 +32,6 @@ lazy val compile = Seq(
   "uk.gov.hmrc" %% "url-builder" % "3.3.0-play-25",
   "uk.gov.hmrc" %% "play-json-union-formatter" % "1.7.0",
   "uk.gov.hmrc" %% "http-metrics" % "1.4.0",
-  "jp.t2v" %% "play2-auth" % t2vVersion,
   "uk.gov.hmrc" %% "json-encryption" % "4.5.0-play-25",
   "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
   "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.2.0-play-25",
@@ -56,7 +54,6 @@ lazy val test = Seq(
   "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
   "com.github.tomakehurst" % "wiremock" % "1.58" % testScope,
   "org.mockito" % "mockito-core" % "2.23.0" % testScope,
-  "jp.t2v" %% "play2-auth-test" % t2vVersion % testScope,
   "org.scalaj" %% "scalaj-http" % "2.3.0" % testScope,
   "org.scalacheck" %% "scalacheck" % "1.13.5" % testScope,
   // batik-bridge has a circular dependency on itself via transitive batik-script. Avoid that to work with updated build tools
