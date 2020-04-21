@@ -63,16 +63,16 @@ abstract class ApplicationController()
 
   def whenTeamMemberOnApp(applicationId: String)
                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    loggedInAction2 { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn2)
+    loggedInAction { implicit request =>
+      val stackedActions = Action andThen applicationAction(applicationId, loggedIn)
       stackedActions.async(fun)(request)
     }
   
   def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction2 { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn2) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
+    loggedInAction { implicit request =>
+      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
       stackedActions.async(fun)(request)
     }
   }
@@ -80,17 +80,17 @@ abstract class ApplicationController()
   def permissionThenCapabilityAction(permissions: Permission, capability: Capability)
                                     (applicationId: String)
                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction2 { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn2) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
+    loggedInAction { implicit request =>
+      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
       stackedActions.async(fun)(request)
     }
   }
 
   def subFieldsDefinitionsExistAction(applicationId: String)
                                     (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction2 { implicit request =>
+    loggedInAction { implicit request =>
       val stackedActions =
-        Action andThen applicationAction(applicationId, loggedIn2) andThen fieldDefinitionsExistRefiner
+        Action andThen applicationAction(applicationId, loggedIn) andThen fieldDefinitionsExistRefiner
       stackedActions.async(fun)(request)
     }
   }

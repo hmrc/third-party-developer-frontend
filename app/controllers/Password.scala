@@ -74,7 +74,7 @@ class Password @Inject()(val auditService: AuditService,
 
   import ErrorFormBuilder.GlobalError
 
-  def showForgotPassword() = loggedOutAction2 { implicit request =>
+  def showForgotPassword() = loggedOutAction { implicit request =>
     Future.successful(Ok(forgotPassword(ForgotPasswordForm.form)))
   }
 

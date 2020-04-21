@@ -36,7 +36,7 @@ class Navigation @Inject()(val sessionService: SessionService,
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController with DevHubAuthWrapper {
 
-  def navLinks: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa2 { implicit request: MaybeUserRequest[AnyContent] =>
+  def navLinks: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request: MaybeUserRequest[AnyContent] =>
     val username = request.developerSession.flatMap(_.loggedInName)
 
     Future.successful(Ok(Json.toJson(UserNavLinks(username))))

@@ -40,25 +40,25 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
                                )
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController {
 
-  def manageApps: Action[AnyContent] = loggedInAction2 { implicit request =>
-    applicationService.fetchByTeamMemberEmail(loggedIn2.email) flatMap { apps =>
+  def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
+    applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>
       if (apps.isEmpty) {
         Future.successful(Ok(views.html.addApplicationSubordinateEmptyNest()))
       } else {
-        Future.successful(Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn2.email)))))
+        Future.successful(Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn.email)))))
       }
     }
   }
 
-  def tenDaysWarning(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.tenDaysWarning()))
   }
 
-  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.addApplicationStartSubordinate()))
   }
 
-  def addApplicationPrincipal(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.addApplicationStartPrincipal()))
   }
 
@@ -73,12 +73,12 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
       }
     }
 
-  def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
     Future.successful(Ok(views.html.addApplicationName(form, environment)))
   }
 
-  def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction2 {
+  def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction {
     implicit request =>
 
       val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
@@ -88,7 +88,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
 
       def addApplication(form: AddApplicationNameForm) = {
         applicationService
-          .createForUser(CreateApplicationRequest.fromAddApplicationJourney(loggedIn2, form, environment))
+          .createForUser(CreateApplicationRequest.fromAddApplicationJourney(loggedIn, form, environment))
       }
 
       def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =

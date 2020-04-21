@@ -44,7 +44,7 @@ class Registration @Inject()(override val sessionService: SessionService,
 
   val regForm: Form[RegisterForm] = RegistrationForm.form
 
-  def registration() = loggedOutAction2 { implicit request =>
+  def registration() = loggedOutAction { implicit request =>
     Future.successful(Ok(views.html.registration(regForm)))
   }
 

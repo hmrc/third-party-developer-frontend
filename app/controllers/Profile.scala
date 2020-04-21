@@ -52,30 +52,30 @@ class Profile @Inject()(
     views.html.changeProfile(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
   }
 
-  def showProfile(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def showProfile(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.profile()))
   }
 
-  def changeProfile(): Action[AnyContent] = loggedInAction2 { implicit request =>
-    Future.successful(Ok(changeProfileView(loggedIn2)))
+  def changeProfile(): Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(changeProfileView(loggedIn)))
   }
 
-  def updateProfile(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def updateProfile(): Action[AnyContent] = loggedInAction { implicit request =>
     val requestForm = profileForm.bindFromRequest
     requestForm.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.changeProfile(formWithErrors.firstnameGlobal().lastnameGlobal())))
       },
-      profile => connector.updateProfile(loggedIn2.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
+      profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ => {
 
-          val updatedDeveloper = loggedIn2.developer.copy(
+          val updatedDeveloper = loggedIn.developer.copy(
               firstName = profile.firstName,
               lastName = profile.lastName,
               organisation = profile.organisation)
 
-          val updatedLoggedIn = loggedIn2.copy(
-            session = loggedIn2.session.copy(developer = updatedDeveloper)
+          val updatedLoggedIn = loggedIn.copy(
+            session = loggedIn.session.copy(developer = updatedDeveloper)
           )
 
           Ok(profileUpdated("profile updated", "Manage profile", "manage-profile", updatedLoggedIn))
@@ -84,21 +84,21 @@ class Profile @Inject()(
     )
   }
 
-  def showPasswordPage(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def showPasswordPage(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(changeProfilePassword(passwordForm)))
   }
 
-  def updatePassword(): Action[AnyContent] = loggedInAction2 { implicit request =>
-    processPasswordChange(loggedIn2.email,
+  def updatePassword(): Action[AnyContent] = loggedInAction { implicit request =>
+    processPasswordChange(loggedIn.email,
       Ok(passwordUpdated("password changed", "Password changed", "change-password")),
       changeProfilePassword(_))
   }
 
-  def requestDeletion(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def requestDeletion(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(profileDeleteConfirmation(DeleteProfileForm.form)))
   }
 
-  def deleteAccount(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def deleteAccount(): Action[AnyContent] = loggedInAction { implicit request =>
     val form = deleteProfileForm.bindFromRequest
 
     form.fold(
@@ -108,10 +108,10 @@ class Profile @Inject()(
       validForm => {
         validForm.confirmation match {
           case Some("true") => applicationService
-            .requestDeveloperAccountDeletion(loggedIn2.displayedName, loggedIn2.email)
+            .requestDeveloperAccountDeletion(loggedIn.displayedName, loggedIn.email)
             .map(_ => Ok(profileDeleteSubmitted()))
 
-          case _ => Future.successful(Ok(changeProfileView(loggedIn2)))
+          case _ => Future.successful(Ok(changeProfileView(loggedIn)))
         }
       }
     )

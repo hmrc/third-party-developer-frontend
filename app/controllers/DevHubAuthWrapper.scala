@@ -42,18 +42,17 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
   private val cookieMaxAge = Some(900) // 15 mins // TODO: Load from config
 
   // TODO: Name :(
-  implicit def loggedIn2(implicit req : UserRequest[_]) : DeveloperSession = {
+  implicit def loggedIn(implicit req : UserRequest[_]) : DeveloperSession = {
     req.developerSession
   }
 
-  def atLeastPartLoggedInEnablingMfa2(body: UserRequest[AnyContent] => Future[Result])
-                                     (implicit ec: ExecutionContext): Action[AnyContent] =
+  def atLeastPartLoggedInEnablingMfa(body: UserRequest[AnyContent] => Future[Result])
+                                    (implicit ec: ExecutionContext): Action[AnyContent] =
     loggedInActionWithFilter(body)(_ => true)
 
-
   // TODO: Rename back to loggedInAction (and any other XXX2 methods / classes)
-  def loggedInAction2(body: UserRequest[AnyContent] => Future[Result])
-                     (implicit ec: ExecutionContext) : Action[AnyContent] =
+  def loggedInAction(body: UserRequest[AnyContent] => Future[Result])
+                    (implicit ec: ExecutionContext) : Action[AnyContent] =
     loggedInActionWithFilter(body)(_.loggedInState == LoggedInState.LOGGED_IN)
 
   private def loggedInActionWithFilter(body: UserRequest[AnyContent] => Future[Result])
@@ -70,16 +69,16 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
       })
   }
 
-  def maybeAtLeastPartLoggedInEnablingMfa2(body: MaybeUserRequest[AnyContent] => Future[Result])
-                          (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+  def maybeAtLeastPartLoggedInEnablingMfa(body: MaybeUserRequest[AnyContent] => Future[Result])
+                                         (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] =>
       loadSession.flatMap(
         maybeDeveloperSession => body(MaybeUserRequest(maybeDeveloperSession, request))
       )
   }
 
-  def loggedOutAction2(body: Request[AnyContent] => Future[Result])
-                      (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+  def loggedOutAction(body: Request[AnyContent] => Future[Result])
+                     (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] =>
       loadSession.flatMap{
         case Some(developerSession) if developerSession.loggedInState.isLoggedIn => loginSucceeded(request)

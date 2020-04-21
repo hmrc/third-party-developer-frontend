@@ -62,7 +62,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
 
-  def login: Action[AnyContent] = loggedOutAction2 { implicit request =>
+  def login: Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(signIn("Sign in", loginForm)))
   }
 
@@ -108,7 +108,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   }
 
   // TODO: Remove me
-  def test : Action[AnyContent] = loggedInAction2 { implicit request =>
+  def test : Action[AnyContent] = loggedInAction { implicit request =>
     successful(Ok("Hello " + request.developerSession.developer.firstName))
   }
 
@@ -160,15 +160,15 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     )
   }
 
-  def get2SVHelpConfirmationPage(): Action[AnyContent] = loggedOutAction2 { implicit request =>
+  def get2SVHelpConfirmationPage(): Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(protectAccountNoAccessCode()))
   }
 
-  def get2SVHelpCompletionPage(): Action[AnyContent] = loggedOutAction2 { implicit request =>
+  def get2SVHelpCompletionPage(): Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(protectAccountNoAccessCodeComplete()))
   }
 
-  def confirm2SVHelp(): Action[AnyContent] = loggedOutAction2 { implicit request =>
+  def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
     applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeComplete()))
   }
 }

@@ -49,16 +49,16 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   private val scale = 4
   val qrCode = QRCode(scale)
 
-  def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfa2 { implicit request =>
-    thirdPartyDeveloperConnector.createMfaSecret(loggedIn2.email).map(secret => {
-      val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn2.email)
+  def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
+    thirdPartyDeveloperConnector.createMfaSecret(loggedIn.email).map(secret => {
+      val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(protectAccountSetup(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
     })
   }
 
-  def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfa2 { implicit request =>
-    thirdPartyDeveloperConnector.fetchDeveloper(loggedIn2.email).map(dev => {
+  def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
+    thirdPartyDeveloperConnector.fetchDeveloper(loggedIn.email).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
         case true => Ok(protectedAccount())
         case false => Ok(protectaccount.protectAccount())
@@ -66,18 +66,18 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
     })
   }
 
-  def getAccessCodePage: Action[AnyContent] = atLeastPartLoggedInEnablingMfa2 { implicit request =>
+  def getAccessCodePage: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
     Future.successful(Ok(protectAccountAccessCode(ProtectAccountForm.form)))
   }
 
-  def getProtectAccountCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfa2 { implicit request =>
+  def getProtectAccountCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
     Future.successful(Ok(protectAccountCompleted()))
   }
 
-  def protectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfa2 { implicit request =>
+  def protectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfa { implicit request =>
 
     def logonAndComplete(): Result = {
-      thirdPartyDeveloperConnector.updateSessionLoggedInState(loggedIn2.session.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+      thirdPartyDeveloperConnector.updateSessionLoggedInState(loggedIn.session.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
       Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 
@@ -95,7 +95,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   },
       (form: ProtectAccountForm) => {
         for {
-          mfaResponse <- mfaService.enableMfa(loggedIn2.email, form.accessCode)
+          mfaResponse <- mfaService.enableMfa(loggedIn.email, form.accessCode)
           result = {
             if (mfaResponse.totpVerified) logonAndComplete()
             else invalidCode(form)
@@ -105,16 +105,16 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   }
 
   // TODO: Remove me
-  def test2 : Action[AnyContent] = loggedInAction2 { implicit request: UserRequest[AnyContent] => {
+  def test2 : Action[AnyContent] = loggedInAction { implicit request: UserRequest[AnyContent] => {
       successful(Ok(test()))
     }
   }
 
-  def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction2 { implicit request =>
+  def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalConfirmation(Remove2SVConfirmForm.form)))
   }
 
-  def confirm2SVRemoval: Action[AnyContent] = loggedInAction2 { implicit request =>
+  def confirm2SVRemoval: Action[AnyContent] = loggedInAction { implicit request =>
     Remove2SVConfirmForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountRemovalConfirmation(form)))
     },
@@ -126,16 +126,16 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       })
   }
 
-  def get2SVRemovalAccessCodePage(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def get2SVRemovalAccessCodePage(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalAccessCode(ProtectAccountForm.form)))
   }
 
-  def remove2SV(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def remove2SV(): Action[AnyContent] = loggedInAction { implicit request =>
     ProtectAccountForm.form.bindFromRequest.fold(form => {
       Future.successful(BadRequest(protectAccountRemovalAccessCode(form)))
     },
       form => {
-        mfaService.removeMfa(loggedIn2.email, form.accessCode).map(r =>
+        mfaService.removeMfa(loggedIn.email, form.accessCode).map(r =>
           r.totpVerified match {
             case true => Redirect(routes.ProtectAccount.get2SVRemovalCompletePage())
             case _ =>
@@ -148,19 +148,19 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       })
   }
 
-  def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalComplete()))
   }
 
-  def get2SVNotSetPage(): Action[AnyContent] = loggedInAction2 { implicit request =>
+  def get2SVNotSetPage(): Action[AnyContent] = loggedInAction { implicit request =>
     successful(Ok(userDidNotAdd2SV()))
   }
   
-  def get2svRecommendationPage(): Action[AnyContent] = loggedInAction2 {
+  def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
     implicit request => {
 
       for {
-        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn2.email)
+        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn.email)
         mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
       }  yield (Ok(add2SV(mfaMandateDetails)))
     }

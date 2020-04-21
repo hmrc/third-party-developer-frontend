@@ -43,7 +43,7 @@ class Support @Inject()(val deskproService: DeskproService,
   private def fullyLoggedInUser(implicit request: MaybeUserRequest[AnyContent]): Option[DeveloperSession] =
     request.developerSession.filter(_.loggedInState.isLoggedIn)
 
-  def raiseSupportEnquiry: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa2 { implicit request =>
+  def raiseSupportEnquiry: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val prefilledForm = fullyLoggedInUser
       .fold(supportForm) { user =>
         supportForm.bind(Map("fullname" -> user.displayedName, "emailaddress" -> user.email)).discardingErrors
@@ -52,7 +52,7 @@ class Support @Inject()(val deskproService: DeskproService,
 
   }
 
-  def submitSupportEnquiry = maybeAtLeastPartLoggedInEnablingMfa2 { implicit request =>
+  def submitSupportEnquiry = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val requestForm = supportForm.bindFromRequest
     val displayName = fullyLoggedInUser.map(_.displayedName)
     requestForm.fold(
@@ -60,7 +60,7 @@ class Support @Inject()(val deskproService: DeskproService,
       formData => deskproService.submitSupportEnquiry(formData).map { _ => Redirect(routes.Support.thankyou().url, SEE_OTHER) })
   }
 
-  def thankyou = maybeAtLeastPartLoggedInEnablingMfa2 { implicit request =>
+  def thankyou = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val displayName = fullyLoggedInUser.map(_.displayedName)
     Future.successful(Ok(supportThankyou("Thank you", displayName)))
   }
