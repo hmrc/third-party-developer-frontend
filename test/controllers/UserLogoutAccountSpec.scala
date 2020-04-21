@@ -54,18 +54,24 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         .willReturn(Future.successful(NO_CONTENT))
 
     def givenUserLoggedIn() =
-      given(underTest.sessionService.fetch(meq(session.sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(session)))
+      given(underTest.sessionService
+        .fetch(meq(session.sessionId))(any[HeaderCarrier]))
+        .willReturn(Future.successful(Some(session)))
 
     val sessionParams = Seq("csrfToken" ->  fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val requestWithCsrfToken = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+
+    val loggedInRequestWithCsrfToken = FakeRequest()
+      .withLoggedIn(underTest, implicitly)(sessionId)
+      .withSession(sessionParams: _*)
+
+    val notLoggedInRequestWithCsrfToken = FakeRequest()
+      .withSession(sessionParams: _*)
   }
-
-
 
   "logging out" should {
 
     "display the logout confirmation page when the user calls logout" in new Setup {
-      val request = requestWithCsrfToken
+      val request = loggedInRequestWithCsrfToken
       val result = await(underTest.logout()(request))
 
       status(result) shouldBe 200
@@ -82,7 +88,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "destroy session on logout" in new Setup {
-      implicit val request = requestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
+      implicit val request = loggedInRequestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
       val result = await(underTest.logout()(request))
 
       verify(underTest.sessionService, atLeastOnce()).destroy(meq(session.sessionId))(any[HeaderCarrier])
@@ -92,8 +98,9 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   "logoutSurvey" should {
 
-    "redirect to the logauthConfigin page if the user is not logged in" in new Setup {
-      val request = requestWithCsrfToken
+    "redirect to the log authConfig in page if the user is not logged in" in new Setup {
+      val request = notLoggedInRequestWithCsrfToken
+
       val result = await(underTest.logoutSurvey()(request))
 
       status(result) shouldBe 303
@@ -103,7 +110,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     "display the survey page if the user is logged in" in new Setup {
       givenUserLoggedIn()
 
-      val request = requestWithCsrfToken
+      val request = loggedInRequestWithCsrfToken
       val result = await(addToken(underTest.logoutSurvey())(request))
 
       status(result) shouldBe 200
@@ -114,7 +121,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   "logoutSurveyAction" should {
     "redirect to the login page if the user is not logged in" in new Setup {
-      val request = requestWithCsrfToken.withFormUrlEncodedBody(
+      val request = notLoggedInRequestWithCsrfToken.withFormUrlEncodedBody(
         "blah" -> "thing"
       )
       val result = await(underTest.logoutSurveyAction()(request))
@@ -134,7 +141,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
 
       val form = SignOutSurveyForm(Some(2), "no suggestions", s"${developerSession.developer.firstName} ${developerSession.developer.lastName}", developerSession.email, isJavascript = true)
-      val request = requestWithCsrfToken.withFormUrlEncodedBody(
+      val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(
         "rating" -> form.rating.get.toString, "email" -> form.email, "name" -> form.name,
         "isJavascript" -> form.isJavascript.toString, "improvementSuggestions" -> form.improvementSuggestions
       )
@@ -159,7 +166,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
 
       val form = SignOutSurveyForm(None, "no suggestions", s"${developerSession.developer.firstName} ${developerSession.developer.lastName}", developerSession.developer.email, isJavascript = true)
-      val request = requestWithCsrfToken.withFormUrlEncodedBody(
+      val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(
         "rating" -> form.rating.getOrElse("").toString, "email" -> form.email, "name" -> form.name,
         "isJavascript" -> form.isJavascript.toString, "improvementSuggestions" -> form.improvementSuggestions
       )
