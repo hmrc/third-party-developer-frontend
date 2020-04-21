@@ -68,7 +68,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   def accountLocked: Action[AnyContent] = Action.async { implicit request =>
     for {
-      _ <- tokenAccessor.extract(request)
+      _ <- extractSessionIdFromCookie(request)
         .map(sessionService.destroy)
         .getOrElse(successful(()))
     } yield Locked(views.html.accountLocked())

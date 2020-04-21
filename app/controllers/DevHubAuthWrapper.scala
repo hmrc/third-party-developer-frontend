@@ -87,7 +87,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
       }
   }
 
-  private def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
+  def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
     Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
     val uri = request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps().url)
     Future.successful(Redirect(uri).withNewSession)
@@ -108,11 +108,20 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
   }
 
   def withSessionCookie(result : Result, sessionId: String): Result = {
-    val c = Cookie(cookieName2,  encodeCookie(sessionId), cookieMaxAge, cookiePathOption, cookieDomainOption, cookieSecureOption, cookieHttpOnlyOption)
-    result.withCookies(c)
+    result.withCookies(createCookie(sessionId))
   }
 
-
+  def createCookie(sessionId: String): Cookie = {
+    Cookie(
+      cookieName2,
+      encodeCookie(sessionId),
+      cookieMaxAge,
+      cookiePathOption,
+      cookieDomainOption,
+      cookieSecureOption,
+      cookieHttpOnlyOption
+    )
+  }
 
   def extractSessionIdFromCookie(request: RequestHeader): Option[String] = {
     request.cookies.get(cookieName2) match {

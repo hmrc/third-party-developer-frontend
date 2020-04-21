@@ -17,7 +17,7 @@
 package controllers
 
 import cats.data.NonEmptyList
-import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import model.ApplicationViewModel
 import play.api.i18n.I18nSupport
@@ -38,6 +38,10 @@ trait HeaderEnricher {
 
   def enrichHeaders(hc: HeaderCarrier, user: DeveloperSession) : HeaderCarrier =
      hc.withExtraHeaders("X-email-address" -> user.email, "X-name" -> user.displayedNameEncoded)
+
+  implicit class RequestWithAjaxSupport(h: Headers) {
+    def isAjaxRequest: Boolean = h.get("X-Requested-With").contains("XMLHttpRequest")
+  }
 }
 
 // TODO : Remove AuthElement
@@ -95,7 +99,6 @@ abstract class ApplicationController()
 
 abstract class LoggedOutController()
 
-// TODO: Replace OptionalAuthElement with DevHubAuthWrapper
   extends BaseController() with DevHubAuthWrapper {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
@@ -123,16 +126,18 @@ trait HeaderCarrierConversion
 }
 
 abstract class BaseController()
-  extends AuthConfigImpl with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
+  extends DevHubAuthWrapper with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
 
   val errorHandler: ErrorHandler
   val sessionService: SessionService
 
   implicit def ec: ExecutionContext
 
-  override implicit val appConfig: ApplicationConfig
+  implicit val appConfig: ApplicationConfig
 
   def ensureLoggedOut(implicit request: Request[_], hc: HeaderCarrier) = {
-    tokenAccessor.extract(request).map(sessionService.destroy).getOrElse(Future.successful(()))
+    extractSessionIdFromCookie(request)
+      .map(sessionService.destroy)
+      .getOrElse(Future.successful(()))
   }
 }
