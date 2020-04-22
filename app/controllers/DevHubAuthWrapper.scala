@@ -18,6 +18,7 @@ package controllers
 
 import java.security.MessageDigest
 
+import config.ApplicationConfig
 import domain.{DeveloperSession, LoggedInState}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
@@ -25,21 +26,27 @@ import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 
+import cats.implicits._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 // TODO : Add some test for this please.
 trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with CookieEncoding {
+  implicit val appConfig: ApplicationConfig
+
+  private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
+  private val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
 
   val sessionService : SessionService
 
   // TODO: Can / should we make private
   val cookieName = "PLAY2AUTH_SESS_ID"
 
-  private val cookieSecureOption: Boolean = false // TODO: Load from config (MUST be true in prod.
+  private val cookieSecureOption: Boolean = appConfig.securedCookie
   private val cookieHttpOnlyOption: Boolean = true
   private val cookieDomainOption: Option[String] = None
   private val cookiePathOption: String = "/"
-  private val cookieMaxAge = Some(900) // 15 mins // TODO: Load from config
+  private val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
 
   // TODO: Name :(
   implicit def loggedIn(implicit req : UserRequest[_]) : DeveloperSession = {
@@ -48,12 +55,12 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
 
   def atLeastPartLoggedInEnablingMfa(body: UserRequest[AnyContent] => Future[Result])
                                     (implicit ec: ExecutionContext): Action[AnyContent] =
-    loggedInActionWithFilter(body)(_ => true)
+    loggedInActionWithFilter(body)(alwaysTrueFilter)
 
   // TODO: Rename back to loggedInAction (and any other XXX2 methods / classes)
   def loggedInAction(body: UserRequest[AnyContent] => Future[Result])
                     (implicit ec: ExecutionContext) : Action[AnyContent] =
-    loggedInActionWithFilter(body)(_.loggedInState == LoggedInState.LOGGED_IN)
+    loggedInActionWithFilter(body)(onlyTrueIfLoggedInFilter)
 
   private def loggedInActionWithFilter(body: UserRequest[AnyContent] => Future[Result])
                                       (filter : DeveloperSession => Boolean)
