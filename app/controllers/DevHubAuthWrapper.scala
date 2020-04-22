@@ -32,7 +32,6 @@ import scala.concurrent.{ExecutionContext, Future}
 case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
 case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A]) extends WrappedRequest[A](request)
 
-// TODO : Add some test for this please.
 trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with CookieEncoding {
   private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
   private val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
