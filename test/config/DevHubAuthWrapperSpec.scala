@@ -16,11 +16,10 @@
 
 package config
 
-import controllers.{routes, DevHubAuthWrapper}
+import controllers.{BaseControllerSpec, DevHubAuthWrapper, routes}
 import domain.{DeveloperSession, LoggedInState}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.Matchers
-import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Results.EmptyContent
 import play.api.test.FakeRequest
@@ -29,26 +28,24 @@ import uk.gov.hmrc.play.test.UnitSpec
 import org.mockito.BDDMockito.given
 import uk.gov.hmrc.http.HeaderCarrier
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import utils.{DeveloperSession => DeveloperSessionBuilder, SharedMetricsClearDown}
+import utils.{SharedMetricsClearDown, DeveloperSession => DeveloperSessionBuilder}
 import play.api.mvc.Results._
 import play.api.http.Status._
 import play.api.mvc.Cookie
 import play.api.test.Helpers.{defaultAwaitTimeout, redirectLocation}
-
 import cats.implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DevHubAuthWrapperSpec extends UnitSpec with MockitoSugar with Matchers with GuiceOneAppPerTest with SharedMetricsClearDown {
+class DevHubAuthWrapperSpec extends BaseControllerSpec with UnitSpec with MockitoSugar with Matchers {
   class TestDevHubAuthWrapper(implicit val appConfig: ApplicationConfig) extends DevHubAuthWrapper {
     override val sessionService: SessionService = mock[SessionService]
     override val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]
   }
 
   class Setup(developerSession: Option[DeveloperSession]) {
-    implicit val applicationConfig: ApplicationConfig = mock[ApplicationConfig]
-    given(applicationConfig.securedCookie).willReturn(false)
+    given(appConfig.securedCookie).willReturn(false)
 
     val underTest = new TestDevHubAuthWrapper()
     val sessionId = "sessionId"
