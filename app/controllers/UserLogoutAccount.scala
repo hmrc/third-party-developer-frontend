@@ -67,6 +67,6 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
       .map(sessionId => sessionService.destroy(sessionId))
       .getOrElse(Future.successful(()))
       .map(_ => Ok(views.html.logoutConfirmation()).withNewSession)
-      .map(result => result.discardingCookies(DiscardingCookie(cookieName2)))
+      .map(result => result.discardingCookies(DiscardingCookie(cookieName)))
   }
 }

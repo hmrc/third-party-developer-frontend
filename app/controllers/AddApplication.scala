@@ -36,8 +36,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
                                val auditService: AuditService,
                                val errorHandler: ErrorHandler,
                                val messagesApi: MessagesApi,
-                               val cookieSigner : CookieSigner
-                               )
+                               val cookieSigner : CookieSigner)
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>

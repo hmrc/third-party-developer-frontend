@@ -33,7 +33,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
   val sessionService : SessionService
 
   // TODO: Can / should we make private
-  val cookieName2 = "PLAY2AUTH_SESS_ID"
+  val cookieName = "PLAY2AUTH_SESS_ID"
 
   private val cookieSecureOption: Boolean = false // TODO: Load from config (MUST be true in prod.
   private val cookieHttpOnlyOption: Boolean = true
@@ -100,7 +100,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
 
   private def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
     (for {
-      cookie <- request.cookies.get(cookieName2)
+      cookie <- request.cookies.get(cookieName)
       sessionId <- decodeCookie(cookie.value)
     } yield fetchDeveloperSession(sessionId))
       .getOrElse(Future.successful(None))
@@ -112,7 +112,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
 
   def createCookie(sessionId: String): Cookie = {
     Cookie(
-      cookieName2,
+      cookieName,
       encodeCookie(sessionId),
       cookieMaxAge,
       cookiePathOption,
@@ -123,7 +123,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
   }
 
   def extractSessionIdFromCookie(request: RequestHeader): Option[String] = {
-    request.cookies.get(cookieName2) match {
+    request.cookies.get(cookieName) match {
       case Some(cookie) => decodeCookie(cookie.value)
       case _ => None
     }
