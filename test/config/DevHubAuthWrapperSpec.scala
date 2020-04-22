@@ -1,6 +1,22 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package config
 
-import controllers.{routes, DevHubAuthWrapper}
+import controllers.{DevHubAuthWrapper, routes}
 import domain.LoggedInState
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.Matchers
@@ -13,16 +29,16 @@ import uk.gov.hmrc.play.test.UnitSpec
 import org.mockito.BDDMockito.given
 import uk.gov.hmrc.http.HeaderCarrier
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import utils.DeveloperSession
+import utils.{DeveloperSession, SharedMetricsClearDown}
 import play.api.mvc.Results._
 import play.api.http.Status._
+import play.api.mvc.Cookie
 import play.api.test.Helpers.{defaultAwaitTimeout, redirectLocation}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-//// TODO: Migrate some of these tests to DevHubAuthWrapper
-class DevHubAuthWrapperSpec extends UnitSpec with MockitoSugar with Matchers with GuiceOneAppPerTest {
+class DevHubAuthWrapperSpec extends UnitSpec with MockitoSugar with Matchers with GuiceOneAppPerTest with SharedMetricsClearDown {
   "DebHubAuthWrapper" when {
     implicit val applicationConfig: ApplicationConfig = mock[ApplicationConfig]
     given(applicationConfig.securedCookie).willReturn(false)
@@ -91,6 +107,40 @@ class DevHubAuthWrapperSpec extends UnitSpec with MockitoSugar with Matchers wit
           val result = await(action()(request))
           status(result) shouldBe OK
         }
+      }
+    }
+
+    "the user is not logged in" when {
+      val action = underTest.atLeastPartLoggedInEnablingMfaAction { implicit request =>
+        Future.successful(Ok(EmptyContent()))
+      }
+
+      "they have no cookie" in {
+        implicit val requestWithNoCookie = FakeRequest()
+
+        val result = await(action()(requestWithNoCookie))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+      }
+
+      "they have a cookie but it is invalid" in {
+        implicit val requestWithInvalidCookie = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID","InvalidCookieValue"))
+
+        val result = await(action()(requestWithInvalidCookie))
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+      }
+
+      "they have a valid cookie but it does not exist in the session service" in {
+        implicit val requestWithNoRealSession = FakeRequest().withCookies(underTest.createCookie(sessionId))
+
+        given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
+          .willReturn(None)
+
+        val result = await(action()(requestWithNoRealSession))
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
       }
     }
   }
