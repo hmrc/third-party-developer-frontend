@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package config
+package controllers
 
-import controllers.{BaseControllerSpec, DevHubAuthWrapper, routes}
-import domain.{DeveloperSession, LoggedInState}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.Matchers
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.Results.EmptyContent
-import play.api.test.FakeRequest
-import service.SessionService
-import uk.gov.hmrc.play.test.UnitSpec
-import org.mockito.BDDMockito.given
-import uk.gov.hmrc.http.HeaderCarrier
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import utils.{SharedMetricsClearDown, DeveloperSession => DeveloperSessionBuilder}
-import play.api.mvc.Results._
-import play.api.http.Status._
-import play.api.mvc.Cookie
-import play.api.test.Helpers.{defaultAwaitTimeout, redirectLocation}
 import cats.implicits._
+import config.ApplicationConfig
+import domain.{DeveloperSession, LoggedInState}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.BDDMockito.given
+import org.scalatest.Matchers
+import org.scalatest.mockito.MockitoSugar
+import play.api.http.Status._
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.Cookie
+import play.api.mvc.Results.{EmptyContent, _}
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{defaultAwaitTimeout, redirectLocation}
+import service.SessionService
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
+import utils.{DeveloperSession => DeveloperSessionBuilder}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
