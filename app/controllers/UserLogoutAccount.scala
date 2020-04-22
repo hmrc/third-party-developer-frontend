@@ -38,13 +38,13 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                  (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController {
 
-  def logoutSurvey = atLeastPartLoggedInEnablingMfa { implicit request =>
+  def logoutSurvey = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)
 
     Future.successful(Ok(page))
   }
 
-  def logoutSurveyAction = atLeastPartLoggedInEnablingMfa { implicit request =>
+  def logoutSurveyAction = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     SignOutSurveyForm.form.bindFromRequest.value match {
       case Some(form) =>
         val res: Future[TicketId] = deskproService.submitSurvey(form)

@@ -18,14 +18,13 @@ package controllers
 
 import java.security.MessageDigest
 
-import config.ApplicationConfig
+import config.{ApplicationConfig, ErrorHandler}
 import domain.{DeveloperSession, LoggedInState}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-
 import cats.implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -53,8 +52,8 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
     req.developerSession
   }
 
-  def atLeastPartLoggedInEnablingMfa(body: UserRequest[AnyContent] => Future[Result])
-                                    (implicit ec: ExecutionContext): Action[AnyContent] =
+  def atLeastPartLoggedInEnablingMfaAction(body: UserRequest[AnyContent] => Future[Result])
+                                          (implicit ec: ExecutionContext): Action[AnyContent] =
     loggedInActionWithFilter(body)(alwaysTrueFilter)
 
   def loggedInAction(body: UserRequest[AnyContent] => Future[Result])
@@ -135,7 +134,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
     }
   }
 
-  def destroySession(request: RequestHeader)(implicit hc: HeaderCarrier) = {
+  def destroySession(request: RequestHeader)(implicit hc: HeaderCarrier): Option[Future[Int]] = {
     extractSessionIdFromCookie(request)
       .map(sessionId => sessionService.destroy(sessionId))
   }

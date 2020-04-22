@@ -124,9 +124,7 @@ trait HeaderCarrierConversion
     HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
 }
 
-abstract class BaseController()
-  extends DevHubAuthWrapper with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
-
+abstract class BaseController() extends DevHubAuthWrapper with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
   val errorHandler: ErrorHandler
   val sessionService: SessionService
 
