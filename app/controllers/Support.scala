@@ -36,7 +36,7 @@ class Support @Inject()(val deskproService: DeskproService,
                         val cookieSigner : CookieSigner
                        )
                        (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends BaseController with DevHubAuthWrapper {
+  extends BaseController {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 

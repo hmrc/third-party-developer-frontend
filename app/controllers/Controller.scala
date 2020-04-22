@@ -44,7 +44,7 @@ trait HeaderEnricher {
   }
 }
 
-abstract class LoggedInController extends BaseController with DevHubAuthWrapper
+abstract class LoggedInController extends BaseController
 
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
@@ -98,7 +98,7 @@ abstract class ApplicationController()
 
 abstract class LoggedOutController()
 
-  extends BaseController() with DevHubAuthWrapper {
+  extends BaseController() with ExtendedDevHubAuthWrapper {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
@@ -131,10 +131,4 @@ abstract class BaseController() extends DevHubAuthWrapper with I18nSupport with 
   implicit def ec: ExecutionContext
 
   implicit val appConfig: ApplicationConfig
-
-  def ensureLoggedOut(implicit request: Request[_], hc: HeaderCarrier) = {
-    extractSessionIdFromCookie(request)
-      .map(sessionService.destroy)
-      .getOrElse(Future.successful(()))
-  }
 }

@@ -36,7 +36,7 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val messagesApi: MessagesApi,
                                   val cookieSigner : CookieSigner)
                                  (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController {
+  extends LoggedInController with ExtendedDevHubAuthWrapper {
 
   def logoutSurvey = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)

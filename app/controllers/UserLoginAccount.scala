@@ -54,7 +54,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val mfaMandateService: MfaMandateService,
                                  val cookieSigner : CookieSigner)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController with Auditing with DevHubAuthWrapper {
+  extends LoggedOutController with Auditing {
 
   import play.api.data._
 

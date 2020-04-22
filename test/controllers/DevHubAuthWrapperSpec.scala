@@ -38,7 +38,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class DevHubAuthWrapperSpec extends BaseControllerSpec with UnitSpec with MockitoSugar with Matchers {
-  class TestDevHubAuthWrapper(implicit val appConfig: ApplicationConfig) extends DevHubAuthWrapper {
+  class TestDevHubAuthWrapper(implicit val appConfig: ApplicationConfig) extends ExtendedDevHubAuthWrapper {
     override val sessionService: SessionService = mock[SessionService]
     override val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]
   }

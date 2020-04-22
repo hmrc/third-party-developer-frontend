@@ -44,7 +44,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
                                val mfaMandateService: MfaMandateService,
                                val cookieSigner : CookieSigner)
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController with DevHubAuthWrapper{
+  extends LoggedInController {
 
   private val scale = 4
   val qrCode = QRCode(scale)

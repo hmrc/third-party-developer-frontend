@@ -38,16 +38,17 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
 
   implicit val appConfig: ApplicationConfig
 
-  val sessionService : SessionService
+  val sessionService: SessionService
 
-  private val cookieName = "PLAY2AUTH_SESS_ID"
+  // TODO: Reduce access?
+  protected val cookieName = "PLAY2AUTH_SESS_ID"
   private val cookieSecureOption: Boolean = appConfig.securedCookie
   private val cookieHttpOnlyOption: Boolean = true
   private val cookieDomainOption: Option[String] = None
   private val cookiePathOption: String = "/"
   private val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
 
-  implicit def loggedIn(implicit req : UserRequest[_]) : DeveloperSession = {
+  implicit def loggedIn(implicit req: UserRequest[_]): DeveloperSession = {
     req.developerSession
   }
 
@@ -56,12 +57,12 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
     loggedInActionWithFilter(body)(alwaysTrueFilter)
 
   def loggedInAction(body: UserRequest[AnyContent] => Future[Result])
-                    (implicit ec: ExecutionContext) : Action[AnyContent] =
+                    (implicit ec: ExecutionContext): Action[AnyContent] =
     loggedInActionWithFilter(body)(onlyTrueIfLoggedInFilter)
 
   private def loggedInActionWithFilter(body: UserRequest[AnyContent] => Future[Result])
-                                      (filter : DeveloperSession => Boolean)
-                                      (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+                                      (filter: DeveloperSession => Boolean)
+                                      (implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
 
     val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
 
@@ -69,40 +70,20 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
       loadSession.flatMap(maybeSession => {
         maybeSession
           .filter(filter)
-          .fold(Future.successful(loginRedirect))(developerSession => body(UserRequest(developerSession,request)))
+          .fold(Future.successful(loginRedirect))(developerSession => body(UserRequest(developerSession, request)))
       })
   }
 
   def maybeAtLeastPartLoggedInEnablingMfa(body: MaybeUserRequest[AnyContent] => Future[Result])
-                                         (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+                                         (implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] =>
       loadSession.flatMap(
         maybeDeveloperSession => body(MaybeUserRequest(maybeDeveloperSession, request))
       )
   }
 
-  def loggedOutAction(body: Request[AnyContent] => Future[Result])
-                     (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
-    implicit request: Request[AnyContent] =>
-      loadSession.flatMap{
-        case Some(developerSession) if developerSession.loggedInState.isLoggedIn => loginSucceeded(request)
-        case _ => body(request)
-      }
-  }
-
-  def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
-    Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
-    val uri = request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps().url)
-    Future.successful(Redirect(uri).withNewSession)
-  }
-
-  private def fetchDeveloperSession[A](sessionId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[DeveloperSession]] = {
-    sessionService
-      .fetch(sessionId)
-      .map(maybeSession => maybeSession.map(DeveloperSession(_)))
-  }
-
-  private def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
+  // TODO : Reduce access?
+  def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
     (for {
       cookie <- request.cookies.get(cookieName)
       sessionId <- decodeCookie(cookie.value)
@@ -110,8 +91,10 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
       .getOrElse(Future.successful(None))
   }
 
-  def withSessionCookie(result : Result, sessionId: String): Result = {
-    result.withCookies(createCookie(sessionId))
+  private def fetchDeveloperSession[A](sessionId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[DeveloperSession]] = {
+    sessionService
+      .fetch(sessionId)
+      .map(maybeSession => maybeSession.map(DeveloperSession(_)))
   }
 
   def createCookie(sessionId: String): Cookie = {
@@ -124,6 +107,27 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
       cookieSecureOption,
       cookieHttpOnlyOption
     )
+  }
+}
+
+trait ExtendedDevHubAuthWrapper extends DevHubAuthWrapper {
+  def loggedOutAction(body: Request[AnyContent] => Future[Result])
+                   (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
+  implicit request: Request[AnyContent] =>
+    loadSession.flatMap{
+      case Some(developerSession) if developerSession.loggedInState.isLoggedIn => loginSucceeded(request)
+      case _ => body(request)
+    }
+  }
+
+  def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext): Future[Result] = {
+    Logger.info(s"loginSucceeded - access_uri ${request.session.get("access_uri")}")
+    val uri = request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps().url)
+    Future.successful(Redirect(uri).withNewSession)
+  }
+
+  def withSessionCookie(result : Result, sessionId: String): Result = {
+    result.withCookies(createCookie(sessionId))
   }
 
   def extractSessionIdFromCookie(request: RequestHeader): Option[String] = {
