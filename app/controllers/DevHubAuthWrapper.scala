@@ -42,16 +42,13 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
 
   val sessionService : SessionService
 
-  // TODO: Can / should we make private
-  val cookieName = "PLAY2AUTH_SESS_ID"
-
+  private val cookieName = "PLAY2AUTH_SESS_ID"
   private val cookieSecureOption: Boolean = appConfig.securedCookie
   private val cookieHttpOnlyOption: Boolean = true
   private val cookieDomainOption: Option[String] = None
   private val cookiePathOption: String = "/"
   private val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
 
-  // TODO: Name :(
   implicit def loggedIn(implicit req : UserRequest[_]) : DeveloperSession = {
     req.developerSession
   }
@@ -136,6 +133,15 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
       case Some(cookie) => decodeCookie(cookie.value)
       case _ => None
     }
+  }
+
+  def destroySession(request: RequestHeader)(implicit hc: HeaderCarrier) = {
+    extractSessionIdFromCookie(request)
+      .map(sessionId => sessionService.destroy(sessionId))
+  }
+
+  def removeCookieFromResult(result: Result): Result = {
+    result.discardingCookies(DiscardingCookie(cookieName))
   }
 }
 

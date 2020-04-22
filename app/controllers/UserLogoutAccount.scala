@@ -49,24 +49,22 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
       case Some(form) =>
         val res: Future[TicketId] = deskproService.submitSurvey(form)
         res.onFailure {
-          case _ => Logger.error(s"Failed to create deskpro ticket")
+          case _ => Logger.error("Failed to create deskpro ticket")
         }
 
         applicationService.userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions).flatMap(_ => {
           Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
         })
       case None =>
-        Logger.error(s"Survey form invalid.")
+        Logger.error("Survey form invalid.")
         Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
     }
   }
 
-  // TODO: Move some of this logic should be in DebHubAuthWrapper?
   def logout = Action.async { implicit request: Request[AnyContent] =>
-    extractSessionIdFromCookie(request)
-      .map(sessionId => sessionService.destroy(sessionId))
+    destroySession(request)
       .getOrElse(Future.successful(()))
       .map(_ => Ok(views.html.logoutConfirmation()).withNewSession)
-      .map(result => result.discardingCookies(DiscardingCookie(cookieName)))
+      .map(removeCookieFromResult)
   }
 }

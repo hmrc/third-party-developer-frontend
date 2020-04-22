@@ -44,7 +44,6 @@ trait HeaderEnricher {
   }
 }
 
-// TODO : Remove AuthElement
 abstract class LoggedInController extends BaseController with DevHubAuthWrapper
 
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
