@@ -30,12 +30,15 @@ import cats.implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
+case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
+case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A]) extends WrappedRequest[A](request)
+
 // TODO : Add some test for this please.
 trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with CookieEncoding {
-  implicit val appConfig: ApplicationConfig
-
   private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
   private val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
+
+  implicit val appConfig: ApplicationConfig
 
   val sessionService : SessionService
 
@@ -57,7 +60,6 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
                                     (implicit ec: ExecutionContext): Action[AnyContent] =
     loggedInActionWithFilter(body)(alwaysTrueFilter)
 
-  // TODO: Rename back to loggedInAction (and any other XXX2 methods / classes)
   def loggedInAction(body: UserRequest[AnyContent] => Future[Result])
                     (implicit ec: ExecutionContext) : Action[AnyContent] =
     loggedInActionWithFilter(body)(onlyTrueIfLoggedInFilter)
@@ -136,9 +138,6 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
     }
   }
 }
-
-case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
-case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A]) extends WrappedRequest[A](request)
 
 trait CookieEncoding {
 
