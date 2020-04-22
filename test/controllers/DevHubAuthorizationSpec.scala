@@ -37,8 +37,8 @@ import utils.{DeveloperSession => DeveloperSessionBuilder}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DevHubAuthWrapperSpec extends BaseControllerSpec with UnitSpec with MockitoSugar with Matchers {
-  class TestDevHubAuthWrapper(implicit val appConfig: ApplicationConfig) extends ExtendedDevHubAuthWrapper {
+class DevHubAuthorizationSpec extends BaseControllerSpec with UnitSpec with MockitoSugar with Matchers {
+  class TestDevHubAuthorization(implicit val appConfig: ApplicationConfig) extends ExtendedDevHubAuthorization {
     override val sessionService: SessionService = mock[SessionService]
     override val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]
   }
@@ -46,7 +46,7 @@ class DevHubAuthWrapperSpec extends BaseControllerSpec with UnitSpec with Mockit
   class Setup(developerSession: Option[DeveloperSession]) {
     given(appConfig.securedCookie).willReturn(false)
 
-    val underTest = new TestDevHubAuthWrapper()
+    val underTest = new TestDevHubAuthorization()
     val sessionId = "sessionId"
 
     val loggedInAction = underTest.loggedInAction { implicit request =>

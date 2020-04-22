@@ -16,14 +16,14 @@
 
 package utils
 
-import controllers.DevHubAuthWrapper
+import controllers.DevHubAuthorization
 import play.api.libs.crypto.CookieSigner
 import play.api.test.FakeRequest
 
 object WithLoggedInSession {
 
   implicit class AuthFakeRequest[A](fakeRequest: FakeRequest[A]) {
-    def withLoggedIn(implicit devHubAuthWrapper: DevHubAuthWrapper, cookieSigner: CookieSigner): String => FakeRequest[A] = { id =>
+    def withLoggedIn(implicit devHubAuthWrapper: DevHubAuthorization, cookieSigner: CookieSigner): String => FakeRequest[A] = { id =>
       fakeRequest.withCookies(devHubAuthWrapper.createCookie(id))
     }
   }

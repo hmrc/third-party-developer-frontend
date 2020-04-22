@@ -98,7 +98,7 @@ abstract class ApplicationController()
 
 abstract class LoggedOutController()
 
-  extends BaseController() with ExtendedDevHubAuthWrapper {
+  extends BaseController() with ExtendedDevHubAuthorization {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
@@ -124,7 +124,7 @@ trait HeaderCarrierConversion
     HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
 }
 
-abstract class BaseController() extends DevHubAuthWrapper with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
+abstract class BaseController() extends DevHubAuthorization with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
   val errorHandler: ErrorHandler
   val sessionService: SessionService
 

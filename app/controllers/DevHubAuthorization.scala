@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
 case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A]) extends WrappedRequest[A](request)
 
-trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with CookieEncoding {
+trait DevHubAuthorization extends Results with HeaderCarrierConversion with CookieEncoding {
   private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
   private val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
 
@@ -110,7 +110,7 @@ trait DevHubAuthWrapper extends Results with HeaderCarrierConversion with Cookie
   }
 }
 
-trait ExtendedDevHubAuthWrapper extends DevHubAuthWrapper {
+trait ExtendedDevHubAuthorization extends DevHubAuthorization {
   def loggedOutAction(body: Request[AnyContent] => Future[Result])
                    (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
   implicit request: Request[AnyContent] =>
