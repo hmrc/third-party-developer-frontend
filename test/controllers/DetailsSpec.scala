@@ -295,7 +295,8 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi
+      messagesApi,
+      cookieSigner
     )
 
     val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")

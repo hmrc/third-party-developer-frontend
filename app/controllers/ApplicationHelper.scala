@@ -17,7 +17,6 @@
 package controllers
 
 import domain.{Application, ApplicationNotFound, Role}
-import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -28,9 +27,6 @@ trait ApplicationHelper {
 
   def fetchApp(id: String): Future[Application] =
     applicationService.fetchByApplicationId(id)(HeaderCarrier())
-
-  def applicationForRequest(id: String)(implicit req: RequestWithAttributes[_], hc: HeaderCarrier): Future[Application] =
-    req.get(AppKey).getOrElse(applicationService.fetchByApplicationId(id))
 
   def roleForApplication(application: Application, email: String): Role = application.role(email).getOrElse(throw new ApplicationNotFound)
 }

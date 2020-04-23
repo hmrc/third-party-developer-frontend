@@ -20,13 +20,12 @@ import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.{DeveloperSession, UpdateProfileRequest}
 import javax.inject.{Inject, Singleton}
-import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
+import play.api.libs.crypto.CookieSigner
 import service.{ApplicationService, AuditService, SessionService}
 import views.html._
 
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -36,7 +35,8 @@ class Profile @Inject()(
   val sessionService: SessionService,
   val connector: ThirdPartyDeveloperConnector,
   val errorHandler: ErrorHandler,
-  val messagesApi: MessagesApi
+  val messagesApi: MessagesApi,
+  val cookieSigner : CookieSigner
 )
 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController with PasswordChange {
@@ -48,7 +48,7 @@ class Profile @Inject()(
   val passwordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
-  private def changeProfileView(developerSession: DeveloperSession)(implicit req: RequestWithAttributes[_]) = {
+  private def changeProfileView(developerSession: DeveloperSession)(implicit req: UserRequest[_]) = {
     views.html.changeProfile(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
   }
 

@@ -95,7 +95,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       mock[ApplicationCheck],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi
+      messagesApi,
+      cookieSigner
     )
 
     when(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))

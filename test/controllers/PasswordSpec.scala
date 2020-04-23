@@ -46,7 +46,8 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mockConnector,
       mockErrorHandler,
-      messagesApi
+      messagesApi,
+      cookieSigner
     )
 
     def mockRequestResetFor(email: String) =

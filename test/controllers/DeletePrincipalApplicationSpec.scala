@@ -44,7 +44,8 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       mock[ApplicationService],
       mock[SessionService],
       mock[ErrorHandler],
-      messagesApi
+      messagesApi,
+      cookieSigner
     )
 
     val appId = "1234"

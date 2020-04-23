@@ -43,7 +43,8 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       mockErrorHandler,
       mock[SessionService],
       mock[ApplicationService],
-      messagesApi
+      messagesApi,
+      cookieSigner
       )
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")

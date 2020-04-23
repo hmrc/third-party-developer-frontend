@@ -23,6 +23,7 @@ import domain._
 import org.mockito.ArgumentMatchers.{any, eq => meq, _}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
+import play.api.libs.crypto.CookieSigner
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -70,7 +71,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[SessionService],
       mock[ApplicationService],
       messagesApi,
-      mfaMandateService
+      mfaMandateService,
+      cookieSigner
     )
     when(mfaMandateService.daysTillAdminMfaMandate).thenReturn(Some(daysRemaining))
     when(mfaMandateService.showAdminMfaMandatedMessage(any())(any[HeaderCarrier])).thenReturn(true)

@@ -19,9 +19,10 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import javax.inject.{Inject, Singleton}
-import jp.t2v.lab.play2.auth.LoginLogout
 import play.api.i18n.MessagesApi
+import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc.{Session => PlaySession}
 import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -50,9 +51,10 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val sessionService: SessionService,
                                  val applicationService: ApplicationService,
                                  val messagesApi: MessagesApi,
-                                 val mfaMandateService: MfaMandateService)
+                                 val mfaMandateService: MfaMandateService,
+                                 val cookieSigner : CookieSigner)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController with LoginLogout with Auditing {
+  extends LoggedOutController with Auditing {
 
   import play.api.data._
 
@@ -66,7 +68,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   def accountLocked: Action[AnyContent] = Action.async { implicit request =>
     for {
-      _ <- tokenAccessor.extract(request)
+      _ <- extractSessionIdFromCookie(request)
         .map(sessionService.destroy)
         .getOrElse(successful(()))
     } yield Locked(views.html.accountLocked())
@@ -74,20 +76,34 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 
   private def routeToLoginOr2SV(login: LoginForm,
                                 userAuthenticationResponse: UserAuthenticationResponse,
-                                playSession: play.api.mvc.Session)(implicit request: Request[AnyContent]): Future[Result] = {
+                                playSession: PlaySession)(implicit request: Request[AnyContent]): Future[Result] = {
 
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     userAuthenticationResponse.session match {
       case Some(session) if session.loggedInState.isLoggedIn => audit(LoginSucceeded, DeveloperSession.apply(session))
-        gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER)
-          .withSession(playSession)))
+        successful(
+          withSessionCookie(
+            Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
+            session.sessionId
+          )
+        )
 
-      case None => successful(Redirect(routes.UserLoginAccount.enterTotp(), SEE_OTHER)
-        .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+      case None =>
+        successful(
+          Redirect(
+            routes.UserLoginAccount.enterTotp(), SEE_OTHER
+          ).withSession(
+            playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)
+          )
+        )
 
       case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA =>
-        gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.getProtectAccount().url)
-          .withSession(playSession)))
+        successful(
+          withSessionCookie(
+            Redirect(routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
+            session.sessionId
+          )
+        )
     }
   }
 
@@ -129,7 +145,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         val email = request.session.get("emailAddress").get
         sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
           audit(LoginSucceeded, DeveloperSession.apply(session))
-          gotoLoginSucceeded(session.sessionId)
+          loginSucceeded(request).map(r => withSessionCookie(r, session.sessionId))
         } recover {
           case _: InvalidCredentials =>
             audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
@@ -150,5 +166,4 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
     applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeComplete()))
   }
-
 }

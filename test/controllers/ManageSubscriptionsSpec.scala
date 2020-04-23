@@ -98,7 +98,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       mockApplicationService,
       mockErrorHandler,
       messagesApi,
-      mockSubscriptionFieldsService
+      mockSubscriptionFieldsService,
+      cookieSigner
     )
 
     when(mockSessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))

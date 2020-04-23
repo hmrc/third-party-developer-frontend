@@ -41,7 +41,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       mock[ApplicationService],
       mock[SessionService],
       mockErrorHandler,
-      messagesApi
+      messagesApi,
+      cookieSigner
     )
 
     val sessionId = "sessionId"

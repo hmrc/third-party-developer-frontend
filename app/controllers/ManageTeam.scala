@@ -27,6 +27,7 @@ import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
+import play.api.libs.crypto.CookieSigner
 import play.twirl.api.Html
 import service._
 
@@ -39,7 +40,8 @@ class ManageTeam @Inject()(val sessionService: SessionService,
                            developerConnector: ThirdPartyDeveloperConnector,
                            val applicationService: ApplicationService,
                            val errorHandler: ErrorHandler,
-                           val messagesApi: MessagesApi
+                           val messagesApi: MessagesApi,
+                           val cookieSigner : CookieSigner
                            )
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController {

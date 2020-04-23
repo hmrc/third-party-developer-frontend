@@ -17,56 +17,38 @@
 package controllers
 
 import cats.data.NonEmptyList
-import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
+import config.{ApplicationConfig, ErrorHandler}
 import domain._
-import jp.t2v.lab.play2.auth.{AuthElement, OptionalAuthElement}
-import jp.t2v.lab.play2.stackc.{RequestAttributeKey, RequestWithAttributes}
 import model.ApplicationViewModel
 import play.api.i18n.I18nSupport
-import play.api.mvc.Results.NotFound
 import play.api.mvc._
+import security.{DevHubAuthorization, ExtendedDevHubAuthorization}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import views.html.helper.input
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case object AppKey extends RequestAttributeKey[Future[Application]]
-
 trait HeaderEnricher {
-
-  def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]) =
+  def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]) : HeaderCarrier =
     user match {
-      case Some(dev) => hc.withExtraHeaders("X-email-address" -> dev.email, "X-name" -> dev.displayedNameEncoded)
+      case Some(dev) => enrichHeaders(hc, dev)
       case _ => hc
     }
-}
 
-abstract class LoggedInController extends BaseController with AuthElement {
+  def enrichHeaders(hc: HeaderCarrier, user: DeveloperSession) : HeaderCarrier =
+     hc.withExtraHeaders("X-email-address" -> user.email, "X-name" -> user.displayedNameEncoded)
 
-  implicit def hc(implicit request: Request[_]): HeaderCarrier = {
-    val carrier = super.hc
-    request match {
-      case x: RequestWithAttributes[_] => enrichHeaders(carrier, Some(loggedIn(x)))
-      case x: ApplicationRequest[_] => enrichHeaders(carrier, Some(x.user))
-      case _ => carrier
-    }
-
-  }
-
-  def loggedInAction(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack(AuthorityKey -> LoggedInUser) {
-      f
-    }
-  }
-
-  def atLeastPartLoggedInEnablingMfa(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack(AuthorityKey -> AtLeastPartLoggedInEnablingMfa) {
-      f
-    }
+  implicit class RequestWithAjaxSupport(h: Headers) {
+    def isAjaxRequest: Boolean = h.get("X-Requested-With").contains("XMLHttpRequest")
   }
 }
+
+case class UserRequest[A](developerSession: DeveloperSession, request: Request[A])
+  extends WrappedRequest[A](request)
+
+case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A])
+  extends WrappedRequest[A](request)
 
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
@@ -74,10 +56,21 @@ case class ApplicationRequest[A](application: Application, subscriptions: Seq[AP
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
+abstract class BaseController() extends DevHubAuthorization with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
+  val errorHandler: ErrorHandler
+  val sessionService: SessionService
+
+  implicit def ec: ExecutionContext
+
+  implicit val appConfig: ApplicationConfig
+}
+
+abstract class LoggedInController extends BaseController
+
 abstract class ApplicationController()
   extends LoggedInController with ActionBuilders {
 
-  implicit def userFromRequest(implicit request: ApplicationRequest[_]): User = request.user
+  implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, request.subscriptions.exists(s => s.subscribed && s.fields.isDefined))
@@ -117,26 +110,19 @@ abstract class ApplicationController()
   }
 }
 
-
 abstract class LoggedOutController()
-  extends BaseController() with OptionalAuthElement {
+  extends BaseController() with ExtendedDevHubAuthorization {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
     request match {
-      case x: RequestWithAttributes[_] => implicit val req = x
-        enrichHeaders(carrier, loggedIn)
+      case x: MaybeUserRequest[_] =>
+        implicit val req: MaybeUserRequest[_] = x
+        enrichHeaders(carrier, x.developerSession)
+      case x: UserRequest[_] =>
+        implicit val req: UserRequest[_] = x
+        enrichHeaders(carrier, x.developerSession)
       case _ => carrier
-    }
-  }
-
-  def loggedOutAction(f: RequestWithAttributes[AnyContent] => Future[Result]): Action[AnyContent] = {
-    AsyncStack {
-      implicit request =>
-        loggedIn match {
-          case Some(session) if session.loggedInState.isLoggedIn => loginSucceeded(request)
-          case Some(_) | None => f(request)
-        }
     }
   }
 }
@@ -147,19 +133,4 @@ trait HeaderCarrierConversion
 
   override implicit def hc(implicit rh: RequestHeader): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
-}
-
-abstract class BaseController()
-  extends AuthConfigImpl with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
-
-  val errorHandler: ErrorHandler
-  val sessionService: SessionService
-
-  implicit def ec: ExecutionContext
-
-  override implicit val appConfig: ApplicationConfig
-
-  def ensureLoggedOut(implicit request: Request[_], hc: HeaderCarrier) = {
-    tokenAccessor.extract(request).map(sessionService.destroy).getOrElse(Future.successful(()))
-  }
 }

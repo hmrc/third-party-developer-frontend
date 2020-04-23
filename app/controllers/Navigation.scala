@@ -16,37 +16,29 @@
 
 package controllers
 
-import config.{ApplicationConfig, AuthConfigImpl, ErrorHandler}
-import domain.LoggedInState.{LOGGED_IN, PART_LOGGED_IN_ENABLING_MFA}
-import domain.{DeveloperSession, UserNavLinks}
+import config.{ApplicationConfig, ErrorHandler}
+import domain.UserNavLinks
 import javax.inject.{Inject, Singleton}
-import jp.t2v.lab.play2.auth.OptionalAuthElement
+import play.api.i18n.MessagesApi
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
-import service.SessionService
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import play.api.libs.crypto.CookieSigner
+import service.{ApplicationService, SessionService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Navigation @Inject()(val sessionService: SessionService,
-                           val errorHandler: ErrorHandler)
+                           val applicationService: ApplicationService,
+                           val messagesApi: MessagesApi,
+                           val errorHandler: ErrorHandler,
+                           val cookieSigner : CookieSigner)
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends FrontendController with AuthConfigImpl with HeaderEnricher with OptionalAuthElement {
+  extends ApplicationController {
 
-  def navLinks(): Action[AnyContent] = AsyncStack {
-    implicit request => {
-      val username =
-        loggedIn.flatMap {
-          session: DeveloperSession => {
-            session.loggedInState match {
-              case LOGGED_IN => session.loggedInName
-              case PART_LOGGED_IN_ENABLING_MFA => None
-            }
-          }
-        }
+  def navLinks: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request: MaybeUserRequest[AnyContent] =>
+    val username = request.developerSession.flatMap(_.loggedInName)
 
-      Future.successful(Ok(Json.toJson(UserNavLinks(username))))
-    }
+    Future.successful(Ok(Json.toJson(UserNavLinks(username))))
   }
 }

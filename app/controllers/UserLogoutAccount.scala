@@ -19,11 +19,11 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.TicketId
 import javax.inject.{Inject, Singleton}
-import jp.t2v.lab.play2.auth.LoginLogout
-import jp.t2v.lab.play2.stackc.RequestWithAttributes
 import play.api.Logger
 import play.api.i18n.MessagesApi
+import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, Request}
+import security.ExtendedDevHubAuthorization
 import service.{ApplicationService, DeskproService, SessionService}
 import views.html.signoutSurvey
 
@@ -34,41 +34,38 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val sessionService: SessionService,
                                   val applicationService: ApplicationService,
                                   val errorHandler: ErrorHandler,
-                                  val messagesApi: MessagesApi)
+                                  val messagesApi: MessagesApi,
+                                  val cookieSigner: CookieSigner)
                                  (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController with LoginLogout {
+  extends LoggedInController with ExtendedDevHubAuthorization {
 
-  def logoutSurvey = atLeastPartLoggedInEnablingMfa { implicit request =>
+  def logoutSurvey = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)
 
     Future.successful(Ok(page))
   }
 
-  def logoutSurveyAction = atLeastPartLoggedInEnablingMfa { implicit request =>
+  def logoutSurveyAction = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     SignOutSurveyForm.form.bindFromRequest.value match {
-      case Some(form) => {
+      case Some(form) =>
         val res: Future[TicketId] = deskproService.submitSurvey(form)
         res.onFailure {
-          case _ => Logger.error(s"Failed to create deskpro ticket")
+          case _ => Logger.error("Failed to create deskpro ticket")
         }
+
         applicationService.userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions).flatMap(_ => {
           Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
         })
-      }
-      case None => {
-        Logger.error(s"Survey form invalid.")
+      case None =>
+        Logger.error("Survey form invalid.")
         Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
-      }
     }
   }
 
   def logout = Action.async { implicit request: Request[AnyContent] =>
-    gotoLogoutSucceeded {
-      for {
-        _ <- tokenAccessor.extract(request)
-          .map(sessionService.destroy)
-          .getOrElse(Future.successful(()))
-      } yield Ok(views.html.logoutConfirmation()).withNewSession
-    }
+    destroySession(request)
+      .getOrElse(Future.successful(()))
+      .map(_ => Ok(views.html.logoutConfirmation()).withNewSession)
+      .map(removeCookieFromResult)
   }
 }
