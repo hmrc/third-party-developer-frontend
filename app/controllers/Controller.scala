@@ -104,7 +104,11 @@ abstract class ApplicationController()
                                     (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       val stackedActions =
-        Action andThen applicationAction(applicationId, loggedIn) andThen fieldDefinitionsExistRefiner
+        Action andThen
+          applicationAction(applicationId, loggedIn) andThen
+          capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
+          fieldDefinitionsExistRefiner
+
       stackedActions.async(fun)(request)
     }
   }

@@ -77,6 +77,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
   )
 
+  val privilegedApplication = application.copy(id = "456", access = Privileged())
+
   val tokens =
     ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
@@ -107,6 +109,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     when(mockApplicationService.fetchByApplicationId(eqTo(appId))(any[HeaderCarrier]))
       .thenReturn(successful(application))
+
+    when(mockApplicationService.fetchByApplicationId(eqTo(privilegedApplication.id))(any[HeaderCarrier]))
+      .thenReturn(successful(privilegedApplication))
 
     when(mockApplicationService.fetchByTeamMemberEmail(any())(any[HeaderCarrier]))
       .thenReturn(successful(List(application)))
@@ -253,6 +258,19 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe NOT_FOUND
       }
 
+      "It renders the metadata list page for a privileged application" in new ManageSubscriptionsSetup{
+        val subsData = Seq(
+          metaDataSubscription("api1", 1)
+        )
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(privilegedApplication))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+
+        private val result =
+          await(manageSubscriptionController.listApiSubscriptions(privilegedApplication.id)(loggedInRequest))
+
+        status(result) shouldBe OK
+      }
     }
 
     "when the user is not logged in" should {
