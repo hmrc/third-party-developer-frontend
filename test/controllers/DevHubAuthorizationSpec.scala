@@ -22,7 +22,6 @@ import domain.{DeveloperSession, LoggedInState}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
@@ -31,13 +30,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{defaultAwaitTimeout, redirectLocation}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.{DeveloperSession => DeveloperSessionBuilder}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DevHubAuthorizationSpec extends BaseControllerSpec with UnitSpec with MockitoSugar with Matchers {
+class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
   class TestDevHubAuthorization(implicit val appConfig: ApplicationConfig) extends ExtendedDevHubAuthorization {
     override val sessionService: SessionService = mock[SessionService]
     override val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]

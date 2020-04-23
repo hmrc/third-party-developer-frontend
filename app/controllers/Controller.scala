@@ -44,13 +44,22 @@ trait HeaderEnricher {
   }
 }
 
-abstract class LoggedInController extends BaseController
-
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
+
+abstract class BaseController() extends DevHubAuthorization with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
+  val errorHandler: ErrorHandler
+  val sessionService: SessionService
+
+  implicit def ec: ExecutionContext
+
+  implicit val appConfig: ApplicationConfig
+}
+
+abstract class LoggedInController extends BaseController
 
 abstract class ApplicationController()
   extends LoggedInController with ActionBuilders {
@@ -95,22 +104,18 @@ abstract class ApplicationController()
   }
 }
 
-
 abstract class LoggedOutController()
-
   extends BaseController() with ExtendedDevHubAuthorization {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
     request match {
-      case x: MaybeUserRequest[_] => {
+      case x: MaybeUserRequest[_] =>
         implicit val req: MaybeUserRequest[_] = x
         enrichHeaders(carrier, x.developerSession)
-      }
-      case x: UserRequest[_] => {
+      case x: UserRequest[_] =>
         implicit val req: UserRequest[_] = x
         enrichHeaders(carrier, x.developerSession)
-      }
       case _ => carrier
     }
   }
@@ -122,13 +127,4 @@ trait HeaderCarrierConversion
 
   override implicit def hc(implicit rh: RequestHeader): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
-}
-
-abstract class BaseController() extends DevHubAuthorization with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
-  val errorHandler: ErrorHandler
-  val sessionService: SessionService
-
-  implicit def ec: ExecutionContext
-
-  implicit val appConfig: ApplicationConfig
 }
