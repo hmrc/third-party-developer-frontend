@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package controllers
+package security
 
 import java.security.MessageDigest
 
-import config.{ApplicationConfig, ErrorHandler}
+import cats.implicits._
+import config.ApplicationConfig
+import controllers.{routes, HeaderCarrierConversion, MaybeUserRequest, UserRequest}
 import domain.{DeveloperSession, LoggedInState}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import cats.implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
-
-case class UserRequest[A](developerSession: DeveloperSession, request: Request[A]) extends WrappedRequest[A](request)
-case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A]) extends WrappedRequest[A](request)
 
 trait DevHubAuthorization extends Results with HeaderCarrierConversion with CookieEncoding {
   private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
@@ -40,13 +38,12 @@ trait DevHubAuthorization extends Results with HeaderCarrierConversion with Cook
 
   val sessionService: SessionService
 
-  // TODO: Reduce access?
-  protected val cookieName = "PLAY2AUTH_SESS_ID"
-  private val cookieSecureOption: Boolean = appConfig.securedCookie
-  private val cookieHttpOnlyOption: Boolean = true
-  private val cookieDomainOption: Option[String] = None
-  private val cookiePathOption: String = "/"
-  private val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
+  private[security] val cookieName = "PLAY2AUTH_SESS_ID"
+  private[security] val cookieSecureOption: Boolean = appConfig.securedCookie
+  private[security] val cookieHttpOnlyOption: Boolean = true
+  private[security] val cookieDomainOption: Option[String] = None
+  private[security] val cookiePathOption: String = "/"
+  private[security] val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
 
   implicit def loggedIn(implicit req: UserRequest[_]): DeveloperSession = {
     req.developerSession
@@ -82,8 +79,7 @@ trait DevHubAuthorization extends Results with HeaderCarrierConversion with Cook
       )
   }
 
-  // TODO : Reduce access?
-  def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
+  private[security] def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
     (for {
       cookie <- request.cookies.get(cookieName)
       sessionId <- decodeCookie(cookie.value)

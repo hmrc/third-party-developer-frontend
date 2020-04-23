@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package controllers
+package security
 
 import cats.implicits._
 import config.ApplicationConfig
+import controllers.{routes, BaseControllerSpec}
 import domain.{DeveloperSession, LoggedInState}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given

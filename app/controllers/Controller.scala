@@ -22,6 +22,7 @@ import domain._
 import model.ApplicationViewModel
 import play.api.i18n.I18nSupport
 import play.api.mvc._
+import security.{DevHubAuthorization, ExtendedDevHubAuthorization}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -29,7 +30,6 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HeaderEnricher {
-
   def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]) : HeaderCarrier =
     user match {
       case Some(dev) => enrichHeaders(hc, dev)
@@ -43,6 +43,12 @@ trait HeaderEnricher {
     def isAjaxRequest: Boolean = h.get("X-Requested-With").contains("XMLHttpRequest")
   }
 }
+
+case class UserRequest[A](developerSession: DeveloperSession, request: Request[A])
+  extends WrappedRequest[A](request)
+
+case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A])
+  extends WrappedRequest[A](request)
 
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)

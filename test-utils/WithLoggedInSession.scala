@@ -16,9 +16,9 @@
 
 package utils
 
-import controllers.DevHubAuthorization
 import play.api.libs.crypto.CookieSigner
 import play.api.test.FakeRequest
+import security.DevHubAuthorization
 
 object WithLoggedInSession {
 

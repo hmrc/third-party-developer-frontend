@@ -17,7 +17,6 @@
 package service
 
 import connectors.{ConnectorMetrics, NoopConnectorMetrics}
-import controllers.CookieEncoding
 import org.scalatest.Matchers
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -25,6 +24,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Mode}
 import play.api.libs.crypto.CookieSigner
+import security.CookieEncoding
 import uk.gov.hmrc.play.test.UnitSpec
 
 class CookieEncodingSpec extends UnitSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite  {
