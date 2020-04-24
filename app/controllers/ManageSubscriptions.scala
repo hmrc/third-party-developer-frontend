@@ -63,8 +63,14 @@ object ManageSubscriptions {
     EditApiMetadata(in.name,in.apiVersion.displayedStatus, fields = in.fields.fields.toList)
   }
 
+  // TODO: Change this to ones below
   case class EditApiMetadata(apiName: String, displayedStatus: String, fields: List[SubscriptionFieldValue])
+  
+  // TODO: Replace above with these
+  // case class EditSubscriptionValueFormData(name: String, value: String)
+  // case class EditApiMetadata(apiName: String, displayedStatus: String, fields: List[EditSubscriptionValueFormData])
 
+  // TODO: Remove unnessisary extra hidden fields, and don't bind to SubscriptionFieldValue / SubscriptionFieldDefinition
   object EditApiMetadata {
     val form: Form[EditApiMetadata] = Form(
       mapping(
@@ -164,6 +170,8 @@ class ManageSubscriptions @Inject() (
     def handleValidForm(validForm: EditApiMetadata) = {
       def saveFields(validForm: EditApiMetadata)(implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
         if (validForm.fields.nonEmpty) {
+
+          // TODO: Lookup field definitions
           subFieldsService.saveFieldValues(request.application, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
         } else {
           Future.successful(SaveSubscriptionFieldsSuccessResponse)

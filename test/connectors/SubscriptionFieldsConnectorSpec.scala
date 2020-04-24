@@ -22,7 +22,7 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import connectors.SubscriptionFieldsConnector._
-import domain.{APIIdentifier, Environment}
+import domain.{APIIdentifier, AccessRequirements, Environment}
 import domain.ApiSubscriptionFields._
 import helpers.FutureTimeoutSupportImpl
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -227,8 +227,8 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     "return all field definitions" in new Setup {
 
       val definitions = List(
-        FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type"),
-        FieldDefinition("field2", "desc2", "sdesc2", "hint2", "some other type")
+        FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default),
+        FieldDefinition("field2", "desc2", "sdesc2", "hint2", "some other type", AccessRequirements.Default)
       )
 
       private val validResponse =
@@ -275,8 +275,8 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     "when retry logic is enabled should retry on failure" in new Setup {
 
       val definitions = List(
-        FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type"),
-        FieldDefinition("field2", "desc2", "sdesc2", "hint2", "some other type")
+        FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default),
+        FieldDefinition("field2", "desc2", "sdesc2", "hint2", "some other type", AccessRequirements.Default)
       )
 
       private val validResponse =
@@ -304,7 +304,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     val url = s"/definition/context/$apiContext/version/$apiVersion"
 
     val definitionsFromRestService = List(
-      FieldDefinition("field1", "desc1", "sdesc2", "hint1", "some type")
+      FieldDefinition("field1", "desc1", "sdesc2", "hint1", "some type", AccessRequirements.Default)
     )
 
     val expectedDefinitions =
@@ -365,7 +365,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
       s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
 
     val definitionsFromRestService = List(
-      FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type")
+      FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default)
     )
 
     val validDefinitionsResponse: ApiFieldDefinitions =
