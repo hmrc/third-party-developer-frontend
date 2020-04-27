@@ -34,7 +34,7 @@
                             <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }"><a id="nav-manage-subscriptions" class="side-nav__link" href="@routes.Subscriptions.manageSubscriptions(app.id)">Manage API subscriptions</a></li>
                         }
 
-                        @if(app.access.accessType.isStandard && applicationView.hasSubscriptionsFields) {
+                        @if(applicationView.hasSubscriptionsFields) {
                             <li class="side-nav__list @if(section == "metadata") { side-nav__list--selected }"><a id="nav-manage-metadata" class="side-nav__link" href="@routes.ManageSubscriptions.listApiSubscriptions(app.id)">Manage API metadata</a></li>
                         }
 

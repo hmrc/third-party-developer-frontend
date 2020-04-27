@@ -52,6 +52,10 @@ object Capabilities {
 
   case object SupportsSubscriptions extends StandardAppCapability with LikePermission
 
+  case object SupportsSubscriptionFields extends Capability {
+    override def hasCapability(app: Application): Boolean = true
+  }
+
   case object SupportsDetails extends StandardAppCapability
 
   case object ManageLockedSubscriptions extends Capability {
