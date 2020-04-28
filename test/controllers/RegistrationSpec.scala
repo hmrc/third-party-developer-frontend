@@ -25,9 +25,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.SessionService
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.failed
 
 class RegistrationSpec extends BaseControllerSpec {
 
@@ -99,6 +100,15 @@ class RegistrationSpec extends BaseControllerSpec {
 
       status(result) shouldBe OK
       bodyOf(result) should include("Email address verified")
+    }
+
+    "invite user to register again when the verification link has expired" in new Setup {
+      given(underTest.connector.verify(meq(code))(any[HeaderCarrier])).willReturn(failed(new BadRequestException("")))
+
+      val result = await(underTest.verify(code)(FakeRequest()))
+
+      status(result) shouldBe BAD_REQUEST
+      bodyOf(result) should include("Your account verification link has expired")
     }
 
     "redirect the user to confirmation page when resending verification" in new Setup {

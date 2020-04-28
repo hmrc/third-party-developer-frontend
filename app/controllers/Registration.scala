@@ -91,8 +91,7 @@ class Registration @Inject()(override val sessionService: SessionService,
       _ <- ensureLoggedOut
       _ <- connector.verify(code)
     } yield Ok(views.html.accountVerified())) recover {
-      case _: BadRequestException => BadRequest(errorHandler.standardErrorTemplate(
-        "Invalid link", "Invalid verification code", "The verification link is invalid, please check your mail and enter valid link."))
+      case _: BadRequestException => BadRequest(views.html.expiredVerificationLink())
     }
   }
 
