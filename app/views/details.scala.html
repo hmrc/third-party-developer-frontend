@@ -37,6 +37,7 @@
     title = title,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
+        Crumb(title),
         Crumb.application(applicationViewModel.application),
         Crumb.viewAllApplications,
         Crumb.home
