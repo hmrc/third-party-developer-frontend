@@ -28,15 +28,7 @@
                 <div class="side-nav" role="navigation" aria-labelledby="nav1">
                     <span class="heading-small" id="nav1">@app.name</span>
                     <ul>
-                        <li class="side-nav__list @if(section == "details") { side-nav__list--selected }"><a id="nav-manage-details" class="side-nav__link" href="@routes.Details.details(app.id)">Manage details</a></li>
-
-                        @if(app.access.accessType.isStandard) {
-                            <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }"><a id="nav-manage-subscriptions" class="side-nav__link" href="@routes.Subscriptions.manageSubscriptions(app.id)">Manage API subscriptions</a></li>
-                        }
-
-                        @if(applicationView.hasSubscriptionsFields) {
-                            <li class="side-nav__list @if(section == "metadata") { side-nav__list--selected }"><a id="nav-manage-metadata" class="side-nav__link" href="@routes.ManageSubscriptions.listApiSubscriptions(app.id)">Manage API metadata</a></li>
-                        }
+                        <li class="side-nav__list @if(section == "details") { side-nav__list--selected }"><a id="nav-manage-details" class="side-nav__link" href="@routes.Details.detapails(app.id)">Application details</a></li>
 
                         <li class="side-nav__list @if(section == "credentials") { side-nav__list--selected }"><a id="nav-manage-credentials" class="side-nav__link" href="@routes.Credentials.credentials(app.id)">Credentials</a></li>
                         @if(loggedIn != null && app.canChangeClientCredentials(loggedIn.developer)) {
@@ -51,6 +43,14 @@
                         }
 
                         @if(app.access.accessType.isStandard) {
+                            <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }"><a id="nav-manage-subscriptions" class="side-nav__link" href="@routes.Subscriptions.manageSubscriptions(app.id)">API subscriptions</a></li>
+                        }
+
+                        @if(applicationView.hasSubscriptionsFields) {
+                            <li class="side-nav__list @if(section == "metadata") { side-nav__list--selected }"><a id="nav-manage-metadata" class="side-nav__link" href="@routes.ManageSubscriptions.listApiSubscriptions(app.id)">API metadata</a></li>
+                        }
+
+                        @if(app.access.accessType.isStandard) {
                             <li class="side-nav__list @if(section == "redirects") { side-nav__list--selected }"><a id="nav-manage-redirects" class="side-nav__link" href="@routes.Redirects.redirects(app.id)">
                                 Manage redirect URIs</a></li>
                         }
@@ -60,7 +60,7 @@
                                 Manage whitelisted IPs</a></li>
                         }
 
-                        <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Manage team members</a></li>
+                        <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Team members</a></li>
 
                         @if(app.access.accessType.isStandard) {
                             <li class="side-nav__list @if(section == "delete-application") { side-nav__list--selected }"><a id="nav-delete-application" class="side-nav__link" href="@routes.DeleteApplication.deleteApplication(app.id, None)">Delete application</a></li>
