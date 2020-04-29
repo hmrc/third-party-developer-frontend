@@ -64,16 +64,17 @@ GET         /reset-password/error                                               
 
 GET         /applications                                                                   controllers.AddApplication.manageApps
 
-GET         /applications/add/production/10-days                                           controllers.AddApplication.tenDaysWarning
+GET         /applications/add/production/10-days                                            controllers.AddApplication.tenDaysWarning
 
-GET         /applications/add/sandbox                                                      controllers.AddApplication.addApplicationSubordinate
-GET         /applications/add/production                                                   controllers.AddApplication.addApplicationPrincipal
+GET         /applications/add/sandbox                                                       controllers.AddApplication.addApplicationSubordinate
+GET         /applications/add/production                                                    controllers.AddApplication.addApplicationPrincipal
 
-GET         /applications/add/:environment/name                                            controllers.AddApplication.addApplicationName(environment: domain.Environment)
-POST        /applications/add/:environment/name                                            controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
-GET         /applications/:id/add/:environment/subscriptions                               controllers.Subscriptions.addAppSubscriptions(id: String, environment: domain.Environment)
+GET         /applications/add/:environment/name                                             controllers.AddApplication.addApplicationName(environment: domain.Environment)
+POST        /applications/add/:environment/name                                             controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
+GET         /applications/:id/add/sandbox/subscription-configuration-start                  controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String)
+GET         /applications/:id/add/:environment/subscriptions                                controllers.Subscriptions.addAppSubscriptions(id: String, environment: domain.Environment)
 
-GET         /applications/:id/add/:environment/success                                     controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
+GET         /applications/:id/add/:environment/success                                      controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
 
 GET         /applications/:id/team-members                                                  controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                              controllers.ManageTeam.addTeamMember(id: String)

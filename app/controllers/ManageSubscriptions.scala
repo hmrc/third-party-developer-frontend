@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatus, Application}
+import domain.{APISubscriptionStatus, APIVersion}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import play.api.data
 import play.api.data.Form
@@ -30,6 +30,7 @@ import play.api.libs.crypto.CookieSigner
 import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.managesubscriptions.editApiMetadata
+import views.html.createJourney.subscriptionConfigurationStart
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
@@ -69,7 +70,7 @@ object ManageSubscriptions {
   case class EditApiMetadata(apiName: String, fields: List[SubscriptionFieldValue])
 
   object EditApiMetadata {
-    val form = Form(
+    val form: Form[EditApiMetadata] = Form(
       mapping(
         "apiName" -> text,
         "fields" -> list(
@@ -115,8 +116,8 @@ class ManageSubscriptions @Inject() (
 
   def listApiSubscriptions(applicationId: String): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
-      implicit val rq = definitionsRequest.applicationRequest.request
-      implicit val appRQ = definitionsRequest.applicationRequest
+      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
       val details = definitionsRequest.fieldDefinitions
         .map(toDetails)
@@ -127,8 +128,8 @@ class ManageSubscriptions @Inject() (
 
   def editApiMetadataPage(applicationId: String, context: String, version: String): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
-      implicit val rq = definitionsRequest.applicationRequest.request
-      implicit val appRQ = definitionsRequest.applicationRequest
+      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
       definitionsRequest.fieldDefinitions
         .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
@@ -138,7 +139,12 @@ class ManageSubscriptions @Inject() (
         .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
 
-  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
+  def saveSubscriptionFields(applicationId: String,
+                             apiContext: String,
+                             apiVersion: String,
+                             subscriptionRedirect: String) : Action[AnyContent]
+    = whenTeamMemberOnApp(applicationId) { implicit request =>
+
     def handleValidForm(validForm: EditApiMetadata) = {
       def saveFields(validForm: EditApiMetadata)(implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
         if (validForm.fields.nonEmpty) {
@@ -163,5 +169,24 @@ class ManageSubscriptions @Inject() (
     }
 
     EditApiMetadata.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+  }
+
+  def subscriptionConfigurationStart(applicationId: String) : Action[AnyContent]
+  = whenTeamMemberOnApp(applicationId) { implicit request =>
+    // TODO
+    // Get real data
+    // Link to this page
+    // Skip is no fields defined
+
+    // Start page - in progress
+    // Also edit subs page
+    // Also x of y page
+
+    val apis = Seq(
+      ApiDetails("Customs Declarations", "", "2.0",NonEmptyList(FieldValue("as","s"), List.empty)),
+      ApiDetails("Customs Inventory Linking Exports", "", "1.0",NonEmptyList(FieldValue("as","s"), List.empty))
+    )
+
+    Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(apis)))
   }
 }
