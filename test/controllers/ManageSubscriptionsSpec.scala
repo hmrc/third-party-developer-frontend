@@ -35,7 +35,6 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
 import scala.concurrent.Future._
-import domain.ApiSubscriptionFields._
 import cats.data.NonEmptyList
 
 import scala.concurrent.Future
@@ -43,25 +42,25 @@ import scala.concurrent.Future
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  val failedNoApp = Future.failed(new ApplicationNotFound)
+  val failedNoApp: Future[Nothing] = Future.failed(new ApplicationNotFound)
 
   val appId = "1234"
   val clientId = "clientId123"
 
-  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+  val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
   val apiContext = "test"
   val apiVersion = "1.0"
 
-  val loggedInUser = DeveloperSession(session)
+  val loggedInUser: DeveloperSession = DeveloperSession(session)
 
   val partLoggedInSessionId = "partLoggedInSessionId"
-  val partLoggedInSession =
+  val partLoggedInSession: Session =
     Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val application = Application(
+  val application: Application = Application(
     appId,
     clientId,
     "App name 1",
@@ -77,9 +76,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
   )
 
-  val privilegedApplication = application.copy(id = "456", access = Privileged())
+  val privilegedApplication: Application = application.copy(id = "456", access = Privileged())
 
-  val tokens =
+  val tokens: ApplicationToken =
     ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
   private val sessionParams = Seq(
@@ -88,11 +87,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait ManageSubscriptionsSetup {
 
-    val mockSessionService = mock[SessionService]
-    val mockAuditService = mock[AuditService]
-    val mockApplicationService = mock[ApplicationService]
-    val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockErrorHandler = fakeApplication.injector.instanceOf[ErrorHandler]
+    val mockSessionService: SessionService = mock[SessionService]
+    val mockAuditService: AuditService = mock[AuditService]
+    val mockApplicationService: ApplicationService = mock[ApplicationService]
+    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
+    val mockErrorHandler: ErrorHandler = fakeApplication.injector.instanceOf[ErrorHandler]
 
     val manageSubscriptionController = new ManageSubscriptions(
       mockSessionService,
@@ -124,20 +123,20 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       .withLoggedIn(manageSubscriptionController, implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
 
-    def generateName(prefix: String) = s"${prefix}-name"
+    def generateName(prefix: String) = s"$prefix-name"
 
     def generateField(prefix: String): SubscriptionFieldDefinition =
       SubscriptionFieldDefinition(
         name = generateName(prefix),
-        description = s"${prefix}-description",
-        shortDescription = s"${prefix}-short-description",
+        description = s"$prefix-description",
+        shortDescription = s"$prefix-short-description",
         hint = "",
         `type` = "STRING"
       )
 
-    def generateValue(prefix: String) = s"${prefix}-value"
+    def generateValue(prefix: String) = s"$prefix-value"
 
-    def generateValueName(prefix: String, index: Int) = s"${prefix}-field-${index}"
+    def generateValueName(prefix: String, index: Int) = s"$prefix-field-$index"
 
     def generateFieldValue(prefix: String, index: Int): SubscriptionFieldValue =
       SubscriptionFieldValue(
@@ -162,11 +161,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       )
     }
 
-    def noConfigurationSubscription(prefix: String) =
+    def noConfigurationSubscription(prefix: String): APISubscriptionStatus =
       APISubscriptionStatus(
         name = generateName(prefix),
-        serviceName = s"${prefix}-api",
-        context = s"/${prefix}-api",
+        serviceName = s"$prefix-api",
+        context = s"/$prefix-api",
         apiVersion = APIVersion("1.0", APIStatus.STABLE),
         subscribed = true,
         requiresTrust = false,
@@ -174,7 +173,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         isTestSupport = false
       )
 
-    def configurationSubscription(prefix: String, count: Int) =
+    def configurationSubscription(prefix: String, count: Int): APISubscriptionStatus =
       noConfigurationSubscription(prefix).copy(fields = generateWrapper(prefix, count))
   }
 
@@ -230,13 +229,13 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         bodyOf(result) should include(generateValueName("api1", 1))
         bodyOf(result) should include(generateValueName("api1", 2))
         bodyOf(result) should include(generateValueName("api1", 3))
-        bodyOf(result) should not include (generateValueName("api1", 4))
+        bodyOf(result) should not include generateValueName("api1", 4)
 
         bodyOf(result) should include(generateName("api2"))
         bodyOf(result) should include(generateValueName("api2", 1))
 
-        bodyOf(result) should not include (generateName("api3"))
-        bodyOf(result) should not include (generateName("api4"))
+        bodyOf(result) should not include generateName("api3")
+        bodyOf(result) should not include generateName("api4")
       }
 
       "return not found if app has no subscription field definitions" in new ManageSubscriptionsSetup {
@@ -273,10 +272,44 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
     }
 
+    "a user is doing the add new sandbox app journey they" should {
+      "be able to view the subscription fields start page if they have subscribed to APIs with subscription fields" in new ManageSubscriptionsSetup {
+        val subsData = Seq(
+          configurationSubscription("api1", 1),
+          configurationSubscription("api2", 1)
+        )
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+
+        private val result =
+          await(manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest))
+
+        status(result) shouldBe OK
+        bodyOf(result) should include("api1-name")
+        bodyOf(result) should include("api2-name")
+        bodyOf(result) should include("1.0")
+      }
+
+      // TODO: Fix this. Make previous page link to either here or end of journey.
+      "be redirected to the end of the journey of they haven't subscribed to any APIs with subscription fields" ignore new ManageSubscriptionsSetup {
+        val subsData = Seq(noConfigurationSubscription("api1"))
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+
+        private val result =
+          await(manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe "some-other-url"
+      }
+    }
+
     "when the user is not logged in" should {
       "return to the login page when the user attempts to list subscription configuration" in new ManageSubscriptionsSetup {
 
-        val request = FakeRequest()
+        val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(request))
@@ -287,7 +320,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return to the login page when the user attempts to edit subscription configuration" in new ManageSubscriptionsSetup {
 
-        val request = FakeRequest()
+        val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
         val fakeContext = "FAKE"
         val fakeVersion = "1.0"

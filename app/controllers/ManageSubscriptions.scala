@@ -171,22 +171,26 @@ class ManageSubscriptions @Inject() (
     EditApiMetadata.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def subscriptionConfigurationStart(applicationId: String) : Action[AnyContent]
-  = whenTeamMemberOnApp(applicationId) { implicit request =>
-    // TODO
-    // Get real data
-    // Link to this page
-    // Skip is no fields defined
+  // TODO
+  // Get real data
+  // Link to this page
+  // Skip is no fields defined
 
-    // Start page - in progress
-    // Also edit subs page
-    // Also x of y page
+  // Start page - in progress
+  // Also edit subs page
+  // Also x of y page
 
-    val apis = Seq(
-      ApiDetails("Customs Declarations", "", "2.0",NonEmptyList(FieldValue("as","s"), List.empty)),
-      ApiDetails("Customs Inventory Linking Exports", "", "1.0",NonEmptyList(FieldValue("as","s"), List.empty))
-    )
+  def subscriptionConfigurationStart(applicationId: String): Action[AnyContent] =
+    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
-    Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(apis)))
-  }
+      val details = definitionsRequest.fieldDefinitions
+        .map(toDetails)
+        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+
+      // TODO: Sort?
+
+      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(details)))
+    }
 }
