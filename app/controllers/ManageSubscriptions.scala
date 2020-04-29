@@ -193,4 +193,35 @@ class ManageSubscriptions @Inject() (
 
       Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(details)))
     }
+
+  def subscriptionConfigurationPage(applicationId: String, apiVersionIndex: Int) : Action[AnyContent] =
+    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+//
+//      val details = definitionsRequest.fieldDefinitions
+//        .map(toDetails)
+//        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+
+      // TODO: Sort?
+
+      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage()))
+    }
+
+  def subscriptionConfigurationStepPage(applicationId: String, apiVersionIndex: Int): Action[AnyContent] =
+    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+      //
+      //      val details = definitionsRequest.fieldDefinitions
+      //        .map(toDetails)
+      //        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+
+      // TODO: Sort?
+
+      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStepPage()))
+    }
+
 }
