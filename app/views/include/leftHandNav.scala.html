@@ -52,12 +52,12 @@
 
                         @if(app.access.accessType.isStandard) {
                             <li class="side-nav__list @if(section == "redirects") { side-nav__list--selected }"><a id="nav-manage-redirects" class="side-nav__link" href="@routes.Redirects.redirects(app.id)">
-                                Manage redirect URIs</a></li>
+                                Redirect URIs</a></li>
                         }
 
                         @if(app.ipWhitelist.nonEmpty) {
                             <li class="side-nav__list @if(section == "manage-ip-whitelist") { side-nav__list--selected }"><a id="nav-manage-ip-whitelist" class="side-nav__link" href="@routes.IpWhitelist.manageIpWhitelist(app.id)">
-                                Manage whitelisted IPs</a></li>
+                                Whitelisted IPs</a></li>
                         }
 
                         <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Team members</a></li>
