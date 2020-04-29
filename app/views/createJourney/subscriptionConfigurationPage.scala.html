@@ -18,7 +18,7 @@
 @import domain._
 @import controllers.ManageSubscriptions.ApiDetails
 
-@()(
+@(app: Application, pageNumber: Int)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,
         messages: Messages,
@@ -40,7 +40,7 @@
   
   <p>The APIs you have subscribed to require additional configuration.
   </p>
+  <p>Page: @pageNumber</p>
 
-  <a href="subs-config" class="button">Continue</a>
-
+  <a href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id,pageNumber)}" class="button">Continue</a>
 }

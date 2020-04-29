@@ -73,8 +73,8 @@ GET         /applications/add/:environment/name                                 
 POST        /applications/add/:environment/name                                             controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
 
 GET         /applications/:id/add/sandbox/subscription-configuration-start                  controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String)
-GET         /applications/:id/add/sandbox/subscription-configuration/:apiVersionIndex       controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, apiVersionIndex: Int)
-GET         /applications/:id/add/sandbox/subscription-configuration-step/:apiVersionIndex  controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, apiVersionIndex: Int)
+GET         /applications/:id/add/sandbox/subscription-configuration/:pageNumber            controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, pageNumber: Int)
+GET         /applications/:id/add/sandbox/subscription-configuration-step/:pageNumber       controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, pageNumber: Int)
 
 GET         /applications/:id/add/:environment/subscriptions                                controllers.Subscriptions.addAppSubscriptions(id: String, environment: domain.Environment)
 

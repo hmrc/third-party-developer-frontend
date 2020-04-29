@@ -194,34 +194,37 @@ class ManageSubscriptions @Inject() (
       Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(details)))
     }
 
-  def subscriptionConfigurationPage(applicationId: String, apiVersionIndex: Int) : Action[AnyContent] =
+  def subscriptionConfigurationPage(applicationId: String, pageNumber: Int) : Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
-//
-//      val details = definitionsRequest.fieldDefinitions
-//        .map(toDetails)
-//        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
 
-      // TODO: Sort?
+      val details: Seq[ApiDetails] = definitionsRequest.fieldDefinitions
+        .map(toDetails)
+        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
 
-      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage()))
+
+      // TODO: Handle missing
+//      val detail = details(pageNumber)
+
+      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber)))
     }
 
-  def subscriptionConfigurationStepPage(applicationId: String, apiVersionIndex: Int): Action[AnyContent] =
+  def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
-      //
-      //      val details = definitionsRequest.fieldDefinitions
-      //        .map(toDetails)
-      //        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+
+      val details = definitionsRequest.fieldDefinitions
+        .map(toDetails)
+        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
 
       // TODO: Sort?
+      val ofPage = details.size
 
-      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStepPage()))
+      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStepPage(definitionsRequest.applicationRequest.application, pageNumber, ofPage)))
     }
 
 }

@@ -18,14 +18,14 @@
 @import domain._
 @import controllers.ManageSubscriptions.ApiDetails
 
-@()(
+@(application: Application, pageNumber: Int, ofPages: Int)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,
         messages: Messages,
         applicationConfig: config.ApplicationConfig)
 
 @pageHeading = @{
-  "The step page."
+  "API subscription configuration"
 }
 
 @devMain(
@@ -37,10 +37,12 @@
   <header>
     <h1 class="heading-xlarge">@pageHeading</h1>
   </header>
-  
-  <p>The APIs you have subscribed to require additional configuration.
+
+  <p>
+    You have completed step @pageNumber of @ofPages.
   </p>
-
-  <a href="subs-config" class="button">Continue</a>
-
+  <br/>
+  <p>
+    <a href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationPage(application.id, pageNumber + 1)}" class="button">Continue</a>
+  </p>
 }
