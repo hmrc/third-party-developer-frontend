@@ -28,7 +28,7 @@
                 <div class="side-nav" role="navigation" aria-labelledby="nav1">
                     <span class="heading-small" id="nav1">@app.name</span>
                     <ul>
-                        <li class="side-nav__list @if(section == "details") { side-nav__list--selected }"><a id="nav-manage-details" class="side-nav__link" href="@routes.Details.detapails(app.id)">Application details</a></li>
+                        <li class="side-nav__list @if(section == "details") { side-nav__list--selected }"><a id="nav-manage-details" class="side-nav__link" href="@routes.Details.details(app.id)">Application details</a></li>
 
                         <li class="side-nav__list @if(section == "credentials") { side-nav__list--selected }"><a id="nav-manage-credentials" class="side-nav__link" href="@routes.Credentials.credentials(app.id)">Credentials</a></li>
                         @if(loggedIn != null && app.canChangeClientCredentials(loggedIn.developer)) {
