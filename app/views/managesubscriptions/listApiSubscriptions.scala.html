@@ -26,28 +26,28 @@ loggedIn: DeveloperSession,
 messages: Messages,
 applicationConfig: config.ApplicationConfig)
 
-@pageHeading = @{ "API metadata" }
+@pageHeading = @{ "Subscription configuration" }
 
 @devMain(
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn),
   breadcrumbs = Seq(
-    Crumb("API metadata"),
+    Crumb(pageHeading),
     Crumb.application(app),
     Crumb.viewAllApplications,
     Crumb.home
   )
 ) {
 <header>
-  <h1 class="heading-xlarge">API metadata</h1>
+  <h1 class="heading-xlarge">@pageHeading</h1>
 </header>
 
 @appEnvironment(app)
 
 <br>
 
-<p>You can submit metadata for each of these APIs.</p>
+<p>Edit the configuration for the APIs you have subscribed to.</p>
 
   @for(api <- details) {
     <h2>@{api.name} @{api.version}</h2>
@@ -55,7 +55,7 @@ applicationConfig: config.ApplicationConfig)
       <thead>
         <tr>
         <th class="col-35">Name</th>
-        <th class="col-60">Metadata</th>
+        <th class="col-60">Configuration</th>
         <td>
             <a href="@{routes.ManageSubscriptions.editApiMetadataPage(app.id, api.context, api.version)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-submit">Edit</a>
         </td>

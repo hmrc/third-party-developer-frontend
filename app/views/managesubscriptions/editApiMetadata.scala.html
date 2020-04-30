@@ -40,18 +40,15 @@
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn),
     breadcrumbs = Seq(
-        Crumb(s"${vm.name} ${vm.apiVersion}"),
+        Crumb(pageHeading),
         Crumb.applicationMetadata(app),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
+        Crumb.application(app)
     )
 ) {
 
     @errorSummary(vm.fieldsForm)
 
     <header>
-      <span class="govuk-caption-xl">API metadata</span>
       <h1 class="heading-xlarge">@{pageHeading}</h1>
     </header>
 

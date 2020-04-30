@@ -31,11 +31,13 @@
 )
 @app = @{applicationViewModel.application}
 
+@title = @{ "Application details" }
+
 @devMain(
-    title = "Manage details",
+    title = title,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-        Crumb("Manage details"),
+        Crumb(title),
         Crumb.application(applicationViewModel.application),
         Crumb.viewAllApplications,
         Crumb.home
@@ -44,7 +46,7 @@
     developerSession = Some(loggedIn)
 ) {
     <header>
-        <h1 class="heading-xlarge">Manage details</h1>
+        <h1 class="heading-xlarge">@title</h1>
     </header>
 
     @appEnvironment(app)

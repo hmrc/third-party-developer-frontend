@@ -56,14 +56,14 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
-        elementExistsByText(document, "a", "Manage API subscriptions") shouldBe true
-        elementExistsByText(document, "a", "Manage API metadata") shouldBe false
+        elementExistsByText(document, "a", "API subscriptions") shouldBe true
+        elementExistsByText(document, "a", "Subscription configuration") shouldBe false
         elementExistsByText(document, "a", "Credentials") shouldBe true
         elementExistsByText(document, "a", "Client ID") shouldBe true
         elementExistsByText(document, "a", "Client secrets") shouldBe true
         elementExistsByText(document, "a", "Server token") shouldBe false
-        elementExistsByText(document, "a", "Manage redirect URIs") shouldBe true
-        elementExistsByText(document, "a", "Manage team members") shouldBe true
+        elementExistsByText(document, "a", "Redirect URIs") shouldBe true
+        elementExistsByText(document, "a", "Team members") shouldBe true
         elementExistsByText(document, "a", "Delete application") shouldBe true
       }
 
@@ -85,14 +85,14 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
-        elementExistsByText(document, "a", "Manage API subscriptions") shouldBe true
-        elementExistsByText(document, "a", "Manage API metadata") shouldBe true
+        elementExistsByText(document, "a", "API subscriptions") shouldBe true
+        elementExistsByText(document, "a", "Subscription configuration") shouldBe true
         elementExistsByText(document, "a", "Credentials") shouldBe true
         elementExistsByText(document, "a", "Client ID") shouldBe true
         elementExistsByText(document, "a", "Client secrets") shouldBe true
         elementExistsByText(document, "a", "Server token") shouldBe false
-        elementExistsByText(document, "a", "Manage redirect URIs") shouldBe true
-        elementExistsByText(document, "a", "Manage team members") shouldBe true
+        elementExistsByText(document, "a", "Redirect URIs") shouldBe true
+        elementExistsByText(document, "a", "Team members") shouldBe true
         elementExistsByText(document, "a", "Delete application") shouldBe true
       }
 

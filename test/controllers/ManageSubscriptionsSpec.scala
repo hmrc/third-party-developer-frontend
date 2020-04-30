@@ -162,7 +162,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       )
     }
 
-    def noMetaDataSubscription(prefix: String) =
+    def noConfigurationSubscription(prefix: String) =
       APISubscriptionStatus(
         name = generateName(prefix),
         serviceName = s"${prefix}-api",
@@ -174,13 +174,13 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         isTestSupport = false
       )
 
-    def metaDataSubscription(prefix: String, count: Int) =
-      noMetaDataSubscription(prefix).copy(fields = generateWrapper(prefix, count))
+    def configurationSubscription(prefix: String, count: Int) =
+      noConfigurationSubscription(prefix).copy(fields = generateWrapper(prefix, count))
   }
 
   "ManageSubscriptions" when {
     "a user is logged in" should {
-      "return the list subscription metadata page with no subscriptions and therefore no subscription field definitions" in new ManageSubscriptionsSetup {
+      "return the list subscription configuration page with no subscriptions and therefore no subscription field definitions" in new ManageSubscriptionsSetup {
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(List()))
@@ -191,9 +191,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe NOT_FOUND
       }
 
-      "return the list subscription metadata page with several subscriptions without metadata" in new ManageSubscriptionsSetup {
+      "return the list subscription configuration page with several subscriptions without subscription configuration" in new ManageSubscriptionsSetup {
 
-        val subsData = Seq(noMetaDataSubscription("api1"), noMetaDataSubscription("api2"))
+        val subsData = Seq(noConfigurationSubscription("api1"), noConfigurationSubscription("api2"))
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(subsData))
@@ -204,13 +204,13 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe NOT_FOUND
       }
 
-      "return the list subscription metadata page with several subscriptions, some with metadata" in new ManageSubscriptionsSetup {
+      "return the list subscription configuration page with several subscriptions, some with subscription configuration" in new ManageSubscriptionsSetup {
 
         val subsData = Seq(
-          metaDataSubscription("api1", 3),
-          metaDataSubscription("api2", 1),
-          noMetaDataSubscription("api3"),
-          metaDataSubscription("api4", 1).copy(subscribed = false)
+          configurationSubscription("api1", 3),
+          configurationSubscription("api2", 1),
+          noConfigurationSubscription("api3"),
+          configurationSubscription("api4", 1).copy(subscribed = false)
         )
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
@@ -223,7 +223,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         bodyOf(result) should include(loggedInUser.displayedName)
         bodyOf(result) should include("Sign out")
         bodyOf(result) should include(
-          "You can submit metadata for each of these APIs."
+          "Edit the configuration for the APIs you have subscribed to."
         )
 
         bodyOf(result) should include(generateName("api1"))
@@ -249,7 +249,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe NOT_FOUND
       }
 
-      "return not found when trying to edit api metadata for an api the application is not subscribed to" in new ManageSubscriptionsSetup {
+      "return not found when trying to edit api subscription configuration for an api the application is not subscribed to" in new ManageSubscriptionsSetup {
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(Seq.empty))
 
@@ -258,9 +258,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe NOT_FOUND
       }
 
-      "It renders the metadata list page for a privileged application" in new ManageSubscriptionsSetup{
+      "It renders the subscription configuration list page for a privileged application" in new ManageSubscriptionsSetup{
         val subsData = Seq(
-          metaDataSubscription("api1", 1)
+          configurationSubscription("api1", 1)
         )
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(privilegedApplication))(any[HeaderCarrier]))
@@ -274,7 +274,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "when the user is not logged in" should {
-      "return to the login page when the user attempts to list metadata" in new ManageSubscriptionsSetup {
+      "return to the login page when the user attempts to list subscription configuration" in new ManageSubscriptionsSetup {
 
         val request = FakeRequest()
 
@@ -285,7 +285,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         redirectLocation(result) shouldBe Some("/developer/login")
       }
 
-      "return to the login page when the user attempts to edit metadata" in new ManageSubscriptionsSetup {
+      "return to the login page when the user attempts to edit subscription configuration" in new ManageSubscriptionsSetup {
 
         val request = FakeRequest()
 
