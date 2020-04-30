@@ -18,6 +18,7 @@ package controllers
 
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
+import controllers.ManageSubscriptions.{ApiDetails, toDetails}
 import domain._
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -70,6 +71,28 @@ trait ActionBuilders {
         .map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
         .toRight(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
       )
+    }
+  }
+
+  def subscriptionFieldPageRefiner(pageNumber: Int)(implicit ec: ExecutionContext):
+    ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPage]
+      = new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPage] {
+
+    def refine[A](input: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldPage[A]]] = {
+      implicit val implicitRequest: Request[A] = input.applicationRequest.request
+
+        val details = input.fieldDefinitions
+          .map(toDetails)
+          .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+
+        // TODO: Sort?
+        val ofPage = details.size
+
+      if (pageNumber > 0 && pageNumber <= ofPage) {
+        Future.successful(Right(ApplicationWithSubscriptionFieldPage(pageNumber, input.fieldDefinitions, input.applicationRequest)))
+      } else {
+          Future.successful(Left(NotFound(errorHandler.notFoundTemplate)))
+      }
     }
   }
 

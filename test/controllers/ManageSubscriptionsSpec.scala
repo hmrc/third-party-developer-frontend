@@ -371,7 +371,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         when(manageSubscriptionsSetup.mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(subsData))
         val result =
-          await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationPage(appId, -1)(manageSubscriptionsSetup.loggedInRequest))
+          await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationStepPage(appId, -1)(manageSubscriptionsSetup.loggedInRequest))
 
         status(result) shouldBe NOT_FOUND
       }

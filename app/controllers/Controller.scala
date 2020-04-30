@@ -56,6 +56,9 @@ case class ApplicationRequest[A](application: Application, subscriptions: Seq[AP
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
+case class ApplicationWithSubscriptionFieldPage[A](pageNumber: Int, fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
+  extends WrappedRequest[A](applicationRequest)
+
 abstract class BaseController() extends DevHubAuthorization with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
   val errorHandler: ErrorHandler
   val sessionService: SessionService
@@ -108,6 +111,21 @@ abstract class ApplicationController()
           applicationAction(applicationId, loggedIn) andThen
           capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
           fieldDefinitionsExistRefiner
+
+      stackedActions.async(fun)(request)
+    }
+  }
+
+  //TODO: Rename and reuse the above action
+  def subFieldsDefinitionsExistAction2(applicationId: String, pageNumber: Int)
+                                     (fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      val stackedActions =
+        Action andThen
+          applicationAction(applicationId, loggedIn) andThen
+          capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
+          fieldDefinitionsExistRefiner andThen
+          subscriptionFieldPageRefiner(pageNumber)
 
       stackedActions.async(fun)(request)
     }

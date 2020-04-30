@@ -194,7 +194,7 @@ class ManageSubscriptions @Inject() (
     }
 
   def subscriptionConfigurationPage(applicationId: String, pageNumber: Int) : Action[AnyContent] =
-    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+    subFieldsDefinitionsExistAction2(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
@@ -203,22 +203,12 @@ class ManageSubscriptions @Inject() (
         .map(toDetails)
         .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
 
-
-      // TODO: Handle missing
-//      val detail = details(pageNumber)
-      val ofPage = details.size
-
-      pageNumber match {
-        case pageNumber if pageNumber > 0 && pageNumber <= ofPage =>
-          Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber)))
-        case _ =>
-          Future.successful(NotFound(errorHandler.notFoundTemplate))
-      }
+      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber)))
 
     }
 
   def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
-    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+    subFieldsDefinitionsExistAction2(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
@@ -231,13 +221,10 @@ class ManageSubscriptions @Inject() (
       // TODO: Sort?
       val ofPage = details.size
 
-      pageNumber match {
-        case pageNumber if pageNumber > 0 && pageNumber < ofPage =>
-          Future.successful (Ok(views.html.createJourney.subscriptionConfigurationStepPage (application, pageNumber, ofPage)))
-        case pageNumber if pageNumber == ofPage =>
-          Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id, application.deployedTo)))
-        case _ =>
-          Future.successful(NotFound(errorHandler.notFoundTemplate))
+      if (pageNumber == ofPage) {
+        Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id, application.deployedTo)))
+      } else {
+        Future.successful (Ok(views.html.createJourney.subscriptionConfigurationStepPage (application, pageNumber, ofPage)))
       }
     }
 
