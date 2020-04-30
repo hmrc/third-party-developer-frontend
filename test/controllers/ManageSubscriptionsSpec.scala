@@ -66,7 +66,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "App name 1",
     DateTimeUtils.now,
     DateTimeUtils.now,
-    Environment.PRODUCTION,
+    Environment.SANDBOX,
     Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
     state = ApplicationState.production(loggedInUser.email, ""),
@@ -290,6 +290,102 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         bodyOf(result) should include("api2-name")
         bodyOf(result) should include("1.0")
       }
+
+      "edit page" in new ManageSubscriptionsSetup {
+        val subsData = Seq(
+          metaDataSubscription("api1", 1)
+        )
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+        private val result =
+          await(manageSubscriptionController.subscriptionConfigurationPage(appId, 1)(loggedInRequest))
+
+        status(result) shouldBe OK
+        //bodyOf(result) should include("api1-name 1.0")
+        //TODO: should show subs field descriptions and hints
+      }
+      "return NOT_FOUND if page number is invalid for edit page " when {
+        def testEditPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
+          val subsData = Seq(
+            manageSubscriptionsSetup.metaDataSubscription("api1", count)
+          )
+
+          when(manageSubscriptionsSetup.mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+            .thenReturn(successful(subsData))
+          val result =
+            await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationPage(appId, -1)(manageSubscriptionsSetup.loggedInRequest))
+
+          status(result) shouldBe NOT_FOUND
+        }
+
+        "negative" in new ManageSubscriptionsSetup {
+          testEditPageNumbers(-1, this)
+        }
+        "0" in new ManageSubscriptionsSetup {
+          testEditPageNumbers(0, this)
+        }
+        "too large" in new ManageSubscriptionsSetup {
+          testEditPageNumbers(100, this)
+        }
+      }
+
+      "step page" in new ManageSubscriptionsSetup {
+        val subsData = Seq(
+          metaDataSubscription("api1", 1),
+          metaDataSubscription("api2", 1)
+        )
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+
+        private val result =
+          await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, 1)(loggedInRequest))
+
+        status(result) shouldBe OK
+        bodyOf(result) should include("You have completed step 1 of 2")
+      }
+
+      "step page for the last page as a redirect" in new ManageSubscriptionsSetup {
+        val subsData = Seq(
+          metaDataSubscription("api1", 1),
+          metaDataSubscription("api2", 1)
+        )
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+
+        private val result =
+          await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, 2)(loggedInRequest))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/add/sandbox/success")
+      }
+
+    "return NOT_FOUND if page number is invalid for step page " when {
+      def testStepPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
+        val subsData = Seq(
+          manageSubscriptionsSetup.metaDataSubscription("api1", count)
+        )
+
+        when(manageSubscriptionsSetup.mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+        val result =
+          await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationPage(appId, -1)(manageSubscriptionsSetup.loggedInRequest))
+
+        status(result) shouldBe NOT_FOUND
+      }
+
+      "negative" in new ManageSubscriptionsSetup {
+        testStepPageNumbers(-1, this)
+      }
+      "0" in new ManageSubscriptionsSetup {
+        testStepPageNumbers(0, this)
+      }
+      "too large" in new ManageSubscriptionsSetup {
+        testStepPageNumbers(100, this)
+      }
+    }
 
       // TODO: Fix this. Make previous page link to either here or end of journey.
       "be redirected to the end of the journey of they haven't subscribed to any APIs with subscription fields" ignore new ManageSubscriptionsSetup {

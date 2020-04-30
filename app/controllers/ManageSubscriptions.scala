@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatus, APIVersion}
+import domain.{APISubscriptionStatus}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import play.api.data
 import play.api.data.Form
@@ -30,7 +30,6 @@ import play.api.libs.crypto.CookieSigner
 import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.managesubscriptions.editApiMetadata
-import views.html.createJourney.subscriptionConfigurationStart
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
@@ -191,7 +190,7 @@ class ManageSubscriptions @Inject() (
 
       // TODO: Sort?
 
-      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(details)))
+      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(definitionsRequest.applicationRequest.application, details)))
     }
 
   def subscriptionConfigurationPage(applicationId: String, pageNumber: Int) : Action[AnyContent] =
@@ -207,8 +206,15 @@ class ManageSubscriptions @Inject() (
 
       // TODO: Handle missing
 //      val detail = details(pageNumber)
+      val ofPage = details.size
 
-      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber)))
+      pageNumber match {
+        case pageNumber if pageNumber > 0 && pageNumber <= ofPage =>
+          Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber)))
+        case _ =>
+          Future.successful(NotFound(errorHandler.notFoundTemplate))
+      }
+
     }
 
   def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
@@ -217,6 +223,7 @@ class ManageSubscriptions @Inject() (
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
+      val application = definitionsRequest.applicationRequest.application
       val details = definitionsRequest.fieldDefinitions
         .map(toDetails)
         .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
@@ -224,7 +231,14 @@ class ManageSubscriptions @Inject() (
       // TODO: Sort?
       val ofPage = details.size
 
-      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStepPage(definitionsRequest.applicationRequest.application, pageNumber, ofPage)))
+      pageNumber match {
+        case pageNumber if pageNumber > 0 && pageNumber < ofPage =>
+          Future.successful (Ok(views.html.createJourney.subscriptionConfigurationStepPage (application, pageNumber, ofPage)))
+        case pageNumber if pageNumber == ofPage =>
+          Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id, application.deployedTo)))
+        case _ =>
+          Future.successful(NotFound(errorHandler.notFoundTemplate))
+      }
     }
 
 }
