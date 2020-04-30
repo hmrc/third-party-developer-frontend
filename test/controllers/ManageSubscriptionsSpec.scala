@@ -293,7 +293,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "edit page" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          metaDataSubscription("api1", 1)
+          configurationSubscription("api1", 1)
         )
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
@@ -308,7 +308,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "return NOT_FOUND if page number is invalid for edit page " when {
         def testEditPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
           val subsData = Seq(
-            manageSubscriptionsSetup.metaDataSubscription("api1", count)
+            manageSubscriptionsSetup.configurationSubscription("api1", count)
           )
 
           when(manageSubscriptionsSetup.mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
@@ -332,8 +332,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "step page" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          metaDataSubscription("api1", 1),
-          metaDataSubscription("api2", 1)
+          configurationSubscription("api1", 1),
+          configurationSubscription("api2", 1)
         )
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
@@ -348,8 +348,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "step page for the last page as a redirect" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          metaDataSubscription("api1", 1),
-          metaDataSubscription("api2", 1)
+          configurationSubscription("api1", 1),
+          configurationSubscription("api2", 1)
         )
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
@@ -365,7 +365,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "return NOT_FOUND if page number is invalid for step page " when {
       def testStepPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
         val subsData = Seq(
-          manageSubscriptionsSetup.metaDataSubscription("api1", count)
+          manageSubscriptionsSetup.configurationSubscription("api1", count)
         )
 
         when(manageSubscriptionsSetup.mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
