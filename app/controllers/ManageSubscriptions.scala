@@ -140,8 +140,7 @@ class ManageSubscriptions @Inject() (
 
   def saveSubscriptionFields(applicationId: String,
                              apiContext: String,
-                             apiVersion: String,
-                             subscriptionRedirect: String) : Action[AnyContent]
+                             apiVersion: String) : Action[AnyContent]
     = whenTeamMemberOnApp(applicationId) { implicit request =>
 
     def handleValidForm(validForm: EditApiMetadata) = {

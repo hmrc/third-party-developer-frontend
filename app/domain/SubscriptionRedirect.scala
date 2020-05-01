@@ -26,5 +26,4 @@ object SubscriptionRedirect extends PlayEnum[SubscriptionRedirect] {
   final case object MANAGE_PAGE extends SubscriptionRedirect
   final case object APPLICATION_CHECK_PAGE extends SubscriptionRedirect
   final case object API_SUBSCRIPTIONS_PAGE extends SubscriptionRedirect
-  final case object API_MANAGE_METADATA_PAGE extends SubscriptionRedirect
 }

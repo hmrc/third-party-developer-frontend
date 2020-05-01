@@ -18,14 +18,12 @@
 @import domain._
 @import model.Crumb
 @import controllers.ManageSubscriptions.EditApiMetadataViewModel
-@import domain.SubscriptionRedirect.API_MANAGE_METADATA_PAGE
 
 @import views.helper.IdFormatter
 
 @(
     app: Application,
-    vm: EditApiMetadataViewModel,
-    subscriptionRedirect: SubscriptionRedirect = API_MANAGE_METADATA_PAGE
+    vm: EditApiMetadataViewModel
 )(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
@@ -55,5 +53,5 @@
 
     <br>
 
-    @editApiMetadataPartial(app,vm,subscriptionRedirect)
+    @editApiMetadataPartial(app,vm)
 }

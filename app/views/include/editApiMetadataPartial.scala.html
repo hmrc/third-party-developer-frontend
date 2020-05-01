@@ -17,21 +17,18 @@
 @import views.helper.GlobalSection._
 @import controllers.ErrorFormBuilder._
 
-@import domain.SubscriptionRedirect.API_MANAGE_METADATA_PAGE
-@import domain.SubscriptionRedirect
 @import controllers.ManageSubscriptions.EditApiMetadataViewModel
 @import domain.Application
 @import views.html.include.fieldError
 @import views.helper.IdFormatter
 @(
         app: Application,
-        vm: EditApiMetadataViewModel,
-        subscriptionRedirect: SubscriptionRedirect = API_MANAGE_METADATA_PAGE
+        vm: EditApiMetadataViewModel
 )(
         implicit request: play.api.mvc.Request[Any],
         messages: Messages)
 
-@helper.form(action = routes.ManageSubscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion, subscriptionRedirect.toString), 'class -> "fields-subscription") {
+@helper.form(action = routes.ManageSubscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion), 'class -> "fields-subscription") {
  @helper.CSRF.formField
  <input type="hidden" name="apiName" value="@vm.name">
 
