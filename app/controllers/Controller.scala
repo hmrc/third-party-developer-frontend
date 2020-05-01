@@ -18,6 +18,7 @@ package controllers
 
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
+import controllers.ManageSubscriptions.ApiDetails
 import domain._
 import model.ApplicationViewModel
 import play.api.i18n.I18nSupport
@@ -56,7 +57,7 @@ case class ApplicationRequest[A](application: Application, subscriptions: Seq[AP
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
-case class ApplicationWithSubscriptionFieldPage[A](pageNumber: Int, fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
+case class ApplicationWithSubscriptionFieldPage[A](pageIndex: Int, totalPages: Int, apiDetails: ApiDetails, applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
 abstract class BaseController() extends DevHubAuthorization with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
@@ -103,31 +104,29 @@ abstract class ApplicationController()
     }
   }
 
+  private object ManageSubscriptionsActions {
+    def stackedActions(applicationId: String)(implicit request: UserRequest[AnyContent]) =
+      Action andThen
+        applicationAction(applicationId, loggedIn) andThen
+        capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
+        fieldDefinitionsExistRefiner
+  }
+
   def subFieldsDefinitionsExistAction(applicationId: String)
                                     (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val stackedActions =
-        Action andThen
-          applicationAction(applicationId, loggedIn) andThen
-          capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
-          fieldDefinitionsExistRefiner
-
-      stackedActions.async(fun)(request)
+    loggedInAction { implicit request: UserRequest[AnyContent] =>
+      ManageSubscriptionsActions
+        .stackedActions(applicationId)
+        .async(fun)(request)
     }
   }
 
-  //TODO: Rename and reuse the above action
-  def subFieldsDefinitionsExistAction2(applicationId: String, pageNumber: Int)
-                                     (fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
+  def subFieldsDefinitionsExistActionWithPageNumber(applicationId: String, pageNumber: Int)
+                                                   (fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
-      val stackedActions =
-        Action andThen
-          applicationAction(applicationId, loggedIn) andThen
-          capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
-          fieldDefinitionsExistRefiner andThen
-          subscriptionFieldPageRefiner(pageNumber)
-
-      stackedActions.async(fun)(request)
+      (ManageSubscriptionsActions
+        .stackedActions(applicationId) andThen subscriptionFieldPageRefiner(pageNumber))
+        .async(fun)(request)
     }
   }
 }

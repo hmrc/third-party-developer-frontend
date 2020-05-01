@@ -188,44 +188,30 @@ class ManageSubscriptions @Inject() (
         .map(toDetails)
         .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
 
-      // TODO: Sort?
-
       Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(definitionsRequest.applicationRequest.application, details)))
     }
 
   def subscriptionConfigurationPage(applicationId: String, pageNumber: Int) : Action[AnyContent] =
-    subFieldsDefinitionsExistAction2(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
+    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
-      val details: Seq[ApiDetails] = definitionsRequest.fieldDefinitions
-        .map(toDetails)
-        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
-
       Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber)))
-
     }
 
   def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
-    subFieldsDefinitionsExistAction2(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
+    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
       val application = definitionsRequest.applicationRequest.application
-      val details = definitionsRequest.fieldDefinitions
-        .map(toDetails)
-        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
 
-      // TODO: Sort?
-      val ofPage = details.size
-
-      if (pageNumber == ofPage) {
+      if (pageNumber == definitionsRequest.totalPages) {
         Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id, application.deployedTo)))
       } else {
-        Future.successful (Ok(views.html.createJourney.subscriptionConfigurationStepPage (application, pageNumber, ofPage)))
+        Future.successful (Ok(views.html.createJourney.subscriptionConfigurationStepPage (application, pageNumber, definitionsRequest.totalPages)))
       }
     }
-
 }

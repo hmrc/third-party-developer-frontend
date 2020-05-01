@@ -81,15 +81,15 @@ trait ActionBuilders {
     def refine[A](input: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldPage[A]]] = {
       implicit val implicitRequest: Request[A] = input.applicationRequest.request
 
-        val details = input.fieldDefinitions
-          .map(toDetails)
-          .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+      // TODO: Sort?
+      val details: Seq[ApiDetails] = input
+        .fieldDefinitions
+        .map(toDetails)
+        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
 
-        // TODO: Sort?
-        val ofPage = details.size
-
-      if (pageNumber > 0 && pageNumber <= ofPage) {
-        Future.successful(Right(ApplicationWithSubscriptionFieldPage(pageNumber, input.fieldDefinitions, input.applicationRequest)))
+      if (pageNumber >= 1 && pageNumber <= details.size) {
+        val apiDetails = details(pageNumber - 1)
+        Future.successful(Right(ApplicationWithSubscriptionFieldPage(pageNumber,details.size, apiDetails, input.applicationRequest)))
       } else {
           Future.successful(Left(NotFound(errorHandler.notFoundTemplate)))
       }
