@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
+import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -270,6 +270,29 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         status(result) shouldBe OK
       }
+
+      // TODO: New test. Give better name and make me work.
+      "It renders the edit subscription page" in new ManageSubscriptionsSetup {
+        // TODO: Can use less data
+        val subsData = Seq(
+          configurationSubscription("api1", 3),
+          configurationSubscription("api2", 1),
+          noConfigurationSubscription("api3"),
+          configurationSubscription("api4", 1).copy(subscribed = false)
+        )
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+
+        private val result =
+          await(addToken(manageSubscriptionController.editApiMetadataPage(appId, "/api1-api", "1.0"))(loggedInRequest))
+
+        status(result) shouldBe OK
+
+        // TODO: Test other stuff?
+      }
+
+      // TODO: Test save method
     }
 
     "a user is doing the add new sandbox app journey they" should {
@@ -299,12 +322,13 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(subsData))
         private val result =
-          await(manageSubscriptionController.subscriptionConfigurationPage(appId, 1)(loggedInRequest))
+          await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, 1))(loggedInRequest))
 
         status(result) shouldBe OK
         //bodyOf(result) should include("api1-name 1.0")
         //TODO: should show subs field descriptions and hints
       }
+
       "return NOT_FOUND if page number is invalid for edit page " when {
         def testEditPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
           val subsData = Seq(

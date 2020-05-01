@@ -32,7 +32,6 @@ import scala.concurrent.Future.failed
 
 class RegistrationSpec extends BaseControllerSpec {
 
-  val loggedInUser = utils.DeveloperSession("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   var userPassword = "Password1!"
 
   trait Setup {
@@ -44,7 +43,8 @@ class RegistrationSpec extends BaseControllerSpec {
       cookieSigner
     )
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+//    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> "Is this a valid token")
   }
 
 
