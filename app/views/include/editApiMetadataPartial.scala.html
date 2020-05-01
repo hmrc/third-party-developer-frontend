@@ -1,0 +1,70 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import views.helper.GlobalSection._
+@import controllers.ErrorFormBuilder._
+
+@import domain.SubscriptionRedirect.API_MANAGE_METADATA_PAGE
+@import domain.SubscriptionRedirect
+@import controllers.ManageSubscriptions.EditApiMetadataViewModel
+@import domain.Application
+@import views.html.include.fieldError
+@import views.helper.IdFormatter
+@(
+        app: Application,
+        vm: EditApiMetadataViewModel,
+        subscriptionRedirect: SubscriptionRedirect = API_MANAGE_METADATA_PAGE
+)(
+        implicit request: play.api.mvc.Request[Any],
+        messages: Messages)
+
+@helper.form(action = routes.ManageSubscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion, subscriptionRedirect.toString), 'class -> "fields-subscription") {
+ @helper.CSRF.formField
+ <input type="hidden" name="apiName" value="@vm.name">
+
+ @helper.repeatWithIndex(vm.fieldsForm("fields")) { (field, idx) =>
+  @defining(field("name").value.getOrElse("")) { formFieldId =>
+   <div class="form-group @if(vm.fieldsForm.errors(formFieldId).nonEmpty){form-group-error}">
+
+    @fieldError(vm.fieldsForm.errors, formFieldId)
+
+    <input type="hidden" name="fields[@idx].name" value="@field("name").value.getOrElse("")">
+    <input type="hidden" name="fields[@idx].description" value="@field("description").value.getOrElse("")">
+    <input type="hidden" name="fields[@idx].shortDescription" value="@field("shortDescription").value.getOrElse("")">
+    <input type="hidden" name="fields[@idx].hint" value="@field("hint").value.getOrElse("")">
+    <input type="hidden" name="fields[@idx].type" value="@field("type").value.getOrElse("")">
+
+    <div class="form-field">
+     <label class="form-label" for="@formFieldId">
+     @{field("description").value.getOrElse("")}
+     </label>
+     <span class="form-hint">@{field("hint").value.getOrElse("")}</span>
+
+     <input  type="text"
+     name="fields[@idx].value"
+     value="@{field("value").value.getOrElse("")}"
+     class="form-input input--medium @if(vm.fieldsForm.errors(formFieldId).nonEmpty){form-control-error}"
+     id="@formFieldId"
+     />
+    </div>
+  }
+ </div>
+ }
+
+ <div class="form-field form-field--submit">
+  <button id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
+ </div>
+}
