@@ -57,7 +57,12 @@ case class ApplicationRequest[A](application: Application, subscriptions: Seq[AP
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
-case class ApplicationWithSubscriptionFieldPage[A](pageIndex: Int, totalPages: Int, apiDetails: ApiDetails, applicationRequest: ApplicationRequest[A])
+case class ApplicationWithSubscriptionFieldPage[A]( pageIndex: Int,
+                                                    totalPages: Int,
+                                                    apiSubscriptionStatus:
+                                                    APISubscriptionStatus,
+                                                    apiDetails: ApiDetails,
+                                                    applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
 abstract class BaseController() extends DevHubAuthorization with I18nSupport with HeaderCarrierConversion with HeaderEnricher {

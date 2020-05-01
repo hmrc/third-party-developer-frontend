@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.{ApiDetails, toDetails}
-import domain._
+import domain.{APISubscriptionStatus, _}
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -89,7 +89,9 @@ trait ActionBuilders {
 
       if (pageNumber >= 1 && pageNumber <= details.size) {
         val apiDetails = details(pageNumber - 1)
-        Future.successful(Right(ApplicationWithSubscriptionFieldPage(pageNumber,details.size, apiDetails, input.applicationRequest)))
+        val apiSubscriptionStatus: APISubscriptionStatus = input.fieldDefinitions.toList(pageNumber - 1)
+
+        Future.successful(Right(ApplicationWithSubscriptionFieldPage(pageNumber,details.size, apiSubscriptionStatus, apiDetails, input.applicationRequest)))
       } else {
           Future.successful(Left(NotFound(errorHandler.notFoundTemplate)))
       }

@@ -18,14 +18,20 @@
 @import domain._
 @import controllers.ManageSubscriptions.ApiDetails
 
-@(app: Application, pageNumber: Int)(
+@import controllers.ManageSubscriptions.EditApiMetadataViewModel
+
+@(
+        app: Application,
+        pageNumber: Int,
+        vm: EditApiMetadataViewModel
+)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,
         messages: Messages,
         applicationConfig: config.ApplicationConfig)
 
 @pageHeading = @{
-  "Edit fields for an API version page"
+  s"${vm.name} ${vm.apiVersion}"
 }
 
 @devMain(
@@ -38,12 +44,5 @@
     <h1 class="heading-xlarge">@pageHeading</h1>
   </header>
   
-  <p>The APIs you have subscribed to require additional configuration.
-  </p>
-  <p>Page: @pageNumber</p>
-
-  <p>
-    <a href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id,pageNumber)}" class="button">Save and continue</a>
-<h1>TODO - I'll do this later</h1>
-  </p>
+  @editApiMetadataPartial(app,vm)
 }

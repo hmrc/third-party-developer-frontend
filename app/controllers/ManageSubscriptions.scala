@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatus}
+import domain.APISubscriptionStatus
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import play.api.data
 import play.api.data.Form
@@ -134,7 +134,7 @@ class ManageSubscriptions @Inject() (
         .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
         .headOption
         .flatMap(toViewModel)
-      .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, vm))))
+        .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, vm))))
         .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
 
@@ -196,7 +196,14 @@ class ManageSubscriptions @Inject() (
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
-      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber)))
+      val vm = toViewModel(definitionsRequest.apiSubscriptionStatus)
+
+      Future.successful(Ok(
+        views.html.createJourney.subscriptionConfigurationPage(
+          definitionsRequest.applicationRequest.application,
+          pageNumber,
+          vm.get // TODO : Fix me
+        )))
     }
 
   def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
