@@ -130,7 +130,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         name = generateName(prefix),
         description = s"$prefix-description",
         shortDescription = s"$prefix-short-description",
-        hint = "",
+        hint = s"$prefix-hint",
         `type` = "STRING"
       )
 
@@ -257,7 +257,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe NOT_FOUND
       }
 
-      "It renders the subscription configuration list page for a privileged application" in new ManageSubscriptionsSetup{
+      "It renders the subscription configuration list page for a privileged application" in new ManageSubscriptionsSetup {
         val subsData = Seq(
           configurationSubscription("api1", 1)
         )
@@ -271,15 +271,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe OK
       }
 
-      // TODO: New test. Give better name and make me work.
-      "It renders the edit subscription page" in new ManageSubscriptionsSetup {
-        // TODO: Can use less data
-        val subsData = Seq(
-          configurationSubscription("api1", 3),
-          configurationSubscription("api2", 1),
-          noConfigurationSubscription("api3"),
-          configurationSubscription("api4", 1).copy(subscribed = false)
-        )
+      "renders the edit subscription page" in new ManageSubscriptionsSetup {
+        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 2)
+
+        val subsData = Seq(apiSubscriptionStatus)
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(subsData))
@@ -289,7 +284,17 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         status(result) shouldBe OK
 
-        // TODO: Test other stuff?
+        bodyOf(result) should include(apiSubscriptionStatus.name)
+        bodyOf(result) should include(apiSubscriptionStatus.apiVersion.version)
+        bodyOf(result) should include(application.name)
+        bodyOf(result) should include("Sandbox")
+
+        private val fields = apiSubscriptionStatus.fields.head.fields.toList
+
+        bodyOf(result) should include(fields.head.definition.description)
+        bodyOf(result) should include(fields.head.definition.hint + "")
+        bodyOf(result) should include(fields(1).definition.description)
+        bodyOf(result) should include(fields(1).definition.hint)
       }
 
       // TODO: Test save method
