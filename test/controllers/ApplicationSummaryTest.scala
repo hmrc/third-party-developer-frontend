@@ -18,15 +18,16 @@ package controllers
 
 import domain.Role.DEVELOPER
 import domain.State.TESTING
-import domain.TermsOfUseStatus
+import domain.{AccessType, TermsOfUseStatus}
 import org.joda.time.DateTime
+import org.scalacheck.Prop.False
 import org.scalatest.{Matchers, WordSpec}
 
 class ApplicationSummaryTest extends WordSpec with Matchers {
 
   "noProductionApplications" should {
-    val sandboxApp = ApplicationSummary("", "", "Sandbox", DEVELOPER, TermsOfUseStatus.AGREED, TESTING, new DateTime(), new DateTime())
-    val productionApp = ApplicationSummary("", "", "Production", DEVELOPER, TermsOfUseStatus.AGREED, TESTING, new DateTime(), new DateTime())
+    val sandboxApp = ApplicationSummary("", "", "Sandbox", DEVELOPER, TermsOfUseStatus.AGREED, TESTING, new DateTime(), new DateTime(), AccessType.STANDARD )
+    val productionApp = ApplicationSummary("", "", "Production", DEVELOPER, TermsOfUseStatus.AGREED, TESTING, new DateTime(), new DateTime(), AccessType.STANDARD)
 
     "return true if only sandbox apps" in {
       val apps = Seq(sandboxApp)

@@ -61,7 +61,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn))
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn, AccessType.STANDARD))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
@@ -84,7 +84,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn))
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn, AccessType.STANDARD))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 

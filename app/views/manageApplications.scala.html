@@ -14,14 +14,16 @@
  * limitations under the License.
  *@
 
-@import domain.{DeveloperSession, Developer}
+@import domain.{DeveloperSession, Developer, AccessType}
 @import helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import model.Crumb
 @import controllers.ApplicationSummary.noProductionApplications
 @import uk.gov.hmrc.auth.core.Admin
-
 @import domain.Role.ADMINISTRATOR
+@import domain.Application
+@import domain.AccessType.PRIVILEGED
+@import domain.AccessType.STANDARD
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 
 @devMain(
@@ -67,39 +69,53 @@
                 <col width="30%"/>
             </colgroup>
             <thead>
-                <th>@{applications.head.environment} applications</th>
+                <th>@{
+                    applications.head.environment
+                } applications</th>
                 <th>Your role</th>
                 <th>Last API call</th>
             </thead>
             <tbody>
-            @for(app<-applications) {
+            @for(app <- applications) {
                 <tr>
                     <td>
-                        @if((app.environment == "Production") && app.state.isInTesting) {
-                            @if(app.role.isAdministrator) {
-                                <a href="@{controllers.checkpages.routes.ApplicationCheck.requestCheckPage(app.id)}" data-app-name>@app.name</a>
-                            } else {
-                                <a href="@{controllers.checkpages.routes.ApplicationCheck.unauthorisedAppDetails(app.id)}" data-app-name>@app.name</a>
-                            }
+                    @if((app.environment == "Production") && app.state.isInTesting) {
+                        @if(app.role.isAdministrator) {
+                            <a href="@{
+                                controllers.checkpages.routes.ApplicationCheck.requestCheckPage(app.id)
+                            }" data-app-name>@app.name</a>
                         } else {
-                            <a href="@{routes.Details.details(app.id)}" data-app-name>@app.name</a>
+                            <a href="@{
+                                controllers.checkpages.routes.ApplicationCheck.unauthorisedAppDetails(app.id)
+                            }" data-app-name>@app.name</a>
                         }
+                    } else {
+                        <a href="@{
+                            routes.Details.details(app.id)
+                        }" data-app-name>@app.name</a>
+                    }
                     </td>
                     <td data-app-user-role>
                         @if(app.role.isAdministrator) {Admin}
                         @if(app.role.isDeveloper) {Developer}
                     </td>
                     <td data-app-lastAccess>
-                        @{formatLastAccessDate(app.lastAccess, app.createdOn) match {
+                    @{
+                        formatLastAccessDate(app.lastAccess, app.createdOn) match {
                             case Some(formattedDate) => formattedDate.capitalize
                             case _ => "No API called"
-                        }}
+                        }
+                    }
                     </td>
                 </tr>
             }
             </tbody>
         </table>
-        <br>
+        @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
+            <h2 class="heading-medium">Using privileged application credentials</h2>
+            <p>Check <a href="/api-documentation/docs/using-privileged-application-credentials">
+                how to use privileged application credentials</a>.</p>
+        }
     }
 }
 
