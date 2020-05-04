@@ -140,7 +140,8 @@ class ManageSubscriptions @Inject() (
 
   def saveSubscriptionFields(applicationId: String,
                              apiContext: String,
-                             apiVersion: String) : Action[AnyContent]
+                             apiVersion: String,
+                             returnRedirectUrl: String) : Action[AnyContent]
     = whenTeamMemberOnApp(applicationId) { implicit request =>
 
     def handleValidForm(validForm: EditApiMetadata) = {
@@ -153,7 +154,7 @@ class ManageSubscriptions @Inject() (
       }
 
       saveFields(validForm) map {
-        case SaveSubscriptionFieldsSuccessResponse => Redirect(routes.ManageSubscriptions.listApiSubscriptions(applicationId))
+        case SaveSubscriptionFieldsSuccessResponse => Redirect(returnRedirectUrl)
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)

@@ -337,6 +337,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         assertCommonEditFormFields(result, apiSubscriptionStatus)
       }
 
+      // TODO: When saving we are redirect to the next page in the journey.
+
       "return NOT_FOUND if page number is invalid for edit page " when {
         def testEditPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
           val subsData = Seq(

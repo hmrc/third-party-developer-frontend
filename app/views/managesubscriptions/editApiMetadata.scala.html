@@ -22,8 +22,8 @@
 @import views.helper.IdFormatter
 
 @(
-    app: Application,
-    vm: EditApiMetadataViewModel
+  app: Application,
+  vm: EditApiMetadataViewModel
 )(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
@@ -53,5 +53,5 @@
 
     <br>
 
-    @editApiMetadataPartial(app,vm)
+    @editApiMetadataPartial(app,vm, routes.ManageSubscriptions.listApiSubscriptions(app.id).url)
 }
