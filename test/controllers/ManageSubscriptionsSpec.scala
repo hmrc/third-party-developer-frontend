@@ -23,7 +23,7 @@ import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFi
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import play.api.mvc.AnyContentAsEmpty
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -175,6 +175,20 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     def configurationSubscription(prefix: String, count: Int): APISubscriptionStatus =
       noConfigurationSubscription(prefix).copy(fields = generateWrapper(prefix, count))
+
+    def assertCommonEditFormFields(result: Result, apiSubscriptionStatus: APISubscriptionStatus) = {
+      status(result) shouldBe OK
+
+      bodyOf(result) should include(apiSubscriptionStatus.name)
+      bodyOf(result) should include(apiSubscriptionStatus.apiVersion.version)
+
+      val fields = apiSubscriptionStatus.fields.head.fields.toList
+
+      for(field <- fields){
+        bodyOf(result) should include(field.definition.description)
+        bodyOf(result) should include(field.definition.hint)
+      }
+    }
   }
 
   "ManageSubscriptions" when {
@@ -279,22 +293,14 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(subsData))
 
-        private val result =
+        private val result: Result =
           await(addToken(manageSubscriptionController.editApiMetadataPage(appId, "/api1-api", "1.0"))(loggedInRequest))
 
-        status(result) shouldBe OK
+        assertCommonEditFormFields(result, apiSubscriptionStatus)
 
-        bodyOf(result) should include(apiSubscriptionStatus.name)
-        bodyOf(result) should include(apiSubscriptionStatus.apiVersion.version)
         bodyOf(result) should include(application.name)
         bodyOf(result) should include("Sandbox")
 
-        private val fields = apiSubscriptionStatus.fields.head.fields.toList
-
-        bodyOf(result) should include(fields.head.definition.description)
-        bodyOf(result) should include(fields.head.definition.hint + "")
-        bodyOf(result) should include(fields(1).definition.description)
-        bodyOf(result) should include(fields(1).definition.hint)
       }
 
       // TODO: Test save method
@@ -320,18 +326,15 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "edit page" in new ManageSubscriptionsSetup {
-        val subsData = Seq(
-          configurationSubscription("api1", 1)
-        )
+        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val subsData = Seq(apiSubscriptionStatus)
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(subsData))
         private val result =
           await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, 1))(loggedInRequest))
 
-        status(result) shouldBe OK
-        //bodyOf(result) should include("api1-name 1.0")
-        //TODO: should show subs field descriptions and hints
+        assertCommonEditFormFields(result, apiSubscriptionStatus)
       }
 
       "return NOT_FOUND if page number is invalid for edit page " when {
