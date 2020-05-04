@@ -56,11 +56,26 @@ trait ActionBuilders {
     }
   }
 
-  def fieldDefinitionsExistRefiner(implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
+  // TODO: Put these somewhere better?
+  // TODO: Test redirect if no fields (or bad request?)
+  sealed trait NoFieldsBehaviour
+
+  object NoFieldsBehaviour {
+    case object BadRequest extends NoFieldsBehaviour
+    case class Redirect(url: String) extends NoFieldsBehaviour
+  }
+
+  def fieldDefinitionsExistRefiner(noFieldsBehaviour : NoFieldsBehaviour)
+                                  (implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
       = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
 
     def refine[A](input: ApplicationRequest[A]): Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]] = {
       implicit val implicitRequest: Request[A] = input.request
+
+      val noFieldsResult = noFieldsBehaviour match {
+        case NoFieldsBehaviour.BadRequest => play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate)
+        case NoFieldsBehaviour.Redirect(url) => play.api.mvc.Results.Redirect(url)
+      }
 
       Future.successful(
         NonEmptyList.fromList(
@@ -69,7 +84,7 @@ trait ActionBuilders {
           ).toList
         )
         .map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
-        .toRight(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
+        .toRight(noFieldsResult)
       )
     }
   }

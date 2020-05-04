@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.APISubscriptionStatus
+import domain.{APISubscriptionStatus, Environment}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import play.api.data
 import play.api.data.Form
@@ -179,11 +179,17 @@ class ManageSubscriptions @Inject() (
   // Also edit subs page
   // Also x of y page
 
+  //controllers.AddApplication.addApplicationSuccess
+
+  // TODO: This is a bit messy
   def subscriptionConfigurationStart(applicationId: String): Action[AnyContent] =
-    subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+    subFieldsDefinitionsExistAction(applicationId,
+      NoFieldsBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId, Environment.SANDBOX).url)) {
+
+      definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
-
       val details = definitionsRequest.fieldDefinitions
         .map(toDetails)
         .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)

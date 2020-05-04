@@ -110,18 +110,19 @@ abstract class ApplicationController()
   }
 
   private object ManageSubscriptionsActions {
-    def stackedActions(applicationId: String)(implicit request: UserRequest[AnyContent]) =
+    def stackedActions(applicationId: String, noFieldsBehaviour : NoFieldsBehaviour)
+                      (implicit request: UserRequest[AnyContent]) =
       Action andThen
         applicationAction(applicationId, loggedIn) andThen
         capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
-        fieldDefinitionsExistRefiner
+        fieldDefinitionsExistRefiner(noFieldsBehaviour)
   }
 
-  def subFieldsDefinitionsExistAction(applicationId: String)
+  def subFieldsDefinitionsExistAction(applicationId: String, noFieldsBehaviour : NoFieldsBehaviour = BadRequest2)
                                     (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request: UserRequest[AnyContent] =>
       ManageSubscriptionsActions
-        .stackedActions(applicationId)
+        .stackedActions(applicationId, noFieldsBehaviour)
         .async(fun)(request)
     }
   }
@@ -130,7 +131,7 @@ abstract class ApplicationController()
                                                    (fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
-        .stackedActions(applicationId) andThen subscriptionFieldPageRefiner(pageNumber))
+        .stackedActions(applicationId, NoFieldsBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
         .async(fun)(request)
     }
   }
