@@ -19,12 +19,12 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{Fields, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import play.api.mvc.{AnyContentAsEmpty, Result}
-import org.mockito.Mockito.when
+import play.api.mvc.{Action, AnyContent, AnyContentAsEmpty, Result}
+import org.mockito.Mockito.{never, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -36,6 +36,7 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.Future._
 import cats.data.NonEmptyList
+import play.api.data.Forms.{list, mapping}
 
 import scala.concurrent.Future
 
@@ -303,7 +304,50 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       }
 
-      // TODO: Test save method
+      "save action saves valid subscription field values" in new ManageSubscriptionsSetup {
+        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(Seq(apiSubscriptionStatus)))
+
+        when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
+          .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
+
+        val newSubscriptionValue = "new value"
+        val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
+
+        private val loggedInWithFormValues = loggedInRequest
+          .withFormUrlEncodedBody("apiName" -> "",
+            "fields[0].name" -> subSubscriptionValue.definition.name,
+            "fields[0].description" -> "",
+            "fields[0].shortDescription" -> "",
+            "fields[0].hint" -> "",
+            "fields[0].type" -> "",
+            "fields[0].value" -> newSubscriptionValue)
+
+        val successRedirectUrl = "my return to page url"
+
+        private val result: Result =
+          await(addToken(manageSubscriptionController.saveSubscriptionFields(
+            appId,
+            apiSubscriptionStatus.context,
+            apiSubscriptionStatus.apiVersion.version,
+            successRedirectUrl))(loggedInWithFormValues))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(successRedirectUrl)
+
+        val expectedFields: Fields = Map(subSubscriptionValue.definition.name -> newSubscriptionValue)
+
+        verify(mockSubscriptionFieldsService)
+          .saveFieldValues(
+            eqTo(appId),
+            eqTo(apiSubscriptionStatus.context),
+            eqTo(apiSubscriptionStatus.apiVersion.version),
+            eqTo(expectedFields))(any[HeaderCarrier]())
+      }
+
+      // TODO: Test for validation errors?
     }
 
     "a user is doing the add new sandbox app journey they" should {
@@ -336,8 +380,6 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         assertCommonEditFormFields(result, apiSubscriptionStatus)
       }
-
-      // TODO: When saving we are redirect to the next page in the journey.
 
       "return NOT_FOUND if page number is invalid for edit page " when {
         def testEditPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
