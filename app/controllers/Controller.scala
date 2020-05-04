@@ -118,7 +118,7 @@ abstract class ApplicationController()
         fieldDefinitionsExistRefiner(noFieldsBehaviour)
   }
 
-  def subFieldsDefinitionsExistAction(applicationId: String, noFieldsBehaviour : NoFieldsBehaviour = BadRequest2)
+  def subFieldsDefinitionsExistAction(applicationId: String, noFieldsBehaviour : NoFieldsBehaviour = NoFieldsBehaviour.BadRequest)
                                     (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request: UserRequest[AnyContent] =>
       ManageSubscriptionsActions
