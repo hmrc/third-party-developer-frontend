@@ -100,7 +100,7 @@ case class APISubscriptionStatusWithSubscriptionFields(
                                 ) extends APISubscriptionStatusBase {}
 
 object APISubscriptionStatusWithSubscriptionFields {
-  def apply(fields : NonEmptyList[APISubscriptionStatus]) : Option[NonEmptyList[APISubscriptionStatusWithSubscriptionFields]] = {
+  def apply(fields : Seq[APISubscriptionStatus]) : Seq[APISubscriptionStatusWithSubscriptionFields] = {
 
     def toAPISubscriptionStatusWithSubscriptionFields(field : APISubscriptionStatus)
     : Option[APISubscriptionStatusWithSubscriptionFields] = {
@@ -116,11 +116,7 @@ object APISubscriptionStatusWithSubscriptionFields {
         field.isTestSupport)
     }
 
-    NonEmptyList.fromList(fields
-      .map(toAPISubscriptionStatusWithSubscriptionFields)
-      .toList
-      .flatten
-    )
+    fields.flatMap(toAPISubscriptionStatusWithSubscriptionFields)
   }
 }
 

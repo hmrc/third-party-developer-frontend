@@ -16,11 +16,10 @@
 
 package controllers
 
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList}
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.ManageSubscriptions.{ApiDetails, toDetails}
-import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
-import domain.{APISubscriptionStatus, _}
+import controllers.ManageSubscriptions.toDetails
+import domain._
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -78,20 +77,19 @@ trait ActionBuilders {
         case NoFieldsBehaviour.Redirect(url) => play.api.mvc.Results.Redirect(url)
       }
 
+      val apiSubscriptionStatuses =
+        input.subscriptions.filter(s => s.subscribed)
+
+      val apiSubStatusesWithFieldDefinitions = NonEmptyList
+        .fromList(APISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatuses).toList)
+
       Future.successful(
-        NonEmptyList.fromList(
-          input.subscriptions.filter(
-            s => s.subscribed && s.fields.isDefined // TODO: Don't need to check isDefined
-          ).toList
-        )
-          // TODO: Can we right with a for/comp (with cats?)
-          .flatMap( (nel: NonEmptyList[APISubscriptionStatus]) =>
-            APISubscriptionStatusWithSubscriptionFields(nel)
-              .map(withFieldDefinitions =>
-                ApplicationWithFieldDefinitionsRequest(withFieldDefinitions, input)
-              )
-          )
-          .toRight(noFieldsResult)
+        apiSubStatusesWithFieldDefinitions
+          .fold[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]]
+            (Left(noFieldsResult))
+            (apiSubStatusesWithFieldDefinitions => Right(
+              ApplicationWithFieldDefinitionsRequest(apiSubStatusesWithFieldDefinitions, input)
+            ))
       )
     }
   }
