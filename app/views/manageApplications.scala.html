@@ -111,12 +111,13 @@
             }
             </tbody>
         </table>
-        @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
+        <br>
+    }
+         @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
             <h2 class="heading-medium">Using privileged application credentials</h2>
             <p>Check <a href="/api-documentation/docs/using-privileged-application-credentials">
                 how to use privileged application credentials</a>.</p>
-        }
-    }
+         }
 }
 
 
