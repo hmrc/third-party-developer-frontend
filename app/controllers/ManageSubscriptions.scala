@@ -46,17 +46,12 @@ object ManageSubscriptions {
     FieldValue(sfv.definition.shortDescription, default(sfv.value, "None"))
   }
 
-  def toDetails(in: APISubscriptionStatusWithSubscriptionFields): Option[ApiDetails] = {
-    // TODO: Tidy me
-    val wrapper = in.fields
-    for {
-      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
-      nelFields = nelSFV.map(toFieldValue)
-    } yield ApiDetails(
+  def toDetails(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
+    ApiDetails(
       name = in.name,
       context = in.context,
       version = in.apiVersion.version,
-      subsValues = nelFields
+      subsValues = in.fields.fields.map(toFieldValue)
     )
   }
 
@@ -117,9 +112,10 @@ class ManageSubscriptions @Inject() (
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
-      val details = definitionsRequest.fieldDefinitions
+      val details = definitionsRequest
+        .fieldDefinitions
         .map(toDetails)
-        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+        .toList
 
       successful(Ok(views.html.managesubscriptions.listApiSubscriptions(definitionsRequest.applicationRequest.application, details)))
     }
@@ -179,9 +175,11 @@ class ManageSubscriptions @Inject() (
 
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
-      val details = definitionsRequest.fieldDefinitions
-        .map(toDetails)
-        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+      val details =
+        definitionsRequest
+          .fieldDefinitions
+          .map(toDetails)
+          .toList
 
       Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(definitionsRequest.applicationRequest.application, details)))
     }

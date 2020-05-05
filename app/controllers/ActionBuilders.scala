@@ -104,10 +104,10 @@ trait ActionBuilders {
       implicit val implicitRequest: Request[A] = input.applicationRequest.request
 
       // TODO: Sort?
-      val details: Seq[ApiDetails] = input
+      val details = input
         .fieldDefinitions
         .map(toDetails)
-        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+        .toList
 
       if (pageNumber >= 1 && pageNumber <= details.size) {
         val apiDetails = details(pageNumber - 1)
