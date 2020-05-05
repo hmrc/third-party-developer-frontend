@@ -28,11 +28,11 @@ import scala.collection.SortedMap
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions])
 
 case class ApplicationSummary(id: String, name: String, environment: String, role: Role,
-                              termsOfUseStatus: TermsOfUseStatus, state: State, lastAccess: DateTime, createdOn: DateTime)
+                              termsOfUseStatus: TermsOfUseStatus, state: State, lastAccess: DateTime, createdOn: DateTime, accessType: AccessType)
 
 object ApplicationSummary {
   def from(app: Application, email: String) = ApplicationSummary(app.id, app.name, app.deployedTo.toString.toLowerCase.capitalize,
-    app.role(email).getOrElse(throw new NotFoundException("Role not found")), app.termsOfUseStatus, app.state.name, app.lastAccess, app.createdOn)
+    app.role(email).getOrElse(throw new NotFoundException("Role not found")), app.termsOfUseStatus, app.state.name, app.lastAccess, app.createdOn, app.access.accessType)
 
   def noProductionApplications(applications: Seq[controllers.ApplicationSummary]): Boolean = {
     !applications.exists(_.environment == "Production")
