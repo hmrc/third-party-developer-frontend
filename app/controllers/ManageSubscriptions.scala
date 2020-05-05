@@ -94,7 +94,8 @@ object ManageSubscriptions {
                                      )
 
   def toViewModel(in: APISubscriptionStatus): Option[EditApiMetadataViewModel] = {
-    toForm(in).map(data => EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data)))
+    toForm(in)
+      .map(data => EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data)))
   }
 }
 
@@ -159,6 +160,7 @@ class ManageSubscriptions @Inject() (
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
 
+          // TODO: Redirect to page request came from in new journey
           Ok(editApiMetadata(request.application, EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)))
       }
     }
@@ -169,17 +171,6 @@ class ManageSubscriptions @Inject() (
 
     EditApiMetadata.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
-
-  // TODO
-  // Get real data
-  // Link to this page
-  // Skip is no fields defined
-
-  // Start page - in progress
-  // Also edit subs page
-  // Also x of y page
-
-  //controllers.AddApplication.addApplicationSuccess
 
   // TODO: This is a bit messy
   def subscriptionConfigurationStart(applicationId: String): Action[AnyContent] =
@@ -203,14 +194,17 @@ class ManageSubscriptions @Inject() (
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
-      val vm = toViewModel(definitionsRequest.apiSubscriptionStatus)
-
-      Future.successful(Ok(
-        views.html.createJourney.subscriptionConfigurationPage(
-          definitionsRequest.applicationRequest.application,
-          pageNumber,
-          vm.get // TODO : Fix me
-        )))
+      Future.successful(
+        toViewModel(definitionsRequest.apiSubscriptionStatus)
+          // TODO : This fold fail can't (shouldn't) be executed?
+          .fold(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
+            (editApiMetadataViewModel =>
+              Ok(views.html.createJourney.subscriptionConfigurationPage(
+                definitionsRequest.applicationRequest.application,
+                pageNumber,
+                editApiMetadataViewModel))
+            )
+      )
     }
 
   def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =

@@ -59,8 +59,7 @@ case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyL
 
 case class ApplicationWithSubscriptionFieldPage[A]( pageIndex: Int,
                                                     totalPages: Int,
-                                                    apiSubscriptionStatus:
-                                                    APISubscriptionStatus,
+                                                    apiSubscriptionStatus: APISubscriptionStatus,
                                                     apiDetails: ApiDetails,
                                                     applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)

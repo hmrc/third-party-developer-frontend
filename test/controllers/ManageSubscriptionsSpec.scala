@@ -381,6 +381,18 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         assertCommonEditFormFields(result, apiSubscriptionStatus)
       }
 
+      "return NOT_FOUND if page has no field definitions" in new ManageSubscriptionsSetup {
+        val apiSubscriptionStatus: APISubscriptionStatus = noConfigurationSubscription("api1")
+        val subsData = Seq(apiSubscriptionStatus)
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+        private val result =
+          await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, 1))(loggedInRequest))
+
+        status(result) shouldBe NOT_FOUND
+      }
+
       "return NOT_FOUND if page number is invalid for edit page " when {
         def testEditPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
           val subsData = Seq(
