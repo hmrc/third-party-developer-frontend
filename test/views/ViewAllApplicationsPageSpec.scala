@@ -96,6 +96,50 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       isGreenAddProductionApplicationButtonVisible(document) shouldBe false
       elementExistsByText(document, "p", "After testing in the sandbox, you can apply for production credentials.") shouldBe false
     }
+
+    "show using privileged application credentials text if user is a collaborator on at least one privileged application" in {
+
+      val appName = "App name 1"
+      val appEnvironment = "Production"
+      val appUserRole = Role.ADMINISTRATOR
+      val appCreatedOn = DateTimeUtils.now
+      val appLastAccess = appCreatedOn
+
+      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
+        TermsOfUseStatus.NOT_APPLICABLE, State.PRODUCTION, appLastAccess, appCreatedOn, AccessType.PRIVILEGED))
+
+      val document = Jsoup.parse(renderPage(appSummaries).body)
+
+      elementExistsByText(document, "h1", "View all applications") shouldBe true
+      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
+      elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
+      elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
+
+      isGreenAddProductionApplicationButtonVisible(document) shouldBe false
+      elementExistsByText(document, "h2", "Using privileged application credentials") shouldBe true
+    }
+
+    "hide using privileged application credentials text if user is not a collaborator on at least one privileged application" in {
+
+      val appName = "App name 1"
+      val appEnvironment = "Production"
+      val appUserRole = Role.ADMINISTRATOR
+      val appCreatedOn = DateTimeUtils.now
+      val appLastAccess = appCreatedOn
+
+      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn, AccessType.STANDARD))
+
+      val document = Jsoup.parse(renderPage(appSummaries).body)
+
+      elementExistsByText(document, "h1", "View all applications") shouldBe true
+      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
+      elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
+      elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
+
+      isGreenAddProductionApplicationButtonVisible(document) shouldBe false
+      elementExistsByText(document, "h2", "Using privileged application credentials") shouldBe false
+    }
   }
 
   "welcome to your account page" should {
