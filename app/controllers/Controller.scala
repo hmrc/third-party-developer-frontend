@@ -54,12 +54,14 @@ case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], reque
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
 
-case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
+case class ApplicationWithFieldDefinitionsRequest[A](
+                                                      fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields],
+                                                      applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
 case class ApplicationWithSubscriptionFieldPage[A]( pageIndex: Int,
                                                     totalPages: Int,
-                                                    apiSubscriptionStatus: APISubscriptionStatus,
+                                                    apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
                                                     apiDetails: ApiDetails,
                                                     applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)

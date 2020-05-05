@@ -19,6 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.{ApiDetails, toDetails}
+import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import domain.{APISubscriptionStatus, _}
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -80,11 +81,17 @@ trait ActionBuilders {
       Future.successful(
         NonEmptyList.fromList(
           input.subscriptions.filter(
-            s => s.subscribed && s.fields.isDefined
+            s => s.subscribed && s.fields.isDefined // TODO: Don't need to check isDefined
           ).toList
         )
-        .map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
-        .toRight(noFieldsResult)
+          // TODO: Can we right with a for/comp (with cats?)
+          .flatMap( (nel: NonEmptyList[APISubscriptionStatus]) =>
+            APISubscriptionStatusWithSubscriptionFields(nel)
+              .map(withFieldDefinitions =>
+                ApplicationWithFieldDefinitionsRequest(withFieldDefinitions, input)
+              )
+          )
+          .toRight(noFieldsResult)
       )
     }
   }
@@ -104,7 +111,7 @@ trait ActionBuilders {
 
       if (pageNumber >= 1 && pageNumber <= details.size) {
         val apiDetails = details(pageNumber - 1)
-        val apiSubscriptionStatus: APISubscriptionStatus = input.fieldDefinitions.toList(pageNumber - 1)
+        val apiSubscriptionStatus = input.fieldDefinitions.toList(pageNumber - 1)
 
         Future.successful(Right(ApplicationWithSubscriptionFieldPage(pageNumber,details.size, apiSubscriptionStatus, apiDetails, input.applicationRequest)))
       } else {

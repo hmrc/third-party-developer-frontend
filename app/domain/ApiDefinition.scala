@@ -16,6 +16,7 @@
 
 package domain
 
+import cats.data.NonEmptyList
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import play.api.libs.json.Json
 
@@ -61,6 +62,21 @@ case class APIAccess(`type`: APIAccessType)
 
 case class APIIdentifier(context: String, version: String)
 
+// TODO : Keep this base class?
+trait APISubscriptionStatusBase {
+  val name: String
+  val serviceName: String
+  val context: String
+  val apiVersion: APIVersion
+  val subscribed: Boolean
+  val requiresTrust: Boolean
+  val isTestSupport: Boolean
+
+  def canUnsubscribe: Boolean = {
+    apiVersion.status != APIStatus.DEPRECATED
+  }
+}
+
 case class APISubscriptionStatus(
     name: String,
     serviceName: String,
@@ -70,9 +86,41 @@ case class APISubscriptionStatus(
     requiresTrust: Boolean,
     fields: Option[SubscriptionFieldsWrapper] = None,
     isTestSupport: Boolean = false
-) {
-  def canUnsubscribe = {
-    apiVersion.status != APIStatus.DEPRECATED
+) extends APISubscriptionStatusBase {}
+
+case class APISubscriptionStatusWithSubscriptionFields(
+                                  name: String,
+                                  serviceName: String,
+                                  context: String,
+                                  apiVersion: APIVersion,
+                                  subscribed: Boolean,
+                                  requiresTrust: Boolean,
+                                  fields: SubscriptionFieldsWrapper,
+                                  isTestSupport: Boolean = false
+                                ) extends APISubscriptionStatusBase {}
+
+object APISubscriptionStatusWithSubscriptionFields {
+  def apply(fields : NonEmptyList[APISubscriptionStatus]) : Option[NonEmptyList[APISubscriptionStatusWithSubscriptionFields]] = {
+
+    def toAPISubscriptionStatusWithSubscriptionFields(field : APISubscriptionStatus)
+    : Option[APISubscriptionStatusWithSubscriptionFields] = {
+      for {
+        subscriptionStatus <- field.fields
+      } yield APISubscriptionStatusWithSubscriptionFields(field.name,
+        field.serviceName,
+        field.context,
+        field.apiVersion,
+        field.subscribed,
+        field.requiresTrust,
+        subscriptionStatus,
+        field.isTestSupport)
+    }
+
+    NonEmptyList.fromList(fields
+      .map(toAPISubscriptionStatusWithSubscriptionFields)
+      .toList
+      .flatten
+    )
   }
 }
 

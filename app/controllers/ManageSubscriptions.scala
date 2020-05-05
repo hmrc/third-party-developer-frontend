@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatus, Environment}
+import domain.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, Environment}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import play.api.data
 import play.api.data.Form
@@ -46,9 +46,10 @@ object ManageSubscriptions {
     FieldValue(sfv.definition.shortDescription, default(sfv.value, "None"))
   }
 
-  def toDetails(in: APISubscriptionStatus): Option[ApiDetails] = {
+  def toDetails(in: APISubscriptionStatusWithSubscriptionFields): Option[ApiDetails] = {
+    // TODO: Tidy me
+    val wrapper = in.fields
     for {
-      wrapper <- in.fields
       nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
       nelFields = nelSFV.map(toFieldValue)
     } yield ApiDetails(
@@ -59,11 +60,8 @@ object ManageSubscriptions {
     )
   }
 
-  def toForm(in: APISubscriptionStatus): Option[EditApiMetadata] = {
-    for {
-      wrapper <- in.fields
-      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
-    } yield EditApiMetadata(in.name, fields = nelSFV.toList)
+  def toForm(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadata = {
+    EditApiMetadata(in.name, fields = in.fields.fields.toList)
   }
 
   case class EditApiMetadata(apiName: String, fields: List[SubscriptionFieldValue])
@@ -93,9 +91,9 @@ object ManageSubscriptions {
                                        fieldsForm: Form[EditApiMetadata]
                                      )
 
-  def toViewModel(in: APISubscriptionStatus): Option[EditApiMetadataViewModel] = {
-    toForm(in)
-      .map(data => EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data)))
+  def toViewModel(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadataViewModel = {
+    val data = toForm(in)
+    EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data))
   }
 }
 
@@ -134,7 +132,7 @@ class ManageSubscriptions @Inject() (
       definitionsRequest.fieldDefinitions
         .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
         .headOption
-        .flatMap(toViewModel)
+        .map(toViewModel)
         .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, vm))))
         .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
@@ -194,17 +192,11 @@ class ManageSubscriptions @Inject() (
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
-      Future.successful(
-        toViewModel(definitionsRequest.apiSubscriptionStatus)
-          // TODO : This fold fail can't (shouldn't) be executed?
-          .fold(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
-            (editApiMetadataViewModel =>
-              Ok(views.html.createJourney.subscriptionConfigurationPage(
-                definitionsRequest.applicationRequest.application,
-                pageNumber,
-                editApiMetadataViewModel))
-            )
-      )
+      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(
+        definitionsRequest.applicationRequest.application,
+        pageNumber,
+        toViewModel(definitionsRequest.apiSubscriptionStatus))
+      ))
     }
 
   def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
