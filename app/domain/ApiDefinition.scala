@@ -64,13 +64,7 @@ case class APIIdentifier(context: String, version: String)
 
 // TODO : Keep this base class?
 trait APISubscriptionStatusBase {
-  val name: String
-  val serviceName: String
-  val context: String
   val apiVersion: APIVersion
-  val subscribed: Boolean
-  val requiresTrust: Boolean
-  val isTestSupport: Boolean
 
   def canUnsubscribe: Boolean = {
     apiVersion.status != APIStatus.DEPRECATED
@@ -90,13 +84,9 @@ case class APISubscriptionStatus(
 
 case class APISubscriptionStatusWithSubscriptionFields(
                                   name: String,
-                                  serviceName: String,
                                   context: String,
                                   apiVersion: APIVersion,
-                                  subscribed: Boolean,
-                                  requiresTrust: Boolean,
-                                  fields: SubscriptionFieldsWrapper,
-                                  isTestSupport: Boolean = false
+                                  fields: SubscriptionFieldsWrapper
                                 ) extends APISubscriptionStatusBase {}
 
 object APISubscriptionStatusWithSubscriptionFields {
@@ -106,14 +96,11 @@ object APISubscriptionStatusWithSubscriptionFields {
     : Option[APISubscriptionStatusWithSubscriptionFields] = {
       for {
         subscriptionStatus <- field.fields
-      } yield APISubscriptionStatusWithSubscriptionFields(field.name,
-        field.serviceName,
+      } yield APISubscriptionStatusWithSubscriptionFields(
+        field.name,
         field.context,
         field.apiVersion,
-        field.subscribed,
-        field.requiresTrust,
-        subscriptionStatus,
-        field.isTestSupport)
+        subscriptionStatus)
     }
 
     fields.flatMap(toAPISubscriptionStatusWithSubscriptionFields)
