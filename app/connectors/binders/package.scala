@@ -16,7 +16,6 @@
 
 package connectors
 
-import controllers.ManageSubscriptions.ApiSubscriptionEditPageMode
 import domain.{AddTeamMemberPageMode, Environment}
 import play.api.mvc.PathBindable
 
@@ -44,22 +43,6 @@ package object binders {
       }
 
       override def unbind(key: String, mode: AddTeamMemberPageMode): String = {
-        mode.toString.toLowerCase
-      }
-    }
-
-  //connectors.ManageSubscriptions.ApiSubscriptionEditPageMode
-
-  implicit def apiSubscriptionEditPageModePathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiSubscriptionEditPageMode] =
-    new PathBindable[ApiSubscriptionEditPageMode] {
-      override def bind(key: String, value: String): Either[String, ApiSubscriptionEditPageMode] = {
-        for {
-          text <- textBinder.bind(key, value).right
-          mode <- ApiSubscriptionEditPageMode.from(text).toRight("Not a valid ApiSubscriptionEditPageMode").right
-        } yield mode
-      }
-
-      override def unbind(key: String, mode: ApiSubscriptionEditPageMode): String = {
         mode.toString.toLowerCase
       }
     }

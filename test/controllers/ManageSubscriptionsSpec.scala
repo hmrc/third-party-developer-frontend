@@ -19,12 +19,12 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain.ApiSubscriptionFields.{Fields, SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields._
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import play.api.mvc.{Action, AnyContent, AnyContentAsEmpty, Result}
-import org.mockito.Mockito.{never, verify, when}
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
+import org.mockito.Mockito.{verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -36,8 +36,6 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.Future._
 import cats.data.NonEmptyList
-import controllers.ManageSubscriptions.ApiSubscriptionEditPageMode
-import play.api.data.Forms.{list, mapping}
 
 import scala.concurrent.Future
 
@@ -125,7 +123,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       .withLoggedIn(manageSubscriptionController, implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
 
-    def editFormPostRequest(fieldName: String, fieldValue: String) = {
+    def editFormPostRequest(fieldName: String, fieldValue: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       loggedInRequest
         .withFormUrlEncodedBody("apiName" -> "",
           "fields[0].name" -> fieldName,
@@ -189,7 +187,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     def configurationSubscription(prefix: String, count: Int): APISubscriptionStatus =
       noConfigurationSubscription(prefix).copy(fields = generateWrapper(prefix, count))
 
-    def assertCommonEditFormFields(result: Result, apiSubscriptionStatus: APISubscriptionStatus) = {
+    def assertCommonEditFormFields(result: Result, apiSubscriptionStatus: APISubscriptionStatus): Unit = {
       status(result) shouldBe OK
 
       bodyOf(result) should include(apiSubscriptionStatus.name)
@@ -210,9 +208,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     def assertIsSandboxJourneyApiConfigureEditPage(result: Result) : Unit = {
-      bodyOf(result) should not include("Subscription configuration")
-      bodyOf(result) should not include("Environment")
-      bodyOf(result) should not include(application.name)
+      bodyOf(result) should not include "Subscription configuration"
+      bodyOf(result) should not include "Environment"
+      bodyOf(result) should not include application.name
     }
   }
 
@@ -332,7 +330,6 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
         val newSubscriptionValue = "new value"
         private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
-        val successRedirectUrl = "my return to page url"
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(Seq(apiSubscriptionStatus)))
@@ -346,13 +343,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           await(addToken(manageSubscriptionController.saveSubscriptionFields(
             appId,
             apiSubscriptionStatus.context,
-            apiSubscriptionStatus.apiVersion.version,
-            ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration,
-            successRedirectUrl,
-            None))(loggedInWithFormValues))
+            apiSubscriptionStatus.apiVersion.version))(loggedInWithFormValues))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(successRedirectUrl)
+        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/api-metadata")
 
         val expectedFields: Fields = Map(subSubscriptionValue.definition.name -> newSubscriptionValue)
 
@@ -367,8 +361,6 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "save action fails validation and shows error message" in new ManageSubscriptionsSetup {
         val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
         val newSubscriptionValue = "my invalid value"
-        val successRedirectUrl = "my return to page url"
-
         val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
@@ -384,12 +376,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
             appId,
             apiSubscriptionStatus.context,
-            apiSubscriptionStatus.apiVersion.version,
-            ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration,
-            successRedirectUrl,
-            None))(loggedInWithFormValues))
+            apiSubscriptionStatus.apiVersion.version))(loggedInWithFormValues))
 
-        status(result) shouldBe OK
+        status(result) shouldBe BAD_REQUEST
 
         assertIsApiConfigureEditPage(result)
 
@@ -399,7 +388,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "save action fails valid and shows error message and renders the add app journey page subs configuration" in new ManageSubscriptionsSetup {
         val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
         val newSubscriptionValue = "my invalid value"
-        val successRedirectUrl = "my return to page url"
+        val pageNumber = 1
 
         val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
@@ -413,15 +402,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
 
-        private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
-          appId,
-          apiSubscriptionStatus.context,
-          apiSubscriptionStatus.apiVersion.version,
-          ApiSubscriptionEditPageMode.AddNewApplicationSubscriptionConfiguration,
-          successRedirectUrl,
-          pageNumber = Some(1)))(loggedInWithFormValues))
+        private val result = await(addToken(
+          manageSubscriptionController.subscriptionConfigurationPagePost(appId, pageNumber))(loggedInWithFormValues))
 
-        status(result) shouldBe OK
+        status(result) shouldBe BAD_REQUEST
 
         assertIsSandboxJourneyApiConfigureEditPage(result)
 

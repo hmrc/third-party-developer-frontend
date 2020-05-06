@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
 import domain.AddTeamMemberPageMode.{findValues, values}
-import domain.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, AddTeamMemberPageMode, Environment}
+import domain.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, AddTeamMemberPageMode, Application, Environment}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import enumeratum.{EnumEntry, PlayEnum}
 import play.api.data
@@ -29,6 +29,7 @@ import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.libs.crypto.CookieSigner
+import play.twirl.api.Html
 import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.managesubscriptions.editApiMetadata
@@ -59,17 +60,6 @@ object ManageSubscriptions {
 
   def toForm(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadata = {
     EditApiMetadata(in.name, fields = in.fields.fields.toList)
-  }
-
-  // TODO : Move this somewhere else?
-  sealed trait ApiSubscriptionEditPageMode extends EnumEntry
-  object ApiSubscriptionEditPageMode extends PlayEnum[ApiSubscriptionEditPageMode] {
-    val values = findValues
-
-    final case object ManageSubscriptionConfiguration extends ApiSubscriptionEditPageMode
-    final case object AddNewApplicationSubscriptionConfiguration extends ApiSubscriptionEditPageMode
-
-    def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
   }
 
   case class EditApiMetadata(apiName: String, fields: List[SubscriptionFieldValue])
@@ -148,44 +138,43 @@ class ManageSubscriptions @Inject() (
 
   def saveSubscriptionFields(applicationId: String,
                              apiContext: String,
-                             apiVersion: String,
-                             apiSubscriptionEditPageMode: ApiSubscriptionEditPageMode,
-                             returnRedirectUrl: String,
-                             pageNumber: Option[Int]) : Action[AnyContent]
-    = whenTeamMemberOnApp(applicationId) { implicit request =>
+                             apiVersion: String) : Action[AnyContent]
+    = whenTeamMemberOnApp(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
 
+    val successRedirectUrl = routes.ManageSubscriptions.listApiSubscriptions(applicationId)
+    doPostSubscriptionConfigurationSave(apiContext, apiVersion, successRedirectUrl, vm =>
+      editApiMetadata(request.application,vm)
+    )
+  }
+
+  def doPostSubscriptionConfigurationSave(apiContext: String,
+                      apiVersion: String,successRedirect: Call,
+                      validationFailureView : EditApiMetadataViewModel => Html)
+                     (implicit hc: HeaderCarrier, request: ApplicationRequest[_]): Future[Result] = {
     def handleValidForm(validForm: EditApiMetadata) = {
       def saveFields(validForm: EditApiMetadata)(implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
         if (validForm.fields.nonEmpty) {
-          subFieldsService.saveFieldValues(applicationId, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
+          subFieldsService.saveFieldValues(request.application.id, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
         } else {
           Future.successful(SaveSubscriptionFieldsSuccessResponse)
         }
       }
 
       saveFields(validForm) map {
-        case SaveSubscriptionFieldsSuccessResponse => Redirect(returnRedirectUrl)
+        case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect.url)
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
 
           val vm = EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)
 
-          val html = apiSubscriptionEditPageMode match {
-            case ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration =>
-              editApiMetadata(request.application,vm)
-            case ApiSubscriptionEditPageMode.AddNewApplicationSubscriptionConfiguration =>
-
-              val pageNumberValue = pageNumber.getOrElse(throw new Exception("Missing pageNumber in query string"))
-              views.html.createJourney.subscriptionConfigurationPage(request.application, pageNumberValue, vm)
-          }
-
-          Ok(html)
+          BadRequest(validationFailureView(vm))
       }
     }
 
     def handleInvalidForm(formWithErrors: Form[EditApiMetadata]) = {
-      Future.successful(BadRequest(editApiMetadata(request.application, EditApiMetadataViewModel(applicationId, apiContext, apiVersion, formWithErrors))))
+      val vm = EditApiMetadataViewModel(request.application.id, apiContext, apiVersion, formWithErrors)
+      Future.successful(BadRequest(validationFailureView(vm)))
     }
 
     EditApiMetadata.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
@@ -220,6 +209,18 @@ class ManageSubscriptions @Inject() (
         pageNumber,
         toViewModel(definitionsRequest.apiSubscriptionStatus))
       ))
+    }
+
+  def subscriptionConfigurationPagePost(applicationId: String, pageNumber: Int) : Action[AnyContent] =
+    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
+
+      implicit val applicationRequest: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+
+      val successRedirectUrl = routes.ManageSubscriptions.subscriptionConfigurationStepPage(applicationId,pageNumber)
+
+      doPostSubscriptionConfigurationSave(definitionsRequest.apiDetails.context, definitionsRequest.apiDetails.version, successRedirectUrl, viewModel => {
+        views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber, viewModel)
+      })
     }
 
   def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =

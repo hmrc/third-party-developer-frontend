@@ -21,7 +21,6 @@
 
 @import views.helper.IdFormatter
 
-@import controllers.ManageSubscriptions.ApiSubscriptionEditPageMode
 @(
   app: Application,
   vm: EditApiMetadataViewModel
@@ -57,6 +56,6 @@
     @editApiMetadataPartial(
       app,
       vm,
-      ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration,
-      routes.ManageSubscriptions.listApiSubscriptions(app.id).url)
+      routes.ManageSubscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion)
+    )
 }

@@ -16,7 +16,6 @@
 
 @import include._
 @import domain._
-@import controllers.ManageSubscriptions.ApiSubscriptionEditPageMode
 
 @import controllers.ManageSubscriptions.EditApiMetadataViewModel
 
@@ -48,8 +47,6 @@
 
   @editApiMetadataPartial(app,
     vm,
-    ApiSubscriptionEditPageMode.AddNewApplicationSubscriptionConfiguration,
-    routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id,pageNumber).url,
-    Some(pageNumber)
+    routes.ManageSubscriptions.subscriptionConfigurationPagePost(app.id,pageNumber)
   )
 }

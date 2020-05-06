@@ -74,6 +74,7 @@ POST        /applications/add/:environment/name                                 
 
 GET         /applications/:id/add/sandbox/subscription-configuration-start                  controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String)
 GET         /applications/:id/add/sandbox/subscription-configuration/:pageNumber            controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, pageNumber: Int)
+POST        /applications/:id/add/sandbox/subscription-configuration/:pageNumber            controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String, pageNumber: Int)
 GET         /applications/:id/add/sandbox/subscription-configuration-step/:pageNumber       controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, pageNumber: Int)
 
 GET         /applications/:id/add/:environment/subscriptions                                controllers.Subscriptions.addAppSubscriptions(id: String, environment: domain.Environment)
@@ -173,7 +174,7 @@ POST        /applications/:id/context/:apiContext/version/:version/subscriptionF
 
 GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: String)
 GET         /applications/:id/api-metadata/:context/:version                                controllers.ManageSubscriptions.editApiMetadataPage(id: String, context: String, version: String)
-POST        /applications/:id/api-metadata/:context/:version                                controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: String, version: String, apiSubscriptionEditPageMode: controllers.ManageSubscriptions.ApiSubscriptionEditPageMode, returnRedirectUrl: String, pageNumber: Option[Int])
+POST        /applications/:id/api-metadata/:context/:version                                controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: String, version: String)
 
 GET         /application-verification                                                       controllers.ApplicationVerification.verifyUplift(code: String)
 GET         /user-navlinks                                                                  controllers.Navigation.navLinks
