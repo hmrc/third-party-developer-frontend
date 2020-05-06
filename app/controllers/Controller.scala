@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
 import domain._
-import model.ApplicationViewModel
+import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import security.{DevHubAuthorization, ExtendedDevHubAuthorization}
@@ -111,7 +111,7 @@ abstract class ApplicationController()
   }
 
   private object ManageSubscriptionsActions {
-    def stackedActions(applicationId: String, noFieldsBehaviour : NoFieldsBehaviour)
+    def stackedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
                       (implicit request: UserRequest[AnyContent]) =
       Action andThen
         applicationAction(applicationId, loggedIn) andThen
@@ -119,7 +119,7 @@ abstract class ApplicationController()
         fieldDefinitionsExistRefiner(noFieldsBehaviour)
   }
 
-  def subFieldsDefinitionsExistAction(applicationId: String, noFieldsBehaviour : NoFieldsBehaviour = NoFieldsBehaviour.BadRequest)
+  def subFieldsDefinitionsExistAction(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)
                                     (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request: UserRequest[AnyContent] =>
       ManageSubscriptionsActions
@@ -132,7 +132,7 @@ abstract class ApplicationController()
                                                    (fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
-        .stackedActions(applicationId, NoFieldsBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
+        .stackedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
         .async(fun)(request)
     }
   }

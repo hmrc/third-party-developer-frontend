@@ -16,10 +16,11 @@
 
 package controllers
 
-import cats.data.{NonEmptyList}
+import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.toDetails
 import domain._
+import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -56,16 +57,7 @@ trait ActionBuilders {
     }
   }
 
-  // TODO: Put these somewhere better?
-  // TODO: Test redirect if no fields (or bad request?)
-  sealed trait NoFieldsBehaviour
-
-  object NoFieldsBehaviour {
-    case object BadRequest extends NoFieldsBehaviour
-    case class Redirect(url: String) extends NoFieldsBehaviour
-  }
-
-  def fieldDefinitionsExistRefiner(noFieldsBehaviour : NoFieldsBehaviour)
+  def fieldDefinitionsExistRefiner(noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
                                   (implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
       = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
 
@@ -73,8 +65,8 @@ trait ActionBuilders {
       implicit val implicitRequest: Request[A] = input.request
 
       val noFieldsResult = noFieldsBehaviour match {
-        case NoFieldsBehaviour.BadRequest => play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate)
-        case NoFieldsBehaviour.Redirect(url) => play.api.mvc.Results.Redirect(url)
+        case NoSubscriptionFieldsRefinerBehaviour.BadRequest => play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate)
+        case NoSubscriptionFieldsRefinerBehaviour.Redirect(url) => play.api.mvc.Results.Redirect(url)
       }
 
       val apiSubscriptionStatuses =
@@ -101,7 +93,6 @@ trait ActionBuilders {
     def refine[A](input: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldPage[A]]] = {
       implicit val implicitRequest: Request[A] = input.applicationRequest.request
 
-      // TODO: Sort?
       val details = input
         .fieldDefinitions
         .map(toDetails)

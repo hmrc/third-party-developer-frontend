@@ -19,10 +19,9 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.AddTeamMemberPageMode.{findValues, values}
-import domain.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, AddTeamMemberPageMode, Application, Environment}
+import domain.{APISubscriptionStatusWithSubscriptionFields, Environment}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
-import enumeratum.{EnumEntry, PlayEnum}
+import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data
 import play.api.data.Form
 import play.api.data.Forms._
@@ -180,22 +179,22 @@ class ManageSubscriptions @Inject() (
     EditApiMetadata.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  // TODO: This is a bit messy
   def subscriptionConfigurationStart(applicationId: String): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId,
-      NoFieldsBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId, Environment.SANDBOX).url)) {
+      NoSubscriptionFieldsRefinerBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId, Environment.SANDBOX))) {
 
-      definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+      definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] => {
 
-      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
-      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
-      val details =
-        definitionsRequest
+        implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+        implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+
+        val details = definitionsRequest
           .fieldDefinitions
           .map(toDetails)
           .toList
 
-      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(definitionsRequest.applicationRequest.application, details)))
+        Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(definitionsRequest.applicationRequest.application, details)))
+      }
     }
 
   def subscriptionConfigurationPage(applicationId: String, pageNumber: Int) : Action[AnyContent] =

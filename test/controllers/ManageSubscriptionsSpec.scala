@@ -538,8 +538,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
     }
 
-      // TODO: Fix this. Make previous page link to either here or end of journey.
-      "be redirected to the end of the journey of they haven't subscribed to any APIs with subscription fields" ignore new ManageSubscriptionsSetup {
+      "be redirected to the end of the journey of they haven't subscribed to any APIs with subscription fields" in new ManageSubscriptionsSetup {
         val subsData = Seq(noConfigurationSubscription("api1"))
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
@@ -549,7 +548,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           await(manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe "some-other-url"
+        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add/sandbox/success")
       }
     }
 
