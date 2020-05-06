@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain.ApiSubscriptionFields.{Fields, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields.{Fields, SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import domain._
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -123,6 +123,17 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(manageSubscriptionController, implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
+
+    def editFormPostRequest(fieldName: String, fieldValue: String) = {
+      loggedInRequest
+        .withFormUrlEncodedBody("apiName" -> "",
+          "fields[0].name" -> fieldName,
+          "fields[0].description" -> "",
+          "fields[0].shortDescription" -> "",
+          "fields[0].hint" -> "",
+          "fields[0].type" -> "",
+          "fields[0].value" -> fieldValue)
+    }
 
     def generateName(prefix: String) = s"$prefix-name"
 
@@ -306,6 +317,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "save action saves valid subscription field values" in new ManageSubscriptionsSetup {
         val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val newSubscriptionValue = "new value"
+        private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
+        val successRedirectUrl = "my return to page url"
 
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(Seq(apiSubscriptionStatus)))
@@ -313,19 +327,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
           .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
-        val newSubscriptionValue = "new value"
-        val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
-
-        private val loggedInWithFormValues = loggedInRequest
-          .withFormUrlEncodedBody("apiName" -> "",
-            "fields[0].name" -> subSubscriptionValue.definition.name,
-            "fields[0].description" -> "",
-            "fields[0].shortDescription" -> "",
-            "fields[0].hint" -> "",
-            "fields[0].type" -> "",
-            "fields[0].value" -> newSubscriptionValue)
-
-        val successRedirectUrl = "my return to page url"
+        private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
 
         private val result: Result =
           await(addToken(manageSubscriptionController.saveSubscriptionFields(
@@ -347,7 +349,40 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
             eqTo(expectedFields))(any[HeaderCarrier]())
       }
 
-      // TODO: Test for validation errors?
+      "save action fails valid and shows error message" in new ManageSubscriptionsSetup {
+        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val newSubscriptionValue = "my invalid value"
+        val successRedirectUrl = "my return to page url"
+
+        val fieldErrors = Map("apiName" -> "apiName is invalid error message")
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(Seq(apiSubscriptionStatus)))
+
+        when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
+          .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
+
+        private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
+
+        private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
+
+        private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
+            appId,
+            apiSubscriptionStatus.context,
+            apiSubscriptionStatus.apiVersion.version,
+            successRedirectUrl))(loggedInWithFormValues))
+
+        status(result) shouldBe OK
+        bodyOf(result) should include("Subscription configuration")
+        bodyOf(result) should include("Application")
+        bodyOf(result) should include(application.name)
+        bodyOf(result) should include("apiName is invalid error message")
+      }
+
+      // TODO
+      "save action fails valid and shows error message and leave you on the new page or something?" in new ManageSubscriptionsSetup {
+
+      }
     }
 
     "a user is doing the add new sandbox app journey they" should {

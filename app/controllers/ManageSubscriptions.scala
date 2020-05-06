@@ -154,7 +154,7 @@ class ManageSubscriptions @Inject() (
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
 
-          // TODO: Redirect to page request came from in new journey
+          // TODO: Bug - Redirect to page request came from in new journey
           Ok(editApiMetadata(request.application, EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)))
       }
     }
