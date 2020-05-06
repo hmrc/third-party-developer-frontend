@@ -36,6 +36,7 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.Future._
 import cats.data.NonEmptyList
+import controllers.ManageSubscriptions.ApiSubscriptionEditPageMode
 import play.api.data.Forms.{list, mapping}
 
 import scala.concurrent.Future
@@ -201,6 +202,18 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         bodyOf(result) should include(field.definition.hint)
       }
     }
+
+    def assertIsApiConfigureEditPage(result: Result) : Unit = {
+      bodyOf(result) should include("Subscription configuration")
+      bodyOf(result) should include("Environment")
+      bodyOf(result) should include(application.name)
+    }
+
+    def assertIsSandboxJourneyApiConfigureEditPage(result: Result) : Unit = {
+      bodyOf(result) should not include("Subscription configuration")
+      bodyOf(result) should not include("Environment")
+      bodyOf(result) should not include(application.name)
+    }
   }
 
   "ManageSubscriptions" when {
@@ -334,6 +347,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
             appId,
             apiSubscriptionStatus.context,
             apiSubscriptionStatus.apiVersion.version,
+            ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration,
             successRedirectUrl))(loggedInWithFormValues))
 
         status(result) shouldBe SEE_OTHER
@@ -349,7 +363,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
             eqTo(expectedFields))(any[HeaderCarrier]())
       }
 
-      "save action fails valid and shows error message" in new ManageSubscriptionsSetup {
+      "save action fails validation and shows error message" in new ManageSubscriptionsSetup {
         val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
         val newSubscriptionValue = "my invalid value"
         val successRedirectUrl = "my return to page url"
@@ -370,18 +384,45 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
             appId,
             apiSubscriptionStatus.context,
             apiSubscriptionStatus.apiVersion.version,
+            ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration,
             successRedirectUrl))(loggedInWithFormValues))
 
         status(result) shouldBe OK
-        bodyOf(result) should include("Subscription configuration")
-        bodyOf(result) should include("Application")
-        bodyOf(result) should include(application.name)
+
+        assertIsApiConfigureEditPage(result)
+
         bodyOf(result) should include("apiName is invalid error message")
       }
 
-      // TODO
-      "save action fails valid and shows error message and leave you on the new page or something?" in new ManageSubscriptionsSetup {
+      "save action fails valid and shows error message and renders the add app journey page subs configuration" in new ManageSubscriptionsSetup {
+        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val newSubscriptionValue = "my invalid value"
+        val successRedirectUrl = "my return to page url"
 
+        val fieldErrors = Map("apiName" -> "apiName is invalid error message")
+
+        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
+          .thenReturn(successful(Seq(apiSubscriptionStatus)))
+
+        when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
+          .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
+
+        private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
+
+        private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
+
+        private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
+          appId,
+          apiSubscriptionStatus.context,
+          apiSubscriptionStatus.apiVersion.version,
+          ApiSubscriptionEditPageMode.AddNewApplicationSubscriptionConfiguration,
+          successRedirectUrl))(loggedInWithFormValues))
+
+        status(result) shouldBe OK
+
+        assertIsSandboxJourneyApiConfigureEditPage(result)
+
+        bodyOf(result) should include("apiName is invalid error message")
       }
     }
 

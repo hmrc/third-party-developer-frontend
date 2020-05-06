@@ -19,8 +19,10 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, Environment}
+import domain.AddTeamMemberPageMode.{findValues, values}
+import domain.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, AddTeamMemberPageMode, Environment}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
+import enumeratum.{EnumEntry, PlayEnum}
 import play.api.data
 import play.api.data.Form
 import play.api.data.Forms._
@@ -57,6 +59,17 @@ object ManageSubscriptions {
 
   def toForm(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadata = {
     EditApiMetadata(in.name, fields = in.fields.fields.toList)
+  }
+
+  // TODO : Move this somewhere else?
+  sealed trait ApiSubscriptionEditPageMode extends EnumEntry
+  object ApiSubscriptionEditPageMode extends PlayEnum[ApiSubscriptionEditPageMode] {
+    val values = findValues
+
+    final case object ManageSubscriptionConfiguration extends ApiSubscriptionEditPageMode
+    final case object AddNewApplicationSubscriptionConfiguration extends ApiSubscriptionEditPageMode
+
+    def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
   }
 
   case class EditApiMetadata(apiName: String, fields: List[SubscriptionFieldValue])
@@ -136,6 +149,7 @@ class ManageSubscriptions @Inject() (
   def saveSubscriptionFields(applicationId: String,
                              apiContext: String,
                              apiVersion: String,
+                             apiSubscriptionEditPageMode: ApiSubscriptionEditPageMode,
                              returnRedirectUrl: String) : Action[AnyContent]
     = whenTeamMemberOnApp(applicationId) { implicit request =>
 
@@ -154,8 +168,19 @@ class ManageSubscriptions @Inject() (
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
 
-          // TODO: Bug - Redirect to page request came from in new journey
-          Ok(editApiMetadata(request.application, EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)))
+          val vm = EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)
+
+          val html = apiSubscriptionEditPageMode match {
+            case ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration =>
+              editApiMetadata(request.application,vm)
+            case ApiSubscriptionEditPageMode.AddNewApplicationSubscriptionConfiguration =>
+              // TODO: Fix page number
+              val pageNumber = 1
+
+              views.html.createJourney.subscriptionConfigurationPage(request.application, pageNumber, vm)
+          }
+
+          Ok(html)
       }
     }
 

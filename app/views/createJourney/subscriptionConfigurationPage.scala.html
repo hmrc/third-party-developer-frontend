@@ -16,7 +16,7 @@
 
 @import include._
 @import domain._
-@import controllers.ManageSubscriptions.ApiDetails
+@import controllers.ManageSubscriptions.ApiSubscriptionEditPageMode
 
 @import controllers.ManageSubscriptions.EditApiMetadataViewModel
 
@@ -40,9 +40,14 @@
   developerSession = Some(loggedIn),
   back = BackButtonWithJavaScript
 ) {
+  @errorSummary(vm.fieldsForm)
+
   <header>
     <h1 class="heading-large">@pageHeading</h1>
   </header>
 
-  @editApiMetadataPartial(app,vm,routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id, pageNumber).url)
+  @editApiMetadataPartial(app,
+    vm,
+    ApiSubscriptionEditPageMode.AddNewApplicationSubscriptionConfiguration,
+    routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id,pageNumber).url)
 }
