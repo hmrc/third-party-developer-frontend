@@ -62,15 +62,6 @@ case class APIAccess(`type`: APIAccessType)
 
 case class APIIdentifier(context: String, version: String)
 
-// TODO : Keep this base class?
-trait APISubscriptionStatusBase {
-  val apiVersion: APIVersion
-
-  def canUnsubscribe: Boolean = {
-    apiVersion.status != APIStatus.DEPRECATED
-  }
-}
-
 case class APISubscriptionStatus(
     name: String,
     serviceName: String,
@@ -79,15 +70,17 @@ case class APISubscriptionStatus(
     subscribed: Boolean,
     requiresTrust: Boolean,
     fields: Option[SubscriptionFieldsWrapper] = None,
-    isTestSupport: Boolean = false
-) extends APISubscriptionStatusBase {}
+    isTestSupport: Boolean = false) {
+  def canUnsubscribe: Boolean = {
+    apiVersion.status != APIStatus.DEPRECATED
+  }
+}
 
 case class APISubscriptionStatusWithSubscriptionFields(
-                                  name: String,
-                                  context: String,
-                                  apiVersion: APIVersion,
-                                  fields: SubscriptionFieldsWrapper
-                                ) extends APISubscriptionStatusBase {}
+  name: String,
+  context: String,
+  apiVersion: APIVersion,
+  fields: SubscriptionFieldsWrapper)
 
 object APISubscriptionStatusWithSubscriptionFields {
   def apply(fields : Seq[APISubscriptionStatus]) : Seq[APISubscriptionStatusWithSubscriptionFields] = {
