@@ -26,13 +26,20 @@
         app: Application,
         vm: EditApiMetadataViewModel,
         apiSubscriptionEditPageMode: ApiSubscriptionEditPageMode,
-        returnRedirectUrl: String
+        returnRedirectUrl: String,
+        pageNumber: Option[Int] = None
 )(
         implicit request: play.api.mvc.Request[Any],
         messages: Messages)
 
 @helper.form(
- action = routes.ManageSubscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion, apiSubscriptionEditPageMode,returnRedirectUrl),
+ action = routes.ManageSubscriptions.saveSubscriptionFields(
+  app.id,
+  vm.apiContext,
+  vm.apiVersion,
+  apiSubscriptionEditPageMode,
+  returnRedirectUrl,
+  pageNumber),
  'class -> "fields-subscription") {
 
  @helper.CSRF.formField

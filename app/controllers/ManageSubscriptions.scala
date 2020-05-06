@@ -150,7 +150,8 @@ class ManageSubscriptions @Inject() (
                              apiContext: String,
                              apiVersion: String,
                              apiSubscriptionEditPageMode: ApiSubscriptionEditPageMode,
-                             returnRedirectUrl: String) : Action[AnyContent]
+                             returnRedirectUrl: String,
+                             pageNumber: Option[Int]) : Action[AnyContent]
     = whenTeamMemberOnApp(applicationId) { implicit request =>
 
     def handleValidForm(validForm: EditApiMetadata) = {
@@ -174,10 +175,9 @@ class ManageSubscriptions @Inject() (
             case ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration =>
               editApiMetadata(request.application,vm)
             case ApiSubscriptionEditPageMode.AddNewApplicationSubscriptionConfiguration =>
-              // TODO: Fix page number
-              val pageNumber = 1
 
-              views.html.createJourney.subscriptionConfigurationPage(request.application, pageNumber, vm)
+              val pageNumberValue = pageNumber.getOrElse(throw new Exception("Missing pageNumber in query string"))
+              views.html.createJourney.subscriptionConfigurationPage(request.application, pageNumberValue, vm)
           }
 
           Ok(html)

@@ -173,7 +173,7 @@ POST        /applications/:id/context/:apiContext/version/:version/subscriptionF
 
 GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: String)
 GET         /applications/:id/api-metadata/:context/:version                                controllers.ManageSubscriptions.editApiMetadataPage(id: String, context: String, version: String)
-POST        /applications/:id/api-metadata/:context/:version                                controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: String, version: String, apiSubscriptionEditPageMode: controllers.ManageSubscriptions.ApiSubscriptionEditPageMode, returnRedirectUrl: String)
+POST        /applications/:id/api-metadata/:context/:version                                controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: String, version: String, apiSubscriptionEditPageMode: controllers.ManageSubscriptions.ApiSubscriptionEditPageMode, returnRedirectUrl: String, pageNumber: Option[Int])
 
 GET         /application-verification                                                       controllers.ApplicationVerification.verifyUplift(code: String)
 GET         /user-navlinks                                                                  controllers.Navigation.navLinks

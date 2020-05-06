@@ -49,5 +49,7 @@
   @editApiMetadataPartial(app,
     vm,
     ApiSubscriptionEditPageMode.AddNewApplicationSubscriptionConfiguration,
-    routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id,pageNumber).url)
+    routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id,pageNumber).url,
+    Some(pageNumber)
+  )
 }

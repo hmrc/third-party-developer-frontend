@@ -348,7 +348,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
             apiSubscriptionStatus.context,
             apiSubscriptionStatus.apiVersion.version,
             ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration,
-            successRedirectUrl))(loggedInWithFormValues))
+            successRedirectUrl,
+            None))(loggedInWithFormValues))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(successRedirectUrl)
@@ -385,7 +386,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
             apiSubscriptionStatus.context,
             apiSubscriptionStatus.apiVersion.version,
             ApiSubscriptionEditPageMode.ManageSubscriptionConfiguration,
-            successRedirectUrl))(loggedInWithFormValues))
+            successRedirectUrl,
+            None))(loggedInWithFormValues))
 
         status(result) shouldBe OK
 
@@ -416,7 +418,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           apiSubscriptionStatus.context,
           apiSubscriptionStatus.apiVersion.version,
           ApiSubscriptionEditPageMode.AddNewApplicationSubscriptionConfiguration,
-          successRedirectUrl))(loggedInWithFormValues))
+          successRedirectUrl,
+          pageNumber = Some(1)))(loggedInWithFormValues))
 
         status(result) shouldBe OK
 
