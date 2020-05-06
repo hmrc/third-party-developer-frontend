@@ -41,7 +41,6 @@
         </header>
 
         @applicationList(applications)
-
         @if(noProductionApplications(applications)) {
             </br>
             <p>After testing in the sandbox, you can apply for production credentials.</p>
@@ -52,7 +51,7 @@
         }
         @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
             <h2 class="heading-medium">Using privileged application credentials</h2>
-            <p>Check <a href="/api-documentation/docs/using-privileged-application-credentials">
+            <p>Check <a href="@controllers.routes.AddApplication.usingPrivilegedApplicationCredentialsPage()">
                 how to use privileged application credentials</a>.</p>
         }
 }

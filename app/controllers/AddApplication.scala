@@ -49,6 +49,10 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     }
   }
 
+  def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(views.html.usingPrivilegedApplicationCredentials()))
+  }
+
   def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(views.html.tenDaysWarning()))
   }
