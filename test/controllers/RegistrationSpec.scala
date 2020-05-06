@@ -43,8 +43,7 @@ class RegistrationSpec extends BaseControllerSpec {
       cookieSigner
     )
 
-//    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val sessionParams = Seq("csrfToken" -> "Is this a valid token")
+    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
   }
 
 

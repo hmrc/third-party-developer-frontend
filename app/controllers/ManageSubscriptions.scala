@@ -130,8 +130,7 @@ class ManageSubscriptions @Inject() (
       definitionsRequest.fieldDefinitions
         .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
         .headOption
-        .map(toViewModel)
-        .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, vm))))
+        .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, toViewModel(vm)))))
         .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
 
@@ -141,15 +140,17 @@ class ManageSubscriptions @Inject() (
     = whenTeamMemberOnApp(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
 
     val successRedirectUrl = routes.ManageSubscriptions.listApiSubscriptions(applicationId)
-    doPostSubscriptionConfigurationSave(apiContext, apiVersion, successRedirectUrl, vm =>
+    subscriptionConfigurationSave(apiContext, apiVersion, successRedirectUrl, vm =>
       editApiMetadata(request.application,vm)
     )
   }
 
-  def doPostSubscriptionConfigurationSave(apiContext: String,
-                      apiVersion: String,successRedirect: Call,
-                      validationFailureView : EditApiMetadataViewModel => Html)
-                     (implicit hc: HeaderCarrier, request: ApplicationRequest[_]): Future[Result] = {
+  private def subscriptionConfigurationSave(apiContext: String,
+                                            apiVersion: String,
+                                            successRedirect: Call,
+                                            validationFailureView : EditApiMetadataViewModel => Html)
+                                           (implicit hc: HeaderCarrier, request: ApplicationRequest[_]): Future[Result] = {
+
     def handleValidForm(validForm: EditApiMetadata) = {
       def saveFields(validForm: EditApiMetadata)(implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
         if (validForm.fields.nonEmpty) {
@@ -164,7 +165,6 @@ class ManageSubscriptions @Inject() (
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
-
           val vm = EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)
 
           BadRequest(validationFailureView(vm))
@@ -217,7 +217,7 @@ class ManageSubscriptions @Inject() (
 
       val successRedirectUrl = routes.ManageSubscriptions.subscriptionConfigurationStepPage(applicationId,pageNumber)
 
-      doPostSubscriptionConfigurationSave(definitionsRequest.apiDetails.context, definitionsRequest.apiDetails.version, successRedirectUrl, viewModel => {
+      subscriptionConfigurationSave(definitionsRequest.apiDetails.context, definitionsRequest.apiDetails.version, successRedirectUrl, viewModel => {
         views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber, viewModel)
       })
     }

@@ -28,6 +28,7 @@ import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ActionBuilders {
@@ -79,9 +80,7 @@ trait ActionBuilders {
         apiSubStatusesWithFieldDefinitions
           .fold[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]]
             (Left(noFieldsResult))
-            (apiSubStatusesWithFieldDefinitions => Right(
-              ApplicationWithFieldDefinitionsRequest(apiSubStatusesWithFieldDefinitions, input)
-            ))
+            (withDefinitions => Right(ApplicationWithFieldDefinitionsRequest(withDefinitions, input)))
       )
     }
   }
@@ -93,19 +92,18 @@ trait ActionBuilders {
     def refine[A](input: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldPage[A]]] = {
       implicit val implicitRequest: Request[A] = input.applicationRequest.request
 
-      val details = input
-        .fieldDefinitions
-        .map(toDetails)
-        .toList
+      val details = input.fieldDefinitions.map(toDetails).toList
 
-      if (pageNumber >= 1 && pageNumber <= details.size) {
-        val apiDetails = details(pageNumber - 1)
-        val apiSubscriptionStatus = input.fieldDefinitions.toList(pageNumber - 1)
+      Future.successful(
+        if (pageNumber >= 1 && pageNumber <= details.size) {
+          val apiDetails = details(pageNumber - 1)
+          val apiSubscriptionStatus = input.fieldDefinitions.toList(pageNumber - 1)
 
-        Future.successful(Right(ApplicationWithSubscriptionFieldPage(pageNumber,details.size, apiSubscriptionStatus, apiDetails, input.applicationRequest)))
-      } else {
-          Future.successful(Left(NotFound(errorHandler.notFoundTemplate)))
-      }
+          Right(ApplicationWithSubscriptionFieldPage(pageNumber,details.size, apiSubscriptionStatus, apiDetails, input.applicationRequest))
+        } else {
+          Left(NotFound(errorHandler.notFoundTemplate))
+        }
+      )
     }
   }
 

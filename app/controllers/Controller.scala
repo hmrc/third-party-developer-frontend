@@ -20,6 +20,7 @@ import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
 import domain._
+import model.NoSubscriptionFieldsRefinerBehaviour._
 import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
@@ -111,7 +112,7 @@ abstract class ApplicationController()
   }
 
   private object ManageSubscriptionsActions {
-    def stackedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
+    def subscriptionsStackedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
                       (implicit request: UserRequest[AnyContent]) =
       Action andThen
         applicationAction(applicationId, loggedIn) andThen
@@ -119,11 +120,12 @@ abstract class ApplicationController()
         fieldDefinitionsExistRefiner(noFieldsBehaviour)
   }
 
-  def subFieldsDefinitionsExistAction(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)
+  def subFieldsDefinitionsExistAction(applicationId: String,
+                                      noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)
                                     (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request: UserRequest[AnyContent] =>
       ManageSubscriptionsActions
-        .stackedActions(applicationId, noFieldsBehaviour)
+        .subscriptionsStackedActions(applicationId, noFieldsBehaviour)
         .async(fun)(request)
     }
   }
@@ -132,7 +134,7 @@ abstract class ApplicationController()
                                                    (fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
-        .stackedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
+        .subscriptionsStackedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
         .async(fun)(request)
     }
   }
