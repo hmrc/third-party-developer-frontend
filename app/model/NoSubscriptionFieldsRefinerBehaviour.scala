@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package domain
+package model
 
-import enumeratum.{EnumEntry, PlayEnum}
+import play.api.mvc.Call
 
-sealed trait SubscriptionRedirect extends EnumEntry
+sealed trait NoSubscriptionFieldsRefinerBehaviour
 
-object SubscriptionRedirect extends PlayEnum[SubscriptionRedirect] {
-  val values = findValues
-
-  final case object MANAGE_PAGE extends SubscriptionRedirect
-  final case object APPLICATION_CHECK_PAGE extends SubscriptionRedirect
-  final case object API_SUBSCRIPTIONS_PAGE extends SubscriptionRedirect
+object NoSubscriptionFieldsRefinerBehaviour {
+  case object BadRequest extends NoSubscriptionFieldsRefinerBehaviour
+  case class Redirect(url: Call) extends NoSubscriptionFieldsRefinerBehaviour
 }

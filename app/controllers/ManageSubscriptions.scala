@@ -19,14 +19,16 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatus, Application}
+import domain.{APISubscriptionStatusWithSubscriptionFields, Environment}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
+import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.libs.crypto.CookieSigner
+import play.twirl.api.Html
 import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.managesubscriptions.editApiMetadata
@@ -46,30 +48,23 @@ object ManageSubscriptions {
     FieldValue(sfv.definition.shortDescription, default(sfv.value, "None"))
   }
 
-  def toDetails(in: APISubscriptionStatus): Option[ApiDetails] = {
-    for {
-      wrapper <- in.fields
-      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
-      nelFields = nelSFV.map(toFieldValue)
-    } yield ApiDetails(
+  def toDetails(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
+    ApiDetails(
       name = in.name,
       context = in.context,
       version = in.apiVersion.version,
-      subsValues = nelFields
+      subsValues = in.fields.fields.map(toFieldValue)
     )
   }
 
-  def toForm(in: APISubscriptionStatus): Option[EditApiMetadata] = {
-    for {
-      wrapper <- in.fields
-      nelSFV <- NonEmptyList.fromList(wrapper.fields.toList)
-    } yield EditApiMetadata(in.name, fields = nelSFV.toList)
+  def toForm(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadata = {
+    EditApiMetadata(in.name, fields = in.fields.fields.toList)
   }
 
   case class EditApiMetadata(apiName: String, fields: List[SubscriptionFieldValue])
 
   object EditApiMetadata {
-    val form = Form(
+    val form: Form[EditApiMetadata] = Form(
       mapping(
         "apiName" -> text,
         "fields" -> list(
@@ -93,8 +88,9 @@ object ManageSubscriptions {
                                        fieldsForm: Form[EditApiMetadata]
                                      )
 
-  def toViewModel(in: APISubscriptionStatus): Option[EditApiMetadataViewModel] = {
-    toForm(in).map(data => EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data)))
+  def toViewModel(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadataViewModel = {
+    val data = toForm(in)
+    EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data))
   }
 }
 
@@ -115,53 +111,129 @@ class ManageSubscriptions @Inject() (
 
   def listApiSubscriptions(applicationId: String): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
-      implicit val rq = definitionsRequest.applicationRequest.request
-      implicit val appRQ = definitionsRequest.applicationRequest
+      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
-      val details = definitionsRequest.fieldDefinitions
+      val details = definitionsRequest
+        .fieldDefinitions
         .map(toDetails)
-        .foldLeft(Seq.empty[ApiDetails])((acc, item) => item.toSeq ++ acc)
+        .toList
 
       successful(Ok(views.html.managesubscriptions.listApiSubscriptions(definitionsRequest.applicationRequest.application, details)))
     }
 
   def editApiMetadataPage(applicationId: String, context: String, version: String): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
-      implicit val rq = definitionsRequest.applicationRequest.request
-      implicit val appRQ = definitionsRequest.applicationRequest
+      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
       definitionsRequest.fieldDefinitions
         .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
         .headOption
-        .flatMap(toViewModel)
-      .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, vm))))
+        .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, toViewModel(vm)))))
         .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
 
-  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
+  def saveSubscriptionFields(applicationId: String,
+                             apiContext: String,
+                             apiVersion: String) : Action[AnyContent]
+    = whenTeamMemberOnApp(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
+
+    val successRedirectUrl = routes.ManageSubscriptions.listApiSubscriptions(applicationId)
+    subscriptionConfigurationSave(apiContext, apiVersion, successRedirectUrl, vm =>
+      editApiMetadata(request.application,vm)
+    )
+  }
+
+  private def subscriptionConfigurationSave(apiContext: String,
+                                            apiVersion: String,
+                                            successRedirect: Call,
+                                            validationFailureView : EditApiMetadataViewModel => Html)
+                                           (implicit hc: HeaderCarrier, request: ApplicationRequest[_]): Future[Result] = {
+
     def handleValidForm(validForm: EditApiMetadata) = {
       def saveFields(validForm: EditApiMetadata)(implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
         if (validForm.fields.nonEmpty) {
-          subFieldsService.saveFieldValues(applicationId, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
+          subFieldsService.saveFieldValues(request.application.id, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
         } else {
           Future.successful(SaveSubscriptionFieldsSuccessResponse)
         }
       }
 
       saveFields(validForm) map {
-        case SaveSubscriptionFieldsSuccessResponse => Redirect(routes.ManageSubscriptions.listApiSubscriptions(applicationId))
+        case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect.url)
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
+          val vm = EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)
 
-          Ok(editApiMetadata(request.application, EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)))
+          BadRequest(validationFailureView(vm))
       }
     }
 
     def handleInvalidForm(formWithErrors: Form[EditApiMetadata]) = {
-      Future.successful(BadRequest(editApiMetadata(request.application, EditApiMetadataViewModel(applicationId, apiContext, apiVersion, formWithErrors))))
+      val vm = EditApiMetadataViewModel(request.application.id, apiContext, apiVersion, formWithErrors)
+      Future.successful(BadRequest(validationFailureView(vm)))
     }
 
     EditApiMetadata.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
+
+  def subscriptionConfigurationStart(applicationId: String): Action[AnyContent] =
+    subFieldsDefinitionsExistAction(applicationId,
+      NoSubscriptionFieldsRefinerBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId, Environment.SANDBOX))) {
+
+      definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] => {
+
+        implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+        implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+
+        val details = definitionsRequest
+          .fieldDefinitions
+          .map(toDetails)
+          .toList
+
+        Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(definitionsRequest.applicationRequest.application, details)))
+      }
+    }
+
+  def subscriptionConfigurationPage(applicationId: String, pageNumber: Int) : Action[AnyContent] =
+    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
+      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+
+      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(
+        definitionsRequest.applicationRequest.application,
+        pageNumber,
+        toViewModel(definitionsRequest.apiSubscriptionStatus))
+      ))
+    }
+
+  def subscriptionConfigurationPagePost(applicationId: String, pageNumber: Int) : Action[AnyContent] =
+    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
+
+      implicit val applicationRequest: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+
+      val successRedirectUrl = routes.ManageSubscriptions.subscriptionConfigurationStepPage(applicationId,pageNumber)
+
+      subscriptionConfigurationSave(definitionsRequest.apiDetails.context, definitionsRequest.apiDetails.version, successRedirectUrl, viewModel => {
+        views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber, viewModel)
+      })
+    }
+
+  def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
+    subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
+      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+
+      val application = definitionsRequest.applicationRequest.application
+
+      if (pageNumber == definitionsRequest.totalPages) {
+        Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id, application.deployedTo)))
+      } else {
+        Future.successful (Ok(views.html.createJourney.subscriptionConfigurationStepPage (application, pageNumber, definitionsRequest.totalPages)))
+      }
+    }
 }

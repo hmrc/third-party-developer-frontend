@@ -18,7 +18,9 @@ package controllers
 
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
+import controllers.ManageSubscriptions.toDetails
 import domain._
+import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -26,6 +28,7 @@ import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ActionBuilders {
@@ -55,20 +58,51 @@ trait ActionBuilders {
     }
   }
 
-  def fieldDefinitionsExistRefiner(implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
+  def fieldDefinitionsExistRefiner(noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
+                                  (implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
       = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
 
     def refine[A](input: ApplicationRequest[A]): Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]] = {
       implicit val implicitRequest: Request[A] = input.request
 
+      val noFieldsResult = noFieldsBehaviour match {
+        case NoSubscriptionFieldsRefinerBehaviour.BadRequest => play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate)
+        case NoSubscriptionFieldsRefinerBehaviour.Redirect(url) => play.api.mvc.Results.Redirect(url)
+      }
+
+      val apiSubscriptionStatuses =
+        input.subscriptions.filter(s => s.subscribed)
+
+      val apiSubStatusesWithFieldDefinitions = NonEmptyList
+        .fromList(APISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatuses).toList)
+
       Future.successful(
-        NonEmptyList.fromList(
-          input.subscriptions.filter(
-            s => s.subscribed && s.fields.isDefined
-          ).toList
-        )
-        .map(nel => ApplicationWithFieldDefinitionsRequest(nel, input))
-        .toRight(play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate))
+        apiSubStatusesWithFieldDefinitions
+          .fold[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]]
+            (Left(noFieldsResult))
+            (withDefinitions => Right(ApplicationWithFieldDefinitionsRequest(withDefinitions, input)))
+      )
+    }
+  }
+
+  def subscriptionFieldPageRefiner(pageNumber: Int)(implicit ec: ExecutionContext):
+    ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPage]
+      = new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPage] {
+
+    def refine[A](input: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldPage[A]]] = {
+      implicit val implicitRequest: Request[A] = input.applicationRequest.request
+
+      val details = input.fieldDefinitions.map(toDetails).toList
+
+      Future.successful(
+        if (pageNumber >= 1 && pageNumber <= details.size) {
+          val apiDetails = details(pageNumber - 1)
+          val apiSubscriptionStatus = input.fieldDefinitions.toList(pageNumber - 1)
+
+          Right(ApplicationWithSubscriptionFieldPage(pageNumber,details.size, apiSubscriptionStatus, apiDetails, input.applicationRequest))
+        } else {
+          Left(NotFound(errorHandler.notFoundTemplate))
+        }
       )
     }
   }

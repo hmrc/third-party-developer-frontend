@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.urls.Link
 
 @import domain.BackButtonWithJavaScript
+@import domain.Environment.PRODUCTION
 @(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, environment: Environment, subscriptions: Option[GroupedSubscriptions])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
 
@@ -63,7 +64,7 @@
                 <p class="panel panel-border-wide">You need admin rights to make API subscription changes.</p>
             }
 
-            @subscriptionGroups(role, groupedSubscriptions, app, API_SUBSCRIPTIONS_PAGE)
+            @subscriptionGroups(role, groupedSubscriptions, app, API_SUBSCRIPTIONS_PAGE, app.deployedTo == PRODUCTION)
         }
 
         case _ => {
@@ -77,8 +78,11 @@
     </br>
     </br>
 
-    <div>
-        <a class="button" href="@routes.AddApplication.addApplicationSuccess(app.id, environment)">Add your application</a>
-    </div>
-
+  <div>
+    @if(app.deployedTo == Environment.PRODUCTION){
+          <a class="button" href="@{routes.AddApplication.addApplicationSuccess(app.id, environment)}">Add your application</a>
+    } else {
+      <a class="button" href="@{routes.ManageSubscriptions.subscriptionConfigurationStart(app.id).url}">Add your application</a>
+    }
+  </div>
 }

@@ -18,8 +18,10 @@ package controllers
 
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
+import controllers.ManageSubscriptions.ApiDetails
 import domain._
-import model.ApplicationViewModel
+import model.NoSubscriptionFieldsRefinerBehaviour._
+import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import security.{DevHubAuthorization, ExtendedDevHubAuthorization}
@@ -53,7 +55,16 @@ case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], reque
 case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
 
-case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatus], applicationRequest: ApplicationRequest[A])
+case class ApplicationWithFieldDefinitionsRequest[A](
+                                                      fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields],
+                                                      applicationRequest: ApplicationRequest[A])
+  extends WrappedRequest[A](applicationRequest)
+
+case class ApplicationWithSubscriptionFieldPage[A]( pageIndex: Int,
+                                                    totalPages: Int,
+                                                    apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
+                                                    apiDetails: ApiDetails,
+                                                    applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
 abstract class BaseController() extends DevHubAuthorization with I18nSupport with HeaderCarrierConversion with HeaderEnricher {
@@ -78,16 +89,16 @@ abstract class ApplicationController()
   def whenTeamMemberOnApp(applicationId: String)
                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn)
-      stackedActions.async(fun)(request)
+      val composedActions = Action andThen applicationAction(applicationId, loggedIn)
+      composedActions.async(fun)(request)
     }
   
   def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
-      stackedActions.async(fun)(request)
+      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
+      composedActions.async(fun)(request)
     }
   }
 
@@ -95,21 +106,36 @@ abstract class ApplicationController()
                                     (applicationId: String)
                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
-      stackedActions.async(fun)(request)
+      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
+      composedActions.async(fun)(request)
     }
   }
 
-  def subFieldsDefinitionsExistAction(applicationId: String)
-                                    (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val stackedActions =
-        Action andThen
-          applicationAction(applicationId, loggedIn) andThen
-          capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
-          fieldDefinitionsExistRefiner
+  private object ManageSubscriptionsActions {
+    def subscriptionsComposedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
+                      (implicit request: UserRequest[AnyContent]) =
+      Action andThen
+        applicationAction(applicationId, loggedIn) andThen
+        capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
+        fieldDefinitionsExistRefiner(noFieldsBehaviour)
+  }
 
-      stackedActions.async(fun)(request)
+  def subFieldsDefinitionsExistAction(applicationId: String,
+                                      noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)
+                                    (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request: UserRequest[AnyContent] =>
+      ManageSubscriptionsActions
+        .subscriptionsComposedActions(applicationId, noFieldsBehaviour)
+        .async(fun)(request)
+    }
+  }
+
+  def subFieldsDefinitionsExistActionWithPageNumber(applicationId: String, pageNumber: Int)
+                                                   (fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      (ManageSubscriptionsActions
+        .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
+        .async(fun)(request)
     }
   }
 }

@@ -16,6 +16,7 @@
 
 package domain
 
+import cats.data.NonEmptyList
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import play.api.libs.json.Json
 
@@ -69,10 +70,33 @@ case class APISubscriptionStatus(
     subscribed: Boolean,
     requiresTrust: Boolean,
     fields: Option[SubscriptionFieldsWrapper] = None,
-    isTestSupport: Boolean = false
-) {
-  def canUnsubscribe = {
+    isTestSupport: Boolean = false) {
+  def canUnsubscribe: Boolean = {
     apiVersion.status != APIStatus.DEPRECATED
+  }
+}
+
+case class APISubscriptionStatusWithSubscriptionFields(
+  name: String,
+  context: String,
+  apiVersion: APIVersion,
+  fields: SubscriptionFieldsWrapper)
+
+object APISubscriptionStatusWithSubscriptionFields {
+  def apply(fields : Seq[APISubscriptionStatus]) : Seq[APISubscriptionStatusWithSubscriptionFields] = {
+
+    def toAPISubscriptionStatusWithSubscriptionFields(field : APISubscriptionStatus)
+    : Option[APISubscriptionStatusWithSubscriptionFields] = {
+      for {
+        subscriptionStatus <- field.fields
+      } yield APISubscriptionStatusWithSubscriptionFields(
+        field.name,
+        field.context,
+        field.apiVersion,
+        subscriptionStatus)
+    }
+
+    fields.flatMap(toAPISubscriptionStatusWithSubscriptionFields)
   }
 }
 

@@ -49,7 +49,16 @@ class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPe
         Set(Collaborator(loggedInUser.email, role)), state = state,
         access = Standard(redirectUris = Seq("https://red1.example.com", "https://red2.example.con"), termsAndConditionsUrl = Some("http://tnc-url.example.com")))
 
-      Jsoup.parse(views.html.include.subscriptionsGroup.render(role, application, apiSubscriptions, group = "Example", afterSubscriptionRedirectTo = SubscriptionRedirect.MANAGE_PAGE, applicationMessages, appConfig, request).body)
+      Jsoup.parse(views.html.include.subscriptionsGroup.render(
+        role,
+        application,
+        apiSubscriptions,
+        group = "Example",
+        afterSubscriptionRedirectTo = SubscriptionRedirect.MANAGE_PAGE,
+        showSubscriptionFields = true,
+        applicationMessages,
+        appConfig,
+        request).body)
     }
 
     lazy val toggle = body.getElementById("test-1_0-toggle")

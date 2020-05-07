@@ -96,7 +96,6 @@ class Subscriptions @Inject() (
     case Some(MANAGE_PAGE)              => Redirect(routes.Details.details(applicationId))
     case Some(APPLICATION_CHECK_PAGE)   => Redirect(controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
     case Some(API_SUBSCRIPTIONS_PAGE)   => Redirect(routes.Subscriptions.manageSubscriptions(applicationId))
-    case Some(API_MANAGE_METADATA_PAGE) => Redirect(routes.ManageSubscriptions.listApiSubscriptions(applicationId))
     case None                           => Redirect(routes.Details.details(applicationId))
   }
 

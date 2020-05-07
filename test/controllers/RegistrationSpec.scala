@@ -32,7 +32,6 @@ import scala.concurrent.Future.failed
 
 class RegistrationSpec extends BaseControllerSpec {
 
-  val loggedInUser = utils.DeveloperSession("thirdpartydeveloper@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   var userPassword = "Password1!"
 
   trait Setup {
