@@ -64,6 +64,8 @@ GET         /reset-password/error                                               
 
 GET         /applications                                                                   controllers.AddApplication.manageApps
 
+GET         /applications/using-privileged-applcation-credentials                          controllers.AddApplication.usingPrivilegedApplicationCredentialsPage()
+
 GET         /applications/add/production/10-days                                           controllers.AddApplication.tenDaysWarning
 
 GET         /applications/add/sandbox                                                      controllers.AddApplication.addApplicationSubordinate
