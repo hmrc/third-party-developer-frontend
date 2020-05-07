@@ -46,7 +46,7 @@
     </div>
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            @subscriptionGroups(role: Role, groupedSubscriptions, app, APPLICATION_CHECK_PAGE)
+            @subscriptionGroups(role: Role, groupedSubscriptions, app, APPLICATION_CHECK_PAGE, true)
             <br/>
             <br/>
             @helper.form(action = submitAction, 'class -> "form") {
