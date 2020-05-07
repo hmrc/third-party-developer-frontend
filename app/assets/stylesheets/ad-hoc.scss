@@ -316,3 +316,13 @@ tr.teamMembers, th {
   display: block;
   color: #626a6e;
 }
+
+/* Reconcile with components library code */
+
+.code--block {
+  border: none;
+  margin: 0;
+  line-height: 1.5em;
+  padding: 10px;
+  word-wrap: break-word;
+}
