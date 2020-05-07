@@ -24,7 +24,8 @@
 @(
         app: Application,
         vm: EditApiMetadataViewModel,
-        formPostUrl: Call
+        formPostUrl: Call,
+        skipLink : Option[Call] = None
 )(
         implicit request: play.api.mvc.Request[Any],
         messages: Messages)
@@ -67,5 +68,10 @@
 
  <div class="form-field form-field--submit">
   <button id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
+
+  @if(skipLink.isDefined){
+   <a href="@{skipLink.get}" class="secondary-button">I'll do this later</a>
+  }
+
  </div>
 }
