@@ -89,16 +89,16 @@ abstract class ApplicationController()
   def whenTeamMemberOnApp(applicationId: String)
                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn)
-      stackedActions.async(fun)(request)
+      val composedActions = Action andThen applicationAction(applicationId, loggedIn)
+      composedActions.async(fun)(request)
     }
   
   def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
-      stackedActions.async(fun)(request)
+      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
+      composedActions.async(fun)(request)
     }
   }
 
@@ -106,13 +106,13 @@ abstract class ApplicationController()
                                     (applicationId: String)
                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
-      val stackedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
-      stackedActions.async(fun)(request)
+      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
+      composedActions.async(fun)(request)
     }
   }
 
   private object ManageSubscriptionsActions {
-    def subscriptionsStackedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
+    def subscriptionsComposedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
                       (implicit request: UserRequest[AnyContent]) =
       Action andThen
         applicationAction(applicationId, loggedIn) andThen
@@ -125,7 +125,7 @@ abstract class ApplicationController()
                                     (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request: UserRequest[AnyContent] =>
       ManageSubscriptionsActions
-        .subscriptionsStackedActions(applicationId, noFieldsBehaviour)
+        .subscriptionsComposedActions(applicationId, noFieldsBehaviour)
         .async(fun)(request)
     }
   }
@@ -134,7 +134,7 @@ abstract class ApplicationController()
                                                    (fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
-        .subscriptionsStackedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
+        .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
         .async(fun)(request)
     }
   }
