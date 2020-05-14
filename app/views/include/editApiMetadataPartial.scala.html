@@ -36,6 +36,7 @@
 
  @helper.CSRF.formField
  <input type="hidden" name="apiName" value="@vm.name">
+ <input type="hidden" name="displayedStatus" value="@vm.displayedStatus">
 
  @helper.repeatWithIndex(vm.fieldsForm("fields")) { (field, idx) =>
   @defining(field("name").value.getOrElse("")) { formFieldId =>

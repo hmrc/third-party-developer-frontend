@@ -126,6 +126,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     def editFormPostRequest(fieldName: String, fieldValue: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       loggedInRequest
         .withFormUrlEncodedBody("apiName" -> "",
+          "displayedStatus" -> "",
           "fields[0].name" -> fieldName,
           "fields[0].description" -> "",
           "fields[0].shortDescription" -> "",
@@ -263,6 +264,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         )
 
         bodyOf(result) should include(generateName("api1"))
+        bodyOf(result) should include("Stable")
         bodyOf(result) should include(generateValueName("api1", 1))
         bodyOf(result) should include(generateValueName("api1", 2))
         bodyOf(result) should include(generateValueName("api1", 3))
@@ -430,6 +432,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         bodyOf(result) should include("api1-name")
         bodyOf(result) should include("api2-name")
         bodyOf(result) should include("1.0")
+        bodyOf(result) should include("Stable")
       }
 
       "edit page" in new ManageSubscriptionsSetup {
