@@ -49,7 +49,6 @@
     <input type="hidden" name="fields[@idx].hint" value="@field("hint").value.getOrElse("")">
     <input type="hidden" name="fields[@idx].type" value="@field("type").value.getOrElse("")">
 
-    <div class="form-field">
      <label class="form-label" for="@formFieldId">
      @{field("description").value.getOrElse("")}
      </label>
@@ -61,12 +60,11 @@
      class="form-input input--medium @if(vm.fieldsForm.errors(formFieldId).nonEmpty){form-control-error}"
      id="@formFieldId"
      />
-    </div>
   }
  </div>
  }
 
- <div class="form-field form-field--submit">
+ <div class="form-group">
   <button id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
 
   @if(skipLink.isDefined){
