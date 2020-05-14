@@ -40,7 +40,7 @@ object ManageSubscriptions {
 
   case class FieldValue(name: String, value: String)
 
-  case class ApiDetails(name: String, context: String, version: String, subsValues: NonEmptyList[FieldValue])
+  case class ApiDetails(name: String, context: String, version: String, displayedStatus: String, subsValues: NonEmptyList[FieldValue])
 
   def toFieldValue(sfv: SubscriptionFieldValue): FieldValue = {
     def default(in: String, default: String) = if (in.isEmpty) default else in
@@ -53,20 +53,22 @@ object ManageSubscriptions {
       name = in.name,
       context = in.context,
       version = in.apiVersion.version,
+      displayedStatus = in.apiVersion.displayedStatus,
       subsValues = in.fields.fields.map(toFieldValue)
     )
   }
 
   def toForm(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadata = {
-    EditApiMetadata(in.name, fields = in.fields.fields.toList)
+    EditApiMetadata(in.name,in.apiVersion.displayedStatus, fields = in.fields.fields.toList)
   }
 
-  case class EditApiMetadata(apiName: String, fields: List[SubscriptionFieldValue])
+  case class EditApiMetadata(apiName: String, displayedStatus: String, fields: List[SubscriptionFieldValue])
 
   object EditApiMetadata {
     val form: Form[EditApiMetadata] = Form(
       mapping(
         "apiName" -> text,
+        "displayedStatus" -> text,
         "fields" -> list(
           mapping(
             "name" -> text,
@@ -85,12 +87,13 @@ object ManageSubscriptions {
                                        name: String,
                                        apiContext: String,
                                        apiVersion: String,
+                                       displayedStatus: String,
                                        fieldsForm: Form[EditApiMetadata]
                                      )
 
   def toViewModel(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadataViewModel = {
     val data = toForm(in)
-    EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, EditApiMetadata.form.fill(data))
+    EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, in.apiVersion.displayedStatus, EditApiMetadata.form.fill(data))
   }
 }
 
@@ -165,14 +168,16 @@ class ManageSubscriptions @Inject() (
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
-          val vm = EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, errorForm)
+          val vm = EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, validForm.displayedStatus, errorForm)
 
           BadRequest(validationFailureView(vm))
       }
     }
 
     def handleInvalidForm(formWithErrors: Form[EditApiMetadata]) = {
-      val vm = EditApiMetadataViewModel(request.application.id, apiContext, apiVersion, formWithErrors)
+      val displayedStatus = formWithErrors.data.getOrElse("displayedStatus", throw new Exception("Missing form field: displayedStatus"))
+
+      val vm = EditApiMetadataViewModel(request.application.id, apiContext, apiVersion, displayedStatus, formWithErrors)
       Future.successful(BadRequest(validationFailureView(vm)))
     }
 
