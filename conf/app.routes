@@ -75,10 +75,10 @@ GET         /applications/add/:environment/name                                 
 POST        /applications/add/:environment/name                                             controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
 
 # TODO: Remove environment from URL? Rely on app.deplyedTo
-GET         /applications/:id/add/:environment/subscription-configuration-start             controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String, environment: domain.Environment)
-GET         /applications/:id/add/:environment/subscription-configuration/:pageNumber       controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, environment: domain.Environment, pageNumber: Int)
-POST        /applications/:id/add/:environment/subscription-configuration/:pageNumber       controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String, environment: domain.Environment,pageNumber: Int)
-GET         /applications/:id/add/:environment/subscription-configuration-step/:pageNumber  controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, environment: domain.Environment, pageNumber: Int)
+GET         /applications/:id/add/subscription-configuration-start                          controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String)
+GET         /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, pageNumber: Int)
+POST        /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String,pageNumber: Int)
+GET         /applications/:id/add/subscription-configuration-step/:pageNumber               controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, pageNumber: Int)
 
 GET         /applications/:id/add/subscriptions                                             controllers.Subscriptions.addAppSubscriptions(id: String)
 

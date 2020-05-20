@@ -184,7 +184,7 @@ class ManageSubscriptions @Inject() (
     EditApiMetadata.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def subscriptionConfigurationStart(applicationId: String, environment: Environment): Action[AnyContent] =
+  def subscriptionConfigurationStart(applicationId: String): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId,
       NoSubscriptionFieldsRefinerBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId))) {
 
@@ -202,7 +202,7 @@ class ManageSubscriptions @Inject() (
       }
     }
 
-  def subscriptionConfigurationPage(applicationId: String, environment: Environment, pageNumber: Int) : Action[AnyContent] =
+  def subscriptionConfigurationPage(applicationId: String, pageNumber: Int) : Action[AnyContent] =
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
@@ -215,19 +215,19 @@ class ManageSubscriptions @Inject() (
       ))
     }
 
-  def subscriptionConfigurationPagePost(applicationId: String, environment: Environment, pageNumber: Int) : Action[AnyContent] =
+  def subscriptionConfigurationPagePost(applicationId: String, pageNumber: Int) : Action[AnyContent] =
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
 
       implicit val applicationRequest: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
-      val successRedirectUrl = routes.ManageSubscriptions.subscriptionConfigurationStepPage(applicationId, environment,  pageNumber)
+      val successRedirectUrl = routes.ManageSubscriptions.subscriptionConfigurationStepPage(applicationId,  pageNumber)
 
       subscriptionConfigurationSave(definitionsRequest.apiDetails.context, definitionsRequest.apiDetails.version, successRedirectUrl, viewModel => {
         views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber, viewModel)
       })
     }
 
-  def subscriptionConfigurationStepPage(applicationId: String, environment: Environment, pageNumber: Int): Action[AnyContent] =
+  def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 

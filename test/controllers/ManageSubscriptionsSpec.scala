@@ -405,7 +405,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
 
         private val result = await(addToken(
-          manageSubscriptionController.subscriptionConfigurationPagePost(appId, application.deployedTo, pageNumber))(loggedInWithFormValues))
+          manageSubscriptionController.subscriptionConfigurationPagePost(appId, pageNumber))(loggedInWithFormValues))
 
         status(result) shouldBe BAD_REQUEST
 
@@ -426,7 +426,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           .thenReturn(successful(subsData))
 
         private val result =
-          await(manageSubscriptionController.subscriptionConfigurationStart(appId, application.deployedTo)(loggedInRequest))
+          await(manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest))
 
         status(result) shouldBe OK
         bodyOf(result) should include("api1-name")
@@ -442,7 +442,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(subsData))
         private val result =
-          await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, application.deployedTo, 1))(loggedInRequest))
+          await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, 1))(loggedInRequest))
 
         assertCommonEditFormFields(result, apiSubscriptionStatus)
       }
@@ -454,7 +454,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(subsData))
         private val result =
-          await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, application.deployedTo, 1))(loggedInRequest))
+          await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, 1))(loggedInRequest))
 
         status(result) shouldBe NOT_FOUND
       }
@@ -468,7 +468,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           when(manageSubscriptionsSetup.mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
             .thenReturn(successful(subsData))
           val result =
-            await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationPage(appId, application.deployedTo, -1)(manageSubscriptionsSetup.loggedInRequest))
+            await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationPage(appId, -1)(manageSubscriptionsSetup.loggedInRequest))
 
           status(result) shouldBe NOT_FOUND
         }
@@ -494,7 +494,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           .thenReturn(successful(subsData))
 
         private val result =
-          await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, application.deployedTo, 1)(loggedInRequest))
+          await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, 1)(loggedInRequest))
 
         status(result) shouldBe OK
         bodyOf(result) should include("You have completed step 1 of 2")
@@ -510,7 +510,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           .thenReturn(successful(subsData))
 
         private val result =
-          await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, application.deployedTo, 2)(loggedInRequest))
+          await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, 2)(loggedInRequest))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/add/success")
@@ -525,7 +525,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         when(manageSubscriptionsSetup.mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
           .thenReturn(successful(subsData))
         val result =
-          await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationStepPage(appId, application.deployedTo, -1)(manageSubscriptionsSetup.loggedInRequest))
+          await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationStepPage(appId, -1)(manageSubscriptionsSetup.loggedInRequest))
 
         status(result) shouldBe NOT_FOUND
       }
@@ -548,7 +548,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           .thenReturn(successful(subsData))
 
         private val result =
-          await(manageSubscriptionController.subscriptionConfigurationStart(appId, application.deployedTo)(loggedInRequest))
+          await(manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add/success")
