@@ -80,7 +80,7 @@ GET         /applications/:id/add/:environment/subscription-configuration/:pageN
 POST        /applications/:id/add/:environment/subscription-configuration/:pageNumber       controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String, environment: domain.Environment,pageNumber: Int)
 GET         /applications/:id/add/:environment/subscription-configuration-step/:pageNumber  controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, environment: domain.Environment, pageNumber: Int)
 
-GET         /applications/:id/add/:environment/subscriptions                                controllers.Subscriptions.addAppSubscriptions(id: String, environment: domain.Environment)
+GET         /applications/:id/add/subscriptions                                             controllers.Subscriptions.addAppSubscriptions(id: String)
 
 GET         /applications/:id/add/success                                                   controllers.AddApplication.addApplicationSuccess(id: String)
 

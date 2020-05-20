@@ -67,7 +67,7 @@ class Subscriptions @Inject() (
     )
   }
 
-  def addAppSubscriptions(applicationId: String, environment: Environment): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+  def addAppSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
       request.user,

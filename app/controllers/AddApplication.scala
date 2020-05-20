@@ -106,7 +106,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
               addApplication(formThatPassesSimpleValidation).map(
                 applicationCreatedResponse => environment match {
                   case PRODUCTION => Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
-                  case SANDBOX => Redirect(routes.Subscriptions.addAppSubscriptions(applicationCreatedResponse.id, environment))
+                  case SANDBOX => Redirect(routes.Subscriptions.addAppSubscriptions(applicationCreatedResponse.id))
                 }
               )
 

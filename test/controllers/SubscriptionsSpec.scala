@@ -141,14 +141,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     "return the ROPC page for a ROPC app" in new Setup {
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(ropcApplication))
       given(underTest.applicationService.apisWithSubscriptions(mockEq(ropcApplication))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
-      val result: Result = await(addToken(underTest.addAppSubscriptions(appId, Environment.PRODUCTION))(loggedInRequest))
+      val result: Result = await(addToken(underTest.addAppSubscriptions(appId))(loggedInRequest))
       status(result) shouldBe FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(privilegedApplication))
       given(underTest.applicationService.apisWithSubscriptions(mockEq(privilegedApplication))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
-      val result: Result = await(addToken(underTest.addAppSubscriptions(appId, Environment.PRODUCTION))(loggedInRequest))
+      val result: Result = await(addToken(underTest.addAppSubscriptions(appId))(loggedInRequest))
       status(result) shouldBe FORBIDDEN
     }
 
@@ -156,7 +156,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       given(underTest.applicationService.fetchByApplicationId(mockEq(appId))(any[HeaderCarrier])).willReturn(successful(activeApplication))
       given(underTest.applicationService.apisWithSubscriptions(mockEq(activeApplication))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
       given(underTest.apiSubscriptionsHelper.fetchPageDataFor(mockEq(activeApplication))(any[HeaderCarrier])).willReturn(successful(PageData(activeApplication, None)))
-      val result: Result = await(addToken(underTest.addAppSubscriptions(appId, Environment.PRODUCTION))(loggedInRequest))
+      val result: Result = await(addToken(underTest.addAppSubscriptions(appId))(loggedInRequest))
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
     }
