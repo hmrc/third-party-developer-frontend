@@ -35,8 +35,12 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
+import uk.gov.hmrc.http.HeaderCarrier
+
 import scala.concurrent.Future
 import scala.concurrent.Future._
+
+import mocks.service._
 
 class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -283,21 +287,21 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         verify(underTest.applicationService).update(any[UpdateApplicationRequest])(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(application.id), any[CheckInformation])(any[HeaderCarrier])
       }
-
     }
-
   }
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new Details (
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[SessionService],
       mockErrorHandler,
       messagesApi,
       cookieSigner
     )
+
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
@@ -325,12 +329,6 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-
-    def givenTheApplicationExists(application: Application) = {
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
-      given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens())
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq())
-    }
 
     def captureUpdatedApplication: UpdateApplicationRequest = {
       val captor = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])

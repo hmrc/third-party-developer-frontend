@@ -31,17 +31,18 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
+import mocks.service._
+
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-
 class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new DeleteApplication(
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[SessionService],
       mock[ErrorHandler],
       messagesApi,
@@ -57,6 +58,8 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInUser = DeveloperSession(session)
+    
+    implicit val hc = new HeaderCarrier()
 
     val application = Application(appId, clientId, appName, DateTime.now.withTimeAtStartOfDay(), DateTime.now.withTimeAtStartOfDay(),
       Environment.PRODUCTION, Some("Description 1"), Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
@@ -64,7 +67,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
+    fetchByApplicationIdReturns(application.id, application)
     given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)

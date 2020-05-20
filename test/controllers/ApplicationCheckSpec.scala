@@ -38,6 +38,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
+import mocks.service._
+
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
@@ -82,9 +84,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     apis = Seq.empty,
     exampleApi = None)
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new ApplicationCheck(
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[ApiSubscriptionsHelper],
       mock[SessionService],
       mockErrorHandler,
@@ -92,7 +94,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       cookieSigner
     )
 
-    val hc: HeaderCarrier = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
       .willReturn(Some(session))
@@ -100,8 +102,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
       .willReturn(successful(ApplicationUpdateSuccessful))
 
-    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
-      .willReturn(successful(application))
+    fetchByApplicationIdReturns(application.id, application)
 
     given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier]))
       .willReturn(successful(Seq.empty[APISubscriptionStatus]))
@@ -153,7 +154,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
         collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
 
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
+      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(Some(application))
       given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
       given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq())
 

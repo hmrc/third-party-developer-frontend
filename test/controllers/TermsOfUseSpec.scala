@@ -33,16 +33,17 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import mocks.service.ApplicationServiceMock
 
 import scala.concurrent.Future
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new TermsOfUse(
       mockErrorHandler,
       mock[SessionService],
-      mock[ApplicationService],
+      applicationServiceMock,
       messagesApi,
       cookieSigner
       )
@@ -57,6 +58,8 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     val appId = "1234"
 
+    implicit val hc = HeaderCarrier()
+
     def givenTheApplicationExists(userRole: Role = ADMINISTRATOR,
                                   environment: Environment = PRODUCTION,
                                   state: ApplicationState = ApplicationState.testing,
@@ -64,9 +67,12 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
                                   access: Access = Standard()) = {
       val application = Application(appId, "clientId", "appName", DateTimeUtils.now, DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), access = access, state = state, checkInformation = checkInformation)
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty[APISubscriptionStatus])
-      application
+    
+        fetchByApplicationIdReturns(application.id, application)
+      
+        given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty[APISubscriptionStatus])
+      
+        application
     }
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))

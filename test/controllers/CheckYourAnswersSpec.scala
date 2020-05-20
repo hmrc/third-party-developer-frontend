@@ -38,6 +38,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
+import mocks.service._
+
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
@@ -88,9 +90,9 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     apis = Seq.empty,
     exampleApi = None)
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new CheckYourAnswers(
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[ApiSubscriptionsHelper],
       mock[ApplicationCheck],
       mock[SessionService],
@@ -105,8 +107,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     when(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
-    when(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier]))
-      .thenReturn(successful(application))
+    fetchByApplicationIdReturns(application.id, application)
 
     when(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier]))
       .thenReturn(tokens)
@@ -129,7 +130,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     when(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
       .thenReturn(successful(Valid))
 
-    val hc = HeaderCarrier()
+    implicit val hc = HeaderCarrier()
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
@@ -151,7 +152,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
         collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
 
-      when(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).thenReturn(application)
+      fetchByApplicationIdReturns(application.id, application)
       when(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).thenReturn(tokens)
       when(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).thenReturn(Seq())
 

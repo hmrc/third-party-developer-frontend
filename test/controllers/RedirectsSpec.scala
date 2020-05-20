@@ -19,7 +19,7 @@ package controllers
 import domain._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.verify
 import play.api.mvc.Result
@@ -32,6 +32,7 @@ import utils.CSRFTokenHelper._
 import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithLoggedInSession._
+import mocks.service.ApplicationServiceMock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -48,26 +49,26 @@ class RedirectsSpec extends BaseControllerSpec {
 
   val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new Redirects(
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[SessionService],
       mockErrorHandler,
       messagesApi,
       cookieSigner
     )
 
+    implicit val hc = HeaderCarrier()
+
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
+    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
 
-    def givenTheApplicationExists(application: Application) = {
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
-      given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens())
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq())
-      given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(ApplicationUpdateSuccessful)
+    override def givenTheApplicationExists(application: Application): Unit = {
+      super.givenTheApplicationExists(application)
+      given(applicationServiceMock.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(ApplicationUpdateSuccessful)
     }
 
     def redirectsShouldRenderThePage(application: Application, shouldShowDeleteButton: Boolean) = {

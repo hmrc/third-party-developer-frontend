@@ -18,7 +18,7 @@ package controllers
 
 import config.ErrorHandler
 import domain._
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -30,7 +30,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.TestApplications.tokens
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-
+import mocks.service._
 
 class AddApplicationSuccessSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
@@ -55,9 +55,9 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new AddApplication(
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
@@ -65,12 +65,12 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
       cookieSigner
     )
 
-    val hc = HeaderCarrier()
+    implicit val hc = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
       .willReturn(Some(session))
 
-    given(underTest.sessionService.fetch(mockEq(partLoggedInSessionId))(any[HeaderCarrier]))
+    given(underTest.sessionService.fetch(eqTo(partLoggedInSessionId))(any[HeaderCarrier]))
       .willReturn(Some(partLoggedInSession))
 
     private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
@@ -82,12 +82,6 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest,implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
-
-    def givenTheApplicationExists(application: Application) = {
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
-      given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens())
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq())
-    }
   }
 
   "Add applications subordinate success page" should {

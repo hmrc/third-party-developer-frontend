@@ -37,6 +37,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithLoggedInSession._
+import mocks.service.ApplicationServiceMock
 
 import scala.concurrent.Future
 import scala.concurrent.Future._
@@ -57,9 +58,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new Credentials(
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
       mock[SessionService],
@@ -68,12 +69,13 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       cookieSigner
     )
 
-
-    val hc = HeaderCarrier()
+    implicit val hc = HeaderCarrier()
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
+    
+    fetchByApplicationIdReturns(application.id, application)
+    
     given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
     given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
 
@@ -91,7 +93,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val application = Application(applicationId.toString, clientId, "app", createdOn, DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), state = state, access = access)
 
-      given(underTest.applicationService.fetchByApplicationId(mockEq(applicationId.toString))(any[HeaderCarrier])).willReturn(application)
+      fetchByApplicationIdReturns(applicationId.toString, application)
       given(underTest.applicationService.fetchCredentials(mockEq(applicationId.toString))(any[HeaderCarrier])).willReturn(tokens)
       given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty)
     }
@@ -258,8 +260,8 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "display the NotFound page when the application does not exist" in new Setup {
-      when(underTest.applicationService.fetchByApplicationId(mockEq(applicationId.toString))(any[HeaderCarrier]))
-        .thenReturn(successful(application))
+      fetchByApplicationIdReturns(applicationId.toString, application)
+
       when(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ApplicationNotFound))
       when(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier]))
