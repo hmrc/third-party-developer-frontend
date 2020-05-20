@@ -43,6 +43,6 @@
   </p>
   <br/>
   <p>
-    <a href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationPage(application.id, pageNumber + 1)}" class="button">Continue</a>
+    <a href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationPage(application.id, application.deployedTo, pageNumber + 1)}" class="button">Continue</a>
   </p>
 }

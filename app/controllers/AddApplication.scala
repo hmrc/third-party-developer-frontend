@@ -70,6 +70,8 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
 
       applicationService.fetchByApplicationId(applicationId).map(_.deployedTo).map {
         case SANDBOX => Ok(views.html.addApplicationSubordinateSuccess(request.application.name, applicationId))
+        // TODO - something like the below is needed
+        // case PRODUCTION => NotFound(errorHandler.notFoundTemplate(request))
       }.recoverWith {
         case NonFatal(_) =>
           Future.successful(NotFound(errorHandler.notFoundTemplate(request)))

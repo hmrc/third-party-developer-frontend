@@ -74,10 +74,11 @@ GET         /applications/add/production                                        
 GET         /applications/add/:environment/name                                             controllers.AddApplication.addApplicationName(environment: domain.Environment)
 POST        /applications/add/:environment/name                                             controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
 
-GET         /applications/:id/add/sandbox/subscription-configuration-start                  controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String)
-GET         /applications/:id/add/sandbox/subscription-configuration/:pageNumber            controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, pageNumber: Int)
-POST        /applications/:id/add/sandbox/subscription-configuration/:pageNumber            controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String, pageNumber: Int)
-GET         /applications/:id/add/sandbox/subscription-configuration-step/:pageNumber       controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, pageNumber: Int)
+# TODO: Remove environment from URL? Rely on app.deplyedTo
+GET         /applications/:id/add/:environment/subscription-configuration-start             controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String, environment: domain.Environment)
+GET         /applications/:id/add/:environment/subscription-configuration/:pageNumber       controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, environment: domain.Environment, pageNumber: Int)
+POST        /applications/:id/add/:environment/subscription-configuration/:pageNumber       controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String, environment: domain.Environment,pageNumber: Int)
+GET         /applications/:id/add/:environment/subscription-configuration-step/:pageNumber  controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, environment: domain.Environment, pageNumber: Int)
 
 GET         /applications/:id/add/:environment/subscriptions                                controllers.Subscriptions.addAppSubscriptions(id: String, environment: domain.Environment)
 
