@@ -186,7 +186,7 @@ class ManageSubscriptions @Inject() (
 
   def subscriptionConfigurationStart(applicationId: String, environment: Environment): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId,
-      NoSubscriptionFieldsRefinerBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId, environment))) {
+      NoSubscriptionFieldsRefinerBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId))) {
 
       definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] => {
 
@@ -237,7 +237,7 @@ class ManageSubscriptions @Inject() (
 
       if (pageNumber == definitionsRequest.totalPages) {
         if (application.deployedTo == Environment.SANDBOX){
-          Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id, application.deployedTo)))
+          Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id)))
         } else{
           // TODO: Test this branch
           // TODO: Flag the 'check' as complete

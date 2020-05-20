@@ -513,7 +513,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, application.deployedTo, 2)(loggedInRequest))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/add/sandbox/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/add/success")
       }
 
     "return NOT_FOUND if page number is invalid for step page " when {
@@ -551,7 +551,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           await(manageSubscriptionController.subscriptionConfigurationStart(appId, application.deployedTo)(loggedInRequest))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add/sandbox/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add/success")
       }
     }
 

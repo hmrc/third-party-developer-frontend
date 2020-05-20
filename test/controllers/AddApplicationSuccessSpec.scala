@@ -95,7 +95,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     "return the page with the user is logged in" in new Setup {
       givenTheApplicationExists(subordinateApp)
 
-      private val result = await(underTest.addApplicationSuccess(appId, Environment.PRODUCTION)(loggedInRequest))
+      private val result = await(underTest.addApplicationSuccess(appId)(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include(loggedInUser.displayedName)

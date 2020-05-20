@@ -65,7 +65,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     Future.successful(Ok(views.html.addApplicationStartPrincipal()))
   }
 
-  def addApplicationSuccess(applicationId: String, notUsedEnvironment: Environment): Action[AnyContent] =
+  def addApplicationSuccess(applicationId: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
 
       applicationService.fetchByApplicationId(applicationId).map(_.deployedTo).map {
