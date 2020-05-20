@@ -68,14 +68,10 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
   def addApplicationSuccess(applicationId: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
 
-      applicationService.fetchByApplicationId(applicationId).map(_.deployedTo).map {
+      applicationService.fetchByApplicationId(applicationId).map(_.fold(NotFound(errorHandler.notFoundTemplate(request)))(_.deployedTo match {
         case SANDBOX => Ok(views.html.addApplicationSubordinateSuccess(request.application.name, applicationId))
-        // TODO - something like the below is needed
-        // case PRODUCTION => NotFound(errorHandler.notFoundTemplate(request))
-      }.recoverWith {
-        case NonFatal(_) =>
-          Future.successful(NotFound(errorHandler.notFoundTemplate(request)))
-      }
+        case PRODUCTION => NotFound(errorHandler.notFoundTemplate(request))
+      }))
     }
 
   def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>

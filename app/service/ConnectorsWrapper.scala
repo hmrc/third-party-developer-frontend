@@ -35,7 +35,8 @@ class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApp
                                   applicationConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
 
   def forApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Connectors] = {
-    fetchApplicationById(applicationId).map(application => connectorsForEnvironment(application.deployedTo))
+// TODO: Don't throw exception.
+    fetchApplicationById(applicationId).map(application => connectorsForEnvironment(application.getOrElse(throw new ApplicationNotFound).deployedTo))
   }
 
   def connectorsForEnvironment(environment: Environment): Connectors = {
@@ -45,7 +46,7 @@ class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApp
     }
   }
 
-  def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Application] = {
+  def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] = {
     val productionApplicationFuture = productionApplicationConnector.fetchApplicationById(id)
     val sandboxApplicationFuture = sandboxApplicationConnector.fetchApplicationById(id) recover {
       case _ => None
@@ -55,10 +56,9 @@ class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApp
       productionApplication <- productionApplicationFuture
       sandboxApplication <- sandboxApplicationFuture
     } yield {
-      productionApplication.orElse(sandboxApplication).getOrElse(throw new ApplicationNotFound)
+      productionApplication.orElse(sandboxApplication)
     }
   }
-
 }
 
 case class Connectors(thirdPartyApplicationConnector: ThirdPartyApplicationConnector, apiSubscriptionFieldsConnector: SubscriptionFieldsConnector)

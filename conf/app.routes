@@ -74,7 +74,6 @@ GET         /applications/add/production                                        
 GET         /applications/add/:environment/name                                             controllers.AddApplication.addApplicationName(environment: domain.Environment)
 POST        /applications/add/:environment/name                                             controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
 
-# TODO: Remove environment from URL? Rely on app.deplyedTo
 GET         /applications/:id/add/subscription-configuration-start                          controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String)
 GET         /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, pageNumber: Int)
 POST        /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String,pageNumber: Int)

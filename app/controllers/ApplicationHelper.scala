@@ -25,7 +25,8 @@ import scala.concurrent.Future
 trait ApplicationHelper {
   val applicationService: ApplicationService
 
-  def fetchApp(id: String): Future[Application] =
+  // TODO: Delete me?
+  def fetchApp(id: String): Future[Option[Application]] =
     applicationService.fetchByApplicationId(id)(HeaderCarrier())
 
   def roleForApplication(application: Application, email: String): Role = application.role(email).getOrElse(throw new ApplicationNotFound)

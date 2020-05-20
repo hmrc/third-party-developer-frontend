@@ -158,7 +158,10 @@ class Subscriptions @Inject() (
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
 
-  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String): Action[AnyContent] = loggedInAction { implicit request =>
+  // TODO : This will be removed as part of this ticket anyway.
+  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
+    implicit request =>
+
     def handleValidForm(validForm: SubscriptionFieldsForm) = {
       def saveFields(validForm: SubscriptionFieldsForm)(implicit hc: HeaderCarrier): Future[Any] = {
         if (validForm.fields.nonEmpty) {
@@ -168,11 +171,7 @@ class Subscriptions @Inject() (
         }
       }
 
-      for {
-        _ <- saveFields(validForm)
-        app <- fetchApp(applicationId)
-        response <- createResponse(app, request.headers.isAjaxRequest, apiContext, apiVersion, subscriptionRedirect)
-      } yield response
+      saveFields(validForm).flatMap(_ => createResponse(request.application, request.headers.isAjaxRequest, apiContext, apiVersion, subscriptionRedirect))
     }
 
     def handleInvalidForm(formWithErrors: Form[SubscriptionFieldsForm]) = {

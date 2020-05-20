@@ -80,8 +80,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
   def answersPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     for {
-      application <- fetchApp(appId)
-      checkYourAnswersData <- populateCheckYourAnswersData(application)
+      checkYourAnswersData <- populateCheckYourAnswersData(request.application)
     } yield Ok(checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
   }
 
