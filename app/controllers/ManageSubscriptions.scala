@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatusWithSubscriptionFields, CheckInformation, Environment}
+import domain.{APISubscriptionStatusWithSubscriptionFields, CheckInformation, Environment, Application}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data
@@ -227,27 +227,31 @@ class ManageSubscriptions @Inject() (
       })
     }
 
-  def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
+  def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] = {
+    def doEndOfJourneyRedirect(application: Application)(implicit hc: HeaderCarrier) = {
+      if (application.deployedTo.isSandbox){
+        Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id)))
+      } else {
+        val information = application.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionConfigurationsConfirmed = true)
+        applicationService.updateCheckInformation(application.id, information) map { _ =>
+          Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(application.id))
+        }
+      }
+    }
+
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
       val application = definitionsRequest.applicationRequest.application
-
+    
       if (pageNumber == definitionsRequest.totalPages) {
-        if (application.deployedTo == Environment.SANDBOX){
-          Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id)))
-        } else{
-          // TODO: Test this branch
-          val information = application.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionConfigurationsConfirmed = true)
-          applicationService.updateCheckInformation(application.id, information) map { _ =>
-            Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(application.id))
-          }
-        }
+        doEndOfJourneyRedirect(application)
 
       } else {
         Future.successful (Ok(views.html.createJourney.subscriptionConfigurationStepPage(application, pageNumber, definitionsRequest.totalPages)))
       }
     }
+  }
 }

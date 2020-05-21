@@ -79,6 +79,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
   )
 
+  val productionApplication = application.copy(deployedTo = Environment.PRODUCTION, id = appId + "_Prod")
+
   val privilegedApplication: Application = application.copy(id = "456", access = Privileged())
 
   val tokens: ApplicationToken =
@@ -109,8 +111,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       .thenReturn(Some(session))
 
     fetchByApplicationIdReturns(appId,application)
-
     fetchByApplicationIdReturns(privilegedApplication.id,privilegedApplication)
+    fetchByApplicationIdReturns(productionApplication.id, productionApplication)
 
     when(applicationServiceMock.fetchByTeamMemberEmail(any())(any[HeaderCarrier]))
       .thenReturn(successful(List(application)))
@@ -500,7 +502,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         bodyOf(result) should include("You have completed step 1 of 2")
       }
 
-      "step page for the last page as a redirect" in new ManageSubscriptionsSetup {
+      "step page for the last page as a redirect for sandbox" in new ManageSubscriptionsSetup {
         val subsData = Seq(
           configurationSubscription("api1", 1),
           configurationSubscription("api2", 1)
@@ -515,6 +517,26 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/add/success")
       }
+
+      "step page for the last page as a redirect for production" in new ManageSubscriptionsSetup {
+        val subsData = Seq(
+          configurationSubscription("api1", 1),
+          configurationSubscription("api2", 1)
+        )
+
+        when(applicationServiceMock.apisWithSubscriptions(eqTo(productionApplication))(any[HeaderCarrier]))
+          .thenReturn(successful(subsData))
+
+        when(applicationServiceMock.updateCheckInformation(any(),any())(any[HeaderCarrier])).thenReturn(successful(ApplicationUpdateSuccessful))
+
+        private val result =
+          await(manageSubscriptionController.subscriptionConfigurationStepPage(productionApplication.id, 2)(loggedInRequest))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${productionApplication.id}/request-check")
+
+        verify(applicationServiceMock).updateCheckInformation(eqTo(productionApplication.id),eqTo(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))(any[HeaderCarrier])
+    }
 
     "return NOT_FOUND if page number is invalid for step page " when {
       def testStepPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
