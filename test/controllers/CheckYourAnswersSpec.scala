@@ -43,7 +43,6 @@ import mocks.service._
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-
 class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))

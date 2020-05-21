@@ -52,7 +52,8 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     with ApiSubscriptionsPartialController
     with PrivacyPolicyPartialController
     with TermsAndConditionsPartialController
-    with TermsOfUsePartialController {
+    with TermsOfUsePartialController
+    with CheckInformationFormHelper {
 
   private def populateCheckYourAnswersData(application: Application, subs: Seq[String]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
@@ -104,9 +105,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
           val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
           applicationService.updateCheckInformation(application.id, information)
 
-          val requestForm = applicationCheck
-            .createCheckFormForApplication(request)
-            .fillAndValidate(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation())))
+          val requestForm = createCheckFormForApplication(request)
 
           val applicationViewModel = ApplicationViewModel(application.copy(checkInformation = Some(information)), hasSubscriptionFields(request))
           Conflict(applicationcheck.landingPage(applicationViewModel, requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))

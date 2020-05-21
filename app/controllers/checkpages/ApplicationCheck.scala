@@ -53,6 +53,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     with PrivacyPolicyPartialController
     with TermsAndConditionsPartialController
     with TermsOfUsePartialController
+    with CheckInformationFormHelper
     {
 
   def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -73,22 +74,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def createCheckFormForApplication(request: ApplicationRequest[_]): Form[CheckInformationForm] = {
-    val application = request.application
-
-    if (hasSubscriptionFields(request)) {
-      ApplicationInformationForm.formWithSubscriptionConfiguration.fillAndValidate(
-        CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
-      )
-    } else {
-      ApplicationInformationForm.formWithoutSubscriptionConfiguration.fillAndValidate(
-        CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
-      )
-    }
-  }
-
   def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request: ApplicationRequest[AnyContent] =>
-
     def withFormErrors(form: Form[CheckInformationForm]): Future[Result] = {
       Future.successful(BadRequest(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(), form)))
     }
