@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatusWithSubscriptionFields, Environment}
+import domain.{APISubscriptionStatusWithSubscriptionFields, CheckInformation, Environment}
 import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsFailureResponse, SaveSubscriptionFieldsResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data
@@ -240,8 +240,10 @@ class ManageSubscriptions @Inject() (
           Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id)))
         } else{
           // TODO: Test this branch
-          // TODO: Flag the 'check' as complete
-          Future.successful(Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(application.id)))
+          val information = application.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionConfigurationsConfirmed = true)
+          applicationService.updateCheckInformation(application.id, information) map { _ =>
+            Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(application.id))
+          }
         }
 
       } else {

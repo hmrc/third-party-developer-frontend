@@ -146,6 +146,7 @@ object ApplicationInformationForm {
     mapping(
       "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
       "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
+      "apiSubscriptionConfigurationsCompleted" -> boolean.verifying("api.subscription.configurations.required.field", subscriptionConfigurationConfirmed => subscriptionConfigurationConfirmed),
       "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
       "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
       "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),

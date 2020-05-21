@@ -247,6 +247,7 @@ object TermsOfUseAgreement {
 
 case class CheckInformationForm(confirmedNameComplete: Boolean = false,
                                 apiSubscriptionsComplete: Boolean = false,
+                                apiSubscriptionConfigurationsComplete: Boolean = false,
                                 contactDetailsComplete: Boolean = false,
                                 providedPrivacyPolicyURLComplete: Boolean = false,
                                 providedTermsAndConditionsURLComplete: Boolean = false,
@@ -255,6 +256,7 @@ case class CheckInformationForm(confirmedNameComplete: Boolean = false,
 
 case class CheckInformation(confirmedName: Boolean = false,
                             apiSubscriptionsConfirmed: Boolean = false,
+                            apiSubscriptionConfigurationsConfirmed: Boolean = false,
                             contactDetails: Option[ContactDetails] = None,
                             providedPrivacyPolicyURL: Boolean = false,
                             providedTermsAndConditionsURL: Boolean = false,
@@ -270,6 +272,7 @@ object CheckInformationForm {
     CheckInformationForm(
       confirmedNameComplete = checkInformation.confirmedName,
       apiSubscriptionsComplete = checkInformation.apiSubscriptionsConfirmed,
+      apiSubscriptionConfigurationsComplete = checkInformation.apiSubscriptionConfigurationsConfirmed,
       contactDetailsComplete = checkInformation.contactDetails.isDefined,
       providedPrivacyPolicyURLComplete = checkInformation.providedPrivacyPolicyURL,
       providedTermsAndConditionsURLComplete = checkInformation.providedTermsAndConditionsURL,

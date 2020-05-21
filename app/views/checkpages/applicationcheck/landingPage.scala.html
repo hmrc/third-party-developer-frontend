@@ -70,6 +70,22 @@
                             </td>
                         </tr>
 
+                        <tr class="@if(form.errors("apiSubscriptionConfigurationsConfirmed").nonEmpty) {form-group-error}">
+                            <td id="apiSubscriptionConfigurations" scope="row" class="step-description">
+                                @include.fieldError(form.errors, "apiSubscriptionConfigurations")
+                                <a id="apiSubscriptionConfigurationsCompleted" href="@controllers.routes.ManageSubscriptions.subscriptionConfigurationStart(app.id)">
+                                    Configure your API subscriptions
+                                </a>
+                            </td>
+                            <td class="numeric">
+                            @if(form("apiSubscriptionConfigurationsCompleted").value.contains("true")) {
+                                <div id="api-subscription-configurations-status" class="step-status status-completed">Complete</div>
+                            } else {
+                                <div id="api-subscription-configurations-status" class="step-status status-incomplete">To do</div>
+                            }
+                            </td>
+                        </tr>
+
                         <tr class="@if(form.errors("contactDetails").nonEmpty){form-group-error}">
                             <td id="contactDetails" scope="row" class="step-description">
                                 @include.fieldError(form.errors,"contactDetails")
