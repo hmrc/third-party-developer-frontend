@@ -103,7 +103,11 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
         case _: ApplicationAlreadyExists =>
           val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
           applicationService.updateCheckInformation(application.id, information)
-          val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation())))
+
+          val requestForm = applicationCheck
+            .createCheckFormForApplication(request)
+            .fillAndValidate(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation())))
+
           val applicationViewModel = ApplicationViewModel(application.copy(checkInformation = Some(information)), hasSubscriptionFields(request))
           Conflict(applicationcheck.landingPage(applicationViewModel, requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
       }

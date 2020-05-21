@@ -312,6 +312,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
         Some(CheckInformation(
           confirmedName = true,
           apiSubscriptionsConfirmed = true,
+          // TODO: MAke a variant wit this set to false
           apiSubscriptionConfigurationsConfirmed = true,
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,

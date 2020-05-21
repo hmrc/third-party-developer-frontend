@@ -21,8 +21,8 @@ import controllers.FormKeys._
 import controllers._
 import domain.{ApplicationRequest => _, _}
 import javax.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.data.Forms.{boolean, mapping, optional, text}
+import play.api.data.{Form, Forms, Mapping}
+import play.api.data.Forms.{boolean, ignored, mapping, optional, text}
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, Call, Result}
@@ -44,7 +44,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                  val cookieSigner : CookieSigner
                                  )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController()
+  extends ApplicationController
     with ApplicationHelper
     with CanUseCheckActions
     with ConfirmNamePartialController
@@ -59,7 +59,8 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     val application = request.application
 
     Future.successful(Ok(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(),
-      ApplicationInformationForm.form.fill(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))))))
+      // TODO: This needs fixing when we add subs config to check-page
+      ApplicationInformationForm.formWithoutSubscriptionConfiguration.fill(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))))))
   }
 
   def unauthorisedAppDetails(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
@@ -72,7 +73,21 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def createCheckFormForApplication(request: ApplicationRequest[_]): Form[CheckInformationForm] = {
+    val application = request.application
+
+    if (hasSubscriptionFields(request)) {
+      ApplicationInformationForm.formWithSubscriptionConfiguration.fillAndValidate(
+        CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
+      )
+    } else {
+      ApplicationInformationForm.formWithoutSubscriptionConfiguration.fillAndValidate(
+        CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
+      )
+    }
+  }
+
+  def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request: ApplicationRequest[AnyContent] =>
 
     def withFormErrors(form: Form[CheckInformationForm]): Future[Result] = {
       Future.successful(BadRequest(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(), form)))
@@ -82,10 +97,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       Future.successful(Redirect(routes.CheckYourAnswers.answersPage(appId)))
     }
 
-    val application = request.application
-    val requestForm = ApplicationInformationForm.form.fillAndValidate(
-      CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
-    )
+    val requestForm = createCheckFormForApplication(request)
 
     requestForm.fold(withFormErrors, withValidForm)
   }
@@ -93,7 +105,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   def credentialsRequested(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     Future.successful(Ok(editapplication.nameSubmitted(appId, request.application)))
   }
-
 
   def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
@@ -143,7 +154,20 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 }
 
 object ApplicationInformationForm {
-  def form: Form[CheckInformationForm] = Form(
+  def formWithoutSubscriptionConfiguration: Form[CheckInformationForm] = Form(
+    mapping(
+      "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
+      "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
+      "apiSubscriptionConfigurationsCompleted" ->  ignored(false),
+      "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
+      "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
+      "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
+      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
+      "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
+    )(CheckInformationForm.apply)(CheckInformationForm.unapply)
+  )
+
+  def formWithSubscriptionConfiguration: Form[CheckInformationForm] = Form(
     mapping(
       "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
       "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
