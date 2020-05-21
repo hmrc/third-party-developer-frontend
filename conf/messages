@@ -125,6 +125,7 @@ confirm.name.required.field=Confirm your application’s name
 application.details.required.field=Tell us what your application does
 contact.details.required.field=Provide contact details
 api.subscriptions.required.field=Confirm the APIs your application uses
+api.subscription.configurations.required.field=Configure your API subscriptions
 privacy.links.required.field=Provide a link to your application’s privacy policy
 tnc.links.required.field=Provide a link to your application’s terms and conditions
 team.required.field=Tell us the name of your team members
