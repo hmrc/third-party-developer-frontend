@@ -99,13 +99,6 @@
                                     </div>
                                 </div>
 
-                                @if(api.fields.isDefined && showSubscriptionFields) {
-                                    <div class="conditionallyHide fieldsContainer" id="subscription-fields-@IdFormatter.identifier(api.context, api.apiVersion.version)" @if(!apiSubscription.isExpanded) {
-                                        data-hide="true"}>
-                                        @api.fields.map(f => subscriptionFields(SubscriptionFieldsViewModel(f.applicationId, f.apiContext, f.apiVersion, SubscriptionFieldsForm.form.fill(SubscriptionFieldsForm.apply(f.fields.toList))), afterSubscriptionRedirectTo))
-                                    </div>
-                                }
-
                             </li>
                         }
                     }

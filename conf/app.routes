@@ -172,8 +172,6 @@ POST        /applications/:id/check-your-answers/team/remove                    
 GET         /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPage(id: String)
 POST        /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPageAction(id: String)
 
-POST        /applications/:id/context/:apiContext/version/:version/subscriptionFields       controllers.Subscriptions.saveSubscriptionFields(id: String, apiContext: String, version: String, subscriptionRedirect: String)
-
 GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: String)
 GET         /applications/:id/api-metadata/:context/:version                                controllers.ManageSubscriptions.editApiMetadataPage(id: String, context: String, version: String)
 POST        /applications/:id/api-metadata/:context/:version                                controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: String, version: String)

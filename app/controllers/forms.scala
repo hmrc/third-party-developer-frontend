@@ -428,25 +428,6 @@ object ChangeSubscriptionConfirmationForm {
     )
 }
 
-case class SubscriptionFieldsForm(fields: Seq[SubscriptionFieldValue])
-
-object SubscriptionFieldsForm {
-  val form = Form(
-    mapping(
-      "fields" -> seq(
-        mapping(
-          "name" -> text,
-          "description" -> text,
-          "shortDescription" -> text,
-          "hint" -> text,
-          "type" -> text,
-          "value" -> text
-        )(SubscriptionFieldValue.fromFormValues)(SubscriptionFieldValue.toFormValues)
-      )
-    )(SubscriptionFieldsForm.apply)(SubscriptionFieldsForm.unapply)
-  )
-}
-
 final case class AddRedirectForm(redirectUri: String)
 
 object AddRedirectForm {
