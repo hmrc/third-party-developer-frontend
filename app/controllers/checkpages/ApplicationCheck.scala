@@ -33,6 +33,7 @@ import views.html.checkpages.applicationcheck
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import model.ApplicationViewModel
 
 @Singleton
 class ApplicationCheck @Inject()(val applicationService: ApplicationService,
@@ -57,7 +58,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val application = request.application
 
-    Future.successful(Ok(applicationcheck.landingPage(application,
+    Future.successful(Ok(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(),
       ApplicationInformationForm.form.fill(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))))))
   }
 
@@ -73,11 +74,11 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 
   def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
 
-    def withFormErrors(app: Application)(form: Form[CheckInformationForm]): Future[Result] = {
-      Future.successful(BadRequest(applicationcheck.landingPage(app, form)))
+    def withFormErrors(form: Form[CheckInformationForm]): Future[Result] = {
+      Future.successful(BadRequest(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(), form)))
     }
 
-    def withValidForm(app: Application)(form: CheckInformationForm): Future[Result] = {
+    def withValidForm(form: CheckInformationForm): Future[Result] = {
       Future.successful(Redirect(routes.CheckYourAnswers.answersPage(appId)))
     }
 
@@ -86,7 +87,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
     )
 
-    requestForm.fold(withFormErrors(application), withValidForm(application))
+    requestForm.fold(withFormErrors, withValidForm)
   }
 
   def credentialsRequested(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>

@@ -84,7 +84,9 @@ abstract class ApplicationController()
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
-    ApplicationViewModel(request.application, request.subscriptions.exists(s => s.subscribed && s.fields.isDefined))
+    ApplicationViewModel(request.application, hasSubscriptionFields(request))
+
+  def hasSubscriptionFields(request: ApplicationRequest[_]) : Boolean = request.subscriptions.exists(s => s.subscribed && s.fields.isDefined)
 
   def whenTeamMemberOnApp(applicationId: String)
                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
@@ -92,7 +94,7 @@ abstract class ApplicationController()
       val composedActions = Action andThen applicationAction(applicationId, loggedIn)
       composedActions.async(fun)(request)
     }
-  
+
   def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {

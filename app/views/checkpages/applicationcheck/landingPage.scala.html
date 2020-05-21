@@ -17,9 +17,11 @@
 @import config.ApplicationConfig
 @import domain._
 @import include._
-@import model.Crumb
+@import model.{ApplicationViewModel, Crumb}
 
-@(app: Application, form: Form[CheckInformationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(applicationView: ApplicationViewModel, form: Form[CheckInformationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+
+@app = @{ applicationView.application }
 
 @pageHeading = @{ s"Get production credentials for ${app.name}" }
 
@@ -70,21 +72,23 @@
                             </td>
                         </tr>
 
-                        <tr class="@if(form.errors("apiSubscriptionConfigurationsConfirmed").nonEmpty) {form-group-error}">
-                            <td id="apiSubscriptionConfigurations" scope="row" class="step-description">
-                                @include.fieldError(form.errors, "apiSubscriptionConfigurations")
-                                <a id="apiSubscriptionConfigurationsCompleted" href="@controllers.routes.ManageSubscriptions.subscriptionConfigurationStart(app.id)">
-                                    Configure your API subscriptions
-                                </a>
-                            </td>
-                            <td class="numeric">
-                            @if(form("apiSubscriptionConfigurationsCompleted").value.contains("true")) {
-                                <div id="api-subscription-configurations-status" class="step-status status-completed">Complete</div>
-                            } else {
-                                <div id="api-subscription-configurations-status" class="step-status status-incomplete">To do</div>
-                            }
-                            </td>
-                        </tr>
+                        @if(applicationView.hasSubscriptionsFields){
+                            <tr class="@if(form.errors("apiSubscriptionConfigurationsConfirmed").nonEmpty) {form-group-error}">
+                                <td id="apiSubscriptionConfigurations" scope="row" class="step-description">
+                                    @include.fieldError(form.errors, "apiSubscriptionConfigurations")
+                                    <a id="apiSubscriptionConfigurationsCompleted" href="@controllers.routes.ManageSubscriptions.subscriptionConfigurationStart(app.id)">
+                                        Configure your API subscriptions
+                                    </a>
+                                </td>
+                                <td class="numeric">
+                                @if(form("apiSubscriptionConfigurationsCompleted").value.contains("true")) {
+                                    <div id="api-subscription-configurations-status" class="step-status status-completed">Complete</div>
+                                } else {
+                                    <div id="api-subscription-configurations-status" class="step-status status-incomplete">To do</div>
+                                }
+                                </td>
+                            </tr>
+                        }
 
                         <tr class="@if(form.errors("contactDetails").nonEmpty){form-group-error}">
                             <td id="contactDetails" scope="row" class="step-description">
