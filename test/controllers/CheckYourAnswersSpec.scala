@@ -123,10 +123,10 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
         Seq(APISubscriptionStatus(
           "API1", "subscriptionServiceName", "context", APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false))))
     val groupedSubs = GroupedSubscriptions(Seq.empty,subscriptions)
-    
+
     when(underTest.applicationService.fetchAllSubscriptions(any[Application])(any[HeaderCarrier]))
       .thenReturn(successful(Seq(mock[APISubscription])))
-    
+
     when(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
       .thenReturn(successful(Valid))
 
@@ -175,6 +175,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       checkInformation = Some(CheckInformation(
         confirmedName = true,
         apiSubscriptionsConfirmed = true,
+        apiSubscriptionConfigurationsConfirmed = true,
         Some(ContactDetails("Example Name", "name@example.com", "012346789")),
         providedPrivacyPolicyURL = true,
         providedTermsAndConditionsURL = true,
