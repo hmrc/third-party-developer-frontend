@@ -87,7 +87,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
   "Add applications subordinate success page" should {
 
     "return the page with the user is logged in" in new Setup {
-      givenTheApplicationExists(subordinateApp)
+      givenApplicationExists(subordinateApp)
 
       private val result = await(underTest.addApplicationSuccess(appId)(loggedInRequest))
 

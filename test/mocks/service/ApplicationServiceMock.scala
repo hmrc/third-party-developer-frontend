@@ -18,6 +18,7 @@ package mocks.service
 
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.scalatest.mockito.MockitoSugar
+import org.mockito.Mockito.withSettings
 
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,21 +31,46 @@ import scala.concurrent.Future.{successful}
 trait ApplicationServiceMock extends MockitoSugar {
   val applicationServiceMock = mock[ApplicationService]
 
-  def fetchByApplicationIdReturns(id: String, returns: Application) : Unit = {
+  def fetchByApplicationIdReturns(id: String, returns: Application) = {
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(any())).thenReturn(successful(Some(returns)))
   }
 
-  def apisWithSubscriptionsReturns(application: Application, returns: Seq[APISubscriptionStatus]) : Unit = {
-    when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(any())).thenReturn(successful(returns))      
+  def fetchByTeamMemberEmailReturns(apps: Seq[Application]) =
+    when(applicationServiceMock.fetchByTeamMemberEmail(any())(any[HeaderCarrier]))
+      .thenReturn(successful(apps))
+
+  def fetchByTeamMemberEmailReturns(email: String, apps: Seq[Application]) =
+    when(applicationServiceMock.fetchByTeamMemberEmail(eqTo(email))(any[HeaderCarrier]))
+      .thenReturn(successful(apps))
+
+  def apisWithSubscriptionsReturns(application: Application, returns: Seq[APISubscriptionStatus]) = {
+    when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(any())).thenReturn(successful(returns))
   }
 
-  def givenTheApplicationExists(application: Application) : Unit = {
+  def fetchCredentialsReturns(application: Application, tokens: ApplicationToken) =
+    when(applicationServiceMock.fetchCredentials(eqTo(application.id))(any())).thenReturn(successful(tokens))
+
+  def givenApplicationNameIsValid() =
+    when(applicationServiceMock.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier])).thenReturn(successful(Valid))
+
+  def givenApplicationNameIsInvalid(invalid: Invalid) =
+    when(applicationServiceMock.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier])).thenReturn(successful(invalid))
+
+  def givenApplicationUpdateSucceeds() =
+    when(applicationServiceMock.update(any[UpdateApplicationRequest])(any())).thenReturn(successful(ApplicationUpdateSuccessful))
+
+  def removeTeamMemberReturns(loggedInUser: DeveloperSession) =
+    when(applicationServiceMock.removeTeamMember(any[Application], any[String], eqTo(loggedInUser.email))(any[HeaderCarrier]))
+    .thenReturn(successful(ApplicationUpdateSuccessful))
+
+
+  def givenApplicationExists(application: Application) : Unit = {
     import utils.TestApplications.tokens
 
     fetchByApplicationIdReturns(application.id, application)
-    
+
     when(applicationServiceMock.fetchCredentials(eqTo(application.id))(any())).thenReturn(successful(tokens()))
-    
+
     apisWithSubscriptionsReturns(application, Seq.empty)
   }
 }

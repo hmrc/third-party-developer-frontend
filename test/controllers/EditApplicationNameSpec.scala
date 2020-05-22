@@ -77,13 +77,11 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
     given(underTest.sessionService.fetch(eqTo(partLoggedInSessionId))(any[HeaderCarrier]))
       .willReturn(Some(partLoggedInSession))
 
-    given(applicationServiceMock.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
-      .willReturn(successful(ApplicationUpdateSuccessful))
+    givenApplicationUpdateSucceeds()
 
     fetchByApplicationIdReturns(application.id, application)
 
-    given(applicationServiceMock.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-      .willReturn(successful(Valid))
+    givenApplicationNameIsValid()
 
     private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
@@ -101,8 +99,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
 
-      given(applicationServiceMock.fetchByTeamMemberEmail(eqTo(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn(successful(List(application)))
+      fetchByTeamMemberEmailReturns(loggedInUser.email,List(application))
 
       private val result = await(underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken))
 
@@ -137,8 +134,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
       "and it contains HMRC it shows an error page and lets you re-submit the name" in new Setup {
         private val invalidApplicationName = "invalidApplicationName"
 
-        given(applicationServiceMock.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-          .willReturn(Invalid(invalidName = true, duplicateName = false))
+        givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
         private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
           .withCSRFToken
@@ -165,8 +161,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
 
-      given(applicationServiceMock.fetchByTeamMemberEmail(eqTo(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn(successful(List(application)))
+      fetchByTeamMemberEmailReturns(loggedInUser.email,List(application))
 
       private val result = await(underTest.addApplicationName( Environment.PRODUCTION)(loggedInRequest.withCSRFToken))
 
@@ -201,8 +196,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
       "and it contains HMRC it shows an error page and lets you re-submit the name" in new Setup {
         private val invalidApplicationName = "invalidApplicationName"
 
-        given(applicationServiceMock.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-          .willReturn(Invalid(invalidName = true, duplicateName = false))
+        givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
         private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
           .withCSRFToken
@@ -226,8 +220,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
       "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
         private val applicationName = "duplicate name"
 
-        given(applicationServiceMock.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-          .willReturn(Invalid(invalidName = false, duplicateName = true))
+        givenApplicationNameIsInvalid(Invalid(invalidName = false, duplicateName = true))
 
         private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
           .withCSRFToken

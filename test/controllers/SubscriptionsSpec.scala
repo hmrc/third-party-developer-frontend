@@ -100,8 +100,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-    given(applicationServiceMock.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
-      .willReturn(successful(ApplicationUpdateSuccessful))
+    givenApplicationUpdateSucceeds()
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
     given(applicationServiceMock.apisWithSubscriptions(eqTo(activeApplication))(any[HeaderCarrier]))
       .willReturn(successful(Seq.empty[APISubscriptionStatus]))

@@ -66,13 +66,13 @@ class RedirectsSpec extends BaseControllerSpec {
 
     given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
 
-    override def givenTheApplicationExists(application: Application): Unit = {
-      super.givenTheApplicationExists(application)
-      given(applicationServiceMock.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(ApplicationUpdateSuccessful)
+    override def givenApplicationExists(application: Application): Unit = {
+      super.givenApplicationExists(application)
+      givenApplicationUpdateSucceeds()
     }
 
     def redirectsShouldRenderThePage(application: Application, shouldShowDeleteButton: Boolean) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callRedirectsController
 
@@ -85,7 +85,7 @@ class RedirectsSpec extends BaseControllerSpec {
     }
 
     def addRedirectShouldRenderThePage(application: Application, resultStatus: Int, shouldShowAmendControls: Boolean) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callAddRedirectController
 
@@ -98,7 +98,7 @@ class RedirectsSpec extends BaseControllerSpec {
     }
 
     def addRedirectActionShouldRenderAddRedirectPageWithError(application: Application) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callAddRedirectActionController
 
@@ -110,7 +110,7 @@ class RedirectsSpec extends BaseControllerSpec {
     }
 
     def addRedirectActionShouldRenderAddRedirectPageWithDuplicateUriError(application: Application, redirectUri: String) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callAddRedirectActionControllerWithUri(redirectUri)
 
@@ -122,7 +122,7 @@ class RedirectsSpec extends BaseControllerSpec {
     }
 
     def addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(application: Application, redirectUriToAdd: String) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callAddRedirectActionControllerWithUri(redirectUriToAdd)
 
@@ -136,7 +136,7 @@ class RedirectsSpec extends BaseControllerSpec {
     }
 
     def deleteRedirectsShouldRenderThePage(application: Application, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: String) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callDeleteRedirectController(redirectUriToDelete)
 
@@ -152,7 +152,7 @@ class RedirectsSpec extends BaseControllerSpec {
                                                              resultStatus: Int,
                                                              shouldShowDeleteControls: Boolean,
                                                              redirectUriToDelete: String) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callDeleteRedirectActionController(redirectUriToDelete)
 
@@ -167,7 +167,7 @@ class RedirectsSpec extends BaseControllerSpec {
     }
 
     def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(application: Application, resultStatus: Int, redirectUriToDelete: String) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callDeleteRedirectActionControllerWithConfirmation(redirectUriToDelete, "Yes")
 
@@ -183,7 +183,7 @@ class RedirectsSpec extends BaseControllerSpec {
     def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(application: Application,
                                                                                         resultStatus: Int,
                                                                                         redirectUriToDelete: String) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callDeleteRedirectActionControllerWithConfirmation(redirectUriToDelete, "No")
 
@@ -193,7 +193,7 @@ class RedirectsSpec extends BaseControllerSpec {
     }
 
     def changeRedirectUriShouldRenderThePage(application: Application, resultStatus: Int, originalRedirectUri: String, newRedirectUri: String) = {
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callChangeRedirectUriController(originalRedirectUri, newRedirectUri)
 
@@ -208,7 +208,7 @@ class RedirectsSpec extends BaseControllerSpec {
 
     def changeRedirectUriActionShouldRenderError(originalRedirectUri: String, newRedirectUri: String, errorMessage: String) = {
       val application = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callChangeRedirectUriActionController(originalRedirectUri, newRedirectUri)
 
@@ -353,7 +353,7 @@ class RedirectsSpec extends BaseControllerSpec {
       val application = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
       val originalRedirectUri = redirectUris.head
       val newRedirectUri = "https://localhost:1111"
-      givenTheApplicationExists(application)
+      givenApplicationExists(application)
 
       val result = application.callChangeRedirectUriActionController(originalRedirectUri, newRedirectUri)
       val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
