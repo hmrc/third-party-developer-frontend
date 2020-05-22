@@ -26,6 +26,7 @@ import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
+import org.mockito.Mockito.withSettings
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.Assertion
 import play.api.mvc.{AnyContentAsEmpty, Result}
@@ -84,10 +85,32 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     apis = Seq.empty,
     exampleApi = None)
 
-  trait Setup extends ApplicationServiceMock {
+  trait Subs {
+    def determineSubs(): Unit
+  }
+
+  trait HasSubs {
+    self: ApplicationServiceMock with Subs =>
+
+    override def determineSubs(): Unit = {
+      println("***** Subs *****")
+      givenApplicationHasSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
+    }
+  }
+
+  trait HasNoSubs {
+    self: ApplicationServiceMock with Subs =>
+
+    override def determineSubs(): Unit = {
+      println("***** NO Subs *****")
+      givenApplicationHasSubs(application, Seq.empty[APISubscriptionStatus])
+    }
+  }
+
+  trait Setup extends ApplicationServiceMock with Subs with HasNoSubs {
     val underTest = new ApplicationCheck(
       applicationServiceMock,
-      mock[ApiSubscriptionsHelper],
+      mock[ApiSubscriptionsHelper](withSettings.verboseLogging),
       mock[SessionService],
       mockErrorHandler,
       messagesApi,
@@ -103,15 +126,16 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     fetchByApplicationIdReturns(application.id, application)
 
-    givenApplicationHasSubs(application, Seq.empty[APISubscriptionStatus])
+    determineSubs()
 
     fetchCredentialsReturns(application, tokens)
 
     givenRemoveTeamMemberSucceeds(loggedInUser)
 
+    // TODO : givenUpdateCheckInformationReturns()
     given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
       .willReturn(ApplicationUpdateSuccessful)
-
+    
     given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
       .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs)))))
 
@@ -148,11 +172,11 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
                                                    access: Access = Standard()): Application = {
 
       val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
-        collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
+         collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
 
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(Some(application))
-      given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq())
+      fetchByApplicationIdReturns(application.id, application)
+      fetchCredentialsReturns(application.id, tokens)
+      givenApplicationHasNoSubs(application)
 
       application
     }
@@ -303,6 +327,23 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       body should include(stepCompleteIndication("agree-terms-status"))
     }
 
+    // TODO: Plan:
+    // Make new ApplicationCheckSpec, and move this test to it, and make it work.
+    "show api subscription configuration step as complete when it has been done" in new Setup with HasSubs {      
+      givenApplicationExists(
+        checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))
+
+      private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
+
+      private val body = bodyOf(result)
+      body should include(stepRequiredIndication("app-name-status"))
+      body should include(stepRequiredIndication("api-subscriptions-status"))
+      body should include(stepRequiredIndication("contact-details-status"))
+      body should include(stepRequiredIndication("urls-status"))
+      body should include(stepRequiredIndication("agree-terms-status"))
+      body should include(stepCompleteIndication("api-subscription-configurations-status"))
+    }
+
     "successful submit action should take you to the check-your-answers page" in new Setup {
       givenApplicationExists(checkInformation =
         Some(CheckInformation(
@@ -310,6 +351,28 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
           apiSubscriptionsConfirmed = true,
           // TODO: MAke a variant wit this set to false
           apiSubscriptionConfigurationsConfirmed = true,
+          Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+          providedPrivacyPolicyURL = true,
+          providedTermsAndConditionsURL = true,
+          teamConfirmed = true,
+          Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
+
+      given(underTest.applicationService.requestUplift(mockEq(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
+        .willReturn(ApplicationUpliftSuccessful)
+
+      private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+    }
+
+    // TODO - names..
+    "successful submit action should take you to the check-your-answers page #2" in new Setup {
+      givenApplicationExists(checkInformation =
+        Some(CheckInformation(
+          confirmedName = true,
+          apiSubscriptionsConfirmed = true,
+          apiSubscriptionConfigurationsConfirmed = false,
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,

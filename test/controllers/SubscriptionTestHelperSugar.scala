@@ -17,15 +17,24 @@
 package controllers
 
 import domain.APIStatus._
-import domain.{APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
+import domain.{Application, APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
 import uk.gov.hmrc.play.test.UnitSpec
+import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import cats.data.NonEmptyList
+import domain.ApiSubscriptionFields.SubscriptionFieldValue
+import domain.ApiSubscriptionFields.SubscriptionFieldDefinition
 
 trait SubscriptionTestHelperSugar {
 
   self: UnitSpec =>
 
-  def subscriptionStatus(apiName: String, serviceName: String, context: String, version: String, status: APIStatus = STABLE, subscribed: Boolean = false, requiresTrust: Boolean = false, access: Option[APIAccess] = None, isTestSupport: Boolean = false) =
-    APISubscriptionStatus(apiName, serviceName, context, APIVersion(version, status, access), subscribed, requiresTrust, isTestSupport = isTestSupport)
+  def subscriptionStatus( apiName: String, serviceName: String, context: String, version: String,
+                          status: APIStatus = STABLE, subscribed: Boolean = false, requiresTrust: Boolean = false, access: Option[APIAccess] = None, isTestSupport: Boolean = false,
+                          fields: Option[SubscriptionFieldsWrapper] = None) =
+    
+    APISubscriptionStatus(apiName, serviceName, context, APIVersion(version, status, access), subscribed, requiresTrust, isTestSupport = isTestSupport, fields = fields)
+
+
 
   val sampleSubscriptions: Seq[APISubscriptionStatus] = {
     Seq(
@@ -33,6 +42,20 @@ trait SubscriptionTestHelperSugar {
       subscriptionStatus("Individual Employment", "individual-employment", "individual-employment-context", "2.0", BETA),
       subscriptionStatus("Individual Tax", "individual-tax", "individual-tax-context", "1.0", STABLE),
       subscriptionStatus("Individual Tax", "individual-tax", "individual-tax-context", "2.0", BETA)
+    )
+  }
+
+   def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {
+    
+    val sfd = SubscriptionFieldDefinition("name", "description", "short-description", "type", "hint")
+    val sfv = SubscriptionFieldValue(sfd, "the value")
+
+    val context = "individual-employment-context-2"
+    val version = "1.0"
+    val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, context, version, NonEmptyList.one(sfv))
+
+    Seq(
+      subscriptionStatus("Individual Employment 2", "individual-employment-2", context, version, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
     )
   }
 
