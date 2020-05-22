@@ -245,13 +245,13 @@ object TermsOfUseAgreement {
   implicit val format = Json.format[TermsOfUseAgreement]
 }
 
-case class CheckInformationForm(confirmedNameComplete: Boolean = false,
-                                apiSubscriptionsComplete: Boolean = false,
+case class CheckInformationForm(apiSubscriptionsComplete: Boolean = false,
                                 apiSubscriptionConfigurationsComplete: Boolean = false,
                                 contactDetailsComplete: Boolean = false,
+                                teamConfirmedComplete: Boolean = false,
+                                confirmedNameComplete: Boolean = false,
                                 providedPrivacyPolicyURLComplete: Boolean = false,
                                 providedTermsAndConditionsURLComplete: Boolean = false,
-                                teamConfirmedComplete: Boolean = false,
                                 termsOfUseAgreementComplete: Boolean = false)
 
 case class CheckInformation(confirmedName: Boolean = false,
