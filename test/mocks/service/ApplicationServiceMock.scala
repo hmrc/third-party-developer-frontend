@@ -57,6 +57,18 @@ trait ApplicationServiceMock extends MockitoSugar {
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     fetchCredentialsReturns(application.id, tokens)
 
+  def subscribeToApiReturnsSuccess(app: Application, apiContext: String, apiVersion: String) =
+    when(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(ApplicationUpdateSuccessful))
+
+  def subscribeToApiReturnsSuccess() =
+    when(applicationServiceMock.subscribeToApi(any(),any(),any())(any())).thenReturn(successful(ApplicationUpdateSuccessful))
+
+  def unsubscribeToApiReturnsSuccess(app: Application, apiContext: String, apiVersion: String) =
+    when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(ApplicationUpdateSuccessful))
+
+  def isSubscribedToApiReturns(app: Application, apiName: String, apiContext: String, apiVersion: String, returns: Boolean) =
+    when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(returns))
+
 
   def givenApplicationNameIsValid() =
     when(applicationServiceMock.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier])).thenReturn(successful(Valid))
@@ -68,9 +80,12 @@ trait ApplicationServiceMock extends MockitoSugar {
     when(applicationServiceMock.update(any[UpdateApplicationRequest])(any())).thenReturn(successful(ApplicationUpdateSuccessful))
 
   def removeTeamMemberReturns(loggedInUser: DeveloperSession) =
-    when(applicationServiceMock.removeTeamMember(any[Application], any[String], eqTo(loggedInUser.email))(any[HeaderCarrier]))
+    when(applicationServiceMock.removeTeamMember(any(), any(), eqTo(loggedInUser.email))(any[HeaderCarrier]))
     .thenReturn(successful(ApplicationUpdateSuccessful))
 
+  def givenUpdateCheckInformationReturns(app: Application) =
+    when(applicationServiceMock.updateCheckInformation(eqTo(app.id), any())(any()))
+    .thenReturn(successful(ApplicationUpdateSuccessful))
 
   def givenApplicationExists(application: Application) : Unit = {
     import utils.TestApplications.tokens

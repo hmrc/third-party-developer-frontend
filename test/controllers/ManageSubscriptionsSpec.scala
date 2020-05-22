@@ -513,7 +513,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         apisWithSubscriptionsReturns(productionApplication, subsData)
 
-        when(applicationServiceMock.updateCheckInformation(any(),any())(any[HeaderCarrier])).thenReturn(successful(ApplicationUpdateSuccessful))
+        givenUpdateCheckInformationReturns(productionApplication)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStepPage(productionApplication.id, 2)(loggedInRequest))

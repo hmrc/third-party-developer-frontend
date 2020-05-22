@@ -185,8 +185,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId,app)
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-        given(applicationServiceMock.updateCheckInformation(eqTo(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        subscribeToApiReturnsSuccess(app, apiContext, apiVersion)
+        givenUpdateCheckInformationReturns(app)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -205,8 +205,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId,app)
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-        given(applicationServiceMock.updateCheckInformation(eqTo(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        unsubscribeToApiReturnsSuccess(app, apiContext, apiVersion)
+        givenUpdateCheckInformationReturns(app)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -225,8 +225,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId,app)
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-        given(applicationServiceMock.updateCheckInformation(eqTo(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        unsubscribeToApiReturnsSuccess(app, apiContext, apiVersion)
+        givenUpdateCheckInformationReturns(app)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -246,8 +246,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId,app)
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-        given(applicationServiceMock.updateCheckInformation(eqTo(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        subscribeToApiReturnsSuccess(app, apiContext, apiVersion)
+        givenUpdateCheckInformationReturns(app)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -267,8 +267,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-        given(applicationServiceMock.updateCheckInformation(eqTo(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        unsubscribeToApiReturnsSuccess(app, apiContext, apiVersion)
+        givenUpdateCheckInformationReturns(app)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -288,8 +288,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-        given(applicationServiceMock.updateCheckInformation(eqTo(app.id), any[CheckInformation])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
+        unsubscribeToApiReturnsSuccess(app, apiContext, apiVersion)
+        givenUpdateCheckInformationReturns(app)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -321,7 +321,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
+        isSubscribedToApiReturns(app,apiName, apiContext, apiVersion, true)
 
         val result: Result = await(underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
 
@@ -341,7 +341,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
+        isSubscribedToApiReturns(app, apiName, apiContext, apiVersion, true)
 
         val result: Result = await(underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
 
@@ -361,7 +361,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(false))
+        isSubscribedToApiReturns(app,apiName, apiContext, apiVersion, false)
 
         val result: Result = await(underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
 
@@ -380,7 +380,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
+        isSubscribedToApiReturns(app,apiName, apiContext, apiVersion, true)
 
         val result: Result = await(underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
 
@@ -412,7 +412,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
+        isSubscribedToApiReturns(app,apiName,apiContext, apiVersion,true)
 
         val result: Result = await(underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
 
@@ -432,7 +432,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
+                isSubscribedToApiReturns(app,apiName,apiContext, apiVersion,true)
 
         val result: Result = await(underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
 
@@ -452,7 +452,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(false))
+        isSubscribedToApiReturns(app,apiName,apiContext, apiVersion,false)
         given(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(mock[TicketResult]))
         given(underTest.subscriptionsService.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(mock[TicketResult]))
 
@@ -477,7 +477,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
+        isSubscribedToApiReturns(app,apiName,apiContext, apiVersion,true)
         given(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(mock[TicketResult]))
         given(underTest.subscriptionsService.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(mock[TicketResult]))
 
@@ -501,7 +501,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
 
         givenApplicationHasNoSubs(app)
-        given(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(true))
+        isSubscribedToApiReturns(app,apiName,apiContext, apiVersion,true)
         given(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(mock[TicketResult]))
         given(underTest.subscriptionsService.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])).willReturn(successful(mock[TicketResult]))
 
