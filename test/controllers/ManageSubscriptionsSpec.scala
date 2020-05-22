@@ -220,7 +220,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "a user is logged in" should {
       "return the list subscription configuration page with no subscriptions and therefore no subscription field definitions" in new ManageSubscriptionsSetup {
 
-        apisWithSubscriptionsReturns(application, List())
+        givenApplicationHasSubs(application, List())
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -232,7 +232,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         val subsData = Seq(noConfigurationSubscription("api1"), noConfigurationSubscription("api2"))
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -249,7 +249,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           configurationSubscription("api4", 1).copy(subscribed = false)
         )
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -276,7 +276,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "return not found if app has no subscription field definitions" in new ManageSubscriptionsSetup {
-        apisWithSubscriptionsReturns(application, Seq.empty)
+        givenApplicationHasSubs(application, Seq.empty)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -285,7 +285,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "return not found when trying to edit api subscription configuration for an api the application is not subscribed to" in new ManageSubscriptionsSetup {
-        apisWithSubscriptionsReturns(application, Seq.empty)
+        givenApplicationHasSubs(application, Seq.empty)
 
         private val result = await(manageSubscriptionController.editApiMetadataPage(appId, apiContext, apiVersion)(loggedInRequest))
 
@@ -297,7 +297,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           configurationSubscription("api1", 1)
         )
 
-        apisWithSubscriptionsReturns(privilegedApplication, subsData)
+        givenApplicationHasSubs(privilegedApplication, subsData)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(privilegedApplication.id)(loggedInRequest))
@@ -310,7 +310,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         val subsData = Seq(apiSubscriptionStatus)
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         private val result: Result =
           await(addToken(manageSubscriptionController.editApiMetadataPage(appId, "/api1-api", "1.0"))(loggedInRequest))
@@ -327,7 +327,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val newSubscriptionValue = "new value"
         private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
 
-        apisWithSubscriptionsReturns(application, Seq(apiSubscriptionStatus))
+        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
         when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
           .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
@@ -358,7 +358,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val newSubscriptionValue = "my invalid value"
         val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
-        apisWithSubscriptionsReturns(application, Seq(apiSubscriptionStatus))
+        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
         when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
           .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
@@ -386,7 +386,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
-        apisWithSubscriptionsReturns(application, Seq(apiSubscriptionStatus))
+        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
         when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
           .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
@@ -413,7 +413,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           configurationSubscription("api2", 1)
         )
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest))
@@ -429,7 +429,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
         val subsData = Seq(apiSubscriptionStatus)
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, 1))(loggedInRequest))
@@ -441,7 +441,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val apiSubscriptionStatus: APISubscriptionStatus = noConfigurationSubscription("api1")
         val subsData = Seq(apiSubscriptionStatus)
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, 1))(loggedInRequest))
@@ -457,7 +457,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
             configurationSubscription("api1", count)
           )
 
-          apisWithSubscriptionsReturns(application, subsData)
+          givenApplicationHasSubs(application, subsData)
           val result =
             await(manageSubscriptionController.subscriptionConfigurationPage(appId, -1)(loggedInRequest))
 
@@ -481,7 +481,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           configurationSubscription("api2", 1)
         )
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, 1)(loggedInRequest))
@@ -496,7 +496,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           configurationSubscription("api2", 1)
         )
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, 2)(loggedInRequest))
@@ -511,7 +511,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           configurationSubscription("api2", 1)
         )
 
-        apisWithSubscriptionsReturns(productionApplication, subsData)
+        givenApplicationHasSubs(productionApplication, subsData)
 
         givenUpdateCheckInformationReturns(productionApplication)
 
@@ -532,7 +532,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           configurationSubscription("api1", count)
         )
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         val result = await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, -1)(loggedInRequest))
 
@@ -553,7 +553,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "be redirected to the end of the journey of they haven't subscribed to any APIs with subscription fields" in new ManageSubscriptionsSetup {
         val subsData = Seq(noConfigurationSubscription("api1"))
 
-        apisWithSubscriptionsReturns(application, subsData)
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest))

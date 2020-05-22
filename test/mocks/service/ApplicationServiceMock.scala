@@ -43,7 +43,7 @@ trait ApplicationServiceMock extends MockitoSugar {
     when(applicationServiceMock.fetchByTeamMemberEmail(eqTo(email))(any[HeaderCarrier]))
       .thenReturn(successful(apps))
 
-  def apisWithSubscriptionsReturns(application: Application, returns: Seq[APISubscriptionStatus]) = {
+  def givenApplicationHasSubs(application: Application, returns: Seq[APISubscriptionStatus]) = {
     when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(any())).thenReturn(successful(returns))
   }
 
@@ -57,17 +57,20 @@ trait ApplicationServiceMock extends MockitoSugar {
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     fetchCredentialsReturns(application.id, tokens)
 
-  def subscribeToApiReturnsSuccess(app: Application, apiContext: String, apiVersion: String) =
+  def givenSubscribeToApiSucceeds(app: Application, apiContext: String, apiVersion: String) =
     when(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def subscribeToApiReturnsSuccess() =
+  def givenSubscribeToApiSucceeds() =
     when(applicationServiceMock.subscribeToApi(any(),any(),any())(any())).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def unsubscribeToApiReturnsSuccess(app: Application, apiContext: String, apiVersion: String) =
+  def ungivenSubscribeToApiSucceeds(app: Application, apiContext: String, apiVersion: String) =
     when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def isSubscribedToApiReturns(app: Application, apiName: String, apiContext: String, apiVersion: String, returns: Boolean) =
-    when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(returns))
+  def givenAppIsSubscribedToApi(app: Application, apiName: String, apiContext: String, apiVersion: String) =
+    when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(true))
+
+    def givenAppIsNotSubscribedToApi(app: Application, apiName: String, apiContext: String, apiVersion: String) =
+    when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(false))
 
 
   def givenApplicationNameIsValid() =
@@ -79,7 +82,7 @@ trait ApplicationServiceMock extends MockitoSugar {
   def givenApplicationUpdateSucceeds() =
     when(applicationServiceMock.update(any[UpdateApplicationRequest])(any())).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def removeTeamMemberReturns(loggedInUser: DeveloperSession) =
+  def givenRemoveTeamMemberSucceeds(loggedInUser: DeveloperSession) =
     when(applicationServiceMock.removeTeamMember(any(), any(), eqTo(loggedInUser.email))(any[HeaderCarrier]))
     .thenReturn(successful(ApplicationUpdateSuccessful))
 
@@ -94,6 +97,6 @@ trait ApplicationServiceMock extends MockitoSugar {
 
     when(applicationServiceMock.fetchCredentials(eqTo(application.id))(any())).thenReturn(successful(tokens()))
 
-    apisWithSubscriptionsReturns(application, Seq.empty)
+    givenApplicationHasSubs(application, Seq.empty)
   }
 }

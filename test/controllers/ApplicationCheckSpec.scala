@@ -103,11 +103,11 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     fetchByApplicationIdReturns(application.id, application)
 
-    apisWithSubscriptionsReturns(application, Seq.empty[APISubscriptionStatus])
+    givenApplicationHasSubs(application, Seq.empty[APISubscriptionStatus])
 
     fetchCredentialsReturns(application, tokens)
 
-    removeTeamMemberReturns(loggedInUser)
+    givenRemoveTeamMemberSucceeds(loggedInUser)
 
     given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
       .willReturn(ApplicationUpdateSuccessful)
