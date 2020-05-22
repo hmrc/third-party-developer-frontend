@@ -78,7 +78,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-  
+
     def givenTheApplicationExistWithUserRole(appId: String,
                                                    userRole: Role,
                                                    state: ApplicationState = ApplicationState.testing,
@@ -86,10 +86,10 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       val application = Application(appId, clientId, "app", DateTime.parse("2018-04-06T09:00"), DateTime.parse("2018-04-06T09:00"), Environment.PRODUCTION,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)) ++ additionalTeamMembers, state = state)
 
-      
+
       fetchByApplicationIdReturns(appId,application)
-      given(applicationServiceMock.fetchCredentials(eqTo(appId))(any[HeaderCarrier])).willReturn(tokens)
-      given(applicationServiceMock.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier])).willReturn(Seq.empty)
+      fetchCredentialsReturns(appId,tokens)
+      apisWithSubscriptionsReturns(application,Seq.empty)
 
       application
     }

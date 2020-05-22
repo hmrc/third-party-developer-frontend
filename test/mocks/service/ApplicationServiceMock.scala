@@ -47,8 +47,16 @@ trait ApplicationServiceMock extends MockitoSugar {
     when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(any())).thenReturn(successful(returns))
   }
 
-  def fetchCredentialsReturns(application: Application, tokens: ApplicationToken) =
-    when(applicationServiceMock.fetchCredentials(eqTo(application.id))(any())).thenReturn(successful(tokens))
+  def givenApplicationHasNoSubs(application: Application) = {
+    when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(any())).thenReturn(successful(Seq.empty))
+  }
+
+  def fetchCredentialsReturns(id: String, tokens: ApplicationToken): Unit =
+    when(applicationServiceMock.fetchCredentials(eqTo(id))(any())).thenReturn(successful(tokens))
+
+  def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
+    fetchCredentialsReturns(application.id, tokens)
+
 
   def givenApplicationNameIsValid() =
     when(applicationServiceMock.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier])).thenReturn(successful(Valid))
