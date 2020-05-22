@@ -19,6 +19,7 @@ package controllers.checkpages
 import controllers.{ApplicationController, ApplicationRequest}
 import domain.{CheckInformation, CheckInformationForm}
 import play.api.data.Form
+import play.api.data.Forms.{boolean, ignored, mapping, optional, text}
 
 trait CheckInformationFormHelper {
   self: ApplicationController =>
@@ -27,14 +28,39 @@ trait CheckInformationFormHelper {
     val application = request.application
 
     if (hasSubscriptionFields(request)) {
-      ApplicationInformationForm.formWithSubscriptionConfiguration.fillAndValidate(
+      formWithSubscriptionConfiguration.fillAndValidate(
         CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
       )
     } else {
-      ApplicationInformationForm.formWithoutSubscriptionConfiguration.fillAndValidate(
+      formWithoutSubscriptionConfiguration.fillAndValidate(
         CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
       )
     }
   }
 
+  private def formWithoutSubscriptionConfiguration: Form[CheckInformationForm] = Form(
+    mapping(
+      "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
+      "apiSubscriptionConfigurationsCompleted" ->  ignored(false),
+      "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
+      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
+      "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
+      "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
+      "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
+      "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
+    )(CheckInformationForm.apply)(CheckInformationForm.unapply)
+  )
+
+  private def formWithSubscriptionConfiguration: Form[CheckInformationForm] = Form(
+    mapping(
+      "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
+      "apiSubscriptionConfigurationsCompleted" -> boolean.verifying("api.subscription.configurations.required.field", subscriptionConfigurationConfirmed => subscriptionConfigurationConfirmed),
+      "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
+      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
+      "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
+      "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
+      "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
+      "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
+    )(CheckInformationForm.apply)(CheckInformationForm.unapply)
+  )
 }
