@@ -29,7 +29,7 @@ import org.mockito.Mockito.withSettings
 import scala.concurrent.Future.{successful}
 
 trait ApplicationServiceMock extends MockitoSugar {
-  val applicationServiceMock = mock[ApplicationService](withSettings.verboseLogging())
+  val applicationServiceMock = mock[ApplicationService]
 
   def fetchByApplicationIdReturns(id: String, returns: Application) = {
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(any())).thenReturn(successful(Some(returns)))
@@ -97,6 +97,6 @@ trait ApplicationServiceMock extends MockitoSugar {
 
     when(applicationServiceMock.fetchCredentials(eqTo(application.id))(any())).thenReturn(successful(tokens()))
 
-    givenApplicationHasSubs(application, Seq.empty)
+    givenApplicationHasNoSubs(application)
   }
 }

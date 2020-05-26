@@ -88,8 +88,6 @@ abstract class ApplicationController()
 
   def hasSubscriptionFields(request: ApplicationRequest[_]) : Boolean = {
 
-    println(s"**** ${request.subscriptions}")
-
     request.subscriptions.exists(s => s.subscribed && s.fields.isDefined)
   }
 

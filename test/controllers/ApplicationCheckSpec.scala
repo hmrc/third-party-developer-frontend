@@ -26,7 +26,6 @@ import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.withSettings
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.Assertion
 import play.api.mvc.{AnyContentAsEmpty, Result}
@@ -44,7 +43,7 @@ import mocks.service._
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
 
   val appId = "1234"
   val appName: String = "app"
@@ -85,32 +84,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     apis = Seq.empty,
     exampleApi = None)
 
-  trait Subs {
-    def determineSubs(): Unit
-  }
-
-  trait HasSubs {
-    self: ApplicationServiceMock with Subs =>
-
-    override def determineSubs(): Unit = {
-      println("***** Subs *****")
-      givenApplicationHasSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
-    }
-  }
-
-  trait HasNoSubs {
-    self: ApplicationServiceMock with Subs =>
-
-    override def determineSubs(): Unit = {
-      println("***** NO Subs *****")
-      givenApplicationHasNoSubs(application)
-    }
-  }
-
-  trait Setup extends ApplicationServiceMock { //with Subs with HasNoSubs {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new ApplicationCheck(
       applicationServiceMock,
-      mock[ApiSubscriptionsHelper](withSettings.verboseLogging),
       mock[SessionService],
       mockErrorHandler,
       messagesApi,
@@ -126,8 +102,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     fetchByApplicationIdReturns(application.id, application)
 
-    // determineSubs()
-
     fetchCredentialsReturns(application, tokens)
 
     givenRemoveTeamMemberSucceeds(loggedInUser)
@@ -135,9 +109,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     // TODO : givenUpdateCheckInformationReturns()
     given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
       .willReturn(ApplicationUpdateSuccessful)
-
-    given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-      .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs)))))
 
     given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
       .willReturn(Future.successful(Valid))
@@ -193,22 +164,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     def idAttributeOnCheckedInput(result: Result): String = Jsoup.parse(bodyOf(result)).select("input[checked]").attr("id")
-  }
-
-  trait SubscriptionValidationSetup extends Setup {
-
-    def testSubscriptionValidation: Assertion = {
-
-      givenApplicationExists()
-
-      val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-      verify(underTest.applicationService, never).updateCheckInformation(mockEq(appId), any())(any[HeaderCarrier])
-
-      val errorMessageElement = Jsoup.parse(bodyOf(result)).select("ul.error-summary-list")
-      errorMessageElement.text() shouldBe "You must subscribe to at least one API, in addition to optionally subscribing to Hello World"
-    }
   }
 
   "check request submitted" should {
@@ -338,8 +293,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       body should include(stepCompleteIndication("agree-terms-status"))
     }
 
-    // TODO: Plan:
-    // Make new ApplicationCheckSpec, and move this test to it, and make it work.
     "show api subscription configuration step as complete when it has been done" in new Setup {
       givenApplicationExists(
         checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)),
@@ -361,7 +314,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
         Some(CheckInformation(
           confirmedName = true,
           apiSubscriptionsConfirmed = true,
-          // TODO: MAke a variant wit this set to false
           apiSubscriptionConfigurationsConfirmed = true,
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
@@ -378,8 +330,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
     }
 
-    // TODO - names..
-    "successful submit action should take you to the check-your-answers page #2" in new Setup {
+    "successful submit action should take you to the check-your-answers page when no configurations confirmed because none required" in new Setup {
       givenApplicationExists(checkInformation =
         Some(CheckInformation(
           confirmedName = true,
@@ -456,11 +407,13 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       status(result) shouldBe OK
       bodyOf(result) should include("Confirm which APIs you want to use")
-      bodyOf(result) should include("subscriptionServiceName")
+      // bodyOf(result) should include("subscriptionServiceName")
     }
 
     "success action" in new Setup {
-      givenApplicationExists()
+      val application = givenApplicationExists()
+      val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      givenApplicationHasSubs(application, subsData)
 
       private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
@@ -511,26 +464,17 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return 404 NOT FOUND when no API subscriptions are retrieved" in new Setup {
       givenApplicationHasNoSubs(application)
 
-      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-        .willReturn(successful(None))
-
       private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
 
-    "fail validation when no APIs have been subscribed to" in new SubscriptionValidationSetup {
-      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-        .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToNothing)))))
+    "return 404 NOT FOUND when only API-EXAMPLE-MICROSERVICE API is subscribed to" in new Setup {
+      givenApplicationHasSubs(application, Seq(onlyApiExampleMicroserviceSubscribedTo) )
 
-      testSubscriptionValidation
-    }
+      private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
-    "fail validation when only the example API has been subscribed to" in new SubscriptionValidationSetup {
-      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-        .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToExampleOnly)))))
-
-      testSubscriptionValidation
+      status(result) shouldBe BAD_REQUEST
     }
   }
 

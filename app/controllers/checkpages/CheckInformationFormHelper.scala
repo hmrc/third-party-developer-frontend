@@ -21,10 +21,25 @@ import domain.{CheckInformation, CheckInformationForm}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, ignored, mapping, optional, text}
 
+// TODO - reduce duplication
 trait CheckInformationFormHelper {
   self: ApplicationController =>
 
   def createCheckFormForApplication(request: ApplicationRequest[_]): Form[CheckInformationForm] = {
+    val application = request.application
+
+    if (hasSubscriptionFields(request)) {
+      formWithSubscriptionConfiguration.fill(
+        CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
+      )
+    } else {
+      formWithoutSubscriptionConfiguration.fill(
+        CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
+      )
+    }
+  }
+
+  def validateCheckFormForApplication(request: ApplicationRequest[_]): Form[CheckInformationForm] = {
     val application = request.application
 
     if (hasSubscriptionFields(request)) {

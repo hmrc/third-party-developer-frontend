@@ -41,8 +41,7 @@ import mocks.service.ApplicationServiceMock
 import scala.concurrent.Future
 
 
-class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
-
+class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = Future.failed(new ApplicationNotFound)
 
   val appId = "1234"
@@ -136,59 +135,6 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           "fields[0].value" -> fieldValue)
     }
 
-    def generateName(prefix: String) = s"$prefix-name"
-
-    def generateField(prefix: String): SubscriptionFieldDefinition =
-      SubscriptionFieldDefinition(
-        name = generateName(prefix),
-        description = s"$prefix-description",
-        shortDescription = s"$prefix-short-description",
-        hint = s"$prefix-hint",
-        `type` = "STRING"
-      )
-
-    def generateValue(prefix: String) = s"$prefix-value"
-
-    def generateValueName(prefix: String, index: Int) = s"$prefix-field-$index"
-
-    def generateFieldValue(prefix: String, index: Int): SubscriptionFieldValue =
-      SubscriptionFieldValue(
-        definition = generateField(prefix),
-        value = generateValueName(prefix, index)
-      )
-
-    val WHO_CARES = "who cares"
-
-    def generateWrapper(prefix: String, count: Int): Option[SubscriptionFieldsWrapper] = {
-      val rawFields = (1 to count).map(i => generateFieldValue(prefix, i)).toList
-      val nelFields = NonEmptyList.fromList(rawFields)
-
-      nelFields.map(fs =>
-        SubscriptionFieldsWrapper(
-          applicationId = WHO_CARES,
-          clientId = WHO_CARES,
-          apiContext = WHO_CARES,
-          apiVersion = WHO_CARES,
-          fields = fs
-        )
-      )
-    }
-
-    def noConfigurationSubscription(prefix: String): APISubscriptionStatus =
-      APISubscriptionStatus(
-        name = generateName(prefix),
-        serviceName = s"$prefix-api",
-        context = s"/$prefix-api",
-        apiVersion = APIVersion("1.0", APIStatus.STABLE),
-        subscribed = true,
-        requiresTrust = false,
-        fields = None,
-        isTestSupport = false
-      )
-
-    def configurationSubscription(prefix: String, count: Int): APISubscriptionStatus =
-      noConfigurationSubscription(prefix).copy(fields = generateWrapper(prefix, count))
-
     def assertCommonEditFormFields(result: Result, apiSubscriptionStatus: APISubscriptionStatus): Unit = {
       status(result) shouldBe OK
 
@@ -220,7 +166,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "a user is logged in" should {
       "return the list subscription configuration page with no subscriptions and therefore no subscription field definitions" in new ManageSubscriptionsSetup {
 
-        givenApplicationHasSubs(application, List())
+        givenApplicationHasNoSubs(application)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -230,7 +176,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return the list subscription configuration page with several subscriptions without subscription configuration" in new ManageSubscriptionsSetup {
 
-        val subsData = Seq(noConfigurationSubscription("api1"), noConfigurationSubscription("api2"))
+        val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
 
         givenApplicationHasSubs(application, subsData)
 
@@ -243,10 +189,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "return the list subscription configuration page with several subscriptions, some with subscription configuration" in new ManageSubscriptionsSetup {
 
         val subsData = Seq(
-          configurationSubscription("api1", 3),
-          configurationSubscription("api2", 1),
-          noConfigurationSubscription("api3"),
-          configurationSubscription("api4", 1).copy(subscribed = false)
+          exampleSubscriptionWithFields("api1", 3),
+          exampleSubscriptionWithFields("api2", 1),
+          exampleSubscriptionWithoutFields("api3"),
+          exampleSubscriptionWithFields("api4", 1).copy(subscribed = false)
         )
 
         givenApplicationHasSubs(application, subsData)
@@ -294,7 +240,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "It renders the subscription configuration list page for a privileged application" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          configurationSubscription("api1", 1)
+          exampleSubscriptionWithFields("api1", 1)
         )
 
         givenApplicationHasSubs(privilegedApplication, subsData)
@@ -306,7 +252,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "renders the edit subscription page" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 2)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 2)
 
         val subsData = Seq(apiSubscriptionStatus)
 
@@ -323,7 +269,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "save action saves valid subscription field values" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
         val newSubscriptionValue = "new value"
         private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
 
@@ -354,7 +300,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "save action fails validation and shows error message" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
         val newSubscriptionValue = "my invalid value"
         val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
@@ -380,7 +326,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "save action fails valid and shows error message and renders the add app journey page subs configuration" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
         val newSubscriptionValue = "my invalid value"
         val pageNumber = 1
 
@@ -409,8 +355,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "a user is doing the add new sandbox app journey they" should {
       "be able to view the subscription fields start page if they have subscribed to APIs with subscription fields" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          configurationSubscription("api1", 1),
-          configurationSubscription("api2", 1)
+          exampleSubscriptionWithFields("api1", 1),
+          exampleSubscriptionWithFields("api2", 1)
         )
 
         givenApplicationHasSubs(application, subsData)
@@ -426,7 +372,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "edit page" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
         val subsData = Seq(apiSubscriptionStatus)
 
         givenApplicationHasSubs(application, subsData)
@@ -438,7 +384,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "return NOT_FOUND if page has no field definitions" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = noConfigurationSubscription("api1")
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithoutFields("api1")
         val subsData = Seq(apiSubscriptionStatus)
 
         givenApplicationHasSubs(application, subsData)
@@ -454,7 +400,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           import manageSubscriptionsSetup._
 
           val subsData = Seq(
-            configurationSubscription("api1", count)
+            exampleSubscriptionWithFields("api1", count)
           )
 
           givenApplicationHasSubs(application, subsData)
@@ -477,8 +423,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "step page" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          configurationSubscription("api1", 1),
-          configurationSubscription("api2", 1)
+          exampleSubscriptionWithFields("api1", 1),
+          exampleSubscriptionWithFields("api2", 1)
         )
 
         givenApplicationHasSubs(application, subsData)
@@ -492,8 +438,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "step page for the last page as a redirect for sandbox" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          configurationSubscription("api1", 1),
-          configurationSubscription("api2", 1)
+          exampleSubscriptionWithFields("api1", 1),
+          exampleSubscriptionWithFields("api2", 1)
         )
 
         givenApplicationHasSubs(application, subsData)
@@ -507,8 +453,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "step page for the last page as a redirect for production" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          configurationSubscription("api1", 1),
-          configurationSubscription("api2", 1)
+          exampleSubscriptionWithFields("api1", 1),
+          exampleSubscriptionWithFields("api2", 1)
         )
 
         givenApplicationHasSubs(productionApplication, subsData)
@@ -529,7 +475,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         import manageSubscriptionsSetup._
 
         val subsData = Seq(
-          configurationSubscription("api1", count)
+          exampleSubscriptionWithFields("api1", count)
         )
 
         givenApplicationHasSubs(application, subsData)
@@ -551,7 +497,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
       "be redirected to the end of the journey of they haven't subscribed to any APIs with subscription fields" in new ManageSubscriptionsSetup {
-        val subsData = Seq(noConfigurationSubscription("api1"))
+        val subsData = Seq(exampleSubscriptionWithoutFields("api1"))
 
         givenApplicationHasSubs(application, subsData)
 

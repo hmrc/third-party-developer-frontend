@@ -16,46 +16,42 @@
 
 package controllers.checkpages
 
-import controllers.{ApiSubscriptionsHelper, ApplicationController, ApplicationRequest}
+import controllers.{ApplicationController, ApplicationRequest}
 import domain.{CheckInformation, SubscriptionData, _}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 
 import scala.concurrent.Future
+import controllers.APISubscriptions
 
 trait ApiSubscriptionsPartialController  {
   self: ApplicationController with CanUseCheckActions =>
 
-  protected def apiSubscriptionsHelper: ApiSubscriptionsHelper
+  private def asSubscriptionData(applicationRequest: ApplicationRequest[AnyContent]) =
+    SubscriptionData(applicationRequest.role, applicationRequest.application, APISubscriptions.groupSubscriptions(applicationRequest.subscriptions))
 
   def apiSubscriptionsPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
-
-    apiSubscriptionsHelper.fetchAllSubscriptions(app, request.user)(hc).flatMap {
-      case Some(subsData) =>
-        Future.successful(Ok(apiSubscriptionsView(app, subsData)))
-      case None =>
-        Future.successful(NotFound(errorHandler.notFoundTemplate))
-    }
+    Future.successful(Ok(apiSubscriptionsView(app, asSubscriptionData(request))))
   }
 
   def apiSubscriptionsAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
+    val subscriptionData = asSubscriptionData(request)
     val information = app.checkInformation.getOrElse(CheckInformation())
 
+    // Grouped subscriptons removed API-EXAMPLE-MICROSERVICE before this code is ever executed
     def hasNonExampleSubscription(subscriptionData: SubscriptionData) =
       subscriptionData.subscriptions.fold(false)(subs => subs.apis.exists(_.hasSubscriptions))
 
-    apiSubscriptionsHelper.fetchAllSubscriptions(app, request.user)(hc) flatMap {
-      case None =>
-        Future.successful(NotFound(errorHandler.notFoundTemplate))
-      case Some(subscriptionData) if !hasNonExampleSubscription(subscriptionData) =>
-        val form = DummySubscriptionsForm.form.bind(Map("hasNonExampleSubscription" -> "false"))
-        Future.successful(BadRequest(apiSubscriptionsView(app, subscriptionData, Some(form))))
-      case _ =>
-        for {
-          _ <- applicationService.updateCheckInformation(app.id, information.copy(apiSubscriptionsConfirmed = true))
-        } yield Redirect(landingPageRoute(app.id))
+    if( !hasNonExampleSubscription(subscriptionData) ) {
+      val form = DummySubscriptionsForm.form.bind(Map("hasNonExampleSubscription" -> "false"))
+      Future.successful(BadRequest(apiSubscriptionsView(app, subscriptionData, Some(form))))
+    }
+    else {
+      for {
+        _ <- applicationService.updateCheckInformation(app.id, information.copy(apiSubscriptionsConfirmed = true))
+      } yield Redirect(landingPageRoute(app.id))
     }
   }
 

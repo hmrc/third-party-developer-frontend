@@ -37,7 +37,6 @@ import model.ApplicationViewModel
 
 @Singleton
 class ApplicationCheck @Inject()(val applicationService: ApplicationService,
-                                 val apiSubscriptionsHelper: ApiSubscriptionsHelper,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
                                  val messagesApi: MessagesApi,
@@ -57,9 +56,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     {
 
   def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-
     val form = createCheckFormForApplication(request)
-
     Future.successful(Ok(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(),form)))
   }
 
@@ -82,7 +79,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       Future.successful(Redirect(routes.CheckYourAnswers.answersPage(appId)))
     }
 
-    val requestForm = createCheckFormForApplication(request)
+    val requestForm = validateCheckFormForApplication(request)
 
     requestForm.fold(withFormErrors, withValidForm)
   }

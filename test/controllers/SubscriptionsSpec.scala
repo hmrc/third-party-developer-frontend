@@ -89,7 +89,6 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       mock[AuditService],
       mock[SubscriptionFieldsService],
       mock[SubscriptionsService],
-      mock[ApiSubscriptionsHelper],
       applicationServiceMock,
       mock[SessionService],
       mockErrorHandler,
@@ -102,7 +101,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
     givenApplicationUpdateSucceeds()
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
-    givenApplicationHasSubs(activeApplication,Seq.empty[APISubscriptionStatus])
+    givenApplicationHasNoSubs(activeApplication)
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
@@ -112,22 +111,21 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   "subscriptions" should {
     "return the ROPC page for a ROPC app" in new Setup {
       fetchByApplicationIdReturns(appId,ropcApplication)
-      givenApplicationHasSubs(ropcApplication, Seq.empty[APISubscriptionStatus])
+      givenApplicationHasNoSubs(ropcApplication)
       val result: Result = await(addToken(underTest.manageSubscriptions(appId))(loggedInRequest))
       status(result) shouldBe FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
       fetchByApplicationIdReturns(appId,privilegedApplication)
-      givenApplicationHasSubs(privilegedApplication, Seq.empty[APISubscriptionStatus])
+      givenApplicationHasNoSubs(privilegedApplication)
       val result: Result = await(addToken(underTest.manageSubscriptions(appId))(loggedInRequest))
       status(result) shouldBe FORBIDDEN
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
       fetchByApplicationIdReturns(appId,activeApplication)
-      givenApplicationHasSubs(activeApplication, Seq.empty[APISubscriptionStatus])
-      given(underTest.apiSubscriptionsHelper.fetchPageDataFor(eqTo(activeApplication))(any[HeaderCarrier])).willReturn(successful(PageData(activeApplication, None)))
+      givenApplicationHasNoSubs(activeApplication)
       val result: Result = await(addToken(underTest.manageSubscriptions(appId))(loggedInRequest))
       status(result) shouldBe OK
       titleOf(result) shouldBe "Manage API subscriptions - HMRC Developer Hub - GOV.UK"
@@ -137,22 +135,21 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   "subscriptions2" should {
     "return the ROPC page for a ROPC app" in new Setup {
       fetchByApplicationIdReturns(appId,ropcApplication)
-      givenApplicationHasSubs(ropcApplication, Seq.empty[APISubscriptionStatus])
+      givenApplicationHasNoSubs(ropcApplication)
       val result: Result = await(addToken(underTest.addAppSubscriptions(appId))(loggedInRequest))
       status(result) shouldBe FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
       fetchByApplicationIdReturns(appId,privilegedApplication)
-      givenApplicationHasSubs(privilegedApplication, Seq.empty[APISubscriptionStatus])
+      givenApplicationHasNoSubs(privilegedApplication)
       val result: Result = await(addToken(underTest.addAppSubscriptions(appId))(loggedInRequest))
       status(result) shouldBe FORBIDDEN
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
       fetchByApplicationIdReturns(appId,activeApplication)
-      givenApplicationHasSubs(activeApplication, Seq.empty[APISubscriptionStatus])
-      given(underTest.apiSubscriptionsHelper.fetchPageDataFor(eqTo(activeApplication))(any[HeaderCarrier])).willReturn(successful(PageData(activeApplication, None)))
+      givenApplicationHasNoSubs(activeApplication)
       val result: Result = await(addToken(underTest.addAppSubscriptions(appId))(loggedInRequest))
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
@@ -537,7 +534,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
       given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
       fetchByApplicationIdReturns(appId,alteredActiveApplication)
-      givenApplicationHasSubs(alteredActiveApplication, Seq.empty[APISubscriptionStatus])
+      givenApplicationHasNoSubs(alteredActiveApplication)
 
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET",
         s"developer/applications/$appId/subscribe?context=$apiContext&version=$apiVersion&accessType=$apiAccessType&tab=subscriptions"
