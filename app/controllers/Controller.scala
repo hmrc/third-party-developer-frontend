@@ -86,7 +86,10 @@ abstract class ApplicationController()
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, hasSubscriptionFields(request))
 
-  def hasSubscriptionFields(request: ApplicationRequest[_]) : Boolean = request.subscriptions.exists(s => s.subscribed && s.fields.isDefined)
+  def hasSubscriptionFields(request: ApplicationRequest[_]) : Boolean = {
+
+    request.subscriptions.exists(s => s.subscribed && s.fields.isDefined)
+  }
 
   def whenTeamMemberOnApp(applicationId: String)
                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =

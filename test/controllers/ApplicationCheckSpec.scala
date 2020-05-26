@@ -24,7 +24,7 @@ import domain._
 import helpers.string._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.Assertion
@@ -43,7 +43,7 @@ import mocks.service._
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
 
   val appId = "1234"
   val appName: String = "app"
@@ -69,11 +69,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     Seq(APISubscriptionStatus("API1", "api-example-microservice", "exampleContext",
       APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false))))
 
-  val groupedSubs: GroupedSubscriptions = GroupedSubscriptions(Seq.empty,
-    Seq(APISubscriptions("API1", "ServiceName", "apiContent",
-      Seq(APISubscriptionStatus(
-        "API1", "subscriptionServiceName", "context", APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false)))))
-
   val groupedSubsSubscribedToExampleOnly: GroupedSubscriptions = GroupedSubscriptions(
     testApis = Seq.empty,
     apis = Seq.empty,
@@ -87,7 +82,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
   trait Setup extends ApplicationServiceMock {
     val underTest = new ApplicationCheck(
       applicationServiceMock,
-      mock[ApiSubscriptionsHelper],
       mock[SessionService],
       mockErrorHandler,
       messagesApi,
@@ -96,27 +90,20 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
       .willReturn(Some(session))
 
     givenApplicationUpdateSucceeds()
 
-    fetchByApplicationIdReturns(application.id, application)
-
-    givenApplicationHasSubs(application, Seq.empty[APISubscriptionStatus])
+    fetchByApplicationIdReturns(appId, application)
 
     fetchCredentialsReturns(application, tokens)
 
     givenRemoveTeamMemberSucceeds(loggedInUser)
 
-    given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
-      .willReturn(ApplicationUpdateSuccessful)
+    givenUpdateCheckInformationReturns(appId)
 
-    given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-      .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs)))))
-
-    given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-      .willReturn(Future.successful(Valid))
+    givenApplicationNameIsValid()
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
@@ -125,10 +112,15 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
-    def givenApplicationExists(appId: String = appId, clientId: String = clientId, userRole: Role = ADMINISTRATOR,
-                                  state: ApplicationState = testing,
-                                  checkInformation: Option[CheckInformation] = None,
-                                  access: Access = Standard()): Application = {
+    def givenApplicationExists(
+        appId: String = appId,
+        clientId: String = clientId,
+        userRole: Role = ADMINISTRATOR,
+        state: ApplicationState = testing,
+        checkInformation: Option[CheckInformation] = None,
+        access: Access = Standard(),
+        hasSubs: Boolean = false): Application = {
+
       // this is to ensure we always have one ADMINISTRATOR
       val anotherRole = if(userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
 
@@ -137,43 +129,33 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
         Collaborator(anotherCollaboratorEmail, anotherRole)
       )
 
-      givenApplicationExistsWithCollaborators(collaborators, appId, clientId, state, checkInformation, access)
+      givenApplicationExistsWithCollaborators(collaborators, appId, clientId, state, checkInformation, access, hasSubs)
     }
 
 
-    def givenApplicationExistsWithCollaborators(collaborators: Set[Collaborator],
-                                                   appId: String = appId, clientId: String = clientId,
-                                                   state: ApplicationState = testing,
-                                                   checkInformation: Option[CheckInformation] = None,
-                                                   access: Access = Standard()): Application = {
+    def givenApplicationExistsWithCollaborators(
+        collaborators: Set[Collaborator],
+        appId: String = appId,
+        clientId: String = clientId,
+        state: ApplicationState = testing,
+        checkInformation: Option[CheckInformation] = None,
+        access: Access = Standard(),
+        hasSubs: Boolean = false ): Application = {
 
       val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
-        collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
+         collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
 
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(Some(application))
-      given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq())
+      fetchByApplicationIdReturns(application.id, application)
+      fetchCredentialsReturns(application.id, tokens)
+      if(hasSubs)
+        givenApplicationHasSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
+      else
+        givenApplicationHasNoSubs(application)
 
       application
     }
 
     def idAttributeOnCheckedInput(result: Result): String = Jsoup.parse(bodyOf(result)).select("input[checked]").attr("id")
-  }
-
-  trait SubscriptionValidationSetup extends Setup {
-
-    def testSubscriptionValidation: Assertion = {
-
-      givenApplicationExists()
-
-      val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
-
-      status(result) shouldBe BAD_REQUEST
-      verify(underTest.applicationService, never).updateCheckInformation(mockEq(appId), any())(any[HeaderCarrier])
-
-      val errorMessageElement = Jsoup.parse(bodyOf(result)).select("ul.error-summary-list")
-      errorMessageElement.text() shouldBe "You must subscribe to at least one API, in addition to optionally subscribing to Hello World"
-    }
   }
 
   "check request submitted" should {
@@ -303,12 +285,27 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       body should include(stepCompleteIndication("agree-terms-status"))
     }
 
+    "show api subscription configuration step as complete when it has been done" in new Setup {
+      givenApplicationExists(
+        checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)),
+        hasSubs = true)
+
+      private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
+
+      private val body = bodyOf(result)
+      body should include(stepRequiredIndication("app-name-status"))
+      body should include(stepRequiredIndication("api-subscriptions-status"))
+      body should include(stepRequiredIndication("contact-details-status"))
+      body should include(stepRequiredIndication("urls-status"))
+      body should include(stepRequiredIndication("agree-terms-status"))
+      body should include(stepCompleteIndication("api-subscription-configurations-status"))
+    }
+
     "successful submit action should take you to the check-your-answers page" in new Setup {
       givenApplicationExists(checkInformation =
         Some(CheckInformation(
           confirmedName = true,
           apiSubscriptionsConfirmed = true,
-          // TODO: MAke a variant wit this set to false
           apiSubscriptionConfigurationsConfirmed = true,
           Some(ContactDetails("Example Name", "name@example.com", "012346789")),
           providedPrivacyPolicyURL = true,
@@ -316,7 +313,28 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
           teamConfirmed = true,
           Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
-      given(underTest.applicationService.requestUplift(mockEq(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
+      given(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
+        .willReturn(ApplicationUpliftSuccessful)
+
+      private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+    }
+
+    "successful submit action should take you to the check-your-answers page when no configurations confirmed because none required" in new Setup {
+      givenApplicationExists(checkInformation =
+        Some(CheckInformation(
+          confirmedName = true,
+          apiSubscriptionsConfirmed = true,
+          apiSubscriptionConfigurationsConfirmed = false,
+          Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+          providedPrivacyPolicyURL = true,
+          providedTermsAndConditionsURL = true,
+          teamConfirmed = true,
+          Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
+
+      given(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(ApplicationUpliftSuccessful)
 
       private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
@@ -376,16 +394,21 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   "api subscriptions review" should {
     "return page" in new Setup {
-      givenApplicationExists()
+      val application = givenApplicationExists()
+      val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      givenApplicationHasSubs(application, subsData)
+
       private val result = await(addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Confirm which APIs you want to use")
-      bodyOf(result) should include("subscriptionServiceName")
+      bodyOf(result) should include(generateName("api1"))
     }
 
     "success action" in new Setup {
-      givenApplicationExists()
+      val application = givenApplicationExists()
+      val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      givenApplicationHasSubs(application, subsData)
 
       private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
@@ -434,26 +457,19 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "return 404 NOT FOUND when no API subscriptions are retrieved" in new Setup {
-      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-        .willReturn(successful(None))
+      givenApplicationHasNoSubs(application)
 
       private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
 
-    "fail validation when no APIs have been subscribed to" in new SubscriptionValidationSetup {
-      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-        .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToNothing)))))
+    "return 404 NOT FOUND when only API-EXAMPLE-MICROSERVICE API is subscribed to" in new Setup {
+      givenApplicationHasSubs(application, Seq(onlyApiExampleMicroserviceSubscribedTo) )
 
-      testSubscriptionValidation
-    }
+      private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
-    "fail validation when only the example API has been subscribed to" in new SubscriptionValidationSetup {
-      given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
-        .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubsSubscribedToExampleOnly)))))
-
-      testSubscriptionValidation
+      status(result) shouldBe BAD_REQUEST
     }
   }
 
@@ -556,8 +572,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, "My First Tax App", appUnderTest.description, appUnderTest.access)
-      verify(underTest.applicationService).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -570,8 +586,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, appUnderTest.access)
-      verify(underTest.applicationService, never()).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -602,7 +618,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       bodyOf(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
       verify(underTest.applicationService)
-        .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION), mockEq(Some(appId)))(any[HeaderCarrier])
+        .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), eqTo(Some(appId)))(any[HeaderCarrier])
     }
 
     "Validation failure when duplicate name" in new Setup {
@@ -622,7 +638,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       bodyOf(result) should include("That application name already exists. Enter a unique name for your application.")
 
       verify(underTest.applicationService)
-        .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION), mockEq(Some(appId)))(any[HeaderCarrier])
+        .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), eqTo(Some(appId)))(any[HeaderCarrier])
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
@@ -734,9 +750,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
 
-      verify(underTest.applicationService).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -750,9 +766,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
       verify(underTest.applicationService)
-        .update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
+        .update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -883,9 +899,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val standardAccess = Standard(termsAndConditionsUrl = Some("http://termsAndConditionsURL.example.com"))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
-      verify(underTest.applicationService).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -899,9 +915,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val standardAccess = Standard(termsAndConditionsUrl = None)
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
-      verify(underTest.applicationService).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -1071,7 +1087,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(appId), eqTo(expectedCheckInformation))(any[HeaderCarrier])
     }
 
     "team post doesn't redirect to the check landing page when not logged in" in new Setup {
@@ -1138,7 +1154,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check/team")
 
-      verify(underTest.applicationService).removeTeamMember(mockEq(app),mockEq(anotherCollaboratorEmail), mockEq(loggedInUser.email))(any[HeaderCarrier])
+      verify(underTest.applicationService).removeTeamMember(eqTo(app),eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
@@ -1150,7 +1166,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(appId), eqTo(expectedCheckInformation))(any[HeaderCarrier])
     }
   }
 
@@ -1200,7 +1216,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       body should include(yetAnotherCollaboratorEmail)
     }
   }
-    private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def stepRequiredIndication(id: String) = {
     s"""<div id="$id" class="step-status status-incomplete">To do</div>"""

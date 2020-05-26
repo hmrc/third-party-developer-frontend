@@ -37,7 +37,6 @@ import model.ApplicationViewModel
 
 @Singleton
 class ApplicationCheck @Inject()(val applicationService: ApplicationService,
-                                 val apiSubscriptionsHelper: ApiSubscriptionsHelper,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
                                  val messagesApi: MessagesApi,
@@ -57,11 +56,8 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     {
 
   def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val application = request.application
-
-    Future.successful(Ok(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(),
-      // TODO: This needs fixing when we add subs config to check-page
-      ApplicationInformationForm.formWithoutSubscriptionConfiguration.fill(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))))))
+    val form = createCheckFormForApplication(request)
+    Future.successful(Ok(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(),form)))
   }
 
   def unauthorisedAppDetails(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
@@ -83,7 +79,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
       Future.successful(Redirect(routes.CheckYourAnswers.answersPage(appId)))
     }
 
-    val requestForm = createCheckFormForApplication(request)
+    val requestForm = validateCheckFormForApplication(request)
 
     requestForm.fold(withFormErrors, withValidForm)
   }
@@ -137,34 +133,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   protected def termsAndConditionsActionRoute(appId: String): Call = routes.ApplicationCheck.termsAndConditionsAction(appId)
   protected def termsOfUseActionRoute(appId: String): Call = routes.ApplicationCheck.termsOfUseAction(appId)
   protected def submitButtonLabel = "Save and return"
-}
-
-object ApplicationInformationForm {
-  def formWithoutSubscriptionConfiguration: Form[CheckInformationForm] = Form(
-    mapping(
-      "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
-      "apiSubscriptionConfigurationsCompleted" ->  ignored(false),
-      "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
-      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
-      "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
-      "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
-      "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
-      "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
-    )(CheckInformationForm.apply)(CheckInformationForm.unapply)
-  )
-
-  def formWithSubscriptionConfiguration: Form[CheckInformationForm] = Form(
-    mapping(
-      "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
-      "apiSubscriptionConfigurationsCompleted" -> boolean.verifying("api.subscription.configurations.required.field", subscriptionConfigurationConfirmed => subscriptionConfigurationConfirmed),
-      "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
-      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
-      "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
-      "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
-      "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
-      "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
-    )(CheckInformationForm.apply)(CheckInformationForm.unapply)
-  )
 }
 
 case class TermsAndConditionsForm(urlPresent: Option[String], termsAndConditionsURL: Option[String])

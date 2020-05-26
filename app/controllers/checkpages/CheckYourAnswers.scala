@@ -17,7 +17,7 @@
 package controllers.checkpages
 
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.{AddTeamMemberForm, ApiSubscriptionsHelper, ApplicationController, ApplicationHelper, ApplicationRequest, RemoveTeamMemberCheckPageConfirmationForm}
+import controllers.{AddTeamMemberForm, ApplicationController, ApplicationHelper, ApplicationRequest, RemoveTeamMemberCheckPageConfirmationForm}
 import controllers.FormKeys.applicationNameAlreadyExistsKey
 import domain.{Application, ApplicationAlreadyExists, CheckInformation, CheckInformationForm, ContactDetails, DeskproTicketCreationFailed}
 import javax.inject.{Inject, Singleton}
@@ -36,7 +36,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
-                                 val apiSubscriptionsHelper: ApiSubscriptionsHelper,
                                  val applicationCheck: ApplicationCheck,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
@@ -105,7 +104,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
           val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
           applicationService.updateCheckInformation(application.id, information)
 
-          val requestForm = createCheckFormForApplication(request)
+          val requestForm = validateCheckFormForApplication(request)
 
           val applicationViewModel = ApplicationViewModel(application.copy(checkInformation = Some(information)), hasSubscriptionFields(request))
           Conflict(applicationcheck.landingPage(applicationViewModel, requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))

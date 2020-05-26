@@ -40,7 +40,6 @@ class Subscriptions @Inject() (
     val auditService: AuditService,
     val subFieldsService: SubscriptionFieldsService,
     val subscriptionsService: SubscriptionsService,
-    val apiSubscriptionsHelper: ApiSubscriptionsHelper,
     val applicationService: ApplicationService,
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
@@ -79,16 +78,13 @@ class Subscriptions @Inject() (
   def renderSubscriptions(application: Application, user: DeveloperSession, renderHtml: (Role, PageData, Form[EditApplicationForm]) => Html)(
       implicit request: ApplicationRequest[AnyContent]
   ): Future[Result] = {
-    apiSubscriptionsHelper.fetchPageDataFor(application).map { data =>
-      val role = apiSubscriptionsHelper.roleForApplication(data.app, user.email)
-      val form = EditApplicationForm.withData(data.app)
+    val subsData = APISubscriptions.groupSubscriptions(request.subscriptions)
+    val role = request.role
+    val form = EditApplicationForm.withData(request.application)
 
-      val html = renderHtml(role, data, form)
+    val html = renderHtml(role, PageData(request.application, subsData), form)
 
-      Ok(html)
-    } recover {
-      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
-    }
+    Future.successful(Ok(html))
   }
 
   private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
@@ -164,26 +160,4 @@ class Subscriptions @Inject() (
       case _ => Future.successful(())
     }
   }
-}
-
-class ApiSubscriptionsHelper @Inject() (applicationService: ApplicationService)(implicit ec: ExecutionContext) {
-  def fetchPageDataFor(application: Application)(implicit hc: HeaderCarrier): Future[PageData] = {
-    for {
-      subscriptions <- applicationService.apisWithSubscriptions(application)
-    } yield {
-      PageData(application, APISubscriptions.groupSubscriptions(subscriptions))
-    }
-  }
-
-  def fetchAllSubscriptions(application: Application, developer: DeveloperSession)(implicit hc: HeaderCarrier): Future[Option[SubscriptionData]] = {
-    fetchPageDataFor(application).map { data =>
-      val role = roleForApplication(data.app, developer.email)
-      Some(SubscriptionData(role, application, data.subscriptions))
-    } recover {
-      case _: ApplicationNotFound => None
-    }
-  }
-
-  def roleForApplication(application: Application, email: String): Role =
-    application.role(email).getOrElse(throw new ApplicationNotFound)
 }

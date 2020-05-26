@@ -17,15 +17,24 @@
 package controllers
 
 import domain.APIStatus._
-import domain.{APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
+import domain.{Application, APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
 import uk.gov.hmrc.play.test.UnitSpec
+import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+import cats.data.NonEmptyList
+import domain.ApiSubscriptionFields.SubscriptionFieldValue
+import domain.ApiSubscriptionFields.SubscriptionFieldDefinition
 
 trait SubscriptionTestHelperSugar {
 
   self: UnitSpec =>
 
-  def subscriptionStatus(apiName: String, serviceName: String, context: String, version: String, status: APIStatus = STABLE, subscribed: Boolean = false, requiresTrust: Boolean = false, access: Option[APIAccess] = None, isTestSupport: Boolean = false) =
-    APISubscriptionStatus(apiName, serviceName, context, APIVersion(version, status, access), subscribed, requiresTrust, isTestSupport = isTestSupport)
+  def subscriptionStatus( apiName: String, serviceName: String, context: String, version: String,
+                          status: APIStatus = STABLE, subscribed: Boolean = false, requiresTrust: Boolean = false, access: Option[APIAccess] = None, isTestSupport: Boolean = false,
+                          fields: Option[SubscriptionFieldsWrapper] = None) =
+
+    APISubscriptionStatus(apiName, serviceName, context, APIVersion(version, status, access), subscribed, requiresTrust, isTestSupport = isTestSupport, fields = fields)
+
+
 
   val sampleSubscriptions: Seq[APISubscriptionStatus] = {
     Seq(
@@ -36,9 +45,89 @@ trait SubscriptionTestHelperSugar {
     )
   }
 
+   def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {
+
+    val sfd = SubscriptionFieldDefinition("name", "description", "short-description", "type", "hint")
+    val sfv = SubscriptionFieldValue(sfd, "the value")
+
+    val context = "individual-employment-context-2"
+    val version = "1.0"
+    val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, context, version, NonEmptyList.one(sfv))
+
+    Seq(
+      subscriptionStatus("Individual Employment 2", "individual-employment-2", context, version, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
+    )
+  }
+
   def verifyApplicationSubscription(applicationSubscription: APISubscriptions, expectedApiHumanReadableAppName: String, expectedApiServiceName: String, expectedVersions: Seq[APIVersion]) {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
     applicationSubscription.apiServiceName shouldBe expectedApiServiceName
     applicationSubscription.subscriptions.map(_.apiVersion) shouldBe expectedVersions
   }
+
+  def generateName(prefix: String) = s"$prefix-name"
+
+  def generateField(prefix: String): SubscriptionFieldDefinition =
+    SubscriptionFieldDefinition(
+      name = generateName(prefix),
+      description = s"$prefix-description",
+      shortDescription = s"$prefix-short-description",
+      hint = s"$prefix-hint",
+      `type` = "STRING"
+    )
+
+  def generateValue(prefix: String) = s"$prefix-value"
+
+  def generateValueName(prefix: String, index: Int) = s"$prefix-field-$index"
+
+  def generateFieldValue(prefix: String, index: Int): SubscriptionFieldValue =
+    SubscriptionFieldValue(
+      definition = generateField(prefix),
+      value = generateValueName(prefix, index)
+    )
+
+  val WHO_CARES = "who cares"
+
+  def generateWrapper(prefix: String, count: Int): Option[SubscriptionFieldsWrapper] = {
+    val rawFields = (1 to count).map(i => generateFieldValue(prefix, i)).toList
+    val nelFields = NonEmptyList.fromList(rawFields)
+
+    nelFields.map(fs =>
+      SubscriptionFieldsWrapper(
+        applicationId = WHO_CARES,
+        clientId = WHO_CARES,
+        apiContext = WHO_CARES,
+        apiVersion = WHO_CARES,
+        fields = fs
+      )
+    )
+  }
+
+  val onlyApiExampleMicroserviceSubscribedTo: APISubscriptionStatus =
+    APISubscriptionStatus(
+      name = "api-example-microservice",
+      serviceName = "api-example-microservice",
+      context = "example-api",
+      apiVersion = APIVersion("1.0", APIStatus.STABLE),
+      subscribed = true,
+      requiresTrust = false,
+      fields = None,
+      isTestSupport = false
+    )
+
+  def exampleSubscriptionWithoutFields(prefix: String): APISubscriptionStatus =
+    APISubscriptionStatus(
+      name = generateName(prefix),
+      serviceName = s"$prefix-api",
+      context = s"/$prefix-api",
+      apiVersion = APIVersion("1.0", APIStatus.STABLE),
+      subscribed = true,
+      requiresTrust = false,
+      fields = None,
+      isTestSupport = false
+    )
+
+  def exampleSubscriptionWithFields(prefix: String, count: Int): APISubscriptionStatus =
+    exampleSubscriptionWithoutFields(prefix).copy(fields = generateWrapper(prefix, count))
+
 }

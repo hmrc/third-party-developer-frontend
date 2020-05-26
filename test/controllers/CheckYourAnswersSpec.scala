@@ -92,7 +92,6 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   trait Setup extends ApplicationServiceMock {
     val underTest = new CheckYourAnswers(
       applicationServiceMock,
-      mock[ApiSubscriptionsHelper],
       mock[ApplicationCheck],
       mock[SessionService],
       mockErrorHandler,
