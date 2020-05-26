@@ -31,9 +31,8 @@ import scala.concurrent.Future.{successful}
 trait ApplicationServiceMock extends MockitoSugar {
   val applicationServiceMock = mock[ApplicationService]
 
-  def fetchByApplicationIdReturns(id: String, returns: Application) = {
+  def fetchByApplicationIdReturns(id: String, returns: Application) =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(any())).thenReturn(successful(Some(returns)))
-  }
 
   def fetchByTeamMemberEmailReturns(apps: Seq[Application]) =
     when(applicationServiceMock.fetchByTeamMemberEmail(any())(any[HeaderCarrier]))
@@ -43,13 +42,11 @@ trait ApplicationServiceMock extends MockitoSugar {
     when(applicationServiceMock.fetchByTeamMemberEmail(eqTo(email))(any[HeaderCarrier]))
       .thenReturn(successful(apps))
 
-  def givenApplicationHasSubs(application: Application, returns: Seq[APISubscriptionStatus]) = {
+  def givenApplicationHasSubs(application: Application, returns: Seq[APISubscriptionStatus]) =
     when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(any())).thenReturn(successful(returns))
-  }
 
-  def givenApplicationHasNoSubs(application: Application) = {
+  def givenApplicationHasNoSubs(application: Application) =
     when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(any())).thenReturn(successful(Seq.empty))
-  }
 
   def fetchCredentialsReturns(id: String, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(id))(any())).thenReturn(successful(tokens))
@@ -69,9 +66,8 @@ trait ApplicationServiceMock extends MockitoSugar {
   def givenAppIsSubscribedToApi(app: Application, apiName: String, apiContext: String, apiVersion: String) =
     when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(true))
 
-    def givenAppIsNotSubscribedToApi(app: Application, apiName: String, apiContext: String, apiVersion: String) =
+  def givenAppIsNotSubscribedToApi(app: Application, apiName: String, apiContext: String, apiVersion: String) =
     when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(false))
-
 
   def givenApplicationNameIsValid() =
     when(applicationServiceMock.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier])).thenReturn(successful(Valid))
