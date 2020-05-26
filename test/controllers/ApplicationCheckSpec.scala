@@ -103,11 +103,11 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     override def determineSubs(): Unit = {
       println("***** NO Subs *****")
-      givenApplicationHasSubs(application, Seq.empty[APISubscriptionStatus])
+      givenApplicationHasNoSubs(application)
     }
   }
 
-  trait Setup extends ApplicationServiceMock with Subs with HasNoSubs {
+  trait Setup extends ApplicationServiceMock { //with Subs with HasNoSubs {
     val underTest = new ApplicationCheck(
       applicationServiceMock,
       mock[ApiSubscriptionsHelper](withSettings.verboseLogging),
@@ -126,7 +126,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     fetchByApplicationIdReturns(application.id, application)
 
-    determineSubs()
+    // determineSubs()
 
     fetchCredentialsReturns(application, tokens)
 
@@ -135,7 +135,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     // TODO : givenUpdateCheckInformationReturns()
     given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
       .willReturn(ApplicationUpdateSuccessful)
-    
+
     given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
       .willReturn(successful(Some(SubscriptionData(Role.ADMINISTRATOR, application, Some(groupedSubs)))))
 
@@ -149,10 +149,15 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
-    def givenApplicationExists(appId: String = appId, clientId: String = clientId, userRole: Role = ADMINISTRATOR,
-                                  state: ApplicationState = testing,
-                                  checkInformation: Option[CheckInformation] = None,
-                                  access: Access = Standard()): Application = {
+    def givenApplicationExists(
+        appId: String = appId,
+        clientId: String = clientId,
+        userRole: Role = ADMINISTRATOR,
+        state: ApplicationState = testing,
+        checkInformation: Option[CheckInformation] = None,
+        access: Access = Standard(),
+        hasSubs: Boolean = false): Application = {
+
       // this is to ensure we always have one ADMINISTRATOR
       val anotherRole = if(userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
 
@@ -161,22 +166,28 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
         Collaborator(anotherCollaboratorEmail, anotherRole)
       )
 
-      givenApplicationExistsWithCollaborators(collaborators, appId, clientId, state, checkInformation, access)
+      givenApplicationExistsWithCollaborators(collaborators, appId, clientId, state, checkInformation, access, hasSubs)
     }
 
 
-    def givenApplicationExistsWithCollaborators(collaborators: Set[Collaborator],
-                                                   appId: String = appId, clientId: String = clientId,
-                                                   state: ApplicationState = testing,
-                                                   checkInformation: Option[CheckInformation] = None,
-                                                   access: Access = Standard()): Application = {
+    def givenApplicationExistsWithCollaborators(
+        collaborators: Set[Collaborator],
+        appId: String = appId,
+        clientId: String = clientId,
+        state: ApplicationState = testing,
+        checkInformation: Option[CheckInformation] = None,
+        access: Access = Standard(),
+        hasSubs: Boolean = false ): Application = {
 
       val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
          collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
 
       fetchByApplicationIdReturns(application.id, application)
       fetchCredentialsReturns(application.id, tokens)
-      givenApplicationHasNoSubs(application)
+      if(hasSubs)
+        givenApplicationHasSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
+      else
+        givenApplicationHasNoSubs(application)
 
       application
     }
@@ -329,9 +340,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     // TODO: Plan:
     // Make new ApplicationCheckSpec, and move this test to it, and make it work.
-    "show api subscription configuration step as complete when it has been done" in new Setup with HasSubs {      
+    "show api subscription configuration step as complete when it has been done" in new Setup {
       givenApplicationExists(
-        checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))
+        checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)),
+        hasSubs = true)
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -497,6 +509,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "return 404 NOT FOUND when no API subscriptions are retrieved" in new Setup {
+      givenApplicationHasNoSubs(application)
+
       given(underTest.apiSubscriptionsHelper.fetchAllSubscriptions(any[Application], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(successful(None))
 
@@ -1263,7 +1277,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with SubscriptionTestHelpe
       body should include(yetAnotherCollaboratorEmail)
     }
   }
-    private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
+
+  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
   private def stepRequiredIndication(id: String) = {
     s"""<div id="$id" class="step-status status-incomplete">To do</div>"""
