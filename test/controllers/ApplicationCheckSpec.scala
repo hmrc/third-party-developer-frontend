@@ -24,7 +24,7 @@ import domain._
 import helpers.string._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.Assertion
@@ -69,11 +69,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     Seq(APISubscriptionStatus("API1", "api-example-microservice", "exampleContext",
       APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false))))
 
-  val groupedSubs: GroupedSubscriptions = GroupedSubscriptions(Seq.empty,
-    Seq(APISubscriptions("API1", "ServiceName", "apiContent",
-      Seq(APISubscriptionStatus(
-        "API1", "subscriptionServiceName", "context", APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false)))))
-
   val groupedSubsSubscribedToExampleOnly: GroupedSubscriptions = GroupedSubscriptions(
     testApis = Seq.empty,
     apis = Seq.empty,
@@ -95,23 +90,20 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
+    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
       .willReturn(Some(session))
 
     givenApplicationUpdateSucceeds()
 
-    fetchByApplicationIdReturns(application.id, application)
+    fetchByApplicationIdReturns(appId, application)
 
     fetchCredentialsReturns(application, tokens)
 
     givenRemoveTeamMemberSucceeds(loggedInUser)
 
-    // TODO : givenUpdateCheckInformationReturns()
-    given(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
-      .willReturn(ApplicationUpdateSuccessful)
+    givenUpdateCheckInformationReturns(appId)
 
-    given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-      .willReturn(Future.successful(Valid))
+    givenApplicationNameIsValid()
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
@@ -321,7 +313,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
           teamConfirmed = true,
           Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
-      given(underTest.applicationService.requestUplift(mockEq(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
+      given(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(ApplicationUpliftSuccessful)
 
       private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
@@ -342,7 +334,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
           teamConfirmed = true,
           Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
-      given(underTest.applicationService.requestUplift(mockEq(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
+      given(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(ApplicationUpliftSuccessful)
 
       private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
@@ -402,12 +394,15 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   "api subscriptions review" should {
     "return page" in new Setup {
-      givenApplicationExists()
+      val application = givenApplicationExists()
+      val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      givenApplicationHasSubs(application, subsData)
+
       private val result = await(addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
       bodyOf(result) should include("Confirm which APIs you want to use")
-      // bodyOf(result) should include("subscriptionServiceName")
+      bodyOf(result) should include(generateName("api1"))
     }
 
     "success action" in new Setup {
@@ -577,8 +572,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, "My First Tax App", appUnderTest.description, appUnderTest.access)
-      verify(underTest.applicationService).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -591,8 +586,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, appUnderTest.access)
-      verify(underTest.applicationService, never()).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -623,7 +618,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       bodyOf(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
       verify(underTest.applicationService)
-        .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION), mockEq(Some(appId)))(any[HeaderCarrier])
+        .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), eqTo(Some(appId)))(any[HeaderCarrier])
     }
 
     "Validation failure when duplicate name" in new Setup {
@@ -643,7 +638,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       bodyOf(result) should include("That application name already exists. Enter a unique name for your application.")
 
       verify(underTest.applicationService)
-        .isApplicationNameValid(mockEq(applicationName), mockEq(Environment.PRODUCTION), mockEq(Some(appId)))(any[HeaderCarrier])
+        .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), eqTo(Some(appId)))(any[HeaderCarrier])
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
@@ -755,9 +750,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
 
-      verify(underTest.applicationService).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -771,9 +766,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
       verify(underTest.applicationService)
-        .update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
+        .update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -904,9 +899,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val standardAccess = Standard(termsAndConditionsUrl = Some("http://termsAndConditionsURL.example.com"))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
-      verify(underTest.applicationService).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -920,9 +915,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val standardAccess = Standard(termsAndConditionsUrl = None)
       private val expectedUpdateRequest =
         UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
-      verify(underTest.applicationService).update(mockEq(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(mockEq(appId), mockEq(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(appId), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -1092,7 +1087,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(appId), eqTo(expectedCheckInformation))(any[HeaderCarrier])
     }
 
     "team post doesn't redirect to the check landing page when not logged in" in new Setup {
@@ -1159,7 +1154,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check/team")
 
-      verify(underTest.applicationService).removeTeamMember(mockEq(app),mockEq(anotherCollaboratorEmail), mockEq(loggedInUser.email))(any[HeaderCarrier])
+      verify(underTest.applicationService).removeTeamMember(eqTo(app),eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
@@ -1171,7 +1166,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(appId), eqTo(expectedCheckInformation))(any[HeaderCarrier])
     }
   }
 

@@ -183,7 +183,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
         givenApplicationHasNoSubs(app)
         givenSubscribeToApiSucceeds(app, apiContext, apiVersion)
-        givenUpdateCheckInformationReturns(app)
+      givenUpdateCheckInformationReturns(appId)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -203,7 +203,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
         givenApplicationHasNoSubs(app)
         ungivenSubscribeToApiSucceeds(app, apiContext, apiVersion)
-        givenUpdateCheckInformationReturns(app)
+        givenUpdateCheckInformationReturns(appId)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -223,7 +223,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
         givenApplicationHasNoSubs(app)
         ungivenSubscribeToApiSucceeds(app, apiContext, apiVersion)
-        givenUpdateCheckInformationReturns(app)
+        givenUpdateCheckInformationReturns(appId)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -244,7 +244,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         fetchByApplicationIdReturns(appId,app)
         givenApplicationHasNoSubs(app)
         givenSubscribeToApiSucceeds(app, apiContext, apiVersion)
-        givenUpdateCheckInformationReturns(app)
+        givenUpdateCheckInformationReturns(appId)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -265,7 +265,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         givenApplicationHasNoSubs(app)
         ungivenSubscribeToApiSucceeds(app, apiContext, apiVersion)
-        givenUpdateCheckInformationReturns(app)
+        givenUpdateCheckInformationReturns(appId)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
@@ -286,7 +286,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         givenApplicationHasNoSubs(app)
         ungivenSubscribeToApiSucceeds(app, apiContext, apiVersion)
-        givenUpdateCheckInformationReturns(app)
+        givenUpdateCheckInformationReturns(appId)
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 

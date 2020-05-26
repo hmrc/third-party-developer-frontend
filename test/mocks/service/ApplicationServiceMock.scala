@@ -86,8 +86,8 @@ trait ApplicationServiceMock extends MockitoSugar {
     when(applicationServiceMock.removeTeamMember(any(), any(), eqTo(loggedInUser.email))(any[HeaderCarrier]))
     .thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenUpdateCheckInformationReturns(app: Application) =
-    when(applicationServiceMock.updateCheckInformation(eqTo(app.id), any())(any()))
+  def givenUpdateCheckInformationReturns(appId: String) =
+    when(applicationServiceMock.updateCheckInformation(eqTo(appId), any())(any()))
     .thenReturn(successful(ApplicationUpdateSuccessful))
 
   def givenApplicationExists(application: Application) : Unit = {
