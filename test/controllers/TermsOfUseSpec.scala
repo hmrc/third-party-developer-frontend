@@ -19,7 +19,7 @@ package controllers
 import domain._
 import domain.Environment._
 import domain.Role._
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
@@ -39,10 +39,10 @@ import scala.concurrent.Future
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new TermsOfUse(
       mockErrorHandler,
-      mock[SessionService],
+      sessionServiceMock,
       applicationServiceMock,
       messagesApi,
       cookieSigner

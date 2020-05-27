@@ -19,6 +19,7 @@ package controllers
 import java.util.UUID
 
 import domain._
+import mocks.service.SessionServiceMock
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
@@ -42,10 +43,10 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   val developerSession: DeveloperSession = DeveloperSession(session)
 
-  trait Setup {
+  trait Setup extends SessionServiceMock {
     val underTest = new UserLogoutAccount(
       mock[DeskproService],
-      mock[SessionService],
+      sessionServiceMock,
       mock[ApplicationService],
       mock[config.ErrorHandler],
       messagesApi,
