@@ -76,10 +76,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     apis = Seq.empty,
     exampleApi = None)
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new ApplicationCheck(
       applicationServiceMock,
-      mock[SessionService],
+      sessionServiceMock,
       mockErrorHandler,
       messagesApi,
       cookieSigner
@@ -87,8 +87,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
-      .willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
 
     givenApplicationUpdateSucceeds()
 
