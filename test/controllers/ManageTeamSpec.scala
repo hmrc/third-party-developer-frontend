@@ -23,7 +23,7 @@ import domain._
 import domain.AddTeamMemberPageMode.ManageTeamMembers
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import helpers.string._
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
 import org.mockito.BDDMockito.given
@@ -54,9 +54,9 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new ManageTeam(
-      mock[SessionService],
+      sessionServiceMock,
       mock[AuditService],
       mock[ThirdPartyDeveloperConnector],
       applicationServiceMock,
@@ -67,8 +67,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
     implicit val hc = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
-      .willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
     given(applicationServiceMock.addTeamMember(any[Application], any[String], any[Collaborator])(any[HeaderCarrier]))
       .willReturn(AddTeamMemberResponse(registeredUser = true))
     given(applicationServiceMock.removeTeamMember(any[Application], any[String], eqTo(loggedInUser.email))(any[HeaderCarrier]))

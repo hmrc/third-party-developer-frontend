@@ -35,12 +35,12 @@ import scala.concurrent.Future.failed
 
 class IpWhitelistSpec extends BaseControllerSpec with TestApplications with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val mockDeskproService = mock[DeskproService]
     val underTest = new IpWhitelist(
       mockDeskproService,
       applicationServiceMock,
-      mock[SessionService],
+      sessionServiceMock,
       mockErrorHandler,
       messagesApi,
       cookieSigner
@@ -54,7 +54,7 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     val developer: Developer = Developer("developer@example.com", "John", "Doe")
     def givenTheUserIsLoggedInAs(user: Developer) = {
       val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
+      fetchSessionByIdReturns(sessionId, session)
     }
 
     implicit val hc = HeaderCarrier()

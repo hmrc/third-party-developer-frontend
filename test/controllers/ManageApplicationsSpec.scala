@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import config.ErrorHandler
 import domain._
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
@@ -59,18 +59,17 @@ class ManageApplicationsSpec
 
   private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val addApplicationController = new AddApplication(
       applicationServiceMock,
-      mock[SessionService],
+      sessionServiceMock,
       mock[AuditService],
       mock[ErrorHandler],
       messagesApi,
       cookieSigner
     )
 
-    given(addApplicationController.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-      .willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(addApplicationController,implicitly)(sessionId)

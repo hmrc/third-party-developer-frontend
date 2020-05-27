@@ -21,7 +21,7 @@ import java.util.UUID.randomUUID
 import config.ErrorHandler
 import domain._
 import domain.ApiSubscriptionFields._
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, when}
@@ -85,15 +85,14 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
     "csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken
   )
 
-  trait ManageSubscriptionsSetup extends ApplicationServiceMock {
+  trait ManageSubscriptionsSetup extends ApplicationServiceMock with SessionServiceMock {
 
-    val mockSessionService: SessionService = mock[SessionService]
     val mockAuditService: AuditService = mock[AuditService]
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
     val mockErrorHandler: ErrorHandler = fakeApplication.injector.instanceOf[ErrorHandler]
 
     val manageSubscriptionController = new ManageSubscriptions(
-      mockSessionService,
+      sessionServiceMock,
       mockAuditService,
       applicationServiceMock,
       mockErrorHandler,
@@ -102,8 +101,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       cookieSigner
     )
 
-    when(mockSessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
-      .thenReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
 
     fetchByApplicationIdReturns(appId,application)
     fetchByApplicationIdReturns(privilegedApplication.id,privilegedApplication)
