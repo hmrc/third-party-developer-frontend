@@ -16,17 +16,14 @@
 
 package mocks.service
 
+import domain._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import org.mockito.Mockito.withSettings
-
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.Future
-import domain._
-import org.mockito.Mockito.when
-import org.mockito.Mockito.withSettings
-import scala.concurrent.Future.{successful}
+
+import scala.concurrent.Future.successful
 
 trait ApplicationServiceMock extends MockitoSugar {
   val applicationServiceMock = mock[ApplicationService]

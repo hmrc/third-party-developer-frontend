@@ -25,7 +25,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
-import service.{AuditService, SessionService}
+import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
@@ -54,10 +54,10 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new AddApplication(
       applicationServiceMock,
-      mock[SessionService],
+      sessionServiceMock,
       mock[AuditService],
       mock[ErrorHandler],
       messagesApi,
@@ -66,11 +66,9 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
 
     implicit val hc = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
-      .willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
 
-    given(underTest.sessionService.fetch(eqTo(partLoggedInSessionId))(any[HeaderCarrier]))
-      .willReturn(Some(partLoggedInSession))
+    fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 
     private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
