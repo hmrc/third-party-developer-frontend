@@ -18,6 +18,7 @@ package controllers
 
 import config.ErrorHandler
 import domain._
+import mocks.service.ApplicationServiceMock
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.BDDMockito._
@@ -25,7 +26,7 @@ import play.api.http.Status.OK
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import service.{ApplicationService, SessionService}
+import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
 
@@ -40,10 +41,10 @@ class NavigationSpec extends BaseControllerSpec {
 
   var userPassword = "Password1!"
 
-  class Setup(loggedInState: Option[LoggedInState]) {
+  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock {
     val underTest = new Navigation(
       mock[SessionService],
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[MessagesApi],
       mock[ErrorHandler],
       cookieSigner

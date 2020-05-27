@@ -20,6 +20,7 @@ import java.util.UUID.randomUUID
 
 import config.ErrorHandler
 import domain._
+import mocks.service.ApplicationServiceMock
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
@@ -58,9 +59,9 @@ class ManageApplicationsSpec
 
   private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
-  trait AddApplicationSetup {
+  trait Setup extends ApplicationServiceMock {
     val addApplicationController = new AddApplication(
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[SessionService],
       mock[AuditService],
       mock[ErrorHandler],
@@ -82,10 +83,8 @@ class ManageApplicationsSpec
 
   "manageApps" should {
 
-    "return the manage Applications page with the user logged in" in new AddApplicationSetup {
-
-      given(addApplicationController.applicationService.fetchByTeamMemberEmail(mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn(successful(List(application)))
+    "return the manage Applications page with the user logged in" in new Setup {
+      fetchByTeamMemberEmailReturns(loggedInUser.email, List(application))
 
       private val result = await(addApplicationController.manageApps()(loggedInRequest))
 
@@ -96,8 +95,7 @@ class ManageApplicationsSpec
       bodyOf(result) should not include "Sign in"
     }
 
-    "return to the login page when the user is not logged in" in new AddApplicationSetup {
-
+    "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()
 
       private val result = await(addApplicationController.manageApps()(request))
@@ -108,8 +106,7 @@ class ManageApplicationsSpec
   }
 
   "tenDaysWarning" should {
-    "return the 10 days warning interrupt page when the user is logged in" in new AddApplicationSetup {
-
+    "return the 10 days warning interrupt page when the user is logged in" in new Setup {
       private val result = await(addApplicationController.tenDaysWarning()(loggedInRequest))
 
       status(result) shouldBe OK
@@ -118,8 +115,7 @@ class ManageApplicationsSpec
       bodyOf(result) should not include "Sign in"
     }
 
-    "return to the login page when the user is not logged in" in new AddApplicationSetup {
-
+    "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()
 
       private val result = await(addApplicationController.tenDaysWarning()(request))
