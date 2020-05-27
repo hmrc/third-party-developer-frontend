@@ -19,13 +19,13 @@ package controllers
 import domain._
 import mocks.service._
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.`given`
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK}
 import play.filters.csrf.CSRF.TokenProvider
-import service.{DeskproService, SessionService}
+import service.DeskproService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{TestApplications, WithCSRFAddToken}
 import utils.CSRFTokenHelper._

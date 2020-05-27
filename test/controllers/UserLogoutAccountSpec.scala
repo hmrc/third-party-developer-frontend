@@ -27,7 +27,7 @@ import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF._
-import service.{ApplicationService, DeskproService, SessionService}
+import service.{ApplicationService, DeskproService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import utils.WithCSRFAddToken

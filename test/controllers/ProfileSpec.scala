@@ -28,8 +28,8 @@ import org.mockito.Mockito.verify
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
-import service.{AuditService, SessionService}
 import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
+import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._

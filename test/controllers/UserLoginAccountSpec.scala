@@ -24,12 +24,11 @@ import mocks.service.SessionServiceMock
 import org.mockito.ArgumentMatchers.{any, eq => meq, _}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
-import play.api.libs.crypto.CookieSigner
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditAction._
 import service._
+import service.AuditAction._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import utils.WithCSRFAddToken

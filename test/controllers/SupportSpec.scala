@@ -21,18 +21,16 @@ import domain.{Developer, LoggedInState, Session, TicketCreated}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito._
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{DeskproService, SessionService}
+import service.DeskproService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-
-import scala.concurrent.Future
 
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 

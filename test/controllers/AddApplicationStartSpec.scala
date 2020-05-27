@@ -19,8 +19,6 @@ package controllers
 import config.ErrorHandler
 import domain._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
-import org.mockito.BDDMockito.given
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}

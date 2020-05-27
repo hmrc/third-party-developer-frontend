@@ -20,14 +20,12 @@ import domain._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.BDDMockito.given
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.verify
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.CSRFTokenHelper._
 import utils.TestApplications._
