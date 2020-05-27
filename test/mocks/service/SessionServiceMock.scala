@@ -28,6 +28,12 @@ import scala.concurrent.Future.successful
 trait SessionServiceMock extends MockitoSugar {
   val sessionServiceMock = mock[SessionService]
 
+  private def fetchSessionById(sessionId: String, returns: Option[Session]) =
+    when(sessionServiceMock.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(returns))
+
   def fetchSessionByIdReturns(sessionId: String, returns: Session) =
-    when(sessionServiceMock.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(Some(returns)))
+    fetchSessionById(sessionId, Some(returns))
+
+  def fetchSessionByIdReturnsNone(sessionId: String) =
+    fetchSessionById(sessionId, None)
 }

@@ -18,6 +18,7 @@ package controllers
 
 import config.ErrorHandler
 import domain.{Developer, LoggedInState, Session, TicketCreated}
+import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
@@ -35,10 +36,10 @@ import scala.concurrent.Future
 
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup {
+  trait Setup extends SessionServiceMock {
     val underTest = new Support(
       mock[DeskproService],
-      mock[SessionService],
+      sessionServiceMock,
       mock[ErrorHandler],
       messagesApi,
       cookieSigner
@@ -57,8 +58,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
 
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(Some(Session(sessionId, developer, LoggedInState.LOGGED_IN))))
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
       val result: Result = await(addToken(underTest.raiseSupportEnquiry())(request))
 
@@ -69,8 +69,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
       val request = FakeRequest()
         .withSession(sessionParams: _*)
 
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(None))
+      fetchSessionByIdReturnsNone(sessionId)
 
       val result = await(addToken(underTest.raiseSupportEnquiry())(request))
       assertFullNameAndEmail(result, "", "")
@@ -81,8 +80,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
 
-      given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(Some(Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))))
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))
 
       val result = await(addToken(underTest.raiseSupportEnquiry())(request))
 

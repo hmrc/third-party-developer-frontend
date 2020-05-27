@@ -18,6 +18,7 @@ package controllers
 
 import connectors.ThirdPartyDeveloperConnector
 import domain.RegistrationSuccessful
+import mocks.service.SessionServiceMock
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.BDDMockito._
@@ -34,9 +35,9 @@ class RegistrationSpec extends BaseControllerSpec {
 
   var userPassword = "Password1!"
 
-  trait Setup {
+  trait Setup extends SessionServiceMock {
     val underTest = new Registration(
-      mock[SessionService],
+      sessionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mockErrorHandler,
       messagesApi,

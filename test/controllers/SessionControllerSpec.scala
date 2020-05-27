@@ -21,42 +21,37 @@ import java.util.UUID
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain.{Developer, LoggedInState, Session}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.BDDMockito.given
+import mocks.service.SessionServiceMock
 import play.api.http.Status._
 import play.api.i18n.MessagesApi
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import play.api.test.Helpers.redirectLocation
 import play.filters.csrf.CSRF.TokenProvider
-import service.{AuditService, SessionService}
-import uk.gov.hmrc.http.HeaderCarrier
+import service.AuditService
 import utils.WithLoggedInSession._
 
-import scala.concurrent.Future
+class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout {
 
-class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout{
-
-  val mockSessionService: SessionService = mock[SessionService]
-
-  val sessionController = new SessionController(
-    mock[AuditService],
-    mockSessionService,
-    mock[ThirdPartyDeveloperConnector],
-    mock[ErrorHandler],
-    mock[MessagesApi],
-    cookieSigner
-  )
+  trait Setup extends SessionServiceMock {
+    val sessionController = new SessionController(
+      mock[AuditService],
+      sessionServiceMock,
+      mock[ThirdPartyDeveloperConnector],
+      mock[ErrorHandler],
+      mock[MessagesApi],
+      cookieSigner
+    )
+  }
 
   "keepAlive" should {
-
-    "reset the session if logged in" in {
+    "reset the session if logged in" in new Setup {
 
       val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
-      val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
+      val sessionId = UUID.randomUUID().toString
+      val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
       val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
-      given(mockSessionService.fetch(any())(any[HeaderCarrier]))
-        .willReturn(Future.successful(Some(session)))
+      fetchSessionByIdReturns(sessionId, session)
 
       val loggedInRequest = FakeRequest()
         .withLoggedIn(sessionController,implicitly)(session.sessionId)
@@ -67,7 +62,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout{
       status(result) shouldBe NO_CONTENT
     }
 
-    "return not authenticated if not logged in" in {
+    "return not authenticated if not logged in" in new Setup {
       val request = FakeRequest()
 
       val result = await(sessionController.keepAlive()(request))

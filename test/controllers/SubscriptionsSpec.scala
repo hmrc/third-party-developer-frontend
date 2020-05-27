@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
 import domain._
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
@@ -84,14 +84,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new Subscriptions(
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
       mock[SubscriptionFieldsService],
       mock[SubscriptionsService],
       applicationServiceMock,
-      mock[SessionService],
+      sessionServiceMock,
       mockErrorHandler,
       messagesApi,
       cookieSigner
@@ -99,7 +99,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
     givenApplicationUpdateSucceeds()
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
     givenApplicationHasNoSubs(activeApplication)
