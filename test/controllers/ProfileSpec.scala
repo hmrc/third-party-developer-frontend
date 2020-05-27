@@ -19,7 +19,7 @@ package controllers
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain._
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => meq}
@@ -38,11 +38,11 @@ import scala.concurrent.Future
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new Profile(
       applicationServiceMock,
       mock[AuditService],
-      mock[SessionService],
+      sessionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[ErrorHandler],
       messagesApi,
@@ -65,8 +65,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       val requestCaptor: ArgumentCaptor[UpdateProfileRequest] = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
 
-      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier]))
-        .willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
+      fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))
 
       given(underTest.connector.updateProfile(meq(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier]))
         .willReturn(Future.successful(OK))

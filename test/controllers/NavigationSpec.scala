@@ -18,7 +18,7 @@ package controllers
 
 import config.ErrorHandler
 import domain._
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.BDDMockito._
@@ -41,9 +41,9 @@ class NavigationSpec extends BaseControllerSpec {
 
   var userPassword = "Password1!"
 
-  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock {
+  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new Navigation(
-      mock[SessionService],
+      sessionServiceMock,
       applicationServiceMock,
       mock[MessagesApi],
       mock[ErrorHandler],
@@ -51,8 +51,7 @@ class NavigationSpec extends BaseControllerSpec {
     )
 
     loggedInState.map(loggedInState => {
-      given(underTest.sessionService.fetch(ArgumentMatchers.eq(sessionId))(any[HeaderCarrier]))
-        .willReturn(successful(Some(Session(sessionId, developer, loggedInState))))
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, loggedInState))
     })
 
     private val request =

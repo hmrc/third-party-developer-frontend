@@ -17,7 +17,7 @@
 package controllers
 
 import domain._
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -49,10 +49,10 @@ class RedirectsSpec extends BaseControllerSpec {
 
   val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new Redirects(
       applicationServiceMock,
-      mock[SessionService],
+      sessionServiceMock,
       mockErrorHandler,
       messagesApi,
       cookieSigner
@@ -64,7 +64,7 @@ class RedirectsSpec extends BaseControllerSpec {
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
 
     override def givenApplicationExists(application: Application): Unit = {
       super.givenApplicationExists(application)
