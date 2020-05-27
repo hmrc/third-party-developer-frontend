@@ -19,29 +19,26 @@ package controllers
 import java.util.UUID.randomUUID
 
 import controllers.checkpages.ApplicationCheck
-import domain.Role._
 import domain._
+import domain.Role._
 import helpers.string._
+import mocks.service._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
-import org.scalatest.Assertion
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, SessionService}
+import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import mocks.service._
-
 import scala.concurrent.Future
-import scala.concurrent.Future.successful
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
 

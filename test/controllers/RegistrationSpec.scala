@@ -17,7 +17,7 @@
 package controllers
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.{LoggedInState, RegistrationSuccessful}
+import domain.RegistrationSuccessful
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.BDDMockito._
@@ -45,7 +45,6 @@ class RegistrationSpec extends BaseControllerSpec {
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
   }
-
 
   "registration" should {
     "register with normalized firstname, lastname, email and organisation" in new Setup {

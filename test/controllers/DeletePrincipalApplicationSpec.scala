@@ -19,6 +19,7 @@ package controllers
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import mocks.service._
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
@@ -26,12 +27,10 @@ import org.mockito.Mockito.verify
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, AuditService, SessionService}
+import service.{AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-
-import mocks.service._
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful

@@ -16,9 +16,10 @@
 
 package controllers
 
+import domain._
 import domain.Environment._
 import domain.Role._
-import domain._
+import mocks.service.ApplicationServiceMock
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
@@ -28,12 +29,11 @@ import org.mockito.Mockito.{never, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, SessionService}
+import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import mocks.service.ApplicationServiceMock
 
 import scala.concurrent.Future
 

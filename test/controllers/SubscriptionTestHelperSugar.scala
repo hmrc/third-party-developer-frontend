@@ -16,13 +16,11 @@
 
 package controllers
 
-import domain.APIStatus._
-import domain.{Application, APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
-import uk.gov.hmrc.play.test.UnitSpec
-import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import cats.data.NonEmptyList
-import domain.ApiSubscriptionFields.SubscriptionFieldValue
-import domain.ApiSubscriptionFields.SubscriptionFieldDefinition
+import domain._
+import domain.APIStatus._
+import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
+import uk.gov.hmrc.play.test.UnitSpec
 
 trait SubscriptionTestHelperSugar {
 
@@ -34,8 +32,6 @@ trait SubscriptionTestHelperSugar {
 
     APISubscriptionStatus(apiName, serviceName, context, APIVersion(version, status, access), subscribed, requiresTrust, isTestSupport = isTestSupport, fields = fields)
 
-
-
   val sampleSubscriptions: Seq[APISubscriptionStatus] = {
     Seq(
       subscriptionStatus("Individual Employment", "individual-employment", "individual-employment-context", "1.0", STABLE, subscribed = true),
@@ -45,8 +41,7 @@ trait SubscriptionTestHelperSugar {
     )
   }
 
-   def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {
-
+  def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {
     val sfd = SubscriptionFieldDefinition("name", "description", "short-description", "type", "hint")
     val sfv = SubscriptionFieldValue(sfd, "the value")
 

@@ -17,6 +17,7 @@
 package controllers
 
 import domain._
+import mocks.service._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.`given`
@@ -24,13 +25,11 @@ import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK}
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, DeskproService, SessionService}
+import service.{DeskproService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.{TestApplications, WithCSRFAddToken}
 import utils.CSRFTokenHelper._
 import utils.WithLoggedInSession._
-import utils.{TestApplications, WithCSRFAddToken}
-
-import mocks.service._
 
 import scala.concurrent.Future.failed
 

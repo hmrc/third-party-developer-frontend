@@ -17,6 +17,7 @@
 package controllers
 
 import domain._
+import mocks.service.ApplicationServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -26,13 +27,12 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, SessionService}
+import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.CSRFTokenHelper._
 import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithLoggedInSession._
-import mocks.service.ApplicationServiceMock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

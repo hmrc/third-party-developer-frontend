@@ -19,6 +19,7 @@ package controllers
 import java.net.URI
 
 import config.ErrorHandler
+import connectors.ThirdPartyDeveloperConnector
 import domain.{Developer, LoggedInState, Session, UpdateLoggedInStateRequest}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
@@ -32,11 +33,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import qr.{OtpAuthUri, QRCode}
-import service.{MFAResponse, MFAService, MfaMandateService, SessionService}
+import service.{MfaMandateService, MFAResponse, MFAService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import connectors.ThirdPartyDeveloperConnector
 
 import scala.concurrent.Future
 

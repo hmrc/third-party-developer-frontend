@@ -20,6 +20,7 @@ import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import mocks.service.ApplicationServiceMock
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
@@ -34,7 +35,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import mocks.service.ApplicationServiceMock
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future._
 

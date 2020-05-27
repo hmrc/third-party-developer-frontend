@@ -19,6 +19,7 @@ package controllers
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import mocks.service.ApplicationServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => meq}
@@ -27,8 +28,8 @@ import org.mockito.Mockito.verify
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
+import service.{AuditService, SessionService}
 import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
-import service.{ApplicationService, AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
@@ -37,9 +38,9 @@ import scala.concurrent.Future
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock {
     val underTest = new Profile(
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[AuditService],
       mock[SessionService],
       mock[ThirdPartyDeveloperConnector],

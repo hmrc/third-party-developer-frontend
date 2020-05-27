@@ -25,8 +25,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import play.api.http.Status._
 import play.api.i18n.MessagesApi
-import play.api.test.Helpers.redirectLocation
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
+import play.api.test.Helpers.redirectLocation
 import play.filters.csrf.CSRF.TokenProvider
 import service.{AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,6 +37,7 @@ import scala.concurrent.Future
 class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout{
 
   val mockSessionService: SessionService = mock[SessionService]
+
   val sessionController = new SessionController(
     mock[AuditService],
     mockSessionService,

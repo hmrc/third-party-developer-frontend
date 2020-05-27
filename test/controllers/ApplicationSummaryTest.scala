@@ -16,11 +16,10 @@
 
 package controllers
 
+import domain.{AccessType, TermsOfUseStatus}
 import domain.Role.DEVELOPER
 import domain.State.TESTING
-import domain.{AccessType, TermsOfUseStatus}
 import org.joda.time.DateTime
-import org.scalacheck.Prop.False
 import org.scalatest.{Matchers, WordSpec}
 
 class ApplicationSummaryTest extends WordSpec with Matchers {

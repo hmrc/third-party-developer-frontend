@@ -20,7 +20,6 @@ import org.scalatest.Matchers
 import play.api.data.{Form, FormError}
 import uk.gov.hmrc.play.test.UnitSpec
 
-
 class EmailValidationSpec extends UnitSpec with Matchers{
   "emailValidator for the field email" should {
     val testForm = Form("emailaddress" -> emailValidator())
