@@ -20,15 +20,15 @@ import java.util.UUID
 
 import config.ErrorHandler
 import domain._
+import mocks.service.SessionServiceMock
 import org.mockito.ArgumentMatchers.{any, eq => meq, _}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
-import play.api.libs.crypto.CookieSigner
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditAction._
 import service._
+import service.AuditAction._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import utils.WithCSRFAddToken
@@ -61,14 +61,14 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     nonce = Some(nonce),
     session = None)
 
-  trait Setup {
+  trait Setup extends SessionServiceMock {
     private val daysRemaining = 10
 
     val mfaMandateService: MfaMandateService = mock[MfaMandateService]
 
     val underTest = new UserLoginAccount(mock[AuditService],
       mock[ErrorHandler],
-      mock[SessionService],
+      sessionServiceMock,
       mock[ApplicationService],
       messagesApi,
       mfaMandateService,

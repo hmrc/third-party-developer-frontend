@@ -19,7 +19,9 @@ package controllers
 import java.net.URI
 
 import config.ErrorHandler
+import connectors.ThirdPartyDeveloperConnector
 import domain.{Developer, LoggedInState, Session, UpdateLoggedInStateRequest}
+import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito._
@@ -32,17 +34,16 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import qr.{OtpAuthUri, QRCode}
-import service.{MFAResponse, MFAService, MfaMandateService, SessionService}
+import service.{MfaMandateService, MFAResponse, MFAService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import connectors.ThirdPartyDeveloperConnector
 
 import scala.concurrent.Future
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup {
+  trait Setup extends SessionServiceMock {
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
@@ -57,7 +58,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ThirdPartyDeveloperConnector],
       mock[OtpAuthUri],
       mock[MFAService],
-      mock[SessionService],
+      sessionServiceMock,
       messagesApi,
       mock[ErrorHandler],
       mock[MfaMandateService],
@@ -65,8 +66,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       override val qrCode: QRCode = mock[QRCode]
     }
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-      .willReturn(Future.successful(Some(Session(sessionId, loggedInUser, loggedInState))))
+    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, loggedInState))
 
     def protectAccountRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       FakeRequest().

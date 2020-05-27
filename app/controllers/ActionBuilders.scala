@@ -30,6 +30,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
+import cats.data.OptionT
 
 trait ActionBuilders {
 
@@ -40,21 +41,21 @@ trait ActionBuilders {
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-  def applicationAction(applicationId: String, developerSession: DeveloperSession)(
-    implicit ec: ExecutionContext): ActionRefiner[Request, ApplicationRequest] = new ActionRefiner[Request, ApplicationRequest] {
+  def applicationAction(applicationId: String, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[Request, ApplicationRequest]
+    = new ActionRefiner[Request, ApplicationRequest] {
 
     override def refine[A](request: Request[A]): Future[Either[Result, ApplicationRequest[A]]] = {
       implicit val implicitRequest: Request[A] = request
+      import cats.implicits._
 
-      for {
-        application <- applicationService.fetchByApplicationId(applicationId)
-        subs <- applicationService.apisWithSubscriptions(application)
+      (for {
+        application <- OptionT(applicationService.fetchByApplicationId(applicationId))
+        subs <- OptionT.liftF(applicationService.apisWithSubscriptions(application))
+        role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
       } yield {
-        application
-          .role(developerSession.developer.email)
-          .map(role => ApplicationRequest(application, subs, role, developerSession, request))
-          .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession))))
-      }
+        ApplicationRequest(application, subs, role, developerSession, request)
+      })
+      .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession)))).value
     }
   }
 

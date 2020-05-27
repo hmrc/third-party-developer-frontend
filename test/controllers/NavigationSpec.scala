@@ -18,18 +18,12 @@ package controllers
 
 import config.ErrorHandler
 import domain._
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers._
-import org.mockito.BDDMockito._
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import play.api.http.Status.OK
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import service.{ApplicationService, SessionService}
-import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
-
-import scala.concurrent.Future._
 
 class NavigationSpec extends BaseControllerSpec {
 
@@ -40,18 +34,17 @@ class NavigationSpec extends BaseControllerSpec {
 
   var userPassword = "Password1!"
 
-  class Setup(loggedInState: Option[LoggedInState]) {
+  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new Navigation(
-      mock[SessionService],
-      mock[ApplicationService],
+      sessionServiceMock,
+      applicationServiceMock,
       mock[MessagesApi],
       mock[ErrorHandler],
       cookieSigner
     )
 
     loggedInState.map(loggedInState => {
-      given(underTest.sessionService.fetch(ArgumentMatchers.eq(sessionId))(any[HeaderCarrier]))
-        .willReturn(successful(Some(Session(sessionId, developer, loggedInState))))
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, loggedInState))
     })
 
     private val request =

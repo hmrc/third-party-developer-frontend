@@ -215,13 +215,13 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     "return the application fetched from the production connector when it exists there" in new Setup {
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       private val result = await(applicationService.fetchByApplicationId(productionApplicationId))
-      result shouldBe productionApplication
+      result shouldBe Some(productionApplication)
     }
 
     "return the application fetched from the sandbox connector when it exists there" in new Setup {
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
       private val result = await(applicationService.fetchByApplicationId(sandboxApplicationId))
-      result shouldBe sandboxApplication
+      result shouldBe Some(sandboxApplication)
     }
   }
 

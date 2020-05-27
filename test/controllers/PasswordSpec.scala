@@ -19,13 +19,14 @@ package controllers
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
 import domain.{ChangePassword, InvalidResetCode, PasswordReset, UnverifiedAccount}
+import mocks.service.SessionServiceMock
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import play.twirl.api.HtmlFormat
-import service.{AuditService, SessionService}
+import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 
@@ -34,16 +35,15 @@ import scala.concurrent.Future.failed
 
 class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup {
+  trait Setup extends SessionServiceMock {
 
     val mockConnector = mock[ThirdPartyDeveloperConnector]
-    val mockSessionService = mock[SessionService]
     val mockAuditService = mock[AuditService]
     val mockAppConfig = mock[ApplicationConfig]
 
     val underTest = new Password(
       mock[AuditService],
-      mock[SessionService],
+      sessionServiceMock,
       mockConnector,
       mockErrorHandler,
       messagesApi,

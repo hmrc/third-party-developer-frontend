@@ -19,6 +19,7 @@ package controllers
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import mocks.service._
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito.given
@@ -26,7 +27,7 @@ import org.mockito.Mockito.verify
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, AuditService, SessionService}
+import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
@@ -34,15 +35,14 @@ import utils.WithLoggedInSession._
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-
 class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new DeleteApplication(
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
-      mock[ApplicationService],
-      mock[SessionService],
+      applicationServiceMock,
+      sessionServiceMock,
       mock[ErrorHandler],
       messagesApi,
       cookieSigner
@@ -57,14 +57,16 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInUser = DeveloperSession(session)
+    
+    implicit val hc = HeaderCarrier()
 
     val application = Application(appId, clientId, appName, DateTime.now.withTimeAtStartOfDay(), DateTime.now.withTimeAtStartOfDay(),
       Environment.PRODUCTION, Some("Description 1"), Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
-    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
+    fetchSessionByIdReturns(sessionId, session)
+    fetchByApplicationIdReturns(application.id, application)
     given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)

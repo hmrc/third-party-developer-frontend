@@ -77,7 +77,7 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
     "return the application fetched from the production connector when it exists there" in new Setup {
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       val result = await(connectors.fetchApplicationById(productionApplicationId))
-      result shouldBe productionApplication
+      result shouldBe Some(productionApplication)
     }
 
     "return the application fetched from the production connector when it exists there and sandbox throws 4xx" in new Setup {
@@ -85,7 +85,7 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
       givenSandboxFailure(Status.BAD_REQUEST)
 
       val result = await(connectors.fetchApplicationById(productionApplicationId))
-      result shouldBe productionApplication
+      result shouldBe Some(productionApplication)
     }
 
     "return the application fetched from the production connector when it exists there and sandbox throws 5xx" in new Setup {
@@ -93,13 +93,13 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
       givenSandboxFailure(Status.BAD_REQUEST)
 
       val result = await(connectors.fetchApplicationById(productionApplicationId))
-      result shouldBe productionApplication
+      result shouldBe Some(productionApplication)
     }
 
     "return the application fetched from the sandbox connector when it exists there" in new Setup {
       theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
       val result = await(connectors.fetchApplicationById(sandboxApplicationId))
-      result shouldBe sandboxApplication
+      result shouldBe Some(sandboxApplication)
     }
   }
 

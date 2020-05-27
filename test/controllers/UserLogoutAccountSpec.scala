@@ -19,6 +19,7 @@ package controllers
 import java.util.UUID
 
 import domain._
+import mocks.service.SessionServiceMock
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
@@ -26,7 +27,7 @@ import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF._
-import service.{ApplicationService, DeskproService, SessionService}
+import service.{ApplicationService, DeskproService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import utils.WithCSRFAddToken
@@ -42,10 +43,10 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   val developerSession: DeveloperSession = DeveloperSession(session)
 
-  trait Setup {
+  trait Setup extends SessionServiceMock {
     val underTest = new UserLogoutAccount(
       mock[DeskproService],
-      mock[SessionService],
+      sessionServiceMock,
       mock[ApplicationService],
       mock[config.ErrorHandler],
       messagesApi,

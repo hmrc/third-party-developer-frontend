@@ -21,8 +21,8 @@ import controllers.FormKeys._
 import controllers._
 import domain.{ApplicationRequest => _, _}
 import javax.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.data.Forms.{boolean, mapping, optional, text}
+import play.api.data.{Form, Forms, Mapping}
+import play.api.data.Forms.{boolean, ignored, mapping, optional, text}
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, Call, Result}
@@ -33,17 +33,17 @@ import views.html.checkpages.applicationcheck
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import model.ApplicationViewModel
 
 @Singleton
 class ApplicationCheck @Inject()(val applicationService: ApplicationService,
-                                 val apiSubscriptionsHelper: ApiSubscriptionsHelper,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
                                  val messagesApi: MessagesApi,
                                  val cookieSigner : CookieSigner
                                  )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController()
+  extends ApplicationController
     with ApplicationHelper
     with CanUseCheckActions
     with ConfirmNamePartialController
@@ -52,13 +52,12 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     with PrivacyPolicyPartialController
     with TermsAndConditionsPartialController
     with TermsOfUsePartialController
+    with CheckInformationFormHelper
     {
 
   def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val application = request.application
-
-    Future.successful(Ok(applicationcheck.landingPage(application,
-      ApplicationInformationForm.form.fill(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))))))
+    val form = createCheckFormForApplication(request)
+    Future.successful(Ok(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(),form)))
   }
 
   def unauthorisedAppDetails(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
@@ -71,28 +70,23 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-
-    def withFormErrors(app: Application)(form: Form[CheckInformationForm]): Future[Result] = {
-      Future.successful(BadRequest(applicationcheck.landingPage(app, form)))
+  def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request: ApplicationRequest[AnyContent] =>
+    def withFormErrors(form: Form[CheckInformationForm]): Future[Result] = {
+      Future.successful(BadRequest(applicationcheck.landingPage(applicationViewModelFromApplicationRequest(), form)))
     }
 
-    def withValidForm(app: Application)(form: CheckInformationForm): Future[Result] = {
+    def withValidForm(form: CheckInformationForm): Future[Result] = {
       Future.successful(Redirect(routes.CheckYourAnswers.answersPage(appId)))
     }
 
-    val application = request.application
-    val requestForm = ApplicationInformationForm.form.fillAndValidate(
-      CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
-    )
+    val requestForm = validateCheckFormForApplication(request)
 
-    requestForm.fold(withFormErrors(application), withValidForm(application))
+    requestForm.fold(withFormErrors, withValidForm)
   }
 
   def credentialsRequested(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     Future.successful(Ok(editapplication.nameSubmitted(appId, request.application)))
   }
-
 
   def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(applicationcheck.team.team(request.application, request.role, request.user)))
@@ -139,20 +133,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
   protected def termsAndConditionsActionRoute(appId: String): Call = routes.ApplicationCheck.termsAndConditionsAction(appId)
   protected def termsOfUseActionRoute(appId: String): Call = routes.ApplicationCheck.termsOfUseAction(appId)
   protected def submitButtonLabel = "Save and return"
-}
-
-object ApplicationInformationForm {
-  def form: Form[CheckInformationForm] = Form(
-    mapping(
-      "confirmedNameCompleted" -> boolean.verifying("confirm.name.required.field", cn => cn),
-      "apiSubscriptionsCompleted" -> boolean.verifying("api.subscriptions.required.field", subsConfirmed => subsConfirmed),
-      "contactDetailsCompleted" -> boolean.verifying("contact.details.required.field", cd => cd),
-      "providedPolicyURLCompleted" -> boolean.verifying("privacy.links.required.field", provided => provided),
-      "providedTermsAndConditionsURLCompleted" -> boolean.verifying("tnc.links.required.field", provided => provided),
-      "teamConfirmedCompleted" -> boolean.verifying("team.required.field", provided => provided),
-      "termsOfUseAgreementsCompleted" -> boolean.verifying("agree.terms.of.use.required.field", terms => terms)
-    )(CheckInformationForm.apply)(CheckInformationForm.unapply)
-  )
 }
 
 case class TermsAndConditionsForm(urlPresent: Option[String], termsAndConditionsURL: Option[String])

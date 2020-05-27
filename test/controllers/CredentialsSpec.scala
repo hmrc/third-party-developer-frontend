@@ -20,9 +20,10 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
+import domain._
 import domain.ApplicationState.pendingGatekeeperApproval
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
-import domain._
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito
@@ -32,7 +33,7 @@ import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, AuditService, SessionService}
+import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
@@ -57,23 +58,24 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new Credentials(
-      mock[ApplicationService],
+      applicationServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
-      mock[SessionService],
+      sessionServiceMock,
       mockErrorHandler,
       messagesApi,
       cookieSigner
     )
 
+    implicit val hc = HeaderCarrier()
 
-    val hc = HeaderCarrier()
-
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
-    given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(successful(application))
+    
+    fetchByApplicationIdReturns(application.id, application)
+    
     given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
     given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
 
@@ -91,7 +93,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val application = Application(applicationId.toString, clientId, "app", createdOn, DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), state = state, access = access)
 
-      given(underTest.applicationService.fetchByApplicationId(mockEq(applicationId.toString))(any[HeaderCarrier])).willReturn(application)
+      fetchByApplicationIdReturns(applicationId.toString, application)
       given(underTest.applicationService.fetchCredentials(mockEq(applicationId.toString))(any[HeaderCarrier])).willReturn(tokens)
       given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty)
     }
@@ -258,8 +260,8 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "display the NotFound page when the application does not exist" in new Setup {
-      when(underTest.applicationService.fetchByApplicationId(mockEq(applicationId.toString))(any[HeaderCarrier]))
-        .thenReturn(successful(application))
+      fetchByApplicationIdReturns(applicationId.toString, application)
+
       when(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
         .thenReturn(failed(new ApplicationNotFound))
       when(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier]))

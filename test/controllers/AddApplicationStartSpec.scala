@@ -18,13 +18,12 @@ package controllers
 
 import config.ErrorHandler
 import domain._
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
-import org.mockito.BDDMockito.given
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, AuditService, SessionService}
+import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
@@ -52,10 +51,10 @@ class AddApplicationStartSpec extends BaseControllerSpec
     Set(collaborator), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new AddApplication(
-      mock[ApplicationService],
-      mock[SessionService],
+      applicationServiceMock,
+      sessionServiceMock,
       mock[AuditService],
       mock[ErrorHandler],
       messagesApi,
@@ -64,11 +63,9 @@ class AddApplicationStartSpec extends BaseControllerSpec
 
     val hc = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-      .willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
 
-    given(underTest.sessionService.fetch(mockEq(partLoggedInSessionId))(any[HeaderCarrier]))
-      .willReturn(Some(partLoggedInSession))
+    fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 
     private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
 
@@ -83,9 +80,7 @@ class AddApplicationStartSpec extends BaseControllerSpec
   }
 
   "Add subordinate applications start page" should {
-
     "return the add applications page with the user logged in" in new Setup {
-
       private val result = await(underTest.addApplicationSubordinate()(loggedInRequest))
 
       status(result) shouldBe OK
@@ -100,7 +95,6 @@ class AddApplicationStartSpec extends BaseControllerSpec
     }
 
     "return to the login page when the user is not logged in" in new Setup {
-
       val request = FakeRequest()
 
       private val result = await(underTest.addApplicationSubordinate()(request))
@@ -118,9 +112,7 @@ class AddApplicationStartSpec extends BaseControllerSpec
   }
 
   "Add principal applications start page" should {
-
     "return the add applications page with the user logged in" in new Setup {
-
       private val result = await(underTest.addApplicationPrincipal()(loggedInRequest))
 
       status(result) shouldBe OK
@@ -132,7 +124,6 @@ class AddApplicationStartSpec extends BaseControllerSpec
     }
 
     "return to the login page when the user is not logged in" in new Setup {
-
       val request = FakeRequest()
 
       private val result = await(underTest.addApplicationPrincipal()(request))

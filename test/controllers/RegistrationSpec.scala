@@ -17,14 +17,14 @@
 package controllers
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.{LoggedInState, RegistrationSuccessful}
+import domain.RegistrationSuccessful
+import mocks.service.SessionServiceMock
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.BDDMockito._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,9 +34,9 @@ class RegistrationSpec extends BaseControllerSpec {
 
   var userPassword = "Password1!"
 
-  trait Setup {
+  trait Setup extends SessionServiceMock {
     val underTest = new Registration(
-      mock[SessionService],
+      sessionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mockErrorHandler,
       messagesApi,
@@ -45,7 +45,6 @@ class RegistrationSpec extends BaseControllerSpec {
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
   }
-
 
   "registration" should {
     "register with normalized firstname, lastname, email and organisation" in new Setup {

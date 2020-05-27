@@ -74,14 +74,14 @@ GET         /applications/add/production                                        
 GET         /applications/add/:environment/name                                             controllers.AddApplication.addApplicationName(environment: domain.Environment)
 POST        /applications/add/:environment/name                                             controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
 
-GET         /applications/:id/add/sandbox/subscription-configuration-start                  controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String)
-GET         /applications/:id/add/sandbox/subscription-configuration/:pageNumber            controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, pageNumber: Int)
-POST        /applications/:id/add/sandbox/subscription-configuration/:pageNumber            controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String, pageNumber: Int)
-GET         /applications/:id/add/sandbox/subscription-configuration-step/:pageNumber       controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, pageNumber: Int)
+GET         /applications/:id/add/subscription-configuration-start                          controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String)
+GET         /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, pageNumber: Int)
+POST        /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String,pageNumber: Int)
+GET         /applications/:id/add/subscription-configuration-step/:pageNumber               controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, pageNumber: Int)
 
-GET         /applications/:id/add/:environment/subscriptions                                controllers.Subscriptions.addAppSubscriptions(id: String, environment: domain.Environment)
+GET         /applications/:id/add/subscriptions                                             controllers.Subscriptions.addAppSubscriptions(id: String)
 
-GET         /applications/:id/add/:environment/success                                      controllers.AddApplication.addApplicationSuccess(id: String, environment: domain.Environment)
+GET         /applications/:id/add/success                                                   controllers.AddApplication.addApplicationSuccess(id: String)
 
 GET         /applications/:id/team-members                                                  controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                              controllers.ManageTeam.addTeamMember(id: String)
@@ -171,8 +171,6 @@ POST        /applications/:id/check-your-answers/team/remove                    
 
 GET         /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPage(id: String)
 POST        /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPageAction(id: String)
-
-POST        /applications/:id/context/:apiContext/version/:version/subscriptionFields       controllers.Subscriptions.saveSubscriptionFields(id: String, apiContext: String, version: String, subscriptionRedirect: String)
 
 GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: String)
 GET         /applications/:id/api-metadata/:context/:version                                controllers.ManageSubscriptions.editApiMetadataPage(id: String, context: String, version: String)

@@ -17,7 +17,7 @@
 package controllers.checkpages
 
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.{AddTeamMemberForm, ApiSubscriptionsHelper, ApplicationController, ApplicationHelper, ApplicationRequest, RemoveTeamMemberCheckPageConfirmationForm}
+import controllers.{AddTeamMemberForm, ApplicationController, ApplicationHelper, ApplicationRequest, RemoveTeamMemberCheckPageConfirmationForm}
 import controllers.FormKeys.applicationNameAlreadyExistsKey
 import domain.{Application, ApplicationAlreadyExists, CheckInformation, CheckInformationForm, ContactDetails, DeskproTicketCreationFailed}
 import javax.inject.{Inject, Singleton}
@@ -29,12 +29,13 @@ import service.{ApplicationService, SessionService}
 import views.html.checkpages.checkyouranswers
 import views.html.checkpages.applicationcheck
 
+import model.ApplicationViewModel
+
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
-                                 val apiSubscriptionsHelper: ApiSubscriptionsHelper,
                                  val applicationCheck: ApplicationCheck,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
@@ -50,7 +51,8 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     with ApiSubscriptionsPartialController
     with PrivacyPolicyPartialController
     with TermsAndConditionsPartialController
-    with TermsOfUsePartialController {
+    with TermsOfUsePartialController
+    with CheckInformationFormHelper {
 
   private def populateCheckYourAnswersData(application: Application, subs: Seq[String]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
@@ -80,8 +82,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
   def answersPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     for {
-      application <- fetchApp(appId)
-      checkYourAnswersData <- populateCheckYourAnswersData(application)
+      checkYourAnswersData <- populateCheckYourAnswersData(request.application)
     } yield Ok(checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
   }
 
@@ -102,8 +103,11 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
         case _: ApplicationAlreadyExists =>
           val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
           applicationService.updateCheckInformation(application.id, information)
-          val requestForm = ApplicationInformationForm.form.fillAndValidate(CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation())))
-          Conflict(applicationcheck.landingPage(application.copy(checkInformation = Some(information)), requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
+
+          val requestForm = validateCheckFormForApplication(request)
+
+          val applicationViewModel = ApplicationViewModel(application.copy(checkInformation = Some(information)), hasSubscriptionFields(request))
+          Conflict(applicationcheck.landingPage(applicationViewModel, requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
       }
   }
 

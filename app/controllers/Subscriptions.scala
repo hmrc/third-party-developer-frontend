@@ -26,12 +26,11 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Result}
 import play.twirl.api.Html
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
-import views.html.include.{changeSubscriptionConfirmation, subscriptionFields}
+import views.html.include.changeSubscriptionConfirmation
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,7 +40,6 @@ class Subscriptions @Inject() (
     val auditService: AuditService,
     val subFieldsService: SubscriptionFieldsService,
     val subscriptionsService: SubscriptionsService,
-    val apiSubscriptionsHelper: ApiSubscriptionsHelper,
     val applicationService: ApplicationService,
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
@@ -67,7 +65,7 @@ class Subscriptions @Inject() (
     )
   }
 
-  def addAppSubscriptions(applicationId: String, environment: Environment): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+  def addAppSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
       request.user,
@@ -80,16 +78,13 @@ class Subscriptions @Inject() (
   def renderSubscriptions(application: Application, user: DeveloperSession, renderHtml: (Role, PageData, Form[EditApplicationForm]) => Html)(
       implicit request: ApplicationRequest[AnyContent]
   ): Future[Result] = {
-    apiSubscriptionsHelper.fetchPageDataFor(application).map { data =>
-      val role = apiSubscriptionsHelper.roleForApplication(data.app, user.email)
-      val form = EditApplicationForm.withData(data.app)
+    val subsData = APISubscriptions.groupSubscriptions(request.subscriptions)
+    val role = request.role
+    val form = EditApplicationForm.withData(request.application)
 
-      val html = renderHtml(role, data, form)
+    val html = renderHtml(role, PageData(request.application, subsData), form)
 
-      Ok(html)
-    } recover {
-      case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
-    }
+    Future.successful(Ok(html))
   }
 
   private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
@@ -158,43 +153,6 @@ class Subscriptions @Inject() (
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
 
-  def saveSubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, subscriptionRedirect: String): Action[AnyContent] = loggedInAction { implicit request =>
-    def handleValidForm(validForm: SubscriptionFieldsForm) = {
-      def saveFields(validForm: SubscriptionFieldsForm)(implicit hc: HeaderCarrier): Future[Any] = {
-        if (validForm.fields.nonEmpty) {
-          subFieldsService.saveFieldValues(applicationId, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
-        } else {
-          Future.successful(())
-        }
-      }
-
-      for {
-        _ <- saveFields(validForm)
-        app <- fetchApp(applicationId)
-        response <- createResponse(app, request.headers.isAjaxRequest, apiContext, apiVersion, subscriptionRedirect)
-      } yield response
-    }
-
-    def handleInvalidForm(formWithErrors: Form[SubscriptionFieldsForm]) = {
-      Future.successful(BadRequest(subscriptionFields(SubscriptionFieldsViewModel(applicationId, apiContext, apiVersion, formWithErrors))))
-    }
-
-    SubscriptionFieldsForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
-  }
-
-  private def createResponse(app: Application, isAjaxRequest: Boolean, apiContext: String, apiVersion: String, subscriptionRedirect: String)(
-      implicit hc: HeaderCarrier
-  ): Future[Result] = {
-    if (isAjaxRequest) createAjaxUnsubscribeResponse(app, apiContext, apiVersion).map(r => Ok(r))
-    else Future.successful(redirect(subscriptionRedirect, app.id))
-  }
-
-  private def createAjaxUnsubscribeResponse(app: Application, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier) = {
-    for {
-      subs <- applicationService.apisWithSubscriptions(app)
-    } yield Json.toJson(AjaxSubscriptionResponse.from(apiContext, apiVersion, subs))
-  }
-
   private def updateCheckInformation(app: Application)(implicit hc: HeaderCarrier): Future[Any] = {
     app.deployedTo match {
       case Environment.PRODUCTION =>
@@ -203,32 +161,3 @@ class Subscriptions @Inject() (
     }
   }
 }
-
-class ApiSubscriptionsHelper @Inject() (applicationService: ApplicationService)(implicit ec: ExecutionContext) {
-  def fetchPageDataFor(application: Application)(implicit hc: HeaderCarrier): Future[PageData] = {
-    for {
-      subscriptions <- applicationService.apisWithSubscriptions(application)
-    } yield {
-      PageData(application, APISubscriptions.groupSubscriptions(subscriptions))
-    }
-  }
-
-  def fetchAllSubscriptions(application: Application, developer: DeveloperSession)(implicit hc: HeaderCarrier): Future[Option[SubscriptionData]] = {
-    fetchPageDataFor(application).map { data =>
-      val role = roleForApplication(data.app, developer.email)
-      Some(SubscriptionData(role, application, data.subscriptions))
-    } recover {
-      case _: ApplicationNotFound => None
-    }
-  }
-
-  def roleForApplication(application: Application, email: String): Role =
-    application.role(email).getOrElse(throw new ApplicationNotFound)
-}
-
-case class SubscriptionFieldsViewModel(
-    applicationId: String,
-    apiContext: String,
-    apiVersion: String,
-    subFieldsForm: Form[SubscriptionFieldsForm]
-)

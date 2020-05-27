@@ -16,9 +16,10 @@
 
 package controllers
 
+import domain._
 import domain.Environment._
 import domain.Role._
-import domain._
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
@@ -28,7 +29,6 @@ import org.mockito.Mockito.{never, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
@@ -38,11 +38,11 @@ import scala.concurrent.Future
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new TermsOfUse(
       mockErrorHandler,
-      mock[SessionService],
-      mock[ApplicationService],
+      sessionServiceMock,
+      applicationServiceMock,
       messagesApi,
       cookieSigner
       )
@@ -57,16 +57,21 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     val appId = "1234"
 
-    def givenTheApplicationExists(userRole: Role = ADMINISTRATOR,
+    implicit val hc = HeaderCarrier()
+
+    def givenApplicationExists(userRole: Role = ADMINISTRATOR,
                                   environment: Environment = PRODUCTION,
                                   state: ApplicationState = ApplicationState.testing,
                                   checkInformation: Option[CheckInformation] = None,
                                   access: Access = Standard()) = {
       val application = Application(appId, "clientId", "appName", DateTimeUtils.now, DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), access = access, state = state, checkInformation = checkInformation)
-      given(underTest.applicationService.fetchByApplicationId(mockEq(application.id))(any[HeaderCarrier])).willReturn(application)
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty[APISubscriptionStatus])
-      application
+    
+        fetchByApplicationIdReturns(application.id, application)
+      
+        given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty[APISubscriptionStatus])
+      
+        application
     }
 
     given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
@@ -95,7 +100,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "render the page for an administrator on a standard production app when the ToU have not been agreed" in new Setup {
       val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
-      givenTheApplicationExists(checkInformation = Some(checkInformation))
+      givenApplicationExists(checkInformation = Some(checkInformation))
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
       status(result) shouldBe OK
       bodyOf(result) should include("Agree to our terms of use")
@@ -109,7 +114,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       val version = "1.0"
 
       val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(email, timeStamp, version)))
-      givenTheApplicationExists(checkInformation = Some(checkInformation))
+      givenApplicationExists(checkInformation = Some(checkInformation))
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
       status(result) shouldBe OK
       bodyOf(result) should include("Terms of use")
@@ -117,19 +122,19 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "return a bad request for a sandbox app" in new Setup {
-      givenTheApplicationExists(environment = SANDBOX)
+      givenApplicationExists(environment = SANDBOX)
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the ROPC page for a ROPC app" in new Setup {
-      givenTheApplicationExists(access = ROPC())
+      givenApplicationExists(access = ROPC())
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
       status(result) shouldBe BAD_REQUEST //FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
-      givenTheApplicationExists(access = Privileged())
+      givenApplicationExists(access = Privileged())
       val result = await(addToken(underTest.termsOfUse(appId))(loggedInRequest))
       status(result) shouldBe BAD_REQUEST //FORBIDDEN
     }
@@ -143,7 +148,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       when(underTest.appConfig.currentTermsOfUseVersion).thenReturn(version)
 
-      givenTheApplicationExists()
+      givenApplicationExists()
       val captor: ArgumentCaptor[CheckInformation] = ArgumentCaptor.forClass(classOf[CheckInformation])
       given(underTest.applicationService.updateCheckInformation(mockEq(appId), captor.capture())(any())).willReturn(Future.successful(ApplicationUpdateSuccessful))
 
@@ -158,7 +163,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "return a bad request if termsOfUseAgreed is not set in the request" in new Setup {
-      givenTheApplicationExists()
+      givenApplicationExists()
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(loggedInRequest))
       status(result) shouldBe BAD_REQUEST
       verify(underTest.applicationService, never()).updateCheckInformation(any(), any())(any())
@@ -166,7 +171,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "return a bad request if the app already has terms of use agreed" in new Setup {
       val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))
-      givenTheApplicationExists(checkInformation = Some(checkInformation))
+      givenApplicationExists(checkInformation = Some(checkInformation))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(request))
@@ -175,14 +180,14 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "return a bad request for a ROPC app" in new Setup {
-      givenTheApplicationExists(access = ROPC())
+      givenApplicationExists(access = ROPC())
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(request))
       status(result) shouldBe BAD_REQUEST //FORBIDDEN
     }
 
     "return a bad request for a Privileged app" in new Setup {
-      givenTheApplicationExists(access = Privileged())
+      givenApplicationExists(access = Privileged())
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(request))
       status(result) shouldBe BAD_REQUEST //FORBIDDEN

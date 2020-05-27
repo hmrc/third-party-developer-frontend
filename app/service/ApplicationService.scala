@@ -52,7 +52,7 @@ class ApplicationService @Inject() (
   def update(updateApplicationRequest: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper.connectorsForEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
 
-  def fetchByApplicationId(id: String)(implicit hc: HeaderCarrier): Future[Application] = {
+  def fetchByApplicationId(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] = {
     connectorWrapper.fetchApplicationById(id)
   }
 

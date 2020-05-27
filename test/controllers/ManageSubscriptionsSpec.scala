@@ -19,29 +19,25 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain.ApiSubscriptionFields._
 import domain._
+import domain.ApiSubscriptionFields._
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import org.mockito.Mockito.{verify, when}
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
+import service.{AuditService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
-import scala.concurrent.Future._
-import cats.data.NonEmptyList
-
 import scala.concurrent.Future
 
-
-class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
-
+class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = Future.failed(new ApplicationNotFound)
 
   val appId = "1234"
@@ -60,6 +56,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
   val partLoggedInSession: Session =
     Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+
   val application: Application = Application(
     appId,
     clientId,
@@ -76,6 +74,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
   )
 
+  val productionApplication = application.copy(deployedTo = Environment.PRODUCTION, id = appId + "_Prod")
+
   val privilegedApplication: Application = application.copy(id = "456", access = Privileged())
 
   val tokens: ApplicationToken =
@@ -85,35 +85,29 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken
   )
 
-  trait ManageSubscriptionsSetup {
+  trait ManageSubscriptionsSetup extends ApplicationServiceMock with SessionServiceMock {
 
-    val mockSessionService: SessionService = mock[SessionService]
     val mockAuditService: AuditService = mock[AuditService]
-    val mockApplicationService: ApplicationService = mock[ApplicationService]
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
     val mockErrorHandler: ErrorHandler = fakeApplication.injector.instanceOf[ErrorHandler]
 
     val manageSubscriptionController = new ManageSubscriptions(
-      mockSessionService,
+      sessionServiceMock,
       mockAuditService,
-      mockApplicationService,
+      applicationServiceMock,
       mockErrorHandler,
       messagesApi,
       mockSubscriptionFieldsService,
       cookieSigner
     )
 
-    when(mockSessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
-      .thenReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
 
-    when(mockApplicationService.fetchByApplicationId(eqTo(appId))(any[HeaderCarrier]))
-      .thenReturn(successful(application))
+    fetchByApplicationIdReturns(appId,application)
+    fetchByApplicationIdReturns(privilegedApplication.id,privilegedApplication)
+    fetchByApplicationIdReturns(productionApplication.id, productionApplication)
 
-    when(mockApplicationService.fetchByApplicationId(eqTo(privilegedApplication.id))(any[HeaderCarrier]))
-      .thenReturn(successful(privilegedApplication))
-
-    when(mockApplicationService.fetchByTeamMemberEmail(any())(any[HeaderCarrier]))
-      .thenReturn(successful(List(application)))
+    fetchByTeamMemberEmailReturns(List(application))
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(manageSubscriptionController, implicitly)(sessionId)
@@ -134,59 +128,6 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
           "fields[0].type" -> "",
           "fields[0].value" -> fieldValue)
     }
-
-    def generateName(prefix: String) = s"$prefix-name"
-
-    def generateField(prefix: String): SubscriptionFieldDefinition =
-      SubscriptionFieldDefinition(
-        name = generateName(prefix),
-        description = s"$prefix-description",
-        shortDescription = s"$prefix-short-description",
-        hint = s"$prefix-hint",
-        `type` = "STRING"
-      )
-
-    def generateValue(prefix: String) = s"$prefix-value"
-
-    def generateValueName(prefix: String, index: Int) = s"$prefix-field-$index"
-
-    def generateFieldValue(prefix: String, index: Int): SubscriptionFieldValue =
-      SubscriptionFieldValue(
-        definition = generateField(prefix),
-        value = generateValueName(prefix, index)
-      )
-
-    val WHO_CARES = "who cares"
-
-    def generateWrapper(prefix: String, count: Int): Option[SubscriptionFieldsWrapper] = {
-      val rawFields = (1 to count).map(i => generateFieldValue(prefix, i)).toList
-      val nelFields = NonEmptyList.fromList(rawFields)
-
-      nelFields.map(fs =>
-        SubscriptionFieldsWrapper(
-          applicationId = WHO_CARES,
-          clientId = WHO_CARES,
-          apiContext = WHO_CARES,
-          apiVersion = WHO_CARES,
-          fields = fs
-        )
-      )
-    }
-
-    def noConfigurationSubscription(prefix: String): APISubscriptionStatus =
-      APISubscriptionStatus(
-        name = generateName(prefix),
-        serviceName = s"$prefix-api",
-        context = s"/$prefix-api",
-        apiVersion = APIVersion("1.0", APIStatus.STABLE),
-        subscribed = true,
-        requiresTrust = false,
-        fields = None,
-        isTestSupport = false
-      )
-
-    def configurationSubscription(prefix: String, count: Int): APISubscriptionStatus =
-      noConfigurationSubscription(prefix).copy(fields = generateWrapper(prefix, count))
 
     def assertCommonEditFormFields(result: Result, apiSubscriptionStatus: APISubscriptionStatus): Unit = {
       status(result) shouldBe OK
@@ -219,8 +160,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "a user is logged in" should {
       "return the list subscription configuration page with no subscriptions and therefore no subscription field definitions" in new ManageSubscriptionsSetup {
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(List()))
+        givenApplicationHasNoSubs(application)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -230,10 +170,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return the list subscription configuration page with several subscriptions without subscription configuration" in new ManageSubscriptionsSetup {
 
-        val subsData = Seq(noConfigurationSubscription("api1"), noConfigurationSubscription("api2"))
+        val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -244,14 +183,13 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "return the list subscription configuration page with several subscriptions, some with subscription configuration" in new ManageSubscriptionsSetup {
 
         val subsData = Seq(
-          configurationSubscription("api1", 3),
-          configurationSubscription("api2", 1),
-          noConfigurationSubscription("api3"),
-          configurationSubscription("api4", 1).copy(subscribed = false)
+          exampleSubscriptionWithFields("api1", 3),
+          exampleSubscriptionWithFields("api2", 1),
+          exampleSubscriptionWithoutFields("api3"),
+          exampleSubscriptionWithFields("api4", 1).copy(subscribed = false)
         )
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -278,8 +216,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "return not found if app has no subscription field definitions" in new ManageSubscriptionsSetup {
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(Seq.empty))
+        givenApplicationHasSubs(application, Seq.empty)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
@@ -288,8 +225,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "return not found when trying to edit api subscription configuration for an api the application is not subscribed to" in new ManageSubscriptionsSetup {
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(Seq.empty))
+        givenApplicationHasSubs(application, Seq.empty)
 
         private val result = await(manageSubscriptionController.editApiMetadataPage(appId, apiContext, apiVersion)(loggedInRequest))
 
@@ -298,11 +234,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "It renders the subscription configuration list page for a privileged application" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          configurationSubscription("api1", 1)
+          exampleSubscriptionWithFields("api1", 1)
         )
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(privilegedApplication))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(privilegedApplication, subsData)
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(privilegedApplication.id)(loggedInRequest))
@@ -311,12 +246,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "renders the edit subscription page" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 2)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 2)
 
         val subsData = Seq(apiSubscriptionStatus)
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(application, subsData)
 
         private val result: Result =
           await(addToken(manageSubscriptionController.editApiMetadataPage(appId, "/api1-api", "1.0"))(loggedInRequest))
@@ -329,12 +263,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "save action saves valid subscription field values" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
         val newSubscriptionValue = "new value"
         private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(Seq(apiSubscriptionStatus)))
+        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
         when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
           .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
@@ -361,12 +294,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "save action fails validation and shows error message" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
         val newSubscriptionValue = "my invalid value"
         val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(Seq(apiSubscriptionStatus)))
+        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
         when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
           .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
@@ -388,14 +320,13 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "save action fails valid and shows error message and renders the add app journey page subs configuration" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
         val newSubscriptionValue = "my invalid value"
         val pageNumber = 1
 
         val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(Seq(apiSubscriptionStatus)))
+        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
         when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
           .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
@@ -418,12 +349,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "a user is doing the add new sandbox app journey they" should {
       "be able to view the subscription fields start page if they have subscribed to APIs with subscription fields" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          configurationSubscription("api1", 1),
-          configurationSubscription("api2", 1)
+          exampleSubscriptionWithFields("api1", 1),
+          exampleSubscriptionWithFields("api2", 1)
         )
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest))
@@ -436,11 +366,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "edit page" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = configurationSubscription("api1", 1)
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
         val subsData = Seq(apiSubscriptionStatus)
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(application, subsData)
+
         private val result =
           await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, 1))(loggedInRequest))
 
@@ -448,11 +378,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "return NOT_FOUND if page has no field definitions" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = noConfigurationSubscription("api1")
+        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithoutFields("api1")
         val subsData = Seq(apiSubscriptionStatus)
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(application, subsData)
+
         private val result =
           await(addToken(manageSubscriptionController.subscriptionConfigurationPage(appId, 1))(loggedInRequest))
 
@@ -461,14 +391,15 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return NOT_FOUND if page number is invalid for edit page " when {
         def testEditPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
+          import manageSubscriptionsSetup._
+
           val subsData = Seq(
-            manageSubscriptionsSetup.configurationSubscription("api1", count)
+            exampleSubscriptionWithFields("api1", count)
           )
 
-          when(manageSubscriptionsSetup.mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-            .thenReturn(successful(subsData))
+          givenApplicationHasSubs(application, subsData)
           val result =
-            await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationPage(appId, -1)(manageSubscriptionsSetup.loggedInRequest))
+            await(manageSubscriptionController.subscriptionConfigurationPage(appId, -1)(loggedInRequest))
 
           status(result) shouldBe NOT_FOUND
         }
@@ -486,12 +417,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "step page" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          configurationSubscription("api1", 1),
-          configurationSubscription("api2", 1)
+          exampleSubscriptionWithFields("api1", 1),
+          exampleSubscriptionWithFields("api2", 1)
         )
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, 1)(loggedInRequest))
@@ -500,32 +430,51 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
         bodyOf(result) should include("You have completed step 1 of 2")
       }
 
-      "step page for the last page as a redirect" in new ManageSubscriptionsSetup {
+      "step page for the last page as a redirect for sandbox" in new ManageSubscriptionsSetup {
         val subsData = Seq(
-          configurationSubscription("api1", 1),
-          configurationSubscription("api2", 1)
+          exampleSubscriptionWithFields("api1", 1),
+          exampleSubscriptionWithFields("api2", 1)
         )
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, 2)(loggedInRequest))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/add/sandbox/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/add/success")
       }
+
+      "step page for the last page as a redirect for production" in new ManageSubscriptionsSetup {
+        val subsData = Seq(
+          exampleSubscriptionWithFields("api1", 1),
+          exampleSubscriptionWithFields("api2", 1)
+        )
+
+        givenApplicationHasSubs(productionApplication, subsData)
+
+        givenUpdateCheckInformationReturns(productionApplication.id)
+
+        private val result =
+          await(manageSubscriptionController.subscriptionConfigurationStepPage(productionApplication.id, 2)(loggedInRequest))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${productionApplication.id}/request-check")
+
+        verify(applicationServiceMock).updateCheckInformation(eqTo(productionApplication.id),eqTo(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))(any[HeaderCarrier])
+    }
 
     "return NOT_FOUND if page number is invalid for step page " when {
       def testStepPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
+        import manageSubscriptionsSetup._
+
         val subsData = Seq(
-          manageSubscriptionsSetup.configurationSubscription("api1", count)
+          exampleSubscriptionWithFields("api1", count)
         )
 
-        when(manageSubscriptionsSetup.mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
-        val result =
-          await(manageSubscriptionsSetup.manageSubscriptionController.subscriptionConfigurationStepPage(appId, -1)(manageSubscriptionsSetup.loggedInRequest))
+        givenApplicationHasSubs(application, subsData)
+
+        val result = await(manageSubscriptionController.subscriptionConfigurationStepPage(appId, -1)(loggedInRequest))
 
         status(result) shouldBe NOT_FOUND
       }
@@ -542,16 +491,15 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
       "be redirected to the end of the journey of they haven't subscribed to any APIs with subscription fields" in new ManageSubscriptionsSetup {
-        val subsData = Seq(noConfigurationSubscription("api1"))
+        val subsData = Seq(exampleSubscriptionWithoutFields("api1"))
 
-        when(mockApplicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-          .thenReturn(successful(subsData))
+        givenApplicationHasSubs(application, subsData)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add/sandbox/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add/success")
       }
     }
 

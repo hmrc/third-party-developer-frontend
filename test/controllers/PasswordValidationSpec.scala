@@ -20,7 +20,6 @@ import org.scalatest.Matchers
 import play.api.data.{Form, FormError}
 import uk.gov.hmrc.play.test.UnitSpec
 
-
 class PasswordValidationSpec extends UnitSpec with Matchers{
   "passwordValidator for the field password" should {
     val testForm = Form("password" -> passwordValidator)
