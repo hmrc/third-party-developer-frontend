@@ -37,12 +37,12 @@ import scala.concurrent.Future.successful
 
 class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new DeleteApplication(
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
       applicationServiceMock,
-      mock[SessionService],
+      sessionServiceMock,
       mock[ErrorHandler],
       messagesApi,
       cookieSigner
@@ -58,14 +58,14 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
 
     val loggedInUser = DeveloperSession(session)
     
-    implicit val hc = new HeaderCarrier()
+    implicit val hc = HeaderCarrier()
 
     val application = Application(appId, clientId, appName, DateTime.now.withTimeAtStartOfDay(), DateTime.now.withTimeAtStartOfDay(),
       Environment.PRODUCTION, Some("Description 1"), Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
     fetchByApplicationIdReturns(application.id, application)
     given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
 

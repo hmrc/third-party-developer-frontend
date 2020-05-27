@@ -89,18 +89,17 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     apis = Seq.empty,
     exampleApi = None)
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new CheckYourAnswers(
       applicationServiceMock,
       mock[ApplicationCheck],
-      mock[SessionService],
+      sessionServiceMock,
       mockErrorHandler,
       messagesApi,
       cookieSigner
     )
 
-    when(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-      .thenReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
 
     when(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
       .thenReturn(successful(ApplicationUpdateSuccessful))

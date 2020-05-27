@@ -23,7 +23,7 @@ import connectors.ThirdPartyDeveloperConnector
 import domain._
 import domain.ApplicationState.pendingGatekeeperApproval
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.BDDMockito
@@ -58,12 +58,12 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new Credentials(
       applicationServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
-      mock[SessionService],
+      sessionServiceMock,
       mockErrorHandler,
       messagesApi,
       cookieSigner
@@ -71,7 +71,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
     implicit val hc = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier])).willReturn(successful(ApplicationUpdateSuccessful))
     
     fetchByApplicationIdReturns(application.id, application)

@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import config.ErrorHandler
 import domain._
-import mocks.service.ApplicationServiceMock
+import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
@@ -57,10 +57,10 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new AddApplication(
       applicationServiceMock,
-      mock[SessionService],
+      sessionServiceMock,
       mock[AuditService],
       mock[ErrorHandler],
       messagesApi,
@@ -69,11 +69,9 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
-      .willReturn(Some(session))
+    fetchSessionByIdReturns(sessionId, session)
 
-    given(underTest.sessionService.fetch(eqTo(partLoggedInSessionId))(any[HeaderCarrier]))
-      .willReturn(Some(partLoggedInSession))
+    fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 
     givenApplicationUpdateSucceeds()
 
