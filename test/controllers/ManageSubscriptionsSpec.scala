@@ -262,37 +262,42 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
       }
 
-      "save action saves valid subscription field values" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
-        val newSubscriptionValue = "new value"
-        private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
+      def saveSubscriptionFieldsTest(mode: SaveSubsFieldsPageMode, expectedRedirectUrl: String) = {
+        s"save action saves valid subscription field values in mode [$mode]" in new ManageSubscriptionsSetup {
+          val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
+          val newSubscriptionValue = "new value"
+          private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
 
-        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
+          givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
-        when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
-          .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
+          when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
+            .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
-        private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
+          private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
 
-        private val result: Result =
-          await(addToken(manageSubscriptionController.saveSubscriptionFields(
-            appId,
-            apiSubscriptionStatus.context,
-            apiSubscriptionStatus.apiVersion.version,
-            SaveSubsFieldsPageMode.LeftHandNavigation))(loggedInWithFormValues))
+          private val result: Result =
+            await(addToken(manageSubscriptionController.saveSubscriptionFields(
+              appId,
+              apiSubscriptionStatus.context,
+              apiSubscriptionStatus.apiVersion.version,
+              mode))(loggedInWithFormValues))
 
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/api-metadata")
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(expectedRedirectUrl)
 
-        val expectedFields: Fields = Map(subSubscriptionValue.definition.name -> newSubscriptionValue)
+          val expectedFields: Fields = Map(subSubscriptionValue.definition.name -> newSubscriptionValue)
 
-        verify(mockSubscriptionFieldsService)
-          .saveFieldValues(
-            eqTo(appId),
-            eqTo(apiSubscriptionStatus.context),
-            eqTo(apiSubscriptionStatus.apiVersion.version),
-            eqTo(expectedFields))(any[HeaderCarrier]())
+          verify(mockSubscriptionFieldsService)
+            .saveFieldValues(
+              eqTo(appId),
+              eqTo(apiSubscriptionStatus.context),
+              eqTo(apiSubscriptionStatus.apiVersion.version),
+              eqTo(expectedFields))(any[HeaderCarrier]())
+        }
       }
+
+      saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/$appId/api-metadata")
+      saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/$appId/check-your-answers#configurations")
 
       "save action fails validation and shows error message" in new ManageSubscriptionsSetup {
         val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
