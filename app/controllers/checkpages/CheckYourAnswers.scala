@@ -63,6 +63,8 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     def asCheckYourSubscriptionData(in: APISubscriptionStatus): CheckYourSubscriptionData = {
       CheckYourSubscriptionData(
         name = in.name,
+        apiVersion = in.apiVersion.version,
+        displayedStatus = in.apiVersion.displayedStatus,
         fields = in.fields.fold(Seq.empty[(String,String)])(wrapper => wrapper.fields.toList.map(sfv => ((sfv.definition.name, sfv.value))))
       )
     }
@@ -169,6 +171,8 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
 case class CheckYourSubscriptionData(
   name: String,
+  apiVersion: String,
+  displayedStatus:String,
   fields: Seq[(String, String)]
 )
 
