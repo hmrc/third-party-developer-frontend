@@ -147,7 +147,7 @@ class ManageSubscriptions @Inject() (
     import SaveSubsFieldsPageMode._
     val successRedirectUrl = mode match {
       case LeftHandNavigation => routes.ManageSubscriptions.listApiSubscriptions(applicationId)
-      case CheckYourAnswers => checkpages.routes.CheckYourAnswers.answersPage(applicationId)
+      case CheckYourAnswers => checkpages.routes.CheckYourAnswers.answersPage(applicationId).withFragment("configurations")
     }
 
     subscriptionConfigurationSave(apiContext, apiVersion, successRedirectUrl, vm =>
@@ -171,7 +171,7 @@ class ManageSubscriptions @Inject() (
       }
 
       saveFields(validForm) map {
-        case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect.url)
+        case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect)
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
           val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)

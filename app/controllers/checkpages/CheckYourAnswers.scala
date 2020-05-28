@@ -92,7 +92,11 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
   def answersPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val checkYourAnswersData = populateCheckYourAnswersData(request.application, request.subscriptions)
-    Future.successful(Ok(checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))))
+    Future.successful(
+      Ok(
+        checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))
+      )
+    )
   }
 
   def answersPageAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
