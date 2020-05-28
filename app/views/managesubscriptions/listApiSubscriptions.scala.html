@@ -16,6 +16,7 @@
 
 @import include._
 @import domain._
+@import domain.SaveSubsFieldsPageMode._
 @import model.Crumb
 @import controllers.ManageSubscriptions.ApiDetails
 @import views.helper.IdFormatter
@@ -57,7 +58,7 @@ applicationConfig: config.ApplicationConfig)
         <th class="col-35">Name</th>
         <th class="col-60">Configuration</th>
         <td>
-            <a href="@{routes.ManageSubscriptions.editApiMetadataPage(app.id, api.context, api.version)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-submit">Edit</a>
+            <a href="@{routes.ManageSubscriptions.editApiMetadataPage(app.id, api.context, api.version, LeftHandNavigation)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-submit">Edit</a>
         </td>
         </tr>
       </thead>

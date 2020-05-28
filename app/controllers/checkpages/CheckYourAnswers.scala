@@ -28,6 +28,7 @@ import play.api.mvc.{Action, AnyContent, Call, Result}
 import service.{ApplicationService, SessionService}
 import views.html.checkpages.checkyouranswers
 import views.html.checkpages.applicationcheck
+import cats.data.{NonEmptyList => NEL}
 
 import model.ApplicationViewModel
 
@@ -36,6 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import domain.APISubscriptionStatusWithSubscriptionFields
 import views.html.editapplication.credentialsPartials.fields
 import domain.APISubscriptionStatus
+import controllers.ManageSubscriptions.FieldValue
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
@@ -63,9 +65,10 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     def asCheckYourSubscriptionData(in: APISubscriptionStatus): CheckYourSubscriptionData = {
       CheckYourSubscriptionData(
         name = in.name,
+        apiContext = in.context,
         apiVersion = in.apiVersion.version,
         displayedStatus = in.apiVersion.displayedStatus,
-        fields = in.fields.fold(Seq.empty[(String,String)])(wrapper => wrapper.fields.toList.map(sfv => ((sfv.definition.name, sfv.value))))
+        fields = in.fields.map(wrapper => wrapper.fields.map(sfv => FieldValue(sfv.definition.name, sfv.value)))
       )
     }
 
@@ -171,9 +174,10 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
 case class CheckYourSubscriptionData(
   name: String,
+  apiContext: String,
   apiVersion: String,
   displayedStatus:String,
-  fields: Seq[(String, String)]
+  fields: Option[NEL[FieldValue]]
 )
 
 case class CheckYourAnswersData(

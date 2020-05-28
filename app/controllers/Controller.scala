@@ -87,7 +87,6 @@ abstract class ApplicationController()
     ApplicationViewModel(request.application, hasSubscriptionFields(request))
 
   def hasSubscriptionFields(request: ApplicationRequest[_]) : Boolean = {
-
     request.subscriptions.exists(s => s.subscribed && s.fields.isDefined)
   }
 

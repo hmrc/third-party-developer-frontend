@@ -35,6 +35,7 @@ import views.html.managesubscriptions.editApiMetadata
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import domain.SaveSubsFieldsPageMode
 
 object ManageSubscriptions {
 
@@ -125,7 +126,7 @@ class ManageSubscriptions @Inject() (
       successful(Ok(views.html.managesubscriptions.listApiSubscriptions(definitionsRequest.applicationRequest.application, details)))
     }
 
-  def editApiMetadataPage(applicationId: String, context: String, version: String): Action[AnyContent] =
+  def editApiMetadataPage(applicationId: String, context: String, version: String, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
@@ -133,18 +134,24 @@ class ManageSubscriptions @Inject() (
       definitionsRequest.fieldDefinitions
         .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
         .headOption
-        .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, toViewModel(vm)))))
+        .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, toViewModel(vm), mode))))
         .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
 
   def saveSubscriptionFields(applicationId: String,
                              apiContext: String,
-                             apiVersion: String) : Action[AnyContent]
-    = whenTeamMemberOnApp(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
+                             apiVersion: String,
+                             mode: SaveSubsFieldsPageMode
+                            ) : Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
 
-    val successRedirectUrl = routes.ManageSubscriptions.listApiSubscriptions(applicationId)
+    import SaveSubsFieldsPageMode._
+    val successRedirectUrl = mode match {
+      case LeftHandNavigation => routes.ManageSubscriptions.listApiSubscriptions(applicationId)
+      case CheckYourAnswers => checkpages.routes.CheckYourAnswers.answersPage(applicationId)
+    }
+
     subscriptionConfigurationSave(apiContext, apiVersion, successRedirectUrl, vm =>
-      editApiMetadata(request.application,vm)
+      editApiMetadata(request.application,vm, mode)
     )
   }
 
@@ -245,7 +252,7 @@ class ManageSubscriptions @Inject() (
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
       val application = definitionsRequest.applicationRequest.application
-    
+
       if (pageNumber == definitionsRequest.totalPages) {
         doEndOfJourneyRedirect(application)
 

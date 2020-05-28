@@ -121,21 +121,23 @@ developerSession = Some(loggedIn)
                 </br>
                 </br>
 
-                <h2 class="step-heading-1" style="margin-bottom: 0px">Your API subscription configuration</h2>
+                @if(data.subscriptions.exists(_.fields.isDefined)) {
+                    <h2 class="step-heading-1" style="margin-bottom: 0px">Your API subscription configuration</h2>
 
-                @data.subscriptions.map { sub =>
-                  <table class="task-list">
-                    <thead>
-                      <tr id="">
-                        <th><span strong class="bold-small">@sub.name @sub.apiVersion @sub.displayedStatus</span></th>
-                        <td>
-                            <div align="right">
-                                <a href="@controllers.checkpages.routes.CheckYourAnswers.namePage(data.appId)">Change<span class="visually-hidden">Edit Subscription</span></a>
-                            </div>
-                        </td>
-                      </tr>
-                    </thead>
-                  </table>
+                    @data.subscriptions.filter(_.fields.isDefined).map { sub =>
+                    <table class="task-list">
+                        <thead>
+                        <tr id="">
+                            <th><span strong class="bold-small">@sub.name @sub.apiVersion @sub.displayedStatus</span></th>
+                            <td>
+                                <div align="right">
+                                    <a href="@controllers.routes.ManageSubscriptions.editApiMetadataPage(data.appId, sub.apiContext, sub.apiVersion, SaveSubsFieldsPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Subscription</span></a>
+                                </div>
+                            </td>
+                        </tr>
+                        </thead>
+                    </table>
+                    }
                 }
 
                 </br>

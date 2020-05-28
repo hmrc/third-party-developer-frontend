@@ -16,7 +16,7 @@
 
 package connectors
 
-import domain.{AddTeamMemberPageMode, Environment}
+import domain.{AddTeamMemberPageMode, SaveSubsFieldsPageMode ,Environment}
 import play.api.mvc.PathBindable
 
 package object binders {
@@ -43,6 +43,20 @@ package object binders {
       }
 
       override def unbind(key: String, mode: AddTeamMemberPageMode): String = {
+        mode.toString.toLowerCase
+      }
+    }
+
+  implicit def saveSubsFieldsPageModePathBinder(implicit textBinder: PathBindable[String]): PathBindable[SaveSubsFieldsPageMode] =
+    new PathBindable[SaveSubsFieldsPageMode] {
+      override def bind(key: String, value: String): Either[String, SaveSubsFieldsPageMode] = {
+        for {
+          text <- textBinder.bind(key, value).right
+          mode <- SaveSubsFieldsPageMode.from(text).toRight("Not a valid SaveSubsFieldsPageMode").right
+        } yield mode
+      }
+
+      override def unbind(key: String, mode: SaveSubsFieldsPageMode): String = {
         mode.toString.toLowerCase
       }
     }
