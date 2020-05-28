@@ -38,6 +38,7 @@ import domain.APISubscriptionStatusWithSubscriptionFields
 import views.html.editapplication.credentialsPartials.fields
 import domain.APISubscriptionStatus
 import controllers.ManageSubscriptions.FieldValue
+import controllers.ManageSubscriptions
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
@@ -68,7 +69,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
         apiContext = in.context,
         apiVersion = in.apiVersion.version,
         displayedStatus = in.apiVersion.displayedStatus,
-        fields = in.fields.map(wrapper => wrapper.fields.map(sfv => FieldValue(sfv.definition.name, sfv.value)))
+        fields = in.fields.map(wrapper => wrapper.fields.map(ManageSubscriptions.toFieldValue))
       )
     }
 

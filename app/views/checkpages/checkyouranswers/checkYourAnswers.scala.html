@@ -122,13 +122,13 @@ developerSession = Some(loggedIn)
                 </br>
 
                 @if(data.subscriptions.exists(_.fields.isDefined)) {
-                    <h2 class="step-heading-1" style="margin-bottom: 0px">Your API subscription configuration</h2>
+                    <h2 class="step-heading-1">Your API subscription configuration</h2>
 
                     @data.subscriptions.filter(_.fields.isDefined).map { sub =>
                     <table class="task-list">
                         <thead>
                         <tr id="">
-                            <th><span strong class="bold-small">@sub.name @sub.apiVersion @sub.displayedStatus</span></th>
+                            <th class="col-80" colspan="2"><span strong class="bold-small">@sub.name @sub.apiVersion @sub.displayedStatus</span></th>
                             <td>
                                 <div align="right">
                                     <a href="@controllers.routes.ManageSubscriptions.editApiMetadataPage(data.appId, sub.apiContext, sub.apiVersion, SaveSubsFieldsPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Subscription</span></a>
@@ -136,7 +136,18 @@ developerSession = Some(loggedIn)
                             </td>
                         </tr>
                         </thead>
+                        <tbody>
+                          @sub.fields.get.toList.map{ field =>
+                            <tr>
+                              <th class="col-40"><span strong class="bold-small">@field.name</span></th>
+                              <td colspan="2">@field.value</td>
+                            </tr>
+                          }
+                        </tbody>
                     </table>
+
+                    </br>
+
                     }
                 }
 
