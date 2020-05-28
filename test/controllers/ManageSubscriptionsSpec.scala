@@ -227,7 +227,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       "return not found when trying to edit api subscription configuration for an api the application is not subscribed to" in new ManageSubscriptionsSetup {
         givenApplicationHasSubs(application, Seq.empty)
 
-        private val result = await(manageSubscriptionController.editApiMetadataPage(appId, apiContext, apiVersion)(loggedInRequest))
+        private val result = await(manageSubscriptionController.editApiMetadataPage(appId, apiContext, apiVersion, SaveSubsFieldsPageMode.LeftHandNavigation)(loggedInRequest))
 
         status(result) shouldBe NOT_FOUND
       }
@@ -253,7 +253,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         givenApplicationHasSubs(application, subsData)
 
         private val result: Result =
-          await(addToken(manageSubscriptionController.editApiMetadataPage(appId, "/api1-api", "1.0"))(loggedInRequest))
+          await(addToken(manageSubscriptionController.editApiMetadataPage(appId, "/api1-api", "1.0", SaveSubsFieldsPageMode.LeftHandNavigation))(loggedInRequest))
 
         assertCommonEditFormFields(result, apiSubscriptionStatus)
 
@@ -278,7 +278,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
           await(addToken(manageSubscriptionController.saveSubscriptionFields(
             appId,
             apiSubscriptionStatus.context,
-            apiSubscriptionStatus.apiVersion.version))(loggedInWithFormValues))
+            apiSubscriptionStatus.apiVersion.version,
+            SaveSubsFieldsPageMode.LeftHandNavigation))(loggedInWithFormValues))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/api-metadata")
@@ -310,7 +311,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
             appId,
             apiSubscriptionStatus.context,
-            apiSubscriptionStatus.apiVersion.version))(loggedInWithFormValues))
+            apiSubscriptionStatus.apiVersion.version,
+            SaveSubsFieldsPageMode.LeftHandNavigation))(loggedInWithFormValues))
 
         status(result) shouldBe BAD_REQUEST
 
@@ -523,7 +525,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         val fakeVersion = "1.0"
 
         private val result =
-          await(manageSubscriptionController.editApiMetadataPage(appId, fakeContext, fakeVersion)(request))
+          await(manageSubscriptionController.editApiMetadataPage(appId, fakeContext, fakeVersion, SaveSubsFieldsPageMode.LeftHandNavigation)(request))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
