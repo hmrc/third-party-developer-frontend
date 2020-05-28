@@ -61,7 +61,7 @@ developerSession = Some(loggedIn)
                             </th>
                             <td>
                                 @data.subscriptions.map { sub =>
-                                @sub<br/>
+                                @sub.name<br/>
                                 }
                             </td>
                             <td>
@@ -70,6 +70,8 @@ developerSession = Some(loggedIn)
                                 </div>
                             </td>
                         </tr>
+
+
 
                         <tr id="contactDetails">
                             <th><span strong class="bold-small">Contact details</span></th>
