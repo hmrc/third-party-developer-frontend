@@ -224,14 +224,6 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         status(result) shouldBe NOT_FOUND
       }
 
-      "return not found when trying to edit api subscription configuration for an api the application is not subscribed to" in new ManageSubscriptionsSetup {
-        givenApplicationHasSubs(application, Seq.empty)
-
-        private val result = await(manageSubscriptionController.editApiMetadataPage(appId, apiContext, apiVersion, SaveSubsFieldsPageMode.LeftHandNavigation)(loggedInRequest))
-
-        status(result) shouldBe NOT_FOUND
-      }
-
       "It renders the subscription configuration list page for a privileged application" in new ManageSubscriptionsSetup {
         val subsData = Seq(
           exampleSubscriptionWithFields("api1", 1)
@@ -294,37 +286,60 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
               eqTo(apiSubscriptionStatus.apiVersion.version),
               eqTo(expectedFields))(any[HeaderCarrier]())
         }
+        
+        s"save action fails validation and shows error message in mode [$mode]" in new ManageSubscriptionsSetup {
+          val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
+          val newSubscriptionValue = "my invalid value"
+          val fieldErrors = Map("apiName" -> "apiName is invalid error message")
+
+          givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
+
+          when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
+            .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
+
+          private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
+
+          private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
+
+          private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
+              appId,
+              apiSubscriptionStatus.context,
+              apiSubscriptionStatus.apiVersion.version,
+              mode))(loggedInWithFormValues))
+
+          status(result) shouldBe BAD_REQUEST
+
+          assertIsApiConfigureEditPage(result)
+
+          bodyOf(result) should include("apiName is invalid error message")
+        }
+
+        s"return to the login page when the user attempts to edit subscription configuration in mode [$mode]" in new ManageSubscriptionsSetup {
+
+          val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+
+          val fakeContext = "FAKE"
+          val fakeVersion = "1.0"
+
+          private val result =
+            await(manageSubscriptionController.editApiMetadataPage(appId, fakeContext, fakeVersion, mode)(request))
+
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some("/developer/login")
+        }
+
+        s"return not found when trying to edit api subscription configuration for an api the application is not subscribed to in mode [$mode]" in new ManageSubscriptionsSetup {
+          givenApplicationHasSubs(application, Seq.empty)
+
+          private val result = await(manageSubscriptionController.editApiMetadataPage(appId, apiContext, apiVersion, mode)(loggedInRequest))
+
+          status(result) shouldBe NOT_FOUND
+        }
+
       }
 
       saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/$appId/api-metadata")
       saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/$appId/check-your-answers#configurations")
-
-      "save action fails validation and shows error message" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
-        val newSubscriptionValue = "my invalid value"
-        val fieldErrors = Map("apiName" -> "apiName is invalid error message")
-
-        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
-
-        when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
-          .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
-
-        private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
-
-        private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
-
-        private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
-            appId,
-            apiSubscriptionStatus.context,
-            apiSubscriptionStatus.apiVersion.version,
-            SaveSubsFieldsPageMode.LeftHandNavigation))(loggedInWithFormValues))
-
-        status(result) shouldBe BAD_REQUEST
-
-        assertIsApiConfigureEditPage(result)
-
-        bodyOf(result) should include("apiName is invalid error message")
-      }
 
       "save action fails valid and shows error message and renders the add app journey page subs configuration" in new ManageSubscriptionsSetup {
         val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
@@ -517,20 +532,6 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
         private val result =
           await(manageSubscriptionController.listApiSubscriptions(appId)(request))
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/login")
-      }
-
-      "return to the login page when the user attempts to edit subscription configuration" in new ManageSubscriptionsSetup {
-
-        val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-
-        val fakeContext = "FAKE"
-        val fakeVersion = "1.0"
-
-        private val result =
-          await(manageSubscriptionController.editApiMetadataPage(appId, fakeContext, fakeVersion, SaveSubsFieldsPageMode.LeftHandNavigation)(request))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
