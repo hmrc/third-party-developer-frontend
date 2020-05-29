@@ -64,7 +64,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
         )
       )
 
-    given(mockConnectorsWrapper.connectorsForEnvironment(application.deployedTo))
+    given(mockConnectorsWrapper.forEnvironment(application.deployedTo))
       .willReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector))
 
     given(

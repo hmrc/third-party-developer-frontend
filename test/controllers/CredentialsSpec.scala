@@ -25,7 +25,7 @@ import domain.ApplicationState.pendingGatekeeperApproval
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.{DateTime, DateTimeZone}
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify, when}
@@ -76,8 +76,8 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     
     fetchByApplicationIdReturns(application.id, application)
     
-    given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
-    given(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).willReturn(tokens)
+    givenApplicationHasNoSubs(application)
+    fetchCredentialsReturns(application, tokens)
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
@@ -87,15 +87,15 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
                                              userRole: Role,
                                              state: ApplicationState = ApplicationState.production("", ""),
                                              access: Access = Standard(),
-                                             environment: Environment = Environment.PRODUCTION, createdOn: DateTime = DateTimeUtils.now)
-                                                : BDDMockito.BDDMyOngoingStubbing[Future[Seq[APISubscriptionStatus]]] = {
+                                             environment: Environment = Environment.PRODUCTION, createdOn: DateTime = DateTimeUtils.now) : Application = {
 
       val application = Application(applicationId.toString, clientId, "app", createdOn, DateTimeUtils.now, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), state = state, access = access)
 
       fetchByApplicationIdReturns(applicationId.toString, application)
-      given(underTest.applicationService.fetchCredentials(mockEq(applicationId.toString))(any[HeaderCarrier])).willReturn(tokens)
-      given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty)
+      givenApplicationHasNoSubs(application)
+      fetchCredentialsReturns(application, tokens)
+      application
     }
   }
 
@@ -224,25 +224,21 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   "addClientSecret" should {
     val applicationId = UUID.randomUUID()
-    val newSecretId = UUID.randomUUID().toString
-    val newSecret = UUID.randomUUID().toString
 
     "add the client secret" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
-      given(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn((newSecretId, newSecret))
+      val application = givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
+      givenAddClientSecretReturns(application, loggedInUser.email)
 
       val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.toString}/client-secrets")
-      verify(underTest.applicationService).addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier])
+      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, environment = Environment.PRODUCTION)
-      when(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .thenReturn(failed(new ClientSecretLimitExceeded))
+      val application = givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, environment = Environment.PRODUCTION)
+      givenAddClientSecretFailsWith(application, loggedInUser.email, new ClientSecretLimitExceeded)
 
       val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
@@ -250,9 +246,8 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, environment = Environment.SANDBOX)
-      when(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .thenReturn(failed(new ClientSecretLimitExceeded))
+      val application = givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR, environment = Environment.SANDBOX)
+      givenAddClientSecretFailsWith(application, loggedInUser.email, new ClientSecretLimitExceeded)
 
       val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
@@ -260,12 +255,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "display the NotFound page when the application does not exist" in new Setup {
-      fetchByApplicationIdReturns(applicationId.toString, application)
-
-      when(underTest.applicationService.addClientSecret(mockEq(applicationId.toString), mockEq(loggedInUser.email))(any[HeaderCarrier]))
-        .thenReturn(failed(new ApplicationNotFound))
-      when(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier]))
-        .thenReturn(successful(Seq.empty[APISubscriptionStatus]))
+      fetchByApplicationIdReturnsNone(applicationId.toString)
 
       val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
@@ -278,7 +268,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe FORBIDDEN
-      verify(underTest.applicationService, never()).addClientSecret(any[String], any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
     }
 
     "display the error page when the application has not reached production state" in new Setup {
@@ -287,7 +277,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result: Result = await(underTest.addClientSecret(applicationId.toString)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
-      verify(underTest.applicationService, never()).addClientSecret(any[String], any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
     }
 
     "return to the login page when the user is not logged in" in new Setup {
@@ -297,7 +287,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      verify(underTest.applicationService, never()).addClientSecret(any[String], any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never()).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
     }
   }
 
@@ -342,7 +332,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
 
       given(underTest.applicationService
-        .deleteClientSecret(mockEq(applicationId), mockEq(clientSecretId), mockEq(loggedInUser.email))(any[HeaderCarrier]))
+        .deleteClientSecret(eqTo(applicationId), eqTo(clientSecretId), eqTo(loggedInUser.email))(any[HeaderCarrier]))
         .willReturn(successful(ApplicationUpdateSuccessful))
 
       val result: Result = await(underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest))

@@ -500,7 +500,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       given(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actorEmailAddress)))
         .willReturn((newClientSecretId, newClientSecret))
 
-      private val updatedToken = await(applicationService.addClientSecret(productionApplicationId, actorEmailAddress))
+      private val updatedToken = await(applicationService.addClientSecret(productionApplication, actorEmailAddress))
 
       updatedToken._1 shouldBe newClientSecretId
       updatedToken._2 shouldBe newClientSecret
@@ -514,7 +514,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         .thenReturn(Future.failed(new ClientSecretLimitExceeded))
 
       intercept[ClientSecretLimitExceeded] {
-        await(applicationService.addClientSecret(productionApplicationId, actorEmailAddress))
+        await(applicationService.addClientSecret(productionApplication, actorEmailAddress))
       }
     }
   }

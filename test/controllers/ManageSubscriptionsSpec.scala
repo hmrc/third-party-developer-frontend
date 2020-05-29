@@ -475,7 +475,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
         givenApplicationHasSubs(productionApplication, subsData)
 
-        givenUpdateCheckInformationReturns(productionApplication.id)
+        givenUpdateCheckInformationSucceeds(productionApplication.id)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStepPage(productionApplication.id, 2)(loggedInRequest))

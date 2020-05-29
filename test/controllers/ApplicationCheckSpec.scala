@@ -96,7 +96,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     givenRemoveTeamMemberSucceeds(loggedInUser)
 
-    givenUpdateCheckInformationReturns(appId)
+    givenUpdateCheckInformationSucceeds(appId)
 
     givenApplicationNameIsValid()
 
@@ -141,7 +141,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
          collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
 
       fetchByApplicationIdReturns(application.id, application)
-      fetchCredentialsReturns(application.id, tokens)
+      fetchCredentialsReturns(application, tokens)
       if(hasSubs)
         givenApplicationHasSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
       else

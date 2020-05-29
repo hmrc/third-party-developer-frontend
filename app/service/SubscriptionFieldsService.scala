@@ -29,7 +29,7 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
 
   def fetchFieldsValues(application: Application, fieldDefinitions: Seq[SubscriptionFieldDefinition], apiIdentifier: APIIdentifier)
                        (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]] = {
-    val connector = connectorsWrapper.connectorsForEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+    val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
 
     if (fieldDefinitions.isEmpty) {
       Future.successful(Seq.empty[SubscriptionFieldValue])
@@ -51,12 +51,12 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
     connectorsWrapper
-      .connectorsForEnvironment(environment)
+      .forEnvironment(environment)
       .apiSubscriptionFieldsConnector.fetchAllFieldDefinitions()
   }
 
   def getFieldDefinitions(application: Application, apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]] = {
-    val connector = connectorsWrapper.connectorsForEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+    val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
 
     connector.fetchFieldDefinitions(apiIdentifier.context, apiIdentifier.version)
   }

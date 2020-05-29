@@ -99,19 +99,15 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     fetchSessionByIdReturns(sessionId, session)
 
-    when(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
-      .thenReturn(successful(ApplicationUpdateSuccessful))
+    updateApplicationSuccessful()
 
     fetchByApplicationIdReturns(application.id, application)
 
-    when(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier]))
-      .thenReturn(tokens)
+    fetchCredentialsReturns(application, tokens)
 
-    when(underTest.applicationService.removeTeamMember(any[Application], any[String], mockEq(loggedInUser.email))(any[HeaderCarrier]))
-      .thenReturn(ApplicationUpdateSuccessful)
+    givenRemoveTeamMemberSucceeds(loggedInUser)
 
-    when(underTest.applicationService.updateCheckInformation(mockEq(appId), any[CheckInformation])(any[HeaderCarrier]))
-      .thenReturn(ApplicationUpdateSuccessful)
+    givenUpdateCheckInformationSucceeds(appId)
 
     val subscriptions = Seq(
       APISubscriptions("API1", "ServiceName", "apiContent",
@@ -119,11 +115,9 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
           "API1", "subscriptionServiceName", "context", APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false))))
     val groupedSubs = GroupedSubscriptions(Seq.empty,subscriptions)
 
-    when(underTest.applicationService.fetchAllSubscriptions(any[Application])(any[HeaderCarrier]))
-      .thenReturn(successful(Seq(mock[APISubscription])))
+    fetchAllSubscriptionsReturns(Seq(mock[APISubscription]))
 
-    when(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-      .thenReturn(successful(Valid))
+    givenApplicationNameIsValid()
 
     implicit val hc = HeaderCarrier()
 
@@ -148,8 +142,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
         collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
 
       fetchByApplicationIdReturns(application.id, application)
-      when(underTest.applicationService.fetchCredentials(mockEq(application.id))(any[HeaderCarrier])).thenReturn(tokens)
-      when(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).thenReturn(Seq())
+      fetchCredentialsReturns(application,tokens)
+      givenApplicationHasNoSubs(application)
 
       application
     }
@@ -188,8 +182,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
           Future.failed(new ApplicationAlreadyExists)
         }
       })
-    when(underTest.applicationService.updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier]))
-      .thenReturn(ApplicationUpdateSuccessful)
+    givenUpdateCheckInformationSucceeds(appId, expectedCheckInformation)
 
     private val result = await(addToken(underTest.answersPageAction(appId))(requestWithFormBody))
 

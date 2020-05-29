@@ -65,7 +65,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
 
   def clientSecrets(applicationId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      applicationService.fetchCredentials(applicationId).map { tokens =>
+      applicationService.fetchCredentials(request.application).map { tokens =>
         Ok(views.html.clientSecrets(request.application, tokens.clientSecrets))
       }
   }
@@ -73,7 +73,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   def serverToken(applicationId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       if (request.application.createdOn.isBefore(serverTokenCutoffDate)) {
-        applicationService.fetchCredentials(applicationId).map { tokens =>
+        applicationService.fetchCredentials(request.application).map { tokens =>
           Ok(views.html.serverToken(request.application, tokens.accessToken))
         }
       } else {
@@ -81,23 +81,25 @@ class Credentials @Inject()(val applicationService: ApplicationService,
       }
     }
 
-  def addClientSecret(applicationId: String): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
-    applicationService.addClientSecret(applicationId, request.user.email).map { response =>
-      Redirect(controllers.routes.Credentials.clientSecrets(applicationId))
-        .flashing("newSecretId" -> response._1, "newSecret" -> response._2)
-    } recover {
-        case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
-        case _: ForbiddenException => Forbidden(errorHandler.badRequestTemplate)
-        case _: ClientSecretLimitExceeded => UnprocessableEntity(errorHandler.badRequestTemplate)
+  def addClientSecret(applicationId: String): Action[AnyContent] = 
+    canChangeClientSecrets(applicationId) { implicit request =>
+      applicationService.addClientSecret(request.application, request.user.email).map { response =>
+        Redirect(controllers.routes.Credentials.clientSecrets(applicationId))
+          .flashing("newSecretId" -> response._1, "newSecret" -> response._2)
+      } recover {
+          case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
+          case _: ForbiddenException => Forbidden(errorHandler.badRequestTemplate)
+          case _: ClientSecretLimitExceeded => UnprocessableEntity(errorHandler.badRequestTemplate)
+      }
     }
-  }
 
-  def deleteClientSecret(applicationId: UUID, clientSecretId: String): Action[AnyContent] = canChangeClientSecrets(applicationId.toString) { implicit request =>
-    applicationService.fetchCredentials(applicationId.toString).map { tokens =>
-      tokens.clientSecrets.find(_.id == clientSecretId)
-        .fold(NotFound(errorHandler.notFoundTemplate))(secret => Ok(views.html.editapplication.deleteClientSecret(request.application, secret)))
+  def deleteClientSecret(applicationId: UUID, clientSecretId: String): Action[AnyContent] = 
+    canChangeClientSecrets(applicationId.toString) { implicit request =>
+      applicationService.fetchCredentials(request.application).map { tokens =>
+        tokens.clientSecrets.find(_.id == clientSecretId)
+          .fold(NotFound(errorHandler.notFoundTemplate))(secret => Ok(views.html.editapplication.deleteClientSecret(request.application, secret)))
+      }
     }
-  }
 
   def deleteClientSecretAction(applicationId: UUID, clientSecretId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId.toString) { implicit request =>
