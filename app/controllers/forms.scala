@@ -189,16 +189,6 @@ object ChangePasswordForm {
 
 }
 
-final case class RemoveTeamMemberForm(email: String)
-
-object RemoveTeamMemberForm {
-  val form: Form[RemoveTeamMemberForm] = Form(
-    mapping(
-      "email" -> emailValidator(FormKeys.teamMemberEmailRequired)
-    )(RemoveTeamMemberForm.apply)(RemoveTeamMemberForm.unapply)
-  )
-}
-
 final case class RemoveTeamMemberConfirmationForm(email: String, confirm: Option[String] = Some(""))
 
 object RemoveTeamMemberConfirmationForm {
@@ -338,68 +328,6 @@ object DeletePrincipalApplicationForm {
       "deleteConfirm" -> optional(text)
         .verifying(FormKeys.deleteApplicationConfirmNoChoiceKey, s => s.isDefined)
     )(DeletePrincipalApplicationForm.apply)(DeletePrincipalApplicationForm.unapply)
-  )
-}
-
-final case class SelectClientSecretsToDeleteForm(clientSecretsToDelete: Seq[String])
-
-object SelectClientSecretsToDeleteForm {
-
-  def form: Form[SelectClientSecretsToDeleteForm] = Form(
-    mapping(
-      "client-secret" -> seq(text)
-    )(SelectClientSecretsToDeleteForm.apply)(SelectClientSecretsToDeleteForm.unapply)
-  )
-}
-
-final case class DeleteClientSecretsConfirmForm(
-    deleteConfirm: Option[String] = Some(""),
-    clientSecretsToDelete: String
-)
-
-object DeleteClientSecretsConfirmForm {
-
-  def form: Form[DeleteClientSecretsConfirmForm] = Form(
-    mapping(
-      "deleteConfirm" -> optional(text)
-        .verifying(FormKeys.deleteClientSecretsConfirmNoChoiceKey, s => s.isDefined),
-      "clientSecretsToDelete" -> text
-    )(DeleteClientSecretsConfirmForm.apply)(DeleteClientSecretsConfirmForm.unapply)
-  )
-}
-
-final case class VerifyPasswordForm(password: String)
-
-object VerifyPasswordForm {
-
-  val form: Form[VerifyPasswordForm] = Form(
-    mapping(
-      "password" -> loginPasswordValidator
-    )(VerifyPasswordForm.apply)(VerifyPasswordForm.unapply)
-  )
-}
-
-final case class SubscriptionConfirmationForm(subscribeConfirm: Option[String] = Some(""))
-
-object SubscriptionConfirmationForm {
-
-  def form: Form[SubscriptionConfirmationForm] = Form(
-    mapping(
-      "subscribeConfirm" -> optional(text)
-        .verifying(FormKeys.subscriptionConfirmationNoChoiceKey, s => s.isDefined)
-    )(SubscriptionConfirmationForm.apply)(SubscriptionConfirmationForm.unapply)
-  )
-}
-
-final case class UnsubscribeConfirmationForm(unsubscribeConfirm: Option[String] = Some(""))
-
-object UnsubscribeConfirmationForm {
-
-  def form: Form[UnsubscribeConfirmationForm] = Form(
-    mapping(
-      "unsubscribeConfirm" -> optional(text)
-        .verifying(FormKeys.unsubscribeConfirmationNoChoiceKey, s => s.isDefined)
-    )(UnsubscribeConfirmationForm.apply)(UnsubscribeConfirmationForm.unapply)
   )
 }
 
