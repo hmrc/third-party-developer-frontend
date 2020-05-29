@@ -55,7 +55,7 @@ trait ContactDetailsPartialController {
     def withValidForm(form: ContactForm) = {
       val information = app.checkInformation.getOrElse(CheckInformation())
         .copy(contactDetails = Some(ContactDetails(form.fullname, form.email, form.telephone)))
-      applicationService.updateCheckInformation(app.id, information) map { _ =>
+      applicationService.updateCheckInformation(app, information) map { _ =>
         Redirect(landingPageRoute(app.id))
       }
     }

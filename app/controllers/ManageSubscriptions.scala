@@ -164,7 +164,7 @@ class ManageSubscriptions @Inject() (
     def handleValidForm(validForm: EditApiMetadata) = {
       def saveFields(validForm: EditApiMetadata)(implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
         if (validForm.fields.nonEmpty) {
-          subFieldsService.saveFieldValues(request.application.id, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
+          subFieldsService.saveFieldValues(request.application, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
         } else {
           Future.successful(SaveSubscriptionFieldsSuccessResponse)
         }
@@ -240,7 +240,7 @@ class ManageSubscriptions @Inject() (
         Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id)))
       } else {
         val information = application.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionConfigurationsConfirmed = true)
-        applicationService.updateCheckInformation(application.id, information) map { _ =>
+        applicationService.updateCheckInformation(application, information) map { _ =>
           Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(application.id))
         }
       }

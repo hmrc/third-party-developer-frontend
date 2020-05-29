@@ -96,7 +96,7 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
 
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
-      _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
+      _ <- applicationService.updateCheckInformation(request.application, information.copy(teamConfirmed = true))
     } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
   }
 

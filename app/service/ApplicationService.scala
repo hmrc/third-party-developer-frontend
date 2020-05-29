@@ -119,7 +119,7 @@ class ApplicationService @Inject() (
         .fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
         .flatMap(values => {
           if (!values.exists(field => field.value != "")) {
-            val x = subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+            val x = subscriptionFieldsService.saveFieldValues(application, context, version, createEmptyFieldValues(fieldDefinitions))
             x.map(_ => HasSucceeded)
           } else {
             Future.successful(HasSucceeded)
@@ -184,8 +184,9 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo)
       .thirdPartyApplicationConnector.deleteClientSecret(UUID.fromString(application.id), clientSecretId, actorEmailAddress)
 
-  def updateCheckInformation(id: String, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.updateApproval(id, checkInformation))
+  def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    connectorWrapper.forEnvironment(application.deployedTo)
+      .thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
   }
 
   def requestUplift(applicationId: String, applicationName: String, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = {
@@ -262,7 +263,7 @@ class ApplicationService @Inject() (
       developer <- developerConnector.fetchDeveloper(teamMember.emailAddress)
       _ <- if (developer.isEmpty) developerConnector.createUnregisteredUser(teamMember.emailAddress) else Future.successful(())
       request = AddTeamMemberRequest(requestingEmail, teamMember, developer.isDefined, adminsToEmail.toSet)
-      connector <- connectorWrapper.forApplication(app.id)
+      connector = connectorWrapper.forEnvironment(app.deployedTo)
       appConnector = connector.thirdPartyApplicationConnector
       response <- appConnector.addTeamMember(app.id, request)
     } yield response
@@ -279,7 +280,7 @@ class ApplicationService @Inject() (
     for {
       otherAdmins <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email)
-      connectors <- connectorWrapper.forApplication(app.id)
+      connectors = connectorWrapper.forEnvironment(app.deployedTo)
       response <- connectors.thirdPartyApplicationConnector.removeTeamMember(app.id, teamMemberToRemove, requestingEmail, adminsToEmail)
     } yield response
   }

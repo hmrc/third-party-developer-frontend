@@ -114,7 +114,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
       .recover {
         case _: ApplicationAlreadyExists =>
           val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
-          applicationService.updateCheckInformation(application.id, information)
+          applicationService.updateCheckInformation(application, information)
 
           val requestForm = validateCheckFormForApplication(request)
 
@@ -131,7 +131,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
-      _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
+      _ <- applicationService.updateCheckInformation(request.application, information.copy(teamConfirmed = true))
     } yield Redirect(routes.CheckYourAnswers.answersPage(appId))
   }
 

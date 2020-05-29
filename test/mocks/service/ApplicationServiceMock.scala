@@ -90,12 +90,12 @@ trait ApplicationServiceMock extends MockitoSugar {
     when(applicationServiceMock.removeTeamMember(any(), any(), eqTo(loggedInUser.email))(any[HeaderCarrier]))
     .thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenUpdateCheckInformationSucceeds(appId: String) =
-    when(applicationServiceMock.updateCheckInformation(eqTo(appId), any())(any()))
+  def givenUpdateCheckInformationSucceeds(app: Application) =
+    when(applicationServiceMock.updateCheckInformation(eqTo(app), any())(any()))
     .thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenUpdateCheckInformationSucceeds(appId: String, checkInfo: CheckInformation) =
-    when(applicationServiceMock.updateCheckInformation(eqTo(appId), eqTo(checkInfo))(any()))
+  def givenUpdateCheckInformationSucceeds(app: Application, checkInfo: CheckInformation) =
+    when(applicationServiceMock.updateCheckInformation(eqTo(app), eqTo(checkInfo))(any()))
     .thenReturn(successful(ApplicationUpdateSuccessful))
 
   def givenAddClientSecretReturns(application: Application, email: String) = {

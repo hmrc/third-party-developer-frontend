@@ -94,7 +94,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
       def updateCheckInformation(updateRequest: UpdateApplicationRequest): Future[ApplicationUpdateSuccessful] = {
         if (application.deployedTo.isProduction()) {
-          applicationService.updateCheckInformation(applicationId, buildCheckInformation(updateRequest, application))
+          applicationService.updateCheckInformation(application, buildCheckInformation(updateRequest, application))
         } else {
           Future.successful(ApplicationUpdateSuccessful)
         }

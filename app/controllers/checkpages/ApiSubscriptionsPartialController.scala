@@ -50,7 +50,7 @@ trait ApiSubscriptionsPartialController  {
     }
     else {
       for {
-        _ <- applicationService.updateCheckInformation(app.id, information.copy(apiSubscriptionsConfirmed = true))
+        _ <- applicationService.updateCheckInformation(app, information.copy(apiSubscriptionsConfirmed = true))
       } yield Redirect(landingPageRoute(app.id))
     }
   }

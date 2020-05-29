@@ -62,7 +62,7 @@ trait TermsAndConditionsPartialController {
       val information = app.checkInformation.getOrElse(CheckInformation())
       for {
         _ <- updateUrl(form)
-        _ <- applicationService.updateCheckInformation(app.id, information.copy(providedTermsAndConditionsURL = true))
+        _ <- applicationService.updateCheckInformation(app, information.copy(providedTermsAndConditionsURL = true))
       } yield Redirect(landingPageRoute(app.id))
     }
 

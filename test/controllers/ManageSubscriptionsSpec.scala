@@ -281,7 +281,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
           verify(mockSubscriptionFieldsService)
             .saveFieldValues(
-              eqTo(appId),
+              eqTo(application),
               eqTo(apiSubscriptionStatus.context),
               eqTo(apiSubscriptionStatus.apiVersion.version),
               eqTo(expectedFields))(any[HeaderCarrier]())
@@ -475,7 +475,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
         givenApplicationHasSubs(productionApplication, subsData)
 
-        givenUpdateCheckInformationSucceeds(productionApplication.id)
+        givenUpdateCheckInformationSucceeds(productionApplication)
 
         private val result =
           await(manageSubscriptionController.subscriptionConfigurationStepPage(productionApplication.id, 2)(loggedInRequest))
@@ -483,7 +483,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/applications/${productionApplication.id}/request-check")
 
-        verify(applicationServiceMock).updateCheckInformation(eqTo(productionApplication.id),eqTo(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))(any[HeaderCarrier])
+        verify(applicationServiceMock).updateCheckInformation(eqTo(productionApplication),eqTo(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))(any[HeaderCarrier])
     }
 
     "return NOT_FOUND if page number is invalid for step page " when {

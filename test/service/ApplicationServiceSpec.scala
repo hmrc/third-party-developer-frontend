@@ -415,7 +415,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         verify(mockProductionApplicationConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(
           any[HeaderCarrier]
         )
-        verify(mockSubscriptionFieldsService).saveFieldValues(eqTo(productionApplicationId), eqTo(context), eqTo(version), eqTo(fields))(any[HeaderCarrier])
+        verify(mockSubscriptionFieldsService).saveFieldValues(eqTo(productionApplication), eqTo(context), eqTo(version), eqTo(fields))(any[HeaderCarrier])
       }
 
       "with values" in new Setup {
@@ -443,7 +443,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
 
         verify(mockProductionApplicationConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier])
-        verify(mockSubscriptionFieldsService, never()).saveFieldValues(any[String], any[String], any[String], any[Fields])(any[HeaderCarrier])
+        verify(mockSubscriptionFieldsService, never()).saveFieldValues(any[Application], any[String], any[String], any[Fields])(any[HeaderCarrier])
       }
     }
   }

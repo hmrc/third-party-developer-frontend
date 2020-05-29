@@ -57,7 +57,7 @@ trait ConfirmNamePartialController {
             val information = app.checkInformation.getOrElse(CheckInformation())
             for {
               _ <- updateNameIfChanged(form)
-              _ <- applicationService.updateCheckInformation(app.id, information.copy(confirmedName = true))
+              _ <- applicationService.updateCheckInformation(app, information.copy(confirmedName = true))
             } yield Redirect(landingPageRoute(app.id))
           case invalid : Invalid =>
             def invalidNameCheckForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)

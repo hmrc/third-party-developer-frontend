@@ -63,7 +63,7 @@ trait PrivacyPolicyPartialController {
       val information = app.checkInformation.getOrElse(CheckInformation())
       for {
         _ <- updateUrl(form)
-        _ <- applicationService.updateCheckInformation(app.id, information.copy(providedPrivacyPolicyURL = true))
+        _ <- applicationService.updateCheckInformation(app, information.copy(providedPrivacyPolicyURL = true))
       } yield Redirect(landingPageRoute(app.id))
     }
     requestForm.fold(withFormErrors, withValidForm)

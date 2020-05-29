@@ -68,7 +68,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
           termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(
             request.user.email, DateTimeUtils.now, appConfig.currentTermsOfUseVersion))
 
-        applicationService.updateCheckInformation(app.id, updatedInformation)
+        applicationService.updateCheckInformation(app, updatedInformation)
           .map(_ => Redirect(routes.Details.details(app.id)))
       } else {
         Future.successful(BadRequest(errorHandler.badRequestTemplate))

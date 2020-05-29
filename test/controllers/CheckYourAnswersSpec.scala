@@ -25,7 +25,7 @@ import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
@@ -107,7 +107,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     givenRemoveTeamMemberSucceeds(loggedInUser)
 
-    givenUpdateCheckInformationSucceeds(appId)
+    givenUpdateCheckInformationSucceeds(application)
 
     val subscriptions = Seq(
       APISubscriptions("API1", "ServiceName", "apiContent",
@@ -144,16 +144,17 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       fetchByApplicationIdReturns(application.id, application)
       fetchCredentialsReturns(application,tokens)
       givenApplicationHasNoSubs(application)
+      givenUpdateCheckInformationSucceeds(application)
 
       application
     }
     def mockRequestUplift() {
-      when(underTest.applicationService.requestUplift (mockEq (appId), any[String], any[DeveloperSession] ) (any[HeaderCarrier] ) )
+      when(underTest.applicationService.requestUplift (eqTo (appId), any[String], any[DeveloperSession] ) (any[HeaderCarrier] ) )
       .thenReturn (ApplicationUpliftSuccessful)
     }
 
     def failedToCreateDeskproTicket() {
-      when(underTest.applicationService.requestUplift (mockEq (appId), any[String], any[DeveloperSession] ) (any[HeaderCarrier] ) )
+      when(underTest.applicationService.requestUplift (eqTo (appId), any[String], any[DeveloperSession] ) (any[HeaderCarrier] ) )
       .thenReturn(Future.failed(new DeskproTicketCreationFailed("Failed")))
     }
 
@@ -176,18 +177,18 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
 
-    when(underTest.applicationService.requestUplift(mockEq(appId), mockEq(application.name), mockEq(loggedInUser))(any[HeaderCarrier]))
+    when(underTest.applicationService.requestUplift(eqTo(appId), eqTo(application.name), eqTo(loggedInUser))(any[HeaderCarrier]))
       .thenAnswer(new Answer[Future[ApplicationUpliftSuccessful]]() {
         def answer(invocation: InvocationOnMock): Future[ApplicationUpliftSuccessful] = {
           Future.failed(new ApplicationAlreadyExists)
         }
       })
-    givenUpdateCheckInformationSucceeds(appId, expectedCheckInformation)
+    givenUpdateCheckInformationSucceeds(application, expectedCheckInformation)
 
     private val result = await(addToken(underTest.answersPageAction(appId))(requestWithFormBody))
 
     status(result) shouldBe CONFLICT
-    verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+    verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
 
     private val errorMessageElement = Jsoup.parse(bodyOf(result)).select("td#confirmedName span.error-message")
     errorMessageElement.text() shouldBe "That application name already exists. Enter a unique name for your application."
@@ -318,7 +319,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     }
 
     "team post redirect to check landing page" in new Setup {
-      givenApplicationExists(checkInformation = Some(CheckInformation()))
+      val application = givenApplicationExists(checkInformation = Some(CheckInformation()))
 
       private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
 
@@ -326,7 +327,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
     }
 
     "team post doesn't redirect to the check landing page when not logged in" in new Setup {
@@ -381,7 +382,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
 
     "redirect to the team member list when the remove confirmation post is executed" in new Setup{
-      val app = givenApplicationExists()
+      val application = givenApplicationExists()
 
       val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail)
 
@@ -391,11 +392,11 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers/team")
 
-      verify(underTest.applicationService).removeTeamMember(mockEq(app),mockEq(anotherCollaboratorEmail), mockEq(loggedInUser.email))(any[HeaderCarrier])
+      verify(underTest.applicationService).removeTeamMember(eqTo(application),eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
-      givenApplicationExists(checkInformation = None)
+      val application = givenApplicationExists(checkInformation = None)
 
       private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
 
@@ -403,7 +404,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
-      verify(underTest.applicationService).updateCheckInformation(mockEq(appId), mockEq(expectedCheckInformation))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
     }
   }
 

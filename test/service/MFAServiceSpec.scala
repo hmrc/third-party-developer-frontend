@@ -17,7 +17,7 @@
 package service
 
 import connectors.ThirdPartyDeveloperConnector
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.Matchers
 import org.scalatest.mockito.MockitoSugar
@@ -36,18 +36,18 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     val totpCode = "12345678"
     val connector = mock[ThirdPartyDeveloperConnector]
 
-    when(connector.enableMfa(mockEq(email))(any[HeaderCarrier])).thenReturn(successful(NO_CONTENT))
-    when(connector.removeMfa(mockEq(email))(any[HeaderCarrier])).thenReturn(successful(OK))
+    when(connector.enableMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(NO_CONTENT))
+    when(connector.removeMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(OK))
 
     val service = new MFAService(connector)
   }
 
   trait FailedTotpVerification extends Setup {
-    when(connector.verifyMfa(mockEq(email), mockEq(totpCode))(any[HeaderCarrier])).thenReturn(successful(false))
+    when(connector.verifyMfa(eqTo(email), eqTo(totpCode))(any[HeaderCarrier])).thenReturn(successful(false))
   }
 
   trait SuccessfulTotpVerification extends Setup {
-    when(connector.verifyMfa(mockEq(email), mockEq(totpCode))(any[HeaderCarrier])).thenReturn(successful(true))
+    when(connector.verifyMfa(eqTo(email), eqTo(totpCode))(any[HeaderCarrier])).thenReturn(successful(true))
   }
 
   "enableMfa" should {
@@ -58,7 +58,7 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
 
     "not call enable mfa when totp verification fails" in new FailedTotpVerification {
       val result = await(service.enableMfa(email, totpCode)(HeaderCarrier()))
-      verify(connector, never).enableMfa(mockEq(email))(any[HeaderCarrier])
+      verify(connector, never).enableMfa(eqTo(email))(any[HeaderCarrier])
     }
 
     "return successful totp when totp verification passes" in new SuccessfulTotpVerification {
@@ -68,11 +68,11 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
 
     "enable MFA totp when totp verification passes" in new SuccessfulTotpVerification {
       val result = await(service.enableMfa(email, totpCode)(HeaderCarrier()))
-      verify(connector, times(1)).enableMfa(mockEq(email))(any[HeaderCarrier])
+      verify(connector, times(1)).enableMfa(eqTo(email))(any[HeaderCarrier])
     }
 
     "throw exception if update fails" in new SuccessfulTotpVerification {
-      when(connector.enableMfa(mockEq(email))(any[HeaderCarrier]))
+      when(connector.enableMfa(eqTo(email))(any[HeaderCarrier]))
         .thenReturn(failed(Upstream5xxResponse("failed to enable MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
       intercept[Upstream5xxResponse](await(service.enableMfa(email, totpCode)(HeaderCarrier())))
@@ -87,7 +87,7 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
 
     "not call remove mfa when totp verification fails" in new FailedTotpVerification {
       val result: MFAResponse = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
-      verify(connector, never).removeMfa(mockEq(email))(any[HeaderCarrier])
+      verify(connector, never).removeMfa(eqTo(email))(any[HeaderCarrier])
     }
 
     "return successful totp when totp verification passes" in new SuccessfulTotpVerification {
@@ -99,11 +99,11 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     "remove MFA when totp verification passes" in new SuccessfulTotpVerification {
       val result: MFAResponse = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
 
-      verify(connector, times(1)).removeMfa(mockEq(email))(any[HeaderCarrier])
+      verify(connector, times(1)).removeMfa(eqTo(email))(any[HeaderCarrier])
     }
 
     "throw exception if removal fails" in new SuccessfulTotpVerification {
-      when(connector.removeMfa(mockEq(email))(any[HeaderCarrier]))
+      when(connector.removeMfa(eqTo(email))(any[HeaderCarrier]))
         .thenReturn(failed(Upstream5xxResponse("failed to remove MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
       intercept[Upstream5xxResponse](await(service.removeMfa(email, totpCode)(HeaderCarrier())))
