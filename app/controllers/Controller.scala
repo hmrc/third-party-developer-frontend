@@ -52,7 +52,7 @@ case class UserRequest[A](developerSession: DeveloperSession, request: Request[A
 case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A])
   extends WrappedRequest[A](request)
 
-case class ApplicationRequest[A](application: Application, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
+case class ApplicationRequest[A](application: Application, deployedTo: Environment, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
 
 case class ApplicationWithFieldDefinitionsRequest[A](

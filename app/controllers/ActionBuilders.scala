@@ -53,7 +53,7 @@ trait ActionBuilders {
         subs <- OptionT.liftF(applicationService.apisWithSubscriptions(application))
         role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
       } yield {
-        ApplicationRequest(application, subs, role, developerSession, request)
+        ApplicationRequest(application, application.deployedTo, subs, role, developerSession, request)
       })
       .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession)))).value
     }

@@ -28,6 +28,7 @@ import play.api.libs.crypto.CookieSigner
 import service._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future.successful
 import scala.util.control.NonFatal
 
 @Singleton
@@ -42,41 +43,44 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>
       if (apps.isEmpty) {
-        Future.successful(Ok(views.html.addApplicationSubordinateEmptyNest()))
+        successful(Ok(views.html.addApplicationSubordinateEmptyNest()))
       } else {
-        Future.successful(Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn.email)))))
+        successful(Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn.email)))))
       }
     }
   }
 
   def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.usingPrivilegedApplicationCredentials()))
+    successful(Ok(views.html.usingPrivilegedApplicationCredentials()))
   }
 
   def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.tenDaysWarning()))
+    successful(Ok(views.html.tenDaysWarning()))
   }
 
   def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.addApplicationStartSubordinate()))
+    successful(Ok(views.html.addApplicationStartSubordinate()))
   }
 
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.addApplicationStartPrincipal()))
+    successful(Ok(views.html.addApplicationStartPrincipal()))
   }
 
   def addApplicationSuccess(applicationId: String): Action[AnyContent] =
-    whenTeamMemberOnApp(applicationId) { implicit request =>
+    whenTeamMemberOnApp(applicationId) { implicit appRequest =>
+      import appRequest._
 
-      applicationService.fetchByApplicationId(applicationId).map(_.fold(NotFound(errorHandler.notFoundTemplate(request)))(_.deployedTo match {
-        case SANDBOX => Ok(views.html.addApplicationSubordinateSuccess(request.application.name, applicationId))
-        case PRODUCTION => NotFound(errorHandler.notFoundTemplate(request))
-      }))
+      successful(
+        deployedTo match {
+          case SANDBOX => Ok(views.html.addApplicationSubordinateSuccess(application.name, applicationId))
+          case PRODUCTION => NotFound(errorHandler.notFoundTemplate(request))
+        }
+      )
     }
 
   def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
-    Future.successful(Ok(views.html.addApplicationName(form, environment)))
+    successful(Ok(views.html.addApplicationName(form, environment)))
   }
 
   def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction {
@@ -85,7 +89,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
       val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
 
       def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
-        Future.successful(Ok(views.html.addApplicationName(errors, environment)))
+        successful(Ok(views.html.addApplicationName(errors, environment)))
 
       def addApplication(form: AddApplicationNameForm) = {
         applicationService
@@ -109,7 +113,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
             case invalid: Invalid =>
               def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-              Future.successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, environment)))
+              successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, environment)))
           }
 
       requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)
