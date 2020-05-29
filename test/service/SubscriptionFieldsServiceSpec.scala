@@ -57,13 +57,6 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
 
     val underTest = new SubscriptionFieldsService(mockConnectorsWrapper)
 
-    given(mockConnectorsWrapper.forApplication(anyString())(any[HeaderCarrier]))
-      .willReturn(
-        Future.successful(
-          Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector)
-        )
-      )
-
     given(mockConnectorsWrapper.forEnvironment(application.deployedTo))
       .willReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector))
 

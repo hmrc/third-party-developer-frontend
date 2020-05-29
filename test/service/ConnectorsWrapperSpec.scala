@@ -102,18 +102,4 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
       result shouldBe Some(sandboxApplication)
     }
   }
-
-  "connectorsForApplication" when {
-    "return production connectors if defined" in new Setup {
-      theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-      val result = await(connectors.forApplication(productionApplicationId))
-      result shouldBe Connectors(connectors.productionApplicationConnector, connectors.productionSubscriptionFieldsConnector)
-    }
-
-    "return sandbox connectors if defined" in new Setup {
-      theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      val result = await(connectors.forApplication(sandboxApplicationId))
-      result shouldBe Connectors(connectors.sandboxApplicationConnector, connectors.sandboxSubscriptionFieldsConnector)
-    }
-  }
 }
