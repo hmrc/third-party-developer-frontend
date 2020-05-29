@@ -329,11 +329,9 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     val clientSecretId: String = UUID.randomUUID().toString
 
     "delete the selected client secret" in new Setup {
-      givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
+      val application = givenTheApplicationExistWithUserRole(applicationId, ADMINISTRATOR)
 
-      given(underTest.applicationService
-        .deleteClientSecret(eqTo(applicationId), eqTo(clientSecretId), eqTo(loggedInUser.email))(any[HeaderCarrier]))
-        .willReturn(successful(ApplicationUpdateSuccessful))
+      givenDeleteClientSecretSucceeds(application, clientSecretId, loggedInUser.email)
 
       val result: Result = await(underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest))
 

@@ -111,6 +111,14 @@ trait ApplicationServiceMock extends MockitoSugar {
       .thenReturn(failed(exception))
   }
 
+  def givenDeleteClientSecretSucceeds(application: Application, clientSecretId: String, email: String) = {
+        when(
+          applicationServiceMock
+            .deleteClientSecret(eqTo(application), eqTo(clientSecretId), eqTo(email))(any[HeaderCarrier])
+        )
+        .thenReturn(successful(ApplicationUpdateSuccessful))
+  }
+
   def updateApplicationSuccessful() = {
     when(applicationServiceMock.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
       .thenReturn(successful(ApplicationUpdateSuccessful))

@@ -178,12 +178,11 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actorEmailAddress))
   }
 
-  def deleteClientSecret(applicationId: UUID,
+  def deleteClientSecret(application: Application,
                          clientSecretId: String,
                          actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    connectorWrapper
-      .forApplication(applicationId.toString)
-      .flatMap(_.thirdPartyApplicationConnector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
+    connectorWrapper.forEnvironment(application.deployedTo)
+      .thirdPartyApplicationConnector.deleteClientSecret(UUID.fromString(application.id), clientSecretId, actorEmailAddress)
 
   def updateCheckInformation(id: String, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.updateApproval(id, checkInformation))

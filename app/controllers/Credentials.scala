@@ -103,7 +103,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
 
   def deleteClientSecretAction(applicationId: UUID, clientSecretId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId.toString) { implicit request =>
-      applicationService.deleteClientSecret(applicationId, clientSecretId, request.user.email)
+      applicationService.deleteClientSecret(request.application, clientSecretId, request.user.email)
         .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId.toString)))
   }
 }
