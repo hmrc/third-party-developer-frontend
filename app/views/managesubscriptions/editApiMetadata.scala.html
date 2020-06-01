@@ -23,7 +23,8 @@
 
 @(
   app: Application,
-  vm: EditApiMetadataViewModel
+  vm: EditApiMetadataViewModel,
+  mode: SaveSubsFieldsPageMode
 )(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
@@ -56,6 +57,6 @@
     @editApiMetadataPartial(
       app,
       vm,
-      routes.ManageSubscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion)
+      routes.ManageSubscriptions.saveSubscriptionFields(app.id, vm.apiContext, vm.apiVersion, mode)
     )
 }

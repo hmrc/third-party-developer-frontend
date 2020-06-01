@@ -29,7 +29,7 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
 
   def fetchFieldsValues(application: Application, fieldDefinitions: Seq[SubscriptionFieldDefinition], apiIdentifier: APIIdentifier)
                        (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]] = {
-    val connector = connectorsWrapper.connectorsForEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+    val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
 
     if (fieldDefinitions.isEmpty) {
       Future.successful(Seq.empty[SubscriptionFieldValue])
@@ -38,25 +38,22 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     }
   }
 
-  def saveFieldValues(applicationId: String, apiContext: String, apiVersion: String, fields: Fields)
+  def saveFieldValues(application: Application, apiContext: String, apiVersion: String, fields: Fields)
                      (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
-    for {
-      connector <- connectorsWrapper.forApplication(applicationId)
-      application <- connector.thirdPartyApplicationConnector.fetchApplicationById(applicationId)
-      fields <- connector.apiSubscriptionFieldsConnector.saveFieldValues(
-        application.getOrElse(throw new ApplicationNotFound).clientId, apiContext, apiVersion, fields
-      )
-    } yield fields
+
+    val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+
+    connector.saveFieldValues(application.clientId, apiContext, apiVersion, fields)
   }
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
     connectorsWrapper
-      .connectorsForEnvironment(environment)
+      .forEnvironment(environment)
       .apiSubscriptionFieldsConnector.fetchAllFieldDefinitions()
   }
 
   def getFieldDefinitions(application: Application, apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]] = {
-    val connector = connectorsWrapper.connectorsForEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+    val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
 
     connector.fetchFieldDefinitions(apiIdentifier.context, apiIdentifier.version)
   }

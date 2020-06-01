@@ -156,7 +156,7 @@ class Subscriptions @Inject() (
   private def updateCheckInformation(app: Application)(implicit hc: HeaderCarrier): Future[Any] = {
     app.deployedTo match {
       case Environment.PRODUCTION =>
-        applicationService.updateCheckInformation(app.id, app.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionsConfirmed = false))
+        applicationService.updateCheckInformation(app, app.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionsConfirmed = false))
       case _ => Future.successful(())
     }
   }

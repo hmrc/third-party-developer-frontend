@@ -28,11 +28,17 @@ import play.api.mvc.{Action, AnyContent, Call, Result}
 import service.{ApplicationService, SessionService}
 import views.html.checkpages.checkyouranswers
 import views.html.checkpages.applicationcheck
+import cats.data.{NonEmptyList => NEL}
 
 import model.ApplicationViewModel
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import domain.APISubscriptionStatusWithSubscriptionFields
+import views.html.editapplication.credentialsPartials.fields
+import domain.APISubscriptionStatus
+import controllers.ManageSubscriptions.FieldValue
+import controllers.ManageSubscriptions
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
@@ -54,8 +60,18 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     with TermsOfUsePartialController
     with CheckInformationFormHelper {
 
-  private def populateCheckYourAnswersData(application: Application, subs: Seq[String]): CheckYourAnswersData = {
+  private def populateCheckYourAnswersData(application: Application, subs: Seq[APISubscriptionStatus]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
+
+    def asCheckYourSubscriptionData(in: APISubscriptionStatus): CheckYourSubscriptionData = {
+      CheckYourSubscriptionData(
+        name = in.name,
+        apiContext = in.context,
+        apiVersion = in.apiVersion.version,
+        displayedStatus = in.apiVersion.displayedStatus,
+        fields = in.fields.map(wrapper => wrapper.fields.map(ManageSubscriptions.toFieldValue))
+      )
+    }
 
     CheckYourAnswersData(
       appId = application.id,
@@ -70,20 +86,17 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
       privacyPolicyUrl = application.privacyPolicyUrl,
       termsAndConditionsUrl = application.termsAndConditionsUrl,
       acceptedTermsOfUse = application.checkInformation.fold(false)(_.termsOfUseAgreements.nonEmpty),
-      subscriptions = subs
+      subscriptions = subs.filter(_.subscribed).map(asCheckYourSubscriptionData)
     )
   }
 
-  private def populateCheckYourAnswersData(application: Application)(implicit request: ApplicationRequest[AnyContent]): Future[CheckYourAnswersData] = {
-    applicationService.fetchAllSubscriptions(application).map(_.map(_.name)).map(subscriptions => {
-      populateCheckYourAnswersData(application, subscriptions)
-    })
-  }
-
   def answersPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    for {
-      checkYourAnswersData <- populateCheckYourAnswersData(request.application)
-    } yield Ok(checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
+    val checkYourAnswersData = populateCheckYourAnswersData(request.application, request.subscriptions)
+    Future.successful(
+      Ok(
+        checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))
+      )
+    )
   }
 
   def answersPageAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -92,17 +105,16 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     (for {
       _ <- applicationService.requestUplift(appId, application.name, request.user)
     } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId)))
-      .recoverWith {
+      .recover {
         case e: DeskproTicketCreationFailed =>
-          for {
-            checkYourAnswersData <- populateCheckYourAnswersData(application)
-            requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
-          } yield InternalServerError(checkyouranswers.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
+          val checkYourAnswersData = populateCheckYourAnswersData(request.application, request.subscriptions)
+          val requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
+          InternalServerError(checkyouranswers.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
       }
       .recover {
         case _: ApplicationAlreadyExists =>
           val information = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
-          applicationService.updateCheckInformation(application.id, information)
+          applicationService.updateCheckInformation(application, information)
 
           val requestForm = validateCheckFormForApplication(request)
 
@@ -119,7 +131,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
-      _ <- applicationService.updateCheckInformation(appId, information.copy(teamConfirmed = true))
+      _ <- applicationService.updateCheckInformation(request.application, information.copy(teamConfirmed = true))
     } yield Redirect(routes.CheckYourAnswers.answersPage(appId))
   }
 
@@ -165,6 +177,14 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
   protected def submitButtonLabel = "Continue"
 }
 
+case class CheckYourSubscriptionData(
+  name: String,
+  apiContext: String,
+  apiVersion: String,
+  displayedStatus:String,
+  fields: Option[NEL[FieldValue]]
+)
+
 case class CheckYourAnswersData(
                                  appId: String,
                                  softwareName: String,
@@ -175,7 +195,7 @@ case class CheckYourAnswersData(
                                  privacyPolicyUrl: Option[String],
                                  termsAndConditionsUrl: Option[String],
                                  acceptedTermsOfUse: Boolean,
-                                 subscriptions: Seq[String]
+                                 subscriptions: Seq[CheckYourSubscriptionData]
                                )
 
 case class DummyCheckYourAnswersForm(dummy: String = "dummy")

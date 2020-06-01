@@ -192,7 +192,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val result = application.withName(newName).callChangeDetailsAction
 
         verify(underTest.applicationService).update(any[UpdateApplicationRequest])(any[HeaderCarrier])
-        verify(underTest.applicationService).updateCheckInformation(mockEq(application.id), any[CheckInformation])(any[HeaderCarrier])
+        verify(underTest.applicationService).updateCheckInformation(mockEq(application), any[CheckInformation])(any[HeaderCarrier])
       }
 
       "return forbidden for a developer" in new Setup {
@@ -282,7 +282,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val result = application.withName(newName).callChangeDetailsAction
 
         verify(underTest.applicationService).update(any[UpdateApplicationRequest])(any[HeaderCarrier])
-        verify(underTest.applicationService, never).updateCheckInformation(mockEq(application.id), any[CheckInformation])(any[HeaderCarrier])
+        verify(underTest.applicationService, never).updateCheckInformation(mockEq(application), any[CheckInformation])(any[HeaderCarrier])
       }
     }
   }
@@ -320,7 +320,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
       .willReturn(successful(ApplicationUpdateSuccessful))
 
-    given(underTest.applicationService.updateCheckInformation(any[String], any[CheckInformation])(any[HeaderCarrier]))
+    given(underTest.applicationService.updateCheckInformation(any[Application], any[CheckInformation])(any[HeaderCarrier]))
       .willReturn(successful(ApplicationUpdateSuccessful))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)

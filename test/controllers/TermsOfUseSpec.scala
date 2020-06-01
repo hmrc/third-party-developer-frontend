@@ -148,9 +148,9 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       when(underTest.appConfig.currentTermsOfUseVersion).thenReturn(version)
 
-      givenApplicationExists()
+      val application = givenApplicationExists()
       val captor: ArgumentCaptor[CheckInformation] = ArgumentCaptor.forClass(classOf[CheckInformation])
-      given(underTest.applicationService.updateCheckInformation(mockEq(appId), captor.capture())(any())).willReturn(Future.successful(ApplicationUpdateSuccessful))
+      given(underTest.applicationService.updateCheckInformation(mockEq(application), captor.capture())(any())).willReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(request))

@@ -47,17 +47,17 @@ class ApplicationService @Inject() (
 )(implicit val ec: ExecutionContext) {
 
   def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
-    connectorWrapper.connectorsForEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
+    connectorWrapper.forEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
 
   def update(updateApplicationRequest: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    connectorWrapper.connectorsForEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
+    connectorWrapper.forEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
 
   def fetchByApplicationId(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] = {
     connectorWrapper.fetchApplicationById(id)
   }
 
-  def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
-    connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.fetchCredentials(id))
+  def fetchCredentials(application: Application)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
 
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
@@ -91,7 +91,7 @@ class ApplicationService @Inject() (
         .map(toApiSubscriptionStatuses(api, _, fieldDefinitions))
     }
 
-    val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
+    val thirdPartyAppConnector = connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
     for {
       fieldDefinitions: DefinitionsByApiVersion <- subscriptionFieldsService.getAllFieldDefinitions(application.deployedTo)
@@ -101,7 +101,7 @@ class ApplicationService @Inject() (
   }
 
   def subscribeToApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val connectors = connectorWrapper.connectorsForEnvironment(application.deployedTo)
+    val connectors = connectorWrapper.forEnvironment(application.deployedTo)
 
     val apiIdentifier = APIIdentifier(context, version)
 
@@ -119,7 +119,7 @@ class ApplicationService @Inject() (
         .fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
         .flatMap(values => {
           if (!values.exists(field => field.value != "")) {
-            val x = subscriptionFieldsService.saveFieldValues(application.id, context, version, createEmptyFieldValues(fieldDefinitions))
+            val x = subscriptionFieldsService.saveFieldValues(application, context, version, createEmptyFieldValues(fieldDefinitions))
             x.map(_ => HasSucceeded)
           } else {
             Future.successful(HasSucceeded)
@@ -144,7 +144,7 @@ class ApplicationService @Inject() (
   }
 
   def unsubscribeFromApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val connectors = connectorWrapper.connectorsForEnvironment(application.deployedTo)
+    val connectors = connectorWrapper.forEnvironment(application.deployedTo)
 
     for {
       unsubscribeResult <- connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, context, version)
@@ -155,7 +155,7 @@ class ApplicationService @Inject() (
   }
 
   def isSubscribedToApi(application: Application, apiName: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
+    val thirdPartyAppConnector = connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
     for {
       subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
@@ -165,7 +165,7 @@ class ApplicationService @Inject() (
   }
 
   def fetchAllSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]] = {
-    val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
+    val thirdPartyAppConnector = connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
     for {
       subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
@@ -174,19 +174,19 @@ class ApplicationService @Inject() (
     } yield subscription
   }
 
-  def addClientSecret(id: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[(String, String)] = {
-    connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.addClientSecrets(id, ClientSecretRequest(actorEmailAddress)))
+  def addClientSecret(application: Application, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[(String, String)] = {
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actorEmailAddress))
   }
 
-  def deleteClientSecret(applicationId: UUID,
+  def deleteClientSecret(application: Application,
                          clientSecretId: String,
                          actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    connectorWrapper
-      .forApplication(applicationId.toString)
-      .flatMap(_.thirdPartyApplicationConnector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
+    connectorWrapper.forEnvironment(application.deployedTo)
+      .thirdPartyApplicationConnector.deleteClientSecret(UUID.fromString(application.id), clientSecretId, actorEmailAddress)
 
-  def updateCheckInformation(id: String, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.updateApproval(id, checkInformation))
+  def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    connectorWrapper.forEnvironment(application.deployedTo)
+      .thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
   }
 
   def requestUplift(applicationId: String, applicationName: String, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = {
@@ -263,7 +263,7 @@ class ApplicationService @Inject() (
       developer <- developerConnector.fetchDeveloper(teamMember.emailAddress)
       _ <- if (developer.isEmpty) developerConnector.createUnregisteredUser(teamMember.emailAddress) else Future.successful(())
       request = AddTeamMemberRequest(requestingEmail, teamMember, developer.isDefined, adminsToEmail.toSet)
-      connector <- connectorWrapper.forApplication(app.id)
+      connector = connectorWrapper.forEnvironment(app.deployedTo)
       appConnector = connector.thirdPartyApplicationConnector
       response <- appConnector.addTeamMember(app.id, request)
     } yield response
@@ -280,7 +280,7 @@ class ApplicationService @Inject() (
     for {
       otherAdmins <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email)
-      connectors <- connectorWrapper.forApplication(app.id)
+      connectors = connectorWrapper.forEnvironment(app.deployedTo)
       response <- connectors.thirdPartyApplicationConnector.removeTeamMember(app.id, teamMemberToRemove, requestingEmail, adminsToEmail)
     } yield response
   }

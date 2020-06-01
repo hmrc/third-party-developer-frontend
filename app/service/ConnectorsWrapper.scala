@@ -34,12 +34,7 @@ class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApp
                                   @Named("PRODUCTION") val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
                                   applicationConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
 
-  def forApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Connectors] = {
-// TODO: Don't throw exception.
-    fetchApplicationById(applicationId).map(application => connectorsForEnvironment(application.getOrElse(throw new ApplicationNotFound).deployedTo))
-  }
-
-  def connectorsForEnvironment(environment: Environment): Connectors = {
+  def forEnvironment(environment: Environment): Connectors = {
     environment match {
       case PRODUCTION => Connectors(productionApplicationConnector, productionSubscriptionFieldsConnector)
       case _ => Connectors(sandboxApplicationConnector, sandboxSubscriptionFieldsConnector)

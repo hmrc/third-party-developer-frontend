@@ -86,7 +86,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
 
       fetchByApplicationIdReturns(appId,application)
-      fetchCredentialsReturns(appId,tokens)
+      fetchCredentialsReturns(application,tokens)
       givenApplicationHasSubs(application,Seq.empty)
 
       application

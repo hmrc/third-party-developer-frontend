@@ -69,7 +69,7 @@ trait TermsOfUsePartialController {
       }
 
       for {
-        _ <- applicationService.updateCheckInformation(app.id, updatedInformation)
+        _ <- applicationService.updateCheckInformation(app, updatedInformation)
       } yield Redirect(landingPageRoute(app.id))
     }
 
