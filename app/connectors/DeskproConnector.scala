@@ -46,7 +46,7 @@ class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, me
     }
   }
 
-  override def toString = s"DeskproConnector()"
+  override def toString = "DeskproConnector()"
 
   private def requestUrl[B, A](uri: String): String = s"$serviceBaseUrl$uri"
 }

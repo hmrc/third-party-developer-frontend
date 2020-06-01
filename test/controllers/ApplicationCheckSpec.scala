@@ -56,14 +56,13 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
-  val application: Application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
   val exampleApiSubscription: Some[APISubscriptions] = Some(APISubscriptions("Example API", "api-example-microservice", "exampleContext",
     Seq(APISubscriptionStatus("API1", "api-example-microservice", "exampleContext",
       APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false))))
+
+  val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
   val groupedSubsSubscribedToExampleOnly: GroupedSubscriptions = GroupedSubscriptions(
     testApis = Seq.empty,
@@ -75,7 +74,64 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     apis = Seq.empty,
     exampleApi = None)
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait ApplicationProvider {
+    // N.B. All fixtures in any Setup that are to be used to supply this method MUST be global scope or lazy to avoid NPE
+    def createApplication(): Application
+  }
+
+  trait BasicApplicationProvider extends ApplicationProvider {
+    def createApplication() =
+      Application(
+        appId,
+        clientId,
+        "App name 1",
+        DateTimeUtils.now,
+        DateTimeUtils.now,
+        Environment.PRODUCTION,
+        Some("Description 1"),
+        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+        state = ApplicationState.production(loggedInUser.email, ""),
+        access = Standard(
+          redirectUris = Seq("https://red1", "https://red2"),
+          termsAndConditionsUrl = Some("http://tnc-url.com")
+        )
+      )
+  }
+
+  def createFullyConfigurableApplication(
+      collaborators: Set[Collaborator],
+      appId: String = appId,
+      clientId: String = clientId,
+      state: ApplicationState = testing,
+      checkInformation: Option[CheckInformation] = None,
+      access: Access = Standard()
+      ): Application = {
+
+    Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
+         collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
+  }
+
+  def createPartiallyConfigurableApplication(
+        appId: String = appId,
+        clientId: String = clientId,
+        userRole: Role = ADMINISTRATOR,
+        state: ApplicationState = testing,
+        checkInformation: Option[CheckInformation] = None,
+        access: Access = Standard()
+        ): Application = {
+
+      // this is to ensure we always have one ADMINISTRATOR
+      val anotherRole = if(userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
+
+      val collaborators = Set(
+        Collaborator(loggedInUser.email, userRole),
+        Collaborator(anotherCollaboratorEmail, anotherRole)
+      )
+
+    createFullyConfigurableApplication(collaborators, appId, clientId, state, checkInformation, access)
+  }
+
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationProvider {
     val underTest = new ApplicationCheck(
       applicationServiceMock,
       sessionServiceMock,
@@ -83,6 +139,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       messagesApi,
       cookieSigner
     )
+
+    val application = createApplication()
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -100,66 +158,20 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     givenApplicationNameIsValid()
 
+    givenApplicationHasNoSubs(application)
+
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest,implicitly)(sessionId).withSession(sessionParams: _*)
     val loggedInRequestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
 
-    val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
-
-    def givenApplicationExists(
-        appId: String = appId,
-        clientId: String = clientId,
-        userRole: Role = ADMINISTRATOR,
-        state: ApplicationState = testing,
-        checkInformation: Option[CheckInformation] = None,
-        access: Access = Standard(),
-        hasSubs: Boolean = false): Application = {
-
-      // this is to ensure we always have one ADMINISTRATOR
-      val anotherRole = if(userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
-
-      val collaborators = Set(
-        Collaborator(loggedInUser.email, userRole),
-        Collaborator(anotherCollaboratorEmail, anotherRole)
-      )
-
-      givenApplicationExistsWithCollaborators(collaborators, appId, clientId, state, checkInformation, access, hasSubs)
-    }
-
-
-    def givenApplicationExistsWithCollaborators(
-        collaborators: Set[Collaborator],
-        appId: String = appId,
-        clientId: String = clientId,
-        state: ApplicationState = testing,
-        checkInformation: Option[CheckInformation] = None,
-        access: Access = Standard(),
-        hasSubs: Boolean = false ): Application = {
-
-      val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
-         collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
-
-      fetchByApplicationIdReturns(application.id, application)
-      givenUpdateCheckInformationSucceeds(application)
-
-      fetchCredentialsReturns(application, tokens)
-  
-  
-      if(hasSubs)
-        givenApplicationHasSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
-      else
-        givenApplicationHasNoSubs(application)
-
-      application
-    }
-
     def idAttributeOnCheckedInput(result: Result): String = Jsoup.parse(bodyOf(result)).select("input[checked]").attr("id")
   }
 
   "check request submitted" should {
-    "return credentials requested page" in new Setup{
-      val application = givenApplicationExists()
+    "return credentials requested page" in new Setup {
+      def createApplication() = createPartiallyConfigurableApplication()
+
       private val result = await(underTest.credentialsRequested(appId)(loggedInRequest))
 
       status(result) shouldBe OK
@@ -173,7 +185,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       body should include("By requesting credentials you've created a new production application")
     }
     "return forbidden when not logged in" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       private val result = await(underTest.credentialsRequested(appId)(loggedOutRequest))
 
       status(result) shouldBe SEE_OTHER
@@ -184,7 +196,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   "landing page" should {
     "return landing page" in new Setup {
 
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -196,7 +208,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -204,7 +216,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "show all steps as required when no check information exists" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -217,7 +229,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "show app name step as complete when it has been done" in new Setup {
-      val application = givenApplicationExists(checkInformation = Some(CheckInformation(confirmedName = true)))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation(confirmedName = true)))
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -230,7 +242,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "show api subscription step as complete when it has been done" in new Setup {
-      val application = givenApplicationExists(checkInformation = Some(CheckInformation(apiSubscriptionsConfirmed = true)))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation(apiSubscriptionsConfirmed = true)))
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -243,8 +255,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "show contact details step as complete when it has been done" in new Setup {
-      val application = givenApplicationExists(checkInformation =
-        Some(CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))))
+      def createApplication() = createPartiallyConfigurableApplication(
+                                    checkInformation = Some(CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678"))))
+                                )
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -257,8 +270,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "show privacy policy and terms and conditions step as complete when it has been done" in new Setup {
-      val application = givenApplicationExists(
-        checkInformation = Some(CheckInformation(providedPrivacyPolicyURL = true, providedTermsAndConditionsURL = true)))
+      def createApplication() = createPartiallyConfigurableApplication(
+                                    checkInformation = Some(CheckInformation(providedPrivacyPolicyURL = true, providedTermsAndConditionsURL = true))
+                                )
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -271,8 +285,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "show agree to terms of use step as complete when it has been done" in new Setup {
-      val application = givenApplicationExists(
-        checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
+      def createApplication() = createPartiallyConfigurableApplication(
+          checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -285,9 +299,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "show api subscription configuration step as complete when it has been done" in new Setup {
-      val application = givenApplicationExists(
-        checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)),
-        hasSubs = true)
+      def createApplication() = createPartiallyConfigurableApplication(
+          checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))
+
+      givenApplicationHasSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -301,7 +316,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "successful submit action should take you to the check-your-answers page" in new Setup {
-      val application = givenApplicationExists(checkInformation =
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation =
         Some(CheckInformation(
           confirmedName = true,
           apiSubscriptionsConfirmed = true,
@@ -322,16 +337,18 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "successful submit action should take you to the check-your-answers page when no configurations confirmed because none required" in new Setup {
-      val application = givenApplicationExists(checkInformation =
-        Some(CheckInformation(
-          confirmedName = true,
-          apiSubscriptionsConfirmed = true,
-          apiSubscriptionConfigurationsConfirmed = false,
-          Some(ContactDetails("Example Name", "name@example.com", "012346789")),
-          providedPrivacyPolicyURL = true,
-          providedTermsAndConditionsURL = true,
-          teamConfirmed = true,
-          Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation =
+          Some(CheckInformation(
+            confirmedName = true,
+            apiSubscriptionsConfirmed = true,
+            apiSubscriptionConfigurationsConfirmed = false,
+            Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+            providedPrivacyPolicyURL = true,
+            providedTermsAndConditionsURL = true,
+            teamConfirmed = true,
+            Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))
+          )
+        )
 
       given(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(ApplicationUpliftSuccessful)
@@ -343,7 +360,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "validation failure submit action" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
 
@@ -351,7 +368,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return forbidden when accessing action without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
 
@@ -359,7 +376,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -367,7 +384,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.requestCheckPage(appId))(loggedInRequest))
 
@@ -375,7 +392,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
 
@@ -383,7 +400,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody))
 
@@ -393,7 +410,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   "api subscriptions review" should {
     "return page" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       givenApplicationHasSubs(application, subsData)
 
@@ -405,7 +422,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "success action" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       givenApplicationHasSubs(application, subsData)
 
@@ -416,7 +433,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
@@ -424,7 +441,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest))
 
@@ -432,7 +449,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest))
 
@@ -440,7 +457,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
@@ -448,14 +465,14 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
 
       status(result) shouldBe BAD_REQUEST
     }
 
-    "return 404 NOT FOUND when no API subscriptions are retrieved" in new Setup {
+    "return 404 NOT FOUND when no API subscriptions are retrieved" in new Setup with BasicApplicationProvider {
       givenApplicationHasNoSubs(application)
 
       private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
@@ -463,7 +480,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       status(result) shouldBe BAD_REQUEST
     }
 
-    "return 404 NOT FOUND when only API-EXAMPLE-MICROSERVICE API is subscribed to" in new Setup {
+    "return 404 NOT FOUND when only API-EXAMPLE-MICROSERVICE API is subscribed to" in new Setup with BasicApplicationProvider {
       givenApplicationHasSubs(application, Seq(onlyApiExampleMicroserviceSubscribedTo) )
 
       private val result = await(addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody))
@@ -475,7 +492,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   "contact review" should {
     "return page" in new Setup {
 
-      val application = givenApplicationExists(checkInformation = Some(defaultCheckInformation))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val result = await(addToken(underTest.contactPage(appId))(loggedInRequest))
 
@@ -485,7 +502,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "successful contact action" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val requestWithFormBody = loggedInRequest
         .withFormUrlEncodedBody("email" -> "email@example.com", "telephone" -> "0000", "fullname" -> "john smith")
@@ -497,7 +514,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "Validation failure contact action" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody))
 
@@ -505,7 +522,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody))
 
@@ -513,7 +530,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.contactPage(appId))(loggedInRequestWithFormBody))
 
@@ -521,7 +538,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.contactPage(appId))(loggedInRequest))
 
@@ -529,7 +546,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.contactPage(appId))(loggedInRequest))
 
@@ -537,7 +554,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody))
 
@@ -545,7 +562,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody))
 
@@ -556,7 +573,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   "name review" should {
     "return page" in new Setup {
 
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.namePage(appId))(loggedInRequest))
       status(result) shouldBe OK
@@ -564,35 +581,35 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "successful name action different names" in new Setup {
-      private val appUnderTest = givenApplicationExists(checkInformation = Some(defaultCheckInformation))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "My First Tax App")
 
       private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
       private val expectedUpdateRequest =
-        UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, "My First Tax App", appUnderTest.description, appUnderTest.access)
+        UpdateApplicationRequest(application.id, application.deployedTo, "My First Tax App", application.description, application.access)
       verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
-      verify(underTest.applicationService).updateCheckInformation(eqTo(appUnderTest), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
 
     "successful name action same names" in new Setup {
-      private val appUnderTest = givenApplicationExists(checkInformation = Some(defaultCheckInformation))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "app")
 
       private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
       private val expectedUpdateRequest =
-        UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, appUnderTest.access)
+        UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, application.access)
       verify(underTest.applicationService, never()).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
-      verify(underTest.applicationService).updateCheckInformation(eqTo(appUnderTest), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
 
     "Validation failure name is blank action" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "")
 
       private val result = await(addToken(underTest.nameAction(appId))(requestWithFormBody))
@@ -601,7 +618,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "Validation failure name contains HMRC action" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
         .willReturn(Future.successful(Invalid.invalidName))
@@ -621,7 +638,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "Validation failure when duplicate name" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
         .willReturn(Future.successful(Invalid.duplicateName))
@@ -641,7 +658,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.nameAction(appId))(loggedInRequestWithFormBody))
 
@@ -649,7 +666,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.namePage(appId))(loggedInRequestWithFormBody))
 
@@ -657,7 +674,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.namePage(appId))(loggedInRequest))
 
@@ -665,7 +682,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.namePage(appId))(loggedInRequest))
 
@@ -673,7 +690,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.nameAction(appId))(loggedInRequestWithFormBody))
 
@@ -681,7 +698,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.nameAction(appId))(loggedInRequestWithFormBody))
 
@@ -691,7 +708,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   "privacy policy review" should {
     "return page" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
@@ -700,7 +717,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
@@ -709,9 +726,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return page with yes pre-selected when the step has not been completed but a URL has already been provided" in new Setup {
-      private val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = false)
-      private val access = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
-      val application = givenApplicationExists(access = access, checkInformation = Some(checkInformation))
+      lazy val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = false)
+      lazy val access = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+
+      def createApplication() = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
@@ -720,9 +738,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return page with yes pre-selected when the step was previously completed with a URL" in new Setup {
-      private val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
-      private val access = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
-      val application = givenApplicationExists(access = access, checkInformation = Some(checkInformation))
+      lazy val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
+      lazy val access = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+      def createApplication() = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
@@ -731,8 +749,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return page with no pre-selected when the step was previously completed with no URL" in new Setup {
-      private val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
-      val application = givenApplicationExists(checkInformation = Some(checkInformation))
+      lazy val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
       status(result) shouldBe OK
@@ -740,40 +758,40 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "successfully process valid urls" in new Setup {
-      private val appUnderTest = givenApplicationExists(checkInformation = Some(defaultCheckInformation))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "privacyPolicyURL" -> "http://privacypolicy.example.com")
 
       private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls))
       private val standardAccess = Standard(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
       private val expectedUpdateRequest =
-        UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
+        UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
       verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(eqTo(appUnderTest), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
     "successfully process when no URL" in new Setup {
-      private val appUnderTest = givenApplicationExists(checkInformation = Some(defaultCheckInformation))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
-      private val result = await(addToken(underTest.privacyPolicyAction(appUnderTest.id))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.privacyPolicyAction(application.id))(loggedInRequestWithUrls))
       private val standardAccess: Standard = Standard(privacyPolicyUrl = None)
       private val expectedUpdateRequest =
-        UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
+        UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
       verify(underTest.applicationService)
         .update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(eqTo(appUnderTest), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
 
     "fail validation when privacy policy url is invalid" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "privacyPolicyURL" -> "invalid url")
 
       private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls))
@@ -781,7 +799,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "fail validation when privacy policy url is missing" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true")
 
       private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls))
@@ -789,7 +807,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody))
 
@@ -797,7 +815,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequestWithFormBody))
 
@@ -805,7 +823,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
@@ -813,7 +831,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.privacyPolicyPage(appId))(loggedInRequest))
 
@@ -821,7 +839,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody))
 
@@ -829,7 +847,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody))
 
@@ -839,7 +857,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   "terms and conditions review" should {
     "return page" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
@@ -848,7 +866,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
@@ -857,9 +875,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return page with yes pre-selected when the step has not been completed but a URL has already been provided" in new Setup {
-      private val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = false)
-      private val access = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
-      val application = givenApplicationExists(access = access, checkInformation = Some(checkInformation))
+      lazy val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = false)
+      lazy val access = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
+      def createApplication() = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
@@ -868,9 +886,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return page with yes pre-selected when the step was previously completed with a URL" in new Setup {
-      private val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
-      private val access = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
-      val application = givenApplicationExists(access = access, checkInformation = Some(checkInformation))
+      lazy val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
+      lazy val access = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
+      def createApplication() = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
@@ -879,8 +897,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return page with no pre-selected when the step was previously completed with no URL" in new Setup {
-      private val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
-      val application = givenApplicationExists(checkInformation = Some(checkInformation))
+      lazy val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
@@ -889,40 +907,40 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "successfully process valid urls" in new Setup {
-      private val appUnderTest = givenApplicationExists(checkInformation = Some(defaultCheckInformation))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val loggedInRequestWithUrls =
         loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "termsAndConditionsURL" -> "http://termsAndConditionsURL.example.com")
 
-      private val result = await(addToken(underTest.termsAndConditionsAction(appUnderTest.id))(loggedInRequestWithUrls))
+      private val result = await(addToken(underTest.termsAndConditionsAction(application.id))(loggedInRequestWithUrls))
       private val standardAccess = Standard(termsAndConditionsUrl = Some("http://termsAndConditionsURL.example.com"))
       private val expectedUpdateRequest =
-        UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
+        UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
       verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(eqTo(appUnderTest), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
 
     "successfully process when doesn't have url" in new Setup {
-      private val appUnderTest = givenApplicationExists(checkInformation = Some(defaultCheckInformation))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
       private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls))
       private val standardAccess = Standard(termsAndConditionsUrl = None)
       private val expectedUpdateRequest =
-        UpdateApplicationRequest(appUnderTest.id, appUnderTest.deployedTo, appUnderTest.name, appUnderTest.description, standardAccess)
+        UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
       verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
       verify(underTest.applicationService)
-        .updateCheckInformation(eqTo(appUnderTest), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
 
     "fail validation when terms and conditions url is invalid but hasUrl true" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "termsAndConditionsURL" -> "invalid url")
 
       private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls))
@@ -930,7 +948,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "fail validation when terms and conditions url is missing but hasUrl true" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true")
 
       private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls))
@@ -938,7 +956,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "action unavailable when accessed without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody))
 
@@ -946,7 +964,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "page unavailable when accessed without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequestWithFormBody))
 
@@ -954,7 +972,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "redirect to the application credentials tab when the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
@@ -962,7 +980,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "redirect to the application credentials tab when the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest))
 
@@ -970,7 +988,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "redirect to the application credentials tab when an attempt is made to submit and the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody))
 
@@ -978,7 +996,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "redirect to the application credentials tab when an attempt is made to submit and the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody))
 
@@ -989,7 +1007,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   "terms of use review" should {
     "return page" in new Setup {
 
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       private val result = await(addToken(underTest.termsOfUsePage(appId))(loggedInRequest))
 
       status(result) shouldBe OK
@@ -997,7 +1015,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "be forbidden when accessed without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.termsOfUsePage(appId))(loggedInRequest))
 
@@ -1005,7 +1023,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "action is forbidden when accessed without being an admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody))
 
@@ -1013,7 +1031,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.termsOfUsePage(appId))(loggedInRequest))
 
@@ -1021,7 +1039,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.termsOfUsePage(appId))(loggedInRequest))
 
@@ -1029,7 +1047,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      val application = givenApplicationExists(state = production)
+      def createApplication() = createPartiallyConfigurableApplication(state = production)
 
       private val result = await(addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody))
 
@@ -1037,7 +1055,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return a bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      val application = givenApplicationExists(state = pendingApproval)
+      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = await(addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody))
 
@@ -1045,7 +1063,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "successful terms of use action" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
 
       private val result = await(addToken(underTest.termsOfUseAction(appId))(requestWithFormBody))
@@ -1058,7 +1076,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   "Manage teams checks" should {
     "return manage team list page when check page is navigated to" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.team(appId))(loggedInRequest))
 
@@ -1069,7 +1087,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "not return the manage team list page when not logged in" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.team(appId))(loggedOutRequest))
 
@@ -1078,7 +1096,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "team post redirect to check landing page" in new Setup {
-      val application = givenApplicationExists(checkInformation = Some(CheckInformation()))
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation()))
 
       private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
 
@@ -1090,7 +1108,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "team post doesn't redirect to the check landing page when not logged in" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.teamAction(appId))(loggedOutRequest))
 
@@ -1100,7 +1118,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
 
     "return add team member page when check page is navigated to" in new Setup{
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.teamAddMember(appId))(loggedInRequest))
 
@@ -1110,7 +1128,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "not return the add team member page when not logged in" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.teamAddMember(appId))(loggedOutRequest))
 
@@ -1121,7 +1139,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.toSha256
 
     "return remove team member confirmation page when navigated to" in new Setup{
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedInRequest))
 
@@ -1133,7 +1151,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "not return the remove team member confirmation page when not logged in" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedOutRequest))
 
@@ -1143,7 +1161,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
 
     "redirect to the team member list when the remove confirmation post is executed" in new Setup{
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail)
 
@@ -1157,7 +1175,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
-      val application = givenApplicationExists(checkInformation = None)
+      def createApplication() = createPartiallyConfigurableApplication(checkInformation = None)
 
       private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
 
@@ -1171,15 +1189,16 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   "unauthorised App details" should {
     "redirect to landing page when Admin" in new Setup {
-      val application = givenApplicationExists()
+      def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = await(addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
     }
+
     "return unauthorised App details page with one Admin" in new Setup {
-      val application = givenApplicationExists(userRole = DEVELOPER)
+      def createApplication() = createPartiallyConfigurableApplication(userRole = DEVELOPER)
 
       private val result = await(addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest))
 
@@ -1191,15 +1210,15 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       body should include("Ask the administrator")
       body should include(anotherCollaboratorEmail)
     }
-    "return unauthorised App details page with 2 Admins " in new Setup {
 
-      val collaborators = Set(
+    "return unauthorised App details page with 2 Admins " in new Setup {
+      lazy val collaborators = Set(
         Collaborator(loggedInUser.email, DEVELOPER),
         Collaborator(anotherCollaboratorEmail, ADMINISTRATOR),
         Collaborator(yetAnotherCollaboratorEmail, ADMINISTRATOR)
       )
 
-      givenApplicationExistsWithCollaborators(collaborators = collaborators)
+      def createApplication() = createFullyConfigurableApplication(collaborators = collaborators)
 
       private val result = await(addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest))
 
