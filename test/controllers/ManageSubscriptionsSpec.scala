@@ -198,7 +198,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         bodyOf(result) should include(loggedInUser.displayedName)
         bodyOf(result) should include("Sign out")
         bodyOf(result) should include(
-          "Edit the configuration for the APIs you have subscribed to."
+          "Edit the configuration for these APIs you have subscribed to."
         )
 
         bodyOf(result) should include(generateName("api1"))
