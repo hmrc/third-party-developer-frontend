@@ -33,6 +33,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.NonEmptyList
+import domain.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
+import domain.ApiSubscriptionFields.SaveSubscriptionFieldsFailureResponse
 
 @Singleton
 class ApplicationService @Inject() (
@@ -119,8 +121,15 @@ class ApplicationService @Inject() (
         .fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
         .flatMap(values => {
           if (!values.exists(field => field.value != "")) {
-            val x = subscriptionFieldsService.saveFieldValues(application, context, version, createEmptyFieldValues(fieldDefinitions))
-            x.map(_ => HasSucceeded)
+            subscriptionFieldsService
+              .saveFieldValues(application, context, version, createEmptyFieldValues(fieldDefinitions))
+              .map({
+                case SaveSubscriptionFieldsSuccessResponse => HasSucceeded
+                case error => {
+                  val errorMessage = s"Failed to save blank subscription field values: $error"  
+                  throw new RuntimeException(errorMessage)
+                }
+              })
           } else {
             Future.successful(HasSucceeded)
           }

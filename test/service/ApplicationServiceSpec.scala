@@ -408,7 +408,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         given(mockProductionApplicationConnector.subscribeToApi(eqTo(productionApplicationId), any())(any[HeaderCarrier]))
           .willReturn(Future.successful(ApplicationUpdateSuccessful))
         given(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]))
-          .willReturn(Future.successful(mock[SaveSubscriptionFieldsResponse]))
+          .willReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
         await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
 
@@ -444,6 +444,43 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
         verify(mockProductionApplicationConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier])
         verify(mockSubscriptionFieldsService, never()).saveFieldValues(any[Application], any[String], any[String], any[Fields])(any[HeaderCarrier])
+      }
+    
+      "but fails to save subscription fields" in new Setup {
+        private val context = "api1"
+        private val version = "1.0"
+
+        private val subscription = APIIdentifier(context, version)
+
+        private val fieldDefinitions =
+          Seq(SubscriptionFieldDefinition("name", "description", "short-description", "hint", "type"))
+
+        private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, ""))
+
+        private val fields: Fields = fieldDefinitions.map(definition => (definition.name, "")).toMap
+
+        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
+
+        given(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(any[HeaderCarrier]))
+          .willReturn(Future.successful(fieldDefinitions))
+        given(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(any[HeaderCarrier]))
+          .willReturn(Future.successful(fieldDefinitionsWithoutValues))
+
+        given(mockProductionApplicationConnector.subscribeToApi(eqTo(productionApplicationId), any())(any[HeaderCarrier]))
+          .willReturn(Future.successful(ApplicationUpdateSuccessful))
+
+        val errors = Map("fieldName" -> "failure reason")
+
+        given(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]))
+          .willReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(errors)))
+
+
+        private val exception = intercept[RuntimeException](
+          await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
+        )
+        
+        exception.getMessage should include("failure reason")
+        exception.getMessage should include("Failed to save blank subscription field values") 
       }
     }
   }
