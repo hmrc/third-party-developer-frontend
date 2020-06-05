@@ -59,48 +59,47 @@ object ManageSubscriptions {
     )
   }
 
-  def toForm(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadata = {
-    EditApiMetadata(in.name,in.apiVersion.displayedStatus, fields = in.fields.fields.toList)
+  def toForm(in: APISubscriptionStatusWithSubscriptionFields): EditApiConfigurationFormData = {
+    EditApiConfigurationFormData(fields = in.fields.fields.toList.map(field => EditSubscriptionValueFormData(field.definition.name, field.value)))
   }
 
-  // TODO: Change this to ones below
-  case class EditApiMetadata(apiName: String, displayedStatus: String, fields: List[SubscriptionFieldValue])
-  
-  // TODO: Replace above with these
-  // case class EditSubscriptionValueFormData(name: String, value: String)
-  // case class EditApiMetadata(apiName: String, displayedStatus: String, fields: List[EditSubscriptionValueFormData])
+  case class EditApiConfigurationFormData(fields: List[EditSubscriptionValueFormData])
+  case class EditSubscriptionValueFormData(name: String, value: String)
 
-  // TODO: Remove unnessisary extra hidden fields, and don't bind to SubscriptionFieldValue / SubscriptionFieldDefinition
-  object EditApiMetadata {
-    val form: Form[EditApiMetadata] = Form(
+  object EditApiConfigurationFormData {
+    val form: Form[EditApiConfigurationFormData] = Form(
       mapping(
-        "apiName" -> text,
-        "displayedStatus" -> text,
         "fields" -> list(
           mapping(
             "name" -> text,
-            "description" -> text,
-            "shortDescription" -> text,
-            "hint" -> text,
-            "type" -> text,
             "value" -> text
-          )(SubscriptionFieldValue.fromFormValues)(SubscriptionFieldValue.toFormValues)
+          )(fromFormValues)(toFormValues)
         )
-      )(EditApiMetadata.apply)(EditApiMetadata.unapply)
+      )(EditApiConfigurationFormData.apply)(EditApiConfigurationFormData.unapply)
     )
   }
 
-  case class EditApiMetadataViewModel(
-                                       name: String,
-                                       apiContext: String,
-                                       apiVersion: String,
-                                       displayedStatus: String,
-                                       fieldsForm: Form[EditApiMetadata]
-                                     )
-
-  def toViewModel(in: APISubscriptionStatusWithSubscriptionFields): EditApiMetadataViewModel = {
+  def toViewModel(in: APISubscriptionStatusWithSubscriptionFields): Form[EditApiConfigurationFormData] = {
     val data = toForm(in)
-    EditApiMetadataViewModel(in.name, in.context, in.apiVersion.version, in.apiVersion.displayedStatus, EditApiMetadata.form.fill(data))
+    EditApiConfigurationFormData.form.fill(data)
+  }
+
+  def fromFormValues(
+      name: String,
+      value: String
+  ) = {
+      EditSubscriptionValueFormData(name, value)
+  }
+
+  def toFormValues(
+      editSubscriptionValueFormData: EditSubscriptionValueFormData
+  ): Option[(String, String)] = {
+    Some(
+      (
+        editSubscriptionValueFormData.name,
+        editSubscriptionValueFormData.value
+      )
+    )
   }
 }
 
@@ -137,18 +136,24 @@ class ManageSubscriptions @Inject() (
       implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
+      // TODO: Can we do this in refiner?
       definitionsRequest.fieldDefinitions
         .filter(s => s.context.equalsIgnoreCase(context) && s.apiVersion.version.equalsIgnoreCase(version))
         .headOption
-        .map(vm => successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, toViewModel(vm), mode))))
+        .map( (vm : APISubscriptionStatusWithSubscriptionFields) => {
+          successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, vm, toViewModel(vm), mode)))
+        })
         .getOrElse(successful(NotFound(errorHandler.notFoundTemplate)))
     }
 
   def saveSubscriptionFields(applicationId: String,
                              apiContext: String,
                              apiVersion: String,
-                             mode: SaveSubsFieldsPageMode
-                            ) : Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
+                             mode: SaveSubsFieldsPageMode) : Action[AnyContent] = 
+      subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
+ 
+    implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
+    implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
     import SaveSubsFieldsPageMode._
     val successRedirectUrl = mode match {
@@ -156,23 +161,29 @@ class ManageSubscriptions @Inject() (
       case CheckYourAnswers => checkpages.routes.CheckYourAnswers.answersPage(applicationId).withFragment("configurations")
     }
 
-    subscriptionConfigurationSave(apiContext, apiVersion, successRedirectUrl, vm =>
-      editApiMetadata(request.application,vm, mode)
+    // TODO: Make this a refiner?
+    // TODO: name
+    val x : APISubscriptionStatusWithSubscriptionFields = definitionsRequest.fieldDefinitions
+      .filter(s => s.context.equalsIgnoreCase(apiContext) && s.apiVersion.version.equalsIgnoreCase(apiVersion))
+      .headOption.get // TODO: Naked get / empty list
+      
+    subscriptionConfigurationSave(apiContext, apiVersion, successRedirectUrl, (vm : Form[EditApiConfigurationFormData])=>
+      editApiMetadata(definitionsRequest.applicationRequest.application,x, vm, mode)
     )
   }
 
   private def subscriptionConfigurationSave(apiContext: String,
                                             apiVersion: String,
                                             successRedirect: Call,
-                                            validationFailureView : EditApiMetadataViewModel => Html)
+                                            validationFailureView : Form[EditApiConfigurationFormData] => Html)
                                            (implicit hc: HeaderCarrier, request: ApplicationRequest[_]): Future[Result] = {
 
-    def handleValidForm(validForm: EditApiMetadata) = {
-      def saveFields(validForm: EditApiMetadata)(implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
+    def handleValidForm(validForm: EditApiConfigurationFormData) = {
+      def saveFields(validForm: EditApiConfigurationFormData)(implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
         if (validForm.fields.nonEmpty) {
 
           // TODO: Lookup field definitions
-          subFieldsService.saveFieldValues(request.application, apiContext, apiVersion, Map(validForm.fields.map(f => f.definition.name -> f.value): _*))
+          subFieldsService.saveFieldValues(request.application, apiContext, apiVersion, Map(validForm.fields.map(f => f.name -> f.value): _*))
         } else {
           Future.successful(SaveSubscriptionFieldsSuccessResponse)
         }
@@ -182,21 +193,19 @@ class ManageSubscriptions @Inject() (
         case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect)
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val errors = fieldErrors.map(fe => data.FormError(fe._1, fe._2)).toSeq
-          val errorForm = EditApiMetadata.form.fill(validForm).copy(errors = errors)
-          val vm = EditApiMetadataViewModel(validForm.apiName, apiContext, apiVersion, validForm.displayedStatus, errorForm)
-
+          val vm = EditApiConfigurationFormData.form.fill(validForm).copy(errors = errors)
+          
           BadRequest(validationFailureView(vm))
       }
     }
 
-    def handleInvalidForm(formWithErrors: Form[EditApiMetadata]) = {
+    def handleInvalidForm(formWithErrors: Form[EditApiConfigurationFormData]) = {
       val displayedStatus = formWithErrors.data.getOrElse("displayedStatus", throw new Exception("Missing form field: displayedStatus"))
-
-      val vm = EditApiMetadataViewModel(request.application.id, apiContext, apiVersion, displayedStatus, formWithErrors)
-      Future.successful(BadRequest(validationFailureView(vm)))
+    
+      Future.successful(BadRequest(validationFailureView(formWithErrors)))
     }
 
-    EditApiMetadata.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
+    EditApiConfigurationFormData.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
   def subscriptionConfigurationStart(applicationId: String): Action[AnyContent] =
@@ -223,9 +232,12 @@ class ManageSubscriptions @Inject() (
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
+      val apiSubscription = definitionsRequest.apiSubscriptionStatus
+
       Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(
         definitionsRequest.applicationRequest.application,
         pageNumber,
+        apiSubscription,
         toViewModel(definitionsRequest.apiSubscriptionStatus))
       ))
     }
@@ -237,9 +249,15 @@ class ManageSubscriptions @Inject() (
 
       val successRedirectUrl = routes.ManageSubscriptions.subscriptionConfigurationStepPage(applicationId,  pageNumber)
 
-      subscriptionConfigurationSave(definitionsRequest.apiDetails.context, definitionsRequest.apiDetails.version, successRedirectUrl, viewModel => {
-        views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber, viewModel)
-      })
+      val apiSubscription = definitionsRequest.apiSubscriptionStatus
+
+      subscriptionConfigurationSave(
+        definitionsRequest.apiDetails.context,
+        definitionsRequest.apiDetails.version,
+        successRedirectUrl,
+        viewModel => {
+          views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber, apiSubscription, viewModel)
+        })
     }
 
   def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] = {

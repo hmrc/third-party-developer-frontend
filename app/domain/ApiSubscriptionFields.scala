@@ -31,36 +31,6 @@ object ApiSubscriptionFields {
 
   case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: String)
 
-  object SubscriptionFieldValue {
-    def fromFormValues(
-        name: String,
-        description: String,
-        shortDescription: String,
-        hint: String,
-        `type`: String,
-        value: String
-    ) = {
-      SubscriptionFieldValue(
-        SubscriptionFieldDefinition(name, description, shortDescription, hint, `type`),
-        value
-      )
-    }
-
-    def toFormValues(
-        subscriptionFieldValue: SubscriptionFieldValue
-    ): Option[(String, String, String, String, String, String)] = {
-      Some(
-        (
-          subscriptionFieldValue.definition.name,
-          subscriptionFieldValue.definition.description,
-          subscriptionFieldValue.definition.shortDescription,
-          subscriptionFieldValue.definition.hint,
-          subscriptionFieldValue.definition.`type`,
-          subscriptionFieldValue.value
-        )
-      )
-    }
-  }
 
   sealed trait FieldsDeleteResult
   case object FieldsDeleteSuccessResult extends FieldsDeleteResult

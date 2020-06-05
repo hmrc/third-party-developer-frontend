@@ -17,56 +17,54 @@
 @import views.helper.GlobalSection._
 @import controllers.ErrorFormBuilder._
 
-@import controllers.ManageSubscriptions.EditApiMetadataViewModel
-@import domain.Application
+@import controllers.ManageSubscriptions.EditApiConfigurationFormData
+@import domain.{Application, APISubscriptionStatusWithSubscriptionFields}
+@import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 @import views.html.include.fieldError
 @import views.helper.IdFormatter
 @(
-        app: Application,
-        vm: EditApiMetadataViewModel,
-        formPostUrl: Call,
-        skipLink : Option[Call] = None
+  app: Application,
+  apiSubscription : APISubscriptionStatusWithSubscriptionFields,
+  form: Form[EditApiConfigurationFormData],
+  formPostUrl: Call,
+  skipLink : Option[Call] = None
 )(
-        implicit request: play.api.mvc.Request[Any],
-        messages: Messages)
+  implicit request: play.api.mvc.Request[Any],
+  messages: Messages)
 
 @helper.form(
  action = formPostUrl,
  'class -> "fields-subscription") {
 
  @helper.CSRF.formField
- <input type="hidden" name="apiName" value="@vm.name">
- <input type="hidden" name="displayedStatus" value="@vm.displayedStatus">
 
- @helper.repeatWithIndex(vm.fieldsForm("fields")) { (field, idx) =>
+ @helper.repeatWithIndex(form("fields")) { (field, idx) =>
   @defining(field("name").value.getOrElse("")) { formFieldId =>
-   <div class="form-group @if(vm.fieldsForm.errors(formFieldId).nonEmpty){form-group-error}">
+    @defining(apiSubscription.fields.fields.toList(idx)) { subscriptionField => 
+        <div class="form-group @if(form.errors(formFieldId).nonEmpty){form-group-error}">
 
-    @fieldError(vm.fieldsForm.errors, formFieldId)
+          @fieldError(form.errors, formFieldId)
 
-    <input type="hidden" name="fields[@idx].name" value="@field("name").value.getOrElse("")">
-    <input type="hidden" name="fields[@idx].description" value="@field("description").value.getOrElse("")">
-    <input type="hidden" name="fields[@idx].shortDescription" value="@field("shortDescription").value.getOrElse("")">
-    <input type="hidden" name="fields[@idx].hint" value="@field("hint").value.getOrElse("")">
-    <input type="hidden" name="fields[@idx].type" value="@field("type").value.getOrElse("")">
+          <input type="hidden" name="fields[@idx].name" value="@field("name").value.getOrElse("")">
 
-     <label class="form-label" for="@formFieldId">
-     @{field("description").value.getOrElse("")}
-     </label>
-     <span class="form-hint">@{field("hint").value.getOrElse("")}</span>
+          <label class="form-label" for="@formFieldId">
+            @{subscriptionField.definition.description}
+          </label>
+          <span class="form-hint">@{subscriptionField.definition.hint}</span>
 
-     <input  type="text"
-     name="fields[@idx].value"
-     value="@{field("value").value.getOrElse("")}"
-     class="form-input input--medium @if(vm.fieldsForm.errors(formFieldId).nonEmpty){form-control-error}"
-     id="@formFieldId"
-     />
+          <input type="text"
+            name="fields[@idx].value"
+            value="@{field("value").value.getOrElse("")}"
+            class="form-input input--medium @if(form.errors(formFieldId).nonEmpty){form-control-error}"
+            id="@formFieldId" />
+
+        </div>
+      }
+    } 
   }
- </div>
- }
 
  <div class="form-group">
-  <button id="@{IdFormatter.identifier(vm.apiContext, vm.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
+  <button id="@{IdFormatter.identifier(apiSubscription.fields.apiContext, apiSubscription.fields.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
 
   @if(skipLink.isDefined){
    <a href="@{skipLink.get}" class="secondary-button">I'll do this later</a>

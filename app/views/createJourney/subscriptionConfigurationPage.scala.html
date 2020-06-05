@@ -17,21 +17,21 @@
 @import include._
 @import domain._
 
-@import controllers.ManageSubscriptions.EditApiMetadataViewModel
+@import controllers.ManageSubscriptions.EditApiConfigurationFormData
+@import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 
 @(
-        app: Application,
-        pageNumber: Int,
-        vm: EditApiMetadataViewModel
+  app: Application,
+  pageNumber: Int,
+  apiSubscription : APISubscriptionStatusWithSubscriptionFields,
+  form: Form[EditApiConfigurationFormData]
 )(
-        implicit request: play.api.mvc.Request[Any],
-        loggedIn: DeveloperSession,
-        messages: Messages,
-        applicationConfig: config.ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any],
+  loggedIn: DeveloperSession,
+  messages: Messages,
+  applicationConfig: config.ApplicationConfig)
 
-@pageHeading = @{
-  s"${vm.name} ${vm.apiVersion} ${vm.displayedStatus}"
-}
+@pageHeading = @{ s"${apiSubscription.name} ${apiSubscription.apiVersion.version} ${apiSubscription.apiVersion.displayedStatus}" }
 
 @devMain(
   title = pageHeading,
@@ -39,14 +39,15 @@
   developerSession = Some(loggedIn),
   back = BackButtonWithJavaScript
 ) {
-  @errorSummary(vm.fieldsForm)
+  @errorSummary(form)
 
   <header>
     <h2 class="heading-large">@pageHeading</h2>
   </header>
 
   @editApiMetadataPartial(app,
-    vm,
+    apiSubscription,
+    form,
     routes.ManageSubscriptions.subscriptionConfigurationPagePost(app.id, pageNumber),
     Some(routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id, pageNumber))
   )
