@@ -37,7 +37,7 @@ object ApiSubscriptionFields {
   case object FieldsDeleteFailureResult extends FieldsDeleteResult
 
   case class SubscriptionFieldsWrapper(
-      applicationId: String,
+      applicationId: String, // TODO: Do we need this? (try and remove me)
       clientId: String,
       apiContext: String,
       apiVersion: String,

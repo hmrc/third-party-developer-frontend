@@ -69,7 +69,7 @@ case class APISubscriptionStatus(
     apiVersion: APIVersion,
     subscribed: Boolean,
     requiresTrust: Boolean,
-    fields: Option[SubscriptionFieldsWrapper] = None,
+    fields: Option[SubscriptionFieldsWrapper] = None, // TODO : Get rid of optiono
     isTestSupport: Boolean = false) {
   def canUnsubscribe: Boolean = {
     apiVersion.status != APIStatus.DEPRECATED

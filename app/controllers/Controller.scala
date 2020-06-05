@@ -55,8 +55,7 @@ case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], reque
 case class ApplicationRequest[A](application: Application, deployedTo: Environment, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
   extends WrappedRequest[A](request)
 
-case class ApplicationWithFieldDefinitionsRequest[A](
-                                                      fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields],
+case class ApplicationWithFieldDefinitionsRequest[A]( fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields],
                                                       applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
@@ -64,6 +63,10 @@ case class ApplicationWithSubscriptionFieldPage[A]( pageIndex: Int,
                                                     totalPages: Int,
                                                     apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
                                                     apiDetails: ApiDetails,
+                                                    applicationRequest: ApplicationRequest[A])
+  extends WrappedRequest[A](applicationRequest)
+
+  case class ApplicationWithSubscriptionFields[A](  apiSubscription: APISubscriptionStatusWithSubscriptionFields,
                                                     applicationRequest: ApplicationRequest[A])
   extends WrappedRequest[A](applicationRequest)
 
@@ -87,7 +90,7 @@ abstract class ApplicationController()
     ApplicationViewModel(request.application, hasSubscriptionFields(request))
 
   def hasSubscriptionFields(request: ApplicationRequest[_]) : Boolean = {
-    request.subscriptions.exists(s => s.subscribed && s.fields.isDefined)
+    request.subscriptions.exists(s => s.subscribed && s.fields.isDefined) // TODO can't remove option because of this! The existence of wrapper means the subscription has sub fields
   }
 
   def whenTeamMemberOnApp(applicationId: String)
@@ -139,6 +142,15 @@ abstract class ApplicationController()
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
         .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
+        .async(fun)(request)
+    }
+  }
+
+  def subFieldsDefinitionsExistActionByApi(applicationId: String, context: String, version: String)
+                                                   (fun: ApplicationWithSubscriptionFields[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      (ManageSubscriptionsActions
+        .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldsRefiner(context, version))
         .async(fun)(request)
     }
   }
