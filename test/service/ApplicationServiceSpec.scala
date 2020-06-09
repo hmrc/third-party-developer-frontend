@@ -18,7 +18,7 @@ package service
 
 import java.util.UUID
 import java.util.UUID.randomUUID
-
+import builder._
 import cats.data.NonEmptyList
 import config.ApplicationConfig
 import connectors._
@@ -46,7 +46,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 import scala.util.Random
 
-class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
+class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures with SubscriptionsBuilder{
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -143,7 +143,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       apiVersion = APIVersion(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
-      fields = None
+      fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
     )
 
   def subStatus(
@@ -157,7 +157,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       requiresTrust: Boolean = false,
       subscriptionFieldWithValues: Seq[SubscriptionFieldValue] = Seq.empty
   ): APISubscriptionStatus = {
-    val nelFields = NonEmptyList.fromList(subscriptionFieldWithValues.toList)
     APISubscriptionStatus(
       name = name,
       serviceName = name,
@@ -165,7 +164,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       apiVersion = APIVersion(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
-      fields = nelFields.map(fs => SubscriptionFieldsWrapper(appId, clientId, context, version, fs))
+      fields = SubscriptionFieldsWrapper(appId, clientId, context, version, subscriptionFieldWithValues)
     )
   }
 

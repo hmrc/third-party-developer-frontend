@@ -99,7 +99,7 @@ class ActionBuildersSpec extends BaseControllerSpec
     val subscriptionWithoutSubFields = buildAPISubscriptionStatus("api name")
     val subscriptionWithSubFields = buildAPISubscriptionStatus(
         "api name", 
-        fields = Some(buildSubscriptionFieldsWrapper(application,NonEmptyList.one(buildSubscriptionFieldValue("field1")))))
+        fields = Some(buildSubscriptionFieldsWrapper(application,Seq(buildSubscriptionFieldValue("field1")))))
   
     val underTest = new TestController(cookieSigner, messagesApi, sessionServiceMock, errorHandler, applicationServiceMock)
 

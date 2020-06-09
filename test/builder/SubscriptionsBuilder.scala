@@ -31,19 +31,29 @@ trait SubscriptionsBuilder {
     APISubscription(name, s"service-$name", s"context-$name", Seq.empty, Some(false), false)
   }  
 
-  def buildAPISubscriptionStatus(name: String, context: Option[String] = None, fields: Option[SubscriptionFieldsWrapper] = None) = {
+  def buildAPISubscriptionStatus(name: String, context: Option[String] = None, fields: Option[SubscriptionFieldsWrapper] = None) : APISubscriptionStatus = {
+
+    val contextName  =  context.getOrElse(s"context-$name")
+    val version = APIVersion("version", APIStatus.STABLE)
+
+    val f = fields.getOrElse(SubscriptionFieldsWrapper("fake-appId", "fake-clientId", contextName, version.version, Seq.empty))
+
     APISubscriptionStatus(
       name,
       s"serviceName-$name",
-      context =  context.getOrElse(s"context-$name"),
-      APIVersion("version", APIStatus.STABLE),
+      contextName,
+      version,
       subscribed = true,
       requiresTrust = false,
-      fields = fields,
+      fields = f,
       isTestSupport = false) 
   }
 
-  def buildSubscriptionFieldsWrapper(application: Application, fields: NonEmptyList[SubscriptionFieldValue]) = {
+  def emptySubscriptionFieldsWrapper(applicationId: String, clientId: String, context : String, version: String) = {
+      SubscriptionFieldsWrapper(applicationId, clientId, context, version, Seq.empty)
+  }
+
+  def buildSubscriptionFieldsWrapper(application: Application, fields: Seq[SubscriptionFieldValue]) = {
 
     val applicationId = application.id
 

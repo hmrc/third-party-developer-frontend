@@ -36,10 +36,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-
+import builder._
 import scala.concurrent.Future
 
-class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
+class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
 
   val appId = "1234"
   val appName: String = "app"
@@ -57,10 +57,13 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
 
+
+  val emptyFields = emptySubscriptionFieldsWrapper("myAppId","clientId", "exampleContext", "api-example-microservice")
+
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
   val exampleApiSubscription: Some[APISubscriptions] = Some(APISubscriptions("Example API", "api-example-microservice", "exampleContext",
     Seq(APISubscriptionStatus("API1", "api-example-microservice", "exampleContext",
-      APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false))))
+      APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false, fields = emptyFields))))
 
   val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 

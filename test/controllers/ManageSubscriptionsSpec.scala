@@ -135,7 +135,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       bodyOf(result) should include(apiSubscriptionStatus.name)
       bodyOf(result) should include(apiSubscriptionStatus.apiVersion.version)
 
-      val fields = apiSubscriptionStatus.fields.head.fields.toList
+      val fields = apiSubscriptionStatus.fields.fields.toList
 
       for(field <- fields){
         bodyOf(result) should include(field.definition.description)
@@ -258,7 +258,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         s"save action saves valid subscription field values in mode [$mode]" in new ManageSubscriptionsSetup {
           val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
           val newSubscriptionValue = "new value"
-          private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
+          private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
 
           givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
@@ -297,7 +297,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
           when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
             .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
 
-          private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
+          private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
 
           private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
 
@@ -353,7 +353,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]()))
           .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
 
-        private val subSubscriptionValue  = apiSubscriptionStatus.fields.head.fields.head
+        private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
 
         private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
 

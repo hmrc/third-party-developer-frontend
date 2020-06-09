@@ -37,11 +37,11 @@ object ApiSubscriptionFields {
   case object FieldsDeleteFailureResult extends FieldsDeleteResult
 
   case class SubscriptionFieldsWrapper(
-      applicationId: String, // TODO: Do we need this? (try and remove me)
+      applicationId: String,
       clientId: String,
       apiContext: String,
       apiVersion: String,
-      fields: NonEmptyList[SubscriptionFieldValue]
+      fields: Seq[SubscriptionFieldValue]
   )
 
   type Fields = Map[String, String]

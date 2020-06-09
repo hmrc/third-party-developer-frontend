@@ -16,9 +16,11 @@
 
 package views.include
 
+import builder.SubscriptionsBuilder
 import config.ApplicationConfig
 import controllers.APISubscriptions
 import domain._
+import domain.ApiSubscriptionFields._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.mockito.MockitoSugar
@@ -30,7 +32,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.SharedMetricsClearDown
 
-class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
+class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown with SubscriptionsBuilder {
   val request = FakeRequest().withCSRFToken
   val appConfig = mock[ApplicationConfig]
   val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
@@ -40,7 +42,11 @@ class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPe
   val apiName = "Test API"
   val apiContext = "test"
   val apiVersion = "1.0"
-  val subscriptionStatus = APISubscriptionStatus(apiName, apiName, apiContext, APIVersion(apiVersion, APIStatus.STABLE, None), false, false)
+
+  val emptyFields = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
+
+  val subscriptionStatus = APISubscriptionStatus(apiName, apiName, apiContext, APIVersion(apiVersion, APIStatus.STABLE, None), false, false, fields = emptyFields)
+
   val apiSubscriptions = Seq(APISubscriptions(apiName, apiName, apiContext, Seq(subscriptionStatus)))
 
   case class Page(role: Role, environment: Environment, state: ApplicationState) {

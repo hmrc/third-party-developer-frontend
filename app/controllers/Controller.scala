@@ -90,7 +90,7 @@ abstract class ApplicationController()
     ApplicationViewModel(request.application, hasSubscriptionFields(request))
 
   def hasSubscriptionFields(request: ApplicationRequest[_]) : Boolean = {
-    request.subscriptions.exists(s => s.subscribed && s.fields.isDefined) // TODO can't remove option because of this! The existence of wrapper means the subscription has sub fields
+    request.subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty) 
   }
 
   def whenTeamMemberOnApp(applicationId: String)

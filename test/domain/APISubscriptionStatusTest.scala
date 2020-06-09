@@ -17,8 +17,9 @@
 package domain
 
 import uk.gov.hmrc.play.test.UnitSpec
+import builder._
 
-class APISubscriptionStatusTest extends UnitSpec {
+class APISubscriptionStatusTest extends UnitSpec with SubscriptionsBuilder{
 
   def aSubscription(name: String = "name",
                     service: String = "service",
@@ -26,7 +27,9 @@ class APISubscriptionStatusTest extends UnitSpec {
                     version: APIVersion = APIVersion("1.0", APIStatus.STABLE),
                     subscribed: Boolean = true,
                     requiresTrust: Boolean = false) = {
-    APISubscriptionStatus(name, service, context, version, subscribed, requiresTrust)
+    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version.version)
+
+    APISubscriptionStatus(name, service, context, version, subscribed, requiresTrust, emptyFields)
   }
 
   "canUnsubscribe" should {

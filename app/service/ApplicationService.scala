@@ -76,9 +76,7 @@ class ApplicationService @Inject() (
 
       subscriptionFieldsWithValues.map { fields: Seq[SubscriptionFieldValue] =>
         {
-          val wrapper =
-            NonEmptyList.fromList(fields.toList)
-                .map { nel => SubscriptionFieldsWrapper(application.id, application.clientId, api.context, version.version.version, nel) }
+          val wrapper = SubscriptionFieldsWrapper(application.id, application.clientId, api.context, version.version.version, fields) 
           APISubscriptionStatus(api.name, api.serviceName, api.context, version.version, version.subscribed, api.requiresTrust.getOrElse(false), wrapper, api.isTestSupport)
         }
       }

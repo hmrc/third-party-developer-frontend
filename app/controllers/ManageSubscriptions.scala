@@ -41,7 +41,7 @@ object ManageSubscriptions {
 
   case class FieldValue(name: String, value: String)
 
-  case class ApiDetails(name: String, context: String, version: String, displayedStatus: String, subsValues: NonEmptyList[FieldValue])
+  case class ApiDetails(name: String, context: String, version: String, displayedStatus: String, subsValues: Seq[FieldValue])
 
   def toFieldValue(sfv: SubscriptionFieldValue): FieldValue = {
     def default(in: String, default: String) = if (in.isEmpty) default else in
@@ -79,7 +79,6 @@ object ManageSubscriptions {
     )
   }
 
-  // TODO: Rename toSomethingForm
   def toViewModel(in: APISubscriptionStatusWithSubscriptionFields): Form[EditApiConfigurationFormData] = {
     val data = toForm(in)
     EditApiConfigurationFormData.form.fill(data)

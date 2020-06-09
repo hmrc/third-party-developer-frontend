@@ -69,7 +69,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
         apiContext = in.context,
         apiVersion = in.apiVersion.version,
         displayedStatus = in.apiVersion.displayedStatus,
-        fields = in.fields.map(wrapper => wrapper.fields.map(ManageSubscriptions.toFieldValue))
+        fields = in.fields.fields.map(ManageSubscriptions.toFieldValue)
       )
     }
 
@@ -182,7 +182,7 @@ case class CheckYourSubscriptionData(
   apiContext: String,
   apiVersion: String,
   displayedStatus:String,
-  fields: Option[NEL[FieldValue]]
+  fields: Seq[FieldValue]
 )
 
 case class CheckYourAnswersData(

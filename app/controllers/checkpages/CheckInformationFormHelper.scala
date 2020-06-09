@@ -21,7 +21,6 @@ import domain.{CheckInformation, CheckInformationForm}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, ignored, mapping, optional, text}
 
-// TODO - reduce duplication
 trait CheckInformationFormHelper {
   self: ApplicationController =>
 
