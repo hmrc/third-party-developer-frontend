@@ -26,11 +26,11 @@ object ApiSubscriptionFields {
       description: String,
       shortDescription: String,
       hint: String,
-      `type`: String
+      `type`: String,
+      access: AccessRequirements
   )
 
   case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: String)
-
 
   sealed trait FieldsDeleteResult
   case object FieldsDeleteSuccessResult extends FieldsDeleteResult
@@ -62,7 +62,11 @@ object ApiSubscriptionFields {
       Json.format[SubscriptionFieldsPutRequest]
   }
 
-  sealed trait SaveSubscriptionFieldsResponse
-  case object SaveSubscriptionFieldsSuccessResponse extends SaveSubscriptionFieldsResponse
-  case class SaveSubscriptionFieldsFailureResponse(fieldErrors : Map[String, String]) extends SaveSubscriptionFieldsResponse
+  sealed trait ServiceSaveSubscriptionFieldsResponse
+  sealed trait ConnectorSaveSubscriptionFieldsResponse extends ServiceSaveSubscriptionFieldsResponse
+  
+  case object SaveSubscriptionFieldsSuccessResponse extends ConnectorSaveSubscriptionFieldsResponse
+  case class SaveSubscriptionFieldsFailureResponse(fieldErrors : Map[String, String]) extends ConnectorSaveSubscriptionFieldsResponse
+  
+  case object SaveSubscriptionFieldsAccessDeniedResponse extends ServiceSaveSubscriptionFieldsResponse
 }

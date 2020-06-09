@@ -22,7 +22,7 @@ import config.ApplicationConfig
 import connectors._
 import domain._
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields._
 import domain.Environment.{PRODUCTION, SANDBOX}
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
@@ -33,8 +33,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.NonEmptyList
-import domain.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
-import domain.ApiSubscriptionFields.SaveSubscriptionFieldsFailureResponse
+import service.SubscriptionFieldsService.SkipRoleValidation
 
 @Singleton
 class ApplicationService @Inject() (
@@ -107,8 +106,7 @@ class ApplicationService @Inject() (
 
     def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionFieldDefinition]) = {
       fieldDefinitions
-        .map(d => (d.name, ""))
-        .toMap
+        .map(d => SubscriptionFieldValue(d, ""))
     }
 
     trait HasSucceeded
@@ -120,7 +118,7 @@ class ApplicationService @Inject() (
         .flatMap(values => {
           if (!values.exists(field => field.value != "")) {
             subscriptionFieldsService
-              .saveFieldValues(application, context, version, createEmptyFieldValues(fieldDefinitions))
+              .saveFieldValues(SkipRoleValidation, application, context, version, createEmptyFieldValues(fieldDefinitions))
               .map({
                 case SaveSubscriptionFieldsSuccessResponse => HasSucceeded
                 case error => {

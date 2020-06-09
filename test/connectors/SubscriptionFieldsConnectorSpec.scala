@@ -37,8 +37,9 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import builder.SubscriptionsBuilder
 
-class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
+class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar with SubscriptionsBuilder {
   def fields(tpl: (String, String)*): Map[String, String] =
     Map[String, String](tpl: _*)
 
@@ -119,12 +120,9 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   }
 
   "fetchFieldsValuesWithPrefetchedDefinitions" should {
-
-    val subscriptionDefinition =
-      SubscriptionFieldDefinition("my-name", "my-description", "my-short-description", "my-hint", "my-type")
-
-    val subscriptionFieldValue =
-      SubscriptionFieldValue(subscriptionDefinition, "my-value")
+    
+    val subscriptionFieldValue = buildSubscriptionFieldValue("my-name", Some("my-value"))
+    val subscriptionDefinition = subscriptionFieldValue.definition
 
     val subscriptionFields =
       ApplicationApiFieldValues(
@@ -308,7 +306,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     )
 
     val expectedDefinitions =
-      List(SubscriptionFieldDefinition("field1", "desc1", "sdesc2", "hint1", "some type"))
+      List(SubscriptionFieldDefinition("field1", "desc1", "sdesc2", "hint1", "some type", AccessRequirements.Default))
 
     val validResponse =
       ApiFieldDefinitions(apiContext, apiVersion, definitionsFromRestService)
@@ -374,7 +372,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     "return field values" in new Setup {
       val expectedDefinitions =
         definitionsFromRestService.map(d =>
-          SubscriptionFieldDefinition(d.name, d.description, d.shortDescription, d.hint, d.`type`)
+          SubscriptionFieldDefinition(d.name, d.description, d.shortDescription, d.hint, d.`type`, AccessRequirements.Default)
         )
       val expectedFieldValues =
         expectedDefinitions.map(definition => SubscriptionFieldValue(definition, "my-value"))

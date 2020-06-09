@@ -58,11 +58,17 @@ object AccessRequirements {
   final val Default = AccessRequirements(devhub = DevhubAccessRequirements.Default)
 }
 
-
 sealed trait DevhubAccessLevel {
   def satisfiesRequirement(requirement: DevhubAccessRequirement): Boolean = DevhubAccessLevel.satisfies(requirement)(this)
 }
+
 object DevhubAccessLevel {
+
+  def fromRole(role: Role) : DevhubAccessLevel = role match {
+      case Role.ADMINISTRATOR => DevhubAccessLevel.Admininstator
+      case Role.DEVELOPER => DevhubAccessLevel.Developer
+  }
+
   case object Developer extends DevhubAccessLevel
   case object Admininstator extends DevhubAccessLevel
 

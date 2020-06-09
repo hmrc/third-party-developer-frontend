@@ -23,6 +23,13 @@ import service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.Role
+import domain.DevhubAccessRequirement
+import domain.DevhubAccessLevel.Developer
+import domain.DevhubAccessLevel
+import domain.Role.ADMINISTRATOR
+import domain.Role.DEVELOPER
+import service.SubscriptionFieldsService._
 
 @Singleton
 class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
@@ -38,12 +45,36 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     }
   }
 
-  def saveFieldValues(application: Application, apiContext: String, apiVersion: String, fields: Fields)
-                     (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
+  def saveFieldValues(accessValidation : AccessValidation, application: Application, apiContext: String, apiVersion: String, newValues : Seq[SubscriptionFieldValue])
+                        (implicit hc: HeaderCarrier): Future[ServiceSaveSubscriptionFieldsResponse] = {
 
-    val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+    def allowedToWriteToAllValues(values: Seq[SubscriptionFieldValue], devhubAccessLevel: DevhubAccessLevel) : Boolean = {
+      values.forall(_.definition.access.devhub.satisfiesWrite(devhubAccessLevel))
+    }
 
-    connector.saveFieldValues(application.clientId, apiContext, apiVersion, fields)
+    def isRoleAllowed : Boolean = {
+      accessValidation match {
+        case ValidateAgainstRole(role) =>
+          val devhubAccessLevel = DevhubAccessLevel.fromRole(role)
+           allowedToWriteToAllValues(newValues,devhubAccessLevel)
+        case SkipRoleValidation => true
+      }
+    }
+
+    if (isRoleAllowed) {
+      val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+
+      val fieldsToSave = newValues.map(v => (v.definition.name -> v.value)).toMap
+
+      connector
+        .saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
+        // .map(r => r match {
+        //   case x: SaveSubscriptionFieldsFailureResponse2 => x
+        //   // case y: SaveSubscriptionFieldsSuccessResponse2 => y
+        // })
+    } else { 
+      Future.successful(SaveSubscriptionFieldsAccessDeniedResponse)
+    }
   }
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
@@ -73,7 +104,7 @@ object SubscriptionFieldsService {
                              (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
     def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
-                       (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse]
+                       (implicit hc: HeaderCarrier): Future[ConnectorSaveSubscriptionFieldsResponse]
 
     def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
   }
@@ -83,4 +114,8 @@ object SubscriptionFieldsService {
   object DefinitionsByApiVersion {
     val empty = Map.empty[APIIdentifier, Seq[SubscriptionFieldDefinition]]
   }
+
+  sealed trait AccessValidation 
+  case class ValidateAgainstRole(role: Role) extends AccessValidation
+  case object SkipRoleValidation extends AccessValidation
 }

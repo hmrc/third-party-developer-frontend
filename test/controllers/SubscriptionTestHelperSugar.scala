@@ -45,9 +45,9 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     )
   }
 
-  def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {
-    val sfd = SubscriptionFieldDefinition("name", "description", "short-description", "type", "hint")
-    val sfv = SubscriptionFieldValue(sfd, "the value")
+  def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {    
+    val sfv = buildSubscriptionFieldValue("the value")
+    val sfd = sfv.definition
 
     val context = "individual-employment-context-2"
     val version = "1.0"
@@ -66,14 +66,8 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def generateName(prefix: String) = s"$prefix-name"
 
-  def generateField(prefix: String): SubscriptionFieldDefinition =
-    SubscriptionFieldDefinition(
-      name = generateName(prefix),
-      description = s"$prefix-description",
-      shortDescription = s"$prefix-short-description",
-      hint = s"$prefix-hint",
-      `type` = "STRING"
-    )
+  def generateField(prefix: String): SubscriptionFieldDefinition = 
+    buildSubscriptionFieldValue(name = generateName(prefix)).definition
 
   def generateValue(prefix: String) = s"$prefix-value"
 

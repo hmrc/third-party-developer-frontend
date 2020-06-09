@@ -33,6 +33,7 @@ import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionF
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import cats.data.{NonEmptyList => NEL}
+import service.SubscriptionFieldsService._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -124,7 +125,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   }
 
   def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
-                     (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
+                     (implicit hc: HeaderCarrier): Future[ConnectorSaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
 
     import CustomResponseHandlers.permissiveBadRequestResponseHandler
@@ -186,7 +187,8 @@ object SubscriptionFieldsConnector {
       description = f.description,
       shortDescription = f.shortDescription,
       `type` = f.`type`,
-      hint = f.hint
+      hint = f.hint,
+      access = f.access
     )
   }
 
