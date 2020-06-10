@@ -51,26 +51,9 @@ import scala.concurrent.Future
 import org.scalatest.Suite
 import domain.DeveloperSession
 import security.DevHubAuthorization
+import helpers.LoggedInRequestTestHelper
 
-trait LoggedInRequestTestHelper extends SessionServiceMock with WithFakeApplication with DevHubAuthorization {
-  this: BaseControllerSpec =>    
-    val sessionService = mock[SessionService]
-
-    val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
-    val sessionId = "sessionId"
-    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-    fetchSessionByIdReturns(sessionId, session)
-   
-    private val sessionParams = Seq(
-      "csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken
-    )
-
-    lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(this, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
-}
-
+//TODO move to its own file
 class TestController( val cookieSigner: CookieSigner,
                       val messagesApi: MessagesApi,
                       val sessionService: SessionService,

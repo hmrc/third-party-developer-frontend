@@ -24,7 +24,7 @@ import domain.ApiSubscriptionFields._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.{verify, when, never}
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -37,6 +37,8 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
 import service.SubscriptionFieldsService.ValidateAgainstRole
+import domain.DevhubAccessRequirement.NoOne
+import domain.DevhubAccessRequirement.Anyone
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = Future.failed(new ApplicationNotFound)
@@ -122,13 +124,8 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
     def editFormPostRequest(fieldName: String, fieldValue: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       loggedInRequest
-        .withFormUrlEncodedBody("apiName" -> "",
-          "displayedStatus" -> "",
+        .withFormUrlEncodedBody(
           "fields[0].name" -> fieldName,
-          "fields[0].description" -> "",
-          "fields[0].shortDescription" -> "",
-          "fields[0].hint" -> "",
-          "fields[0].type" -> "",
           "fields[0].value" -> fieldValue)
     }
 
@@ -143,6 +140,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       for(field <- fields){
         bodyOf(result) should include(field.definition.description)
         bodyOf(result) should include(field.definition.hint)
+        
+        if (!field.definition.access.devhub.satisfiesWrite(DevhubAccessLevel.Admininstator)){
+          bodyOf(result) should include("disabled")
+        }
       }
     }
 
@@ -160,260 +161,354 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
   }
 
   "ManageSubscriptions" when {
-    "a user is logged in" should {
-      "return the list subscription configuration page with no subscriptions and therefore no subscription field definitions" in new ManageSubscriptionsSetup {
+    
+    "a user is logged in" when {
 
-        givenApplicationHasNoSubs(application)
+      "the subscriptions list action is called it" should {
+        "return the list subscription configuration page with no subscriptions and therefore no subscription field definitions" in new ManageSubscriptionsSetup {
+          givenApplicationHasNoSubs(application)
 
-        private val result =
-          await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
+          private val result =
+            await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
 
-        status(result) shouldBe NOT_FOUND
+          status(result) shouldBe NOT_FOUND
+        }
+
+        "return the list subscription configuration page with several subscriptions without subscription configuration" in new ManageSubscriptionsSetup {
+
+          val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+
+          givenApplicationHasSubs(application, subsData)
+
+          private val result =
+            await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
+
+          status(result) shouldBe NOT_FOUND
+        }
+
+        "return the list subscription configuration page with several subscriptions, some with subscription configuration" in new ManageSubscriptionsSetup {
+
+          val subsData = Seq(
+            exampleSubscriptionWithFields("api1", 3),
+            exampleSubscriptionWithFields("api2", 1),
+            exampleSubscriptionWithoutFields("api3"),
+            exampleSubscriptionWithFields("api4", 1).copy(subscribed = false)
+          )
+
+          givenApplicationHasSubs(application, subsData)
+
+          private val result =
+            await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
+
+          status(result) shouldBe OK
+          bodyOf(result) should include(loggedInUser.displayedName)
+          bodyOf(result) should include("Sign out")
+          bodyOf(result) should include(
+            "Edit the configuration for these APIs you have subscribed to."
+          )
+
+          bodyOf(result) should include(generateName("api1"))
+          bodyOf(result) should include("Stable")
+          bodyOf(result) should include(generateValueName("api1", 1))
+          bodyOf(result) should include(generateValueName("api1", 2))
+          bodyOf(result) should include(generateValueName("api1", 3))
+          bodyOf(result) should not include generateValueName("api1", 4)
+
+          bodyOf(result) should include(generateName("api2"))
+          bodyOf(result) should include(generateValueName("api2", 1))
+
+          bodyOf(result) should not include generateName("api3")
+          bodyOf(result) should not include generateName("api4")
+        }
+
+        "return not found if app has no subscription field definitions" in new ManageSubscriptionsSetup {
+          givenApplicationHasSubs(application, Seq.empty)
+
+          private val result =
+            await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
+
+          status(result) shouldBe NOT_FOUND
+        }
+
+        "It renders the subscription configuration list page for a privileged application" in new ManageSubscriptionsSetup {
+          val subsData = Seq(
+            exampleSubscriptionWithFields("api1", 1)
+          )
+
+          givenApplicationHasSubs(privilegedApplication, subsData)
+
+          private val result =
+            await(manageSubscriptionController.listApiSubscriptions(privilegedApplication.id)(loggedInRequest))
+
+          status(result) shouldBe OK
+        }
       }
+      
+      "the editApiMetadataPage is called it" should {
+        "renders the edit subscription page" in new ManageSubscriptionsSetup {
+          val whoCanWrite = NoOne
+          val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
 
-      "return the list subscription configuration page with several subscriptions without subscription configuration" in new ManageSubscriptionsSetup {
+          val wrapper = buildSubscriptionFieldsWrapper(application, Seq(buildSubscriptionFieldValue("field-name", Some("old-value"), accessDenied)))
+          
+          val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
 
-        val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
-
-        givenApplicationHasSubs(application, subsData)
-
-        private val result =
-          await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
-
-        status(result) shouldBe NOT_FOUND
-      }
-
-      "return the list subscription configuration page with several subscriptions, some with subscription configuration" in new ManageSubscriptionsSetup {
-
-        val subsData = Seq(
-          exampleSubscriptionWithFields("api1", 3),
-          exampleSubscriptionWithFields("api2", 1),
-          exampleSubscriptionWithoutFields("api3"),
-          exampleSubscriptionWithFields("api4", 1).copy(subscribed = false)
-        )
-
-        givenApplicationHasSubs(application, subsData)
-
-        private val result =
-          await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
-
-        status(result) shouldBe OK
-        bodyOf(result) should include(loggedInUser.displayedName)
-        bodyOf(result) should include("Sign out")
-        bodyOf(result) should include(
-          "Edit the configuration for these APIs you have subscribed to."
-        )
-
-        bodyOf(result) should include(generateName("api1"))
-        bodyOf(result) should include("Stable")
-        bodyOf(result) should include(generateValueName("api1", 1))
-        bodyOf(result) should include(generateValueName("api1", 2))
-        bodyOf(result) should include(generateValueName("api1", 3))
-        bodyOf(result) should not include generateValueName("api1", 4)
-
-        bodyOf(result) should include(generateName("api2"))
-        bodyOf(result) should include(generateValueName("api2", 1))
-
-        bodyOf(result) should not include generateName("api3")
-        bodyOf(result) should not include generateName("api4")
-      }
-
-      "return not found if app has no subscription field definitions" in new ManageSubscriptionsSetup {
-        givenApplicationHasSubs(application, Seq.empty)
-
-        private val result =
-          await(manageSubscriptionController.listApiSubscriptions(appId)(loggedInRequest))
-
-        status(result) shouldBe NOT_FOUND
-      }
-
-      "It renders the subscription configuration list page for a privileged application" in new ManageSubscriptionsSetup {
-        val subsData = Seq(
-          exampleSubscriptionWithFields("api1", 1)
-        )
-
-        givenApplicationHasSubs(privilegedApplication, subsData)
-
-        private val result =
-          await(manageSubscriptionController.listApiSubscriptions(privilegedApplication.id)(loggedInRequest))
-
-        status(result) shouldBe OK
-      }
-
-      "renders the edit subscription page" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 2)
-
-        val subsData = Seq(apiSubscriptionStatus)
-
-        givenApplicationHasSubs(application, subsData)
-
-        private val result: Result =
-          await(addToken(manageSubscriptionController.editApiMetadataPage(appId, "/api1-api", "1.0", SaveSubsFieldsPageMode.LeftHandNavigation))(loggedInRequest))
-
-        assertCommonEditFormFields(result, apiSubscriptionStatus)
-
-        bodyOf(result) should include(application.name)
-        bodyOf(result) should include("Sandbox")
-
-      }
-
-      def saveSubscriptionFieldsTest(mode: SaveSubsFieldsPageMode, expectedRedirectUrl: String) = {
-        s"save action saves valid subscription field values in mode [$mode]" in new ManageSubscriptionsSetup {
-          val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
-          val newSubscriptionValue = "new value"
-          private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
-
+          private val readonlySubSubscriptionValue  = apiSubscriptionStatus.fields.fields(0)
+          
           givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
-          when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any())(any[HeaderCarrier]()))
-            .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
+          val subsData = Seq(apiSubscriptionStatus)
 
-          private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
+          givenApplicationHasSubs(application, subsData)
 
           private val result: Result =
-            await(addToken(manageSubscriptionController.saveSubscriptionFields(
-              appId,
-              apiSubscriptionStatus.context,
-              apiSubscriptionStatus.apiVersion.version,
-              mode))(loggedInWithFormValues))
+            await(addToken(manageSubscriptionController.editApiMetadataPage(appId, "/api1-api", "1.0", SaveSubsFieldsPageMode.LeftHandNavigation))(loggedInRequest))
 
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(expectedRedirectUrl)
+          assertCommonEditFormFields(result, apiSubscriptionStatus)
 
-          val expectedFields = Seq(SubscriptionFieldValue(subSubscriptionValue.definition, newSubscriptionValue))
-
-          verify(mockSubscriptionFieldsService)
-            .saveFieldValues(
-              eqTo(ValidateAgainstRole(role)),
-              eqTo(application),
-              eqTo(apiSubscriptionStatus.context),
-              eqTo(apiSubscriptionStatus.apiVersion.version),
-              eqTo(expectedFields))(any[HeaderCarrier]())
+          bodyOf(result) should include(application.name)
+          bodyOf(result) should include("Sandbox")
+        }
+      }
+    
+      "the page mode for saveSubscriptionFields action" when {
+        "LeftHandNavigation" should {
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/$appId/api-metadata")
         }
         
-        s"save action fails validation and shows error message in mode [$mode]" in new ManageSubscriptionsSetup {
+        "CheckYourAnswers" should {
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/$appId/check-your-answers#configurations")
+        }
+
+        def saveSubscriptionFieldsTest(mode: SaveSubsFieldsPageMode, expectedRedirectUrl: String) = {
+          s"save action saves valid subscription field values in mode [$mode]" in new ManageSubscriptionsSetup {
+            val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
+            val newSubscriptionValue = "new value"
+            private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
+
+            givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
+
+            when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any(), any())(any[HeaderCarrier]()))
+              .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
+
+            private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
+
+            private val result: Result =
+              await(addToken(manageSubscriptionController.saveSubscriptionFields(
+                appId,
+                apiSubscriptionStatus.context,
+                apiSubscriptionStatus.apiVersion.version,
+                mode))(loggedInWithFormValues))
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(expectedRedirectUrl)
+
+            val expectedFields = Map(subSubscriptionValue.definition.name -> newSubscriptionValue)
+
+            verify(mockSubscriptionFieldsService)
+              .saveFieldValues(
+                eqTo(role),
+                eqTo(application),
+                eqTo(apiSubscriptionStatus.context),
+                eqTo(apiSubscriptionStatus.apiVersion.version),
+                eqTo(apiSubscriptionStatus.fields.fields),
+                eqTo(expectedFields))(any[HeaderCarrier]())
+          }
+
+          s"save action saves valid subscription field values in mode [$mode] and with a read only field" in new ManageSubscriptionsSetup {
+            val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 2)
+
+            private val readonlySubSubscriptionValue  = apiSubscriptionStatus.fields.fields(0)
+            private val writableSubSubscriptionValue  = apiSubscriptionStatus.fields.fields(1)
+
+            givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
+
+            when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any(), any())(any[HeaderCarrier]()))
+              .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
+
+            val newSubscriptionValue = "new value"
+
+            private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
+              "fields[1].name" -> writableSubSubscriptionValue.definition.name,
+              "fields[1].value" -> newSubscriptionValue
+            )
+
+            private val result: Result =
+              await(addToken(manageSubscriptionController.saveSubscriptionFields(
+                appId,
+                apiSubscriptionStatus.context,
+                apiSubscriptionStatus.apiVersion.version,
+                mode))(loggedInWithFormValues))
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(expectedRedirectUrl)
+
+            val expectedFields = Map(writableSubSubscriptionValue.definition.name -> newSubscriptionValue)
+
+            verify(mockSubscriptionFieldsService)
+              .saveFieldValues(
+                eqTo(role),
+                eqTo(application),
+                eqTo(apiSubscriptionStatus.context),
+                eqTo(apiSubscriptionStatus.apiVersion.version),
+                eqTo(apiSubscriptionStatus.fields.fields),
+                eqTo(expectedFields))(any[HeaderCarrier]())
+          }
+
+          s"save action saves valid subscription field values in mode [$mode] fails and with a read only field is passed in by a bad actor" in new ManageSubscriptionsSetup {
+            val whoCanWrite = NoOne
+            val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
+
+            val wrapper = buildSubscriptionFieldsWrapper(application, Seq(buildSubscriptionFieldValue("field-name", Some("old-value"), accessDenied)))
+            
+            val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
+
+            private val readonlySubSubscriptionValue  = apiSubscriptionStatus.fields.fields(0)
+            
+            givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
+
+            when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any(), any())(any[HeaderCarrier]()))
+              .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
+
+            val newSubscriptionValue = "illegal new value"
+
+            private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
+              "fields[0].name" -> readonlySubSubscriptionValue.definition.name,
+              "fields[0].value" -> newSubscriptionValue
+            )
+
+            private val result: Result =
+              await(addToken(manageSubscriptionController.saveSubscriptionFields(
+                appId,
+                apiSubscriptionStatus.context,
+                apiSubscriptionStatus.apiVersion.version,
+                mode))(loggedInWithFormValues))
+
+            status(result) shouldBe FORBIDDEN
+          }
+          
+          s"save action fails validation and shows error message in mode [$mode]" in new ManageSubscriptionsSetup {
+            val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
+            val newSubscriptionValue = "my invalid value"
+            val fieldErrors = Map("apiName" -> "apiName is invalid error message")
+
+            givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
+
+            when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any(), any())(any[HeaderCarrier]()))
+              .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
+
+            private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
+
+            private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
+
+            private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
+                appId,
+                apiSubscriptionStatus.context,
+                apiSubscriptionStatus.apiVersion.version,
+                mode))(loggedInWithFormValues))
+
+            status(result) shouldBe BAD_REQUEST
+
+            assertIsApiConfigureEditPage(result)
+
+            bodyOf(result) should include("apiName is invalid error message")
+          }
+
+          s"save action fails with access deinied and shows error message in mode [$mode]" in new ManageSubscriptionsSetup {
+            val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
+            val newSubscriptionValue = "my invalid value"
+            val fieldErrors = Map("apiName" -> "apiName is invalid error message")
+
+            givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
+
+            when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any(), any())(any[HeaderCarrier]()))
+              .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
+
+            private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
+
+            private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
+
+            private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
+                appId,
+                apiSubscriptionStatus.context,
+                apiSubscriptionStatus.apiVersion.version,
+                mode))(loggedInWithFormValues))
+
+            status(result) shouldBe FORBIDDEN
+          }
+
+          s"return to the login page when the user attempts to edit subscription configuration in mode [$mode]" in new ManageSubscriptionsSetup {
+
+            val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+
+            val fakeContext = "FAKE"
+            val fakeVersion = "1.0"
+
+            private val result =
+              await(manageSubscriptionController.editApiMetadataPage(appId, fakeContext, fakeVersion, mode)(request))
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some("/developer/login")
+          }
+
+          s"return not found when trying to edit api subscription configuration for an api the application is not subscribed to in mode [$mode]" in new ManageSubscriptionsSetup {
+            givenApplicationHasSubs(application, Seq.empty)
+
+            private val result = await(manageSubscriptionController.editApiMetadataPage(appId, apiContext, apiVersion, mode)(loggedInRequest))
+
+            status(result) shouldBe NOT_FOUND
+          }
+        }
+      }
+      
+      "subscriptionConfigurationPagePost save action is called it" should {
+        "and fails validation it should show error message and renders the add app journey page subs configuration" in new ManageSubscriptionsSetup {
           val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
           val newSubscriptionValue = "my invalid value"
+          val pageNumber = 1
+
           val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
           givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
-          when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any())(any[HeaderCarrier]()))
+          when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any(), any())(any[HeaderCarrier]()))
             .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
 
           private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
 
           private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
 
-          private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
-              appId,
-              apiSubscriptionStatus.context,
-              apiSubscriptionStatus.apiVersion.version,
-              mode))(loggedInWithFormValues))
+          private val result = await(addToken(
+            manageSubscriptionController.subscriptionConfigurationPagePost(appId, pageNumber))(loggedInWithFormValues))
 
           status(result) shouldBe BAD_REQUEST
 
-          assertIsApiConfigureEditPage(result)
+          assertIsSandboxJourneyApiConfigureEditPage(result)
 
           bodyOf(result) should include("apiName is invalid error message")
         }
 
-        s"save action fails with access deinied and shows error message in mode [$mode]" in new ManageSubscriptionsSetup {
+        "and fails with access denied and shows forbidden error message" in new ManageSubscriptionsSetup {
           val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
           val newSubscriptionValue = "my invalid value"
+          val pageNumber = 1
+
           val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
           givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
 
-          when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any())(any[HeaderCarrier]()))
+          when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any(), any())(any[HeaderCarrier]()))
             .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
           private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
 
           private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
 
-          private val result = await(addToken(manageSubscriptionController.saveSubscriptionFields(
-              appId,
-              apiSubscriptionStatus.context,
-              apiSubscriptionStatus.apiVersion.version,
-              mode))(loggedInWithFormValues))
+          private val result = await(addToken(
+            manageSubscriptionController.subscriptionConfigurationPagePost(appId, pageNumber))(loggedInWithFormValues))
 
           status(result) shouldBe FORBIDDEN
         }
-
-        s"return to the login page when the user attempts to edit subscription configuration in mode [$mode]" in new ManageSubscriptionsSetup {
-
-          val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-
-          val fakeContext = "FAKE"
-          val fakeVersion = "1.0"
-
-          private val result =
-            await(manageSubscriptionController.editApiMetadataPage(appId, fakeContext, fakeVersion, mode)(request))
-
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some("/developer/login")
-        }
-
-        s"return not found when trying to edit api subscription configuration for an api the application is not subscribed to in mode [$mode]" in new ManageSubscriptionsSetup {
-          givenApplicationHasSubs(application, Seq.empty)
-
-          private val result = await(manageSubscriptionController.editApiMetadataPage(appId, apiContext, apiVersion, mode)(loggedInRequest))
-
-          status(result) shouldBe NOT_FOUND
-        }
-
-      }
-
-      saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/$appId/api-metadata")
-      saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/$appId/check-your-answers#configurations")
-
-      "save action fails valid and shows error message and renders the add app journey page subs configuration" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
-        val newSubscriptionValue = "my invalid value"
-        val pageNumber = 1
-
-        val fieldErrors = Map("apiName" -> "apiName is invalid error message")
-
-        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
-
-        when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any())(any[HeaderCarrier]()))
-          .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
-
-        private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
-
-        private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
-
-        private val result = await(addToken(
-          manageSubscriptionController.subscriptionConfigurationPagePost(appId, pageNumber))(loggedInWithFormValues))
-
-        status(result) shouldBe BAD_REQUEST
-
-        assertIsSandboxJourneyApiConfigureEditPage(result)
-
-        bodyOf(result) should include("apiName is invalid error message")
-      }
-
-      "save action fails with access denied and shows forbidden error message" in new ManageSubscriptionsSetup {
-        val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
-        val newSubscriptionValue = "my invalid value"
-        val pageNumber = 1
-
-        val fieldErrors = Map("apiName" -> "apiName is invalid error message")
-
-        givenApplicationHasSubs(application, Seq(apiSubscriptionStatus))
-
-        when(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any(), any())(any[HeaderCarrier]()))
-          .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
-
-        private val subSubscriptionValue  = apiSubscriptionStatus.fields.fields.head
-
-        private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name,newSubscriptionValue)
-
-        private val result = await(addToken(
-          manageSubscriptionController.subscriptionConfigurationPagePost(appId, pageNumber))(loggedInWithFormValues))
-
-        status(result) shouldBe FORBIDDEN
       }
     }
 

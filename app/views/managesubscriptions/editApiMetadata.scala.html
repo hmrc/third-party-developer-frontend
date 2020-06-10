@@ -17,15 +17,14 @@
 @import include._
 @import domain._
 @import model.Crumb
-@import controllers.ManageSubscriptions.EditApiConfigurationFormData
+@import model.EditManageSubscription._
 @import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 
 @import views.helper.IdFormatter
 
 @(
   app: Application,
-  apiSubscription: APISubscriptionStatusWithSubscriptionFields,
-  form: Form[EditApiConfigurationFormData],
+  viewModel: EditApiConfigurationViewModel,
   mode: SaveSubsFieldsPageMode
 )(
     implicit request: play.api.mvc.Request[Any],
@@ -34,7 +33,7 @@
     applicationConfig: config.ApplicationConfig
 )
 
-@pageHeading = @{ s"${apiSubscription.name} ${apiSubscription.apiVersion.version} ${apiSubscription.apiVersion.displayedStatus}" }
+@pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion} ${viewModel.displayedStatus}" }
 
 @devMain(
     title = pageHeading,
@@ -46,7 +45,7 @@
         Crumb.application(app)
     )
 ) {
-    @errorSummary(form)
+    @errorSummary(viewModel.form)
 
     <header>
       <h1 class="heading-large">@{pageHeading}</h1>
@@ -58,8 +57,7 @@
 
     @editApiMetadataPartial(
       app,
-      apiSubscription,
-      form,
-      routes.ManageSubscriptions.saveSubscriptionFields(app.id, apiSubscription.fields.apiContext, apiSubscription.fields.apiVersion, mode)
+      viewModel,
+      routes.ManageSubscriptions.saveSubscriptionFields(app.id, viewModel.apiContext, viewModel.apiVersion, mode)
     )
 }

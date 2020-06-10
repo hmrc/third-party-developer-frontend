@@ -64,10 +64,10 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     applicationSubscription.subscriptions.map(_.apiVersion) shouldBe expectedVersions
   }
 
-  def generateName(prefix: String) = s"$prefix-name"
+  def generateName(prefix: String, index: Int = 1) = s"$prefix-name-$index"
 
-  def generateField(prefix: String): SubscriptionFieldDefinition = 
-    buildSubscriptionFieldValue(name = generateName(prefix)).definition
+  def generateField(prefix: String, index: Int): SubscriptionFieldDefinition = 
+    buildSubscriptionFieldValue(name = generateName(prefix, index)).definition
 
   def generateValue(prefix: String) = s"$prefix-value"
 
@@ -75,7 +75,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def generateFieldValue(prefix: String, index: Int): SubscriptionFieldValue =
     SubscriptionFieldValue(
-      definition = generateField(prefix),
+      definition = generateField(prefix, index),
       value = generateValueName(prefix, index)
     )
 
@@ -115,8 +115,9 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     val version = APIVersion("1.0", APIStatus.STABLE)
     val emptyFields = emptySubscriptionFieldsWrapper("myAppId","myClientId",context, version.version)
 
+    val subscriptinFieldInxed = 1
     APISubscriptionStatus(
-      name = generateName(prefix),
+      name = generateName(prefix, subscriptinFieldInxed),
       serviceName = s"$prefix-api",
       context = context,
       apiVersion = version,
@@ -129,5 +130,4 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def exampleSubscriptionWithFields(prefix: String, count: Int): APISubscriptionStatus =
     exampleSubscriptionWithoutFields(prefix).copy(fields = generateWrapper(prefix, count))
-
 }

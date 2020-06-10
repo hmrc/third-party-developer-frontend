@@ -17,15 +17,14 @@
 @import views.helper.GlobalSection._
 @import controllers.ErrorFormBuilder._
 
-@import controllers.ManageSubscriptions.EditApiConfigurationFormData
+@import model.EditManageSubscription.{EditApiConfigurationFormData, EditApiConfigurationViewModel}
 @import domain.{Application, APISubscriptionStatusWithSubscriptionFields}
 @import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 @import views.html.include.fieldError
 @import views.helper.IdFormatter
 @(
   app: Application,
-  apiSubscription : APISubscriptionStatusWithSubscriptionFields,
-  form: Form[EditApiConfigurationFormData],
+  viewModel: EditApiConfigurationViewModel,
   formPostUrl: Call,
   skipLink : Option[Call] = None
 )(
@@ -33,38 +32,44 @@
   messages: Messages)
 
 @helper.form(
- action = formPostUrl,
- 'class -> "fields-subscription") {
+  action = formPostUrl,
+  'class -> "fields-subscription") {
 
- @helper.CSRF.formField
+  @helper.CSRF.formField
 
- @helper.repeatWithIndex(form("fields")) { (field, idx) =>
-  @defining(field("name").value.getOrElse("")) { formFieldId =>
-    @defining(apiSubscription.fields.fields.toList(idx)) { subscriptionField => 
-        <div class="form-group @if(form.errors(formFieldId).nonEmpty){form-group-error}">
+  @for((field, idx) <- viewModel.fields.zipWithIndex) {
+  @defining(viewModel.writableFieldValues.get(field.name)) { formFieldValue => 
+      <div class="form-group @if(viewModel.form.errors(field.name).nonEmpty){form-group-error}">
 
-          @fieldError(form.errors, formFieldId)
+        @fieldError(viewModel.form.errors, field.name)
+        
+        @if(field.canWrite){
+          <input type="hidden" name="@{formFieldValue.get.playFormFieldNamePrefix}.name" value="@{field.name}">
+        }
 
-          <input type="hidden" name="fields[@idx].name" value="@field("name").value.getOrElse("")">
+        <label class="form-label" for="@{field.name}">
+          @{field.description}
+        </label>
+        <span class="form-hint">@{field.hint}</span>
 
-          <label class="form-label" for="@formFieldId">
-            @{subscriptionField.definition.description}
-          </label>
-          <span class="form-hint">@{subscriptionField.definition.hint}</span>
-
+        @if(field.canWrite){
           <input type="text"
-            name="fields[@idx].value"
-            value="@{field("value").value.getOrElse("")}"
-            class="form-input input--medium @if(form.errors(formFieldId).nonEmpty){form-control-error}"
-            id="@formFieldId" />
-
-        </div>
-      }
+            name="@{formFieldValue.get.playFormFieldNamePrefix}.value"
+            value="@{formFieldValue.get.value}"
+            class="form-input input--medium @if(viewModel.form.errors(field.name).nonEmpty){form-control-error}"
+            id="@{field.name}" />
+        } else {
+          <input type="text"
+            value="@{field.originalValue}"
+            class="form-input input--medium"
+            id="@{field.name}" disabled/>
+        }
+      </div>
     } 
   }
 
  <div class="form-group">
-  <button id="@{IdFormatter.identifier(apiSubscription.fields.apiContext, apiSubscription.fields.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
+  <button id="@{IdFormatter.identifier(viewModel.apiContext, viewModel.apiVersion)}-submit" class="button submit-button" type="submit">Save changes</button>
 
   @if(skipLink.isDefined){
    <a href="@{skipLink.get}" class="secondary-button">I'll do this later</a>

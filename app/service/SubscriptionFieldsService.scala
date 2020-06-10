@@ -30,6 +30,8 @@ import domain.DevhubAccessLevel
 import domain.Role.ADMINISTRATOR
 import domain.Role.DEVELOPER
 import service.SubscriptionFieldsService._
+import domain.APIDefinition
+import cats.implicits._
 
 @Singleton
 class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
@@ -45,35 +47,67 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     }
   }
 
-  def saveFieldValues(accessValidation : AccessValidation, application: Application, apiContext: String, apiVersion: String, newValues : Seq[SubscriptionFieldValue])
-                        (implicit hc: HeaderCarrier): Future[ServiceSaveSubscriptionFieldsResponse] = {
+  def saveFieldValues( role : Role,
+                        application : Application,
+                        apiContext: String,
+                        apiVersion : String,
+                        oldValues: Seq[SubscriptionFieldValue],
+                        newValues: Map[String, String])
+                        (implicit hc: HeaderCarrier) : Future[ServiceSaveSubscriptionFieldsResponse] = {
+    case class AccessDenied()
+    if (newValues.isEmpty) {
+        Future.successful(SaveSubscriptionFieldsSuccessResponse)
+    } else {
 
-    def allowedToWriteToAllValues(values: Seq[SubscriptionFieldValue], devhubAccessLevel: DevhubAccessLevel) : Boolean = {
-      values.forall(_.definition.access.devhub.satisfiesWrite(devhubAccessLevel))
-    }
-
-    def isRoleAllowed : Boolean = {
-      accessValidation match {
-        case ValidateAgainstRole(role) =>
-          val devhubAccessLevel = DevhubAccessLevel.fromRole(role)
-           allowedToWriteToAllValues(newValues,devhubAccessLevel)
-        case SkipRoleValidation => true
+      def toNewValue(oldValue: SubscriptionFieldValue)(newFormValue: String) = {
+        if (oldValue.definition.access.devhub.satisfiesWrite(DevhubAccessLevel.fromRole(role))){
+          Right(oldValue.copy(value = newFormValue))
+        } else {
+          Left(AccessDenied())
+        }
       }
+
+      val eitherValuesToSave = oldValues.map(oldValue => 
+        newValues.get(oldValue.definition.name) match {
+          case Some(newFormValue) => toNewValue(oldValue)(newFormValue)
+          case None => Right(oldValue)
+        }
+      )
+
+      def doConnectorSave(valuesToSave: Seq[SubscriptionFieldValue]) = { 
+        val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+        val fieldsToSave = valuesToSave.map(v => (v.definition.name -> v.value)).toMap
+
+        connector.saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
+      }
+
+      eitherValuesToSave.toList.sequence.fold(
+        accessDenied => Future.successful(SaveSubscriptionFieldsAccessDeniedResponse),
+        values => doConnectorSave(values)
+      )
+    }
+  }
+  
+  def saveBlankFieldValues( application: Application,
+                            apiContext: String,
+                            apiVersion: String,
+                            values : Seq[SubscriptionFieldValue])
+                            (implicit hc: HeaderCarrier) : Future[ServiceSaveSubscriptionFieldsResponse] = {
+
+    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionFieldDefinition]) = {
+      fieldDefinitions
+        .map(d => d.name -> "")
+        .toMap
     }
 
-    if (isRoleAllowed) {
+    if(values.forall(value => value.value == "")){
       val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
 
-      val fieldsToSave = newValues.map(v => (v.definition.name -> v.value)).toMap
+      val emptyFieldValues = createEmptyFieldValues(values.map(_.definition))
 
-      connector
-        .saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
-        // .map(r => r match {
-        //   case x: SaveSubscriptionFieldsFailureResponse2 => x
-        //   // case y: SaveSubscriptionFieldsSuccessResponse2 => y
-        // })
-    } else { 
-      Future.successful(SaveSubscriptionFieldsAccessDeniedResponse)
+      connector.saveFieldValues(application.clientId, apiContext, apiVersion, emptyFieldValues)
+    } else {
+      Future.successful(SaveSubscriptionFieldsSuccessResponse)
     }
   }
 
