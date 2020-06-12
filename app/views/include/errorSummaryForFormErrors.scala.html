@@ -17,19 +17,23 @@
 @import views.helper.GlobalSection._
 @import controllers.ErrorFormBuilder._
 
-@(form: Form[_])(implicit messages: Messages)
+@(errors: Seq[FormError])(implicit messages: Messages)
 
-@if(form.hasGlobalErrors) {
-<div class="error-summary" id="error-summary-display" role="alert" aria-labelledby="error-summary-heading" tabindex="-1">
+@if(errors.nonEmpty) {
+  <div class="error-summary"
+    id="error-summary-display"
+    role="alert"
+    aria-labelledby="error-summary-heading"
+    tabindex="-1">
+    
     <h2 id="error-summary-heading" class="heading-medium error-summary-heading">There is a problem</h2>
+    
     <ul class="error-summary-list">
-    @for(error <- form.globalErrors) {
+        @for(error <- errors) {
         <li>
-            <a @dataAttribute(error.message) href="@anchor(error.message)" data-focuses="@errorField(error.message)" data-global-error>@Messages(error.message)</a>
+            <a href="#@error.key">@Messages(s"${error.messages.head}")</a>
         </li>
-    }
+        }
     </ul>
-</div>
-} else {
-    @errorSummaryForFormErrors(form.errors)
+  </div>
 }

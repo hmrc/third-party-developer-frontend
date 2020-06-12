@@ -22,6 +22,8 @@ import domain.APISubscriptionStatusWithSubscriptionFields
 import domain.Role
 import domain.DevhubAccessLevel
 import domain.ApiSubscriptionFields.SubscriptionFieldValue
+import play.api.data.FormError
+import scala.annotation.meta.field
 
 object EditManageSubscription {
 
@@ -31,37 +33,43 @@ object EditManageSubscription {
       apiContext: String,
       displayedStatus: String,
       fields: Seq[SubscriptionFieldViewModel],
-      form: Form[EditApiConfigurationFormData],
-      writableFieldValues : Map[String, FormValue])
-
-  case class FormValue(playFormFieldNamePrefix: String, value: String)
-
-  case class SubscriptionFieldViewModel(name: String, description: String, hint: String, canWrite: Boolean, originalValue: String)
-
-  case class EditApiConfigurationFormData(fields: List[EditSubscriptionValueFormData])
-  case class EditSubscriptionValueFormData(name: String, value: String)
+      errors: Seq[FormError])
+  
+  case class SubscriptionFieldViewModel(
+    name: String,
+    description: String,
+    hint: String,
+    canWrite: Boolean,
+    value: String,
+    errors: Seq[FormError])
 
   object EditApiConfigurationViewModel {
     def toViewModel(
         apiSubscription : APISubscriptionStatusWithSubscriptionFields,
-        form : Form[EditApiConfigurationFormData],
-        role: Role): EditApiConfigurationViewModel = {
+        role: Role,
+        formErrors: Seq[FormError],
+        postedFormValues: Map[String, String]): EditApiConfigurationViewModel = {
           
     val fieldsViewModel = apiSubscription.fields.fields
         .map(field => {
           val accessLevel = DevhubAccessLevel.fromRole(role)
           val canWrite = field.definition.access.devhub.satisfiesWrite(accessLevel)
-        
-          SubscriptionFieldViewModel(field.definition.name, field.definition.description, field.definition.hint, canWrite, field.value)
-        })
-    
-      val writableFormFields = fieldsViewModel.filter(_.canWrite)
-        .zipWithIndex.map { case(field, index) => {
-            val playFormNamePrefix = s"fields[$index]"
-            val formValue = form(s"$playFormNamePrefix.value").value.getOrElse(throw new RuntimeException("Cannot find field in form values"))
-            (field.name -> FormValue(playFormNamePrefix, formValue))
+          val fieldErrors = formErrors.filter(e => e.key == field.definition.name)
+
+          val newValue = if (canWrite){
+            postedFormValues.get(field.definition.name).getOrElse(field.value)
+          } else { 
+            field.value
           }
-        }.toMap
+          
+          SubscriptionFieldViewModel(
+            field.definition.name,
+            field.definition.description,
+            field.definition.hint,
+            canWrite,
+            newValue,
+            fieldErrors)
+        })
 
       EditApiConfigurationViewModel(
         apiSubscription.name,
@@ -69,39 +77,8 @@ object EditManageSubscription {
         apiSubscription.context,
         apiSubscription.apiVersion.displayedStatus,
         fieldsViewModel,
-        form,
-        writableFormFields)
-    }
-  }
-
-  object EditApiConfigurationFormData {
-    val form: Form[EditApiConfigurationFormData] = Form(
-      mapping(
-        "fields" -> list(
-          mapping(
-            "name" -> text,
-            "value" -> text
-          )(fromFormValues)(toFormValues)
-        )
-      )(EditApiConfigurationFormData.apply)(EditApiConfigurationFormData.unapply)
-    )
-
-    private def fromFormValues(name: String, value: String) = EditSubscriptionValueFormData(name, value)
-
-    private def toFormValues(editSubscriptionValueFormData: EditSubscriptionValueFormData): Option[(String, String)] = {
-      Some((editSubscriptionValueFormData.name, editSubscriptionValueFormData.value))
-    }
-
-    def toFormData(in: APISubscriptionStatusWithSubscriptionFields, role: Role): Form[EditApiConfigurationFormData] = {
-      def toEditSubscriptionValueFormData(fieldValue: SubscriptionFieldValue) : EditSubscriptionValueFormData = {
-        EditSubscriptionValueFormData(fieldValue.definition.name, fieldValue.value)
-      }
-
-      val writableFormFields = in.fields.fields.toList
-        .filter(_.definition.access.devhub.satisfiesWrite(DevhubAccessLevel.fromRole(role)))
-        .map(toEditSubscriptionValueFormData(_))
-      
-      EditApiConfigurationFormData.form.fill(EditApiConfigurationFormData(writableFormFields))
+        formErrors
+      )
     }
   }
 }

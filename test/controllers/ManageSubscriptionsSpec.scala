@@ -125,8 +125,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
     def editFormPostRequest(fieldName: String, fieldValue: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       loggedInRequest
         .withFormUrlEncodedBody(
-          "fields[0].name" -> fieldName,
-          "fields[0].value" -> fieldValue)
+          fieldName -> fieldValue)
     }
 
     def assertCommonEditFormFields(result: Result, apiSubscriptionStatus: APISubscriptionStatus): Unit = {
@@ -329,8 +328,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             val newSubscriptionValue = "new value"
 
             private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
-              "fields[1].name" -> writableSubSubscriptionValue.definition.name,
-              "fields[1].value" -> newSubscriptionValue
+              writableSubSubscriptionValue.definition.name -> newSubscriptionValue
             )
 
             private val result: Result =
@@ -373,8 +371,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             val newSubscriptionValue = "illegal new value"
 
             private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
-              "fields[0].name" -> readonlySubSubscriptionValue.definition.name,
-              "fields[0].value" -> newSubscriptionValue
+              readonlySubSubscriptionValue.definition.name -> newSubscriptionValue
             )
 
             private val result: Result =

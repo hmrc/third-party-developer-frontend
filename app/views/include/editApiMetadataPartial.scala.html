@@ -17,7 +17,7 @@
 @import views.helper.GlobalSection._
 @import controllers.ErrorFormBuilder._
 
-@import model.EditManageSubscription.{EditApiConfigurationFormData, EditApiConfigurationViewModel}
+@import model.EditManageSubscription.EditApiConfigurationViewModel
 @import domain.{Application, APISubscriptionStatusWithSubscriptionFields}
 @import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 @import views.html.include.fieldError
@@ -38,34 +38,28 @@
   @helper.CSRF.formField
 
   @for((field, idx) <- viewModel.fields.zipWithIndex) {
-  @defining(viewModel.writableFieldValues.get(field.name)) { formFieldValue => 
-      <div class="form-group @if(viewModel.form.errors(field.name).nonEmpty){form-group-error}">
+    <div class="form-group @if(field.errors.nonEmpty){form-group-error}">
 
-        @fieldError(viewModel.form.errors, field.name)
-        
-        @if(field.canWrite){
-          <input type="hidden" name="@{formFieldValue.get.playFormFieldNamePrefix}.name" value="@{field.name}">
-        }
+      @fieldError(field.errors, field.name)
+      
+      <label class="form-label" for="@{field.name}">
+        @{field.description}
+      </label>
+      <span class="form-hint">@{field.hint}</span>
 
-        <label class="form-label" for="@{field.name}">
-          @{field.description}
-        </label>
-        <span class="form-hint">@{field.hint}</span>
-
-        @if(field.canWrite){
-          <input type="text"
-            name="@{formFieldValue.get.playFormFieldNamePrefix}.value"
-            value="@{formFieldValue.get.value}"
-            class="form-input input--medium @if(viewModel.form.errors(field.name).nonEmpty){form-control-error}"
-            id="@{field.name}" />
-        } else {
-          <input type="text"
-            value="@{field.originalValue}"
-            class="form-input input--medium"
-            id="@{field.name}" disabled/>
-        }
-      </div>
-    } 
+      @if(field.canWrite){
+        <input type="text"
+          name="@{field.name}"
+          value="@{field.value}"
+          class="form-input input--medium @if(field.errors.nonEmpty){form-control-error}"
+          id="@{field.name}" />
+      } else {
+        <input type="text"
+          value="@{field.value}"
+          class="form-input input--medium"
+          id="@{field.name}" disabled/>
+      }
+    </div>
   }
 
  <div class="form-group">

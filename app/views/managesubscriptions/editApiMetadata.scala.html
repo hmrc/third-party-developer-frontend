@@ -45,8 +45,8 @@
         Crumb.application(app)
     )
 ) {
-    @errorSummary(viewModel.form)
 
+  @errorSummaryForFormErrors(viewModel.errors)
     <header>
       <h1 class="heading-large">@{pageHeading}</h1>
     </header>

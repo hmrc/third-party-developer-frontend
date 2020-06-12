@@ -18,7 +18,7 @@
 @import domain._
 
 @import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
-@import model.EditManageSubscription.{EditApiConfigurationFormData, EditApiConfigurationViewModel}
+@import model.EditManageSubscription.EditApiConfigurationViewModel
 
 @(
   app: Application,
@@ -38,7 +38,9 @@
   developerSession = Some(loggedIn),
   back = BackButtonWithJavaScript
 ) {
-  @errorSummary(viewModel.form)
+
+  @errorSummaryForFormErrors(viewModel.errors)
+
 
   <header>
     <h2 class="heading-large">@pageHeading</h2>
