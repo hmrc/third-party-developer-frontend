@@ -26,13 +26,13 @@ lazy val enumeratumVersion = "1.5.11"
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "5.1.0",
-  "uk.gov.hmrc" %% "govuk-template" % "5.52.0-play-25",
-  "uk.gov.hmrc" %% "play-ui" % "8.8.0-play-25",
-  "uk.gov.hmrc" %% "url-builder" % "3.3.0-play-25",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "5.3.0",
+  "uk.gov.hmrc" %% "govuk-template" % "5.55.0-play-25",
+  "uk.gov.hmrc" %% "play-ui" % "8.11.0-play-25",
+  "uk.gov.hmrc" %% "url-builder" % "3.4.0-play-25",
   "uk.gov.hmrc" %% "play-json-union-formatter" % "1.7.0",
   "uk.gov.hmrc" %% "http-metrics" % "1.4.0",
-  "uk.gov.hmrc" %% "json-encryption" % "4.5.0-play-25",
+  "uk.gov.hmrc" %% "json-encryption" % "4.8.0-play-25",
   "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
   "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.2.0-play-25",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
