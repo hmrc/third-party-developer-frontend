@@ -53,7 +53,6 @@ import domain.DeveloperSession
 import security.DevHubAuthorization
 import helpers.LoggedInRequestTestHelper
 
-//TODO move to its own file
 class TestController( val cookieSigner: CookieSigner,
                       val messagesApi: MessagesApi,
                       val sessionService: SessionService,
