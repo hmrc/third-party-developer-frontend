@@ -22,7 +22,7 @@ import config.ApplicationConfig
 import connectors._
 import domain._
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import domain.ApiSubscriptionFields._
 import domain.Environment.{PRODUCTION, SANDBOX}
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
@@ -33,8 +33,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.NonEmptyList
-import domain.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
-import domain.ApiSubscriptionFields.SaveSubscriptionFieldsFailureResponse
+import service.SubscriptionFieldsService.SkipRoleValidation
 
 @Singleton
 class ApplicationService @Inject() (
@@ -76,9 +75,7 @@ class ApplicationService @Inject() (
 
       subscriptionFieldsWithValues.map { fields: Seq[SubscriptionFieldValue] =>
         {
-          val wrapper =
-            NonEmptyList.fromList(fields.toList)
-                .map { nel => SubscriptionFieldsWrapper(application.id, application.clientId, api.context, version.version.version, nel) }
+          val wrapper = SubscriptionFieldsWrapper(application.id, application.clientId, api.context, version.version.version, fields) 
           APISubscriptionStatus(api.name, api.serviceName, api.context, version.version, version.subscribed, api.requiresTrust.getOrElse(false), wrapper, api.isTestSupport)
         }
       }
@@ -107,34 +104,21 @@ class ApplicationService @Inject() (
 
     val apiIdentifier = APIIdentifier(context, version)
 
-    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionFieldDefinition]) = {
-      fieldDefinitions
-        .map(d => (d.name, ""))
-        .toMap
-    }
-
     trait HasSucceeded
     object HasSucceeded extends HasSucceeded
 
     def ensureEmptyValuesWhenNoneExists(fieldDefinitions: Seq[SubscriptionFieldDefinition]): Future[HasSucceeded] = {
-      subscriptionFieldsService
-        .fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
-        .flatMap(values => {
-          if (!values.exists(field => field.value != "")) {
-            subscriptionFieldsService
-              .saveFieldValues(application, context, version, createEmptyFieldValues(fieldDefinitions))
-              .map({
-                case SaveSubscriptionFieldsSuccessResponse => HasSucceeded
-                case error => {
-                  val errorMessage = s"Failed to save blank subscription field values: $error"  
-                  throw new RuntimeException(errorMessage)
-                }
-              })
-          } else {
-            Future.successful(HasSucceeded)
-          }
-        })
-    }
+      
+      for {
+        oldValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
+        saveResponse <- subscriptionFieldsService.saveBlankFieldValues(application, context, version, oldValues)
+      } yield(saveResponse match { 
+          case SaveSubscriptionFieldsSuccessResponse => HasSucceeded
+          case error => {
+            val errorMessage = s"Failed to save blank subscription field values: $error"  
+            throw new RuntimeException(errorMessage)
+        }})
+      }
 
     def ensureSavedValuesForAnyDefinitions(defns: Seq[SubscriptionFieldDefinition]): Future[HasSucceeded] = {
       if (defns.nonEmpty) {

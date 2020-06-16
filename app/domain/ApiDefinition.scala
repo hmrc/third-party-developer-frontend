@@ -69,7 +69,7 @@ case class APISubscriptionStatus(
     apiVersion: APIVersion,
     subscribed: Boolean,
     requiresTrust: Boolean,
-    fields: Option[SubscriptionFieldsWrapper] = None,
+    fields: SubscriptionFieldsWrapper,
     isTestSupport: Boolean = false) {
   def canUnsubscribe: Boolean = {
     apiVersion.status != APIStatus.DEPRECATED
@@ -85,15 +85,17 @@ case class APISubscriptionStatusWithSubscriptionFields(
 object APISubscriptionStatusWithSubscriptionFields {
   def apply(fields : Seq[APISubscriptionStatus]) : Seq[APISubscriptionStatusWithSubscriptionFields] = {
 
-    def toAPISubscriptionStatusWithSubscriptionFields(field : APISubscriptionStatus)
+    def toAPISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatus : APISubscriptionStatus)
     : Option[APISubscriptionStatusWithSubscriptionFields] = {
-      for {
-        subscriptionStatus <- field.fields
-      } yield APISubscriptionStatusWithSubscriptionFields(
-        field.name,
-        field.context,
-        field.apiVersion,
-        subscriptionStatus)
+      if (apiSubscriptionStatus.fields.fields.isEmpty){
+        None
+      } else {
+        Some(APISubscriptionStatusWithSubscriptionFields(
+          apiSubscriptionStatus.name,
+          apiSubscriptionStatus.context,
+          apiSubscriptionStatus.apiVersion,
+          apiSubscriptionStatus.fields))
+      }
     }
 
     fields.flatMap(toAPISubscriptionStatusWithSubscriptionFields)

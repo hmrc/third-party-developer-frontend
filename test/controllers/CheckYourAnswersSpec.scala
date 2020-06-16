@@ -37,11 +37,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-
+import builder._
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder{
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
@@ -68,14 +68,23 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
+  val emptyFields = emptySubscriptionFieldsWrapper("myAppId","myClientId", "context", "version")
+
   val exampleApiSubscription = Some(APISubscriptions("Example API", "api-example-microservice", "exampleContext",
     Seq(APISubscriptionStatus("API1", "api-example-microservice", "exampleContext",
-      APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false))))
+      APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false,
+      fields = emptyFields))))
 
   val groupedSubs = GroupedSubscriptions(Seq.empty,
     Seq(APISubscriptions("API1", "ServiceName", "apiContent",
       Seq(APISubscriptionStatus(
-        "API1", "subscriptionServiceName", "context", APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false)))))
+        "API1",
+        "subscriptionServiceName",
+        "context",
+        APIVersion("version", APIStatus.STABLE),
+        subscribed = true,
+        requiresTrust = false,
+        fields = emptyFields)))))
 
   val groupedSubsSubscribedToExampleOnly = GroupedSubscriptions(
     testApis = Seq.empty,
@@ -109,10 +118,23 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     givenUpdateCheckInformationSucceeds(application)
 
+    val context = "apiContent"
+    val version = "version"
+    val emptyFields = emptySubscriptionFieldsWrapper("myAppId","myClientId",context, version)
+
     val subscriptions = Seq(
-      APISubscriptions("API1", "ServiceName", "apiContent",
-        Seq(APISubscriptionStatus(
-          "API1", "subscriptionServiceName", "context", APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false))))
+      APISubscriptions("API1", "ServiceName", context,
+        Seq(
+          APISubscriptionStatus(
+            "API1",
+            "subscriptionServiceName",
+            context,
+            APIVersion(version, APIStatus.STABLE),
+            subscribed = true,
+            requiresTrust = false,
+            fields = emptyFields
+          ))))
+
     val groupedSubs = GroupedSubscriptions(Seq.empty,subscriptions)
 
     fetchAllSubscriptionsReturns(Seq(mock[APISubscription]))

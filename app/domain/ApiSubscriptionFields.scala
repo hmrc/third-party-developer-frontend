@@ -26,41 +26,11 @@ object ApiSubscriptionFields {
       description: String,
       shortDescription: String,
       hint: String,
-      `type`: String
+      `type`: String,
+      access: AccessRequirements
   )
 
   case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: String)
-
-  object SubscriptionFieldValue {
-    def fromFormValues(
-        name: String,
-        description: String,
-        shortDescription: String,
-        hint: String,
-        `type`: String,
-        value: String
-    ) = {
-      SubscriptionFieldValue(
-        SubscriptionFieldDefinition(name, description, shortDescription, hint, `type`),
-        value
-      )
-    }
-
-    def toFormValues(
-        subscriptionFieldValue: SubscriptionFieldValue
-    ): Option[(String, String, String, String, String, String)] = {
-      Some(
-        (
-          subscriptionFieldValue.definition.name,
-          subscriptionFieldValue.definition.description,
-          subscriptionFieldValue.definition.shortDescription,
-          subscriptionFieldValue.definition.hint,
-          subscriptionFieldValue.definition.`type`,
-          subscriptionFieldValue.value
-        )
-      )
-    }
-  }
 
   sealed trait FieldsDeleteResult
   case object FieldsDeleteSuccessResult extends FieldsDeleteResult
@@ -71,7 +41,7 @@ object ApiSubscriptionFields {
       clientId: String,
       apiContext: String,
       apiVersion: String,
-      fields: NonEmptyList[SubscriptionFieldValue]
+      fields: Seq[SubscriptionFieldValue]
   )
 
   type Fields = Map[String, String]
@@ -92,7 +62,11 @@ object ApiSubscriptionFields {
       Json.format[SubscriptionFieldsPutRequest]
   }
 
-  sealed trait SaveSubscriptionFieldsResponse
-  case object SaveSubscriptionFieldsSuccessResponse extends SaveSubscriptionFieldsResponse
-  case class SaveSubscriptionFieldsFailureResponse(fieldErrors : Map[String, String]) extends SaveSubscriptionFieldsResponse
+  sealed trait ServiceSaveSubscriptionFieldsResponse
+  sealed trait ConnectorSaveSubscriptionFieldsResponse extends ServiceSaveSubscriptionFieldsResponse
+  
+  case object SaveSubscriptionFieldsSuccessResponse extends ConnectorSaveSubscriptionFieldsResponse
+  case class SaveSubscriptionFieldsFailureResponse(fieldErrors : Map[String, String]) extends ConnectorSaveSubscriptionFieldsResponse
+  
+  case object SaveSubscriptionFieldsAccessDeniedResponse extends ServiceSaveSubscriptionFieldsResponse
 }

@@ -121,10 +121,10 @@ developerSession = Some(loggedIn)
                 </br>
                 </br>
 
-                @if(data.subscriptions.exists(_.fields.isDefined)) {
+                @if(data.subscriptions.exists(_.fields.nonEmpty)) {
                     <h2 id="configurations" class="step-heading-1">Your API subscription configuration</h2>
 
-                    @data.subscriptions.filter(_.fields.isDefined).map { sub =>
+                    @data.subscriptions.filter(_.fields.nonEmpty).map { sub =>
                       <table class="task-list">
                           <thead>
                           <tr id="">
@@ -137,7 +137,7 @@ developerSession = Some(loggedIn)
                           </tr>
                           </thead>
                           <tbody>
-                            @sub.fields.get.toList.map{ field =>
+                            @sub.fields.map{ field =>
                               <tr>
                                 <th class="col-40"><span strong class="bold-small">@field.name</span></th>
                                 <td colspan="2">@field.value</td>

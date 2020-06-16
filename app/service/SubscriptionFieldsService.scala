@@ -23,6 +23,15 @@ import service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.Role
+import domain.DevhubAccessRequirement
+import domain.DevhubAccessLevel.Developer
+import domain.DevhubAccessLevel
+import domain.Role.ADMINISTRATOR
+import domain.Role.DEVELOPER
+import service.SubscriptionFieldsService._
+import domain.APIDefinition
+import cats.implicits._
 
 @Singleton
 class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
@@ -38,12 +47,68 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     }
   }
 
-  def saveFieldValues(application: Application, apiContext: String, apiVersion: String, fields: Fields)
-                     (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
+  def saveFieldValues(  role : Role,
+                        application : Application,
+                        apiContext: String,
+                        apiVersion : String,
+                        oldValues: Seq[SubscriptionFieldValue],
+                        newValues: Map[String, String])
+                        (implicit hc: HeaderCarrier) : Future[ServiceSaveSubscriptionFieldsResponse] = {
+    case object AccessDenied
 
-    val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+    def isAllowedToAndCreateNewValue(oldValue: SubscriptionFieldValue, newValue: String) = {
+      if (oldValue.definition.access.devhub.satisfiesWrite(DevhubAccessLevel.fromRole(role))) {
+        Right(oldValue.copy(value = newValue))
+      } else {
+        Left(AccessDenied)
+      }
+    }
 
-    connector.saveFieldValues(application.clientId, apiContext, apiVersion, fields)
+    def doConnectorSave(valuesToSave: Seq[SubscriptionFieldValue]) = { 
+      val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+      val fieldsToSave = valuesToSave.map(v => (v.definition.name -> v.value)).toMap
+
+      connector.saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
+    }
+    
+    if (newValues.isEmpty) {
+        Future.successful(SaveSubscriptionFieldsSuccessResponse)
+    } else {
+      val eitherValuesToSave = oldValues.map(oldValue => 
+        newValues.get(oldValue.definition.name) match {
+          case Some(newFormValue) => isAllowedToAndCreateNewValue(oldValue, newFormValue)
+          case None => Right(oldValue)
+        }
+      )
+
+      eitherValuesToSave.toList.sequence.fold(
+        accessDenied => Future.successful(SaveSubscriptionFieldsAccessDeniedResponse),
+        values => doConnectorSave(values)
+      )
+    }
+  }
+  
+  def saveBlankFieldValues( application: Application,
+                            apiContext: String,
+                            apiVersion: String,
+                            values : Seq[SubscriptionFieldValue])
+                            (implicit hc: HeaderCarrier) : Future[ServiceSaveSubscriptionFieldsResponse] = {
+
+    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionFieldDefinition]) = {
+      fieldDefinitions
+        .map(d => d.name -> "")
+        .toMap
+    }
+
+    if(values.forall(_.value.isEmpty)){
+      val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
+
+      val emptyFieldValues = createEmptyFieldValues(values.map(_.definition))
+
+      connector.saveFieldValues(application.clientId, apiContext, apiVersion, emptyFieldValues)
+    } else {
+      Future.successful(SaveSubscriptionFieldsSuccessResponse)
+    }
   }
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
@@ -73,7 +138,7 @@ object SubscriptionFieldsService {
                              (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
     def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
-                       (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse]
+                       (implicit hc: HeaderCarrier): Future[ConnectorSaveSubscriptionFieldsResponse]
 
     def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
   }
@@ -83,4 +148,8 @@ object SubscriptionFieldsService {
   object DefinitionsByApiVersion {
     val empty = Map.empty[APIIdentifier, Seq[SubscriptionFieldDefinition]]
   }
+
+  sealed trait AccessValidation 
+  case class ValidateAgainstRole(role: Role) extends AccessValidation
+  case object SkipRoleValidation extends AccessValidation
 }

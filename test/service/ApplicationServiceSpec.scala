@@ -18,7 +18,7 @@ package service
 
 import java.util.UUID
 import java.util.UUID.randomUUID
-
+import builder._
 import cats.data.NonEmptyList
 import config.ApplicationConfig
 import connectors._
@@ -45,8 +45,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
 import scala.util.Random
+import service.SubscriptionFieldsService.SkipRoleValidation
 
-class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
+class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures with SubscriptionsBuilder {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -143,7 +144,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       apiVersion = APIVersion(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
-      fields = None
+      fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
     )
 
   def subStatus(
@@ -157,7 +158,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       requiresTrust: Boolean = false,
       subscriptionFieldWithValues: Seq[SubscriptionFieldValue] = Seq.empty
   ): APISubscriptionStatus = {
-    val nelFields = NonEmptyList.fromList(subscriptionFieldWithValues.toList)
     APISubscriptionStatus(
       name = name,
       serviceName = name,
@@ -165,7 +165,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       apiVersion = APIVersion(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
-      fields = nelFields.map(fs => SubscriptionFieldsWrapper(appId, clientId, context, version, fs))
+      fields = SubscriptionFieldsWrapper(appId, clientId, context, version, subscriptionFieldWithValues)
     )
   }
 
@@ -235,15 +235,13 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         api("api-2", "api-2/ctx", None, version("1.0", BETA, subscribed = true), version("1.0-RC", STABLE, subscribed = false))
       )
 
-      private val subscriptionFieldDefinition1 = SubscriptionFieldDefinition("question1", "description1", "short-description-1", "hint1", "STRING")
-      private val subscriptionFieldDefinition2 = SubscriptionFieldDefinition("question2", "description2", "short-description-2", "hint2", "STRING")
+      val value1 = buildSubscriptionFieldValue("question1", Some("value1"))
+      val value2 = buildSubscriptionFieldValue("question2", Some(""))
+      
+      val subscriptionFieldDefinitions = Seq(value1.definition, value2.definition)
+      val subscriptionFieldsWithValue = Seq(value1, value2)
 
-      val subscriptionFieldDefinitions = Seq(subscriptionFieldDefinition1, subscriptionFieldDefinition2)
-      val subscriptionFieldsWithValue = Seq(
-        SubscriptionFieldValue(subscriptionFieldDefinition1, "value1"),
-        SubscriptionFieldValue(subscriptionFieldDefinition2, "")
-      )
-
+      
       private val fieldDefinitionsResponse = Seq(subscriptionFieldDefinitions)
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
@@ -381,22 +379,19 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
 
       verify(mockProductionApplicationConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier])
-      verify(mockSubscriptionFieldsService, never()).saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier])
+      verify(mockSubscriptionFieldsService, never()).saveBlankFieldValues(any(), any(), any(), any())(any[HeaderCarrier])
     }
 
     "with subscription fields definitions" should {
-      "but no values" in new Setup {
+      "save blank subscription values" in new Setup {
         private val context = "api1"
         private val version = "1.0"
 
         private val subscription = APIIdentifier(context, version)
 
-        private val fieldDefinitions =
-          Seq(SubscriptionFieldDefinition("name", "description", "short-description", "hint", "type"))
+        private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
         private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, ""))
-
-        private val fields: Fields = fieldDefinitions.map(definition => (definition.name, "")).toMap
 
         theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
 
@@ -407,7 +402,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
         given(mockProductionApplicationConnector.subscribeToApi(eqTo(productionApplicationId), any())(any[HeaderCarrier]))
           .willReturn(Future.successful(ApplicationUpdateSuccessful))
-        given(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]))
+        given(mockSubscriptionFieldsService.saveBlankFieldValues(any(), any(), any(), any())(any[HeaderCarrier]))
           .willReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
         await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
@@ -415,35 +410,8 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         verify(mockProductionApplicationConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(
           any[HeaderCarrier]
         )
-        verify(mockSubscriptionFieldsService).saveFieldValues(eqTo(productionApplication), eqTo(context), eqTo(version), eqTo(fields))(any[HeaderCarrier])
-      }
-
-      "with values" in new Setup {
-        private val context = "api1"
-        private val version = "1.0"
-
-        private val subscription = APIIdentifier(context, version)
-
-        private val fieldDefinitions =
-          Seq(SubscriptionFieldDefinition("name", "description", "short-description", "hint", "type"))
-
-        private val fieldDefinitionsWithValues =
-          fieldDefinitions.map(d => SubscriptionFieldValue(d, Random.nextString(10)))
-
-        theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-
-        given(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(any[HeaderCarrier]))
-          .willReturn(Future.successful(fieldDefinitions))
-        given(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(any[HeaderCarrier]))
-          .willReturn(Future.successful(fieldDefinitionsWithValues))
-
-        given(mockProductionApplicationConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier]))
-          .willReturn(Future.successful(ApplicationUpdateSuccessful))
-
-        await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
-
-        verify(mockProductionApplicationConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier])
-        verify(mockSubscriptionFieldsService, never()).saveFieldValues(any[Application], any[String], any[String], any[Fields])(any[HeaderCarrier])
+        verify(mockSubscriptionFieldsService)
+          .saveBlankFieldValues(eqTo(productionApplication), eqTo(context), eqTo(version), eqTo(fieldDefinitionsWithoutValues))(any[HeaderCarrier])
       }
     
       "but fails to save subscription fields" in new Setup {
@@ -452,8 +420,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
         private val subscription = APIIdentifier(context, version)
 
-        private val fieldDefinitions =
-          Seq(SubscriptionFieldDefinition("name", "description", "short-description", "hint", "type"))
+        private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
         private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, ""))
 
@@ -471,9 +438,8 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
         val errors = Map("fieldName" -> "failure reason")
 
-        given(mockSubscriptionFieldsService.saveFieldValues(any(), any(), any(), any())(any[HeaderCarrier]))
+        given(mockSubscriptionFieldsService.saveBlankFieldValues(any(), any(), any(), any())(any[HeaderCarrier]))
           .willReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(errors)))
-
 
         private val exception = intercept[RuntimeException](
           await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful

@@ -22,16 +22,18 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.{APIIdentifier, Environment}
+import domain.{APIIdentifier, AccessRequirements, Environment}
 import domain.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
-import play.api.libs.json.{Format, Json, JsSuccess}
+import play.api.libs.json.{Format, JsPath, JsSuccess, Json, Reads}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import cats.data.{NonEmptyList => NEL}
+import service.SubscriptionFieldsService._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -123,7 +125,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   }
 
   def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
-                     (implicit hc: HeaderCarrier): Future[SaveSubscriptionFieldsResponse] = {
+                     (implicit hc: HeaderCarrier): Future[ConnectorSaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
 
     import CustomResponseHandlers.permissiveBadRequestResponseHandler
@@ -185,7 +187,8 @@ object SubscriptionFieldsConnector {
       description = f.description,
       shortDescription = f.shortDescription,
       `type` = f.`type`,
-      hint = f.hint
+      hint = f.hint,
+      access = f.access
     )
   }
 
@@ -208,7 +211,8 @@ object SubscriptionFieldsConnector {
       description: String,
       shortDescription: String,
       hint: String,
-      `type`: String
+      `type`: String,
+      access : AccessRequirements
   )
 
   private[connectors] case class ApiFieldDefinitions(
@@ -219,13 +223,8 @@ object SubscriptionFieldsConnector {
 
   private[connectors] case class AllApiFieldDefinitions(apis: Seq[ApiFieldDefinitions])
 
-  object JsonFormatters {
+  object JsonFormatters extends FieldDefinitionFormatters {
     implicit val format: Format[ApplicationApiFieldValues] = Json.format[ApplicationApiFieldValues]
-    implicit val formatFieldDefinition: Format[FieldDefinition] = Json.format[FieldDefinition]
-    implicit val formatApiFieldDefinitionsResponse: Format[ApiFieldDefinitions] =
-      Json.format[ApiFieldDefinitions]
-    implicit val formatAllApiFieldDefinitionsResponse: Format[AllApiFieldDefinitions] =
-      Json.format[AllApiFieldDefinitions]
   }
 }
 
