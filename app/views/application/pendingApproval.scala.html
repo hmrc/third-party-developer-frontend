@@ -26,22 +26,23 @@
 
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
-@pageHeading = @{ "Credentials requested" }
 
 @devMain(
-    title = pageHeading,
+    title = data.softwareName + " Credentials requested",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-      Crumb(pageHeading),
+      Crumb(data.softwareName),
       Crumb.viewAllApplications,
       Crumb.home
     ),
     developerSession = Some(loggedIn)
 ) {
     @errorSummary(form)
+
     <heading>
-        <h1 class="heading-xlarge">
-            @pageHeading
+        <span class="govuk-caption-xl">@{data.softwareName}</span>
+        <h1 class="heading-xlarge compressed-header">
+            Credentials requested
         </h1>
     </heading>
 
