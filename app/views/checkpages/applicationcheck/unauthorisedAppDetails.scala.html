@@ -21,6 +21,8 @@
 @(appName: String, adminEmails: Set[String])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
+@* TODO: This view is for the bin *@
+
 @devMain(
     title = "Production application",
     userFullName = loggedIn.loggedInName,

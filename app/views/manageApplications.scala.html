@@ -83,6 +83,7 @@
             @for(app <- applications) {
                 <tr>
                     <td>
+                    @* TODO : Move this logic inside the appi{appid}/details action (with redirects?) *@
                     @if((app.environment == "Production") && app.state.isInTesting) {
                         @if(app.role.isAdministrator) {
                             <a href="@{

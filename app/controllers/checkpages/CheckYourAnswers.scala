@@ -60,38 +60,8 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     with TermsOfUsePartialController
     with CheckInformationFormHelper {
 
-  private def populateCheckYourAnswersData(application: Application, subs: Seq[APISubscriptionStatus]): CheckYourAnswersData = {
-    val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
-
-    def asCheckYourSubscriptionData(in: APISubscriptionStatus): CheckYourSubscriptionData = {
-      CheckYourSubscriptionData(
-        name = in.name,
-        apiContext = in.context,
-        apiVersion = in.apiVersion.version,
-        displayedStatus = in.apiVersion.displayedStatus,
-        fields = in.fields.fields.map(ManageSubscriptions.toFieldValue)
-      )
-    }
-
-    CheckYourAnswersData(
-      appId = application.id,
-      softwareName = application.name,
-
-      fullName = contactDetails.map(_.fullname),
-      email = contactDetails.map(_.email),
-      telephoneNumber = contactDetails.map(_.telephoneNumber),
-
-      teamMembers = application.collaborators.map(_.emailAddress),
-
-      privacyPolicyUrl = application.privacyPolicyUrl,
-      termsAndConditionsUrl = application.termsAndConditionsUrl,
-      acceptedTermsOfUse = application.checkInformation.fold(false)(_.termsOfUseAgreements.nonEmpty),
-      subscriptions = subs.filter(_.subscribed).map(asCheckYourSubscriptionData)
-    )
-  }
-
   def answersPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val checkYourAnswersData = populateCheckYourAnswersData(request.application, request.subscriptions)
+    val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
     Future.successful(
       Ok(
         checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))
@@ -107,7 +77,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId)))
       .recover {
         case e: DeskproTicketCreationFailed =>
-          val checkYourAnswersData = populateCheckYourAnswersData(request.application, request.subscriptions)
+          val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
           val requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
           InternalServerError(checkyouranswers.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
       }
@@ -197,6 +167,38 @@ case class CheckYourAnswersData(
                                  acceptedTermsOfUse: Boolean,
                                  subscriptions: Seq[CheckYourSubscriptionData]
                                )
+
+object CheckYourAnswersData {
+  def apply(application: Application, subs: Seq[APISubscriptionStatus]): CheckYourAnswersData = {
+    val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
+
+    def asCheckYourSubscriptionData(in: APISubscriptionStatus): CheckYourSubscriptionData = {
+      CheckYourSubscriptionData(
+        name = in.name,
+        apiContext = in.context,
+        apiVersion = in.apiVersion.version,
+        displayedStatus = in.apiVersion.displayedStatus,
+        fields = in.fields.fields.map(ManageSubscriptions.toFieldValue)
+      )
+    }
+
+    CheckYourAnswersData(
+      appId = application.id,
+      softwareName = application.name,
+
+      fullName = contactDetails.map(_.fullname),
+      email = contactDetails.map(_.email),
+      telephoneNumber = contactDetails.map(_.telephoneNumber),
+
+      teamMembers = application.collaborators.map(_.emailAddress),
+
+      privacyPolicyUrl = application.privacyPolicyUrl,
+      termsAndConditionsUrl = application.termsAndConditionsUrl,
+      acceptedTermsOfUse = application.checkInformation.fold(false)(_.termsOfUseAgreements.nonEmpty),
+      subscriptions = subs.filter(_.subscribed).map(asCheckYourSubscriptionData)
+    )
+  }
+}
 
 case class DummyCheckYourAnswersForm(dummy: String = "dummy")
 
