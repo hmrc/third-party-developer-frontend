@@ -57,7 +57,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
     request.application.state.name match {
       case State.TESTING => ???
       case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => 
-        Future.successful(Ok(views.html.checkpages.checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))))
+        Future.successful(Ok(views.html.application.pendingApproval(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))))
       case State.PRODUCTION => Future.successful(Ok(views.html.details(applicationViewModelFromApplicationRequest)))
     }
 

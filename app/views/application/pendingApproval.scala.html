@@ -24,21 +24,20 @@
 @import controllers.checkpages.CheckYourAnswersData
 @import controllers.checkpages.DummyCheckYourAnswersForm
 
-@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
-@pageHeading = @{ s"Check your answers before requesting credentials" }
+@pageHeading = @{ "Credentials requested" }
 
 @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-    Crumb(pageHeading),
-    Crumb.viewAllApplications,
-    Crumb.home
-),
-developerSession = Some(loggedIn)
+      Crumb(pageHeading),
+      Crumb.viewAllApplications,
+      Crumb.home
+    ),
+    developerSession = Some(loggedIn)
 ) {
-
     @errorSummary(form)
     <heading>
         <h1 class="heading-xlarge">
