@@ -53,18 +53,19 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
   def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
       val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
 
-    (request.application.state.name) match {
-      case State.TESTING => {
-        if (request.role.isAdministrator){
-          Future.successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id)))
-        } else {
-          Future.successful(Ok(views.html.checkpages.applicationcheck.unauthorisedAppDetails(request.application.name, request.application.adminEmails)))
-        }
-      }
+    Future.successful(request.application.state.name match {
+      case State.TESTING if request.role.isAdministrator =>
+        Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id))
+
+      case State.TESTING if request.role.isDeveloper =>
+        Ok(views.html.checkpages.applicationcheck.unauthorisedAppDetails(request.application.name, request.application.adminEmails))
+
       case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => 
-        Future.successful(Ok(views.html.application.pendingApproval(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))))
-      case State.PRODUCTION => Future.successful(Ok(views.html.details(applicationViewModelFromApplicationRequest)))
-    }
+        Ok(views.html.application.pendingApproval(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
+
+      case State.PRODUCTION => 
+        Ok(views.html.details(applicationViewModelFromApplicationRequest))
+    })
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
