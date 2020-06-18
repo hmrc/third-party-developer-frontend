@@ -35,19 +35,28 @@
     fullWidthContent = true
 ) {
     <br>
-    <div class="notice">
-        <i class="icon icon-important">
-            <span class="visually-hidden">Alert</span>
-        </i>
-        <strong class="bold-small">
-            Server token retires on 1 October 2020.
-        </strong>
+
+    <div class="column-three-quarters">
+        <br>
+        <div class="notice">
+            <i class="icon icon-important">
+                <span class="visually-hidden">Alert</span>
+            </i>
+            <strong class="bold-small">
+                @if(app.deployedTo.toString.toLowerCase() == "production") {
+                    Server token retires in production on 1 October 2020.
+                } else {
+                    Server token retires on 1 September 2020 in sandbox and 1 October 2020 in production.
+                }
+            </strong>
+        </div>
     </div>
 
-    <h1 class="heading-xlarge">Server token</h1>
+
 
     <div class="grid-row">
         <div class="js-mask-container column-one-half" data-mask-timer="20">
+            <h1 class="heading-xlarge">Server token</h1>
             <div class="float--right">
                 <span><a href="#" role="button" class="js-visible js-mask-control action-name" data-text-show="Show" data-text-hide="Hide" data-accessible-text="server token"><span data-toggle-text="">Show</span> <span class="visuallyhidden">server token</span></a>
                 </span>
