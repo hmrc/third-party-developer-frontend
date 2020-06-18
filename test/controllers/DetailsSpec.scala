@@ -45,11 +45,13 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "details" should {
       "return the view for a developer on a standard production app with no change link" in new Setup {
-        detailsShouldRenderThePage(anApplication(developerEmail = loggedInUser.email), hasChangeButton = false)
+        val approvedApplication = anApplication(developerEmail = loggedInUser.email, state = ApplicationState.production("dont-care", "dont-care"))
+        detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
       }
 
       "return the view for an admin on a standard production app" in new Setup {
-        detailsShouldRenderThePage(anApplication(adminEmail = loggedInUser.email))
+        val approvedApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.production("dont-care", "dont-care"))
+        detailsShouldRenderThePage(approvedApplication)
       }
 
       "return the view for a developer on a sandbox app" in new Setup {
