@@ -53,24 +53,18 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
   def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
       val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
 
-    // Is admin in the match as well?
-    request.application.state.name match {
-      case State.TESTING => ???
+    (request.application.state.name) match {
+      case State.TESTING => {
+        if (request.role.isAdministrator){
+          Future.successful(Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id)))
+        } else {
+          Future.successful(Ok(views.html.checkpages.applicationcheck.unauthorisedAppDetails(request.application.name, request.application.adminEmails)))
+        }
+      }
       case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => 
         Future.successful(Ok(views.html.application.pendingApproval(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))))
       case State.PRODUCTION => Future.successful(Ok(views.html.details(applicationViewModelFromApplicationRequest)))
     }
-
-    // TODO: Add logic here:
-    // 1) If PRODUCTION status -> render this view 
-    // Future.successful(Ok(views.html.details(applicationViewModelFromApplicationRequest)))
-    // 2) If pre-submission (TESTING)
-    //    - isAdmin -> redirect to request check page => controllers.checkpages.routes.ApplicationCheck.requestCheckPage(app.id)
-    //    - isDev -> redirect / renddr applicationcheck.unauthorisedAppDetails
-    // 3) If post-submission (PENDING_GATEKEEPER_APPROVAL, OR PENDING_REQUESTER_VERIFICATION) -> Redirect / render the new pending submission checks page (or reuse old page?)
-
-    // Load VM data
-    // Render old view (flag hide 'edit' bits)
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
