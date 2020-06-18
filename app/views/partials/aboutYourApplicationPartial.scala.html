@@ -17,7 +17,7 @@
 @import controllers.checkpages.{CheckYourAnswersData,DummyCheckYourAnswersForm}
 @import domain.{DeveloperSession, SaveSubsFieldsPageMode}
 
-@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages)
+@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages)
 
 @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.answersPageAction(data.appId), 'class -> "form") {
   @helper.CSRF.formField
@@ -40,11 +40,13 @@
                           @sub.name<br/>
                           }
                       </td>
-                      <td>
-                          <div align="right">
-                              <a href="@controllers.checkpages.routes.CheckYourAnswers.apiSubscriptionsPage(data.appId)">Change<span class="visually-hidden">Edit API subscription</span></a>
-                          </div>
-                      </td>
+                      @if(editable) {
+                        <td>
+                            <div align="right">
+                                <a href="@controllers.checkpages.routes.CheckYourAnswers.apiSubscriptionsPage(data.appId)">Change<span class="visually-hidden">Edit API subscription</span></a>
+                            </div>
+                        </td>
+                      }
                   </tr>
 
 
@@ -59,11 +61,13 @@
                           @data.telephoneNumber
                           <br/>
                       </td>
-                      <td>
-                          <div align="right">
-                              <a href="@controllers.checkpages.routes.CheckYourAnswers.contactPage(data.appId)">Change<span class="visually-hidden">Edit Contact details</span></a>
-                          </div>
-                      </td>
+                      @if(editable) {
+                        <td>
+                            <div align="right">
+                                <a href="@controllers.checkpages.routes.CheckYourAnswers.contactPage(data.appId)">Change<span class="visually-hidden">Edit Contact details</span></a>
+                            </div>
+                        </td>
+                      }
                   </tr>
 
                   <tr id="teamMembers">
@@ -73,11 +77,13 @@
                           @teamMember<br/>
                           }
                       </td>
-                      <td>
-                          <div align="right">
-                              <a href="@controllers.checkpages.routes.CheckYourAnswers.team(data.appId)">Change<span class="visually-hidden">Edit Team Members</span></a>
-                          </div>
-                      </td>
+                      @if(editable) {
+                        <td>
+                            <div align="right">
+                                <a href="@controllers.checkpages.routes.CheckYourAnswers.team(data.appId)">Change<span class="visually-hidden">Edit Team Members</span></a>
+                            </div>
+                        </td>
+                      }
                   </tr>
 
                   <tr id="softwareName">
@@ -85,11 +91,13 @@
                       <td>
                           @data.softwareName
                       </td>
-                      <td>
-                          <div align="right">
-                              <a href="@controllers.checkpages.routes.CheckYourAnswers.namePage(data.appId)">Change<span class="visually-hidden">Edit Software name</span></a>
-                          </div>
-                      </td>
+                      @if(editable) {
+                        <td>
+                            <div align="right">
+                                <a href="@controllers.checkpages.routes.CheckYourAnswers.namePage(data.appId)">Change<span class="visually-hidden">Edit Software name</span></a>
+                            </div>
+                        </td>
+                      }
                   </tr>
               </tbody>
           </table>
@@ -105,11 +113,13 @@
                     <thead>
                     <tr id="">
                         <th class="col-80" colspan="2"><span strong class="bold-small">@sub.name @sub.apiVersion @sub.displayedStatus</span></th>
-                        <td>
-                            <div align="right">
-                                <a href="@controllers.routes.ManageSubscriptions.editApiMetadataPage(data.appId, sub.apiContext, sub.apiVersion, SaveSubsFieldsPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Subscription</span></a>
-                            </div>
-                        </td>
+                          <td>
+                              @if(editable) {
+                                  <div align="right">
+                                      <a href="@controllers.routes.ManageSubscriptions.editApiMetadataPage(data.appId, sub.apiContext, sub.apiVersion, SaveSubsFieldsPageMode.CheckYourAnswers)">Change<span class="visually-hidden">Edit Subscription</span></a>
+                                  </div>
+                              }
+                          </td>
                     </tr>
                     </thead>
                     <tbody>
@@ -139,11 +149,13 @@
                   <td>
                       @data.privacyPolicyUrl.getOrElse("None")
                   </td>
-                  <td>
-                      <div align="right">
-                          <a href="@controllers.checkpages.routes.CheckYourAnswers.privacyPolicyPage(data.appId)">Change<span class="visually-hidden">Edit Privacy policy</span></a>
-                      </div>
-                  </td>
+                  @if(editable) {
+                    <td>
+                        <div align="right">
+                            <a href="@controllers.checkpages.routes.CheckYourAnswers.privacyPolicyPage(data.appId)">Change<span class="visually-hidden">Edit Privacy policy</span></a>
+                        </div>
+                    </td>
+                  }
               </tr>
 
               <tr id="providedTermsAndConditionsURL">
@@ -151,11 +163,13 @@
                   <td>
                       @data.termsAndConditionsUrl.getOrElse("None")
                   </td>
-                  <td>
-                      <div align="right">
-                          <a href="@controllers.checkpages.routes.CheckYourAnswers.termsAndConditionsPage(data.appId)">Change<span class="visually-hidden">Edit Terms and conditions</span></a>
-                      </div>
-                  </td>
+                  @if(editable) {
+                    <td>
+                        <div align="right">
+                            <a href="@controllers.checkpages.routes.CheckYourAnswers.termsAndConditionsPage(data.appId)">Change<span class="visually-hidden">Edit Terms and conditions</span></a>
+                        </div>
+                    </td>
+                  }
               </tr>
 
               <tr id="agreeTermsOfUse">
@@ -163,22 +177,25 @@
                   <td>
                       @if(data.acceptedTermsOfUse) { Accepted } else { Not Accepted }
                   </td>
-                  <td>
-                      <div align="right">
-                          <a href="@controllers.checkpages.routes.CheckYourAnswers.termsOfUsePage(data.appId)">View<span class="visually-hidden">View Terms of use</span></a>
-                      </div>
-                  </td>
+                  @if(editable) {
+                    <td>
+                        <div align="right">
+                            <a href="@controllers.checkpages.routes.CheckYourAnswers.termsOfUsePage(data.appId)">View<span class="visually-hidden">View Terms of use</span></a>
+                        </div>
+                    </td>
+                  }
               </tr>
 
               </tbody>
           </table>
-
       </div>
-      <div class="form-group">
-          <h2>Now request production credentials</h2>
-          <p>By submitting your request you are confirming that, to the best your knowledge, the details you are providing are correct.</p>
-          <button id="submit" class="button" type="submit">Accept and send</button>
-          <a href="@routes.AddApplication.manageApps" id="cancel" class="secondary-button">Save and come back later</a>
-      </div>
+      @if(editable) {
+        <div class="form-group">
+            <h2>Now request production credentials</h2>
+            <p>By submitting your request you are confirming that, to the best your knowledge, the details you are providing are correct.</p>
+            <button id="submit" class="button" type="submit">Accept and send</button>
+            <a href="@routes.AddApplication.manageApps" id="cancel" class="secondary-button">Save and come back later</a>
+        </div>
+      }
   </section>
 }
