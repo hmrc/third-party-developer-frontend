@@ -109,6 +109,15 @@ abstract class ApplicationController()
     }
   }
 
+  def capabilityThenPermissionsAction2(capability: Capability, permissions: Permission)
+                                     (applicationId: String)
+                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions) andThen isApprovedFilter
+      composedActions.async(fun)(request)
+    }
+  }
+
   def permissionThenCapabilityAction(permissions: Permission, capability: Capability)
                                     (applicationId: String)
                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {

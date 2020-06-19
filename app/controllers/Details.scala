@@ -45,11 +45,10 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                        (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController {
 
-  def canChangeDetailsAction(applicationId: String)
-                               (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(SupportsDetails,SandboxOrAdmin)(applicationId)(fun)
-
-
+  def canChangeDetailsAndIsApprovedAction(applicationId: String)
+                                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    capabilityThenPermissionsAction2(SupportsDetails, SandboxOrAdmin)(applicationId)(fun)
+  
   def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
 
@@ -68,7 +67,8 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
     })
   }
 
-  def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
+  // TODO - Make only work for prod apps
+  def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
     Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
   }
 
@@ -104,7 +104,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
   }
 
   def changeDetailsAction(applicationId: String): Action[AnyContent] =
-    canChangeDetailsAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
+    canChangeDetailsAndIsApprovedAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
       val application = request.application
 
       def updateCheckInformation(updateRequest: UpdateApplicationRequest): Future[ApplicationUpdateSuccessful] = {

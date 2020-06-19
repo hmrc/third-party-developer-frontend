@@ -160,42 +160,22 @@ trait ActionBuilders {
     }
   }
 
-  def capabilityFilter(capability: Capability) = {
+  def capabilityFilter(capability: Capability) : ActionFilter[ApplicationRequest] = {
     val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
     capability match {
       case c : LikePermission => forbiddenWhenNotFilter(capabilityCheck)
-      case c : Capability => badRequestWhenNotFilter(capabilityCheck)
+      case c : Capability => badRequestWhenNotFilter(capabilityCheck)     
     }
   }
 
-  def sandboxOrAdminIfProductionAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
-      implicit val implicitRequest: ApplicationRequest[A] = request
+  def isApprovedFilter = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
+      implicit val implicitRequest = request
 
-      (request.application.deployedTo, request.role) match {
-        case (Environment.SANDBOX, _) => None
-        case (_, Role.ADMINISTRATOR) => None
-        case _ => Some(Forbidden(errorHandler.badRequestTemplate))
+      if (request.application.state.name.isApproved) None
+      else {
+        Some(NotFound(errorHandler.badRequestTemplate))
       }
-    }
-  }
-
-
-  def adminFilter = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
-      implicit val implicitRequest = request
-
-      if (request.role == Role.ADMINISTRATOR) None
-      else Some(Forbidden(errorHandler.badRequestTemplate))
-    }
-  }
-
-  def notProductionAppFilter = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
-      implicit val implicitRequest = request
-
-      if (request.application.deployedTo == Environment.SANDBOX) None
-      else Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
 
