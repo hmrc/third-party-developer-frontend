@@ -51,7 +51,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
 
   def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-      val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
+    val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
 
     Future.successful(request.application.state.name match {
       case State.TESTING if request.role.isAdministrator =>
