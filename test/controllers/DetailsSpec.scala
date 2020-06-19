@@ -43,39 +43,88 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   Helpers.running(fakeApplication) {
 
-    "details" should {
-      "return the view for a developer on a standard production app with no change link" in new Setup {
-        detailsShouldRenderThePage(anApplication(developerEmail = loggedInUser.email), hasChangeButton = false)
+    "details" when {
+      "logged in as a Developer on an application" should {
+        "return the view for a standard production app with no change link" in new Setup {
+          val approvedApplication = anApplication(developerEmail = loggedInUser.email, state = ApplicationState.production("dont-care", "dont-care"))
+          detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
+        }
+
+        "return the view for a developer on a sandbox app" in new Setup {
+          detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInUser.email))
+        }
       }
 
-      "return the view for an admin on a standard production app" in new Setup {
-        detailsShouldRenderThePage(anApplication(adminEmail = loggedInUser.email))
+      "logged in as an Administrator on an application" should {
+        "return the view for a standard production app" in new Setup {
+          val approvedApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.production("dont-care", "dont-care"))
+          detailsShouldRenderThePage(approvedApplication)
+        }
+
+        "return the view for an admin on a sandbox app" in new Setup {
+          detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInUser.email))
+        }
+
+        "return a redirect when using an application in testing state" in new Setup {
+          val testingApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.testing)
+
+          givenApplicationExists(testingApplication)
+
+          val result = testingApplication.callDetails
+
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(s"/developer/applications/${testingApplication.id}/request-check")
+        }
+
+        "return the credentials requested page on an application pending approval" in new Setup {
+          val pendingApprovalApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingGatekeeperApproval("dont-care"))
+
+          givenApplicationExists(pendingApprovalApplication)
+
+          val result = await(addToken(underTest.details(pendingApprovalApplication.id))(loggedInRequest))
+
+          status(result) shouldBe OK
+
+          val document = Jsoup.parse(bodyOf(result))
+          elementExistsByText(document, "h1", "Credentials requested") shouldBe true
+          elementExistsByText(document, "span", pendingApprovalApplication.name) shouldBe true
+        }
+
+        "return the credentials requested page on an application pending verification" in new Setup {
+          val pendingVerificationApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care"))
+
+          givenApplicationExists(pendingVerificationApplication)
+
+          val result = await(addToken(underTest.details(pendingVerificationApplication.id))(loggedInRequest))
+
+          status(result) shouldBe OK
+          
+          val document = Jsoup.parse(bodyOf(result))
+          elementExistsByText(document, "h1", "Credentials requested") shouldBe true
+          elementExistsByText(document, "span", pendingVerificationApplication.name) shouldBe true
+        }
       }
 
-      "return the view for a developer on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInUser.email))
+      "not a team member on an application" should {
+        "return not found" in new Setup {
+          val application = aStandardApplication()
+          givenApplicationExists(application)
+
+          val result = application.callDetails
+
+          status(result) shouldBe NOT_FOUND
+        }
       }
 
-      "return the view for an admin on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInUser.email))
-      }
+      "not logged in" should {
+        "redirect to login" in new Setup {
+          val application = aStandardApplication()
+          givenApplicationExists(application)
 
-      "return not found when not a teamMember on the app" in new Setup {
-        val application = aStandardApplication()
-        givenApplicationExists(application)
+          val result = application.callDetailsNotLoggedIn
 
-        val result = application.callDetails
-
-        status(result) shouldBe NOT_FOUND
-      }
-
-      "redirect to login when not logged in" in new Setup {
-        val application = aStandardApplication()
-        givenApplicationExists(application)
-
-        val result = application.callDetailsNotLoggedIn
-
-        redirectsToLogin(result)
+          redirectsToLogin(result)
+        }
       }
     }
 

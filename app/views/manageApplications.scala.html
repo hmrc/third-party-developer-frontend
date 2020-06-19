@@ -83,21 +83,7 @@
             @for(app <- applications) {
                 <tr>
                     <td>
-                    @if((app.environment == "Production") && app.state.isInTesting) {
-                        @if(app.role.isAdministrator) {
-                            <a href="@{
-                                controllers.checkpages.routes.ApplicationCheck.requestCheckPage(app.id)
-                            }" data-app-name>@app.name</a>
-                        } else {
-                            <a href="@{
-                                controllers.checkpages.routes.ApplicationCheck.unauthorisedAppDetails(app.id)
-                            }" data-app-name>@app.name</a>
-                        }
-                    } else {
-                        <a href="@{
-                            routes.Details.details(app.id)
-                        }" data-app-name>@app.name</a>
-                    }
+                        <a href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
                     </td>
                     <td data-app-user-role>
                         @if(app.role.isAdministrator) {Admin}

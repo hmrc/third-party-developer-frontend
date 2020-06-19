@@ -24,27 +24,30 @@
 @import controllers.checkpages.CheckYourAnswersData
 @import controllers.checkpages.DummyCheckYourAnswersForm
 
-@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
-@pageHeading = @{ "Check your answers before requesting credentials" }
 
 @devMain(
-    title = pageHeading,
+    title = data.softwareName + " Credentials requested",
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
-    Crumb(pageHeading),
-    Crumb.viewAllApplications,
-    Crumb.home
-),
-developerSession = Some(loggedIn)
+      Crumb(data.softwareName),
+      Crumb.viewAllApplications,
+      Crumb.home
+    ),
+    developerSession = Some(loggedIn)
 ) {
-
     @errorSummary(form)
+
     <heading>
-        <h1 class="heading-xlarge">
-            @pageHeading
+        <span class="govuk-caption-xl">@{data.softwareName}</span>
+        <h1 class="heading-xlarge compressed-header">
+            Credentials requested
         </h1>
     </heading>
 
-    @aboutYourApplicationPartial(data, form, editable = true)
+    <p>We're checking the information you've provided and reviewing your testing.</p>
+    <p>Once your credentials are issued, you can access them in your application. You'll be notified by email.</p>
+
+    @aboutYourApplicationPartial(data, form, editable = false)
 }

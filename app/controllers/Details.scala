@@ -29,6 +29,7 @@ import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service._
+import controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,7 +51,21 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
 
   def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.details(applicationViewModelFromApplicationRequest)))
+    val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
+
+    Future.successful(request.application.state.name match {
+      case State.TESTING if request.role.isAdministrator =>
+        Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id))
+
+      case State.TESTING if request.role.isDeveloper =>
+        Ok(views.html.checkpages.applicationcheck.unauthorisedAppDetails(request.application.name, request.application.adminEmails))
+
+      case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => 
+        Ok(views.html.application.pendingApproval(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
+
+      case State.PRODUCTION => 
+        Ok(views.html.details(applicationViewModelFromApplicationRequest))
+    })
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAction(applicationId) { implicit request =>
