@@ -44,7 +44,7 @@ trait TestApplications {
   def anApplication(appId: String = randomUUID().toString,
                     clientId: String = randomString(28),
                     environment: Environment = Environment.PRODUCTION,
-                    state: ApplicationState = ApplicationState.testing, // TODO: Should we make this defail to approved?
+                    state: ApplicationState = ApplicationState.production("test", "test"),
                     adminEmail: String = "admin@example.com",
                     developerEmail: String = "developer@example.com",
                     access: Access = standardAccess(),
