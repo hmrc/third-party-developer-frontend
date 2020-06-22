@@ -217,12 +217,13 @@ class RedirectsSpec extends BaseControllerSpec {
       elementIdentifiedByAttrContainsText(document, "span", "data-field-error-newredirecturi", errorMessage) shouldBe true
     }
 
+    // TODO: Get rid - it's hard to read.
     implicit class RedirectsAppAugment(val app: Application) {
-      final def callRedirectsController: Result = await(underTest.redirects(app.id)(loggedInRequest.withCSRFToken))
+      final def callRedirectsController(): Result = await(underTest.redirects(app.id)(loggedInRequest.withCSRFToken))
 
-      final def callAddRedirectController: Result = await(underTest.addRedirect(app.id)(loggedInRequest.withCSRFToken))
+      final def callAddRedirectController(): Result = await(underTest.addRedirect(app.id)(loggedInRequest.withCSRFToken))
 
-      final def callAddRedirectActionController: Result = await(underTest.addRedirectAction(app.id)(loggedInRequest.withCSRFToken))
+      final def callAddRedirectActionController(): Result = await(underTest.addRedirectAction(app.id)(loggedInRequest.withCSRFToken))
 
       final def callAddRedirectActionControllerWithUri(redirectUriToAdd: String): Result =
         await(underTest.addRedirectAction(app.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToAdd)))
@@ -245,7 +246,51 @@ class RedirectsSpec extends BaseControllerSpec {
         await(underTest.changeRedirectAction(app.id)(
           loggedInRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)))
     }
+  }
 
+  "production application in state pre-production" should {
+
+    trait PreApprovedReturnsNotFound extends Setup {
+      def executeAction: () => Result
+      
+      val testingApplication = aStandardApplication()
+        .withState(ApplicationState.testing)
+        .withRedirectUris(redirectUris)
+
+      givenApplicationExists(testingApplication)
+      
+      val result : Result = executeAction()
+
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "return not found for redirects action" in new PreApprovedReturnsNotFound {
+      def executeAction = testingApplication.callRedirectsController
+    }
+
+    "return not found for addRedirect action" in new PreApprovedReturnsNotFound {
+       def executeAction = testingApplication.callAddRedirectController
+    }
+
+    "return not found for addRedirectAction action" in new PreApprovedReturnsNotFound {
+      def executeAction = testingApplication.callAddRedirectActionController
+    }
+
+    "return not found for deleteRedirect action" in new PreApprovedReturnsNotFound {
+      def executeAction = { () => testingApplication.callDeleteRedirectController("dont-care") }
+    }
+
+    "return not found for deleteRedirectAction action" in new PreApprovedReturnsNotFound {
+      def executeAction = { () => testingApplication.callDeleteRedirectActionController("dont-care") }
+    }
+
+    "return not found for changeRedirect action" in new PreApprovedReturnsNotFound {
+      def executeAction = { () => testingApplication.callChangeRedirectUriController("dont-care", "dont-care") }
+    }
+
+    "return not found for changeRedirectACtion action" in new PreApprovedReturnsNotFound {
+      def executeAction = { () => testingApplication.callChangeRedirectUriActionController("dont-care", "don't-care") }
+    }
   }
 
   "redirects" should {

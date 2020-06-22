@@ -43,7 +43,7 @@ class Redirects @Inject()(val applicationService: ApplicationService,
 
   def canChangeRedirectInformationAction(applicationId: String)
                                         (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(SupportsRedirects, SandboxOrAdmin)(applicationId)(fun)
+    capabilityThenPermissionsAction2(SupportsRedirects, SandboxOrAdmin)(applicationId)(fun)
 
   def redirects(applicationId: String) = capabilityThenPermissionsAction(SupportsRedirects, TeamMembersOnly)(applicationId) { implicit request =>
     val appAccess = request.application.access.asInstanceOf[Standard]
