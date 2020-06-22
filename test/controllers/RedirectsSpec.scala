@@ -230,9 +230,7 @@ class RedirectsSpec extends BaseControllerSpec {
     trait PreApprovedReturnsNotFound extends Setup {
       def executeAction: Application => Result
       
-      val testingApplication = aStandardApplication()
-        .withState(ApplicationState.testing)
-        .withRedirectUris(redirectUris)
+      val testingApplication = aStandardNonApprovedApplication().withRedirectUris(redirectUris)
 
       givenApplicationExists(testingApplication)
       

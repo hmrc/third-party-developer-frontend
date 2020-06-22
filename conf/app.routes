@@ -103,6 +103,7 @@ POST        /applications/:id/redirect-uris/delete                              
 POST        /applications/:id/redirect-uris/change                                          controllers.Redirects.changeRedirect(id: String)
 POST        /applications/:id/redirect-uris/change-confirmation                             controllers.Redirects.changeRedirectAction(id: String)
 
+# TODO - Done
 GET         /applications/:id/delete                                                        controllers.DeleteApplication.deleteApplication(id: String, error: Option[String])
 GET         /applications/:id/delete-principal-confirm                                      controllers.DeleteApplication.deletePrincipalApplicationConfirm(id: String, error: Option[String])
 POST        /applications/:id/delete-principal                                              controllers.DeleteApplication.deletePrincipalApplicationAction(id: String)

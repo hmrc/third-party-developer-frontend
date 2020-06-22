@@ -232,7 +232,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "changeDetailsAction for production app in testing state" should {
 
       "return not found" in new Setup {
-        val application = aStandardApplication().withState(ApplicationState.testing)
+        val application = aStandardNonApprovedApplication()
         givenApplicationExists(application)
 
         val result = application.callChangeDetails

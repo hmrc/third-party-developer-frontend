@@ -63,10 +63,13 @@ trait TestApplications {
       ipWhitelist = ipWhitelist)
   }
 
-  // TODO: Get rid - is should use ApplicationState.production("dont-care", "dont-care")
   def aStandardApplication(): Application = anApplication()
 
-  def aStandardApprovedApplication: Application = anApplication(state = ApplicationState.production("dont-care", "dont-care"))
+  def aStandardApprovedApplication: Application = aStandardApplication
+
+  def aStandardNonApprovedApplication(adminEmail: String = "admin@example.com"): Application = 
+    anApplication(adminEmail = adminEmail).withState(ApplicationState.testing)
+
 
   def standardAccess(redirectUris: Seq[String] = Seq("https://redirect1", "https://redirect2"),
                      termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),
