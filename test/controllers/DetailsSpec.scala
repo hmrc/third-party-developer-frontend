@@ -41,13 +41,11 @@ import scala.concurrent.Future._
 
 class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  val approvedState = ApplicationState.production("dont-care", "dont-care")
-
   Helpers.running(fakeApplication) {
     "details" when {
       "logged in as a Developer on an application" should {
         "return the view for a standard production app with no change link" in new Setup {
-          val approvedApplication = anApplication(developerEmail = loggedInUser.email, state = approvedState)
+          val approvedApplication = anApplication(developerEmail = loggedInUser.email)
           detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
         }
 
@@ -58,7 +56,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "logged in as an Administrator on an application" should {
         "return the view for a standard production app" in new Setup {
-          val approvedApplication = anApplication(adminEmail = loggedInUser.email, state = approvedState)
+          val approvedApplication = anApplication(adminEmail = loggedInUser.email)
           detailsShouldRenderThePage(approvedApplication)
         }
 
@@ -133,7 +131,6 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "return the view for an admin on a standard production app" in new Setup {
         changeDetailsShouldRenderThePage(
           anApplication(adminEmail = loggedInUser.email)
-            .withState(approvedState)
         )
       }
 
@@ -150,7 +147,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "return forbidden for a developer on a standard production app" in new Setup {
-        val application = anApplication(developerEmail = loggedInUser.email).withState(approvedState)
+        val application = anApplication(developerEmail = loggedInUser.email)
         givenApplicationExists(application)
 
         val result = application.callChangeDetails
@@ -197,7 +194,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "changeDetailsAction validation" should {
       "not pass when application is updated with empty name" in new Setup {
-        val application = anApplication(adminEmail = loggedInUser.email, state = approvedState)
+        val application = anApplication(adminEmail = loggedInUser.email)
         givenApplicationExists(application)
 
         val result = application.withName("").callChangeDetailsAction
@@ -206,7 +203,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "not pass when application is updated with invalid name" in new Setup {
-        val application = anApplication(adminEmail = loggedInUser.email, state = approvedState)
+        val application = anApplication(adminEmail = loggedInUser.email)
         givenApplicationExists(application)
 
         val result = application.withName("a").callChangeDetailsAction
@@ -218,7 +215,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
           .willReturn(Future.successful(Invalid.invalidName))
 
-        val application = anApplication(adminEmail = loggedInUser.email, state = approvedState)
+        val application = anApplication(adminEmail = loggedInUser.email)
         givenApplicationExists(application)
 
         val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
@@ -266,14 +263,12 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "redirect to the details page on success for an admin" in new Setup {
         val application = anApplication(adminEmail = loggedInUser.email)
-          .withState(approvedState)
 
         changeDetailsShouldRedirectOnSuccess(application)
       }
 
       "return forbidden for a developer" in new Setup {
         val application = anApplication(developerEmail = loggedInUser.email)
-          .withState(approvedState)
 
         givenApplicationExists(application)
 
@@ -284,7 +279,6 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "keep original application name when administrator does an update" in new Setup {
         val application = anApplication(adminEmail = loggedInUser.email)
-          .withState(approvedState)
 
         givenApplicationExists(application)
 
