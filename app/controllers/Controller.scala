@@ -127,6 +127,15 @@ abstract class ApplicationController()
     }
   }
 
+  def permissionThenCapabilityAction2(permissions: Permission, capability: Capability)
+                                    (applicationId: String)
+                                    (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability) andThen isApprovedFilter
+      composedActions.async(fun)(request)
+    }
+  }
+  
   private object ManageSubscriptionsActions {
     def subscriptionsComposedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
                       (implicit request: UserRequest[AnyContent]) =

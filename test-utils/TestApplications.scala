@@ -44,7 +44,7 @@ trait TestApplications {
   def anApplication(appId: String = randomUUID().toString,
                     clientId: String = randomString(28),
                     environment: Environment = Environment.PRODUCTION,
-                    state: ApplicationState = ApplicationState.testing,
+                    state: ApplicationState = ApplicationState.testing, // TODO: Should we make this defail to approved?
                     adminEmail: String = "admin@example.com",
                     developerEmail: String = "developer@example.com",
                     access: Access = standardAccess(),
@@ -63,7 +63,10 @@ trait TestApplications {
       ipWhitelist = ipWhitelist)
   }
 
+  // TODO: Get rid - is should use ApplicationState.production("dont-care", "dont-care")
   def aStandardApplication(): Application = anApplication()
+
+  def aStandardApprovedApplication: Application = anApplication(state = ApplicationState.production("dont-care", "dont-care"))
 
   def standardAccess(redirectUris: Seq[String] = Seq("https://redirect1", "https://redirect2"),
                      termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),

@@ -86,13 +86,15 @@ POST        /applications/:id/team-members/remove                               
 
 GET         /applications/:id/details                                                       controllers.Details.details(id: String)
 
-# TODO - Fix me. 404 unless production.
+# TODO - Done
 GET         /applications/:id/details/change                                                controllers.Details.changeDetails(id: String)
-
 POST        /applications/:id/details/change                                                controllers.Details.changeDetailsAction(id: String)
+
+# TODO - Done
 GET         /applications/:id/details/terms-of-use                                          controllers.TermsOfUse.termsOfUse(id: String)
 POST        /applications/:id/details/terms-of-use                                          controllers.TermsOfUse.agreeTermsOfUse(id: String)
 
+# TODO: Fix me. 404 unless production.
 GET         /applications/:id/redirect-uris                                                 controllers.Redirects.redirects(id: String)
 GET         /applications/:id/redirect-uris/add                                             controllers.Redirects.addRedirect(id: String)
 POST        /applications/:id/redirect-uris/add                                             controllers.Redirects.addRedirectAction(id: String)
