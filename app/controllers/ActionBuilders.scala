@@ -141,8 +141,7 @@ trait ActionBuilders {
     if (cond) {
       None
     } else {
-      // TODO: Make this not Json
-      Some(BadRequest(Json.toJson(BadRequestError)))
+      Some(BadRequest(errorHandler.badRequestTemplate))
     }
   }
 

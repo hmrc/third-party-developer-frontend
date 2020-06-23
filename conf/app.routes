@@ -118,13 +118,14 @@ POST        /applications/:id/ip-whitelist/change                               
 GET         /applications/:id/subscriptions                                                 controllers.Subscriptions.manageSubscriptions(id: String)
 
 
-# TODO: Sandbox only (AND Approved only?)
+# TODO: Done
 POST        /applications/:id/change-subscription                                           controllers.Subscriptions.changeApiSubscription(id: String, context: String, version: String, redirectTo: String)
 
-# TODO: Production and approved only
+# TODO: Done
 GET         /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: String, version: String, redirectTo: String)
 POST        /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscriptionAction(id: String, name: String, context: String, version: String, redirectTo: String)
 
+# TODO - Done
 GET         /applications/:id/credentials                                                   controllers.Credentials.credentials(id: String)
 GET         /applications/:id/client-id                                                     controllers.Credentials.clientId(id: String)
 GET         /applications/:id/client-secrets                                                controllers.Credentials.clientSecrets(id: String)

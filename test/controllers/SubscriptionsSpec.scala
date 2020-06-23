@@ -159,7 +159,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
   "changeApiSubscription" when {
     def forbiddenSubscriptionChange(app: => Application): Unit = {
-      "return 403 Forbidden" in new Setup {
+      "return 400 Bad Request" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
           s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
@@ -170,7 +170,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         val result: Result = await(underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request))
 
-        status(result) shouldBe FORBIDDEN
+        status(result) shouldBe BAD_REQUEST
       }
     }
 

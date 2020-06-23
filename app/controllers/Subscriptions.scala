@@ -25,6 +25,7 @@ import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
+import play.api.libs.json.Json
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, Result}
 import play.twirl.api.Html
@@ -107,7 +108,7 @@ class Subscriptions @Inject() (
 
       def handleValidForm(form: ChangeSubscriptionForm) =
         if (request.application.hasLockedSubscriptions) {
-          Future.successful(Forbidden(errorHandler.badRequestTemplate))
+          Future.successful(BadRequest(Json.toJson(BadRequestError)))
         } else {
           updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
         }
