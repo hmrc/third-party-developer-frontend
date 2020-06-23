@@ -42,6 +42,7 @@ object Capabilities {
     def hasCapability(app: Application) = true
   }
 
+  // TODO: use app.state.name.isApproved
   case object ChangeClientSecret extends Capability {
     def hasCapability(app: Application) = app.state.name == State.PRODUCTION
   }
@@ -52,8 +53,8 @@ object Capabilities {
 
   case object SupportsSubscriptions extends StandardAppCapability with LikePermission
 
-  case object SupportsSubscriptionFields extends Capability {
-    override def hasCapability(app: Application): Boolean = true
+  case object EditSubscriptionFields extends Capability {
+    override def hasCapability(app: Application): Boolean = !app.state.name.isPendingApproval
   }
 
   case object SupportsDetails extends StandardAppCapability

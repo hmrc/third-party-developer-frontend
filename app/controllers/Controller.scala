@@ -141,7 +141,7 @@ abstract class ApplicationController()
                       (implicit request: UserRequest[AnyContent]) =
       Action andThen
         applicationAction(applicationId, loggedIn) andThen
-        capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
+        capabilityFilter(Capabilities.EditSubscriptionFields) andThen
         fieldDefinitionsExistRefiner(noFieldsBehaviour)
   }
 
