@@ -69,6 +69,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
     "App name 1",
     DateTimeUtils.now,
     DateTimeUtils.now,
+    None,
     Environment.SANDBOX,
     Some("Description 1"),
     Set(Collaborator(loggedInUser.email, role)),

@@ -38,6 +38,7 @@ trait ApplicationBuilder {
       s"$appId-name",
       DateTimeUtils.now,
       DateTimeUtils.now,
+      None,
       Environment.SANDBOX,
       Some(s"$appId-description"),
       buildCollaborators(Seq(appOwnerEmail)),

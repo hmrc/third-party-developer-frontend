@@ -68,6 +68,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
       "Test Application",
       DateTime.now(),
       DateTime.now(),
+      None,
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR)),

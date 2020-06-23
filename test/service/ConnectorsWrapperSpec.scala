@@ -68,10 +68,10 @@ class ConnectorsWrapperSpec extends UnitSpec with MockitoSugar with ScalaFutures
 
   val productionApplicationId = "Application ID"
   val productionClientId = "hBnFo14C0y4SckYUbcoL2PbFA40a"
-  val productionApplication = Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("description"))
+  val productionApplication = Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("description"))
   val sandboxApplicationId = "Application ID"
   val sandboxClientId = "Client ID"
-  val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX, Some("description"))
+  val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, Some("description"))
 
   "fetchByApplicationId" when {
     "return the application fetched from the production connector when it exists there" in new Setup {

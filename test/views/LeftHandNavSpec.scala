@@ -35,9 +35,9 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
   trait Setup {
     implicit val request = FakeRequest()
     implicit val loggedIn = utils.DeveloperSession("user@example.com", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
-    val standardApplication = Application("std-app-id", "std-client-id", "name", now, now, PRODUCTION, access = Standard())
-    val privilegedApplication = Application("std-app-id", "std-client-id", "name", now, now, PRODUCTION, access = Privileged())
-    val ropcApplication = Application("std-app-id", "std-client-id", "name", now, now, PRODUCTION, access = ROPC())
+    val standardApplication = Application("std-app-id", "std-client-id", "name", now, now, None, PRODUCTION, access = Standard())
+    val privilegedApplication = Application("std-app-id", "std-client-id", "name", now, now, None, PRODUCTION, access = Privileged())
+    val ropcApplication = Application("std-app-id", "std-client-id", "name", now, now, None, PRODUCTION, access = ROPC())
 
     def elementExistsById(doc: Document, id: String) = doc.select(s"#$id").nonEmpty
   }

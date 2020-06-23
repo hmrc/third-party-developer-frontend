@@ -60,7 +60,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     
     implicit val hc = HeaderCarrier()
 
-    val application = Application(appId, clientId, appName, DateTime.now.withTimeAtStartOfDay(), DateTime.now.withTimeAtStartOfDay(),
+    val application = Application(appId, clientId, appName, DateTime.now.withTimeAtStartOfDay(), DateTime.now.withTimeAtStartOfDay(), None,
       Environment.PRODUCTION, Some("Description 1"), Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))

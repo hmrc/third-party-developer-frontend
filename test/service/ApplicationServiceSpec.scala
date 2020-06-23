@@ -122,10 +122,10 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   val productionApplicationId = "Application ID"
   val productionClientId = s"client-id-${randomUUID().toString}"
   val productionApplication: Application =
-    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("description"), Set())
+    Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("description"), Set())
   val sandboxApplicationId = "Application ID"
   val sandboxClientId = "Client ID"
-  val sandboxApplication: Application = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX, Some("description"))
+  val sandboxApplication: Application = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, Some("description"))
 
   def subStatusWithoutFieldValues(
       appId: String,
@@ -171,9 +171,9 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
   "Fetch by teamMember email" should {
     val emailAddress = "user@example.com"
-    val app1 = Application("id1", "cl-id1", "zapplication", DateTime.now, DateTime.now, Environment.PRODUCTION)
-    val app2 = Application("id2", "cl-id2", "application", DateTime.now, DateTime.now, Environment.SANDBOX)
-    val app3 = Application("id3", "cl-id3", "4pplication", DateTime.now, DateTime.now, Environment.PRODUCTION)
+    val app1 = Application("id1", "cl-id1", "zapplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION)
+    val app2 = Application("id2", "cl-id2", "application", DateTime.now, DateTime.now, None, Environment.SANDBOX)
+    val app3 = Application("id3", "cl-id3", "4pplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION)
 
     val productionApps = Seq(app1, app3)
     val sandboxApps = Seq(app2)
@@ -470,7 +470,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val applicationId = "applicationId"
     val clientId = "clientId"
     val applicationName = "applicationName"
-    val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, None)
+    val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, None)
 
     "truncate the description to 250 characters on update request" in new Setup {
       private val longDescription = "abcde" * 100

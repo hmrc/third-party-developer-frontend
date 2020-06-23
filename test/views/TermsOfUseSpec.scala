@@ -63,7 +63,7 @@ class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneSe
         val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
         val version = "1.0"
         val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(emailAddress, timeStamp, version)))
-        val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, checkInformation = Some(checkInformation))
+        val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
         val page: Page = Page(views.html.termsOfUse(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
       }
 
@@ -88,7 +88,7 @@ class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneSe
     "viewing an unagreed application" should {
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
-        val application = Application(id, clientId, appName, createdOn, lastAccess, deployedTo, checkInformation = Some(checkInformation))
+        val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
         val page: Page = Page(views.html.termsOfUse(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
       }
 

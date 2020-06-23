@@ -289,6 +289,7 @@ case class Application(id: String,
                        name: String,
                        createdOn: DateTime,
                        lastAccess: DateTime,
+                       lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
                        deployedTo: Environment,
                        description: Option[String] = None,
                        collaborators: Set[Collaborator] = Set.empty,

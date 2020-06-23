@@ -90,6 +90,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         "App name 1",
         DateTimeUtils.now,
         DateTimeUtils.now,
+        None,
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
@@ -110,7 +111,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       access: Access = Standard()
       ): Application = {
 
-    Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
+    Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION,
          collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
   }
 

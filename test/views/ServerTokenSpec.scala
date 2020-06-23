@@ -54,6 +54,7 @@ class ServerTokenSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
       "Test Application",
       DateTime.now(),
       DateTime.now(),
+      None,
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR)),

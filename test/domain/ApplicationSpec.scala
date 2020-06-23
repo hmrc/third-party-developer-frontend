@@ -161,6 +161,7 @@ class ApplicationSpec extends FunSpec with Matchers {
       "app name",
       DateTime.now(),
       DateTime.now(),
+      None,
       environment,
       description = None,
       collaborators = collaborators,

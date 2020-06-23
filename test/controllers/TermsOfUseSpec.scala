@@ -64,7 +64,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
                                   state: ApplicationState = ApplicationState.testing,
                                   checkInformation: Option[CheckInformation] = None,
                                   access: Access = Standard()) = {
-      val application = Application(appId, "clientId", "appName", DateTimeUtils.now, DateTimeUtils.now, environment,
+      val application = Application(appId, "clientId", "appName", DateTimeUtils.now, DateTimeUtils.now, None, environment,
         collaborators = Set(Collaborator(loggedInUser.email, userRole)), access = access, state = state, checkInformation = checkInformation)
     
         fetchByApplicationIdReturns(application.id, application)
