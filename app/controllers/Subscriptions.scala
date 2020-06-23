@@ -53,12 +53,9 @@ class Subscriptions @Inject() (
     permissionThenCapabilityAction(AdministratorOnly, ManageLockedSubscriptions)(applicationId)(fun)
 
   private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    capabilityThenPermissionsAction(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
-
-  private def canViewSubscriptionsInDevHubAction2(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     capabilityThenPermissionsAction2(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
 
-  def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction2(applicationId) { implicit request =>
+  def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
       request.user,
@@ -68,7 +65,7 @@ class Subscriptions @Inject() (
     )
   }
 
-  def addAppSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction2(applicationId) { implicit request =>
+  def addAppSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
       request.user,
