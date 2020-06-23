@@ -106,7 +106,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "not a team member on an application" should {
         "return not found" in new Setup {
-          val application = aStandardApplication()
+          val application = aStandardApplication
           givenApplicationExists(application)
 
           val result = application.callDetails
@@ -117,7 +117,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "not logged in" should {
         "redirect to login" in new Setup {
-          val application = aStandardApplication()
+          val application = aStandardApplication
           givenApplicationExists(application)
 
           val result = application.callDetailsNotLoggedIn

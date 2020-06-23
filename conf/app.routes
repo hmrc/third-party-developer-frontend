@@ -78,6 +78,7 @@ POST        /applications/add/:environment/name                                 
 # TODO: Validate permissions
 GET         /applications/:id/add/success                                                   controllers.AddApplication.addApplicationSuccess(id: String)
 
+# TODO - Done
 GET         /applications/:id/team-members                                                  controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                              controllers.ManageTeam.addTeamMember(id: String)
 POST        /applications/:id/team-members/add/:addTeamMemberPageMode                       controllers.ManageTeam.addTeamMemberAction(id: String, addTeamMemberPageMode: domain.AddTeamMemberPageMode)

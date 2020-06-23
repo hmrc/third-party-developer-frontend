@@ -63,7 +63,7 @@ trait TestApplications {
       ipWhitelist = ipWhitelist)
   }
 
-  def aStandardApplication(): Application = anApplication()
+  val aStandardApplication: Application = anApplication()
 
   def aStandardApprovedApplication: Application = aStandardApplication
 
