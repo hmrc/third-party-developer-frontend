@@ -19,7 +19,7 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
-import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
+import domain.Permissions.{AdministratorOnly, TeamMembersOnly, SandboxOrAdmin}
 import domain.SubscriptionRedirect._
 import domain._
 import javax.inject.{Inject, Singleton}
@@ -54,7 +54,7 @@ class Subscriptions @Inject() (
     permissionThenCapabilityAction(AdministratorOnly, ManageLockedSubscriptions)(applicationId)(fun)
 
   private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    capabilityThenPermissionsAction2(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
+    capabilityThenPermissionsAction(SupportsSubscriptions, SandboxOrAdmin)(applicationId)(fun)
 
   def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
