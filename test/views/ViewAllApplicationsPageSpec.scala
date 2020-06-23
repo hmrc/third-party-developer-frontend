@@ -61,7 +61,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn, AccessType.STANDARD))
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, false, appCreatedOn, AccessType.STANDARD))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
@@ -84,7 +84,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn, AccessType.STANDARD))
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, false, appCreatedOn, AccessType.STANDARD))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
@@ -106,7 +106,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.PRODUCTION, appLastAccess, appCreatedOn, AccessType.PRIVILEGED))
+        TermsOfUseStatus.NOT_APPLICABLE, State.PRODUCTION, appLastAccess, false, appCreatedOn, AccessType.PRIVILEGED))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
@@ -128,7 +128,7 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, appCreatedOn, AccessType.STANDARD))
+        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, false, appCreatedOn, AccessType.STANDARD))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
