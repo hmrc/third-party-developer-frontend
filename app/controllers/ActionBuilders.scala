@@ -132,6 +132,7 @@ trait ActionBuilders {
     if (cond) {
       None
     } else {
+      // TODO: Return forbidden template
       Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
@@ -140,6 +141,7 @@ trait ActionBuilders {
     if (cond) {
       None
     } else {
+      // TODO: Make this not Json
       Some(BadRequest(Json.toJson(BadRequestError)))
     }
   }
@@ -174,7 +176,7 @@ trait ActionBuilders {
 
       if (request.application.state.name.isApproved) None
       else {
-        Some(NotFound(errorHandler.badRequestTemplate))
+        Some(NotFound(errorHandler.notFoundTemplate))
       }
     }
   }
