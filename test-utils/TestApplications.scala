@@ -70,6 +70,8 @@ trait TestApplications {
   def aStandardNonApprovedApplication(adminEmail: String = "admin@example.com"): Application = 
     anApplication(adminEmail = adminEmail).withState(ApplicationState.testing)
 
+  def aStandardPendingApprovalApplication(adminEmail: String = "admin@example.com"): Application = 
+    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test", "test"))
 
   def standardAccess(redirectUris: Seq[String] = Seq("https://redirect1", "https://redirect2"),
                      termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),
