@@ -41,10 +41,10 @@ class IpWhitelist @Inject()(deskproService: DeskproService,
   extends ApplicationController {
 
   private def canChangeIpWhitelistAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(SupportsIpWhitelist, AdministratorOnly)(applicationId)(fun)
+    capabilityThenPermissionsAction2(SupportsIpWhitelist, AdministratorOnly)(applicationId)(fun)
 
   private def canViewManageIpWhitelistAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(SupportsIpWhitelist, TeamMembersOnly)(applicationId)(fun)
+    capabilityThenPermissionsAction2(SupportsIpWhitelist, TeamMembersOnly)(applicationId)(fun)
 
   def manageIpWhitelist(applicationId: String): Action[AnyContent] =
     canViewManageIpWhitelistAction(applicationId) { implicit request =>
