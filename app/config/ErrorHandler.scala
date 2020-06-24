@@ -22,6 +22,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, RequestHeader, Result}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
+import play.api.mvc.Request
 
 @Singleton
 class ErrorHandler @Inject()(val messagesApi: MessagesApi,
@@ -33,6 +34,9 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi,
     views.html.errorTemplate(pageTitle, heading, message)
   }
 
+  def forbiddenTemplate(implicit request : Request[_]) = {
+    views.html.forbiddenTemplate()
+  }
 
   override def resolveError(rh: RequestHeader, ex: Throwable): Result = {
     implicit val r: Request[String] = Request(rh, "")

@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package mocks.service
+@import include._
+@import domain._
 
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
-import config.{ApplicationConfig, ErrorHandler}
-import play.twirl.api.Html
+@()(
+        implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
-trait ErrorHandlerMock extends MockitoSugar {
-  val mockErrorHandler = mock[ErrorHandler]
-  when(mockErrorHandler.notFoundTemplate(any())).thenReturn(Html(""))
-  when(mockErrorHandler.badRequestTemplate(any())).thenReturn(Html(""))
-  when(mockErrorHandler.forbiddenTemplate(any())).thenReturn(Html(""))
+@main(
+    title = applicationConfig.title,
+    navTitle = Some(applicationConfig.title),
+    navTitleLink = Some(Call("GET", "/api-documentation")),
+    headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
+    serviceInfoContent = Some(HtmlFormat.empty),
+    developerSession = None
+) {
+  <h1>Forbidden</h1>
 }

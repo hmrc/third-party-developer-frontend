@@ -133,7 +133,7 @@ trait ActionBuilders {
       None
     } else {
       // TODO: Return forbidden template
-      Some(Forbidden(errorHandler.badRequestTemplate))
+      Some(Forbidden(errorHandler.forbiddenTemplate))
     }
   }
 
