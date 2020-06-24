@@ -104,41 +104,36 @@ abstract class ApplicationController()
       composedActions.async(fun)(request)
     }
 
+  private def capabilityThenPermissionsActionWithStateCheck(capability: Capability, permissions: Permission, stateCheck : State => Boolean)
+                                               (applicationId: String)
+                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      val composedActions = Action andThen 
+                            applicationAction(applicationId, loggedIn) andThen 
+                            capabilityFilter(capability) andThen 
+                            permissionFilter(permissions) andThen 
+                            approvalFilter(stateCheck)
+        
+      composedActions.async(fun)(request)
+    }
+  }
+
   def capabilityThenPermissionsActionForAllStates(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
-      composedActions.async(fun)(request)
-    }
+    capabilityThenPermissionsActionWithStateCheck(capability, permissions, stateCheck = _ => true)(applicationId)(fun)
   }
 
   def capabilityThenPermissionsActionForApprovedApps(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val composedActions = Action andThen
-                            applicationAction(applicationId, loggedIn) andThen
-                            capabilityFilter(capability) andThen
-                            permissionFilter(permissions) andThen
-                            approvalFilter(applicationStateApprovedPredicate)
-
-      composedActions.async(fun)(request)
-    }
+    capabilityThenPermissionsActionWithStateCheck(capability, permissions, applicationStateApprovedPredicate)(applicationId)(fun)
   }
 
   def capabilityThenPermissionsActionForApprovedOrTestingApps(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val composedActions = Action andThen
-                            applicationAction(applicationId, loggedIn) andThen
-                            capabilityFilter(capability) andThen
-                            permissionFilter(permissions) andThen
-                            approvalFilter(applicationStateApprovedOrTestingPredicate)
-                            
-      composedActions.async(fun)(request)
-    }
+    capabilityThenPermissionsActionWithStateCheck(capability, permissions, applicationStateApprovedOrTestingPredicate)(applicationId)(fun)
   }
 
   def permissionThenCapabilityAction(permissions: Permission, capability: Capability)

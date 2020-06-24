@@ -78,7 +78,6 @@ POST        /applications/add/:environment/name                                 
 # TODO: Validate permissions
 GET         /applications/:id/add/success                                                   controllers.AddApplication.addApplicationSuccess(id: String)
 
-# TODO - Done
 GET         /applications/:id/team-members                                                  controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                              controllers.ManageTeam.addTeamMember(id: String)
 POST        /applications/:id/team-members/add/:addTeamMemberPageMode                       controllers.ManageTeam.addTeamMemberAction(id: String, addTeamMemberPageMode: domain.AddTeamMemberPageMode)
@@ -87,15 +86,12 @@ POST        /applications/:id/team-members/remove                               
 
 GET         /applications/:id/details                                                       controllers.Details.details(id: String)
 
-# TODO - Done
 GET         /applications/:id/details/change                                                controllers.Details.changeDetails(id: String)
 POST        /applications/:id/details/change                                                controllers.Details.changeDetailsAction(id: String)
 
-# TODO - Done
 GET         /applications/:id/details/terms-of-use                                          controllers.TermsOfUse.termsOfUse(id: String)
 POST        /applications/:id/details/terms-of-use                                          controllers.TermsOfUse.agreeTermsOfUse(id: String)
 
-# TODO - Done
 GET         /applications/:id/redirect-uris                                                 controllers.Redirects.redirects(id: String)
 GET         /applications/:id/redirect-uris/add                                             controllers.Redirects.addRedirect(id: String)
 POST        /applications/:id/redirect-uris/add                                             controllers.Redirects.addRedirectAction(id: String)
@@ -104,7 +100,6 @@ POST        /applications/:id/redirect-uris/delete                              
 POST        /applications/:id/redirect-uris/change                                          controllers.Redirects.changeRedirect(id: String)
 POST        /applications/:id/redirect-uris/change-confirmation                             controllers.Redirects.changeRedirectAction(id: String)
 
-# TODO - Done
 GET         /applications/:id/delete                                                        controllers.DeleteApplication.deleteApplication(id: String, error: Option[String])
 GET         /applications/:id/delete-principal-confirm                                      controllers.DeleteApplication.deletePrincipalApplicationConfirm(id: String, error: Option[String])
 POST        /applications/:id/delete-principal                                              controllers.DeleteApplication.deletePrincipalApplicationAction(id: String)
@@ -115,18 +110,13 @@ GET         /applications/:id/ip-whitelist                                      
 GET         /applications/:id/ip-whitelist/change                                           controllers.IpWhitelist.changeIpWhitelist(id: String)
 POST        /applications/:id/ip-whitelist/change                                           controllers.IpWhitelist.changeIpWhitelistAction(id: String)
 
-# TODO - Done
 GET         /applications/:id/subscriptions                                                 controllers.Subscriptions.manageSubscriptions(id: String)
 
-
-# TODO: Done
 POST        /applications/:id/change-subscription                                           controllers.Subscriptions.changeApiSubscription(id: String, context: String, version: String, redirectTo: String)
 
-# TODO: Done
 GET         /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: String, version: String, redirectTo: String)
 POST        /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscriptionAction(id: String, name: String, context: String, version: String, redirectTo: String)
 
-# TODO - Done
 GET         /applications/:id/credentials                                                   controllers.Credentials.credentials(id: String)
 GET         /applications/:id/client-id                                                     controllers.Credentials.clientId(id: String)
 GET         /applications/:id/client-secrets                                                controllers.Credentials.clientSecrets(id: String)
@@ -135,7 +125,6 @@ GET         /applications/:id/client-secret/:clientSecretId/delete              
 POST        /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecretAction(id: java.util.UUID, clientSecretId: String)
 POST        /applications/:id/client-secret-new                                             controllers.Credentials.addClientSecret(id: String)
 
-# TODO: Should only work for TESTING only (not pending or approved)
 GET         /applications/:id/request-check                                                 controllers.checkpages.ApplicationCheck.requestCheckPage(id: String)
 POST        /applications/:id/request-check                                                 controllers.checkpages.ApplicationCheck.requestCheckAction(id: String)
 GET         /applications/:id/request-check/submitted                                       controllers.checkpages.ApplicationCheck.credentialsRequested(id: String)
@@ -159,13 +148,11 @@ GET         /applications/:id/request-check/team/add                            
 GET         /applications/:id/request-check/team/remove-confirmation/:teamMemberHash        controllers.checkpages.ApplicationCheck.teamMemberRemoveConfirmation(id: String, teamMemberHash: String)
 POST        /applications/:id/request-check/team/remove                                     controllers.checkpages.ApplicationCheck.teamMemberRemoveAction(id: String)
 
-# TODO: done
 GET         /applications/:id/add/subscription-configuration-start                          controllers.ManageSubscriptions.subscriptionConfigurationStart(id: String)
 GET         /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPage(id: String, pageNumber: Int)
 POST        /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: String,pageNumber: Int)
 GET         /applications/:id/add/subscription-configuration-step/:pageNumber               controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, pageNumber: Int)
 
-# TODO: Should only work for TESTING only (not pending or approved)
 GET         /applications/:id/check-your-answers/name                                       controllers.checkpages.CheckYourAnswers.namePage(id: String)
 POST        /applications/:id/check-your-answers/name                                       controllers.checkpages.CheckYourAnswers.nameAction(id: String)
 GET         /applications/:id/check-your-answers/contact                                    controllers.checkpages.CheckYourAnswers.contactPage(id: String)
@@ -187,12 +174,10 @@ POST        /applications/:id/check-your-answers/team/remove                    
 GET         /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPage(id: String)
 POST        /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPageAction(id: String)
 
-# TODO - Done
 GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: String)
 GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.editApiMetadataPage(id: String, context: String, version: String, saveSubsFieldsPageMode: domain.SaveSubsFieldsPageMode)
 POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: String, version: String, saveSubsFieldsPageMode: domain.SaveSubsFieldsPageMode)
 
-# TODO - Done
 GET         /applications/:id/add/subscriptions                                             controllers.Subscriptions.addAppSubscriptions(id: String)
 
 GET         /application-verification                                                       controllers.ApplicationVerification.verifyUplift(code: String)
