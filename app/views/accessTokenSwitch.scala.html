@@ -1,0 +1,70 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import include._
+@import domain.{BackButtonWithJavaScript, DeveloperSession}
+
+@import uk.gov.hmrc.urls.Link
+@()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+
+@devMain(
+    title = "Switch to an OAuth 2.0 access token",
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
+) {
+
+    <h1 class="heading-large">
+        Switch to an OAuth 2.0 access token
+    </h1>
+
+    <p>Using application-restricted endpoints with server tokens is now deprecated.</p>
+
+    <p>To continue using your application, you need @{Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints", value = Some("an OAuth 2.0 access token")).toHtml} to make API calls. OAuth 2.0 access tokens are secure and better protect your data.</p>
+
+    <p>Server token retires on:</p>
+
+    <ul class="list list-bullet">
+        <li>1 September 2020 in sandbox</li>
+        <li>1 October 2020 in production</li>
+    </ul>
+
+    <p class="panel panel-border-wide">You must switch to an OAuth 2.0 access token before server token is retired. If you do nothing, your application may not work.</p>
+
+    <p>These APIs have application-restricted endpoints:</p>
+
+    <ul class="list list-bullet">
+        <li>Hello World</li>
+        <li>Create Test User</li>
+        <li>Individual PAYE Test Support</li>
+        <li>Marriage Allowance Test Support</li>
+        <li>Pull Notifications</li>
+        <li>Bulk Data File List</li>
+        <li>Test Fraud Prevention Headers</li>
+        <li>Individuals Income Test Support</li>
+        <li>Enrolment Management and Agent Client Relationship</li>
+        <li>Transit Movement</li>
+        <li>Check a UK VAT number</li>
+        <li>Payments Bin Check</li>
+        <li>CDS Financials Notifications</li>
+        <li>Mobile RDS Vehicle Private</li>
+        <li>Charge Ref Notification</li>
+    </ul>
+
+    <p>@{Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints", value = Some("Get an OAuth 2.0 access token")).toHtml}</p>
+
+}
