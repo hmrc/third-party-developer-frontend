@@ -143,16 +143,6 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       bodyOf(result) should include("Credentials")
       bodyOf(result) should include("You cannot view or edit production credentials because you're not an administrator")
     }
-
-    "inform the user about the state of the application when it has not reached production state" in new Setup {
-      def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
-
-      val result: Result = await(underTest.credentials(applicationId.toString)(loggedInRequest))
-
-      status(result) shouldBe OK
-      bodyOf(result) should include("Credentials")
-      bodyOf(result) should include("Production credentials have been requested")
-    }
   }
 
   "The client ID page" should {

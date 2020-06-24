@@ -48,10 +48,10 @@ class Credentials @Inject()(val applicationService: ApplicationService,
   extends ApplicationController {
 
   private def canViewClientCredentialsPage(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(ViewCredentials, TeamMembersOnly)(applicationId)(fun)
+    capabilityThenPermissionsAction2(ViewCredentials, TeamMembersOnly)(applicationId)(fun)
 
   private def canChangeClientSecrets(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction(ChangeClientSecret, SandboxOrAdmin)(applicationId)(fun)
+    capabilityThenPermissionsAction2(ChangeClientSecret, SandboxOrAdmin)(applicationId)(fun)
 
   def credentials(applicationId: String): Action[AnyContent] =
     canViewClientCredentialsPage(applicationId) { implicit request =>
