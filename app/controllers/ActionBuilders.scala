@@ -161,7 +161,7 @@ trait ActionBuilders {
     }
   }
 
-  def capabilityFilter(capability: Capability) : ActionFilter[ApplicationRequest] = {
+  def capabilityFilter(capability: Capability): ActionFilter[ApplicationRequest] = {
     val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
     capability match {
       case c : LikePermission => forbiddenWhenNotFilter(capabilityCheck)

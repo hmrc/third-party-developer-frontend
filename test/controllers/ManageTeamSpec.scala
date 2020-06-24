@@ -377,8 +377,6 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         }
       }
 
-      // TODO: Allow testing state
-      // (e.g. pre-approval & approved)
       "return a bad request for addTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
         def executeAction = {
           val requestWithForm = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "thirdpartydeveloper@example.com", "role" -> "DEVELOPER")

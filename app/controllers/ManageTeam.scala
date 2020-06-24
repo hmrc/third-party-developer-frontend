@@ -49,8 +49,6 @@ class ManageTeam @Inject()(val sessionService: SessionService,
   private def whenAppSupportsTeamMembers(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     capabilityThenPermissionsActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
 
-  // TODO: Make great : alsoAllowTestingState
-  // OVerride the allowed app status in capabilityThenPermissionsActionForApprovedApps (defaults to approved only)
   private def canEditTeamMembers(applicationId: String, alsoAllowTestingState : Boolean = false)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     if (alsoAllowTestingState)
       capabilityThenPermissionsActionForApprovedOrTestingApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
