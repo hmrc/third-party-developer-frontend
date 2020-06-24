@@ -104,7 +104,7 @@ abstract class ApplicationController()
       composedActions.async(fun)(request)
     }
 
-  def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
+  def capabilityThenPermissionsActionForAllStates(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
@@ -113,7 +113,7 @@ abstract class ApplicationController()
     }
   }
 
-  def capabilityThenPermissionsAction2(capability: Capability, permissions: Permission)
+  def capabilityThenPermissionsActionForApprovedApps(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
@@ -127,7 +127,7 @@ abstract class ApplicationController()
     }
   }
 
-  def capabilityThenPermissionsAction3(capability: Capability, permissions: Permission)
+  def capabilityThenPermissionsActionForApprovedOrTestingApps(capability: Capability, permissions: Permission)
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
@@ -159,7 +159,7 @@ abstract class ApplicationController()
                             permissionFilter(permissions) andThen
                             capabilityFilter(capability) andThen
                             approvalFilter(applicationStateApprovedPredicate)
-                            
+
       composedActions.async(fun)(request)
     }
   }

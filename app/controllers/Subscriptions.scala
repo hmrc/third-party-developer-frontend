@@ -54,7 +54,7 @@ class Subscriptions @Inject() (
     permissionThenCapabilityAction(AdministratorOnly, ManageLockedSubscriptions)(applicationId)(fun)
 
   private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    capabilityThenPermissionsAction(SupportsSubscriptions, SandboxOrAdmin)(applicationId)(fun)
+    capabilityThenPermissionsActionForAllStates(SupportsSubscriptions, SandboxOrAdmin)(applicationId)(fun)
 
   def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(

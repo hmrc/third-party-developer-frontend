@@ -47,7 +47,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
   def canChangeDetailsAndIsApprovedAction(applicationId: String)
                                           (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsAction2(SupportsDetails, SandboxOrAdmin)(applicationId)(fun)
+    capabilityThenPermissionsActionForApprovedApps(SupportsDetails, SandboxOrAdmin)(applicationId)(fun)
   
   def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
