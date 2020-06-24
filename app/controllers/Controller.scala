@@ -104,7 +104,7 @@ abstract class ApplicationController()
       composedActions.async(fun)(request)
     }
 
-  private def capabilityThenPermissionsActionWithStateCheck(capability: Capability, permissions: Permission, stateCheck : State => Boolean)
+  private def capabilityThenPermissionsActionWithStateCheck(stateCheck : State => Boolean)(capability: Capability, permissions: Permission)
                                                (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
@@ -118,23 +118,11 @@ abstract class ApplicationController()
     }
   }
 
-  def capabilityThenPermissionsActionForAllStates(capability: Capability, permissions: Permission)
-                                     (applicationId: String)
-                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    capabilityThenPermissionsActionWithStateCheck(capability, permissions, stateCheck = _ => true)(applicationId)(fun)
-  }
+  def capabilityThenPermissionsActionForAllStates = capabilityThenPermissionsActionWithStateCheck(stateCheck = _ => true) _
 
-  def capabilityThenPermissionsActionForApprovedApps(capability: Capability, permissions: Permission)
-                                     (applicationId: String)
-                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    capabilityThenPermissionsActionWithStateCheck(capability, permissions, applicationStateApprovedPredicate)(applicationId)(fun)
-  }
-
-  def capabilityThenPermissionsActionForApprovedOrTestingApps(capability: Capability, permissions: Permission)
-                                     (applicationId: String)
-                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    capabilityThenPermissionsActionWithStateCheck(capability, permissions, applicationStateApprovedOrTestingPredicate)(applicationId)(fun)
-  }
+  def capabilityThenPermissionsActionForApprovedApps = capabilityThenPermissionsActionWithStateCheck(stateCheck = applicationStateApprovedPredicate) _
+  
+  def capabilityThenPermissionsActionForApprovedOrTestingApps = capabilityThenPermissionsActionWithStateCheck(stateCheck = applicationStateApprovedOrTestingPredicate) _
 
   def permissionThenCapabilityAction(permissions: Permission, capability: Capability)
                                     (applicationId: String)
