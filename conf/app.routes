@@ -166,7 +166,7 @@ POST        /applications/:id/add/subscription-configuration/:pageNumber        
 GET         /applications/:id/add/subscription-configuration-step/:pageNumber               controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: String, pageNumber: Int)
 
 # TODO: Should only work for TESTING only (not pending or approved)
-GET         /applications/:id/check-your-answers/adname                                     controllers.checkpages.CheckYourAnswers.namePage(id: String)
+GET         /applications/:id/check-your-answers/name                                       controllers.checkpages.CheckYourAnswers.namePage(id: String)
 POST        /applications/:id/check-your-answers/name                                       controllers.checkpages.CheckYourAnswers.nameAction(id: String)
 GET         /applications/:id/check-your-answers/contact                                    controllers.checkpages.CheckYourAnswers.contactPage(id: String)
 POST        /applications/:id/check-your-answers/contact                                    controllers.checkpages.CheckYourAnswers.contactAction(id: String)

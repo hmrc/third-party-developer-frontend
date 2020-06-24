@@ -86,6 +86,10 @@ abstract class ApplicationController()
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
+  def applicationStateApprovedPredicate(state: State) = state == State.PRODUCTION
+
+  def applicationStateApprovedOrTestingPredicate(state: State) = state == State.PRODUCTION || state == State.TESTING
+
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, hasSubscriptionFields(request))
 
@@ -113,7 +117,26 @@ abstract class ApplicationController()
                                      (applicationId: String)
                                      (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
-      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions) andThen isApprovedFilter
+      val composedActions = Action andThen
+                            applicationAction(applicationId, loggedIn) andThen
+                            capabilityFilter(capability) andThen
+                            permissionFilter(permissions) andThen
+                            approvalFilter(applicationStateApprovedPredicate)
+
+      composedActions.async(fun)(request)
+    }
+  }
+
+  def capabilityThenPermissionsAction3(capability: Capability, permissions: Permission)
+                                     (applicationId: String)
+                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      val composedActions = Action andThen
+                            applicationAction(applicationId, loggedIn) andThen
+                            capabilityFilter(capability) andThen
+                            permissionFilter(permissions) andThen
+                            approvalFilter(applicationStateApprovedOrTestingPredicate)
+                            
       composedActions.async(fun)(request)
     }
   }
@@ -131,7 +154,12 @@ abstract class ApplicationController()
                                     (applicationId: String)
                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
-      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability) andThen isApprovedFilter
+      val composedActions = Action andThen
+                            applicationAction(applicationId, loggedIn) andThen
+                            permissionFilter(permissions) andThen
+                            capabilityFilter(capability) andThen
+                            approvalFilter(applicationStateApprovedPredicate)
+                            
       composedActions.async(fun)(request)
     }
   }

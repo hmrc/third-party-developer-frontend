@@ -169,11 +169,11 @@ trait ActionBuilders {
     }
   }
 
-  def isApprovedFilter = new ActionFilter[ApplicationRequest] {
+  def approvalFilter(approvalPredicate: State => Boolean) = new ActionFilter[ApplicationRequest] {
     override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
       implicit val implicitRequest = request
 
-      if (request.application.state.name.isApproved) None
+      if (approvalPredicate(request.application.state.name)) None
       else {
         Some(NotFound(errorHandler.notFoundTemplate))
       }

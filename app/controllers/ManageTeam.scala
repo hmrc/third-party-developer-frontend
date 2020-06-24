@@ -53,7 +53,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
   // OVerride the allowed app status in capabilityThenPermissionsAction2 (defaults to approved only)
   private def canEditTeamMembers(applicationId: String, alsoAllowTestingState : Boolean = false)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     if (alsoAllowTestingState)
-      capabilityThenPermissionsAction(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
+      capabilityThenPermissionsAction3(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
     else
       capabilityThenPermissionsAction2(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
 

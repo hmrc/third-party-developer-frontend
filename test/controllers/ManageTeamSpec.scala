@@ -339,57 +339,63 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         verify(applicationServiceMock, never()).removeTeamMember(any[Application], anyString(), anyString())(any[HeaderCarrier])
       }
     }
+  }
     
-    "ManageSubscriptions" when {
-      "using an application pending approval" should {
+  "ManageTeam" when {
+    "using an application pending approval" should {
 
-        trait PendingApprovalReturnsBadRequest extends Setup {
-          def executeAction: () => Result
-
-          val pageNumber = 1
-          
-          val apiVersion = exampleSubscriptionWithFields("api1", 1)
-          val subsData = Seq(
-            apiVersion
-          )
-
-          val app = aStandardPendingApprovalApplication(developer.email)
-
-          fetchByApplicationIdReturns(app)          
-          givenApplicationHasSubs(app, subsData)
-          
-          val result : Result = executeAction()
-
-          // println("*** -> " + bodyOf(result))
-
-          status(result) shouldBe NOT_FOUND
-        }
-
-        "return a bad request for manageTeam action" in new PendingApprovalReturnsBadRequest {
-          def executeAction = () => await(underTest.manageTeam(app.id)(loggedInRequest))
-        }
-
-        "return a bad request for addTeamMember action" in new PendingApprovalReturnsBadRequest {
-          def executeAction = () => await(underTest.addTeamMember(app.id)(loggedInRequest))
-        }
-
-        // TODO: Allow testing state
-        // (e.g. pre-approval & approved)
-        "return a bad request for addTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
-
-          var requestWithForm = loggedInRequest
-          // TODO : Fix me (pass this formdata)
-          // (loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString)))
-
-          def executeAction = () => await(addToken(underTest.addTeamMemberAction(app.id, AddTeamMemberPageMode.ApplicationCheck))(requestWithForm))
-        }
+      trait PendingApprovalReturnsBadRequest extends Setup {
+        def executeAction: Result
         
-        "return a bad request for removeTeamMember action" in new PendingApprovalReturnsBadRequest {
-          def executeAction = () => await(underTest.removeTeamMember(app.id, "fake-hash")(loggedInRequest))
-        }
+        val pageNumber = 1
         
-        "return a bad request for removeTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
-          def executeAction = () => await(underTest.removeTeamMemberAction(app.id)(loggedInRequest))
+        val apiVersion = exampleSubscriptionWithFields("api1", 1)
+        val subsData = Seq(
+          apiVersion
+        )
+
+        val app = aStandardPendingApprovalApplication(developer.email)
+
+        fetchByApplicationIdReturns(app)          
+        givenApplicationHasSubs(app, subsData)
+        
+        val result : Result = executeAction
+
+        status(result) shouldBe NOT_FOUND
+      }
+
+      "return a bad request for manageTeam action" in new PendingApprovalReturnsBadRequest {
+
+        def executeAction = {
+          await(underTest.manageTeam(app.id)(loggedInRequest))
+        }
+      }
+
+      "return a bad request for addTeamMember action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = {
+          await(underTest.addTeamMember(app.id)(loggedInRequest))
+        }
+      }
+
+      // TODO: Allow testing state
+      // (e.g. pre-approval & approved)
+      "return a bad request for addTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = {
+          val requestWithForm = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "thirdpartydeveloper@example.com", "role" -> "DEVELOPER")
+
+          await(addToken(underTest.addTeamMemberAction(app.id, AddTeamMemberPageMode.ApplicationCheck))(requestWithForm))
+        }
+      }
+      
+      "return a bad request for removeTeamMember action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = {
+          await(underTest.removeTeamMember(app.id, "fake-hash")(loggedInRequest))
+        }
+      }
+      
+      "return a bad request for removeTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = {
+          await(underTest.removeTeamMemberAction(app.id)(loggedInRequest))
         }
       }
     }

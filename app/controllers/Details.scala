@@ -67,7 +67,6 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
     })
   }
 
-  // TODO - Make only work for prod apps
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
     Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
   }
