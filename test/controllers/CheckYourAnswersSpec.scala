@@ -62,7 +62,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
@@ -160,7 +160,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
         Collaborator(anotherCollaboratorEmail, Role.DEVELOPER)
       )
 
-      val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION,
+      val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION,
         collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
 
       fetchByApplicationIdReturns(application.id, application)

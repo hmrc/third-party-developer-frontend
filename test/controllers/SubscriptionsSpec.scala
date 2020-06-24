@@ -54,7 +54,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
   val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
 
-  val anApplication: Application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val anApplication: Application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 

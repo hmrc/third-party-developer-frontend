@@ -44,11 +44,11 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val principalApp = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, Environment.PRODUCTION, Some("Description 1"),
+  val principalApp = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-  val subordinateApp = Application(appId, clientId, "App name 2", DateTimeUtils.now, DateTimeUtils.now, Environment.SANDBOX, Some("Description 2"),
+  val subordinateApp = Application(appId, clientId, "App name 2", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, Some("Description 2"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 

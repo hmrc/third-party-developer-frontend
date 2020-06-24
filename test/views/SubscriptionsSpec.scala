@@ -55,6 +55,7 @@ class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
     "Test Application",
     DateTime.now(),
     DateTime.now(),
+    None,
     environment,
     Some("Test Application"),
     Set.empty,

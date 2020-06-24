@@ -50,6 +50,10 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     }
   }
 
+  def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Ok(views.html.accessTokenSwitch()))
+  }
+
   def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request =>
     successful(Ok(views.html.usingPrivilegedApplicationCredentials()))
   }

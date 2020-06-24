@@ -56,3 +56,78 @@
         line-height: 1.25;
     }
 }
+
+.heading-banner {
+    font-family: "nta", Arial, sans-serif;
+    font-weight: 700;
+    display: block;
+    margin-block-start: 5px;
+    font-size: 18px;
+    line-height: 1.2;
+    margin-top: 2px;
+    margin-bottom: 0;
+}
+@media (min-width: 641px) {
+    .heading-banner {
+        font-size: 24px;
+        line-height: 1.2;
+    }
+}
+@media (min-width: 641px) {
+    .heading-banner {
+        margin-top: 2px;
+        margin-bottom: 0;
+    }
+}
+
+.moj-banner {
+    border: 5px solid #1d70b8;
+    color: #1d70b8;
+    font-size: 0;
+    margin: 20px 0 30px;
+    padding: 10px;
+}
+
+@media (min-width: 641px) {
+    .moj-banner {
+        margin: 0 0 30px;
+    }
+}
+
+.moj-banner__icon {
+    fill: currentColor;
+    float: left;
+    margin-right: 10px;
+}
+
+.moj-banner__message {
+    color: #0b0c0c;
+    display: block;
+    overflow: hidden;
+}
+
+.moj-banner-text {
+    font-size: 19px;
+    line-height: 1.25;
+    display: block;
+    margin-top: 0;
+}
+
+.heading-bannerx {
+    font-family: "nta", Arial, sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.2;
+    display: block;
+    margin-top: 1.875em;
+    margin-bottom: 0.83333em;
+}
+
+.moj-banner__message h2 {
+    margin-bottom: 10px;
+}
+
+.moj-banner__message h2:last-child,
+.moj-banner__message p:last-child {
+    margin-bottom: 0;
+}

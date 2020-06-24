@@ -44,6 +44,7 @@ class RedirectsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsCl
     "App name 1",
     DateTimeUtils.now,
     DateTimeUtils.now,
+    None,
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR), Collaborator(loggedInDev.email, Role.DEVELOPER)),

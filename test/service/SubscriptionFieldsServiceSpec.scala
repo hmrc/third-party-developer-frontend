@@ -51,7 +51,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
   val applicationId: String = "application-id"
   val clientId = "clientId"
   val application =
-    Application(applicationId, clientId, applicationName, DateTime.now(), DateTime.now(), Environment.PRODUCTION)
+    Application(applicationId, clientId, applicationName, DateTime.now(), DateTime.now(), None, Environment.PRODUCTION)
 
   trait Setup extends SubscriptionFieldsConnectorMock{
 
@@ -73,7 +73,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
     ).willReturn(
       Future.successful(
         Some(
-          Application(applicationId, clientId, "name", DateTime.now(), DateTime.now(), Environment.PRODUCTION)
+          Application(applicationId, clientId, "name", DateTime.now(), DateTime.now(), None, Environment.PRODUCTION)
         )
       )
     )
