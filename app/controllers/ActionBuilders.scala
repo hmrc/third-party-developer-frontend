@@ -163,10 +163,7 @@ trait ActionBuilders {
 
   def capabilityFilter(capability: Capability): ActionFilter[ApplicationRequest] = {
     val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
-    capability match {
-      case c : LikePermission => forbiddenWhenNotFilter(capabilityCheck)
-      case c : Capability => badRequestWhenNotFilter(capabilityCheck)     
-    }
+    badRequestWhenNotFilter(capabilityCheck)
   }
 
   def approvalFilter(approvalPredicate: State => Boolean) = new ActionFilter[ApplicationRequest] {

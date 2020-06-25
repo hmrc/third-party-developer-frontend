@@ -20,11 +20,6 @@ sealed trait Capability {
   def hasCapability(app: Application): Boolean
 }
 
-// Marker trait
-trait LikePermission {
-  self: Capability =>
-}
-
 object Capabilities {
   trait StandardAppCapability extends Capability {
     final def hasCapability(app: Application): Boolean = app.access.accessType.isStandard
@@ -50,7 +45,7 @@ object Capabilities {
     def hasCapability(app: Application) = true
   }
 
-  case object SupportsSubscriptions extends StandardAppCapability with LikePermission
+  case object SupportsSubscriptions extends StandardAppCapability
 
   case object EditSubscriptionFields extends Capability {
     override def hasCapability(app: Application): Boolean = !app.state.name.isPendingApproval

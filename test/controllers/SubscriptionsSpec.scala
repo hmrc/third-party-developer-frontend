@@ -114,14 +114,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       fetchByApplicationIdReturns(appId,ropcApplication)
       givenApplicationHasNoSubs(ropcApplication)
       val result: Result = await(addToken(underTest.manageSubscriptions(appId))(loggedInRequest))
-      status(result) shouldBe FORBIDDEN
+      status(result) shouldBe BAD_REQUEST
     }
 
     "return the privileged page for a privileged app" in new Setup {
       fetchByApplicationIdReturns(appId,privilegedApplication)
       givenApplicationHasNoSubs(privilegedApplication)
       val result: Result = await(addToken(underTest.manageSubscriptions(appId))(loggedInRequest))
-      status(result) shouldBe FORBIDDEN
+      status(result) shouldBe BAD_REQUEST
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
@@ -138,14 +138,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       fetchByApplicationIdReturns(appId,ropcApplication)
       givenApplicationHasNoSubs(ropcApplication)
       val result: Result = await(addToken(underTest.addAppSubscriptions(appId))(loggedInRequest))
-      status(result) shouldBe FORBIDDEN
+      status(result) shouldBe BAD_REQUEST
     }
 
     "return the privileged page for a privileged app" in new Setup {
       fetchByApplicationIdReturns(appId,privilegedApplication)
       givenApplicationHasNoSubs(privilegedApplication)
       val result: Result = await(addToken(underTest.addAppSubscriptions(appId))(loggedInRequest))
-      status(result) shouldBe FORBIDDEN
+      status(result) shouldBe BAD_REQUEST
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
