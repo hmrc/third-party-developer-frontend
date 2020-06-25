@@ -42,9 +42,8 @@ object Capabilities {
     def hasCapability(app: Application) = true
   }
 
-  // TODO: use app.state.name.isApproved
   case object ChangeClientSecret extends Capability {
-    def hasCapability(app: Application) = app.state.name == State.PRODUCTION
+    def hasCapability(app: Application) = app.state.name.isApproved
   }
 
   case object SupportsTeamMembers extends Capability {
@@ -68,11 +67,11 @@ object Capabilities {
   case object SupportsDeletion extends StandardAppCapability
 
   case object SupportsAppChecks extends Capability {
-    def hasCapability(app: Application): Boolean = app.state.name == State.TESTING
+    def hasCapability(app: Application): Boolean = app.state.name.isInTesting
   }
 
   case object SupportChangingAppDetails extends Capability {
-    def hasCapability(app: Application): Boolean = app.state.name == State.TESTING || app.deployedTo.isSandbox
+    def hasCapability(app: Application): Boolean = app.state.name.isInTesting || app.deployedTo.isSandbox
   }
 
   case object SupportsIpWhitelist extends Capability {
