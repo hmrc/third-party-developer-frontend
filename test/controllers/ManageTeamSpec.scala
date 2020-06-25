@@ -54,8 +54,6 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
   val loggedInUser = DeveloperSession(session)
 
-  val tokens2 = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
-
   trait Setup extends ApplicationServiceMock with SessionServiceMock with TestApplications {
     val underTest = new ManageTeam(
       sessionServiceMock,
@@ -88,7 +86,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       val application = aStandardApplication.copy(collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = DateTime.parse("2018-04-06T09:00"))
 
       fetchByApplicationIdReturns(appId,application)
-      fetchCredentialsReturns(application,tokens2)
+      fetchCredentialsReturns(application,tokens())
       givenApplicationHasSubs(application,Seq.empty)
 
       application
