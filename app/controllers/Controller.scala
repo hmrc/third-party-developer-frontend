@@ -86,9 +86,11 @@ abstract class ApplicationController()
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
-  def applicationStateApprovedPredicate(state: State) = state == State.PRODUCTION
+  def applicationStateApprovedPredicate(state: State) = state.isApproved
 
-  def applicationStateApprovedOrTestingPredicate(state: State) = state == State.PRODUCTION || state == State.TESTING
+  def applicationStateTesting(state: State) = state.isInTesting
+
+  def applicationStateApprovedOrTestingPredicate(state: State) = state.isApproved || state.isInTesting
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, hasSubscriptionFields(request))
@@ -123,6 +125,8 @@ abstract class ApplicationController()
   def capabilityThenPermissionsActionForApprovedApps = capabilityThenPermissionsActionWithStateCheck(stateCheck = applicationStateApprovedPredicate) _
   
   def capabilityThenPermissionsActionForApprovedOrTestingApps = capabilityThenPermissionsActionWithStateCheck(stateCheck = applicationStateApprovedOrTestingPredicate) _
+
+  def capabilityThenPermissionsActionForTesting = capabilityThenPermissionsActionWithStateCheck(stateCheck =  applicationStateTesting) _
 
   private object ManageSubscriptionsActions {
     def subscriptionsComposedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)

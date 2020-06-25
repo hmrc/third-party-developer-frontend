@@ -26,9 +26,8 @@ import scala.concurrent.Future
 trait CanUseCheckActions {
   self: ApplicationController =>
 
-  // TODO - probably only used for TESTING/pre-approval apps
   private[controllers] def canUseChecksAction(applicationId: String)
                                 (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsActionForAllStates(SupportsAppChecks, AdministratorOnly)(applicationId)(fun)
+    capabilityThenPermissionsActionForTesting(SupportsAppChecks, AdministratorOnly)(applicationId)(fun)
 }
 
