@@ -309,8 +309,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   }
 
   "changeLockedApiSubscription" when {
-    def forbiddenLockedSubscriptionChangeRequest(app: => Application): Unit = {
-      "return 403 Forbidden" in new Setup {
+    def checkBadLockedSubscriptionChangeRequest(app: => Application, expectedStatus: Int): Unit = {
+      s"return $expectedStatus" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
@@ -323,30 +323,18 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         val result: Result = await(underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
 
-        status(result) shouldBe FORBIDDEN
+        status(result) shouldBe expectedStatus
 
         verify(applicationServiceMock, never).isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])
       }
     }
 
+    def forbiddenLockedSubscriptionChangeRequest(app: => Application): Unit = {
+      checkBadLockedSubscriptionChangeRequest(app, FORBIDDEN)
+    }
+
     def badLockedSubscriptionChangeRequest(app: => Application): Unit = {
-      "return 400 Bad Request" in new Setup {
-        val redirectTo = "MANAGE_PAGE"
-        val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
-          "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
-
-        fetchByApplicationIdReturns(appId,app)
-
-        givenApplicationHasNoSubs(app)
-        givenAppIsSubscribedToApi(app, apiName, apiContext, apiVersion)
-
-        val result: Result = await(underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request))
-
-        status(result) shouldBe BAD_REQUEST
-
-        verify(applicationServiceMock, never).isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any[HeaderCarrier])
-      }
+      checkBadLockedSubscriptionChangeRequest(app, BAD_REQUEST)
     }
 
     def allowedLockedSubscriptionChangeRequest(app: => Application): Unit = {
@@ -394,9 +382,9 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminSubmittedSandboxApplication) }
     "an administrator attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedSandboxApplication) }
     "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedProductionApplication) }
-    "a developer attempts to change a created production application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerCreatedProductionApplication) }
-    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedSandboxApplication) }
-    "a developer attempts to change a created sandbox application" should { behave like forbiddenLockedSubscriptionChangeRequest(devloperCreatedSandboxApplication) }
+    "a developer attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(developerCreatedProductionApplication) }
+    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(developerSubmittedSandboxApplication) }
+    "a developer attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(devloperCreatedSandboxApplication) }
   }
 
   "changeLockedApiSubscriptionAction" when {
@@ -519,10 +507,9 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminSubmittedSandboxApplication) }
     "an administrator attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedSandboxApplication) }
     "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedProductionApplication) }
-    "a developer attempts to change a created production application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerCreatedProductionApplication) }
-    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedSandboxApplication) }
-    "a developer attempts to change a created sandbox application" should { behave like forbiddenLockedSubscriptionChangeRequest(devloperCreatedSandboxApplication) }
-
+    "a developer attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(developerCreatedProductionApplication) }
+    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(developerSubmittedSandboxApplication) }
+    "a developer attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(devloperCreatedSandboxApplication) }
   }
 
   "Authorization" should {

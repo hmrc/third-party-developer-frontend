@@ -124,23 +124,6 @@ abstract class ApplicationController()
   
   def capabilityThenPermissionsActionForApprovedOrTestingApps = capabilityThenPermissionsActionWithStateCheck(stateCheck = applicationStateApprovedOrTestingPredicate) _
 
-  private def permissionThenCapabilityActionWithStateCheck(stateCheck: State => Boolean)(permissions: Permission, capability: Capability)
-                                                  (applicationId: String)
-                                                  (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val composedActions = Action andThen
-                            applicationAction(applicationId, loggedIn) andThen
-                            permissionFilter(permissions) andThen
-                            capabilityFilter(capability)
-                            approvalFilter(stateCheck)
-      composedActions.async(fun)(request)
-    }
-  }
-
-  def permissionThenCapabilityActionForAllStates = permissionThenCapabilityActionWithStateCheck(stateCheck = _ => true) _
-
-  def permissionThenCapabilityActionForApprovedApps = permissionThenCapabilityActionWithStateCheck(stateCheck = applicationStateApprovedPredicate) _
-  
   private object ManageSubscriptionsActions {
     def subscriptionsComposedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
                       (implicit request: UserRequest[AnyContent]) =

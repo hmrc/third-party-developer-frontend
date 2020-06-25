@@ -132,7 +132,6 @@ trait ActionBuilders {
     if (cond) {
       None
     } else {
-      // TODO: Return forbidden template
       Some(Forbidden(errorHandler.forbiddenTemplate))
     }
   }

@@ -44,8 +44,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
 
   def canChangeTermsOfUseAction(applicationId: String)
                                 (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    permissionThenCapabilityActionForApprovedApps(SandboxOrAdmin,SupportsTermsOfUse)(applicationId)(fun)
-
+    capabilityThenPermissionsActionForApprovedApps(SupportsTermsOfUse, SandboxOrAdmin)(applicationId)(fun)
 
   def termsOfUsePartial() = Action {
     Ok(partials.termsOfUse())
