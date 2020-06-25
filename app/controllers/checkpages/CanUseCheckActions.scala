@@ -28,6 +28,6 @@ trait CanUseCheckActions {
 
   private[controllers] def canUseChecksAction(applicationId: String)
                                 (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsActionForTesting(SupportsAppChecks, AdministratorOnly)(applicationId)(fun)
+    checkActionForTesting(SupportsAppChecks, AdministratorOnly)(applicationId)(fun)
 }
 

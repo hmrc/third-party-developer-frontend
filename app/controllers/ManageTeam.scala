@@ -47,13 +47,13 @@ class ManageTeam @Inject()(val sessionService: SessionService,
   extends ApplicationController {
 
   private def whenAppSupportsTeamMembers(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    capabilityThenPermissionsActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
+    checkActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
 
   private def canEditTeamMembers(applicationId: String, alsoAllowTestingState : Boolean = false)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     if (alsoAllowTestingState)
-      capabilityThenPermissionsActionForApprovedOrTestingApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
+      checkActionForApprovedOrTestingApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
     else
-      capabilityThenPermissionsActionForApprovedApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
+      checkActionForApprovedApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
 
   def manageTeam(applicationId: String, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     val view = views.html.manageTeamViews.manageTeam(applicationViewModelFromApplicationRequest, request.role, AddTeamMemberForm.form)

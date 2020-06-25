@@ -86,12 +86,6 @@ abstract class ApplicationController()
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
-  def applicationStateApprovedPredicate(state: State) = state.isApproved
-
-  def applicationStateTesting(state: State) = state.isInTesting
-
-  def applicationStateApprovedOrTestingPredicate(state: State) = state.isApproved || state.isInTesting
-
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, hasSubscriptionFields(request))
 
@@ -106,7 +100,7 @@ abstract class ApplicationController()
       composedActions.async(fun)(request)
     }
 
-  private def capabilityThenPermissionsActionWithStateCheck(stateCheck: State => Boolean)(capability: Capability, permissions: Permission)
+  private def checkActionWithStateCheck(stateCheck: State => Boolean)(capability: Capability, permissions: Permission)
                                                             (applicationId: String)
                                                             (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
@@ -120,13 +114,13 @@ abstract class ApplicationController()
     }
   }
 
-  def capabilityThenPermissionsActionForAllStates = capabilityThenPermissionsActionWithStateCheck(stateCheck = _ => true) _
+  def checkActionForAllStates = checkActionWithStateCheck(stateCheck = _ => true) _
 
-  def capabilityThenPermissionsActionForApprovedApps = capabilityThenPermissionsActionWithStateCheck(stateCheck = applicationStateApprovedPredicate) _
+  def checkActionForApprovedApps = checkActionWithStateCheck(_.isApproved) _
   
-  def capabilityThenPermissionsActionForApprovedOrTestingApps = capabilityThenPermissionsActionWithStateCheck(stateCheck = applicationStateApprovedOrTestingPredicate) _
+  def checkActionForApprovedOrTestingApps = checkActionWithStateCheck(state => state.isApproved || state.isInTesting) _
 
-  def capabilityThenPermissionsActionForTesting = capabilityThenPermissionsActionWithStateCheck(stateCheck =  applicationStateTesting) _
+  def checkActionForTesting = checkActionWithStateCheck(_.isInTesting) _
 
   private object ManageSubscriptionsActions {
     def subscriptionsComposedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)

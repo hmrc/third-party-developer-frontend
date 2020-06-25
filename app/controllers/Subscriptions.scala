@@ -51,10 +51,10 @@ class Subscriptions @Inject() (
     with ApplicationHelper {
 
   private def canManageLockedApiSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    capabilityThenPermissionsActionForAllStates(ManageLockedSubscriptions, AdministratorOnly)(applicationId)(fun)
+    checkActionForAllStates(ManageLockedSubscriptions, AdministratorOnly)(applicationId)(fun)
 
   private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    capabilityThenPermissionsActionForAllStates(SupportsSubscriptions, SandboxOrAdmin)(applicationId)(fun)
+    checkActionForAllStates(SupportsSubscriptions, SandboxOrAdmin)(applicationId)(fun)
 
   def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
