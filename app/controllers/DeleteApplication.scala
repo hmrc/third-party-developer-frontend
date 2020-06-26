@@ -42,10 +42,10 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
   extends ApplicationController {
 
   private def canDeleteApplicationAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    capabilityThenPermissionsAction(SupportsDeletion,AdministratorOnly)(applicationId)(fun)
+    checkActionForApprovedApps(SupportsDeletion,AdministratorOnly)(applicationId)(fun)
 
   private def canViewDeleteApplicationAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    capabilityThenPermissionsAction(SupportsDeletion,TeamMembersOnly)(applicationId)(fun)
+    checkActionForApprovedApps(SupportsDeletion,TeamMembersOnly)(applicationId)(fun)
 
 
   def deleteApplication(applicationId: String, error: Option[String] = None) =

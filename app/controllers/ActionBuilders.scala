@@ -132,7 +132,7 @@ trait ActionBuilders {
     if (cond) {
       None
     } else {
-      Some(Forbidden(errorHandler.badRequestTemplate))
+      Some(Forbidden(errorHandler.forbiddenTemplate))
     }
   }
 
@@ -140,7 +140,7 @@ trait ActionBuilders {
     if (cond) {
       None
     } else {
-      Some(BadRequest(Json.toJson(BadRequestError)))
+      Some(BadRequest(errorHandler.badRequestTemplate))
     }
   }
 
@@ -160,42 +160,19 @@ trait ActionBuilders {
     }
   }
 
-  def capabilityFilter(capability: Capability) = {
+  def capabilityFilter(capability: Capability): ActionFilter[ApplicationRequest] = {
     val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
-    capability match {
-      case c : LikePermission => forbiddenWhenNotFilter(capabilityCheck)
-      case c : Capability => badRequestWhenNotFilter(capabilityCheck)
-    }
+    badRequestWhenNotFilter(capabilityCheck)
   }
 
-  def sandboxOrAdminIfProductionAppFilter: ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = Future.successful {
-      implicit val implicitRequest: ApplicationRequest[A] = request
+  def approvalFilter(approvalPredicate: State => Boolean) = new ActionFilter[ApplicationRequest] {
+    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
+      implicit val implicitRequest = request
 
-      (request.application.deployedTo, request.role) match {
-        case (Environment.SANDBOX, _) => None
-        case (_, Role.ADMINISTRATOR) => None
-        case _ => Some(Forbidden(errorHandler.badRequestTemplate))
+      if (approvalPredicate(request.application.state.name)) None
+      else {
+        Some(NotFound(errorHandler.notFoundTemplate))
       }
-    }
-  }
-
-
-  def adminFilter = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
-      implicit val implicitRequest = request
-
-      if (request.role == Role.ADMINISTRATOR) None
-      else Some(Forbidden(errorHandler.badRequestTemplate))
-    }
-  }
-
-  def notProductionAppFilter = new ActionFilter[ApplicationRequest] {
-    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
-      implicit val implicitRequest = request
-
-      if (request.application.deployedTo == Environment.SANDBOX) None
-      else Some(Forbidden(errorHandler.badRequestTemplate))
     }
   }
 

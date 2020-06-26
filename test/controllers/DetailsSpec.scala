@@ -42,11 +42,10 @@ import scala.concurrent.Future._
 class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   Helpers.running(fakeApplication) {
-
     "details" when {
       "logged in as a Developer on an application" should {
         "return the view for a standard production app with no change link" in new Setup {
-          val approvedApplication = anApplication(developerEmail = loggedInUser.email, state = ApplicationState.production("dont-care", "dont-care"))
+          val approvedApplication = anApplication(developerEmail = loggedInUser.email)
           detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
         }
 
@@ -57,7 +56,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "logged in as an Administrator on an application" should {
         "return the view for a standard production app" in new Setup {
-          val approvedApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.production("dont-care", "dont-care"))
+          val approvedApplication = anApplication(adminEmail = loggedInUser.email)
           detailsShouldRenderThePage(approvedApplication)
         }
 
@@ -107,7 +106,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "not a team member on an application" should {
         "return not found" in new Setup {
-          val application = aStandardApplication()
+          val application = aStandardApplication
           givenApplicationExists(application)
 
           val result = application.callDetails
@@ -118,7 +117,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "not logged in" should {
         "redirect to login" in new Setup {
-          val application = aStandardApplication()
+          val application = aStandardApplication
           givenApplicationExists(application)
 
           val result = application.callDetailsNotLoggedIn
@@ -130,15 +129,21 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "changeDetails" should {
       "return the view for an admin on a standard production app" in new Setup {
-        changeDetailsShouldRenderThePage(anApplication(adminEmail = loggedInUser.email))
+        changeDetailsShouldRenderThePage(
+          anApplication(adminEmail = loggedInUser.email)
+        )
       }
 
       "return the view for a developer on a sandbox app" in new Setup {
-        changeDetailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInUser.email))
+        changeDetailsShouldRenderThePage(
+          aSandboxApplication(developerEmail = loggedInUser.email)
+        )
       }
 
       "return the view for an admin on a sandbox app" in new Setup {
-        changeDetailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInUser.email))
+        changeDetailsShouldRenderThePage(
+          aSandboxApplication(adminEmail = loggedInUser.email)
+        )
       }
 
       "return forbidden for a developer on a standard production app" in new Setup {
@@ -151,7 +156,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "return not found when not a teamMember on the app" in new Setup {
-        val application = aStandardApplication()
+        val application = aStandardApprovedApplication
         givenApplicationExists(application)
 
         val result = application.callChangeDetails
@@ -160,7 +165,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "redirect to login when not logged in" in new Setup {
-        val application = aStandardApplication()
+        val application = aStandardApprovedApplication
         givenApplicationExists(application)
 
         val result = application.callDetailsNotLoggedIn
@@ -226,35 +231,17 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "changeDetailsAction for production app in testing state" should {
 
-      "redirect to the details page on success for an admin" in new Setup {
-        changeDetailsShouldRedirectOnSuccess(anApplication(adminEmail = loggedInUser.email))
-      }
-
-      "update all fields for an admin" in new Setup {
-        changeDetailsShouldUpdateTheApplication(anApplication(adminEmail = loggedInUser.email))
-      }
-
-      "update both the app and the check information" in new Setup {
-        val application = anApplication(adminEmail = loggedInUser.email)
+      "return not found" in new Setup {
+        val application = aStandardNonApprovedApplication()
         givenApplicationExists(application)
 
-        val result = application.withName(newName).callChangeDetailsAction
+        val result = application.callChangeDetails
 
-        verify(underTest.applicationService).update(any[UpdateApplicationRequest])(any[HeaderCarrier])
-        verify(underTest.applicationService).updateCheckInformation(mockEq(application), any[CheckInformation])(any[HeaderCarrier])
-      }
-
-      "return forbidden for a developer" in new Setup {
-        val application = anApplication(developerEmail = loggedInUser.email)
-        givenApplicationExists(application)
-
-        val result = application.withDescription(newDescription).callChangeDetailsAction
-
-        status(result) shouldBe FORBIDDEN
+        status(result) shouldBe NOT_FOUND
       }
 
       "return not found when not a teamMember on the app" in new Setup {
-        val application = aStandardApplication()
+        val application = aStandardApprovedApplication
         givenApplicationExists(application)
 
         val result = application.withDescription(newDescription).callChangeDetailsAction
@@ -263,7 +250,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "redirect to login when not logged in" in new Setup {
-        val application = aStandardApplication()
+        val application = aStandardApprovedApplication
         givenApplicationExists(application)
 
         val result = application.withDescription(newDescription).callChangeDetailsActionNotLoggedIn
@@ -276,14 +263,12 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "redirect to the details page on success for an admin" in new Setup {
         val application = anApplication(adminEmail = loggedInUser.email)
-          .withState(ApplicationState.pendingGatekeeperApproval(loggedInUser.email))
 
         changeDetailsShouldRedirectOnSuccess(application)
       }
 
       "return forbidden for a developer" in new Setup {
         val application = anApplication(developerEmail = loggedInUser.email)
-          .withState(ApplicationState.pendingGatekeeperApproval(loggedInUser.email))
 
         givenApplicationExists(application)
 
@@ -292,10 +277,8 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe FORBIDDEN
       }
 
-
       "keep original application name when administrator does an update" in new Setup {
         val application = anApplication(adminEmail = loggedInUser.email)
-          .withState(ApplicationState.pendingGatekeeperApproval(loggedInUser.email))
 
         givenApplicationExists(application)
 

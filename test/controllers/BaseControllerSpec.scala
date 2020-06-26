@@ -27,10 +27,11 @@ import play.api.libs.crypto.CookieSigner
 import play.twirl.api.Html
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.SharedMetricsClearDown
+import mocks.service.ErrorHandlerMock
 
 import scala.concurrent.ExecutionContext
 
-class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication with SharedMetricsClearDown {
+class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication with SharedMetricsClearDown with ErrorHandlerMock {
 
   SharedMetricRegistries.clear()
 
@@ -43,8 +44,4 @@ class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures wi
   implicit lazy val materializer = fakeApplication.materializer
 
   lazy val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
-
-  val mockErrorHandler = mock[ErrorHandler]
-  when(mockErrorHandler.notFoundTemplate(any())).thenReturn(Html(""))
-  when(mockErrorHandler.badRequestTemplate(any())).thenReturn(Html(""))
 }

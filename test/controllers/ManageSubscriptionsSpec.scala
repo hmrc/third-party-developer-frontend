@@ -39,6 +39,7 @@ import scala.concurrent.Future
 import service.SubscriptionFieldsService.ValidateAgainstRole
 import domain.DevhubAccessRequirement.NoOne
 import domain.DevhubAccessRequirement.Anyone
+import utils.TestApplications
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = Future.failed(new ApplicationNotFound)
@@ -161,7 +162,57 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
   }
 
   "ManageSubscriptions" when {
-    
+    "using an appplication pending approval" should {
+
+      trait PendingApprovalReturnsBadRequest extends ManageSubscriptionsSetup with TestApplications {
+        def executeAction: () => Result
+
+        val pageNumber = 1
+        
+        val apiVersion = exampleSubscriptionWithFields("api1", 1)
+        val subsData = Seq(
+          apiVersion
+        )
+
+        val app = aStandardPendingApprovalApplication(developer.email)
+
+        fetchByApplicationIdReturns(app)          
+        givenApplicationHasSubs(app, subsData)
+        
+        val result : Result = executeAction()
+
+        status(result) shouldBe BAD_REQUEST
+      }
+
+      "return a bad request for subscriptionConfigurationStart action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = () => await(manageSubscriptionController.subscriptionConfigurationStart(app.id)(loggedInRequest))
+      }
+
+      "return a bad request for subscriptionConfigurationPage action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = () => await(manageSubscriptionController.subscriptionConfigurationPage(app.id, pageNumber)(loggedInRequest))
+      }
+
+      "return a bad request for subscriptionConfigurationPagePost action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = () => await(manageSubscriptionController.subscriptionConfigurationPagePost(app.id, pageNumber)(loggedInRequest))
+      }
+      
+      "return a bad request for subscriptionConfigurationStepPage action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = () => await(manageSubscriptionController.subscriptionConfigurationStepPage(app.id, pageNumber)(loggedInRequest))
+      }
+      
+      "return a bad request for listApiSubscriptions action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = () => await(manageSubscriptionController.listApiSubscriptions(app.id)(loggedInRequest))
+      }
+
+      "return a bad request for editApiMetadataPage action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = () => await(manageSubscriptionController.editApiMetadataPage(app.id, apiVersion.context, apiVersion.apiVersion.version, SaveSubsFieldsPageMode.CheckYourAnswers)(loggedInRequest))
+      }
+
+      "return a bad request for saveSubscriptionFields action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = () => await(manageSubscriptionController.saveSubscriptionFields(app.id, apiVersion.context, apiVersion.apiVersion.version, SaveSubsFieldsPageMode.CheckYourAnswers)(loggedInRequest))
+      }
+    }
+  
     "a user is logged in" when {
 
       "the subscriptions list action is called it" should {

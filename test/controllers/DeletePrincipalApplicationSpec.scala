@@ -29,13 +29,13 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.WithCSRFAddToken
+import utils.{WithCSRFAddToken, TestApplications}
 import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken {
+class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken with TestApplications with ErrorHandlerMock {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val underTest = new DeleteApplication(
@@ -43,7 +43,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       mock[AuditService],
       applicationServiceMock,
       sessionServiceMock,
-      mock[ErrorHandler],
+      mockErrorHandler,
       messagesApi,
       cookieSigner
     )
@@ -130,4 +130,40 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     }
   }
 
+  "return not found if non-approved app" when {
+    trait UnapprovedApplicationSetup extends Setup {
+      val nonApprovedApplication = aStandardNonApprovedApplication(loggedInUser.email)
+
+      fetchByApplicationIdReturns(nonApprovedApplication)
+      given(underTest.applicationService.apisWithSubscriptions(any())(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
+
+      given(underTest.applicationService.requestPrincipalApplicationDeletion(any(), any())(any[HeaderCarrier]))
+        .willReturn(Future.successful(TicketCreated))
+    }
+
+    "deleteApplication action is called" in new UnapprovedApplicationSetup {
+      val result = await(addToken(underTest.deleteApplication(nonApprovedApplication.id, None))(loggedInRequest))
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "deletePrincipalApplicationConfirm action is called" in new UnapprovedApplicationSetup {
+      val result = await(addToken(underTest.deletePrincipalApplicationConfirm(nonApprovedApplication.id, None))(loggedInRequest))
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "deletePrincipalApplicationAction action is called" in new UnapprovedApplicationSetup {
+      val result = await(addToken(underTest.deletePrincipalApplicationAction(nonApprovedApplication.id))(loggedInRequest))
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "deleteSubordinateApplicationConfirm action is called" in new UnapprovedApplicationSetup {
+      val result = await(addToken(underTest.deleteSubordinateApplicationConfirm(nonApprovedApplication.id))(loggedInRequest))
+      status(result) shouldBe NOT_FOUND
+    }
+    
+    "deleteSubordinateApplicationAction action is called" in new UnapprovedApplicationSetup {
+      val result = await(addToken(underTest.deleteSubordinateApplicationAction(nonApprovedApplication.id))(loggedInRequest))
+      status(result) shouldBe NOT_FOUND
+    }
+  }
 }

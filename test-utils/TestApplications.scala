@@ -44,7 +44,7 @@ trait TestApplications {
   def anApplication(appId: String = randomUUID().toString,
                     clientId: String = randomString(28),
                     environment: Environment = Environment.PRODUCTION,
-                    state: ApplicationState = ApplicationState.testing,
+                    state: ApplicationState = ApplicationState.production("test", "test"),
                     adminEmail: String = "admin@example.com",
                     developerEmail: String = "developer@example.com",
                     access: Access = standardAccess(),
@@ -63,7 +63,15 @@ trait TestApplications {
       ipWhitelist = ipWhitelist)
   }
 
-  def aStandardApplication(): Application = anApplication()
+  val aStandardApplication: Application = anApplication()
+
+  def aStandardApprovedApplication: Application = aStandardApplication
+
+  def aStandardNonApprovedApplication(adminEmail: String = "admin@example.com"): Application = 
+    anApplication(adminEmail = adminEmail).withState(ApplicationState.testing)
+
+  def aStandardPendingApprovalApplication(adminEmail: String = "admin@example.com"): Application = 
+    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test", "test"))
 
   def standardAccess(redirectUris: Seq[String] = Seq("https://redirect1", "https://redirect2"),
                      termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),
@@ -100,13 +108,9 @@ trait TestApplications {
 
     final def withState(state: ApplicationState): Application = app.copy(state = state)
 
-    final def withEnvironment(environment: Environment): Application = app.copy(deployedTo = environment)
-
     final def withCheckInformation(checkInformation: CheckInformation): Application = app.copy(checkInformation = Some(checkInformation))
-  }
 
-  implicit class AppAugment2(val app: Application) {
-    def standardAccess(): Standard = {
+    def standardAccess: Standard = {
       if (app.access.accessType != AccessType.STANDARD) {
         throw new IllegalArgumentException(s"You can only use this method on a Standard application. Your app was ${app.access.accessType}")
       } else {
@@ -114,14 +118,11 @@ trait TestApplications {
       }
     }
 
-    final def withRedirectUri(redirectUri: String): Application =
-      app.copy(access = standardAccess().copy(redirectUris = standardAccess().redirectUris :+ redirectUri))
+    final def withRedirectUris(redirectUris: Seq[String]): Application = app.copy(access = standardAccess.copy(redirectUris = redirectUris))
 
-    final def withRedirectUris(redirectUris: Seq[String]): Application = app.copy(access = standardAccess().copy(redirectUris = redirectUris))
+    final def withTermsAndConditionsUrl(url: Option[String]): Application = app.copy(access = standardAccess.copy(termsAndConditionsUrl = url))
 
-    final def withTermsAndConditionsUrl(url: Option[String]): Application = app.copy(access = standardAccess().copy(termsAndConditionsUrl = url))
-
-    final def withPrivacyPolicyUrl(url: Option[String]): Application = app.copy(access = standardAccess().copy(privacyPolicyUrl = url))
+    final def withPrivacyPolicyUrl(url: Option[String]): Application = app.copy(access = standardAccess.copy(privacyPolicyUrl = url))
   }
 }
 

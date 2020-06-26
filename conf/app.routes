@@ -84,8 +84,10 @@ GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation  
 POST        /applications/:id/team-members/remove                                           controllers.ManageTeam.removeTeamMemberAction(id: String)
 
 GET         /applications/:id/details                                                       controllers.Details.details(id: String)
+
 GET         /applications/:id/details/change                                                controllers.Details.changeDetails(id: String)
 POST        /applications/:id/details/change                                                controllers.Details.changeDetailsAction(id: String)
+
 GET         /applications/:id/details/terms-of-use                                          controllers.TermsOfUse.termsOfUse(id: String)
 POST        /applications/:id/details/terms-of-use                                          controllers.TermsOfUse.agreeTermsOfUse(id: String)
 
@@ -110,6 +112,7 @@ POST        /applications/:id/ip-whitelist/change                               
 GET         /applications/:id/subscriptions                                                 controllers.Subscriptions.manageSubscriptions(id: String)
 
 POST        /applications/:id/change-subscription                                           controllers.Subscriptions.changeApiSubscription(id: String, context: String, version: String, redirectTo: String)
+
 GET         /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: String, version: String, redirectTo: String)
 POST        /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscriptionAction(id: String, name: String, context: String, version: String, redirectTo: String)
 
@@ -125,7 +128,6 @@ GET         /applications/:id/request-check                                     
 POST        /applications/:id/request-check                                                 controllers.checkpages.ApplicationCheck.requestCheckAction(id: String)
 GET         /applications/:id/request-check/submitted                                       controllers.checkpages.ApplicationCheck.credentialsRequested(id: String)
 GET         /applications/:id/request-check/appDetails                                      controllers.checkpages.ApplicationCheck.unauthorisedAppDetails(id: String)
-
 
 GET         /applications/:id/request-check/name                                            controllers.checkpages.ApplicationCheck.namePage(id: String)
 POST        /applications/:id/request-check/name                                            controllers.checkpages.ApplicationCheck.nameAction(id: String)

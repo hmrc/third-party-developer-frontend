@@ -100,30 +100,34 @@ abstract class ApplicationController()
       composedActions.async(fun)(request)
     }
 
-  def capabilityThenPermissionsAction(capability: Capability, permissions: Permission)
-                                     (applicationId: String)
-                                     (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+  private def checkActionWithStateCheck(stateCheck: State => Boolean)(capability: Capability, permissions: Permission)
+                                                            (applicationId: String)
+                                                            (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
-      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen capabilityFilter(capability) andThen permissionFilter(permissions)
+      val composedActions = Action andThen 
+                            applicationAction(applicationId, loggedIn) andThen 
+                            capabilityFilter(capability) andThen 
+                            permissionFilter(permissions) andThen 
+                            approvalFilter(stateCheck)
+        
       composedActions.async(fun)(request)
     }
   }
 
-  def permissionThenCapabilityAction(permissions: Permission, capability: Capability)
-                                    (applicationId: String)
-                                    (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
-    loggedInAction { implicit request =>
-      val composedActions = Action andThen applicationAction(applicationId, loggedIn) andThen permissionFilter(permissions) andThen capabilityFilter(capability)
-      composedActions.async(fun)(request)
-    }
-  }
+  def checkActionForAllStates = checkActionWithStateCheck(stateCheck = _ => true) _
+
+  def checkActionForApprovedApps = checkActionWithStateCheck(_.isApproved) _
+  
+  def checkActionForApprovedOrTestingApps = checkActionWithStateCheck(state => state.isApproved || state.isInTesting) _
+
+  def checkActionForTesting = checkActionWithStateCheck(_.isInTesting) _
 
   private object ManageSubscriptionsActions {
     def subscriptionsComposedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
                       (implicit request: UserRequest[AnyContent]) =
       Action andThen
         applicationAction(applicationId, loggedIn) andThen
-        capabilityFilter(Capabilities.SupportsSubscriptionFields) andThen
+        capabilityFilter(Capabilities.EditSubscriptionFields) andThen
         fieldDefinitionsExistRefiner(noFieldsBehaviour)
   }
 

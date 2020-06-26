@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package controllers.checkpages
+@import include._
+@import domain._
 
-import controllers.{ApplicationController, ApplicationRequest}
-import domain.Capabilities.SupportsAppChecks
-import domain.Permissions.AdministratorOnly
-import play.api.mvc.{Action, AnyContent, Result}
+@()(
+        implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
-import scala.concurrent.Future
-
-trait CanUseCheckActions {
-  self: ApplicationController =>
-
-  private[controllers] def canUseChecksAction(applicationId: String)
-                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    checkActionForTesting(SupportsAppChecks, AdministratorOnly)(applicationId)(fun)
+@main(
+    title = applicationConfig.title,
+    navTitle = Some(applicationConfig.title),
+    navTitleLink = Some(Call("GET", "/api-documentation")),
+    headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
+    serviceInfoContent = Some(HtmlFormat.empty),
+    developerSession = None
+) {
+  <h1>Forbidden</h1>
 }
-

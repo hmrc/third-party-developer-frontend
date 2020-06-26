@@ -20,11 +20,6 @@ sealed trait Capability {
   def hasCapability(app: Application): Boolean
 }
 
-// Marker trait
-trait LikePermission {
-  self: Capability =>
-}
-
 object Capabilities {
   trait StandardAppCapability extends Capability {
     final def hasCapability(app: Application): Boolean = app.access.accessType.isStandard
@@ -43,17 +38,17 @@ object Capabilities {
   }
 
   case object ChangeClientSecret extends Capability {
-    def hasCapability(app: Application) = app.state.name == State.PRODUCTION
+    def hasCapability(app: Application) = app.state.name.isApproved
   }
 
   case object SupportsTeamMembers extends Capability {
     def hasCapability(app: Application) = true
   }
 
-  case object SupportsSubscriptions extends StandardAppCapability with LikePermission
+  case object SupportsSubscriptions extends StandardAppCapability
 
-  case object SupportsSubscriptionFields extends Capability {
-    override def hasCapability(app: Application): Boolean = true
+  case object EditSubscriptionFields extends Capability {
+    override def hasCapability(app: Application): Boolean = !app.state.name.isPendingApproval
   }
 
   case object SupportsDetails extends StandardAppCapability
@@ -67,11 +62,11 @@ object Capabilities {
   case object SupportsDeletion extends StandardAppCapability
 
   case object SupportsAppChecks extends Capability {
-    def hasCapability(app: Application): Boolean = app.state.name == State.TESTING
+    def hasCapability(app: Application): Boolean = app.state.name.isInTesting
   }
 
   case object SupportChangingAppDetails extends Capability {
-    def hasCapability(app: Application): Boolean = app.state.name == State.TESTING || app.deployedTo.isSandbox
+    def hasCapability(app: Application): Boolean = app.state.name.isInTesting || app.deployedTo.isSandbox
   }
 
   case object SupportsIpWhitelist extends Capability {

@@ -40,6 +40,8 @@ import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import utils.TestApplications
+import play.api.mvc.Result
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
@@ -52,9 +54,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
   val loggedInUser = DeveloperSession(session)
 
-  val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
-
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with TestApplications {
     val underTest = new ManageTeam(
       sessionServiceMock,
       mock[AuditService],
@@ -77,23 +77,21 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    def givenTheApplicationExistWithUserRole(appId: String,
-                                                   userRole: Role,
-                                                   state: ApplicationState = ApplicationState.testing,
-                                                   additionalTeamMembers: Seq[Collaborator] = Seq()) = {
-      val application = Application(appId, clientId, "app", DateTime.parse("2018-04-06T09:00"), DateTime.parse("2018-04-06T09:00"), None, Environment.PRODUCTION,
-        collaborators = Set(Collaborator(loggedInUser.email, userRole)) ++ additionalTeamMembers, state = state)
-
+    def givenTheApplicationExistWithUserRole( appId: String,
+                                              userRole: Role,
+                                              state: ApplicationState = ApplicationState.production("test", "test"),
+                                              additionalTeamMembers: Seq[Collaborator] = Seq()) = {
+      
+      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(Collaborator(loggedInUser.email, userRole))
+      val application = aStandardApplication.copy(collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = DateTime.parse("2018-04-06T09:00"))
 
       fetchByApplicationIdReturns(appId,application)
-      fetchCredentialsReturns(application,tokens)
+      fetchCredentialsReturns(application,tokens())
       givenApplicationHasSubs(application,Seq.empty)
 
       application
     }
-
   }
-
 
   "manageTeam" should {
     "show the add team member page when logged in as an admin" in new Setup {
@@ -337,6 +335,64 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
         verify(applicationServiceMock, never()).removeTeamMember(any[Application], anyString(), anyString())(any[HeaderCarrier])
+      }
+    }
+  }
+    
+  "ManageTeam" when {
+    "using an application pending approval" should {
+
+      trait PendingApprovalReturnsBadRequest extends Setup {
+        def executeAction: Result
+        
+        val pageNumber = 1
+        
+        val apiVersion = exampleSubscriptionWithFields("api1", 1)
+        val subsData = Seq(
+          apiVersion
+        )
+
+        val app = aStandardPendingApprovalApplication(developer.email)
+
+        fetchByApplicationIdReturns(app)          
+        givenApplicationHasSubs(app, subsData)
+        
+        val result : Result = executeAction
+
+        status(result) shouldBe NOT_FOUND
+      }
+
+      "return a bad request for manageTeam action" in new PendingApprovalReturnsBadRequest {
+
+        def executeAction = {
+          await(underTest.manageTeam(app.id)(loggedInRequest))
+        }
+      }
+
+      "return a bad request for addTeamMember action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = {
+          await(underTest.addTeamMember(app.id)(loggedInRequest))
+        }
+      }
+
+      "return a bad request for addTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = {
+          val requestWithForm = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "thirdpartydeveloper@example.com", "role" -> "DEVELOPER")
+
+          await(addToken(underTest.addTeamMemberAction(app.id, AddTeamMemberPageMode.ApplicationCheck))(requestWithForm))
+        }
+      }
+      
+      "return a bad request for removeTeamMember action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = {
+          await(underTest.removeTeamMember(app.id, "fake-hash")(loggedInRequest))
+        }
+      }
+      
+      "return a bad request for removeTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
+        def executeAction = {
+          await(underTest.removeTeamMemberAction(app.id)(loggedInRequest))
+        }
       }
     }
   }

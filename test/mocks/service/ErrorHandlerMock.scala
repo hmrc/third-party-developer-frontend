@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package controllers.checkpages
+package mocks.service
 
-import controllers.{ApplicationController, ApplicationRequest}
-import domain.Capabilities.SupportsAppChecks
-import domain.Permissions.AdministratorOnly
-import play.api.mvc.{Action, AnyContent, Result}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
+import org.scalatest.mockito.MockitoSugar
+import config.{ApplicationConfig, ErrorHandler}
+import play.twirl.api.Html
 
-import scala.concurrent.Future
-
-trait CanUseCheckActions {
-  self: ApplicationController =>
-
-  private[controllers] def canUseChecksAction(applicationId: String)
-                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
-    checkActionForTesting(SupportsAppChecks, AdministratorOnly)(applicationId)(fun)
+trait ErrorHandlerMock extends MockitoSugar {
+  val mockErrorHandler = mock[ErrorHandler]
+  when(mockErrorHandler.notFoundTemplate(any())).thenReturn(Html(""))
+  when(mockErrorHandler.badRequestTemplate(any())).thenReturn(Html(""))
+  when(mockErrorHandler.forbiddenTemplate(any())).thenReturn(Html(""))
 }
-

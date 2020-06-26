@@ -19,12 +19,13 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
-import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
+import domain.Permissions.{AdministratorOnly, TeamMembersOnly, SandboxOrAdmin}
 import domain.SubscriptionRedirect._
 import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
+import play.api.libs.json.Json
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, Result}
 import play.twirl.api.Html
@@ -50,10 +51,10 @@ class Subscriptions @Inject() (
     with ApplicationHelper {
 
   private def canManageLockedApiSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    permissionThenCapabilityAction(AdministratorOnly, ManageLockedSubscriptions)(applicationId)(fun)
+    checkActionForAllStates(ManageLockedSubscriptions, AdministratorOnly)(applicationId)(fun)
 
   private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    capabilityThenPermissionsAction(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
+    checkActionForAllStates(SupportsSubscriptions, SandboxOrAdmin)(applicationId)(fun)
 
   def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
@@ -107,7 +108,7 @@ class Subscriptions @Inject() (
 
       def handleValidForm(form: ChangeSubscriptionForm) =
         if (request.application.hasLockedSubscriptions) {
-          Future.successful(Forbidden(errorHandler.badRequestTemplate))
+          Future.successful(BadRequest(Json.toJson(BadRequestError)))
         } else {
           updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
         }
