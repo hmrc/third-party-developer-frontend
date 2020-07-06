@@ -138,13 +138,7 @@ class ApplicationService @Inject() (
 
   def unsubscribeFromApi(application: Application, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val connectors = connectorWrapper.forEnvironment(application.deployedTo)
-
-    for {
-      unsubscribeResult <- connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, context, version)
-      _ <- connectors.apiSubscriptionFieldsConnector.deleteFieldValues(application.id, context, version)
-    } yield {
-      unsubscribeResult
-    }
+    connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, context, version)
   }
 
   def isSubscribedToApi(application: Application, apiName: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
