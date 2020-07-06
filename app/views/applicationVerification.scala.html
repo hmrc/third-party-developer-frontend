@@ -18,6 +18,8 @@
 @import domain._
 @import model.Crumb
 
+@import play.twirl.api.HtmlFormat
+
 @(success: Boolean)(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @main(title = applicationConfig.title,
