@@ -18,6 +18,13 @@
 @import domain.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, NoBackButton, LoggedInState}
 
 @import domain.DeveloperSession
+
+@import layouts.{govuk_template => hmrcGovUkTemplate}
+@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
+@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
+
+@import play.twirl.api.HtmlFormat
+
 @(title: String,
     navTitle: Option[String] = None,
     navTitleLink: Option[play.api.mvc.Call] = None,
@@ -32,10 +39,6 @@
     fullWidthContent: Boolean = false,
     developerSession: Option[DeveloperSession]
 )(mainContent: Html = HtmlFormat.empty)(implicit messages: Messages, applicationConfig: config.ApplicationConfig)
-
-@import layouts.{govuk_template => hmrcGovUkTemplate}
-@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
-@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
 
 @headScripts = {
 <script src='@routes.Assets.versioned("javascripts/googleTagManager.js")'></script>
