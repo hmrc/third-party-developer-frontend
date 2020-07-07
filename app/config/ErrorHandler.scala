@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{RequestHeader, Result}
-import play.twirl.api.HtmlFormat
+import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 import play.api.mvc.Request
 import views.html.{ErrorTemplate, ForbiddenTemplate}
@@ -38,7 +38,7 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi,
   }
 
   def forbiddenTemplate(implicit request : Request[_]) = {
-    forbiddenTemplateView
+    forbiddenTemplateView()
   }
 
   override def resolveError(rh: RequestHeader, ex: Throwable): Result = {

@@ -29,20 +29,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Profile @Inject()(
-  val applicationService: ApplicationService,
-  val auditService: AuditService,
-  val sessionService: SessionService,
-  val connector: ThirdPartyDeveloperConnector,
-  val errorHandler: ErrorHandler,
-  mcc: MessagesControllerComponents,
-  val cookieSigner : CookieSigner,
-  changeProfileViewView: ChangeProfileView,
-  profileView: ProfileView,
-  profileUpdatedView: ProfileUpdatedView,
-  changeProfilePasswordView: ChangeProfilePasswordView,
-  passwordUpdatedView: PasswordUpdatedView,
-  profileDeleteConfirmationView: ProfileDeleteConfirmationView,
-  profileDeleteSubmittedView: ProfileDeleteSubmittedView
+                         val applicationService: ApplicationService,
+                         val auditService: AuditService,
+                         val sessionService: SessionService,
+                         val connector: ThirdPartyDeveloperConnector,
+                         val errorHandler: ErrorHandler,
+                         mcc: MessagesControllerComponents,
+                         val cookieSigner : CookieSigner,
+                         changeProfileViewTemplate: ChangeProfileView,
+                         profileView: ProfileView,
+                         profileUpdatedView: ProfileUpdatedView,
+                         changeProfilePasswordView: ChangeProfilePasswordView,
+                         passwordUpdatedView: PasswordUpdatedView,
+                         profileDeleteConfirmationView: ProfileDeleteConfirmationView,
+                         profileDeleteSubmittedView: ProfileDeleteSubmittedView
 )
 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController(mcc) with PasswordChange {
@@ -55,7 +55,7 @@ class Profile @Inject()(
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
   private def changeProfileView(developerSession: DeveloperSession)(implicit req: UserRequest[_]) = {
-    changeProfileViewView(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
+    changeProfileViewTemplate(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
   }
 
   def showProfile(): Action[AnyContent] = loggedInAction { implicit request =>
@@ -70,7 +70,7 @@ class Profile @Inject()(
     val requestForm = profileForm.bindFromRequest
     requestForm.fold(
       formWithErrors => {
-        Future.successful(BadRequest(changeProfileViewView(formWithErrors.firstnameGlobal().lastnameGlobal())))
+        Future.successful(BadRequest(changeProfileViewTemplate(formWithErrors.firstnameGlobal().lastnameGlobal())))
       },
       profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ => {

@@ -20,12 +20,14 @@ import controllers.ApplicationController
 import domain._
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
-import views.html.checkpages.contactDetails
+import views.html.checkpages.ContactDetailsView
 
 import scala.concurrent.Future
 
 trait ContactDetailsPartialController {
   self: ApplicationController with CanUseCheckActions =>
+
+  val contactDetailsView: ContactDetailsView
 
   def contactPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
@@ -38,9 +40,9 @@ trait ContactDetailsPartialController {
     Future.successful(contactForm match {
       case Some(form) =>
         val filledContactForm = ContactForm.form.fill(ContactForm(form.fullname, form.email, form.telephone))
-        Ok(contactDetails(app, filledContactForm, contactActionRoute(app.id)))
+        Ok(contactDetailsView(app, filledContactForm, contactActionRoute(app.id)))
       case _ =>
-        Ok(contactDetails(app, ContactForm.form, contactActionRoute(app.id)))
+        Ok(contactDetailsView(app, ContactForm.form, contactActionRoute(app.id)))
     })
   }
 
@@ -49,7 +51,7 @@ trait ContactDetailsPartialController {
     val app = request.application
 
     def withFormErrors(form: Form[ContactForm]) = {
-      Future.successful(BadRequest(contactDetails(app, form, contactActionRoute(app.id))))
+      Future.successful(BadRequest(contactDetailsView(app, form, contactActionRoute(app.id))))
     }
 
     def withValidForm(form: ContactForm) = {
