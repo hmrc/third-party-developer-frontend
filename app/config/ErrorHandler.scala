@@ -19,23 +19,26 @@ package config
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, RequestHeader, Result}
+import play.api.mvc.{RequestHeader, Result}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 import play.api.mvc.Request
+import views.html.{ErrorTemplate, ForbiddenTemplate}
 
 @Singleton
 class ErrorHandler @Inject()(val messagesApi: MessagesApi,
                              val configuration: Configuration,
-                             implicit val appConfig: ApplicationConfig)
+                             errorTemplateView: ErrorTemplate,
+                             forbiddenTemplateView: ForbiddenTemplate)
+                            (implicit val appConfig: ApplicationConfig)
   extends FrontendErrorHandler {
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): HtmlFormat.Appendable = {
-    views.html.errorTemplate(pageTitle, heading, message)
+    errorTemplateView(pageTitle, heading, message)
   }
 
   def forbiddenTemplate(implicit request : Request[_]) = {
-    views.html.forbiddenTemplate()
+    forbiddenTemplateView
   }
 
   override def resolveError(rh: RequestHeader, ex: Throwable): Result = {
