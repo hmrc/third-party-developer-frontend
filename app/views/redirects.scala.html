@@ -22,6 +22,8 @@
 @import domain.Permissions.SandboxOrAdmin
 @import model.ApplicationViewModel
 
+@this(devMain: DevMain)
+
 @(applicationViewModel: ApplicationViewModel, redirectUris: Seq[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
 @application = @{applicationViewModel.application}

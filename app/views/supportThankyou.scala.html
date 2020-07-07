@@ -14,9 +14,10 @@
  * limitations under the License.
  *@
 
-@import domain.DeveloperSession
 @import include._
 @import model.Crumb
+
+@this(devMain: DevMain)
 
 @(heading: String, loggedIn: Option[String])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
 

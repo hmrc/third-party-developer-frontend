@@ -18,6 +18,8 @@
 @import domain.{Application, DeveloperSession}
 @import include._
 
+@this(devMain: DevMain)
+
 @(app: Application)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
 

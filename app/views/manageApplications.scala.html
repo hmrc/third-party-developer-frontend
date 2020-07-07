@@ -20,10 +20,9 @@
 @import model.Crumb
 @import controllers.ApplicationSummary.noProductionApplications
 @import uk.gov.hmrc.auth.core.Admin
-@import domain.Role.ADMINISTRATOR
-@import domain.Application
-@import domain.AccessType.PRIVILEGED
-@import domain.AccessType.STANDARD
+
+@this(devMain: DevMain)
+
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 
 @devMain(

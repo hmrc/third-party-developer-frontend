@@ -22,6 +22,8 @@
 @import org.joda.time.format.DateTimeFormat
 @import model.ApplicationViewModel
 
+@this(devMain: DevMain)
+
 @(applicationViewModel: ApplicationViewModel)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,

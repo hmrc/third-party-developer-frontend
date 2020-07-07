@@ -15,10 +15,13 @@
  *@
 
 @import include._
-@import model.Crumb
+
+@this(devMain: DevMain)
 
 @(heading: String, form: Form[controllers.LoginForm], endOfJourney: Boolean = false)(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, messages: Messages, appConfig: config.ApplicationConfig)
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
 @devMain(
     title = titleError + heading,
     isRegistering = true,

@@ -18,6 +18,8 @@
 @import include._
 @import domain.{BackButtonWithJavaScript, DeveloperSession}
 
+@this(devMain: DevMain)
+
 @()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(

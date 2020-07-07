@@ -17,19 +17,19 @@
 @import include._
 @import model.Crumb
 
+@this(devMain: DevMain)
+
 @(loggedIn: Option[String], form: Form[controllers.SupportEnquiryForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
 
-        @devMain(
-            title = "Support",
-            userFullName = loggedIn,
-            breadcrumbs = Seq(
-                Crumb("Support", "",Some("data-breadcrumb-manage-app")),
-                Crumb.home
-            ),
-            developerSession = None
-        ) {
-
-
+@devMain(
+    title = "Support",
+    userFullName = loggedIn,
+    breadcrumbs = Seq(
+        Crumb("Support", "",Some("data-breadcrumb-manage-app")),
+        Crumb.home
+    ),
+    developerSession = None
+) {
     @errorSummary(form)
 
     <header>

@@ -17,8 +17,10 @@
 @import config.ApplicationConfig
 @import include._
 @import domain.{BackButtonWithJavaScript, DeveloperSession}
-
 @import uk.gov.hmrc.urls.Link
+
+@this(devMain: DevMain)
+
 @()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(

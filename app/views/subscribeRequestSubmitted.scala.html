@@ -15,11 +15,13 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, DeveloperSession}
+@import domain.DeveloperSession
 @import include._
 @import model.Crumb
-
 @import model.ApplicationViewModel
+
+@this(devMain: DevMain)
+
 @(applicationView: ApplicationViewModel, name: String, version: String)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "subscriptions")
 

@@ -19,6 +19,8 @@
 @import include._
 @import model.Crumb
 
+@this(devMain: DevMain)
+
 @(app: Application, serverToken: String)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 

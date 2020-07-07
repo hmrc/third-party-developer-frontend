@@ -18,6 +18,8 @@
 @import include._
 @import model.Crumb
 
+@this(devMain: DevMain)
+
 @(title:String, heading: String, navSection: String, loggedIn: DeveloperSession
 )(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: config.ApplicationConfig)
 

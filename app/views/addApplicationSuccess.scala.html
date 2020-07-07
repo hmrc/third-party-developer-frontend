@@ -20,6 +20,8 @@
 @import include._
 @import model.Crumb
 
+@this(devMain: DevMain)
+
 @(applicationName: String, applicationId: String, environment: Environment)(
         implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "add-application")
 

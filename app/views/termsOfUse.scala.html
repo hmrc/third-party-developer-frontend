@@ -15,15 +15,16 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, Environment, DeveloperSession, Role, State, TermsOfUseStatus}
+@import domain.DeveloperSession
 @import domain.TermsOfUseStatus._
 @import include._
 @import model.Crumb
-@import uk.gov.hmrc.urls.Link
 @import org.joda.time.format.DateTimeFormat
 @import controllers.TermsOfUseForm
-
 @import model.ApplicationViewModel
+
+@this(devMain: DevMain)
+
 @(applicationView: ApplicationViewModel, form: Form[TermsOfUseForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
 

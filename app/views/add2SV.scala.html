@@ -20,6 +20,8 @@
 @import domain.BackButtonWithJavaScript
 @import domain.DeveloperSession
 
+@this(devMain: DevMain)
+
 @(mfaMandateDetails: MfaMandateDetails)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(

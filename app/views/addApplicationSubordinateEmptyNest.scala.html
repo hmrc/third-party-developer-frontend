@@ -14,15 +14,12 @@
  * limitations under the License.
  *@
 
-@import domain.{DeveloperSession, Role}
-@import helpers.DateFormatter.formatLastAccessDate
+@import domain.DeveloperSession
 @import include._
 @import model.Crumb
-
-@import domain.TermsOfUseStatus
-@import uk.gov.hmrc.auth.core.Admin
-@import domain.Developer
 @import domain.Environment
+
+@this(devMain: DevMain)
 
 @()(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "manage-account")
 

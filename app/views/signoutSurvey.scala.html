@@ -18,9 +18,10 @@
 @import domain.DeveloperSession
 @import include._
 
+@this(devMain: DevMain)
+
 @(heading: String, form: Form[controllers.SignOutSurveyForm])(implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
-
 
 @devMain(
     title = heading,

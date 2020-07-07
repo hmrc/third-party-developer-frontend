@@ -15,9 +15,10 @@
  *@
 
 @import config.ApplicationConfig
-@import domain._
 @import include._
 @import model.Crumb
+
+@this(devMain: DevMain)
 
 @()(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, messages: Messages, applicationConfig: ApplicationConfig, session: play.api.mvc.Session)
 

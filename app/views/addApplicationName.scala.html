@@ -17,13 +17,13 @@
 @import domain.DeveloperSession
 @import include._
 @import domain.Environment
-
 @import model.Crumb
 
-@(
-        form: Form[controllers.AddApplicationNameForm],
-        environment: Environment
+@this(devMain: DevMain)
+
+@(form: Form[controllers.AddApplicationNameForm], environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @pageHeading = @{ "What's the name of your application?" }

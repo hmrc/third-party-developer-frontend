@@ -14,13 +14,12 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
 @import domain.DeveloperSession
 @import include._
-@import domain.BackButtonWithJavaScript
-@import domain.Environment
-
 @import model.Crumb
+
+@this(devMain: DevMain)
+
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
 @pageHeading = @{"Get production credentials"}
