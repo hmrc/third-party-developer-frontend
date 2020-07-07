@@ -25,7 +25,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, MessagesControllerComponents, Request}
 import service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
-import views.html.{AccountVerifiedView, ExpiredVerificationLinkView, RegistrationView, SignInView}
+import views.html.{AccountVerifiedView, ConfirmationView, ExpiredVerificationLinkView, RegistrationView, ResendConfirmationView, SignInView}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,7 +38,9 @@ class Registration @Inject()(override val sessionService: SessionService,
                              registrationView: RegistrationView,
                              signInView: SignInView,
                              accountVerifiedView: AccountVerifiedView,
-                             expiredVerificationLinkView: ExpiredVerificationLinkView
+                             expiredVerificationLinkView: ExpiredVerificationLinkView,
+                             confirmationView: ConfirmationView,
+                             resendConfirmationView: ResendConfirmationView
                              )
                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedOutController(mcc) {
@@ -94,18 +96,18 @@ class Registration @Inject()(override val sessionService: SessionService,
     (for {
       _ <- ensureLoggedOut
       _ <- connector.verify(code)
-    } yield Ok(accountVerifiedView)) recover {
-      case _: BadRequestException => BadRequest(expiredVerificationLinkView)
+    } yield Ok(accountVerifiedView())) recover {
+      case _: BadRequestException => BadRequest(expiredVerificationLinkView())
     }
   }
 
   def confirmation = Action.async {
     implicit request =>
-      Future.successful(Ok(views.html.confirmation()))
+      Future.successful(Ok(confirmationView()))
   }
 
   def resendConfirmation = Action.async {
     implicit request =>
-      Future.successful(Ok(views.html.resendConfirmation()))
+      Future.successful(Ok(resendConfirmationView()))
   }
 }
