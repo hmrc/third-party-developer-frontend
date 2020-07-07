@@ -21,10 +21,10 @@ import domain.Capabilities.SupportsIpWhitelist
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
 import service._
+import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,8 +35,10 @@ class IpWhitelist @Inject()(deskproService: DeskproService,
                             val sessionService: SessionService,
                             val errorHandler: ErrorHandler,
                             mcc: MessagesControllerComponents,
-                            val cookieSigner : CookieSigner
-                            )
+                            val cookieSigner : CookieSigner,
+                            manageIpWhitelistView: ManageIpWhitelistView,
+                            changeIpWhitelistView: ChangeIpWhitelistView,
+                            changeIpWhitelistSuccessView: ChangeIpWhitelistSuccessView)
                            (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc) {
 
@@ -48,12 +50,12 @@ class IpWhitelist @Inject()(deskproService: DeskproService,
 
   def manageIpWhitelist(applicationId: String): Action[AnyContent] =
     canViewManageIpWhitelistAction(applicationId) { implicit request =>
-      successful(Ok(views.html.ipwhitelist.manageIpWhitelist(request.application, request.role)))
+      successful(Ok(manageIpWhitelistView(request.application, request.role)))
     }
 
   def changeIpWhitelist(applicationId: String): Action[AnyContent] =
     canChangeIpWhitelistAction(applicationId) { implicit request =>
-      successful(Ok(views.html.ipwhitelist.changeIpWhitelist(request.application, ChangeIpWhitelistForm.form.fill(ChangeIpWhitelistForm("")))))
+      successful(Ok(changeIpWhitelistView(request.application, ChangeIpWhitelistForm.form.fill(ChangeIpWhitelistForm("")))))
     }
 
   def changeIpWhitelistAction(applicationId: String): Action[AnyContent] =
@@ -62,12 +64,12 @@ class IpWhitelist @Inject()(deskproService: DeskproService,
         val developer = request.user.developer
         val supportForm = SupportEnquiryForm(s"${developer.firstName} ${developer.lastName}", developer.email, form.description)
         deskproService.submitSupportEnquiry(supportForm) map { _ =>
-          Ok(views.html.ipwhitelist.changeIpWhitelistSuccess(request.application))
+          Ok(changeIpWhitelistSuccessView(request.application))
         }
       }
 
       def handleInvalidForm(formWithErrors: Form[ChangeIpWhitelistForm]): Future[Result] = {
-        successful(BadRequest(views.html.ipwhitelist.changeIpWhitelist(request.application, formWithErrors)))
+        successful(BadRequest(changeIpWhitelistView(request.application, formWithErrors)))
       }
 
       ChangeIpWhitelistForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
