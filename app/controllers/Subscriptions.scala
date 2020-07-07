@@ -31,7 +31,8 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
-import views.html.include.changeSubscriptionConfirmation
+import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,7 +46,12 @@ class Subscriptions @Inject() (
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
     mcc: MessagesControllerComponents,
-    val cookieSigner : CookieSigner
+    val cookieSigner : CookieSigner,
+    manageSubscriptionsView: ManageSubscriptionsView,
+    addAppSubscriptionsView: AddAppSubscriptionsView,
+    changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
+    unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
+    subscribeRequestSubmittedView: SubscribeRequestSubmittedView
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
     extends ApplicationController(mcc)
     with ApplicationHelper {
@@ -61,7 +67,7 @@ class Subscriptions @Inject() (
       request.application,
       request.user,
       (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-        views.html.manageSubscriptions(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.app.id)
+        manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.app.id)
       }
     )
   }
@@ -71,7 +77,7 @@ class Subscriptions @Inject() (
       request.application,
       request.user,
       (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-        views.html.addAppSubscriptions(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
+        addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
       }
     )
   }
@@ -123,7 +129,7 @@ class Subscriptions @Inject() (
       applicationService
         .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)
         .map(subscribed =>
-          Ok(changeSubscriptionConfirmation(applicationViewModelFromApplicationRequest, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo))
+          Ok(changeSubscriptionConfirmationView(applicationViewModelFromApplicationRequest, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo))
         )
     }
 
@@ -133,11 +139,11 @@ class Subscriptions @Inject() (
         if (subscribed) {
           subscriptionsService
             .requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
-            .map(_ => Ok(views.html.unsubscribeRequestSubmitted(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
+            .map(_ => Ok(unsubscribeRequestSubmittedView(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
         } else {
           subscriptionsService
             .requestApiSubscription(request.user, request.application, apiName, apiVersion)
-            .map(_ => Ok(views.html.subscribeRequestSubmitted(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
+            .map(_ => Ok(subscribeRequestSubmittedView(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
         }
       }
 
@@ -147,7 +153,7 @@ class Subscriptions @Inject() (
       }
 
       def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
-        Future.successful(BadRequest(changeSubscriptionConfirmation(applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
+        Future.successful(BadRequest(changeSubscriptionConfirmationView(applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
 
       applicationService
         .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)
