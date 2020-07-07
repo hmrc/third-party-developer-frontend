@@ -46,8 +46,8 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
 
   lazy val reportAProblemPartialUrl = s"$contactPath/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   lazy val reportAProblemNonJSUrl = s"$contactPath/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  lazy val apiDocumentationFrontendUrl = buildUrl("platform.frontend").getOrElse(baseUrl("api-documentation-frontend"))
-  lazy val thirdPartyDeveloperFrontendUrl = buildUrl("platform.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
+  lazy val apiDocumentationFrontendUrl = baseUrl("api-documentation-frontend")
+  lazy val thirdPartyDeveloperFrontendUrl = baseUrl("third-party-developer-frontend")
   lazy val productionApiBaseUrl = buildUrl("platform.api.production")
   lazy val sandboxApiBaseUrl = buildUrl("platform.api.sandbox")
 
@@ -62,6 +62,7 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   lazy val currentTermsOfUseDate = DateTime.parse(getConfigDefaulted("currentTermsOfUseDate", ""))
   lazy val retryCount = getConfigDefaulted("retryCount", 0)
   lazy val retryDelayMilliseconds = getConfigDefaulted("retryDelayMilliseconds", 500)
+
   lazy val dateOfAdminMfaMandate: Option[LocalDate] = {
     config.getOptional[String]("dateOfAdminMfaMandate") match {
       case Some(s) => MfaMandateService.parseLocalDate(s)
@@ -80,7 +81,7 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   val apiSubscriptionFieldsSandboxApiKey = getConfigDefaulted("api-subscription-fields-sandbox.api-key", "")
 
   private def buildUrl(key: String) = {
-    (getConfigDefaulted(s"$key.protocol", ""), getConfigDefaulted(s"$key.host", "")) match {
+    (getConfigDefaulted(s"$env.$key.protocol", ""), getConfigDefaulted(s"$env.$key.host", "")) match {
       case (p, h) if !p.isEmpty && !h.isEmpty => Some(s"$p://$h")
       case (p, h) if p.isEmpty => Some(s"https://$h")
       case _ => None
