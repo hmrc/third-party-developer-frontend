@@ -16,36 +16,24 @@
 
 package controllers
 
-import cats.data.NonEmptyList
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatusWithSubscriptionFields, CheckInformation, Environment, Application}
+import domain.{APISubscriptionStatusWithSubscriptionFields, Application, CheckInformation, Environment}
 import domain.ApiSubscriptionFields._
 import model.NoSubscriptionFieldsRefinerBehaviour
 import model.EditManageSubscription._
-import play.api.data
-import play.api.data.Form
-import play.api.data.Forms._
-import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.libs.crypto.CookieSigner
 import play.twirl.api.Html
 import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
-import views.html.managesubscriptions.editApiMetadata
+import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import domain.SaveSubsFieldsPageMode
-import service.SubscriptionFieldsService.ValidateAgainstRole
-import domain.ApiSubscriptionFields.SubscriptionFieldDefinition
-import domain.Role._
-import domain.Role
-import domain.DevhubAccessLevel
-
-import scala.util.{Either, Right, Left}
-import cats.implicits._
 import play.api.data.FormError
+import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
 
 object ManageSubscriptions {
 
@@ -71,17 +59,20 @@ object ManageSubscriptions {
 }
 
 @Singleton
-class ManageSubscriptions @Inject() (
-    val sessionService: SessionService,
-    val auditService: AuditService,
-    val applicationService: ApplicationService,
-    val errorHandler: ErrorHandler,
-    mcc: MessagesControllerComponents,
-    val subFieldsService: SubscriptionFieldsService,
-    val cookieSigner : CookieSigner
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc)
-      with ApplicationHelper {
+class ManageSubscriptions @Inject() (val sessionService: SessionService,
+                                     val auditService: AuditService,
+                                     val applicationService: ApplicationService,
+                                     val errorHandler: ErrorHandler,
+                                     mcc: MessagesControllerComponents,
+                                     val subFieldsService: SubscriptionFieldsService,
+                                     val cookieSigner : CookieSigner,
+                                     listApiSubscriptionsView: ListApiSubscriptionsView,
+                                     editApiMetadataView: EditApiMetadataView,
+                                     subscriptionConfigurationStartView: SubscriptionConfigurationStartView,
+                                     subscriptionConfigurationPageView: SubscriptionConfigurationPageView,
+                                     subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView)
+                                    (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends ApplicationController(mcc) with ApplicationHelper {
 
   import ManageSubscriptions._
 
@@ -95,7 +86,7 @@ class ManageSubscriptions @Inject() (
         .map(toDetails)
         .toList
 
-      successful(Ok(views.html.managesubscriptions.listApiSubscriptions(definitionsRequest.applicationRequest.application, details)))
+      successful(Ok(listApiSubscriptionsView(definitionsRequest.applicationRequest.application, details)))
     }
 
   def editApiMetadataPage(applicationId: String, context: String, version: String, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
@@ -109,7 +100,7 @@ class ManageSubscriptions @Inject() (
   
       val viewModel = EditApiConfigurationViewModel.toViewModel(apiSubscription, role, formErrors = Seq.empty, postedFormValues = Map.empty)
 
-      successful(Ok(views.html.managesubscriptions.editApiMetadata(appRQ.application, viewModel, mode))) 
+      successful(Ok(editApiMetadataView(appRQ.application, viewModel, mode)))
     }
 
   def saveSubscriptionFields(applicationId: String,
@@ -128,7 +119,7 @@ class ManageSubscriptions @Inject() (
     }
     
     subscriptionConfigurationSave(apiContext, apiVersion,definitionsRequest.apiSubscription, successRedirectUrl, viewModel => {
-        editApiMetadata(definitionsRequest.applicationRequest.application, viewModel, mode)
+        editApiMetadataView(definitionsRequest.applicationRequest.application, viewModel, mode)
       }
     )
   }
@@ -173,7 +164,7 @@ class ManageSubscriptions @Inject() (
           .map(toDetails)
           .toList
 
-        Future.successful(Ok(views.html.createJourney.subscriptionConfigurationStart(definitionsRequest.applicationRequest.application, details)))
+        Future.successful(Ok(subscriptionConfigurationStartView(definitionsRequest.applicationRequest.application, details)))
       }
     }
 
@@ -188,7 +179,7 @@ class ManageSubscriptions @Inject() (
 
       val viewModel = EditApiConfigurationViewModel.toViewModel(apiSubscription, role, formErrors = Seq.empty, postedFormValues = Map.empty)
 
-      Future.successful(Ok(views.html.createJourney.subscriptionConfigurationPage(
+      Future.successful(Ok(subscriptionConfigurationPageView(
         definitionsRequest.applicationRequest.application,
         pageNumber,
         viewModel)
@@ -208,7 +199,7 @@ class ManageSubscriptions @Inject() (
         definitionsRequest.apiSubscriptionStatus,
         successRedirectUrl,
         viewModel => {
-          views.html.createJourney.subscriptionConfigurationPage(definitionsRequest.applicationRequest.application, pageNumber, viewModel)
+          subscriptionConfigurationPageView(definitionsRequest.applicationRequest.application, pageNumber, viewModel)
         })
     }
 
@@ -235,7 +226,7 @@ class ManageSubscriptions @Inject() (
         doEndOfJourneyRedirect(application)
 
       } else {
-        Future.successful (Ok(views.html.createJourney.subscriptionConfigurationStepPage(application, pageNumber, definitionsRequest.totalPages)))
+        Future.successful (Ok(subscriptionConfigurationStepPageView(application, pageNumber, definitionsRequest.totalPages)))
       }
     }
   }
