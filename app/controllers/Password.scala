@@ -22,7 +22,6 @@ import domain._
 import javax.inject.Inject
 import play.api.Logger
 import play.api.data.Form
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import play.twirl.api.HtmlFormat
@@ -67,7 +66,13 @@ class Password @Inject()(val auditService: AuditService,
                          val connector: ThirdPartyDeveloperConnector,
                          val errorHandler: ErrorHandler,
                          mcc: MessagesControllerComponents,
-                         val cookieSigner: CookieSigner
+                         val cookieSigner: CookieSigner,
+                         forgotPasswordView: ForgotPasswordView,
+                         checkEmailView: CheckEmailView,
+                         resetView: ResetView,
+                         resetInvalidView: ResetInvalidView,
+                         resetErrorView: ResetErrorView,
+                         signInView: SignInView
                         )
                         (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedOutController(mcc) with PasswordChange {
@@ -75,21 +80,21 @@ class Password @Inject()(val auditService: AuditService,
   import ErrorFormBuilder.GlobalError
 
   def showForgotPassword() = loggedOutAction { implicit request =>
-    Future.successful(Ok(forgotPassword(ForgotPasswordForm.form)))
+    Future.successful(Ok(forgotPasswordView(ForgotPasswordForm.form)))
   }
 
   def requestReset() = Action.async { implicit request =>
     val requestForm = ForgotPasswordForm.form.bindFromRequest
     requestForm.fold(
       formWithErrors => {
-        Future.successful(BadRequest(forgotPassword(formWithErrors.emailaddressGlobal())))
+        Future.successful(BadRequest(forgotPasswordView(formWithErrors.emailaddressGlobal())))
       },
       data => connector.requestReset(data.emailaddress) map {
-        _ => Ok(checkEmail(data.emailaddress))
+        _ => Ok(checkEmailView(data.emailaddress))
       } recover {
-        case _: UnverifiedAccount => Forbidden(forgotPassword(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
+        case _: UnverifiedAccount => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
           .withSession("email" -> data.emailaddress)
-        case _: NotFoundException => Ok(checkEmail(data.emailaddress))
+        case _: NotFoundException => Ok(checkEmailView(data.emailaddress))
       }
     )
   }
@@ -111,7 +116,7 @@ class Password @Inject()(val auditService: AuditService,
     request.session.get("email") match {
       case None => Logger.warn("email not found in session")
         Future.successful(Redirect(routes.Password.resetPasswordError()).flashing("error" -> "Error"))
-      case Some(_) => Future.successful(Ok(reset(PasswordResetForm.form)))
+      case Some(_) => Future.successful(Ok(resetView(PasswordResetForm.form)))
     }
   }
 
@@ -119,24 +124,24 @@ class Password @Inject()(val auditService: AuditService,
     request.flash.get("error").getOrElse("error") match {
       case "UnverifiedAccount" =>
         val email = request.flash.get("email").getOrElse("").toString
-        Forbidden(forgotPassword(ForgotPasswordForm.accountUnverified(ForgotPasswordForm.form, email))).withSession("email" -> email)
+        Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(ForgotPasswordForm.form, email))).withSession("email" -> email)
       case "InvalidResetCode" =>
-        BadRequest(resetInvalid())
+        BadRequest(resetInvalidView())
       case _ =>
-        BadRequest(resetError())
+        BadRequest(resetErrorView())
     }
   )
 
   def resetPassword = Action.async { implicit request =>
     PasswordResetForm.form.bindFromRequest.fold(
       formWithErrors =>
-        Future.successful(BadRequest(reset(formWithErrors.passwordGlobal().passwordNoMatchField()))),
+        Future.successful(BadRequest(resetView(formWithErrors.passwordGlobal().passwordNoMatchField()))),
       data => {
         val email = request.session.get("email").getOrElse(throw new RuntimeException("email not found in session"))
         connector.reset(PasswordReset(email, data.password)) map {
-          _ => Ok(signIn("You have reset your password", LoginForm.form, endOfJourney = true))
+          _ => Ok(signInView("You have reset your password", LoginForm.form, endOfJourney = true))
         } recover {
-          case _: UnverifiedAccount => Forbidden(reset(PasswordResetForm.accountUnverified(PasswordResetForm.form, email)))
+          case _: UnverifiedAccount => Forbidden(resetView(PasswordResetForm.accountUnverified(PasswordResetForm.form, email)))
             .withSession("email" -> email)
         }
       }

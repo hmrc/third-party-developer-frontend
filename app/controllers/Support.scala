@@ -20,11 +20,10 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{DeskproService, SessionService}
-import views.html.{supportEnquiry, supportThankyou}
+import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,7 +32,9 @@ class Support @Inject()(val deskproService: DeskproService,
                         val sessionService: SessionService,
                         val errorHandler: ErrorHandler,
                         mcc: MessagesControllerComponents,
-                        val cookieSigner : CookieSigner
+                        val cookieSigner : CookieSigner,
+                        supportEnquiryView: SupportEnquiryView,
+                        supportThankyouView: SupportThankyouView
                        )
                        (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends BaseController(mcc) {
@@ -48,7 +49,7 @@ class Support @Inject()(val deskproService: DeskproService,
       .fold(supportForm) { user =>
         supportForm.bind(Map("fullname" -> user.displayedName, "emailaddress" -> user.email)).discardingErrors
       }
-    Future.successful(Ok(supportEnquiry(fullyLoggedInUser.map(_.displayedName), prefilledForm)))
+    Future.successful(Ok(supportEnquiryView(fullyLoggedInUser.map(_.displayedName), prefilledForm)))
 
   }
 
@@ -56,12 +57,12 @@ class Support @Inject()(val deskproService: DeskproService,
     val requestForm = supportForm.bindFromRequest
     val displayName = fullyLoggedInUser.map(_.displayedName)
     requestForm.fold(
-      formWithErrors => Future.successful(BadRequest(supportEnquiry(displayName, formWithErrors))),
+      formWithErrors => Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors))),
       formData => deskproService.submitSupportEnquiry(formData).map { _ => Redirect(routes.Support.thankyou().url, SEE_OTHER) })
   }
 
   def thankyou = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val displayName = fullyLoggedInUser.map(_.displayedName)
-    Future.successful(Ok(supportThankyou("Thank you", displayName)))
+    Future.successful(Ok(supportThankyouView("Thank you", displayName)))
   }
 }

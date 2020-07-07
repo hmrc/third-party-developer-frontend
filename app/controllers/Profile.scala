@@ -20,9 +20,8 @@ import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.{DeveloperSession, UpdateProfileRequest}
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{ApplicationService, AuditService, SessionService}
 import views.html._
 
@@ -36,7 +35,14 @@ class Profile @Inject()(
   val connector: ThirdPartyDeveloperConnector,
   val errorHandler: ErrorHandler,
   mcc: MessagesControllerComponents,
-  val cookieSigner : CookieSigner
+  val cookieSigner : CookieSigner,
+  changeProfileView: ChangeProfileView,
+  profileView: ProfileView,
+  profileUpdatedView: ProfileUpdatedView,
+  changeProfilePasswordView: ChangeProfilePasswordView,
+  passwordUpdatedView: PasswordUpdatedView,
+  profileDeleteConfirmationView: ProfileDeleteConfirmationView,
+  profileDeleteSubmittedView: ProfileDeleteSubmittedView
 )
 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController(mcc) with PasswordChange {
@@ -49,11 +55,11 @@ class Profile @Inject()(
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
   private def changeProfileView(developerSession: DeveloperSession)(implicit req: UserRequest[_]) = {
-    views.html.changeProfile(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
+    changeProfileView(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
   }
 
   def showProfile(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(views.html.profile()))
+    Future.successful(Ok(profileView()))
   }
 
   def changeProfile(): Action[AnyContent] = loggedInAction { implicit request =>
@@ -64,7 +70,7 @@ class Profile @Inject()(
     val requestForm = profileForm.bindFromRequest
     requestForm.fold(
       formWithErrors => {
-        Future.successful(BadRequest(views.html.changeProfile(formWithErrors.firstnameGlobal().lastnameGlobal())))
+        Future.successful(BadRequest(changeProfileView(formWithErrors.firstnameGlobal().lastnameGlobal())))
       },
       profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ => {
@@ -78,24 +84,24 @@ class Profile @Inject()(
             session = loggedIn.session.copy(developer = updatedDeveloper)
           )
 
-          Ok(profileUpdated("profile updated", "Manage profile", "manage-profile", updatedLoggedIn))
+          Ok(profileUpdatedView("profile updated", "Manage profile", "manage-profile", updatedLoggedIn))
         }
       }
     )
   }
 
   def showPasswordPage(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(changeProfilePassword(passwordForm)))
+    Future.successful(Ok(changeProfilePasswordView(passwordForm)))
   }
 
   def updatePassword(): Action[AnyContent] = loggedInAction { implicit request =>
     processPasswordChange(loggedIn.email,
-      Ok(passwordUpdated("password changed", "Password changed", "change-password")),
-      changeProfilePassword(_))
+      Ok(passwordUpdatedView("password changed", "Password changed", "change-password")),
+      changeProfilePasswordView(_))
   }
 
   def requestDeletion(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(profileDeleteConfirmation(DeleteProfileForm.form)))
+    Future.successful(Ok(profileDeleteConfirmationView(DeleteProfileForm.form)))
   }
 
   def deleteAccount(): Action[AnyContent] = loggedInAction { implicit request =>
@@ -103,13 +109,13 @@ class Profile @Inject()(
 
     form.fold(
       invalidForm => {
-        Future.successful(BadRequest(profileDeleteConfirmation(invalidForm)))
+        Future.successful(BadRequest(profileDeleteConfirmationView(invalidForm)))
       },
       validForm => {
         validForm.confirmation match {
           case Some("true") => applicationService
             .requestDeveloperAccountDeletion(loggedIn.displayedName, loggedIn.email)
-            .map(_ => Ok(profileDeleteSubmitted()))
+            .map(_ => Ok(profileDeleteSubmittedView()))
 
           case _ => Future.successful(Ok(changeProfileView(loggedIn)))
         }

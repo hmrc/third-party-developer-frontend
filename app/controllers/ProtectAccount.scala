@@ -23,13 +23,12 @@ import javax.inject.{Inject, Singleton}
 import model.MfaMandateDetails
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, MfaMandateService, SessionService}
+import views.html.UserDidNotAdd2SVView
 import views.html.protectaccount._
-import views.html.{add2SV, protectaccount, userDidNotAdd2SV}
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,7 +41,18 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
                                mcc: MessagesControllerComponents,
                                val errorHandler: ErrorHandler,
                                val mfaMandateService: MfaMandateService,
-                               val cookieSigner : CookieSigner)
+                               val cookieSigner : CookieSigner,
+                               protectAccountSetupView: ProtectAccountSetupView,
+                               protectedAccountView: ProtectedAccountView,
+                               protectAccountView: ProtectAccountView,
+                               protectAccountAccessCodeView: ProtectAccountAccessCodeView,
+                               protectAccountCompletedView: ProtectAccountCompletedView,
+                               protectAccountRemovalConfirmationView: ProtectAccountRemovalConfirmationView,
+                               protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView,
+                               protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView,
+                               userDidNotAdd2SVView: UserDidNotAdd2SVView,
+                               add2SVView: UserDidNotAdd2SVView
+                              )
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController(mcc) {
 
@@ -53,25 +63,25 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
     thirdPartyDeveloperConnector.createMfaSecret(loggedIn.email).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
-      Ok(protectAccountSetup(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
+      Ok(protectAccountSetupView(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
     })
   }
 
   def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(loggedIn.email).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
-        case true => Ok(protectedAccount())
-        case false => Ok(protectaccount.protectAccount())
+        case true => Ok(protectedAccountView())
+        case false => Ok(protectAccountView())
       }
     })
   }
 
   def getAccessCodePage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    Future.successful(Ok(protectAccountAccessCode(ProtectAccountForm.form)))
+    Future.successful(Ok(protectAccountAccessCodeView(ProtectAccountForm.form)))
   }
 
   def getProtectAccountCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    Future.successful(Ok(protectAccountCompleted()))
+    Future.successful(Ok(protectAccountCompletedView()))
   }
 
   def protectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
@@ -87,11 +97,11 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
         .fill(form)
         .withError(key = "accessCode", message = "You have entered an incorrect access code")
 
-      BadRequest(protectAccountAccessCode(protectAccountForm))
+      BadRequest(protectAccountAccessCodeView(protectAccountForm))
     }
 
     ProtectAccountForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountAccessCode(form)))
+      Future.successful(BadRequest(protectAccountAccessCodeView(form)))
   },
       (form: ProtectAccountForm) => {
         for {
@@ -105,12 +115,12 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   }
 
   def get2SVRemovalConfirmationPage: Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountRemovalConfirmation(Remove2SVConfirmForm.form)))
+    Future.successful(Ok(protectAccountRemovalConfirmationView(Remove2SVConfirmForm.form)))
   }
 
   def confirm2SVRemoval: Action[AnyContent] = loggedInAction { implicit request =>
     Remove2SVConfirmForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountRemovalConfirmation(form)))
+      Future.successful(BadRequest(protectAccountRemovalConfirmationView(form)))
     },
       form => {
         form.removeConfirm match {
@@ -121,12 +131,12 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   }
 
   def get2SVRemovalAccessCodePage(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountRemovalAccessCode(ProtectAccountForm.form)))
+    Future.successful(Ok(protectAccountRemovalAccessCodeView(ProtectAccountForm.form)))
   }
 
   def remove2SV(): Action[AnyContent] = loggedInAction { implicit request =>
     ProtectAccountForm.form.bindFromRequest.fold(form => {
-      Future.successful(BadRequest(protectAccountRemovalAccessCode(form)))
+      Future.successful(BadRequest(protectAccountRemovalAccessCodeView(form)))
     },
       form => {
         mfaService.removeMfa(loggedIn.email, form.accessCode).map(r =>
@@ -136,18 +146,18 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
               val protectAccountForm = ProtectAccountForm.form.fill(form)
                 .withError("accessCode", "You have entered an incorrect access code")
 
-              BadRequest(protectAccountRemovalAccessCode(protectAccountForm))
+              BadRequest(protectAccountRemovalAccessCodeView(protectAccountForm))
           }
         )
       })
   }
 
   def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(protectAccountRemovalComplete()))
+    Future.successful(Ok(protectAccountRemovalCompleteView()))
   }
 
   def get2SVNotSetPage(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(userDidNotAdd2SV()))
+    successful(Ok(userDidNotAdd2SVView()))
   }
   
   def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
@@ -156,7 +166,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       for {
         showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn.email)
         mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
-      }  yield (Ok(add2SV(mfaMandateDetails)))
+      }  yield (Ok(add2SVView(mfaMandateDetails)))
     }
   }
 }
