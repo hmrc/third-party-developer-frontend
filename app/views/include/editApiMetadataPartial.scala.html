@@ -14,14 +14,11 @@
  * limitations under the License.
  *@
 
-@import views.helper.GlobalSection._
-@import controllers.ErrorFormBuilder._
-
 @import model.EditManageSubscription.EditApiConfigurationViewModel
-@import domain.{Application, APISubscriptionStatusWithSubscriptionFields}
-@import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
+@import domain.Application
 @import views.html.include.fieldError
 @import views.helper.IdFormatter
+
 @(
   app: Application,
   viewModel: EditApiConfigurationViewModel,
