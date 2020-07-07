@@ -21,8 +21,7 @@ import domain._
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Request, Result}
-import play.api.mvc.{Session => PlaySession}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -50,11 +49,11 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val errorHandler: ErrorHandler,
                                  val sessionService: SessionService,
                                  val applicationService: ApplicationService,
-                                 val messagesApi: MessagesApi,
+                                 mcc: MessagesControllerComponents,
                                  val mfaMandateService: MfaMandateService,
                                  val cookieSigner : CookieSigner)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController with Auditing {
+  extends LoggedOutController(mcc) with Auditing {
 
   import play.api.data._
 

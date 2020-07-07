@@ -27,7 +27,7 @@ import domain._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
 import service._
 import uk.gov.hmrc.http.ForbiddenException
@@ -41,11 +41,11 @@ class Credentials @Inject()(val applicationService: ApplicationService,
                             val auditService: AuditService,
                             val sessionService: SessionService,
                             val errorHandler: ErrorHandler,
-                            val messagesApi: MessagesApi,
+                            mcc: MessagesControllerComponents,
                             val cookieSigner : CookieSigner
                             )
                            (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController {
+  extends ApplicationController(mcc) {
 
   private def canViewClientCredentialsPage(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(ViewCredentials, TeamMembersOnly)(applicationId)(fun)

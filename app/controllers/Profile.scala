@@ -21,7 +21,7 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.{DeveloperSession, UpdateProfileRequest}
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.api.libs.crypto.CookieSigner
 import service.{ApplicationService, AuditService, SessionService}
 import views.html._
@@ -35,11 +35,11 @@ class Profile @Inject()(
   val sessionService: SessionService,
   val connector: ThirdPartyDeveloperConnector,
   val errorHandler: ErrorHandler,
-  val messagesApi: MessagesApi,
+  mcc: MessagesControllerComponents,
   val cookieSigner : CookieSigner
 )
 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController with PasswordChange {
+  extends LoggedInController(mcc) with PasswordChange {
 
   import ErrorFormBuilder.GlobalError
   import play.api.data._

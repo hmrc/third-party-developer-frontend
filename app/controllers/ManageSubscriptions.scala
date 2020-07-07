@@ -76,11 +76,11 @@ class ManageSubscriptions @Inject() (
     val auditService: AuditService,
     val applicationService: ApplicationService,
     val errorHandler: ErrorHandler,
-    val messagesApi: MessagesApi,
+    mcc: MessagesControllerComponents,
     val subFieldsService: SubscriptionFieldsService,
     val cookieSigner : CookieSigner
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController
+    extends ApplicationController(mcc)
       with ApplicationHelper {
 
   import ManageSubscriptions._

@@ -21,19 +21,19 @@ import domain.ApplicationVerificationFailed
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.Action
+import play.api.mvc.{Action, MessagesControllerComponents}
 import service.{ApplicationService, SessionService}
 
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class ApplicationVerification @Inject()(val service: ApplicationService,
+class ApplicationVerification @Inject()(service: ApplicationService,
                                         val sessionService: SessionService,
                                         val errorHandler: ErrorHandler,
-                                        val messagesApi: MessagesApi,
+                                        mcc: MessagesControllerComponents,
                                         val cookieSigner: CookieSigner
                                         )
-                                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedOutController {
+                                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedOutController(mcc) {
 
   def verifyUplift(code: String) = Action.async { implicit request =>
     service.verify(code) map { _ => Ok(views.html.applicationVerification(success = true))

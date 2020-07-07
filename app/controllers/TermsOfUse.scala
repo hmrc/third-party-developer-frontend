@@ -25,7 +25,7 @@ import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import views.html.partials
@@ -36,11 +36,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
                            val sessionService: SessionService,
                            val applicationService: ApplicationService,
-                           val messagesApi: MessagesApi,
+                           mcc: MessagesControllerComponents,
                            val cookieSigner : CookieSigner
                            )
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController() with ApplicationHelper {
+  extends ApplicationController(mcc) with ApplicationHelper {
 
   def canChangeTermsOfUseAction(applicationId: String)
                                 (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =

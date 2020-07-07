@@ -24,12 +24,11 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Call, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import service.{ApplicationService, SessionService}
 import views.html.checkpages.checkyouranswers
 import views.html.checkpages.applicationcheck
 import cats.data.{NonEmptyList => NEL}
-
 import model.ApplicationViewModel
 
 import scala.concurrent.Future.successful
@@ -45,11 +44,11 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
                                  val applicationCheck: ApplicationCheck,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
-                                 val messagesApi: MessagesApi,
+                                 mcc: MessagesControllerComponents,
                                  val cookieSigner : CookieSigner
                                 )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController()
+  extends ApplicationController(mcc)
     with ApplicationHelper
     with CanUseCheckActions
     with ConfirmNamePartialController

@@ -39,11 +39,11 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
                         val applicationService: ApplicationService,
                         val sessionService: SessionService,
                         val errorHandler: ErrorHandler,
-                        val messagesApi: MessagesApi,
+                        mcc: MessagesControllerComponents,
                         val cookieSigner : CookieSigner
                         )
                        (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController {
+  extends ApplicationController(mcc) {
 
   def canChangeDetailsAndIsApprovedAction(applicationId: String)
                                           (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =

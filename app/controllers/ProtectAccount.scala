@@ -24,7 +24,7 @@ import model.MfaMandateDetails
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, MfaMandateService, SessionService}
@@ -39,12 +39,12 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
                                val otpAuthUri: OtpAuthUri,
                                val mfaService: MFAService,
                                val sessionService: SessionService,
-                               val messagesApi: MessagesApi,
+                               mcc: MessagesControllerComponents,
                                val errorHandler: ErrorHandler,
                                val mfaMandateService: MfaMandateService,
                                val cookieSigner : CookieSigner)
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController {
+  extends LoggedInController(mcc) {
 
   private val scale = 4
   val qrCode = QRCode(scale)

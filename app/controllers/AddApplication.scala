@@ -23,22 +23,21 @@ import domain.{Environment, _}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
-import scala.util.control.NonFatal
 
 @Singleton
 class AddApplication @Inject()(val applicationService: ApplicationService,
                                val sessionService: SessionService,
                                val auditService: AuditService,
                                val errorHandler: ErrorHandler,
-                               val messagesApi: MessagesApi,
+                               mcc: MessagesControllerComponents,
                                val cookieSigner : CookieSigner)
-                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController {
+                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>

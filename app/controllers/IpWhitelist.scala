@@ -22,7 +22,7 @@ import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
 import service._
 
@@ -34,11 +34,11 @@ class IpWhitelist @Inject()(deskproService: DeskproService,
                             val applicationService: ApplicationService,
                             val sessionService: SessionService,
                             val errorHandler: ErrorHandler,
-                            val messagesApi: MessagesApi,
+                            mcc: MessagesControllerComponents,
                             val cookieSigner : CookieSigner
                             )
                            (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController {
+  extends ApplicationController(mcc) {
 
   private def canChangeIpWhitelistAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsIpWhitelist, AdministratorOnly)(applicationId)(fun)

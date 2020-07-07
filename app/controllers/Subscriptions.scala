@@ -19,7 +19,7 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
-import domain.Permissions.{AdministratorOnly, TeamMembersOnly, SandboxOrAdmin}
+import domain.Permissions.{AdministratorOnly, SandboxOrAdmin, TeamMembersOnly}
 import domain.SubscriptionRedirect._
 import domain._
 import javax.inject.{Inject, Singleton}
@@ -27,7 +27,7 @@ import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -44,10 +44,10 @@ class Subscriptions @Inject() (
     val applicationService: ApplicationService,
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
-    val messagesApi: MessagesApi,
+    mcc: MessagesControllerComponents,
     val cookieSigner : CookieSigner
 )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController
+    extends ApplicationController(mcc)
     with ApplicationHelper {
 
   private def canManageLockedApiSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =

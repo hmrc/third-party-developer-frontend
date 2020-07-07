@@ -26,7 +26,7 @@ import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
 import play.twirl.api.Html
 import service._
@@ -40,11 +40,11 @@ class ManageTeam @Inject()(val sessionService: SessionService,
                            developerConnector: ThirdPartyDeveloperConnector,
                            val applicationService: ApplicationService,
                            val errorHandler: ErrorHandler,
-                           val messagesApi: MessagesApi,
+                           mcc: MessagesControllerComponents,
                            val cookieSigner : CookieSigner
                            )
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController {
+  extends ApplicationController(mcc) {
 
   private def whenAppSupportsTeamMembers(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)

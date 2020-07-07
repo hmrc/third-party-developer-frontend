@@ -66,11 +66,11 @@ class Password @Inject()(val auditService: AuditService,
                          val sessionService: SessionService,
                          val connector: ThirdPartyDeveloperConnector,
                          val errorHandler: ErrorHandler,
-                         val messagesApi: MessagesApi,
+                         mcc: MessagesControllerComponents,
                          val cookieSigner: CookieSigner
                         )
                         (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController with PasswordChange {
+  extends LoggedOutController(mcc) with PasswordChange {
 
   import ErrorFormBuilder.GlobalError
 

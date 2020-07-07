@@ -22,7 +22,7 @@ import domain.{EmailAlreadyInUse, RegistrationSuccessful}
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, Request}
+import play.api.mvc.{Action, MessagesControllerComponents, Request}
 import service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
 import views.html.signIn
@@ -33,11 +33,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class Registration @Inject()(override val sessionService: SessionService,
                              val connector: ThirdPartyDeveloperConnector,
                              val errorHandler: ErrorHandler,
-                             val messagesApi: MessagesApi,
+                             mcc: MessagesControllerComponents,
                              val cookieSigner : CookieSigner
                              )
                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController {
+  extends LoggedOutController(mcc) {
 
   import ErrorFormBuilder.GlobalError
   import play.api.data._

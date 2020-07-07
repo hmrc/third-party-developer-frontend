@@ -25,7 +25,7 @@ import play.api.data.{Form, Forms, Mapping}
 import play.api.data.Forms.{boolean, ignored, mapping, optional, text}
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Call, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.editapplication
@@ -39,11 +39,11 @@ import model.ApplicationViewModel
 class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
-                                 val messagesApi: MessagesApi,
+                                 mcc: MessagesControllerComponents,
                                  val cookieSigner : CookieSigner
                                  )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController
+  extends ApplicationController(mcc)
     with ApplicationHelper
     with CanUseCheckActions
     with ConfirmNamePartialController

@@ -22,7 +22,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Request}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import security.ExtendedDevHubAuthorization
 import service.{ApplicationService, DeskproService, SessionService}
 import views.html.signoutSurvey
@@ -34,10 +34,10 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val sessionService: SessionService,
                                   val applicationService: ApplicationService,
                                   val errorHandler: ErrorHandler,
-                                  val messagesApi: MessagesApi,
+                                  mcc: MessagesControllerComponents,
                                   val cookieSigner: CookieSigner)
                                  (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController with ExtendedDevHubAuthorization {
+  extends LoggedInController(mcc) with ExtendedDevHubAuthorization {
 
   def logoutSurvey = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)

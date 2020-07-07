@@ -22,9 +22,8 @@ import domain.Capabilities.SupportsDeletion
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, Result}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
 import service._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,11 +34,11 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
                                   val applicationService: ApplicationService,
                                   val sessionService: SessionService,
                                   val errorHandler: ErrorHandler,
-                                  val messagesApi: MessagesApi,
+                                  mcc: MessagesControllerComponents,
                                   val cookieSigner : CookieSigner
                                   )
                                  (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController {
+  extends ApplicationController(mcc) {
 
   private def canDeleteApplicationAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     checkActionForApprovedApps(SupportsDeletion,AdministratorOnly)(applicationId)(fun)
