@@ -27,7 +27,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import qr.{OtpAuthUri, QRCode}
 import service.{MFAService, MfaMandateService, SessionService}
-import views.html.UserDidNotAdd2SVView
+import views.html.{Add2SVView, UserDidNotAdd2SVView}
 import views.html.protectaccount._
 
 import scala.concurrent.Future.successful
@@ -51,7 +51,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
                                protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView,
                                protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView,
                                userDidNotAdd2SVView: UserDidNotAdd2SVView,
-                               add2SVView: UserDidNotAdd2SVView
+                               add2SVView: Add2SVView
                               )
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController(mcc) {

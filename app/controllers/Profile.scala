@@ -36,7 +36,7 @@ class Profile @Inject()(
   val errorHandler: ErrorHandler,
   mcc: MessagesControllerComponents,
   val cookieSigner : CookieSigner,
-  changeProfileView: ChangeProfileView,
+  changeProfileViewView: ChangeProfileView,
   profileView: ProfileView,
   profileUpdatedView: ProfileUpdatedView,
   changeProfilePasswordView: ChangeProfilePasswordView,
@@ -55,7 +55,7 @@ class Profile @Inject()(
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
   private def changeProfileView(developerSession: DeveloperSession)(implicit req: UserRequest[_]) = {
-    changeProfileView(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
+    changeProfileViewView(profileForm.fill(ProfileForm(developerSession.developer.firstName, developerSession.developer.lastName, developerSession.developer.organisation)))
   }
 
   def showProfile(): Action[AnyContent] = loggedInAction { implicit request =>
@@ -70,7 +70,7 @@ class Profile @Inject()(
     val requestForm = profileForm.bindFromRequest
     requestForm.fold(
       formWithErrors => {
-        Future.successful(BadRequest(changeProfileView(formWithErrors.firstnameGlobal().lastnameGlobal())))
+        Future.successful(BadRequest(changeProfileViewView(formWithErrors.firstnameGlobal().lastnameGlobal())))
       },
       profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ => {
