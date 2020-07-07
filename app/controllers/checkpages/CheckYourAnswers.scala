@@ -36,7 +36,7 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
+abstract class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
                                  val applicationCheck: ApplicationCheck,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
