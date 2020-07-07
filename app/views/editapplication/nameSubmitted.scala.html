@@ -19,10 +19,13 @@
 @import include._
 @import model.Crumb
 
+@this(devMain: DevMain)
+
 @(applicationId: String, app: Application)(
         implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "credentials")
 
 @pageHeading = @{s"Request received"}
+
 @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,

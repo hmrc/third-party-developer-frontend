@@ -19,7 +19,10 @@
 @import include._
 @import controllers.checkpages.ContactForm
 
+@this(devMain: DevMain)
+
 @(app: Application,form: Form[ContactForm], action: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @pageHeading = @{ "Who to contact about your application" }

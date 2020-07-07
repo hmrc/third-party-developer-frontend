@@ -18,8 +18,11 @@
 @import domain.{Application, BackButtonWithJavaScript, DeveloperSession}
 @import include._
 
+@this(devMain: DevMain)
+
 @(app: Application, form: Form[DeletePrincipalApplicationForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "delete-application")
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(

@@ -14,17 +14,16 @@
  * limitations under the License.
  *@
 
-@import views.html.include.devMain
 @import domain.DeveloperSession
-
 @import domain.BackButtonWithJavaScript
 @import config.ApplicationConfig
 @import views.html.include.teamMembers.addTeamMemberPartial
-
-@import domain.Application
-
 @import domain.AddTeamMemberPageMode.CheckYourAnswers
 @import model.ApplicationViewModel
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
 @(applicationView: ApplicationViewModel, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 

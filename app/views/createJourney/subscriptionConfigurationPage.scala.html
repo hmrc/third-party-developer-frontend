@@ -16,15 +16,11 @@
 
 @import include._
 @import domain._
-
-@import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 @import model.EditManageSubscription.EditApiConfigurationViewModel
 
-@(
-  app: Application,
-  pageNumber: Int,
-  viewModel: EditApiConfigurationViewModel
-)(
+@this(devMain: DevMain)
+
+@(app: Application, pageNumber: Int, viewModel: EditApiConfigurationViewModel)(
   implicit request: play.api.mvc.Request[Any],
   loggedIn: DeveloperSession,
   messages: Messages,

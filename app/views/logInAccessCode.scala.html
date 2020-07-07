@@ -17,8 +17,8 @@
 @import config.ApplicationConfig
 @import domain._
 @import include._
-@import model.Crumb
-@import play.api.mvc.Call
+
+@this(devMain: DevMain)
 
 @(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 

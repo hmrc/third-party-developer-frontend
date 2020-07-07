@@ -17,6 +17,8 @@
 @import config.ApplicationConfig
 @import include._
 
+@this(devMain: DevMain)
+
 @(email: String)(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(title = "Check your emails", developerSession = None) {

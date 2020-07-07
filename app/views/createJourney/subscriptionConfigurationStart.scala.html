@@ -18,6 +18,8 @@
 @import domain._
 @import controllers.ManageSubscriptions.ApiDetails
 
+@this(devMain: DevMain)
+
 @(application: Application, apis: Seq[ApiDetails])(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,

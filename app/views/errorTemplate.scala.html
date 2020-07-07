@@ -16,8 +16,9 @@
 
 @import include._
 @import domain._
-
 @import play.twirl.api.HtmlFormat
+
+@this(main: Main)
 
 @(title: String, heading: String, message: String)(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)

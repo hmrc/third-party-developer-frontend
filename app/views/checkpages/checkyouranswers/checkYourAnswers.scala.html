@@ -18,11 +18,11 @@
 @import domain._
 @import include._
 @import model.Crumb
-
 @import views.html.partials.aboutYourApplicationPartial
-
 @import controllers.checkpages.CheckYourAnswersData
 @import controllers.checkpages.DummyCheckYourAnswersForm
+
+@this(devMain: DevMain)
 
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 

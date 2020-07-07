@@ -20,7 +20,10 @@
 @import model.Crumb
 @import model.ApplicationViewModel
 
+@this(devMain: DevMain)
+
 @(applicationViewModel: ApplicationViewModel, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @application = @{applicationViewModel.application}

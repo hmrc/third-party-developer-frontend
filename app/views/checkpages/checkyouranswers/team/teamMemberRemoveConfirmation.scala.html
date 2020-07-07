@@ -16,22 +16,23 @@
 
 @import domain.DeveloperSession
 @import config.ApplicationConfig
-@import views.html.include.devMain
 @import domain.BackButtonWithJavaScript
-
 @import domain.Application
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
 @(app: Application, loggedIn: DeveloperSession, email: String)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 
- @pageHeading = @{ "Are you sure you want to remove this team member from your application?" }
+@pageHeading = @{ "Are you sure you want to remove this team member from your application?" }
 
- @devMain(
+@devMain(
   title = pageHeading,
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
- ) {
-
+) {
   <header>
    <h1 class="heading-xlarge">@pageHeading</h1>
   </header>

@@ -16,7 +16,8 @@
 
 @import include._
 @import domain._
-@import controllers.ManageSubscriptions.ApiDetails
+
+@this(devMain: DevMain)
 
 @(application: Application, pageNumber: Int, ofPages: Int)(
         implicit request: play.api.mvc.Request[Any],

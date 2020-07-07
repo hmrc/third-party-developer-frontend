@@ -21,7 +21,10 @@
 @import controllers.TermsOfUseForm
 @import model.ApplicationViewModel
 
+@this(devMain: DevMain)
+
 @(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @app = @{applicationViewModel.application}

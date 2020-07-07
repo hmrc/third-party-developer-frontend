@@ -14,16 +14,22 @@
  * limitations under the License.
  *@
 
+@import domain.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, DeveloperSession, NoBackButton}
 @import model.Crumb
-@import domain.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, NoBackButton, LoggedInState}
-
-@import domain.DeveloperSession
-
-@import layouts.{govuk_template => hmrcGovUkTemplate}
-@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
-@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
-
 @import play.twirl.api.HtmlFormat
+@import views.html.layouts.GovUkTemplate
+@import uk.gov.hmrc.play.views.html.layouts.{BetaBanner, Footer, Head, HeaderNav, MainContentHeader, ServiceInfo}
+@import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
+
+@this(layoutsHead: Head,
+        layoutsFooter: Footer,
+        layoutsHeaderNav: HeaderNav,
+        layoutsBetaBanner: BetaBanner,
+        layoutsServiceInfo: ServiceInfo,
+        layoutsMainContentHeader: MainContentHeader,
+        helpersReportAProblemLink: ReportAProblemLink,
+        govUkTemplate: GovUkTemplate
+)
 
 @(title: String,
     navTitle: Option[String] = None,
@@ -45,21 +51,22 @@
 }
 
 @head = {
-@uiLayouts.head(
-    linkElem = None,
-    headScripts = Some(headScripts))
-
+    @layoutsHead(
+        linkElem = None,
+        headScripts = Some(headScripts)
+    )
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/main.css")'/>
     <meta data-title="@applicationConfig.title"/>
 }
 
 
 @insideHeader = {
-@uiLayouts.header_nav(
-    navTitle = navTitle.map(t => s"HMRC $t"),
-    navTitleLink = navTitleLink,
-    showBetaLink = false,
-    navLinks = Some(headerNavLinks))
+    @layoutsHeaderNav(
+        navTitle = navTitle.map(t => s"HMRC $t"),
+        navTitleLink = navTitleLink,
+        showBetaLink = false,
+        navLinks = Some(headerNavLinks)
+    )
 }
 
 @afterHeader = {}
@@ -85,12 +92,13 @@
 }
 
 @bodyEnd = {
-@uiLayouts.footer(
-    analyticsToken = applicationConfig.analyticsToken,
-    analyticsHost = applicationConfig.analyticsHost,
-    ssoUrl = None,
-    scriptElem = Some(scriptElem),
-    gaCalls = None)
+    @layoutsFooter(
+        analyticsToken = applicationConfig.analyticsToken,
+        analyticsHost = applicationConfig.analyticsHost,
+        ssoUrl = None,
+        scriptElem = Some(scriptElem),
+        gaCalls = None
+    )
 }
 
 @footerTop = {}
@@ -118,30 +126,32 @@
 }
 
 @betaBanner = {
-@uiLayouts.betaBanner(
-    userLoggedIn = false,
-    betaFeedbackUrl = applicationConfig.betaFeedbackUrl,
-    betaFeedbackUnauthenticatedUrl = applicationConfig.betaFeedbackUnauthenticatedUrl,
-    showFeedbackLinkInBetaBanner = true)
+    @layoutsBetaBanner(
+        userLoggedIn = false,
+        betaFeedbackUrl = applicationConfig.betaFeedbackUrl,
+        betaFeedbackUnauthenticatedUrl = applicationConfig.betaFeedbackUnauthenticatedUrl,
+        showFeedbackLinkInBetaBanner = true
+    )
 }
 
 @serviceInfo = {
     @if(serviceInfoContent.isDefined) {
-        @uiLayouts.serviceInfo(
+        @layoutsServiceInfo(
             betaBanner = banner,
             includeGridWrapper = false,
             includeHMRCBranding = false,
-            serviceInfoContent = None)
+            serviceInfoContent = None
+        )
     }
 }
 
 @mainContentHeader = {
     @if(contentHeader.isDefined) {
-        @uiLayouts.main_content_header(contentHeader = contentHeader.getOrElse(HtmlFormat.empty))
+        @layoutsMainContentHeader(contentHeader = contentHeader.getOrElse(HtmlFormat.empty))
     }
 }
 
-@getHelpForm = @{uiHelpers.reportAProblemLink(applicationConfig.reportAProblemPartialUrl, applicationConfig.reportAProblemNonJSUrl)}
+@getHelpForm = @{helpersReportAProblemLink(applicationConfig.reportAProblemPartialUrl, applicationConfig.reportAProblemNonJSUrl)}
 
 @backLink = {
     @back match {
@@ -181,7 +191,6 @@
 }
 
 @bodyContent = {
-
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TSFTCWZ"
                       height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
@@ -203,7 +212,7 @@
     </main>
 }
 
-@hmrcGovUkTemplate(title = Some(title), None)(head = head,
+@govUkTemplate(title = Some(title), None)(head = head,
     bodyEnd = bodyEnd,
     insideHeader = insideHeader,
     afterHeader = afterHeader,

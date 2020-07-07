@@ -22,7 +22,10 @@
 @import controllers.AddRedirectForm
 @import model.ApplicationViewModel
 
+@this(devMain: DevMain)
+
 @(applicationViewModel: ApplicationViewModel, form: Form[AddRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @application = @{applicationViewModel.application}

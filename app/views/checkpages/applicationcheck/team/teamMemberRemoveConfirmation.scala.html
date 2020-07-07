@@ -16,10 +16,12 @@
 
 @import domain.DeveloperSession
 @import config.ApplicationConfig
-@import views.html.include.devMain
 @import domain.BackButtonWithJavaScript
-
 @import domain.Application
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
 @(app: Application, loggedIn: DeveloperSession, email: String)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 

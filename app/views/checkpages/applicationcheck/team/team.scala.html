@@ -18,13 +18,14 @@
 @import domain.Role
 @import domain.DeveloperSession
 @import views.html.include.teamMembers._
-
 @import helpers.string._
-
-@import views.html.include.devMain
 @import config.ApplicationConfig
 @import domain.BackButtonWithJavaScript
 @import domain.Link
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
 @(app: Application, role: Role, loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 

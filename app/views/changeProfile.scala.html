@@ -18,6 +18,8 @@
 @import include._
 @import model.Crumb
 
+@this(devMain: DevMain)
+
 @(form: Form[controllers.ProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "manage-profile")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 

@@ -18,8 +18,9 @@
 @import domain._
 @import model.Crumb
 
-@(
-    title: String,
+@this(main: Main)
+
+@(title: String,
     userFullName: Option[String] = None,
     isRegistering: Boolean = false,
     breadcrumbs: Seq[Crumb] = Seq.empty,
@@ -27,9 +28,7 @@
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
     developerSession: Option[DeveloperSession]
-)(
-    mainContent: Html
-)(
+)(mainContent: Html)(
     implicit request: Request[_],
         messages: Messages,
         applicationConfig: config.ApplicationConfig
