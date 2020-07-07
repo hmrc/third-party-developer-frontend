@@ -62,7 +62,12 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   lazy val currentTermsOfUseDate = DateTime.parse(getConfigDefaulted("currentTermsOfUseDate", ""))
   lazy val retryCount = getConfigDefaulted("retryCount", 0)
   lazy val retryDelayMilliseconds = getConfigDefaulted("retryDelayMilliseconds", 500)
-  lazy val dateOfAdminMfaMandate: Option[LocalDate] = MfaMandateService.parseLocalDate(getString("dateOfAdminMfaMandate"))
+  lazy val dateOfAdminMfaMandate: Option[LocalDate] = {
+    config.getOptional[String]("dateOfAdminMfaMandate") match {
+      case Some(s) => MfaMandateService.parseLocalDate(s)
+      case None => None
+    }
+  }
 
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl = apiSubscriptionFieldsUrl("api-subscription-fields-production")
