@@ -25,7 +25,7 @@ import play.filters.csrf.CSRFFilter
 import play.filters.headers.SecurityHeadersFilter
 import uk.gov.hmrc.play.bootstrap.filters.{CacheControlFilter, LoggingFilter, MDCFilter}
 import uk.gov.hmrc.play.bootstrap.filters.frontend._
-import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.CookieCryptoFilter
+import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCryptoFilter
 import uk.gov.hmrc.play.bootstrap.filters.frontend.deviceid.DeviceIdFilter
 
 @Singleton
@@ -38,7 +38,7 @@ class ApplicationFrontendFilters @Inject()(
                                  metricsFilter: MetricsFilter,
                                  deviceIdFilter: DeviceIdFilter,
                                  csrfFilter: CSRFFilter,
-                                 cookieCryptoFilter: CookieCryptoFilter,
+                                 sessionCookieCryptoFilter: SessionCookieCryptoFilter,
                                  sessionTimeoutFilter: SessionTimeoutFilter,
                                  cacheControlFilter: CacheControlFilter,
                                  mdcFilter: MDCFilter
@@ -47,7 +47,7 @@ class ApplicationFrontendFilters @Inject()(
   val frontendFilters: Seq[EssentialFilter] = Seq(
     metricsFilter,
     headersFilter,
-    cookieCryptoFilter,
+    sessionCookieCryptoFilter,
     deviceIdFilter,
     loggingFilter,
     frontendAuditFilter,

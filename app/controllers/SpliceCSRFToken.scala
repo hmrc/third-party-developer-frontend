@@ -17,8 +17,7 @@
 package controllers
 
 import play.api.mvc.{Call, RequestHeader}
-import play.filters.csrf.CSRF.Token
-import play.filters.csrf.CSRF.Token._
+import play.filters.csrf.CSRF._
 
 object SpliceCSRFToken {
   // Not materially different from play's play.filters.csrf.CSRF helper, but rather than
@@ -31,11 +30,23 @@ object SpliceCSRFToken {
     call.copy(url = url)
   }
 
-  def getToken(implicit request: RequestHeader): Option[Token] = {
-    // Try to get the re-signed token first, then get the "new" token.
-    for {
-      name <- request.tags.get(NameRequestTag)
-      value <- request.tags.get(ReSignedRequestTag) orElse request.tags.get(RequestTag)
-    } yield Token(name, value)
-  }
+//  private def getToken(implicit request: RequestHeader): Option[Token] = {
+//    // Try to get the re-signed token first, then get the "new" token.
+//    for {
+//      name <- request.attrs(Attrs.NameRequestTag)
+//      value <- request.tags.get(ReSignedRequestTag) orElse request.attrs(Attrs.RequestTag)
+//    } yield Token(name, value)
+//  }
+
+
+//  object Attrs {
+//    val NameRequestTag: TypedKey[String] = TypedKey("CSRF_TOKEN_NAME")
+//    val ReSignedRequestTag: TypedKey[String] = TypedKey("CSRF_TOKEN_RE_SIGNED")
+//    val RequestTag: TypedKey[String] = TypedKey("CSRF_TOKEN_RE_SIGNED")
+//  }
+  // Getting an attribute from a Request or RequestHeader
+//  val userName: String = request.attrs(Attrs.NameRequestTag)
+//  val optUserName: [String] = req.attrs.get(Attrs.UserName)
+  // Setting an attribute on a Request or RequestHeader
+//  val newReq = req.addAttr(Attrs.UserName, newName)
 }

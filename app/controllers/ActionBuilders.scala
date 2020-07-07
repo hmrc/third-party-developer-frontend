@@ -16,21 +16,18 @@
 
 package controllers
 
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList, OptionT}
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.toDetails
 import domain._
 import model.NoSubscriptionFieldsRefinerBehaviour
-import play.api.libs.json.Json
-import play.api.mvc._
 import play.api.mvc.Results._
+import play.api.mvc._
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
-import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
-import cats.data.OptionT
 
 trait ActionBuilders {
 
