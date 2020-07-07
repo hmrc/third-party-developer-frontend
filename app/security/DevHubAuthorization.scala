@@ -20,17 +20,18 @@ import java.security.MessageDigest
 
 import cats.implicits._
 import config.ApplicationConfig
-import controllers.{routes, HeaderCarrierConversion, MaybeUserRequest, UserRequest}
+import controllers.{MaybeUserRequest, UserRequest, routes}
 import domain.{DeveloperSession, LoggedInState}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.FrontendHeaderCarrierProvider
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait DevHubAuthorization extends Results with HeaderCarrierConversion with CookieEncoding {
+trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider with CookieEncoding {
   private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
   private val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
 
