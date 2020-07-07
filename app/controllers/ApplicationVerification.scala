@@ -23,6 +23,7 @@ import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, MessagesControllerComponents}
 import service.{ApplicationService, SessionService}
+import views.html.ApplicationVerificationView
 
 import scala.concurrent.ExecutionContext
 
@@ -31,15 +32,15 @@ class ApplicationVerification @Inject()(service: ApplicationService,
                                         val sessionService: SessionService,
                                         val errorHandler: ErrorHandler,
                                         mcc: MessagesControllerComponents,
-                                        val cookieSigner: CookieSigner
-                                        )
+                                        val cookieSigner: CookieSigner,
+                                        applicationVerificationView: ApplicationVerificationView)
                                        (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedOutController(mcc) {
 
   def verifyUplift(code: String) = Action.async { implicit request =>
-    service.verify(code) map { _ => Ok(views.html.applicationVerification(success = true))
+    service.verify(code) map { _ => Ok(applicationVerificationView(success = true))
     } recover {
       case _: ApplicationVerificationFailed =>
-        Ok(views.html.applicationVerification(success = false))
+        Ok(applicationVerificationView(success = false))
     }
   }
 }
