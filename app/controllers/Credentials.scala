@@ -31,6 +31,8 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
 import service._
 import uk.gov.hmrc.http.ForbiddenException
+import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
+import views.html.editapplication.DeleteClientSecretView
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,8 +44,12 @@ class Credentials @Inject()(val applicationService: ApplicationService,
                             val sessionService: SessionService,
                             val errorHandler: ErrorHandler,
                             mcc: MessagesControllerComponents,
-                            val cookieSigner : CookieSigner
-                            )
+                            val cookieSigner : CookieSigner,
+                            credentialsView: CredentialsView,
+                            clientIdView: ClientIdView,
+                            clientSecretsView: ClientSecretsView,
+                            serverTokenView: ServerTokenView,
+                            deleteClientSecretView: DeleteClientSecretView)
                            (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc) {
 
@@ -55,18 +61,18 @@ class Credentials @Inject()(val applicationService: ApplicationService,
 
   def credentials(applicationId: String): Action[AnyContent] =
     canViewClientCredentialsPage(applicationId) { implicit request =>
-      successful(Ok(views.html.credentials(request.application)))
+      successful(Ok(credentialsView(request.application)))
   }
 
   def clientId(applicationId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      successful(Ok(views.html.clientId(request.application)))
+      successful(Ok(clientIdView(request.application)))
   }
 
   def clientSecrets(applicationId: String): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.fetchCredentials(request.application).map { tokens =>
-        Ok(views.html.clientSecrets(request.application, tokens.clientSecrets))
+        Ok(clientSecretsView(request.application, tokens.clientSecrets))
       }
   }
 
@@ -74,7 +80,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     canChangeClientSecrets(applicationId) { implicit request =>
       if (request.application.createdOn.isBefore(serverTokenCutoffDate)) {
         applicationService.fetchCredentials(request.application).map { tokens =>
-          Ok(views.html.serverToken(request.application, tokens.accessToken))
+          Ok(serverTokenView(request.application, tokens.accessToken))
         }
       } else {
         successful(NotFound(errorHandler.notFoundTemplate))
@@ -97,7 +103,7 @@ class Credentials @Inject()(val applicationService: ApplicationService,
     canChangeClientSecrets(applicationId.toString) { implicit request =>
       applicationService.fetchCredentials(request.application).map { tokens =>
         tokens.clientSecrets.find(_.id == clientSecretId)
-          .fold(NotFound(errorHandler.notFoundTemplate))(secret => Ok(views.html.editapplication.deleteClientSecret(request.application, secret)))
+          .fold(NotFound(errorHandler.notFoundTemplate))(secret => Ok(deleteClientSecretView(request.application, secret)))
       }
     }
 
