@@ -17,9 +17,9 @@
 @import config.ApplicationConfig
 @import domain._
 @import include._
-@import model.Crumb
-@import uk.gov.hmrc.urls.Link
-@import controllers.AddRedirectForm
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
 
 @(form: Form[Remove2SVConfirmForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}

@@ -16,9 +16,10 @@
 
 @import config.ApplicationConfig
 @import domain._
-@import include._
-@import model.Crumb
-@import uk.gov.hmrc.urls.Link
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
 
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 

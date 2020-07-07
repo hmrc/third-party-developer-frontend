@@ -17,6 +17,9 @@
 @import config.ApplicationConfig
 @import domain.{Application, BackButtonWithJavaScript, DeveloperSession, Role}
 @import include._
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
 
 @(app: Application, roleOfLoggedIn: Role)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-ip-whitelist")

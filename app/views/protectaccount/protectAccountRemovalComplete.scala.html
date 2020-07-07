@@ -15,10 +15,11 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{Application, DeveloperSession}
-@import include._
+@import domain.DeveloperSession
 @import domain._
-@import model.Crumb
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 

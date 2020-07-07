@@ -20,6 +20,10 @@
 @import include._
 
 @import model.ApplicationViewModel
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
 @(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,

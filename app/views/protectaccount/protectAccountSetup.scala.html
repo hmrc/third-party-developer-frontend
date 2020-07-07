@@ -15,8 +15,9 @@
  *@
 
 @import domain._
-@import include._
-@import model.Crumb
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
 
 @(secret: String, qrImg: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "protect-account")
 

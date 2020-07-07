@@ -15,7 +15,7 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{DeveloperSession, Application, Role}
+@import domain.DeveloperSession
 @import include._
 @import model.Crumb
 
@@ -23,6 +23,10 @@
 
 @import domain.AddTeamMemberPageMode.ManageTeamMembers
 @import model.ApplicationViewModel
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
 @(applicationView: ApplicationViewModel, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
 implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}

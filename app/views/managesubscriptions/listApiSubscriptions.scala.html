@@ -20,6 +20,9 @@
 @import model.Crumb
 @import controllers.ManageSubscriptions.ApiDetails
 @import views.helper.IdFormatter
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
 
 @(app: Application, details: Seq[ApiDetails])(
 implicit request: play.api.mvc.Request[Any],

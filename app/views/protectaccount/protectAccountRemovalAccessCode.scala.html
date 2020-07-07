@@ -16,9 +16,11 @@
 
 @import domain._
 @import include._
-@import model.Crumb
-
 @import config.ApplicationConfig
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
 @(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, applicationConfig: ApplicationConfig)
 
 @devMain(
