@@ -17,27 +17,23 @@
 package controllers.checkpages
 
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.{AddTeamMemberForm, ApplicationController, ApplicationHelper, ApplicationRequest, RemoveTeamMemberCheckPageConfirmationForm}
 import controllers.FormKeys.applicationNameAlreadyExistsKey
-import domain.{Application, ApplicationAlreadyExists, CheckInformation, CheckInformationForm, ContactDetails, DeskproTicketCreationFailed}
+import controllers.ManageSubscriptions.FieldValue
+import controllers._
+import domain._
 import javax.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.i18n.MessagesApi
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
-import service.{ApplicationService, SessionService}
-import views.html.checkpages.checkyouranswers
-import views.html.checkpages.applicationcheck
-import cats.data.{NonEmptyList => NEL}
 import model.ApplicationViewModel
+import play.api.data.Form
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc._
+import service.{ApplicationService, SessionService}
+import views.html.checkpages.applicationcheck.LandingPageView
+import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
+import views.html.checkpages.checkyouranswers.CheckYourAnswersView
+import views.html.checkpages.checkyouranswers.team.TeamView
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import domain.APISubscriptionStatusWithSubscriptionFields
-import views.html.editapplication.credentialsPartials.fields
-import domain.APISubscriptionStatus
-import controllers.ManageSubscriptions.FieldValue
-import controllers.ManageSubscriptions
 
 @Singleton
 class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
@@ -45,7 +41,12 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
                                  mcc: MessagesControllerComponents,
-                                 val cookieSigner : CookieSigner
+                                 val cookieSigner : CookieSigner,
+                                 checkYourAnswersView: CheckYourAnswersView,
+                                 landingPageView: LandingPageView,
+                                 teamView: TeamView,
+                                 teamMemberAddView: TeamMemberAddView,
+                                 teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView
                                 )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
@@ -63,7 +64,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
     Future.successful(
       Ok(
-        checkyouranswers.checkYourAnswers(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))
+        checkYourAnswersView(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))
       )
     )
   }
@@ -78,7 +79,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
         case e: DeskproTicketCreationFailed =>
           val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
           val requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
-          InternalServerError(checkyouranswers.checkYourAnswers(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
+          InternalServerError(checkYourAnswersView(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
       }
       .recover {
         case _: ApplicationAlreadyExists =>
@@ -88,12 +89,12 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
           val requestForm = validateCheckFormForApplication(request)
 
           val applicationViewModel = ApplicationViewModel(application.copy(checkInformation = Some(information)), hasSubscriptionFields(request))
-          Conflict(applicationcheck.landingPage(applicationViewModel, requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
+          Conflict(landingPageView(applicationViewModel, requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
       }
   }
 
   def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(checkyouranswers.team.team(request.application, request.role, request.user)))
+    Future.successful(Ok(teamView(request.application, request.role, request.user)))
   }
 
   def teamAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
@@ -105,12 +106,12 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
   }
 
   def teamAddMember(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(checkyouranswers.team.teamMemberAdd(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
   }
 
   def teamMemberRemoveConfirmation(appId: String, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     successful(request.application.findCollaboratorByHash(teamMemberHash)
-      .map(collaborator => Ok(checkyouranswers.team.teamMemberRemoveConfirmation(request.application, request.user, collaborator.emailAddress)))
+      .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.user, collaborator.emailAddress)))
       .getOrElse(Redirect(routes.CheckYourAnswers.team(appId))))
   }
 

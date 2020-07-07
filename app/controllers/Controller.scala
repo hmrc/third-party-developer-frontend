@@ -83,9 +83,7 @@ abstract class BaseController(mcc: MessagesControllerComponents) extends Fronten
 
 abstract class LoggedInController(mcc: MessagesControllerComponents) extends BaseController(mcc)
 
-abstract class ApplicationController(mcc: MessagesControllerComponents,
-                                     termsOfUseView: TermsOfUseView
-                                    )
+abstract class ApplicationController(mcc: MessagesControllerComponents)
   extends LoggedInController(mcc) with ActionBuilders {
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
