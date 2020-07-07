@@ -30,18 +30,22 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service._
 import controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
+import views.html.application.PendingApprovalView
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+import views.html.{ChangeDetailsView, DetailsView}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
-                        auditService: AuditService,
-                        val applicationService: ApplicationService,
+class Details @Inject()(val applicationService: ApplicationService,
                         val sessionService: SessionService,
                         val errorHandler: ErrorHandler,
                         mcc: MessagesControllerComponents,
-                        val cookieSigner : CookieSigner
-                        )
+                        val cookieSigner : CookieSigner,
+                        unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
+                        pendingApprovalView: PendingApprovalView,
+                        detailsView: DetailsView,
+                        changeDetailsView: ChangeDetailsView)
                        (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc) {
 
@@ -57,18 +61,18 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
         Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id))
 
       case State.TESTING if request.role.isDeveloper =>
-        Ok(views.html.checkpages.applicationcheck.unauthorisedAppDetails(request.application.name, request.application.adminEmails))
+        Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
 
       case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => 
-        Ok(views.html.application.pendingApproval(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
+        Ok(pendingApprovalView(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
 
       case State.PRODUCTION => 
-        Ok(views.html.details(applicationViewModelFromApplicationRequest))
+        Ok(detailsView(applicationViewModelFromApplicationRequest))
     })
   }
 
   def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.changeDetails(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
+    Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
   }
 
   private def buildCheckInformation(updateRequest: UpdateApplicationRequest, application: Application): CheckInformation = {
@@ -131,7 +135,7 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
               def invalidNameCheckForm: Form[EditApplicationForm] =
                 requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-              Future.successful(BadRequest(views.html.changeDetails(invalidNameCheckForm, applicationViewModelFromApplicationRequest)))
+              Future.successful(BadRequest(changeDetailsView(invalidNameCheckForm, applicationViewModelFromApplicationRequest)))
           })
       }
 
@@ -143,5 +147,5 @@ class Details @Inject()(developerConnector: ThirdPartyDeveloperConnector,
 
   private def errorView(id: String, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)
                        (implicit request: ApplicationRequest[_]): Future[Result] =
-    Future.successful(BadRequest(views.html.changeDetails(form, applicationViewModel)))
+    Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))
 }
