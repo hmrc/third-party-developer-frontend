@@ -52,7 +52,7 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   lazy val sandboxApiBaseUrl = buildUrl("platform.api.sandbox")
 
   lazy val sessionTimeoutInSeconds = getInt("session.timeoutSeconds")
-  lazy val analyticsToken = getString(s"$env.google-analytics.token")
+  lazy val analyticsToken = config.getOptional[String](s"$env.google-analytics.token").filterNot(_ == "")
   lazy val analyticsHost = getConfigDefaulted(s"$env.google-analytics.host", "auto")
   lazy val securedCookie = getConfigDefaulted(s"$env.cookie.secure", true)
   lazy val title = "Developer Hub"
