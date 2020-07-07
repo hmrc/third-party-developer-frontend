@@ -275,19 +275,13 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
   "parseLocalDate" when {
     "an empty date value is used" should {
       "parse to None" in {
-        MfaMandateService.parseLocalDate(Some("")) shouldBe None
+        MfaMandateService.parseLocalDate("") shouldBe None
       }
     }
 
     "an whitespace date value is used" should {
       "parse to None" in {
-        MfaMandateService.parseLocalDate(Some(" ")) shouldBe None
-      }
-    }
-
-    "an None date value is used" should {
-      "parse to None" in {
-        MfaMandateService.parseLocalDate(None) shouldBe None
+        MfaMandateService.parseLocalDate(" ") shouldBe None
       }
     }
 
@@ -296,7 +290,7 @@ class MfaMandateServiceSpec extends WordSpec with Matchers with MockitoSugar wit
         val year = 2001
         val month = 2
         val day = 3
-        MfaMandateService.parseLocalDate(Some("2001-02-03")) shouldBe Some(new LocalDate(year, month, day))
+        MfaMandateService.parseLocalDate("2001-02-03") shouldBe Some(new LocalDate(year, month, day))
       }
     }
   }
