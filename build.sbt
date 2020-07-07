@@ -22,7 +22,7 @@ lazy val appDependencies: Seq[ModuleID] = compile ++ test
 
 lazy val cucumberVersion = "1.2.5"
 lazy val seleniumVersion = "2.53.1"
-lazy val enumeratumVersion = "1.6.0"
+lazy val enumeratumVersion = "1.5.12"
 
 val testScope = "test, it"
 
@@ -41,6 +41,7 @@ lazy val compile = Seq(
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.google.zxing" % "core" % "3.2.1",
   "org.typelevel" %% "cats-core" % "2.0.0",
+  "com.typesafe.play" %% "play-json" % "2.7.4",
   "com.typesafe.play" %% "play-json-joda" % "2.7.4"
 )
 
