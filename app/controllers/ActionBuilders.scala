@@ -40,6 +40,7 @@ trait ActionBuilders {
 
   def applicationAction(applicationId: String, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[Request, ApplicationRequest]
     = new ActionRefiner[Request, ApplicationRequest] {
+    override protected def executionContext: ExecutionContext = ec
 
     override def refine[A](request: Request[A]): Future[Either[Result, ApplicationRequest[A]]] = {
       implicit val implicitRequest: Request[A] = request
@@ -59,6 +60,7 @@ trait ActionBuilders {
   def fieldDefinitionsExistRefiner(noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
                                   (implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest]
       = new ActionRefiner[ApplicationRequest, ApplicationWithFieldDefinitionsRequest] {
+    override protected def executionContext: ExecutionContext = ec
 
     def refine[A](input: ApplicationRequest[A]): Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]] = {
       implicit val implicitRequest: Request[A] = input.request
@@ -86,6 +88,7 @@ trait ActionBuilders {
   def subscriptionFieldPageRefiner(pageNumber: Int)(implicit ec: ExecutionContext):
     ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPage]
       = new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFieldPage] {
+    override protected def executionContext: ExecutionContext = ec
 
     def refine[A](input: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldPage[A]]] = {
       implicit val implicitRequest: Request[A] = input.applicationRequest.request
@@ -108,6 +111,7 @@ trait ActionBuilders {
   def subscriptionFieldsRefiner(context: String, version: String)(implicit ec: ExecutionContext):
     ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFields]
       = new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFields] {
+    override protected def executionContext: ExecutionContext = ec
 
     def refine[A](input: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFields[A]]] = {
       implicit val implicitRequest: Request[A] = input.applicationRequest.request
@@ -141,7 +145,9 @@ trait ActionBuilders {
     }
   }
 
-  def forbiddenWhenNotFilter(cond: ApplicationRequest[_] => Boolean): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+  def forbiddenWhenNotFilter(cond: ApplicationRequest[_] => Boolean)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def executionContext: ExecutionContext = ec
+
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
@@ -149,7 +155,9 @@ trait ActionBuilders {
     }
   }
 
-  def badRequestWhenNotFilter(cond: ApplicationRequest[_] => Boolean): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+  def badRequestWhenNotFilter(cond: ApplicationRequest[_] => Boolean)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def executionContext: ExecutionContext = ec
+
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
@@ -157,12 +165,14 @@ trait ActionBuilders {
     }
   }
 
-  def capabilityFilter(capability: Capability): ActionFilter[ApplicationRequest] = {
+  def capabilityFilter(capability: Capability)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = {
     val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
     badRequestWhenNotFilter(capabilityCheck)
   }
 
-  def approvalFilter(approvalPredicate: State => Boolean) = new ActionFilter[ApplicationRequest] {
+  def approvalFilter(approvalPredicate: State => Boolean)(implicit ec: ExecutionContext) = new ActionFilter[ApplicationRequest] {
+    override protected def executionContext: ExecutionContext = ec
+
     override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
       implicit val implicitRequest = request
 
@@ -173,7 +183,6 @@ trait ActionBuilders {
     }
   }
 
-  def permissionFilter(permission: Permission) =
+  def permissionFilter(permission: Permission)(implicit ec: ExecutionContext) =
     forbiddenWhenNotFilter(req => permission.hasPermissions(req.application, req.user.developer))
-
 }
