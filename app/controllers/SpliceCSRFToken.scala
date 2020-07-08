@@ -33,7 +33,7 @@ object SpliceCSRFToken {
 //  private def getToken(implicit request: RequestHeader): Option[Token] = {
 //    // Try to get the re-signed token first, then get the "new" token.
 //    for {
-//      name <- request.attrs(Attrs.NameRequestTag)
+//      name <- request.tags.get(NameRequestTag)
 //      value <- request.tags.get(ReSignedRequestTag) orElse request.attrs(Attrs.RequestTag)
 //    } yield Token(name, value)
 //  }
