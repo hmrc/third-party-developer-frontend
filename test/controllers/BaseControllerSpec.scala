@@ -24,7 +24,8 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{MessagesControllerComponents, Request}
+import play.api.test.{CSRFTokenHelper, FakeRequest}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.SharedMetricsClearDown
 
@@ -45,4 +46,8 @@ class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures wi
   lazy val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
+
+  implicit class CSRFRequest[T](request: FakeRequest[T]) {
+    def withCSRFToken: FakeRequest[T] = CSRFTokenHelper.addCSRFToken(request).asInstanceOf[FakeRequest[T]]
+  }
 }
