@@ -27,7 +27,6 @@ import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK}
 import play.filters.csrf.CSRF.TokenProvider
 import service.DeskproService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.CSRFTokenHelper._
 import utils.WithLoggedInSession._
 import utils.{TestApplications, WithCSRFAddToken}
 import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}

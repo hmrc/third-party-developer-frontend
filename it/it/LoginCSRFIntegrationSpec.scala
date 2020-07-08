@@ -32,7 +32,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.CSRFTokenHelper._
 
 class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with MockitoSugar {
   private val config = Configuration("play.filters.csrf.token.sign" -> false)

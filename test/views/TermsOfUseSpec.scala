@@ -30,7 +30,6 @@ import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
 import utils.SharedMetricsClearDown
 
 class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {

@@ -30,7 +30,6 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.CSRFTokenHelper._
 import utils.SharedMetricsClearDown
 import views.html.manageSubscriptions
 

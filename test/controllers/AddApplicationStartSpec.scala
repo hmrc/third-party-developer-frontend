@@ -19,20 +19,17 @@ package controllers
 import config.ErrorHandler
 import domain._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
-import play.api.mvc.AnyContentAsEmpty
+import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
-import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
-import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html._
 
 class AddApplicationStartSpec extends BaseControllerSpec
-  with SubscriptionTestHelperSugar with WithCSRFAddToken {
+  with SubscriptionTestHelperSugar {
 
   val appId = "1234"
   val clientId = "clientId123"
@@ -87,17 +84,13 @@ class AddApplicationStartSpec extends BaseControllerSpec
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 
-    private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val loggedInRequest = addCSRFToken(
+      FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+    )
 
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
-      .withCSRFToken
-
-    val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
-      .withSession(sessionParams: _*)
-  }
+    val partLoggedInRequest = addCSRFToken(
+      FakeRequest().withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
+    )
 
   "Add subordinate applications start page" should {
     "return the add applications page with the user logged in" in new Setup {

@@ -29,7 +29,6 @@ import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
 import utils.SharedMetricsClearDown
 
 class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown with SubscriptionsBuilder {
