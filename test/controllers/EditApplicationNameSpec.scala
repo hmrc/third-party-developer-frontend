@@ -28,15 +28,15 @@ import org.mockito.Mockito.verify
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import play.api.test.CSRFTokenHelper._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html._
 
-class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
 
   val appId = "1234"
   val clientId = "clientId123"
@@ -115,7 +115,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
       fetchByTeamMemberEmailReturns(loggedInUser.email,List(application))
 
-      private val result = await(underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken))
+      private val result = await(underTest.addApplicationName(Environment.SANDBOX)(addCSRFToken(loggedInRequest)))
 
       status(result) shouldBe OK
       bodyOf(result) should include("What&#x27;s the name of your application?")
@@ -150,12 +150,13 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
         givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
-        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
-          .withCSRFToken
+        private val request = addCSRFToken(loggedInRequest
           .withFormUrlEncodedBody(
             ("applicationName", invalidApplicationName),
             ("environment", "SANDBOX"),
-            ("description", ""))
+            ("description", "")
+          )
+        )
 
         private val result = await(underTest.editApplicationNameAction(Environment.SANDBOX)(request))
 
@@ -177,7 +178,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
       fetchByTeamMemberEmailReturns(loggedInUser.email,List(application))
 
-      private val result = await(underTest.addApplicationName( Environment.PRODUCTION)(loggedInRequest.withCSRFToken))
+      private val result = await(underTest.addApplicationName(Environment.PRODUCTION)(addCSRFToken(loggedInRequest)))
 
       status(result) shouldBe OK
       bodyOf(result) should include("What&#x27;s the name of your application?")
@@ -212,12 +213,13 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
         givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
-        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
-          .withCSRFToken
+        private val request = addCSRFToken(loggedInRequest
           .withFormUrlEncodedBody(
             ("applicationName", invalidApplicationName),
             ("environment", "PRODUCTION"),
-            ("description", ""))
+            ("description", "")
+          )
+        )
 
         private val result = await(underTest.editApplicationNameAction(Environment.PRODUCTION)(request))
 
@@ -236,12 +238,13 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
         givenApplicationNameIsInvalid(Invalid(invalidName = false, duplicateName = true))
 
-        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
-          .withCSRFToken
+        private val request = addCSRFToken(loggedInRequest
           .withFormUrlEncodedBody(
             ("applicationName", applicationName),
             ("environment", "PRODUCTION"),
-            ("description", ""))
+            ("description", "")
+          )
+        )
 
         private val result = await(underTest.editApplicationNameAction(Environment.PRODUCTION)(request))
 
