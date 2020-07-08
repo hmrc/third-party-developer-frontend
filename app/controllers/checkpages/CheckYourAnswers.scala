@@ -48,12 +48,12 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
                                  teamView: TeamView,
                                  teamMemberAddView: TeamMemberAddView,
                                  teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView,
-                                 termsOfUseViewTemplate: TermsOfUseView,
-                                 confirmNameViewTemplate: ConfirmNameView,
-                                 termsAndConditionsViewTemplate: TermsAndConditionsView,
-                                 privacyPolicyViewTemplate: PrivacyPolicyView,
-                                 apiSubscriptionsView: ApiSubscriptionsView,
-                                 contactDetailsViewTemplate: ContactDetailsView
+                                 val termsOfUseView: TermsOfUseView,
+                                 val confirmNameView: ConfirmNameView,
+                                 val termsAndConditionsView: TermsAndConditionsView,
+                                 val privacyPolicyView: PrivacyPolicyView,
+                                 val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
+                                 val contactDetailsView: ContactDetailsView
                                 )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
@@ -66,14 +66,6 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
     with TermsAndConditionsPartialController
     with TermsOfUsePartialController
     with CheckInformationFormHelper {
-
-  override val termsOfUseView: TermsOfUseView = termsOfUseViewTemplate
-  override val confirmNameView: ConfirmNameView = confirmNameViewTemplate
-  override val termsAndConditionsView: TermsAndConditionsView = termsAndConditionsViewTemplate
-  override val privacyPolicyView: PrivacyPolicyView = privacyPolicyViewTemplate
-  override val apiSubscriptionsViewTemplate: ApiSubscriptionsView = apiSubscriptionsView
-  override val contactDetailsView: ContactDetailsView = contactDetailsViewTemplate
-
 
   def answersPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)

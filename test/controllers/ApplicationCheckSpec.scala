@@ -37,6 +37,11 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import builder._
+import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
+import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
+import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
+import views.html.editapplication.NameSubmittedView
+
 import scala.concurrent.Future
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
@@ -136,12 +141,39 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   }
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationProvider {
+    val landingPageView = app.injector.instanceOf[LandingPageView]
+    val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
+    val nameSubmittedView = app.injector.instanceOf[NameSubmittedView]
+    val teamView = app.injector.instanceOf[TeamView]
+    val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
+    val teamMemberRemoveConfirmationView = app.injector.instanceOf[TeamMemberRemoveConfirmationView]
+    val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
+    val confirmNameView = app.injector.instanceOf[ConfirmNameView]
+    val contactDetailsView = app.injector.instanceOf[ContactDetailsView]
+    val apiSubscriptionsViewTemplate = app.injector.instanceOf[ApiSubscriptionsView]
+    val privacyPolicyView = app.injector.instanceOf[PrivacyPolicyView]
+    val termsAndConditionsView = app.injector.instanceOf[TermsAndConditionsView]
+
+    val applicationCheck = app.injector.instanceOf[ApplicationCheck]
+
     val underTest = new ApplicationCheck(
       applicationServiceMock,
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      landingPageView,
+      unauthorisedAppDetailsView,
+      nameSubmittedView,
+      teamView,
+      teamMemberAddView,
+      teamMemberRemoveConfirmationView,
+      termsOfUseView,
+      confirmNameView,
+      contactDetailsView,
+      apiSubscriptionsViewTemplate,
+      privacyPolicyView,
+      termsAndConditionsView
     )
 
     val application = createApplication()

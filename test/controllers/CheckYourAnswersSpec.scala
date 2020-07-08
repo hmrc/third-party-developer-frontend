@@ -38,6 +38,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
@@ -106,6 +107,12 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     val teamView = app.injector.instanceOf[TeamView]
     val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
     val teamMemberRemoveConfirmationView = app.injector.instanceOf[TeamMemberRemoveConfirmationView]
+    val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
+    val confirmNameView = app.injector.instanceOf[ConfirmNameView]
+    val termsAndConditionsView = app.injector.instanceOf[TermsAndConditionsView]
+    val privacyPolicyView = app.injector.instanceOf[PrivacyPolicyView]
+    val apiSubscriptionsViewTemplate = app.injector.instanceOf[ApiSubscriptionsView]
+    val contactDetailsView = app.injector.instanceOf[ContactDetailsView]
 
     val underTest = new CheckYourAnswers(
       applicationServiceMock,
@@ -118,7 +125,13 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       landingPageView,
       teamView,
       teamMemberAddView,
-      teamMemberRemoveConfirmationView
+      teamMemberRemoveConfirmationView,
+      termsOfUseView,
+      confirmNameView,
+      termsAndConditionsView,
+      privacyPolicyView,
+      apiSubscriptionsViewTemplate,
+      contactDetailsView
     )
 
     fetchSessionByIdReturns(sessionId, session)

@@ -92,64 +92,65 @@ class AddApplicationStartSpec extends BaseControllerSpec
       FakeRequest().withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
     )
 
-  "Add subordinate applications start page" should {
-    "return the add applications page with the user logged in" in new Setup {
-      private val result = await(underTest.addApplicationSubordinate()(loggedInRequest))
+    "Add subordinate applications start page" should {
+      "return the add applications page with the user logged in" in new Setup {
+        private val result = await(underTest.addApplicationSubordinate()(loggedInRequest))
 
-      status(result) shouldBe OK
-      bodyOf(result) should include("Add an application to the sandbox")
-      bodyOf(result) should include(loggedInUser.displayedName)
-      bodyOf(result) should include("Sign out")
-      bodyOf(result) should include("get its sandbox credentials")
-      bodyOf(result) should include("use its credentials for integration testing")
-      bodyOf(result) should include("In production, your application will need to comply with the expectations set out in our")
-      bodyOf(result) should include("Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:")
-      bodyOf(result) should not include "Sign in"
+        status(result) shouldBe OK
+        bodyOf(result) should include("Add an application to the sandbox")
+        bodyOf(result) should include(loggedInUser.displayedName)
+        bodyOf(result) should include("Sign out")
+        bodyOf(result) should include("get its sandbox credentials")
+        bodyOf(result) should include("use its credentials for integration testing")
+        bodyOf(result) should include("In production, your application will need to comply with the expectations set out in our")
+        bodyOf(result) should include("Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:")
+        bodyOf(result) should not include "Sign in"
+      }
+
+      "return to the login page when the user is not logged in" in new Setup {
+        val request = FakeRequest()
+
+        private val result = await(underTest.addApplicationSubordinate()(request))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/login")
+      }
+
+      "redirect to the login screen when partly logged" in new Setup {
+        private val result = await(underTest.addApplicationSubordinate()(partLoggedInRequest))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/login")
+      }
     }
 
-    "return to the login page when the user is not logged in" in new Setup {
-      val request = FakeRequest()
+    "Add principal applications start page" should {
+      "return the add applications page with the user logged in" in new Setup {
+        private val result = await(underTest.addApplicationPrincipal()(loggedInRequest))
 
-      private val result = await(underTest.addApplicationSubordinate()(request))
+        status(result) shouldBe OK
+        bodyOf(result) should include("Get production credentials")
+        bodyOf(result) should include(loggedInUser.displayedName)
+        bodyOf(result) should include("Sign out")
+        bodyOf(result) should include("Now that you've tested your software you can request production credentials to use live data.")
+        bodyOf(result) should not include "Sign in"
+      }
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/login")
-    }
+      "return to the login page when the user is not logged in" in new Setup {
+        val request = FakeRequest()
 
-    "redirect to the login screen when partly logged" in new Setup {
-      private val result = await(underTest.addApplicationSubordinate()(partLoggedInRequest))
+        private val result = await(underTest.addApplicationPrincipal()(request))
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/login")
-    }
-  }
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/login")
+      }
 
-  "Add principal applications start page" should {
-    "return the add applications page with the user logged in" in new Setup {
-      private val result = await(underTest.addApplicationPrincipal()(loggedInRequest))
+      "redirect to the login screen when partly logged" in new Setup {
+        private val result = await(underTest.addApplicationPrincipal()(partLoggedInRequest))
 
-      status(result) shouldBe OK
-      bodyOf(result) should include("Get production credentials")
-      bodyOf(result) should include(loggedInUser.displayedName)
-      bodyOf(result) should include("Sign out")
-      bodyOf(result) should include("Now that you've tested your software you can request production credentials to use live data.")
-      bodyOf(result) should not include "Sign in"
-    }
-
-    "return to the login page when the user is not logged in" in new Setup {
-      val request = FakeRequest()
-
-      private val result = await(underTest.addApplicationPrincipal()(request))
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/login")
-    }
-
-    "redirect to the login screen when partly logged" in new Setup {
-      private val result = await(underTest.addApplicationPrincipal()(partLoggedInRequest))
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some("/developer/login")
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/login")
+      }
     }
   }
 }

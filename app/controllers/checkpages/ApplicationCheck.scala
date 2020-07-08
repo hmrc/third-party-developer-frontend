@@ -27,6 +27,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.{ApplicationService, SessionService}
 import uk.gov.voa.play.form.ConditionalMappings._
+import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
 import views.html.editapplication.NameSubmittedView
@@ -35,7 +36,7 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-abstract class ApplicationCheck @Inject()(val applicationService: ApplicationService,
+class ApplicationCheck @Inject()(val applicationService: ApplicationService,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
                                  mcc: MessagesControllerComponents,
@@ -45,7 +46,13 @@ abstract class ApplicationCheck @Inject()(val applicationService: ApplicationSer
                                  nameSubmittedView: NameSubmittedView,
                                  teamView: TeamView,
                                  teamMemberAddView: TeamMemberAddView,
-                                 teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView
+                                 teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView,
+                                 val termsOfUseView: TermsOfUseView,
+                                 val confirmNameView: ConfirmNameView,
+                                 val contactDetailsView: ContactDetailsView,
+                                 val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
+                                 val privacyPolicyView: PrivacyPolicyView,
+                                 val termsAndConditionsView: TermsAndConditionsView
                                  )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
@@ -59,6 +66,8 @@ abstract class ApplicationCheck @Inject()(val applicationService: ApplicationSer
     with TermsOfUsePartialController
     with CheckInformationFormHelper
     {
+
+//      override val termsOfUseView: TermsOfUseView = termsOfUseViewTemmplate
 
   def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val form = createCheckFormForApplication(request)
