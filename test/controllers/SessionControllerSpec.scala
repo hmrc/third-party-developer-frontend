@@ -23,7 +23,6 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.{Developer, LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import play.api.http.Status._
-import play.api.i18n.MessagesApi
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import play.api.test.Helpers.redirectLocation
 import play.filters.csrf.CSRF.TokenProvider
@@ -38,7 +37,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout 
       sessionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[ErrorHandler],
-      mock[MessagesApi],
+      mcc,
       cookieSigner
     )
   }
