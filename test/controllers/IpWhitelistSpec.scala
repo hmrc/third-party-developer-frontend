@@ -27,9 +27,10 @@ import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK}
 import play.filters.csrf.CSRF.TokenProvider
 import service.DeskproService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{TestApplications, WithCSRFAddToken}
 import utils.CSRFTokenHelper._
 import utils.WithLoggedInSession._
+import utils.{TestApplications, WithCSRFAddToken}
+import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}
 
 import scala.concurrent.Future.failed
 
@@ -37,13 +38,20 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val mockDeskproService = mock[DeskproService]
+    val manageIpWhitelistView = app.injector.instanceOf[ManageIpWhitelistView]
+    val changeIpWhitelistView = app.injector.instanceOf[ChangeIpWhitelistView]
+    val changeIpWhitelistSuccessView = app.injector.instanceOf[ChangeIpWhitelistSuccessView]
+
     val underTest = new IpWhitelist(
       mockDeskproService,
       applicationServiceMock,
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      manageIpWhitelistView,
+      changeIpWhitelistView,
+      changeIpWhitelistSuccessView
     )
 
     val sessionId = "sessionId"
