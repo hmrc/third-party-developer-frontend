@@ -18,31 +18,28 @@ package controllers
 
 import java.util.UUID.randomUUID
 
-import connectors.ThirdPartyDeveloperConnector
-import domain._
 import domain.AddTeamMemberPageMode.ManageTeamMembers
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
+import domain._
 import helpers.string._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
+import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import utils.TestApplications
-import play.api.mvc.Result
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
+
+import scala.concurrent.Future
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 

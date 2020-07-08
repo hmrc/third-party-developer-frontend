@@ -19,7 +19,7 @@ package controllers
 import config.ErrorHandler
 import domain._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
-import play.api.test.CSRFTokenHelper._
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import service.AuditService
@@ -84,13 +84,13 @@ class AddApplicationStartSpec extends BaseControllerSpec
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 
-    val loggedInRequest = addCSRFToken(
-      FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
-    )
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+      .withLoggedIn(underTest, implicitly)(sessionId)
+      .withCSRFToken
 
-    val partLoggedInRequest = addCSRFToken(
-      FakeRequest().withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
-    )
+    val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+      .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
+  }
 
     "Add subordinate applications start page" should {
       "return the add applications page with the user logged in" in new Setup {
@@ -152,5 +152,4 @@ class AddApplicationStartSpec extends BaseControllerSpec
         redirectLocation(result) shouldBe Some("/developer/login")
       }
     }
-  }
 }
