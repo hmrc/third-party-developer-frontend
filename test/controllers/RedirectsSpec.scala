@@ -31,6 +31,7 @@ import utils.CSRFTokenHelper._
 import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithLoggedInSession._
+import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmationView, RedirectsView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -48,12 +49,21 @@ class RedirectsSpec extends BaseControllerSpec {
   val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val redirectsView = app.injector.instanceOf[RedirectsView]
+    val addRedirectView = app.injector.instanceOf[AddRedirectView]
+    val deleteRedirectConfirmationView = app.injector.instanceOf[DeleteRedirectConfirmationView]
+    val changeRedirectView = app.injector.instanceOf[ChangeRedirectView]
+
     val underTest = new Redirects(
       applicationServiceMock,
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      redirectsView,
+      addRedirectView,
+      deleteRedirectConfirmationView,
+      changeRedirectView
     )
 
     implicit val hc = HeaderCarrier()
