@@ -145,7 +145,7 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
-//  .settings(logLevel := Level.Error)
+  .settings(logLevel := Level.Error)
 
 lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
 lazy val IntegrationTest = config("it") extend Test
