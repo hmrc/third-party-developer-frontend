@@ -22,7 +22,7 @@
 
 @this(devMain: DevMain)
 
-@(mfaMandateDetails: MfaMandateDetails)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(mfaMandateDetails: MfaMandateDetails)(implicit messagesProvider: MessagesProvider, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
     title = "Add 2-step verification",

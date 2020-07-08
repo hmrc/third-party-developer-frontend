@@ -47,7 +47,7 @@ class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures wi
 
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
 
-  implicit class CSRFRequest[T](request: FakeRequest[T]) {
-    def withCSRFToken: FakeRequest[T] = CSRFTokenHelper.addCSRFToken(request).asInstanceOf[FakeRequest[T]]
-  }
+//  implicit class CSRFRequest[T](request: FakeRequest[T]) {
+//    def withCSRFToken: FakeRequest[T] = CSRFTokenHelper.addCSRFToken(request).asInstanceOf[FakeRequest[T]]
+//  }
 }

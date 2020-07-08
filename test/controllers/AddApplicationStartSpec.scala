@@ -25,13 +25,14 @@ import play.api.test.Helpers.{redirectLocation, _}
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
+import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AddApplicationStartSpec extends BaseControllerSpec
-  with SubscriptionTestHelperSugar {
+  with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val appId = "1234"
   val clientId = "clientId123"

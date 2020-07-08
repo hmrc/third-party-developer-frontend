@@ -31,12 +31,13 @@ import play.api.test.Helpers._
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
+import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
+class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val appId = "1234"
   val clientId = "clientId123"

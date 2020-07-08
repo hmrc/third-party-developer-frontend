@@ -16,31 +16,27 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
 import domain._
 import model.ApplicationViewModel
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.SharedMetricsClearDown
-import views.html.manageSubscriptions
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.ManageSubscriptionsView
 
 import scala.collection.JavaConversions._
 
-class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig: ApplicationConfig = mock[ApplicationConfig]
+  val manageSubscriptions = app.injector.instanceOf[ManageSubscriptionsView]
 
   trait Setup {
-
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
       doc.select(elementType).exists(node => node.text.trim == elementText)
     }
@@ -83,7 +79,7 @@ class SubscriptionsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
         "",
         request,
         developer,
-        applicationMessages,
+        messagesProvider,
         appConfig,
         "subscriptions"
       )

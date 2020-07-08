@@ -27,13 +27,13 @@ import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK}
 import service.DeskproService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithLoggedInSession._
-import utils.TestApplications
+import utils.{TestApplications, WithCSRFAddToken}
 import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.failed
 
-class IpWhitelistSpec extends BaseControllerSpec with TestApplications {
+class IpWhitelistSpec extends BaseControllerSpec with TestApplications with WithCSRFAddToken {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val mockDeskproService = mock[DeskproService]

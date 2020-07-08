@@ -21,23 +21,17 @@ import controllers.TermsOfUseForm
 import domain._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.i18n.Messages.Implicits._
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatestplus.play.PlaySpec
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import views.html.checkpages.termsOfUse
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.checkpages.TermsOfUseView
 
-class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
+class TermsOfUseSpec extends PlaySpec with CommonViewSpec with WithCSRFAddToken {
 
-  override def fakeApplication(): play.api.Application =
-    GuiceApplicationBuilder()
-      .configure(("metrics.jvm", false))
-      .build()
-
-  val appConfig: ApplicationConfig = mock[ApplicationConfig]
+  val termsOfUse = app.injector.instanceOf[TermsOfUseView]
 
   "Terms of use view" must {
     val thirdPartyApplication =
@@ -71,7 +65,7 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
         landingPageRoute = mock[Call],
         request,
         developer,
-        applicationMessages,
+        messagesProvider,
         appConfig)
       page.contentType must include("text/html")
 

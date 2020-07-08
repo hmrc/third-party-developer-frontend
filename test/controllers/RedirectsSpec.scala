@@ -29,12 +29,13 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.TestApplications._
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmationView, RedirectsView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RedirectsSpec extends BaseControllerSpec {
+class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   val applicationId = "1234"
   val clientId = "clientId123"
