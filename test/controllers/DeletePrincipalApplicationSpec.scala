@@ -16,8 +16,6 @@
 
 package controllers
 
-import config.ErrorHandler
-import connectors.ThirdPartyDeveloperConnector
 import domain._
 import mocks.service._
 import org.joda.time.DateTime
@@ -27,10 +25,10 @@ import org.mockito.Mockito.verify
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{WithCSRFAddToken, TestApplications}
 import utils.WithLoggedInSession._
+import utils.{TestApplications, WithCSRFAddToken}
+import views.html._
 
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -38,14 +36,23 @@ import scala.concurrent.Future.successful
 class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken with TestApplications with ErrorHandlerMock {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
+    val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
+    val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
+    val deleteSubordinateApplicationConfirmView = app.injector.instanceOf[DeleteSubordinateApplicationConfirmView]
+    val deleteSubordinateApplicationCompleteView = app.injector.instanceOf[DeleteSubordinateApplicationCompleteView]
+
     val underTest = new DeleteApplication(
-      mock[ThirdPartyDeveloperConnector],
-      mock[AuditService],
       applicationServiceMock,
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      deleteApplicationView,
+      deletePrincipalApplicationConfirmView,
+      deletePrincipalApplicationCompleteView,
+      deleteSubordinateApplicationConfirmView,
+      deleteSubordinateApplicationCompleteView
     )
 
     val appId = "1234"

@@ -26,8 +26,8 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
 import play.api.libs.json.Json
 import play.api.mvc.Result
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import play.filters.csrf.CSRF.TokenProvider
 import service.{AuditService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -35,6 +35,9 @@ import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.{ChangeDetailsView, DetailsView}
+import views.html.application.PendingApprovalView
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
 import scala.concurrent.Future
 import scala.concurrent.Future._
@@ -320,14 +323,21 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait Setup extends ApplicationServiceMock {
+    val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
+    val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
+    val detailsView = app.injector.instanceOf[DetailsView]
+    val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
+
     val underTest = new Details (
-      mock[ThirdPartyDeveloperConnector],
-      mock[AuditService],
       applicationServiceMock,
       mock[SessionService],
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      unauthorisedAppDetailsView,
+      pendingApprovalView,
+      detailsView,
+      changeDetailsView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
