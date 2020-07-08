@@ -29,7 +29,7 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify, when}
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -38,6 +38,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithLoggedInSession._
+import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
+import views.html.editapplication.DeleteClientSecretView
 
 import scala.concurrent.Future
 import scala.concurrent.Future._
@@ -59,20 +61,20 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   }
 
   trait BasicApplicationProvider extends ApplicationProvider {
-    def createApplication() = 
+    def createApplication() =
       Application(
-        applicationId.toString, 
-        clientId, 
-        "App name 1", 
-        DateTimeUtils.now, 
+        applicationId.toString,
+        clientId,
+        "App name 1",
+        DateTimeUtils.now,
         DateTimeUtils.now,
         None,
-        Environment.PRODUCTION, 
+        Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), 
+        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
-          redirectUris = Seq("https://red1", "https://red2"), 
+          redirectUris = Seq("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
         )
       )
@@ -85,27 +87,38 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       access: Access = Standard(),
       environment: Environment = Environment.PRODUCTION, createdOn: DateTime = DateTimeUtils.now) =
     Application(
-      applicationId.toString, 
-      clientId, 
-      "app", 
-      createdOn, 
+      applicationId.toString,
+      clientId,
+      "app",
+      createdOn,
       DateTimeUtils.now,
       None,
       environment,
       collaborators = Set(Collaborator(loggedInUser.email, userRole)),
-      state = state, 
+      state = state,
       access = access
     )
   
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationProvider {
+    val credentialsView = app.injector.instanceOf[CredentialsView]
+    val clientIdView = app.injector.instanceOf[ClientIdView]
+    val clientSecretsView = app.injector.instanceOf[ClientSecretsView]
+    val serverTokenView = app.injector.instanceOf[ServerTokenView]
+    val deleteClientSecretView = app.injector.instanceOf[DeleteClientSecretView]
+
     val underTest = new Credentials(
       applicationServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      credentialsView,
+      clientIdView,
+      clientSecretsView,
+      serverTokenView,
+      deleteClientSecretView
     )
 
     val application = createApplication()

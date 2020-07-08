@@ -19,12 +19,11 @@ package mocks.service
 import domain._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.UUID
-import java.util.UUID.randomUUID
 
 import scala.concurrent.Future.{failed, successful}
 

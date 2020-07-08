@@ -17,31 +17,32 @@
 package controllers
 
 import com.codahale.metrics.SharedMetricRegistries
-import config.{ApplicationConfig, ErrorHandler}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import config.ApplicationConfig
+import mocks.service.ErrorHandlerMock
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.twirl.api.Html
+import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.SharedMetricsClearDown
-import mocks.service.ErrorHandlerMock
 
 import scala.concurrent.ExecutionContext
 
-class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication with SharedMetricsClearDown with ErrorHandlerMock {
+class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
 
   SharedMetricRegistries.clear()
 
-  implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
+  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
-  implicit val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]
+  implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 
-  implicit lazy val materializer = fakeApplication.materializer
+  implicit lazy val materializer = app.materializer
 
   lazy val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+
+  val mcc = app.injector.instanceOf[MessagesControllerComponents]
 }
