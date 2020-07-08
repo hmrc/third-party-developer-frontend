@@ -34,6 +34,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {

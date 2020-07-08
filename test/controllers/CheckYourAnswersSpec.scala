@@ -44,6 +44,7 @@ import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMembe
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder{

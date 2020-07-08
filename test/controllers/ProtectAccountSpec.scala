@@ -38,9 +38,10 @@ import service.{MfaMandateService, MFAResponse, MFAService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import views.html.protectaccount.{ProtectAccountAccessCodeView, ProtectAccountCompletedView, ProtectAccountRemovalAccessCodeView, ProtectAccountRemovalCompleteView, ProtectAccountRemovalConfirmationView, ProtectAccountSetupView, ProtectAccountView, ProtectedAccountView}
 import views.html.{Add2SVView, UserDidNotAdd2SVView}
+import views.html.protectaccount._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {

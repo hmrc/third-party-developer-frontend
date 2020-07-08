@@ -29,6 +29,8 @@ import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import utils.WithLoggedInSession._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout {
 
   trait Setup extends SessionServiceMock {

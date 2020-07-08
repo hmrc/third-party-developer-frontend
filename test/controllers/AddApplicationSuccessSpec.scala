@@ -30,6 +30,8 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class AddApplicationSuccessSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
 

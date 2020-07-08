@@ -31,6 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import views.html.{CheckEmailView, ForgotPasswordView, ResetErrorView, ResetInvalidView, ResetView, SignInView}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
 

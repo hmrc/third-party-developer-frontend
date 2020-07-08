@@ -33,8 +33,9 @@ import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import views.html.{ChangeProfilePasswordView, ChangeProfileView, PasswordUpdatedView, ProfileDeleteConfirmationView, ProfileDeleteSubmittedView, ProfileUpdatedView, ProfileView}
+import views.html._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {

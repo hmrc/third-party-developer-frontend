@@ -30,6 +30,7 @@ import utils.WithLoggedInSession._
 import utils.TestApplications
 import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.failed
 
 class IpWhitelistSpec extends BaseControllerSpec with TestApplications {

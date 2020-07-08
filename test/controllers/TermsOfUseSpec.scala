@@ -35,6 +35,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.TermsOfUseView
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {

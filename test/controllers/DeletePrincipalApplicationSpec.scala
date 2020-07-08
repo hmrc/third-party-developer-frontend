@@ -30,6 +30,7 @@ import utils.WithLoggedInSession._
 import utils.{TestApplications, WithCSRFAddToken}
 import views.html._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 

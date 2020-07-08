@@ -35,7 +35,7 @@ class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures wi
 
   SharedMetricRegistries.clear()
 
-  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+//  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
 

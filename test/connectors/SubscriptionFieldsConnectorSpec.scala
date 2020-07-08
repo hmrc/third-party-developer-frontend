@@ -36,7 +36,7 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+
 import builder.SubscriptionsBuilder
 
 class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar with SubscriptionsBuilder {
@@ -56,6 +56,8 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   private val actorSystem = ActorSystem("test-actor-system")
 
   trait Setup {
+    import scala.concurrent.ExecutionContext.Implicits.global
+
     val apiKey: String = UUID.randomUUID().toString
     val bearerToken: String = UUID.randomUUID().toString
     val mockHttpClient: HttpClient = mock[HttpClient]
@@ -77,6 +79,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   }
 
   trait ProxiedSetup extends Setup {
+    import scala.concurrent.ExecutionContext.Implicits.global
 
     when(mockProxiedHttpClient.withHeaders(any(), any()))
       .thenReturn(mockProxiedHttpClient)
@@ -107,7 +110,6 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
       extends AbstractSubscriptionFieldsConnector {
     val serviceBaseUrl = ""
     val environment: Environment = Environment.SANDBOX
-
   }
 
   private def squidProxyRelatedBadRequest = {
@@ -540,12 +542,11 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   }
 
   "deleteFieldValues" should {
+    import scala.concurrent.ExecutionContext.Implicits.global
 
-    val url =
-      s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
+    val url = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
 
     "return success after delete call has returned 204 NO CONTENT" in new Setup {
-
       when(mockHttpClient.DELETE(url))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
@@ -558,7 +559,6 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     }
 
     "return failure if api-subscription-fields returns unexpected status" in new Setup {
-
       when(mockHttpClient.DELETE(url))
         .thenReturn(Future.successful(HttpResponse(ACCEPTED)))
 
@@ -584,7 +584,6 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
     }
 
     "return success when api-subscription-fields returns a 404" in new Setup {
-
       when(mockHttpClient.DELETE(url))
         .thenReturn(Future.failed(new NotFoundException("")))
 
@@ -592,6 +591,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
         subscriptionFieldsConnector
           .deleteFieldValues(clientId, apiContext, apiVersion)
       )
+
       result shouldBe FieldsDeleteSuccessResult
     }
   }

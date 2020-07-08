@@ -39,6 +39,7 @@ import utils.WithLoggedInSession._
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {

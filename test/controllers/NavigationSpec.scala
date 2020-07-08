@@ -20,10 +20,11 @@ import config.ErrorHandler
 import domain._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import play.api.http.Status.OK
-import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import utils.WithLoggedInSession._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class NavigationSpec extends BaseControllerSpec {
 

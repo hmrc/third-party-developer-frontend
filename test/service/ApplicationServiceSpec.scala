@@ -18,14 +18,14 @@ package service
 
 import java.util.UUID
 import java.util.UUID.randomUUID
+
 import builder._
-import cats.data.NonEmptyList
 import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
+import domain._
 import domain.APIStatus._
 import domain.ApiSubscriptionFields._
-import domain._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -36,16 +36,14 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status.OK
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future._
-import scala.util.Random
-import service.SubscriptionFieldsService.SkipRoleValidation
+import scala.concurrent.Future.successful
 
 class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures with SubscriptionsBuilder {
 

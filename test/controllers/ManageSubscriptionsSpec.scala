@@ -42,6 +42,8 @@ import utils.TestApplications
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
 import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = Future.failed(new ApplicationNotFound)
 

@@ -38,7 +38,7 @@ import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRe
 import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future._
+import scala.concurrent.Future.successful
 
 class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 

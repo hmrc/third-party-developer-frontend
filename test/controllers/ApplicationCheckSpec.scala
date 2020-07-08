@@ -42,6 +42,7 @@ import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMembe
 import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
 import views.html.editapplication.NameSubmittedView
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {

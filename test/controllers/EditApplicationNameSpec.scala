@@ -28,12 +28,13 @@ import org.mockito.Mockito.verify
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithLoggedInSession._
 import views.html._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
 

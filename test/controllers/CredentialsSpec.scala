@@ -39,6 +39,8 @@ import views.html.editapplication.DeleteClientSecretView
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import play.api.test.CSRFTokenHelper._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")

@@ -30,7 +30,9 @@ import service.AuditService
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import views.html.{AccessTokenSwitchView, AddApplicationNameView, AddApplicationStartPrincipalView, AddApplicationStartSubordinateView, AddApplicationSubordinateEmptyNestView, AddApplicationSubordinateSuccessView, ManageApplicationsView, TenDaysWarningView, UsingPrivilegedApplicationCredentialsView}
+import views.html._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ManageApplicationsSpec
   extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {

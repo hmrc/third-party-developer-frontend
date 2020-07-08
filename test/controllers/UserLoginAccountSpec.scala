@@ -36,6 +36,7 @@ import utils.WithLoggedInSession._
 import views.html.{AccountLockedView, LogInAccessCodeView, SignInView}
 import views.html.protectaccount.{ProtectAccountNoAccessCodeCompleteView, ProtectAccountNoAccessCodeView}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
@@ -79,7 +80,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       mock[ErrorHandler],
       sessionServiceMock,
       mock[ApplicationService],
-      messagesApi,
+      mcc,
       mfaMandateService,
       cookieSigner,
       signInView,

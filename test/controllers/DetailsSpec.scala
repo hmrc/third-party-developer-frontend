@@ -16,7 +16,6 @@
 
 package controllers
 
-import connectors.ThirdPartyDeveloperConnector
 import domain._
 import mocks.service._
 import org.jsoup.Jsoup
@@ -26,10 +25,10 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
 import play.api.libs.json.Json
 import play.api.mvc.Result
-import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{AuditService, SessionService}
+import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.TestApplications._
 import utils.ViewHelpers._
@@ -39,6 +38,7 @@ import views.html.{ChangeDetailsView, DetailsView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
 

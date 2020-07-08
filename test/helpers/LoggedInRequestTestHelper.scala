@@ -30,7 +30,7 @@ import play.api.mvc.AnyContentAsEmpty
 import utils.WithLoggedInSession._
 
 trait LoggedInRequestTestHelper extends SessionServiceMock with WithFakeApplication with DevHubAuthorization {
-  this: BaseControllerSpec =>    
+  this: BaseControllerSpec =>
     val sessionService = mock[SessionService]
 
     val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")

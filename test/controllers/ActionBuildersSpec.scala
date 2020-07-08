@@ -26,6 +26,7 @@ import play.api.mvc.{AnyContent, MessagesControllerComponents}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.play.test.UnitSpec
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestController( val cookieSigner: CookieSigner,

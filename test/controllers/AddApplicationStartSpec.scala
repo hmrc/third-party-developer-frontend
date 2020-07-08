@@ -28,6 +28,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithLoggedInSession._
 import views.html._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class AddApplicationStartSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar {
 

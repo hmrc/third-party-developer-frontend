@@ -141,7 +141,7 @@ object SubscriptionFieldsService {
     val empty = Map.empty[APIIdentifier, Seq[SubscriptionFieldDefinition]]
   }
 
-  sealed trait AccessValidation 
+  sealed trait AccessValidation
   case class ValidateAgainstRole(role: Role) extends AccessValidation
   case object SkipRoleValidation extends AccessValidation
 }

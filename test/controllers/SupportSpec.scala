@@ -33,6 +33,8 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup extends SessionServiceMock {
