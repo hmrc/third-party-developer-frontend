@@ -24,7 +24,7 @@ import domain.ApiSubscriptionFields._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{verify, when, never}
+import org.mockito.Mockito.{verify, when}
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -36,10 +36,11 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
-import service.SubscriptionFieldsService.ValidateAgainstRole
 import domain.DevhubAccessRequirement.NoOne
 import domain.DevhubAccessRequirement.Anyone
 import utils.TestApplications
+import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
+import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = Future.failed(new ApplicationNotFound)
@@ -93,19 +94,29 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
   )
 
   trait ManageSubscriptionsSetup extends ApplicationServiceMock with SessionServiceMock {
-
     val mockAuditService: AuditService = mock[AuditService]
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
     val mockErrorHandler: ErrorHandler = fakeApplication.injector.instanceOf[ErrorHandler]
+
+    val listApiSubscriptionsView = app.injector.instanceOf[ListApiSubscriptionsView]
+    val editApiMetadataView = app.injector.instanceOf[EditApiMetadataView]
+    val subscriptionConfigurationStartView = app.injector.instanceOf[SubscriptionConfigurationStartView]
+    val subscriptionConfigurationPageView = app.injector.instanceOf[SubscriptionConfigurationPageView]
+    val subscriptionConfigurationStepPageView = app.injector.instanceOf[SubscriptionConfigurationStepPageView]
 
     val manageSubscriptionController = new ManageSubscriptions(
       sessionServiceMock,
       mockAuditService,
       applicationServiceMock,
       mockErrorHandler,
-      messagesApi,
+      mcc,
       mockSubscriptionFieldsService,
-      cookieSigner
+      cookieSigner,
+      listApiSubscriptionsView,
+      editApiMetadataView,
+      subscriptionConfigurationStartView,
+      subscriptionConfigurationPageView,
+      subscriptionConfigurationStepPageView
     )
 
     fetchSessionByIdReturns(sessionId, session)

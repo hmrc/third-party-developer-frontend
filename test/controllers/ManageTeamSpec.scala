@@ -42,6 +42,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import utils.TestApplications
 import play.api.mvc.Result
+import views.html.checkpages.applicationcheck.team.TeamMemberAddView
+import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
@@ -55,14 +57,22 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
   val loggedInUser = DeveloperSession(session)
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with TestApplications {
+    val manageTeamView = app.injector.instanceOf[ManageTeamView]
+    val addTeamMemberView = app.injector.instanceOf[AddTeamMemberView]
+    val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
+    val removeTeamMemberView = app.injector.instanceOf[RemoveTeamMemberView]
+
     val underTest = new ManageTeam(
       sessionServiceMock,
       mock[AuditService],
-      mock[ThirdPartyDeveloperConnector],
       applicationServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      manageTeamView,
+      addTeamMemberView,
+      teamMemberAddView,
+      removeTeamMemberView
     )
 
     implicit val hc = HeaderCarrier()
