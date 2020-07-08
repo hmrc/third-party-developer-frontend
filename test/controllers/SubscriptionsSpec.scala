@@ -35,6 +35,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future._
@@ -85,6 +87,12 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val manageSubscriptionsView = app.injector.instanceOf[ManageSubscriptionsView]
+    val addAppSubscriptionsView = app.injector.instanceOf[AddAppSubscriptionsView]
+    val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
+    val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
+    val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
+
     val underTest = new Subscriptions(
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
@@ -93,8 +101,13 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       applicationServiceMock,
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      manageSubscriptionsView,
+      addAppSubscriptionsView,
+      changeSubscriptionConfirmationView,
+      unsubscribeRequestSubmittedView,
+      subscribeRequestSubmittedView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
