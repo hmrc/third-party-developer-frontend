@@ -33,20 +33,36 @@ import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.{ChangeProfilePasswordView, ChangeProfileView, PasswordUpdatedView, ProfileDeleteConfirmationView, ProfileDeleteSubmittedView, ProfileUpdatedView, ProfileView}
 
 import scala.concurrent.Future
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val changeProfileView = app.injector.instanceOf[ChangeProfileView]
+    val profileView = app.injector.instanceOf[ProfileView]
+    val profileUpdatedView = app.injector.instanceOf[ProfileUpdatedView]
+    val changeProfilePasswordView = app.injector.instanceOf[ChangeProfilePasswordView]
+    val passwordUpdatedView = app.injector.instanceOf[PasswordUpdatedView]
+    val profileDeleteConfirmationView = app.injector.instanceOf[ProfileDeleteConfirmationView]
+    val profileDeleteSubmittedView = app.injector.instanceOf[ProfileDeleteSubmittedView]
+
     val underTest = new Profile(
       applicationServiceMock,
       mock[AuditService],
       sessionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[ErrorHandler],
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      changeProfileView,
+      profileView,
+      profileUpdatedView,
+      changeProfilePasswordView,
+      passwordUpdatedView,
+      profileDeleteConfirmationView,
+      profileDeleteSubmittedView
     )
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
