@@ -29,6 +29,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html._
 
 class AddApplicationStartSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
@@ -52,13 +53,32 @@ class AddApplicationStartSpec extends BaseControllerSpec
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
+    val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
+    val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
+    val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
+    val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
+    val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
+    val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
+    val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+
     val underTest = new AddApplication(
       applicationServiceMock,
       sessionServiceMock,
       mock[AuditService],
       mock[ErrorHandler],
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      addApplicationSubordinateEmptyNestView,
+      manageApplicationsView,
+      accessTokenSwitchView,
+      usingPrivilegedApplicationCredentialsView,
+      tenDaysWarningView,
+      addApplicationStartSubordinateView,
+      addApplicationStartPrincipalView,
+      addApplicationSubordinateSuccessView,
+      addApplicationNameView
     )
 
     val hc = HeaderCarrier()
