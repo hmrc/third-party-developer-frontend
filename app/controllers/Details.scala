@@ -17,22 +17,20 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import connectors.ThirdPartyDeveloperConnector
 import controllers.FormKeys.appNameField
+import controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
+import domain._
 import domain.Capabilities.SupportsDetails
 import domain.Permissions.SandboxOrAdmin
-import domain._
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service._
-import controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
+import views.html.{ChangeDetailsView, DetailsView}
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
-import views.html.{ChangeDetailsView, DetailsView}
 
 import scala.concurrent.{ExecutionContext, Future}
 

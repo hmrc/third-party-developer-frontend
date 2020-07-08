@@ -19,10 +19,9 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.UserNavLinks
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
+import play.api.libs.crypto.CookieSigner
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import play.api.libs.crypto.CookieSigner
 import service.{ApplicationService, SessionService}
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -18,15 +18,14 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys.appNameField
-import domain.Environment.{PRODUCTION, SANDBOX}
 import domain.{Environment, _}
+import domain.Environment.{PRODUCTION, SANDBOX}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service._
-import views.html.{AccessTokenSwitchView, AddApplicationNameView, AddApplicationStartPrincipalView, AddApplicationStartSubordinateView, AddApplicationSubordinateEmptyNestView, AddApplicationSubordinateSuccessView, ManageApplicationsView, TenDaysWarningView, UsingPrivilegedApplicationCredentialsView}
+import views.html._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful

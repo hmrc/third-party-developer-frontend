@@ -16,7 +16,6 @@
 
 package domain
 
-import play.api.i18n.Messages
 import play.api.libs.json.Json
 
 class InvalidCredentials extends RuntimeException("Login failed")

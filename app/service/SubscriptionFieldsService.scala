@@ -16,22 +16,14 @@
 
 package service
 
-import domain.{APIIdentifier, Application, ApplicationNotFound, Environment}
+import cats.implicits._
 import domain.ApiSubscriptionFields._
+import domain._
 import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.Role
-import domain.DevhubAccessRequirement
-import domain.DevhubAccessLevel.Developer
-import domain.DevhubAccessLevel
-import domain.Role.ADMINISTRATOR
-import domain.Role.DEVELOPER
-import service.SubscriptionFieldsService._
-import domain.APIDefinition
-import cats.implicits._
 
 @Singleton
 class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
@@ -64,7 +56,7 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
       }
     }
 
-    def doConnectorSave(valuesToSave: Seq[SubscriptionFieldValue]) = { 
+    def doConnectorSave(valuesToSave: Seq[SubscriptionFieldValue]) = {
       val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
       val fieldsToSave = valuesToSave.map(v => (v.definition.name -> v.value)).toMap
 
@@ -74,7 +66,7 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     if (newValues.isEmpty) {
         Future.successful(SaveSubscriptionFieldsSuccessResponse)
     } else {
-      val eitherValuesToSave = oldValues.map(oldValue => 
+      val eitherValuesToSave = oldValues.map(oldValue =>
         newValues.get(oldValue.definition.name) match {
           case Some(newFormValue) => isAllowedToAndCreateNewValue(oldValue, newFormValue)
           case None => Right(oldValue)

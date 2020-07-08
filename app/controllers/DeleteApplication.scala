@@ -17,7 +17,6 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import connectors.ThirdPartyDeveloperConnector
 import domain.Capabilities.SupportsDeletion
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
@@ -25,7 +24,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
 import service._
-import views.html.{DeleteApplicationView, DeletePrincipalApplicationCompleteView, DeletePrincipalApplicationConfirmView, DeleteSubordinateApplicationCompleteView, DeleteSubordinateApplicationConfirmView}
+import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -18,22 +18,21 @@ package controllers
 
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.{APISubscriptionStatusWithSubscriptionFields, Application, CheckInformation, Environment}
 import domain.ApiSubscriptionFields._
-import model.NoSubscriptionFieldsRefinerBehaviour
+import domain.{APISubscriptionStatusWithSubscriptionFields, Application, CheckInformation, SaveSubsFieldsPageMode}
 import model.EditManageSubscription._
-import play.api.mvc._
+import model.NoSubscriptionFieldsRefinerBehaviour
+import play.api.data.FormError
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc._
 import play.twirl.api.Html
 import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
+import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
 import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
-import domain.SaveSubsFieldsPageMode
-import play.api.data.FormError
-import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
 
 object ManageSubscriptions {
 

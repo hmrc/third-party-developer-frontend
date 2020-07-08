@@ -17,7 +17,6 @@
 package service
 
 import config.ApplicationConfig
-import domain.{Application, Environment, Role}
 import javax.inject.{Inject, Singleton}
 import org.joda.time.{Days, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier

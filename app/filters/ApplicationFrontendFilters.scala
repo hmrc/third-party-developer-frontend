@@ -58,7 +58,7 @@ class ApplicationFrontendFilters @Inject()(
   )
 
   lazy val enableSecurityHeaderFilter: Boolean =
-    configuration.getBoolean("security.headers.filter.enabled").getOrElse(true)
+    configuration.getOptional[Boolean]("security.headers.filter.enabled").getOrElse(true)
 
   override val filters: Seq[EssentialFilter] =
     if (enableSecurityHeaderFilter) Seq(securityFilter) ++ frontendFilters else frontendFilters

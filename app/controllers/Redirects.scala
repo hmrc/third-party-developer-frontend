@@ -17,14 +17,13 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.{Standard, UpdateApplicationRequest}
 import domain.Capabilities.SupportsRedirects
 import domain.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-import domain.{Standard, UpdateApplicationRequest}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service.{ApplicationService, SessionService}
 import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmationView, RedirectsView}
 

@@ -21,12 +21,11 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HeaderNames.ACCEPT
 import play.api.libs.ws.{WSClient, WSProxyServer, WSRequest}
-import play.api.mvc.Headers
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.http.HttpAuditing
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.bootstrap.config.RunMode
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.http.ws.{WSProxy, WSProxyConfiguration}
 
 @Singleton

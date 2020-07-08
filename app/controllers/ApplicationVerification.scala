@@ -19,9 +19,8 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.ApplicationVerificationFailed
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, MessagesControllerComponents}
+import play.api.mvc.MessagesControllerComponents
 import service.{ApplicationService, SessionService}
 import views.html.ApplicationVerificationView
 

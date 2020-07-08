@@ -20,12 +20,11 @@ import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.{EmailAlreadyInUse, RegistrationSuccessful}
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, MessagesControllerComponents, Request}
+import play.api.mvc.{MessagesControllerComponents, Request}
 import service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
-import views.html.{AccountVerifiedView, ConfirmationView, ExpiredVerificationLinkView, RegistrationView, ResendConfirmationView, SignInView}
+import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 

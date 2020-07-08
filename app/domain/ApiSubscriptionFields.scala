@@ -16,7 +16,6 @@
 
 package domain
 
-import cats.data.NonEmptyList
 import play.api.libs.json.{Format, Json}
 
 object ApiSubscriptionFields {

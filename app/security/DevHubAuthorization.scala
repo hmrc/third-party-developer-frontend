@@ -20,11 +20,11 @@ import java.security.MessageDigest
 
 import cats.implicits._
 import config.ApplicationConfig
-import controllers.{MaybeUserRequest, UserRequest, routes}
+import controllers.{routes, BaseController, MaybeUserRequest, UserRequest}
 import domain.{DeveloperSession, LoggedInState}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
+import play.api.mvc.{Action, AnyContent, Cookie, DiscardingCookie, Request, RequestHeader, Result, Results}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendHeaderCarrierProvider
@@ -32,6 +32,8 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendHeaderCarrierProvider
 import scala.concurrent.{ExecutionContext, Future}
 
 trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider with CookieEncoding {
+  self: BaseController =>
+
   private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
   private val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
 
@@ -108,6 +110,7 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
 }
 
 trait ExtendedDevHubAuthorization extends DevHubAuthorization {
+  self: BaseController =>
   def loggedOutAction(body: Request[AnyContent] => Future[Result])
                    (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
   implicit request: Request[AnyContent] =>

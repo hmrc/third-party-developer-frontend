@@ -19,7 +19,7 @@ package controllers.checkpages
 import controllers.{ApplicationController, ApplicationRequest}
 import domain.{CheckInformation, CheckInformationForm}
 import play.api.data.Form
-import play.api.data.Forms.{boolean, ignored, mapping, optional, text}
+import play.api.data.Forms.{boolean, ignored, mapping}
 
 trait CheckInformationFormHelper {
   self: ApplicationController =>

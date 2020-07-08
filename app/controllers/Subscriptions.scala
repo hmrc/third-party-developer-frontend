@@ -18,15 +18,14 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import domain.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
-import domain.Permissions.{AdministratorOnly, SandboxOrAdmin, TeamMembersOnly}
-import domain.SubscriptionRedirect._
 import domain._
+import domain.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
+import domain.Permissions.{AdministratorOnly, SandboxOrAdmin}
+import domain.SubscriptionRedirect._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.i18n.MessagesApi
-import play.api.libs.json.Json
 import play.api.libs.crypto.CookieSigner
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import service._

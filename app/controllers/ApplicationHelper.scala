@@ -18,9 +18,6 @@ package controllers
 
 import domain.{Application, ApplicationNotFound, Role}
 import service.ApplicationService
-import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.Future
 
 trait ApplicationHelper {
   val applicationService: ApplicationService

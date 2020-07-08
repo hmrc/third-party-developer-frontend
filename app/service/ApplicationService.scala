@@ -32,8 +32,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
-import cats.data.NonEmptyList
-import service.SubscriptionFieldsService.SkipRoleValidation
 
 @Singleton
 class ApplicationService @Inject() (

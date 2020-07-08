@@ -21,21 +21,20 @@ import java.util.UUID
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Credentials.serverTokenCutoffDate
+import domain._
 import domain.Capabilities.{ChangeClientSecret, ViewCredentials}
 import domain.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-import domain._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service._
 import uk.gov.hmrc.http.ForbiddenException
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
 
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future.successful
 
 @Singleton
 class Credentials @Inject()(val applicationService: ApplicationService,
