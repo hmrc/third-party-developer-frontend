@@ -29,6 +29,7 @@ import play.twirl.api.HtmlFormat
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
+import views.html.{CheckEmailView, ForgotPasswordView, ResetErrorView, ResetInvalidView, ResetView, SignInView}
 
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
@@ -41,13 +42,26 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     val mockAuditService = mock[AuditService]
     val mockAppConfig = mock[ApplicationConfig]
 
+    val forgotPasswordView = app.injector.instanceOf[ForgotPasswordView]
+    val checkEmailView = app.injector.instanceOf[CheckEmailView]
+    val resetView = app.injector.instanceOf[ResetView]
+    val resetInvalidView = app.injector.instanceOf[ResetInvalidView]
+    val resetErrorView = app.injector.instanceOf[ResetErrorView]
+    val signInView = app.injector.instanceOf[SignInView]
+
     val underTest = new Password(
       mock[AuditService],
       sessionServiceMock,
       mockConnector,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      forgotPasswordView,
+      checkEmailView,
+      resetView,
+      resetInvalidView,
+      resetErrorView,
+      signInView
     )
 
     def mockRequestResetFor(email: String) =
