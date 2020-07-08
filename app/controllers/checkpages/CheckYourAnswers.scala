@@ -27,6 +27,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.{ApplicationService, SessionService}
+import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
@@ -36,7 +37,7 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-abstract class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
+class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
                                  val applicationCheck: ApplicationCheck,
                                  val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
@@ -46,7 +47,13 @@ abstract class CheckYourAnswers @Inject()(val applicationService: ApplicationSer
                                  landingPageView: LandingPageView,
                                  teamView: TeamView,
                                  teamMemberAddView: TeamMemberAddView,
-                                 teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView
+                                 teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView,
+                                 termsOfUseViewTemplate: TermsOfUseView,
+                                 confirmNameViewTemplate: ConfirmNameView,
+                                 termsAndConditionsViewTemplate: TermsAndConditionsView,
+                                 privacyPolicyViewTemplate: PrivacyPolicyView,
+                                 apiSubscriptionsView: ApiSubscriptionsView,
+                                 contactDetailsViewTemplate: ContactDetailsView
                                 )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc)
@@ -59,6 +66,14 @@ abstract class CheckYourAnswers @Inject()(val applicationService: ApplicationSer
     with TermsAndConditionsPartialController
     with TermsOfUsePartialController
     with CheckInformationFormHelper {
+
+  override val termsOfUseView: TermsOfUseView = termsOfUseViewTemplate
+  override val confirmNameView: ConfirmNameView = confirmNameViewTemplate
+  override val termsAndConditionsView: TermsAndConditionsView = termsAndConditionsViewTemplate
+  override val privacyPolicyView: PrivacyPolicyView = privacyPolicyViewTemplate
+  override val apiSubscriptionsViewTemplate: ApiSubscriptionsView = apiSubscriptionsView
+  override val contactDetailsView: ContactDetailsView = contactDetailsViewTemplate
+
 
   def answersPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)

@@ -18,9 +18,10 @@ package controllers
 
 import java.util.UUID.randomUUID
 
+import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
-import domain._
 import domain.Role._
+import domain._
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -37,9 +38,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import builder._
+import views.html.checkpages.applicationcheck.LandingPageView
+import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
+import views.html.checkpages.checkyouranswers.CheckYourAnswersView
+import views.html.checkpages.checkyouranswers.team.TeamView
+
 import scala.concurrent.Future
-import scala.concurrent.Future.successful
 
 class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder{
 
@@ -97,13 +101,24 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     exampleApi = None)
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val checkYourAnswersView = app.injector.instanceOf[CheckYourAnswersView]
+    val landingPageView = app.injector.instanceOf[LandingPageView]
+    val teamView = app.injector.instanceOf[TeamView]
+    val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
+    val teamMemberRemoveConfirmationView = app.injector.instanceOf[TeamMemberRemoveConfirmationView]
+
     val underTest = new CheckYourAnswers(
       applicationServiceMock,
       mock[ApplicationCheck],
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      checkYourAnswersView,
+      landingPageView,
+      teamView,
+      teamMemberAddView,
+      teamMemberRemoveConfirmationView
     )
 
     fetchSessionByIdReturns(sessionId, session)
