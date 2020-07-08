@@ -38,7 +38,8 @@ class APISubscriptionsSpec extends UnitSpec with SubscriptionTestHelperSugar {
       groupedSubscriptions.testApis.size shouldBe 1
       groupedSubscriptions.apis.size shouldBe 1
       groupedSubscriptions.exampleApi.isDefined shouldBe false
-      verifyApplicationSubscription(groupedSubscriptions.apis.head, "Individual Employment", "individual-employment", Seq(APIVersion("1.0", STABLE), APIVersion("2.0", BETA, publicAccess), APIVersion("3.0", BETA, privateAccess), APIVersion("4.0", BETA, privateAccess)))
+      verifyApplicationSubscription(groupedSubscriptions.apis.head, "Individual Employment", "individual-employment",
+        Seq(APIVersion("1.0", STABLE), APIVersion("2.0", BETA, publicAccess), APIVersion("3.0", BETA, privateAccess), APIVersion("4.0", BETA, privateAccess)))
       verifyApplicationSubscription(groupedSubscriptions.testApis.head, "Individual Tax", "individual-tax", Seq(APIVersion("1.0", STABLE)))
     }
 
