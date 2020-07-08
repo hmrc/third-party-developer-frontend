@@ -38,7 +38,7 @@ class NavigationSpec extends BaseControllerSpec {
     val underTest = new Navigation(
       sessionServiceMock,
       applicationServiceMock,
-      mock[MessagesApi],
+      mcc,
       mock[ErrorHandler],
       cookieSigner
     )
