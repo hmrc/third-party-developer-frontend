@@ -22,7 +22,7 @@
 @this(devMain: DevMain)
 
 @(form: Form[controllers.AddApplicationNameForm], environment: Environment
-)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, navSection: String = "add-application")
+)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "add-application")
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 

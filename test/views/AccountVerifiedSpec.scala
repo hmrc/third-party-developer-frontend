@@ -17,24 +17,20 @@
 package views
 
 import config.ApplicationConfig
-import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.SharedMetricsClearDown
-import html.accountVerified
+import views.helper.CommonViewSpec
+import views.html.AccountVerifiedView
 
-class AccountVerifiedSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
+class AccountVerifiedSpec extends CommonViewSpec {
+
+  val accountVerifiedView = app.injector.instanceOf[AccountVerifiedView]
 
   "Account verified view" should {
     implicit val mockConfig = mock[ApplicationConfig]
     implicit val request = FakeRequest()
 
     "contain a google analytics event (via the data-journey attribute)" in {
-      val mainView = html.accountVerified()
-      mainView.body should include("""data-journey="user:registered"""")
+      accountVerifiedView.render(request, messagesProvider, appConfig).body should include("""data-journey="user:registered"""")
     }
   }
 }

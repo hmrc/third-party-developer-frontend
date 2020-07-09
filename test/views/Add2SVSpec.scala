@@ -21,6 +21,7 @@ import model.MfaMandateDetails
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
 import play.api.test.FakeRequest
+import play.twirl.api.Html
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.Add2SVView
@@ -36,7 +37,7 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken {
   val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
   implicit val developerSession = DeveloperSession(session)
 
-  private def renderPage(mfaMandateDetails: MfaMandateDetails) = {
+  private def renderPage(mfaMandateDetails: MfaMandateDetails): Html = {
     add2SVView.render(mfaMandateDetails, messagesProvider, developerSession, request, appConfig)
   }
 

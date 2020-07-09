@@ -19,6 +19,7 @@ package views.helper
 import java.util.Locale
 
 import config.ApplicationConfig
+import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}
@@ -26,7 +27,7 @@ import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.SharedMetricsClearDown
 
-trait CommonViewSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with SharedMetricsClearDown {
+trait CommonViewSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with SharedMetricsClearDown with Matchers {
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
   val messagesApi = mcc.messagesApi
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
