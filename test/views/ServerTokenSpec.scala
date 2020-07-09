@@ -29,14 +29,14 @@ import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.ServerTokenView
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
     val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
-      doc.select(elementType).exists(node => node.text.trim == elementText)
+      doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
     }
   }
 
