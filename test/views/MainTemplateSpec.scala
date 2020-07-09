@@ -16,9 +16,9 @@
 
 package views
 
-import domain.{Developer, DeveloperSession, LoggedInState, Session}
+import domain._
 import org.mockito.BDDMockito.given
-import play.twirl.api.Html
+import play.twirl.api.{Html, HtmlFormat}
 import views.helper.CommonViewSpec
 import views.html.include.Main
 
@@ -34,7 +34,22 @@ class MainTemplateSpec extends CommonViewSpec {
       given(appConfig.title).willReturn("Application Title")
 
       val view: Html = mainView.render(
-        title = "Test", developerSession = Some(developerSession), messagesProvider = messagesProvider, applicationConfig = appConfig)
+        title = "Test",
+        navTitle = None,
+        navTitleLink = None,
+        headerNavLinks = HtmlFormat.empty,
+        contentHeader = None,
+        sidebar = None,
+        serviceInfoContent = None,
+        fullWidthBanner = None,
+        leftNav = None,
+        breadcrumbs = Seq.empty,
+        back = NoBackButton,
+        fullWidthContent = false,
+        developerSession = Some(developerSession),
+        mainContent = HtmlFormat.empty,
+        messagesProvider = messagesProvider,
+        applicationConfig = appConfig)
 
       view.body should include("data-title=\"Application Title")
     }
