@@ -16,23 +16,20 @@
 
 package views
 
-import config.ApplicationConfig
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
+import utils.WithCSRFAddToken
 import utils.ViewHelpers._
+import views.helper.CommonViewSpec
+import views.html.RedirectsView
 
-class RedirectsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig = mock[ApplicationConfig]
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
@@ -67,12 +64,14 @@ class RedirectsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsCl
         loggedInDev
       }
 
-      views.html.redirects.render(
+      val redirectsView = app.injector.instanceOf[RedirectsView]
+
+      redirectsView.render(
         ApplicationViewModel(applicationWithRedirects,hasSubscriptionsFields = false),
         redirects,
         request,
         user,
-        applicationMessages,
+        messagesProvider,
         appConfig,
         "redirects")
     }
