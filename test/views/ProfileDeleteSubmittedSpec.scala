@@ -16,28 +16,24 @@
 
 package views
 
-import config.ApplicationConfig
 import domain._
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.SharedMetricsClearDown
+import utils.WithCSRFAddToken
 import utils.ViewHelpers._
+import views.helper.CommonViewSpec
+import views.html.ProfileDeleteSubmittedView
 
-class ProfileDeleteSubmittedSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
-
-  val appConfig = mock[ApplicationConfig]
-
+class ProfileDeleteSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Profile delete submitted page" should {
+    val profileDeleteSubmittedView = app.injector.instanceOf[ProfileDeleteSubmittedView]
+
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
       val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
-      val page = views.html.profileDeleteSubmitted.render(request, developer, appConfig, applicationMessages, "details")
+      val page = profileDeleteSubmittedView.render(request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
