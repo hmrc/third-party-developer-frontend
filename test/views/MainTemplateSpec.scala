@@ -16,30 +16,27 @@
 
 package views
 
-import config.ApplicationConfig
+import domain.{Developer, DeveloperSession, LoggedInState, Session}
 import org.mockito.BDDMockito.given
-import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits.applicationMessages
 import play.twirl.api.Html
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.SharedMetricsClearDown
-import html._
+import views.helper.CommonViewSpec
+import views.html.include.Main
 
-class MainTemplateSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
-
+class MainTemplateSpec extends CommonViewSpec {
 
   "MainTemplateSpec" should {
-
-    implicit val mockConfig = mock[ApplicationConfig]
+    val mainView = app.injector.instanceOf[Main]
+    val developer = Developer("email", "firstName", "lastName")
+    val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
+    implicit val developerSession = DeveloperSession(session)
 
     "Application title meta data set by configuration" in {
-      given(mockConfig.title).willReturn("Application Title")
+      given(appConfig.title).willReturn("Application Title")
 
-      val mainView: Html = html.include.main("Test", developerSession = None)()
+      val view: Html = mainView.render(
+        title = "Test", developerSession = Some(developerSession), messagesProvider = messagesProvider, applicationConfig = appConfig)
 
-      mainView.body should include("data-title=\"Application Title")
+      view.body should include("data-title=\"Application Title")
     }
   }
 }

@@ -44,7 +44,7 @@
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
     developerSession: Option[DeveloperSession]
-)(mainContent: Html = HtmlFormat.empty)(implicit messages: Messages, applicationConfig: config.ApplicationConfig)
+)(mainContent: Html = HtmlFormat.empty)(implicit messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig)
 
 @headScripts = {
 <script src='@routes.Assets.versioned("javascripts/googleTagManager.js")'></script>

@@ -24,17 +24,19 @@ import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.SharedMetricsClearDown
+import utils.{SharedMetricsClearDown, WithCSRFAddToken}
 import utils.ViewHelpers._
+import views.helper.CommonViewSpec
+import views.html.ExpiredVerificationLinkView
 
-class ExpiredVerificationLinkSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
+class ExpiredVerificationLinkSpec extends CommonViewSpec with WithCSRFAddToken {
   "Expired verification link page" should {
 
-    val appConfig = mock[ApplicationConfig]
+    val expiredVerificationLinkView = app.injector.instanceOf[ExpiredVerificationLinkView]
     val request = FakeRequest().withCSRFToken
 
     "render" in {
-      val page = views.html.expiredVerificationLink.render(request, applicationMessages, appConfig)
+      val page = expiredVerificationLinkView.render(request, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
