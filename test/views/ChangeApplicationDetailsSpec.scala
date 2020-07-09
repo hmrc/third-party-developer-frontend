@@ -16,24 +16,21 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.EditApplicationForm
 import domain._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.ChangeDetailsView
 
-class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig = mock[ApplicationConfig]
+  val changeDetails = app.injector.instanceOf[ChangeDetailsView]
 
   "change application details page" should {
 
@@ -44,12 +41,12 @@ class ChangeApplicationDetailsSpec extends UnitSpec with OneServerPerSuite with 
       val form = EditApplicationForm.form.fill(EditApplicationForm(application.id, application.name, application.description,
         application.privacyPolicyUrl, application.termsAndConditionsUrl))
 
-      views.html.changeDetails.render(
+      changeDetails.render(
         form,
         ApplicationViewModel(application, hasSubscriptionsFields = false),
         request,
         loggedIn,
-        applicationMessages,
+        messagesProvider,
         appConfig,
         "nav-section")
     }

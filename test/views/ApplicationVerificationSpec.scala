@@ -16,27 +16,25 @@
 
 package views
 
-import config.ApplicationConfig
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.ApplicationVerificationView
 
-class ApplicationVerificationSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class ApplicationVerificationSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig = mock[ApplicationConfig]
 
+  val applicationVerification = app.injector.instanceOf[ApplicationVerificationView]
   "Application verification page" should {
 
     def renderPage(success: Boolean): Html = {
       val request = FakeRequest().withCSRFToken
-      views.html.applicationVerification.render(success, request, applicationMessages, appConfig)
+      applicationVerification.render(success, request, messagesProvider, appConfig)
     }
 
     "show email verified message when email was verified" in {

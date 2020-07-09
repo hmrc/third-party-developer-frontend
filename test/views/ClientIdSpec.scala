@@ -16,28 +16,25 @@
 
 package views
 
-import config.ApplicationConfig
 import domain._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.SharedMetricsClearDown
-import views.html.clientId
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.ClientIdView
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
-class ClientIdSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
-    val appConfig: ApplicationConfig = mock[ApplicationConfig]
+    val clientIdView = app.injector.instanceOf[ClientIdView]
+
 
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
-      doc.select(elementType).exists(node => node.text.trim == elementText)
+      doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
     }
   }
 
@@ -61,7 +58,7 @@ class ClientIdSpec extends UnitSpec with OneServerPerSuite with SharedMetricsCle
     )
 
     "render" in new Setup {
-      val page: Html = clientId.render(application, request, developer, applicationMessages, appConfig)
+      val page: Html = clientIdView.render(application, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
