@@ -28,7 +28,7 @@
 @this(devMain: DevMain)
 
 @(applicationView: ApplicationViewModel, role: Role, form: Form[controllers.AddTeamMemberForm])(
-        implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
+        implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @app = @{applicationView.application}
