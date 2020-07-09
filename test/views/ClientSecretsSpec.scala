@@ -19,36 +19,32 @@ package views
 import java.util.UUID
 import java.util.UUID.randomUUID
 
-import config.ApplicationConfig
 import domain._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Flash
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
-import views.html.clientSecrets
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.ClientSecretsView
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
-class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
-    val appConfig: ApplicationConfig = mock[ApplicationConfig]
+    val clientSecretsView = app.injector.instanceOf[ClientSecretsView]
 
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
-      doc.select(elementType).exists(node => node.text.trim == elementText)
+      doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
     }
 
     def elementContainsText(doc: Document, elementType: String, elementText: String): Boolean = {
-      doc.select(elementType).exists(node => node.text.trim.contains(elementText))
+      doc.select(elementType).asScala.exists(node => node.text.trim.contains(elementText))
     }
 
-    def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").nonEmpty
+    def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
   }
 
   "Client secrets page" should {
@@ -78,7 +74,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
 
     "show generate a client secret button but no delete button when the app does not have any client secrets yet" in new Setup {
       val emptyClientSecrets = Seq.empty
-      val page = clientSecrets.render(application, emptyClientSecrets, request, developer, applicationMessages, appConfig, Flash())
+      val page = clientSecretsView.render(application, emptyClientSecrets, request, developer, messagesProvider, appConfig, Flash())
 
       page.contentType should include ("text/html")
 
@@ -89,7 +85,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
 
     "show generate another client secret button but no delete button when the app has only one client secret" in new Setup {
       val oneClientSecret = Seq(clientSecret1)
-      val page = clientSecrets.render(application, oneClientSecret, request, developer, applicationMessages, appConfig, Flash())
+      val page = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig, Flash())
 
       page.contentType should include("text/html")
 
@@ -103,7 +99,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
       val newClientSecretValue = UUID.randomUUID().toString
       val flash = Flash(Map("newSecretId" -> clientSecret1.id, "newSecret" -> newClientSecretValue))
 
-      val page = clientSecrets.render(application, oneClientSecret, request, developer, applicationMessages, appConfig, flash)
+      val page = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig, flash)
 
       page.contentType should include("text/html")
 
@@ -116,7 +112,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
     "not show copy button when a new client secret has not just been added" in new Setup {
       val oneClientSecret = Seq(clientSecret1)
 
-      val page = clientSecrets.render(application, oneClientSecret, request, developer, applicationMessages, appConfig, Flash())
+      val page = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig, Flash())
 
       page.contentType should include("text/html")
 
@@ -128,7 +124,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
 
     "show generate another client secret button and delete button when the app has more than one client secret" in new Setup {
       val twoClientSecrets = Seq(clientSecret1, clientSecret2)
-      val page = clientSecrets.render(application, twoClientSecrets, request, developer, applicationMessages, appConfig, Flash())
+      val page = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig, Flash())
 
       page.contentType should include ("text/html")
 
@@ -139,7 +135,7 @@ class ClientSecretsSpec extends UnitSpec with OneServerPerSuite with SharedMetri
 
     "not show generate another client secret button when the app has reached the limit of 5 client secrets" in new Setup {
       val twoClientSecrets = Seq(clientSecret1, clientSecret2, clientSecret3, clientSecret4, clientSecret5)
-      val page = clientSecrets.render(application, twoClientSecrets, request, developer, applicationMessages, appConfig, Flash())
+      val page = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig, Flash())
 
       page.contentType should include ("text/html")
 
