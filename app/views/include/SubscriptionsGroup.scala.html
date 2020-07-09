@@ -21,14 +21,15 @@
 
 @import include._
 
-@(
-        role: Role,
-        app: Application,
-        apisSubscriptions: Seq[APISubscriptions],
-        group: String,
-        afterSubscriptionRedirectTo: SubscriptionRedirect,
-        showSubscriptionFields: Boolean)(
-        implicit messages: Messages, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
+@this()
+
+@(role: Role,
+    app: Application,
+    apisSubscriptions: Seq[APISubscriptions],
+    group: String,
+    afterSubscriptionRedirectTo: SubscriptionRedirect,
+    showSubscriptionFields: Boolean)(
+    implicit messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
 
 <ul class="subscriptions-group">
     @apisSubscriptions.map { case apiSubscription =>

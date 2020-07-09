@@ -24,7 +24,7 @@ import controllers.{routes, BaseController, MaybeUserRequest, UserRequest}
 import domain.{DeveloperSession, LoggedInState}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Cookie, DiscardingCookie, Request, RequestHeader, Result, Results}
+import play.api.mvc.{Action, AnyContent, Cookie, DiscardingCookie, MessagesRequest, Request, RequestHeader, Result, Results}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendHeaderCarrierProvider
@@ -66,7 +66,7 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
 
     val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
 
-    implicit request: Request[AnyContent] =>
+    implicit request: MessagesRequest[AnyContent] =>
       loadSession.flatMap(maybeSession => {
         maybeSession
           .filter(filter)
@@ -76,7 +76,7 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
 
   def maybeAtLeastPartLoggedInEnablingMfa(body: MaybeUserRequest[AnyContent] => Future[Result])
                                          (implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
-    implicit request: Request[AnyContent] =>
+    implicit request: MessagesRequest[AnyContent] =>
       loadSession.flatMap(
         maybeDeveloperSession => body(MaybeUserRequest(maybeDeveloperSession, request))
       )
@@ -111,9 +111,9 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
 
 trait ExtendedDevHubAuthorization extends DevHubAuthorization {
   self: BaseController =>
-  def loggedOutAction(body: Request[AnyContent] => Future[Result])
+  def loggedOutAction(body: MessagesRequest[AnyContent] => Future[Result])
                    (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
-  implicit request: Request[AnyContent] =>
+  implicit request: MessagesRequest[AnyContent] =>
     loadSession.flatMap{
       case Some(developerSession) if developerSession.loggedInState.isLoggedIn => loginSucceeded(request)
       case _ => body(request)

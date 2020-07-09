@@ -65,7 +65,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
   val loginForm: Form[LoginForm] = LoginForm.form
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
-
   def login: Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(signInView("Sign in", loginForm)))
   }

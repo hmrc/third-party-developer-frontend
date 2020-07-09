@@ -38,12 +38,12 @@ trait ActionBuilders {
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-  def applicationAction(applicationId: String, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[Request, ApplicationRequest]
-    = new ActionRefiner[Request, ApplicationRequest] {
+  def applicationAction(applicationId: String, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[MessagesRequest, ApplicationRequest]
+    = new ActionRefiner[MessagesRequest, ApplicationRequest] {
     override protected def executionContext: ExecutionContext = ec
 
-    override def refine[A](request: Request[A]): Future[Either[Result, ApplicationRequest[A]]] = {
-      implicit val implicitRequest: Request[A] = request
+    override def refine[A](request: MessagesRequest[A]): Future[Either[Result, ApplicationRequest[A]]] = {
+      implicit val implicitRequest: MessagesRequest[A] = request
       import cats.implicits._
 
       (for {

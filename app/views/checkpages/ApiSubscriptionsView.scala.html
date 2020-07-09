@@ -18,10 +18,9 @@
 @import domain._
 @import include._
 @import config.ApplicationConfig
-
 @import controllers.checkpages.DummySubscriptionsForm
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
 @(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, submitAction: Call, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
 

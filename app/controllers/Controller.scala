@@ -45,31 +45,31 @@ trait HeaderEnricher {
   }
 }
 
-case class UserRequest[A](developerSession: DeveloperSession, request: Request[A])
-  extends WrappedRequest[A](request)
+case class UserRequest[A](developerSession: DeveloperSession, request: MessagesRequest[A])
+  extends MessagesRequest[A](request, request.messagesApi)
 
-case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: Request[A])
-  extends WrappedRequest[A](request)
+case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: MessagesRequest[A])
+  extends MessagesRequest[A](request, request.messagesApi)
 
-case class ApplicationRequest[A](application: Application, deployedTo: Environment, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: Request[A])
-  extends WrappedRequest[A](request)
+case class ApplicationRequest[A](application: Application, deployedTo: Environment, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: MessagesRequest[A])
+  extends MessagesRequest[A](request, request.messagesApi)
 
 case class ApplicationWithFieldDefinitionsRequest[A]( fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields],
                                                       applicationRequest: ApplicationRequest[A])
-  extends WrappedRequest[A](applicationRequest)
+  extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
 case class ApplicationWithSubscriptionFieldPage[A]( pageIndex: Int,
                                                     totalPages: Int,
                                                     apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
                                                     apiDetails: ApiDetails,
                                                     applicationRequest: ApplicationRequest[A])
-  extends WrappedRequest[A](applicationRequest)
+  extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
   case class ApplicationWithSubscriptionFields[A](  apiSubscription: APISubscriptionStatusWithSubscriptionFields,
                                                     applicationRequest: ApplicationRequest[A])
-  extends WrappedRequest[A](applicationRequest)
+  extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
-abstract class BaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with I18nSupport with HeaderEnricher {
+abstract class BaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher {
   val errorHandler: ErrorHandler
   val sessionService: SessionService
 

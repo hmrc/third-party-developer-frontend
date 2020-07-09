@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.urls.Link
 @import model.ApplicationViewModel
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
 @(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], applicationView: ApplicationViewModel, subscriptions: Option[GroupedSubscriptions], id: String)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")

@@ -15,10 +15,11 @@
  *@
 
 @import domain.{Application, DeveloperSession, Role, SubscriptionRedirect}
-@import include._
+@import views.html.include.SubscriptionsGroup
 
-@(
-        role: Role,
+@this(subscriptionsGroup: SubscriptionsGroup)
+
+@(role: Role,
         subscriptions: GroupedSubscriptions,
         app: Application,
         afterUnsubscribeRedirectTo: SubscriptionRedirect,

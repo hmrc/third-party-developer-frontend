@@ -21,7 +21,7 @@ import domain.TicketId
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest, Request}
 import security.ExtendedDevHubAuthorization
 import service.{ApplicationService, DeskproService, SessionService}
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
@@ -64,7 +64,7 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
     }
   }
 
-  def logout = Action.async { implicit request: Request[AnyContent] =>
+  def logout = Action.async { implicit request: MessagesRequest[AnyContent] =>
     destroySession(request)
       .getOrElse(Future.successful(()))
       .map(_ => Ok(logoutConfirmationView()).withNewSession)
