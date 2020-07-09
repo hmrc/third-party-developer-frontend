@@ -16,21 +16,18 @@
 
 package views
 
-import config.ApplicationConfig
 import domain._
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers.elementExistsByText
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.DeleteSubordinateApplicationConfirmView
 
-class DeleteSubordinateApplicationConfirmSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig = mock[ApplicationConfig]
+  val deleteSubordinateApplicationConfirmView = app.injector.instanceOf[DeleteSubordinateApplicationConfirmView]
 
   "delete application confirm page" should {
 
@@ -44,7 +41,7 @@ class DeleteSubordinateApplicationConfirmSpec extends UnitSpec with OneServerPer
 
     "show link and text to confirm deletion" in {
 
-      val page = views.html.deleteSubordinateApplicationConfirm.render(application, request, loggedInUser, applicationMessages, appConfig, "details")
+      val page = deleteSubordinateApplicationConfirmView.render(application, request, loggedInUser, messagesProvider, appConfig, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
