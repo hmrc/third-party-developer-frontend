@@ -16,10 +16,8 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.RegistrationForm
 import org.jsoup.Jsoup
-import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
