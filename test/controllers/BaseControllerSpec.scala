@@ -16,7 +16,6 @@
 
 package controllers
 
-import com.codahale.metrics.SharedMetricRegistries
 import config.ApplicationConfig
 import mocks.service.ErrorHandlerMock
 import org.scalatest.concurrent.ScalaFutures
@@ -26,15 +25,13 @@ import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{MessagesControllerComponents, Request}
-import play.api.test.{CSRFTokenHelper, FakeRequest}
+import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.SharedMetricsClearDown
 
-import scala.concurrent.ExecutionContext
-
 class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
-  SharedMetricRegistries.clear()
+
+  override lazy val app: Application = fakeApplication()
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
