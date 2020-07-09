@@ -22,7 +22,7 @@
 @import model.ApplicationViewModel
 @import views.html.include.DevMain
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
     implicit request: play.api.mvc.Request[Any],

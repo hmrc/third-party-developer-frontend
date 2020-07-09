@@ -17,6 +17,7 @@
 @import domain.DeveloperSession
 @import model.ApplicationViewModel
 @import controllers.Credentials.serverTokenCutoffDate
+@this()
 
 @(application: Option[ApplicationViewModel] = None, navSection: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession)
 

@@ -18,7 +18,7 @@
 @import include._
 @import model.Crumb
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 

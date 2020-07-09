@@ -21,7 +21,7 @@
 @import controllers.ApplicationSummary.noProductionApplications
 @import uk.gov.hmrc.auth.core.Admin
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], flash: play.api.mvc.Flash, loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
 

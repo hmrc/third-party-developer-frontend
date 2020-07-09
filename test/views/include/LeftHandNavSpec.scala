@@ -24,13 +24,16 @@ import org.scalatestplus.play.OneServerPerSuite
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
+import utils.{SharedMetricsClearDown, WithCSRFAddToken}
 import utils.ViewHelpers.elementExistsByText
-import views.html.include.leftHandNav
+import views.helper.CommonViewSpec
+import views.html.include.LeftHandNav
 
-class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown {
+class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
+    val leftHandNavView = app.injector.instanceOf[LeftHandNav]
+
     val request = FakeRequest().withCSRFToken
 
     val applicationId = "1234"
@@ -39,8 +42,10 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
-    val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
+    val application = Application(applicationId, clientId, applicationName,
+      DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
+      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+      state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
     val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application,hasSubscriptionsFields = true)
@@ -50,7 +55,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
   "Left Hand Nav" when {
     "working with an application with no api subscriptions" should {
       "render correctly" in new Setup {
-        val page = leftHandNav.render(Some(applicationViewModelWithNoApiSubscriptions), Some("details"), request, loggedInUser)
+        val page = leftHandNavView.render(Some(applicationViewModelWithNoApiSubscriptions), Some("details"), request, loggedInUser)
 
         page.contentType should include("text/html")
 
@@ -68,7 +73,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
       "display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields = ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false)
-        val page = leftHandNav.render(Some(oldAppWithoutSubsFields), Some("details"), request, loggedInUser)
+        val page = leftHandNavView.render(Some(oldAppWithoutSubsFields), Some("details"), request, loggedInUser)
 
         page.contentType should include("text/html")
 
@@ -79,7 +84,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     "working with an application with api subscriptions" should {
       "render correctly" in new Setup {
-        val page = leftHandNav.render(Some(applicationViewModelWithApiSubscriptions), Some("details"), request, loggedInUser)
+        val page = leftHandNavView.render(Some(applicationViewModelWithApiSubscriptions), Some("details"), request, loggedInUser)
 
         page.contentType should include("text/html")
 
@@ -97,7 +102,7 @@ class LeftHandNavSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
       "display server token link for old apps" in new Setup {
         val oldAppWithSubsFields = ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true)
-        val page = leftHandNav.render(Some(oldAppWithSubsFields), Some("details"), request, loggedInUser)
+        val page = leftHandNavView.render(Some(oldAppWithSubsFields), Some("details"), request, loggedInUser)
 
         page.contentType should include("text/html")
 

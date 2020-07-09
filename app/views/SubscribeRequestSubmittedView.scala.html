@@ -20,7 +20,7 @@
 @import model.Crumb
 @import model.ApplicationViewModel
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, name: String, version: String)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "subscriptions")

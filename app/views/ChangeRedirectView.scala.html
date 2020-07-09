@@ -22,7 +22,7 @@
 @import controllers.ChangeRedirectForm
 @import model.ApplicationViewModel
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[ChangeRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 

@@ -23,7 +23,7 @@
 @import controllers.TermsOfUseForm
 @import model.ApplicationViewModel
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, form: Form[TermsOfUseForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")

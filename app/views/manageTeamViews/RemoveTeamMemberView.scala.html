@@ -22,7 +22,7 @@
 @import model.ApplicationViewModel
 @import views.html.include.DevMain
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, form: Form[controllers.RemoveTeamMemberConfirmationForm], email: String = "")(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)

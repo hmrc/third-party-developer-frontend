@@ -25,7 +25,7 @@
 @import model.ApplicationViewModel
 @import views.html.include.DevMain
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, role: Role, form: Form[controllers.AddTeamMemberForm])(
         implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)

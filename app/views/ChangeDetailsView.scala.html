@@ -22,7 +22,7 @@
 
 @import model.ApplicationViewModel
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(form: Form[controllers.EditApplicationForm], applicationViewModel: ApplicationViewModel)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "details")
