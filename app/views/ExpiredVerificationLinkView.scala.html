@@ -20,7 +20,7 @@
 
 @this(main: Main)
 
-@()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig)
 
 @main(
     title = "Your account verification link has expired",
