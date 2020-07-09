@@ -16,10 +16,10 @@
 
 package mocks.service
 
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
-import config.{ApplicationConfig, ErrorHandler}
+import org.scalatestplus.mockito.MockitoSugar
+import config.ErrorHandler
 import play.twirl.api.Html
 
 trait ErrorHandlerMock extends MockitoSugar {

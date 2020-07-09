@@ -41,13 +41,6 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
 
   val sessionService: SessionService
 
-  private[security] val cookieName = "PLAY2AUTH_SESS_ID"
-  private[security] val cookieSecureOption: Boolean = appConfig.securedCookie
-  private[security] val cookieHttpOnlyOption: Boolean = true
-  private[security] val cookieDomainOption: Option[String] = None
-  private[security] val cookiePathOption: String = "/"
-  private[security] val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
-
   implicit def loggedIn(implicit req: UserRequest[_]): DeveloperSession = {
     req.developerSession
   }
@@ -95,18 +88,6 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
       .fetch(sessionId)
       .map(maybeSession => maybeSession.map(DeveloperSession(_)))
   }
-
-  def createCookie(sessionId: String): Cookie = {
-    Cookie(
-      cookieName,
-      encodeCookie(sessionId),
-      cookieMaxAge,
-      cookiePathOption,
-      cookieDomainOption,
-      cookieSecureOption,
-      cookieHttpOnlyOption
-    )
-  }
 }
 
 trait ExtendedDevHubAuthorization extends DevHubAuthorization {
@@ -148,8 +129,28 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
 }
 
 trait CookieEncoding {
+  implicit val appConfig: ApplicationConfig
+
+  private[security] val cookieName = "PLAY2AUTH_SESS_ID"
+  private[security] val cookieSecureOption: Boolean = appConfig.securedCookie
+  private[security] val cookieHttpOnlyOption: Boolean = true
+  private[security] val cookieDomainOption: Option[String] = None
+  private[security] val cookiePathOption: String = "/"
+  private[security] val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
 
   val cookieSigner : CookieSigner
+
+  def createCookie(sessionId: String): Cookie = {
+    Cookie(
+      cookieName,
+      encodeCookie(sessionId),
+      cookieMaxAge,
+      cookiePathOption,
+      cookieDomainOption,
+      cookieSecureOption,
+      cookieHttpOnlyOption
+    )
+  }
 
   def encodeCookie(token : String) : String = {
     cookieSigner.sign(token) + token

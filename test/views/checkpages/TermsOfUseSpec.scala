@@ -21,7 +21,6 @@ import controllers.TermsOfUseForm
 import domain._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import org.scalatestplus.play.PlaySpec
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
@@ -29,7 +28,7 @@ import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.checkpages.TermsOfUseView
 
-class TermsOfUseSpec extends PlaySpec with CommonViewSpec with WithCSRFAddToken {
+class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
 
   val termsOfUse = app.injector.instanceOf[TermsOfUseView]
 
@@ -67,11 +66,11 @@ class TermsOfUseSpec extends PlaySpec with CommonViewSpec with WithCSRFAddToken 
         developer,
         messagesProvider,
         appConfig)
-      page.contentType must include("text/html")
+      page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
-      document.getElementById("termsOfUseAgreed") mustNot be(null)
-      document.getElementById("termsOfUseAgreed").attr("checked") mustNot be("checked")
+      document.getElementById("termsOfUseAgreed") shouldNot be(null)
+      document.getElementById("termsOfUseAgreed").attr("checked") shouldNot be("checked")
     }
 
     "show terms of use agreement page that already has the correct terms of use agreed" in {
@@ -95,9 +94,9 @@ class TermsOfUseSpec extends PlaySpec with CommonViewSpec with WithCSRFAddToken 
         developer,
         implicitly,
         appConfigMock)
-      page.contentType must include("text/html")
+      page.contentType should include("text/html")
 
-      page.body.contains("Terms of use agreed by email@example.com") mustBe true
+      page.body.contains("Terms of use agreed by email@example.com") shouldBe true
     }
   }
 }

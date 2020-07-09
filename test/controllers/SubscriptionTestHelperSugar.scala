@@ -16,7 +16,6 @@
 
 package controllers
 
-import cats.data.NonEmptyList
 import domain._
 import domain.APIStatus._
 import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}

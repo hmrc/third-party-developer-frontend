@@ -19,12 +19,10 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import helpers.LoggedInRequestTestHelper
 import mocks.service.ApplicationServiceMock
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents}
 import service.{ApplicationService, SessionService}
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,14 +35,12 @@ class TestController( val cookieSigner: CookieSigner,
                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController(mcc) {}
 
 class ActionBuildersSpec extends BaseControllerSpec
-  with UnitSpec
-  with MockitoSugar
   with ApplicationServiceMock
   with builder.ApplicationBuilder
   with builder.SubscriptionsBuilder
   with LoggedInRequestTestHelper {
+
   trait Setup {
-    
     val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
     val application = buildApplication(developer.email)

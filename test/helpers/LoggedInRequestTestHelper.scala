@@ -18,8 +18,7 @@ package helpers
 
 import mocks.service.SessionServiceMock
 import controllers.BaseControllerSpec
-import uk.gov.hmrc.play.test.WithFakeApplication
-import security.DevHubAuthorization
+import security.CookieEncoding
 import domain.Developer
 import service.SessionService
 import domain.LoggedInState
@@ -29,7 +28,8 @@ import play.api.test.FakeRequest
 import play.api.mvc.AnyContentAsEmpty
 import utils.WithLoggedInSession._
 
-trait LoggedInRequestTestHelper extends SessionServiceMock with WithFakeApplication with DevHubAuthorization {
+// TODO: Look at removing this and instead putting it in ActionBuildersSpec
+trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding {
   this: BaseControllerSpec =>
     val sessionService = mock[SessionService]
 

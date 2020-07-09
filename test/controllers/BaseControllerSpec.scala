@@ -32,10 +32,7 @@ import utils.SharedMetricsClearDown
 import scala.concurrent.ExecutionContext
 
 class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
-
   SharedMetricRegistries.clear()
-
-//  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
@@ -43,11 +40,7 @@ class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures wi
 
   implicit lazy val materializer = app.materializer
 
-  lazy val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+  lazy val messagesApi = app.injector.instanceOf[MessagesApi]
 
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
-
-//  implicit class CSRFRequest[T](request: FakeRequest[T]) {
-//    def withCSRFToken: FakeRequest[T] = CSRFTokenHelper.addCSRFToken(request).asInstanceOf[FakeRequest[T]]
-//  }
 }
