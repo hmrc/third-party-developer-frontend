@@ -16,24 +16,19 @@
 
 package views.include
 
-import config.ApplicationConfig
 import controllers.ChangeSubscriptionConfirmationForm
 import domain.{SubscriptionRedirect, _}
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
+import utils.WithCSRFAddToken
 import utils.ViewHelpers.elementExistsByText
+import views.helper.CommonViewSpec
+import views.html.include.ChangeSubscriptionConfirmationView
 
-class ChangeSubscriptionConfirmationSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
-
-  val appConfig = mock[ApplicationConfig]
+class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken {
   val request = FakeRequest().withCSRFToken
 
   val applicationId = "1234"
@@ -51,7 +46,9 @@ class ChangeSubscriptionConfirmationSpec extends UnitSpec with OneServerPerSuite
 
 
   def renderPage(form: Form[ChangeSubscriptionConfirmationForm], subscribed: Boolean) = {
-    views.html.include.changeSubscriptionConfirmation.render(
+    val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
+
+    changeSubscriptionConfirmationView.render(
       ApplicationViewModel(application,hasSubscriptionsFields = false),
       form,
       apiName,
@@ -61,7 +58,7 @@ class ChangeSubscriptionConfirmationSpec extends UnitSpec with OneServerPerSuite
       SubscriptionRedirect.API_SUBSCRIPTIONS_PAGE.toString,
       request,
       loggedInUser,
-      applicationMessages,
+      messagesProvider,
       appConfig,
       "details"
     )
