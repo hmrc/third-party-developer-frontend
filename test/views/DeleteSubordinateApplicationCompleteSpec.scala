@@ -16,22 +16,19 @@
 
 package views
 
-import config.ApplicationConfig
 import domain._
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers.elementExistsByText
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.DeleteSubordinateApplicationCompleteView
 
 
-class DeleteSubordinateApplicationCompleteSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig = mock[ApplicationConfig]
+  val deleteSubordinateApplicationCompleteView = app.injector.instanceOf[DeleteSubordinateApplicationCompleteView]
 
   "delete application complete page" should {
     "render with no errors" in {
@@ -46,7 +43,7 @@ class DeleteSubordinateApplicationCompleteSpec extends UnitSpec with OneServerPe
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
 
-      val page = views.html.deleteSubordinateApplicationComplete.render(application, request, loggedInUser, applicationMessages, appConfig, "details")
+      val page = deleteSubordinateApplicationCompleteView.render(application, request, loggedInUser, messagesProvider, appConfig, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

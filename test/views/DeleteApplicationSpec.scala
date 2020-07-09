@@ -16,23 +16,19 @@
 
 package views
 
-import config.ApplicationConfig
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
-import views.html.deleteApplication
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.DeleteApplicationView
 
-class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig: ApplicationConfig = mock[ApplicationConfig]
+  val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
@@ -50,7 +46,7 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with SharedM
       "on Production" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplication.render(prodApp, ADMINISTRATOR, request, loggedInUser, applicationMessages, appConfig, "details")
+        val page = deleteApplicationView.render(prodApp, ADMINISTRATOR, request, loggedInUser, messagesProvider, appConfig, "details")
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -62,7 +58,7 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with SharedM
       "on Sandbox" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplication.render(sandboxApp, ADMINISTRATOR, request, loggedInUser, applicationMessages, appConfig, "details")
+        val page = deleteApplicationView.render(sandboxApp, ADMINISTRATOR, request, loggedInUser, messagesProvider, appConfig, "details")
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -76,7 +72,7 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with SharedM
         Seq(prodApp, sandboxApp) foreach { application =>
           val request = FakeRequest().withCSRFToken
 
-          val page = deleteApplication.render(application, DEVELOPER, request, loggedInUser, applicationMessages, appConfig, "details")
+          val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInUser, messagesProvider, appConfig, "details")
 
           page.contentType should include("text/html")
           val document = Jsoup.parse(page.body)
@@ -94,7 +90,7 @@ class DeleteApplicationSpec extends UnitSpec with OneServerPerSuite with SharedM
           .foreach { application =>
             val request = FakeRequest().withCSRFToken
 
-            val page = deleteApplication.render(application, DEVELOPER, request, loggedInUser, applicationMessages, appConfig, "details")
+            val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInUser, messagesProvider, appConfig, "details")
 
             page.contentType should include("text/html")
             val document = Jsoup.parse(page.body)
