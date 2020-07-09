@@ -16,23 +16,20 @@
 
 package views
 
-import config.ApplicationConfig
 import domain.{Environment, LoggedInState}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.AddApplicationSuccessView
 
-class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class AddApplicationSuccessSpec extends CommonViewSpec with WithCSRFAddToken {
 
+  val addApplicationSuccess = app.injector.instanceOf[AddApplicationSuccessView]
   val sandboxMessage = "You can now get your sandbox credentials for testing."
   val sandboxButton = "Manage API subscriptions"
-  val appConfig = mock[ApplicationConfig]
 
   "Add application success page" should {
 
@@ -40,7 +37,8 @@ class AddApplicationSuccessSpec extends UnitSpec with OneServerPerSuite with Sha
       val applicationId = "application-id"
       val loggedIn = utils.DeveloperSession("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
-      val page = views.html.addApplicationSuccess.render(applicationName, applicationId, environment, request, loggedIn, applicationMessages, appConfig, navSection = "nav-section")
+      val page = addApplicationSuccess.render(
+        applicationName, applicationId, environment, request, loggedIn, messagesProvider, appConfig, navSection = "nav-section")
       val document = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", s"You added $applicationName") shouldBe true
       document

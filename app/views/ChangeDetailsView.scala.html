@@ -25,7 +25,7 @@
 @this(devMain: DevMain)
 
 @(form: Form[controllers.EditApplicationForm], applicationViewModel: ApplicationViewModel)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "details")
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @app = @{applicationViewModel.application}
