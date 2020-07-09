@@ -16,30 +16,24 @@
 
 package views
 
-import config.ApplicationConfig
 import domain.{Developer, DeveloperSession, LoggedInState, Session}
-import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.SharedMetricsClearDown
-import html._
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.protectaccount.ProtectAccountView
 
-class ProtectAccountSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
+class ProtectAccountSpec extends CommonViewSpec with WithCSRFAddToken {
+  implicit val request = FakeRequest()
+  val protectAccountView = app.injector.instanceOf[ProtectAccountView]
 
   "Protect Account view" should {
-    implicit val mockConfig = mock[ApplicationConfig]
-    implicit val request = FakeRequest()
-
     val developer = Developer("email", "firstName", "lastName")
     "show the sensitive account warning if doing the mandated MFA enablement journey" in {
 
       val session = Session("sessionId", developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
       implicit val developerSession = DeveloperSession(session)
 
-      val mainView = html.protectaccount.protectAccount()
+      val mainView = protectAccountView.apply()
       mainView.body should include("Your account has access to sensitive information, for example client secrets")
     }
 
@@ -47,7 +41,7 @@ class ProtectAccountSpec extends UnitSpec with Matchers with MockitoSugar with O
       val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
       implicit val developerSession = DeveloperSession(session)
 
-      val mainView = html.protectaccount.protectAccount()
+      val mainView = protectAccountView.apply()
       mainView.body should not include("Your account has access to sensitive information, for example client secrets")
     }
   }
