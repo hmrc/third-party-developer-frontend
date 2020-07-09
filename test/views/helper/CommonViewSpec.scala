@@ -22,7 +22,9 @@ import config.ApplicationConfig
 import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.SharedMetricsClearDown
@@ -32,5 +34,10 @@ trait CommonViewSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar
   val messagesApi = mcc.messagesApi
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
+
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure(("metrics.jvm", false))
+      .build()
 
 }

@@ -23,7 +23,7 @@ import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.test.UnitSpec

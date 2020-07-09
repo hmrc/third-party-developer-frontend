@@ -22,7 +22,9 @@ import mocks.service.ErrorHandlerMock
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
 import play.api.i18n.MessagesApi
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
 import play.api.test.{CSRFTokenHelper, FakeRequest}
@@ -43,4 +45,9 @@ class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures wi
   lazy val messagesApi = app.injector.instanceOf[MessagesApi]
 
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
+
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure(("metrics.jvm", false))
+      .build()
 }
