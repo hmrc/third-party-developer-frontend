@@ -16,22 +16,19 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.DeletePrincipalApplicationForm
 import domain._
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueContainsText}
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.DeletePrincipalApplicationConfirmView
 
-class DeletePrincipalApplicationConfirmSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig = mock[ApplicationConfig]
+  val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
 
   "delete application confirm page" should {
 
@@ -45,7 +42,8 @@ class DeletePrincipalApplicationConfirmSpec extends UnitSpec with OneServerPerSu
 
     "render with no errors" in {
 
-      val page = views.html.deletePrincipalApplicationConfirm.render(application, DeletePrincipalApplicationForm.form, request, loggedInUser, applicationMessages, appConfig, "details")
+      val page = deletePrincipalApplicationConfirmView.render(
+        application, DeletePrincipalApplicationForm.form, request, loggedInUser, messagesProvider, appConfig, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -59,7 +57,7 @@ class DeletePrincipalApplicationConfirmSpec extends UnitSpec with OneServerPerSu
 
       val formWithErrors = DeletePrincipalApplicationForm.form.withError("confirmation", "Confirmation error message")
 
-      val page = views.html.deletePrincipalApplicationConfirm.render(application, formWithErrors, request, loggedInUser, applicationMessages, appConfig, "details")
+      val page = deletePrincipalApplicationConfirmView.render(application, formWithErrors, request, loggedInUser, messagesProvider, appConfig, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

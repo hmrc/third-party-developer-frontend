@@ -27,7 +27,7 @@
 @(applicationViewModel: ApplicationViewModel)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: DeveloperSession,
-        messages: Messages,
+        messagesProvider: MessagesProvider,
         appConfig: ApplicationConfig,
         navSection: String = "details"
 )
