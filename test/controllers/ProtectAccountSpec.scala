@@ -96,7 +96,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     def protectAccountRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       FakeRequest().
         withLoggedIn(underTest, implicitly)(sessionId).
-        withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken).
+        withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken).
         withFormUrlEncodedBody("accessCode" -> code)
     }
   }

@@ -55,7 +55,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
     val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)

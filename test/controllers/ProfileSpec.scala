@@ -97,7 +97,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
     "fail and send an audit event while changing the password if old password is incorrect" in new Setup {
       val request = FakeRequest()
         .withLoggedIn(underTest, implicitly)(sessionId)
-        .withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+        .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
         .withFormUrlEncodedBody(
           ("currentpassword", "oldPassword"),
           ("password", "StrongNewPwd!2"),
@@ -117,7 +117,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
     "Password updated should have correct page title" in new Setup {
       val request = FakeRequest()
         .withLoggedIn(underTest, implicitly)(sessionId)
-        .withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+        .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
         .withFormUrlEncodedBody(
           ("currentpassword", "oldPassword"),
           ("password", "StrongNewPwd!2"),

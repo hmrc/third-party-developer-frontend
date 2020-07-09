@@ -50,7 +50,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout 
       val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
       val sessionId = UUID.randomUUID().toString
       val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-      val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+      val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
       fetchSessionByIdReturns(sessionId, session)
 

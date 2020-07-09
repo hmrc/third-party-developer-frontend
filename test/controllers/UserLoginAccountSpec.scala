@@ -92,7 +92,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     when(mfaMandateService.daysTillAdminMfaMandate).thenReturn(Some(daysRemaining))
     when(mfaMandateService.showAdminMfaMandatedMessage(any())(any[HeaderCarrier])).thenReturn(true)
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
     def mockAuthenticate(email: String, password: String, result: Future[UserAuthenticationResponse],
                          resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {

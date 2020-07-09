@@ -116,7 +116,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
     givenApplicationHasNoSubs(activeApplication)
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }

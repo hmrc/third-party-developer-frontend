@@ -55,7 +55,7 @@ class ManageApplicationsSpec
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
-  private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+  private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]

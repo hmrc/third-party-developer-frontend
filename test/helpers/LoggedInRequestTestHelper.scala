@@ -40,7 +40,7 @@ trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding {
     fetchSessionByIdReturns(sessionId, session)
    
     private val sessionParams = Seq(
-      "csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken
+      "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
     )
 
     lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()

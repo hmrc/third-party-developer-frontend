@@ -57,7 +57,7 @@ class RegistrationSpec extends BaseControllerSpec {
       resendConfirmationView
     )
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
   }
 
   "registration" should {

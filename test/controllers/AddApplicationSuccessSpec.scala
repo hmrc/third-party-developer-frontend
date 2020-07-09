@@ -91,7 +91,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 
-    private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest, implicitly)(sessionId)
