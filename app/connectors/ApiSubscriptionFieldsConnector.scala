@@ -178,7 +178,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 }
 
 object SubscriptionFieldsConnector {
-
   def toDomain(f: FieldDefinition): SubscriptionFieldDefinition = {
     SubscriptionFieldDefinition(
       name = f.name,

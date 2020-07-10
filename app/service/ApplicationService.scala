@@ -73,7 +73,7 @@ class ApplicationService @Inject() (
 
       subscriptionFieldsWithValues.map { fields: Seq[SubscriptionFieldValue] =>
         {
-          val wrapper = SubscriptionFieldsWrapper(application.id, application.clientId, api.context, version.version.version, fields) 
+          val wrapper = SubscriptionFieldsWrapper(application.id, application.clientId, api.context, version.version.version, fields)
           APISubscriptionStatus(api.name, api.serviceName, api.context, version.version, version.subscribed, api.requiresTrust.getOrElse(false), wrapper, api.isTestSupport)
         }
       }
@@ -110,13 +110,13 @@ class ApplicationService @Inject() (
       for {
         oldValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
         saveResponse <- subscriptionFieldsService.saveBlankFieldValues(application, context, version, oldValues)
-      } yield(saveResponse match { 
+      } yield saveResponse match {
           case SaveSubscriptionFieldsSuccessResponse => HasSucceeded
-          case error => {
-            val errorMessage = s"Failed to save blank subscription field values: $error"  
+          case error =>
+            val errorMessage = s"Failed to save blank subscription field values: $error"
             throw new RuntimeException(errorMessage)
-        }})
       }
+    }
 
     def ensureSavedValuesForAnyDefinitions(defns: Seq[SubscriptionFieldDefinition]): Future[HasSucceeded] = {
       if (defns.nonEmpty) {
@@ -255,7 +255,6 @@ class ApplicationService @Inject() (
   }
 
   def removeTeamMember(app: Application, teamMemberToRemove: String, requestingEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-
     val otherAdminEmails = app.collaborators
       .filter(_.role.isAdministrator)
       .map(_.emailAddress)
@@ -328,10 +327,11 @@ class ApplicationService @Inject() (
   }
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
-    if (environment.contains(PRODUCTION))
+    if (environment.contains(PRODUCTION)) {
       productionApplicationConnector
-    else
+    } else {
       sandboxApplicationConnector
+    }
 }
 
 object ApplicationService {

@@ -19,7 +19,7 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain._
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -32,35 +32,7 @@ import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait PasswordChange {
-
-  import ErrorFormBuilder.GlobalError
-  import Results._
-
-  val connector: ThirdPartyDeveloperConnector
-  val auditService: AuditService
-
-  def processPasswordChange(email: String, success: Result, error: Form[ChangePasswordForm] => HtmlFormat.Appendable)
-                           (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext) = {
-    ChangePasswordForm.form.bindFromRequest.fold(
-      errors => Future.successful(BadRequest(error(errors.currentPasswordGlobal().passwordGlobal().passwordNoMatchField()))),
-      data => {
-        val payload = ChangePassword(email, data.currentPassword, data.password)
-        connector.changePassword(payload) map {
-          _ => success
-        } recover {
-          case _: UnverifiedAccount => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email)))
-            .withSession("email" -> email)
-          case _: InvalidCredentials =>
-            auditService.audit(PasswordChangeFailedDueToInvalidCredentials(email))
-            Unauthorized(error(ChangePasswordForm.invalidCredentials(ChangePasswordForm.form)))
-          case _: LockedAccount => Redirect(controllers.routes.UserLoginAccount.accountLocked())
-        }
-      }
-    )
-  }
-}
-
+@Singleton
 class Password @Inject()(val auditService: AuditService,
                          val sessionService: SessionService,
                          val connector: ThirdPartyDeveloperConnector,
@@ -143,6 +115,34 @@ class Password @Inject()(val auditService: AuditService,
         } recover {
           case _: UnverifiedAccount => Forbidden(resetView(PasswordResetForm.accountUnverified(PasswordResetForm.form, email)))
             .withSession("email" -> email)
+        }
+      }
+    )
+  }
+}
+
+trait PasswordChange {
+  import ErrorFormBuilder.GlobalError
+  import Results._
+
+  val connector: ThirdPartyDeveloperConnector
+  val auditService: AuditService
+
+  def processPasswordChange(email: String, success: Result, error: Form[ChangePasswordForm] => HtmlFormat.Appendable)
+                           (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext) = {
+    ChangePasswordForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(error(errors.currentPasswordGlobal().passwordGlobal().passwordNoMatchField()))),
+      data => {
+        val payload = ChangePassword(email, data.currentPassword, data.password)
+        connector.changePassword(payload) map {
+          _ => success
+        } recover {
+          case _: UnverifiedAccount => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email)))
+            .withSession("email" -> email)
+          case _: InvalidCredentials =>
+            auditService.audit(PasswordChangeFailedDueToInvalidCredentials(email))
+            Unauthorized(error(ChangePasswordForm.invalidCredentials(ChangePasswordForm.form)))
+          case _: LockedAccount => Redirect(controllers.routes.UserLoginAccount.accountLocked())
         }
       }
     )

@@ -29,24 +29,4 @@ object SpliceCSRFToken {
 
     call.copy(url = url)
   }
-
-//  private def getToken(implicit request: RequestHeader): Option[Token] = {
-//    // Try to get the re-signed token first, then get the "new" token.
-//    for {
-//      name <- request.tags.get(NameRequestTag)
-//      value <- request.tags.get(ReSignedRequestTag) orElse request.attrs(Attrs.RequestTag)
-//    } yield Token(name, value)
-//  }
-
-
-//  object Attrs {
-//    val NameRequestTag: TypedKey[String] = TypedKey("CSRF_TOKEN_NAME")
-//    val ReSignedRequestTag: TypedKey[String] = TypedKey("CSRF_TOKEN_RE_SIGNED")
-//    val RequestTag: TypedKey[String] = TypedKey("CSRF_TOKEN_RE_SIGNED")
-//  }
-  // Getting an attribute from a Request or RequestHeader
-//  val userName: String = request.attrs(Attrs.NameRequestTag)
-//  val optUserName: [String] = req.attrs.get(Attrs.UserName)
-  // Setting an attribute on a Request or RequestHeader
-//  val newReq = req.addAttr(Attrs.UserName, newName)
 }

@@ -35,6 +35,7 @@ import org.scalatest.Matchers
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.api.{Logger, Mode}
+import play.core.server.ServerConfig
 import utils.BrowserStackCaps
 
 import scala.util.{Properties, Try}
@@ -161,7 +162,8 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps {
         .in(Mode.Prod)
         .build()
 
-    server = new TestServer(port, application)
+    val serverConfig = ServerConfig(port = Some(port))
+    server = new TestServer(serverConfig, application, None)
     server.start()
   }
 }
