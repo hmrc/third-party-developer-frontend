@@ -37,8 +37,8 @@ class CookieEncodingSpec extends UnitSpec with Matchers with MockitoSugar with G
       .build()
 
   private val wrapper = new CookieEncoding {
-    override implicit val appConfig: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
-    override val cookieSigner: CookieSigner = fakeApplication().injector.instanceOf[CookieSigner]
+    override val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
+    override implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
   }
 
   "decode cookie" should {

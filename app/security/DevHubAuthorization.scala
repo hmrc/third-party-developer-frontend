@@ -131,12 +131,12 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
 trait CookieEncoding {
   implicit val appConfig: ApplicationConfig
 
-  private[security] val cookieName = "PLAY2AUTH_SESS_ID"
-  private[security] val cookieSecureOption: Boolean = appConfig.securedCookie
-  private[security] val cookieHttpOnlyOption: Boolean = true
-  private[security] val cookieDomainOption: Option[String] = None
-  private[security] val cookiePathOption: String = "/"
-  private[security] val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
+  private[security] lazy val cookieName = "PLAY2AUTH_SESS_ID"
+  private[security] lazy val cookieSecureOption: Boolean = appConfig.securedCookie
+  private[security] lazy val cookieHttpOnlyOption: Boolean = true
+  private[security] lazy val cookieDomainOption: Option[String] = None
+  private[security] lazy val cookiePathOption: String = "/"
+  private[security] lazy val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
 
   val cookieSigner : CookieSigner
 
