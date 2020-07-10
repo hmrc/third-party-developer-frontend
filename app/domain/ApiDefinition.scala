@@ -16,7 +16,6 @@
 
 package domain
 
-import cats.data.NonEmptyList
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import play.api.libs.json.Json
 
