@@ -22,6 +22,7 @@ import domain.{ChangePassword, InvalidResetCode, PasswordReset, UnverifiedAccoun
 import mocks.service.SessionServiceMock
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -106,10 +107,10 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "validate reset unverified user" in new Setup {
       mockConnectorUnverifiedForValidateReset(developerCode)
-      val result = await(addToken(underTest.validateReset(developerEmail, developerCode))(request))
+      val result: Result = await(addToken(underTest.validateReset(developerEmail, developerCode))(request))
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
-      result.header.headers("Set-Cookie") should include("UnverifiedAccount")
+      result.newFlash.get.get("error").mkString shouldBe "UnverifiedAccount"
     }
 
     "validate reset invalid reset code" in new Setup {
@@ -117,7 +118,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result = await(addToken(underTest.validateReset(developerEmail, developerCode))(request))
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
-      result.header.headers("Set-Cookie") should include("InvalidResetCode")
+      result.newFlash.get.get("error").mkString shouldBe "InvalidResetCode"
     }
 
     "process password changed unverified user" in new Setup {
@@ -128,7 +129,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result = await(underTest.processPasswordChange(
         developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, implicitly))
       status(result) shouldBe FORBIDDEN
-      result.toString should include(developerEmail.replace("@", "%40"))
+      result.session(requestWithPassword).get("email").mkString shouldBe developerEmail
     }
 
     "request reset unverified user" in new Setup {
@@ -137,7 +138,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
         .withSession((emailSessionName, developerEmail))
       val result = await(addToken(underTest.requestReset())(requestWithPasswordAndEmail))
       status(result) shouldBe FORBIDDEN
-      result.toString should include(developerEmail.replace("@", "%40"))
+      result.session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail
     }
 
     "reset unverified user" in new Setup {
@@ -146,7 +147,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
         .withSession((emailSessionName, developerEmail))
       val result = await(addToken(underTest.resetPassword())(requestWithPasswordAndEmail))
       status(result) shouldBe FORBIDDEN
-      result.toString should include(developerEmail.replace("@", "%40"))
+      result.session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail
     }
 
     "show the forgot password page" in new Setup {

@@ -238,7 +238,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       status(result) shouldBe FORBIDDEN
       bodyOf(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
-      result.toString should include(user.email.replace("@", "%40"))
+      result.session(request).get("email").mkString shouldBe user.email
     }
 
     "display the Account locked page when the account is locked" in new Setup {
