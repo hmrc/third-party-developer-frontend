@@ -19,7 +19,6 @@ package domain
 import play.api.libs.json.{JsError, JsString, Json}
 import uk.gov.hmrc.play.test.UnitSpec
 
-
 class OverrideFlagSpec extends UnitSpec {
 
   "OverrideFlag" should {

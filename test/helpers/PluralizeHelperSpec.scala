@@ -17,7 +17,7 @@
 package helpers
 
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.UnitSpec
 
 class PluralizeHelperSpec extends UnitSpec with ScalaFutures with MockitoSugar {

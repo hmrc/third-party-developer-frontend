@@ -18,7 +18,6 @@ package views.helper
 
 import org.scalatest.Matchers
 import uk.gov.hmrc.play.test.UnitSpec
-import GlobalSection._
 
 class GlobalSectionSpec extends UnitSpec with Matchers {
 

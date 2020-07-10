@@ -32,8 +32,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.play.test.UnitSpec
+import utils.WithCSRFAddToken
 
-class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with MockitoSugar {
+class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with MockitoSugar with WithCSRFAddToken {
   private val config = Configuration("play.filters.csrf.token.sign" -> false)
 
   override def fakeApplication(): Application =

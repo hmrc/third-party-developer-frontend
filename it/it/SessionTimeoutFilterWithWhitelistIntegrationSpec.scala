@@ -25,13 +25,13 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Writeable
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.Request
+import play.api.mvc.{DefaultSessionCookieBaker, Request, SessionCookieBaker}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.crypto._
 import uk.gov.hmrc.http.SessionKeys._
-import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.CookieCryptoFilter
+import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCryptoFilter
 import uk.gov.hmrc.play.bootstrap.filters.frontend.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -59,9 +59,11 @@ object SessionTimeoutFilterWithWhitelistIntegrationSpec {
   }
 
   class PlainCookieCryptoFilter @Inject()(implicit override val mat: Materializer,
-                                          override val ec: ExecutionContext) extends CookieCryptoFilter {
+                                          override val ec: ExecutionContext) extends SessionCookieCryptoFilter {
     override protected lazy val encrypter: Encrypter = noCrypt
     override protected lazy val decrypter: Decrypter = noCrypt
+
+    override protected def sessionBaker: SessionCookieBaker = new DefaultSessionCookieBaker
   }
 }
 
@@ -82,7 +84,7 @@ class SessionTimeoutFilterWithWhitelistIntegrationSpec extends UnitSpec with Gui
       .configure(config)
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics],
         bind[SessionTimeoutFilter].to[StaticDateSessionTimeoutFilterWithWhitelist],
-        bind[CookieCryptoFilter].to[PlainCookieCryptoFilter])
+        bind[SessionCookieCryptoFilter].to[PlainCookieCryptoFilter])
       .in(Mode.Test)
       .build()
 

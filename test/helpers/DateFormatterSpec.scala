@@ -20,7 +20,7 @@ import helpers.DateFormatter.initialLastAccessDate
 import org.joda.time.{DateTime, DateTimeUtils}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.UnitSpec
 
 class DateFormatterSpec extends UnitSpec with ScalaFutures with MockitoSugar with BeforeAndAfterAll {
