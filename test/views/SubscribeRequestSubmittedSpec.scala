@@ -22,15 +22,14 @@ import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
-import views.html.UnsubscribeRequestSubmittedView
+import views.html.SubscribeRequestSubmittedView
 
 class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Subscribe request submitted page" should {
     "render with no errors" in {
-
       val appConfig = mock[ApplicationConfig]
       val request = FakeRequest().withCSRFToken
 
@@ -43,7 +42,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
         Set(Collaborator(developer.email, Role.ADMINISTRATOR)), state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-      val subscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
+      val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
 
       val page = subscribeRequestSubmittedView.render(
         ApplicationViewModel(application,hasSubscriptionsFields = false),
