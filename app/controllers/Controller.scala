@@ -21,7 +21,6 @@ import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
 import domain._
 import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
-import play.api.i18n.I18nSupport
 import play.api.mvc._
 import security.{DevHubAuthorization, ExtendedDevHubAuthorization}
 import service.SessionService

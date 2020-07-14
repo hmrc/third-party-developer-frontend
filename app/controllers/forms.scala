@@ -16,7 +16,6 @@
 
 package controllers
 
-import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import domain.{Application, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
