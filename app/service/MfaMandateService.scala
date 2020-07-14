@@ -31,24 +31,34 @@ class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicat
   }
 
   def isMfaMandatedForUser(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    println(s"In MfaMandateService.isMfaMandatedForUser - email is: $email")
     mfaMandateCheck(email, mandatedDate => !(mandatedDate.isAfter(new LocalDate())))
   }
 
   private def mfaMandateCheck(email: String, dateCheck : LocalDate => Boolean)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    println(s"In MfaMandateService.mfaMandateCheck - email is: $email")
+    println(s"In MfaMandateService.mfaMandateCheck - appConfig.dateOfAdminMfaMandate is: ${appConfig.dateOfAdminMfaMandate}")
     isAdminOnProductionApplication(email).map(isAdminOnProductionApplication =>
       if (isAdminOnProductionApplication) {
+        println(s"In MfaMandateService.mfaMandateCheck - in if")
         appConfig.dateOfAdminMfaMandate.fold(false)((mandatedDate: LocalDate) => dateCheck(mandatedDate))
-      } else false
+      } else {
+        println(s"In MfaMandateService.mfaMandateCheck - in else to return false")
+        false
+      }
     )
   }
 
   private def isAdminOnProductionApplication(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    applicationService.fetchByTeamMemberEmail(email).map(applications =>
+    println(s"In MfaMandateService.isAdminOnProductionApplication")
+    applicationService.fetchByTeamMemberEmail(email).map(applications => {
+      println(s"In MfaMandateService.isAdminOnProductionApplication - applications: $applications")
       applications
         .filter(app => app.deployedTo.isProduction())
         .flatMap(app => app.collaborators)
         .filter(collaborators => collaborators.emailAddress == email)
         .exists(collaborator => collaborator.role.isAdministrator)
+    }
     )
   }
 

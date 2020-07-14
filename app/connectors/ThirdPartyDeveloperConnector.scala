@@ -217,6 +217,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     }
 
   def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
+    println(s"In ThirdPartyDeveloperConnector.authenticate")
     encryptedJson.secretRequestJson(
       Json.toJson(loginRequest),
       http.POST(s"$serviceBaseUrl/authenticate", _, Seq(CONTENT_TYPE -> JSON)))

@@ -27,9 +27,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
                                val mfaMandateService: MfaMandateService)(implicit val ec: ExecutionContext) {
   def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = {
+    println(s"In SessionService.authenticate - emailAddress is: $emailAddress")
     for {
       mfaMandatedForUser <- mfaMandateService.isMfaMandatedForUser(emailAddress)
-      response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser))
+      response <- {
+        println(s"In SessionService.authenticate - mfaMandatedForUser is: $mfaMandatedForUser")
+        thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser))
+      }
     } yield response
   }
 

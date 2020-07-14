@@ -27,10 +27,18 @@ import scala.concurrent.Future
 class  CSRFErrorHandler @Inject()(errorHandler: ErrorHandler) extends CSRF.ErrorHandler {
   override def handle(req: RequestHeader, msg: String): Future[Result] = {
     val login = controllers.routes.UserLoginAccount.login()
+    println("*******In CSRFErrorHandler********")
 
-    if (req.path == login.url)
-      Future.successful(Redirect(login))
-    else
+    if (req.path == login.url) {
+      println("*******In CSRFErrorHandler******** IFFFFFF")
+      val x = Future.successful(Redirect(login))
+      println(s"${x}")
+      x
+    }
+    else {
+      println("*******In CSRFErrorHandler******** ELSEEEE")
       errorHandler.onClientError(req, FORBIDDEN, msg)
+    }
+
   }
 }

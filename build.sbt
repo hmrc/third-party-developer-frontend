@@ -1,4 +1,3 @@
-
 import com.typesafe.sbt.digest.Import._
 import com.typesafe.sbt.uglify.Import._
 import com.typesafe.sbt.web.Import._
@@ -16,12 +15,13 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 import scala.util.Properties
+import bloop.integrations.sbt.BloopDefaults
 
 lazy val appName = "third-party-developer-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test
 
-lazy val cucumberVersion = "1.2.5"
+lazy val cucumberVersion = "6.2.2"
 lazy val seleniumVersion = "2.53.1"
 lazy val enumeratumVersion = "1.5.12"
 
@@ -47,8 +47,9 @@ lazy val compile = Seq(
 )
 
 lazy val test = Seq(
-  "info.cukes" %% "cucumber-scala" % cucumberVersion % testScope,
-  "info.cukes" % "cucumber-junit" % cucumberVersion % testScope,
+  "io.cucumber" %% "cucumber-scala" % cucumberVersion % testScope,
+  "io.cucumber" % "cucumber-junit" % cucumberVersion % testScope,
+  "io.cucumber" % "cucumber-java8" % cucumberVersion % testScope,
   "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % testScope,
   "junit" % "junit" % "4.12" % testScope,
   "org.jsoup" % "jsoup" % "1.10.2" % testScope,
@@ -63,10 +64,10 @@ lazy val test = Seq(
   // batik-bridge has a circular dependency on itself via transitive batik-script. Avoid that to work with updated build tools
   //[warn] circular dependency found: batik#batik-bridge;1.6-1->batik#batik-script;1.6-1->...
   //[warn] circular dependency found: batik#batik-script;1.6-1->batik#batik-bridge;1.6-1->...
-  "com.github.mkolisnyk" % "cucumber-runner" % "1.0.9" % testScope exclude("batik", "batik-script"),
-  "batik" % "batik-script" % "1.6-1" % testScope exclude("batik", "batik-bridge"),
-  "net.masterthought" % "cucumber-reporting" % "3.3.0" % testScope,
-  "net.masterthought" % "cucumber-sandwich" % "3.3.0" % testScope,
+  // "batik" % "batik-script" % "1.6-1" % testScope exclude("batik", "batik-bridge"),
+  // "com.github.mkolisnyk" % "cucumber-runner" % "1.3.5" % testScope exclude("batik", "batik-script"),
+  "net.masterthought" % "cucumber-reporting" % "5.3.0" % testScope,
+  "net.masterthought" % "cucumber-sandwich" % "5.3.0" % testScope,
   "com.assertthat" % "selenium-shutterbug" % "0.2" % testScope
 )
 
@@ -147,6 +148,10 @@ lazy val microservice = Project(appName, file("."))
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
   .settings(logLevel := Level.Error)
+  .settings(
+    inConfig(TemplateTest)(BloopDefaults.configSettings),
+    inConfig(ComponentTest)(BloopDefaults.configSettings),
+  )
 
 lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
 lazy val IntegrationTest = config("it") extend Test
@@ -160,6 +165,9 @@ lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
   publishArtifact in(Compile, packageSrc) := false
 ) ++
   publishAllArtefacts
+
+// Note that this task has to be scoped globally
+bloopAggregateSourceDependencies in Global := true
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
   tests map { test =>
