@@ -18,8 +18,9 @@ package steps
 
 import matchers.CustomMatchers
 import pages._
-import cucumber.api.DataTable
-import cucumber.api.scala.{EN, ScalaDsl}
+import io.cucumber.datatable.DataTable
+import io.cucumber.scala.Implicits._
+import io.cucumber.scala.{EN, ScalaDsl}
 import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.{By, WebDriver, WebElement}
 import org.scalatest.Matchers
@@ -62,7 +63,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   }
 
   Given( """^I enter all the fields:$""") { (data: DataTable) =>
-    val form: mutable.Map[String, String] = data.asMap(classOf[String], classOf[String]).asScala
+    val form = scala.collection.mutable.Map.empty ++ data.asScalaRawMaps[String,String].get(0)
     Form.populate(form)
   }
 
@@ -87,7 +88,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   }
 
   Then( """^I see:$""") { (labels: DataTable) =>
-    val textsToFind = labels.raw().flatten.toList
+    val textsToFind = labels.cells().flatten.toList
     eventually {
     CurrentPage.bodyText should containInOrder(textsToFind) }
   }
@@ -102,7 +103,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   }
 
   Then( """^I see on current page:$""") { (labels: DataTable) =>
-    val textsToFind = labels.raw().flatten.toList
+    val textsToFind = labels.cells().flatten.toList
     Env.driver.findElement(By.tagName("body")).getText should containInOrder(textsToFind)
   }
 

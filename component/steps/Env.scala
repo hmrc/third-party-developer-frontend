@@ -25,7 +25,8 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import stubs.AuditStub
-import cucumber.api.scala.{EN, ScalaDsl}
+import io.cucumber.scala.{EN, ScalaDsl, Scenario}
+import io.cucumber.datatable.DataTable
 import org.apache.commons.io.FileUtils
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxProfile}
@@ -113,7 +114,7 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps {
     if (server != null) server.stop()
   }
 
-  Before { _ =>
+  Before { _: Scenario =>
     if (!wireMockServer.isRunning) {
       wireMockServer.start()
     }
@@ -136,12 +137,12 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps {
       } catch {
         case e: IOException => e.printStackTrace()
       }
-      scenario.embed(srcFile, "image/png")
+      scenario.attach(srcFile, "image/png", "attachment")
     }
-    if (scenario.getStatus.equalsIgnoreCase("passed")) {
+    if (scenario.getStatus.equals("passed")) {
       passedTestCount = passedTestCount + 1
     }
-    else if (scenario.getStatus.equalsIgnoreCase("failed")) {
+    else if (scenario.getStatus.equals("failed")) {
       failedTestCount = failedTestCount + 1
     }
     Logger.info("\n*******************************************************************************************************")

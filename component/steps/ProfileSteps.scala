@@ -18,7 +18,7 @@ package steps
 
 import pages._
 import stubs.{DeveloperStub, Stubs}
-import cucumber.api.scala.{EN, ScalaDsl}
+import io.cucumber.scala.{EN, ScalaDsl}
 import domain.UpdateProfileRequest
 import org.openqa.selenium.WebDriver
 import org.scalatest.Matchers

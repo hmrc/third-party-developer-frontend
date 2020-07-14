@@ -19,8 +19,8 @@ package steps
 import matchers.CustomMatchers
 import pages._
 import stubs.DeveloperStub
-import cucumber.api.DataTable
-import cucumber.api.scala.{EN, ScalaDsl}
+import io.cucumber.datatable.DataTable
+import io.cucumber.scala.{EN, ScalaDsl}
 import domain.Registration
 import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.{By, WebDriver}
@@ -55,7 +55,6 @@ class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar 
   import scala.collection.JavaConverters._
 
   implicit val webDriver: WebDriver = Env.driver
-
 
   Given( """^I enter valid information for all fields:$""") { (registrationDetails: DataTable) =>
     val data: mutable.Map[String, String] = registrationDetails.asMap(classOf[String], classOf[String]).asScala
