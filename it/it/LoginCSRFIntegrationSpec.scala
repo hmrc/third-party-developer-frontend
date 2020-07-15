@@ -25,7 +25,6 @@ import connectors.{ConnectorMetrics, NoopConnectorMetrics}
 import controllers.routes
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.CSRFTokenHelper._
@@ -33,18 +32,17 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Mode}
 import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with MockitoSugar {
+class LoginCSRFIntegrationSpec extends UnitSpec with OneAppPerSuiteWithComponents with BeforeAndAfterEach with MockitoSugar {
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
-    .configure("httpOnly" -> false,
-    )
-//      .configure("play.filters.csrf.token.sign" -> false)
-      .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
-
-//      .in(Mode.Test)
-      .build()
+    // .configure("play.http.errorHandler" -> "config.ErrorHandler",
+    //           "play.filters.csrf.errorHandler" -> "config.CSRFErrorHandler")
+    .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+    .in(Mode.Test)
+    .build()
 
   private val stubPort = sys.env.getOrElse("WIREMOCK", "11111").toInt
   val stubHost = "localhost"
@@ -72,36 +70,42 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
   }
 
   "CSRF handling for login" when {
-//    "there is no CSRF token" should {
-//      "redirect back to the login page" in new Setup {
-//        private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
-//        private val result = await(route(app, request)).get
-//
-//        println(s"**** HELLO ${redirectLocation(result)}")
-//        status(result) shouldBe FORBIDDEN
-////        redirectLocation(result) shouldBe Some("/developer/login")
-//      }
-//    }
-//
-//    "there is no CSRF token in the request body but it is present in the headers" should {
-//      "redirect back to the login page" in new Setup {
-//        private val request = addCSRFToken(loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword))
-//        private val result = await(route(app, request)).get
-//
-//        status(result) shouldBe SEE_OTHER
-//        redirectLocation(result) shouldBe Some("/developer/login")
-//      }
-//    }
-//
-//    "there is a CSRF token in the request body but not in the headers" should {
-//      "redirect back to the login page" in new Setup {
-//        private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
-//        private val result = await(route(app, request)).get
-//
-//        status(result) shouldBe SEE_OTHER
-//        redirectLocation(result) shouldBe Some("/developer/login")
-//      }
-//    }
+   "there is no CSRF token" should {
+     "redirect back to the login page" in new Setup {
+       private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
+       println(s"In test **** request is ${request.headers.headers.mkString(",")}")
+       println(s"In test **** request is ${request.body}")
+       private val result = await(route(app, request)).get
+
+       println(s"**** HELLO ${redirectLocation(result)}")
+       status(result) shouldBe FORBIDDEN
+       redirectLocation(result) shouldBe Some("/developer/login")
+     }
+   }
+
+   "there is no CSRF token in the request body but it is present in the headers" should {
+     "redirect back to the login page" in new Setup {
+       private val request = addCSRFToken(loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword))
+       println(s"In test **** request is ${request.headers.headers.mkString(",")}")
+       println(s"In test **** request is ${request.body}")
+       private val result = await(route(app, request)).get
+
+       status(result) shouldBe SEE_OTHER
+       redirectLocation(result) shouldBe Some("/developer/login")
+     }
+   }
+
+   "there is a CSRF token in the request body but not in the headers" should {
+     "redirect back to the login page" in new Setup {
+       private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
+       println(s"In test **** request is ${request.headers.headers.mkString(",")}")
+       println(s"In test **** request is ${request.body}")
+       private val result = await(route(app, request)).get
+
+       status(result) shouldBe SEE_OTHER
+       redirectLocation(result) shouldBe Some("/developer/login")
+     }
+   }
 
     "there is a valid CSRF token" should {
       "redirect to the 2SV sign-up reminder if user does not have it set up" in new Setup {
