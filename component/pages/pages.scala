@@ -152,7 +152,7 @@ case object Setup2svEnterAccessCodePage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/protect-account/access-code"
 
   def enterAccessCode(accessCode: String) = {
-    val formData = mutable.Map("accessCode" -> accessCode)
+    val formData = Map("accessCode" -> accessCode)
 
     Form.populate(formData)
   }

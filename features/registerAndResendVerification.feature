@@ -11,11 +11,9 @@ Scenario: Resend verification email successfully in the Developer Hub
       | Your password must be at least 12 characters and contain at least one number, lowercase letter, uppercase letter and special character  |
       | Confirm password                                                                                                                        |
     And I enter valid information for all fields:
-      | first name       | John                   |
-      | last name        | Smith                  |
-      | email address    | john.smith@example.com |
-      | password         | A1@wwwwwwwww           |
-      | confirm password | A1@wwwwwwwww           |
+      | first name | last name | email address          | password     | confirm password |
+      | John       | Smith     | john.smith@example.com | A1@wwwwwwwww | A1@wwwwwwwww     |
+
     Then I click on submit
     Then I expect a resend call from 'john.smith@example.com'
     Then I am on the 'Email confirmation' page

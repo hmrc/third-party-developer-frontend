@@ -31,8 +31,6 @@ import org.scalatest.Matchers
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 
-import scala.collection.mutable
-
 case class MfaSecret(secret: String)
 
 object MfaSecret {
@@ -56,7 +54,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     goOn(SignInPage.default)
     webDriver.manage().deleteAllCookies()
     webDriver.navigate().refresh()
-    Form.populate(mutable.Map("email address" -> email, "password" -> password))
+    Form.populate(Map("email address" -> email, "password" -> password))
     click on id("submit")
     on(RecommendMfaPage)
     click on waitForElement(By.id("skip")) // Skip the 2SV reminder screen
@@ -135,7 +133,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Given("""^I fill in the login form with$""") { (data: DataTable) =>
-    val form: mutable.Map[String,String] = mutable.Map.empty ++ data.asScalaRawMaps[String, String].head
+    val form = data.asScalaRawMaps[String, String].head
     Form.populate(form)
   }
 

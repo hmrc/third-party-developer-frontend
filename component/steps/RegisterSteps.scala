@@ -28,11 +28,9 @@ import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
 import play.api.http.Status
 
-import scala.collection.mutable
-
 object Form extends WebBrowser {
 
-  def populate(a: mutable.Map[String, String])(implicit driver: WebDriver) = a.foreach {
+  def populate(a: Map[String, String])(implicit driver: WebDriver) = a.foreach {
     case (field, value) if field.toLowerCase.contains("password") =>
       val f = field.replaceAll(" ", "")
       pwdField(f).value = value
@@ -52,17 +50,17 @@ object Form extends WebBrowser {
 
 class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers {
 
-  import scala.collection.JavaConverters._
-
   implicit val webDriver: WebDriver = Env.driver
 
   Given( """^I enter valid information for all fields:$""") { (registrationDetails: DataTable) =>
-    val data: mutable.Map[String, String] = registrationDetails.asMap(classOf[String], classOf[String]).asScala
+    import io.cucumber.scala.Implicits._
+
+    val data: Map[String, String] = registrationDetails.asScalaRawMaps[String,String].head
     DeveloperStub.register(createPayload(data), Status.CREATED)
     Form.populate(data)
   }
 
-  def createPayload(data: mutable.Map[String, String]): Registration = {
+  def createPayload(data: Map[String, String]): Registration = {
     Registration(data("first name"), data("last name"), data("email address"), data("password"))
   }
 
