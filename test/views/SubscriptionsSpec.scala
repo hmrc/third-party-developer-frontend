@@ -22,7 +22,6 @@ import model.ApplicationViewModel
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.i18n.Messages.Implicits._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
@@ -30,7 +29,7 @@ import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.ManageSubscriptionsView
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -38,10 +37,10 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
-      doc.select(elementType).exists(node => node.text.trim == elementText)
+      doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
     }
 
-    def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").nonEmpty
+    def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
   }
 
   def buildApplication(applicationState: ApplicationState, environment: Environment): Application = Application(

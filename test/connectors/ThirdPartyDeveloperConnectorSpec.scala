@@ -91,7 +91,6 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
     }
 
     "successfully verify a developer" in new Setup {
-      val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
       val code = "A1234"
 
       when(mockHttp.GET(endpoint(s"verification?code=$code"))).
@@ -256,7 +255,6 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
     val checkPasswordRequest = PasswordCheckRequest(email, password)
 
     "successfully return if called with an encrypted payload" in new Setup {
-      val checkPassword = PasswordCheckRequest(email, password)
 
       when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).
         thenReturn(Future.successful(HttpResponse(Status.NO_CONTENT)))

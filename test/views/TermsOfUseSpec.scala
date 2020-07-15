@@ -16,7 +16,6 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.TermsOfUseForm
 import domain._
 import model.ApplicationViewModel

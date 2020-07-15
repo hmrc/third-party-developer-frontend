@@ -18,34 +18,34 @@ package utils
 
 import org.jsoup.nodes.Document
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object ViewHelpers {
 
   def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
-    doc.select(elementType).exists(node => node.text.trim == elementText)
+    doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
   }
 
-  def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").nonEmpty
+  def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
 
   def elementExistsByAttr(doc: Document, elementType: String, attr: String): Boolean = {
-    doc.select(s"$elementType[$attr]").nonEmpty
+    doc.select(s"$elementType[$attr]").asScala.nonEmpty
   }
 
   def elementExistsByAttrWithValue(doc: Document, elementType: String, attr: String, value: String): Boolean = {
-    doc.select(s"$elementType[$attr=$value]").nonEmpty
+    doc.select(s"$elementType[$attr=$value]").asScala.nonEmpty
   }
 
   def linkExistsWithHref(doc: Document, href: String): Boolean = {
-    doc.select(s"a[href=$href]").nonEmpty
+    doc.select(s"a[href=$href]").asScala.nonEmpty
   }
 
   def formExistsWithAction(doc: Document, action: String): Boolean = {
-    doc.select(s"form[action=$action]").nonEmpty
+    doc.select(s"form[action=$action]").asScala.nonEmpty
   }
 
   def inputExistsWithValue(doc: Document, id: String,  inputType: String, value: String): Boolean = {
-    doc.select(s"input[id=$id][type=$inputType][value=$value]").nonEmpty
+    doc.select(s"input[id=$id][type=$inputType][value=$value]").asScala.nonEmpty
   }
 
   def textareaExistsWithText(doc: Document, id: String, text: String): Boolean = {
@@ -53,18 +53,18 @@ object ViewHelpers {
   }
 
   def elementIdentifiedByAttrContainsText(doc: Document, elementType: String, attr: String, text: String): Boolean = {
-    doc.select(s"$elementType[$attr]").exists(element => element.text.equals(text))
+    doc.select(s"$elementType[$attr]").asScala.exists(element => element.text.equals(text))
   }
 
   def elementIdentifiedByAttrWithValueContainsText(doc: Document, elementType: String, attr: String, value: String, text: String): Boolean = {
-    doc.select(s"$elementType[$attr=$value]").exists(element => element.text.equals(text))
+    doc.select(s"$elementType[$attr=$value]").asScala.exists(element => element.text.equals(text))
   }
 
   def elementIdentifiedByIdContainsText(doc: Document, id: String, text: String): Boolean = {
-    doc.select(s"#$id").exists(element => element.text.equals(text))
+    doc.select(s"#$id").asScala.exists(element => element.text.equals(text))
   }
 
   def elementIdentifiedByIdContainsValue(doc: Document, id: String, value: String): Boolean = {
-    doc.select(s"#$id").exists(element => element.`val`.equals(value))
+    doc.select(s"#$id").asScala.exists(element => element.`val`.equals(value))
   }
 }

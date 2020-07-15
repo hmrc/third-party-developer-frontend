@@ -26,7 +26,7 @@ import uk.gov.hmrc.time.DateTimeUtils.now
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class LeftHandNavSpec extends CommonViewSpec {
 
@@ -39,7 +39,7 @@ class LeftHandNavSpec extends CommonViewSpec {
     val privilegedApplication = Application("std-app-id", "std-client-id", "name", now, now, None, PRODUCTION, access = Privileged())
     val ropcApplication = Application("std-app-id", "std-client-id", "name", now, now, None, PRODUCTION, access = ROPC())
 
-    def elementExistsById(doc: Document, id: String) = doc.select(s"#$id").nonEmpty
+    def elementExistsById(doc: Document, id: String) = doc.select(s"#$id").asScala.nonEmpty
   }
 
   "Left Hand Nav" should {

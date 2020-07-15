@@ -18,7 +18,6 @@ package views
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import utils.ViewHelpers._

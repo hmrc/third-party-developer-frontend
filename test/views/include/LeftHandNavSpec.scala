@@ -20,12 +20,10 @@ import controllers.Credentials.serverTokenCutoffDate
 import domain._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import org.scalatestplus.play.OneServerPerSuite
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.{SharedMetricsClearDown, WithCSRFAddToken}
 import utils.ViewHelpers.elementExistsByText
+import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 

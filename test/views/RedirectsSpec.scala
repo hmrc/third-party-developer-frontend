@@ -20,11 +20,10 @@ import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.RedirectsView
 

@@ -16,16 +16,10 @@
 
 package views
 
-import config.ApplicationConfig
 import org.jsoup.Jsoup
-import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.{SharedMetricsClearDown, WithCSRFAddToken}
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.ExpiredVerificationLinkView
 

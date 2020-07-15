@@ -46,7 +46,6 @@ class SubscriptionFieldsConnectorProxySpec extends UnitSpec with MockitoSugar wi
   private val testActorSystem = ActorSystem("test-actor-system")
 
   class Setup(proxyEnabled: Boolean = false) {
-    private val fieldsId = UUID.randomUUID()
     val testApiKey: String = UUID.randomUUID().toString
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]

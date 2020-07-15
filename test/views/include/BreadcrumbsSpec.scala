@@ -20,15 +20,15 @@ import config.ApplicationConfig
 import domain.{Application, Environment}
 import model.Crumb
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.SharedMetricsClearDown
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class BreadcrumbsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class BreadcrumbsSpec extends UnitSpec with GuiceOneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
 
   val appConfig = mock[ApplicationConfig]
 
@@ -37,7 +37,7 @@ class BreadcrumbsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
       val applicationName = "An Application Name"
       val application = Application("appId123", "clientId123", applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION)
-      val crumbs = Array(Crumb("Another Breadcrumb"), Crumb.application(application), Crumb.viewAllApplications, Crumb.home(appConfig))
+      val crumbs: Array[Crumb] = Array(Crumb("Another Breadcrumb"), Crumb.application(application), Crumb.viewAllApplications, Crumb.home(appConfig))
 
       val page = views.html.include.breadcrumbs.render(crumbs)
 
