@@ -34,17 +34,31 @@ import uk.gov.hmrc.http.SessionKeys._
 import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCryptoFilter
 import uk.gov.hmrc.play.bootstrap.filters.frontend.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
 import uk.gov.hmrc.play.test.UnitSpec
+import play.api.test.CSRFTokenHelper._
 
 import scala.concurrent.ExecutionContext
+import org.scalatest.BeforeAndAfterAll
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import org.scalatest.BeforeAndAfterEach
+import domain.LoggedInState
+import domain.Developer
 
 object SessionTimeoutFilterWithWhitelistIntegrationSpec {
-  val now = new DateTime(2019, 1, 1, 0, 0)
+  val fixedTime = new DateTime(2019, 1, 1, 0, 0)
   val whitelistedUrl = "/developer/login"
-  val notWhitelistedUrl = "/developer/registration"
+  val notWhitelistedUrl = "/keep-alive"
+
+  val stubPort = sys.env.getOrElse("WIREMOCK_PORT", "11111").toInt
+  private val stubHost = "localhost"
+  val wireMockUrl = s"http://$stubHost:$stubPort"
+  private val wireMockConfiguration = WireMockConfiguration.wireMockConfig().port(stubPort)
 
   class StaticDateSessionTimeoutFilterWithWhitelist @Inject()(config: SessionTimeoutFilterConfig)(implicit ec: ExecutionContext, mat: Materializer)
     extends SessionTimeoutFilterWithWhitelist(config)(ec, mat) {
-    override val clock: DateTime = now
+    println(s"Config : $config")
+    override def clock(): DateTime = fixedTime
   }
 
   val noCrypt = new Encrypter with Decrypter {
@@ -67,18 +81,22 @@ object SessionTimeoutFilterWithWhitelistIntegrationSpec {
   }
 }
 
-class SessionTimeoutFilterWithWhitelistIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite {
+class SessionTimeoutFilterWithWhitelistIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterAll with BeforeAndAfterEach {
 
   import SessionTimeoutFilterWithWhitelistIntegrationSpec._
 
   val token = "AUTH_TOKEN"
-  val sessionTimeoutSeconds = 900
+  val sessionTimeoutSeconds = 15*60  // TODO - go back to 900
+  val email = "thirdpartydeveloper@example.com"
   val config = Configuration(
     "session.timeoutSeconds" -> sessionTimeoutSeconds,
     "session.wipeIdleSession" -> false,
-    "session.additionalSessionKeysToKeep" -> Seq("access_uri"),
-    "httpOnly" -> false)
-  val postBody = Seq("emailaddress" -> "thirdpartydeveloper@example.com", "password" -> "password1!")
+    "session.additionalSessionKeysToKeep" -> Seq("access_uri")
+  )
+
+  val postBody = Seq("emailaddress" -> email, "password" -> "password1!")
+
+  val wireMockServer = new WireMockServer(wireMockConfiguration)
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
@@ -89,91 +107,112 @@ class SessionTimeoutFilterWithWhitelistIntegrationSpec extends UnitSpec with Gui
       .in(Mode.Test)
       .build()
 
-  class Setup[T](implicit request: Request[T], w: Writeable[T]) {
-    val session = await(route(app, request)).get.session
+
+  override def beforeAll() = {
+    super.beforeAll()
+    wireMockServer.start()
   }
 
-  "SessionTimeoutFilterWithWhitelist" when {
+  override def afterAll() = {
+    wireMockServer.stop()
+    super.afterAll()
+  }
 
-    "the session has not expired" when {
-      val timestamp = now.minusSeconds(sessionTimeoutSeconds / 2).getMillis.toString
-      val session = Seq(lastRequestTimestamp -> timestamp, authToken -> token)
+  class Setup[T](implicit request: Request[T], w: Writeable[T]) {
+    WireMock.configureFor(stubPort)
+    stubs.ApplicationStub.configureUserApplications(email)
+
+    val developer = Developer(email, "bob", "smith", None, Some(false))
+    stubs.ThirdPartyDeveloperStub.configureAuthenticate(Some(domain.Session(sessionId, developer, LoggedInState.LOGGED_IN)))
+    val outputSession = await(route(app, request)).get.session
+  }
+
+  "SessionTimeoutFilterWithWhitelist" can {
+
+    "if the session has not expired" ignore {
+      val fixedPointInThePast = fixedTime.minusSeconds(sessionTimeoutSeconds / 2).getMillis.toString
+      val session = Seq(lastRequestTimestamp -> fixedPointInThePast, authToken -> token)
 
       "making a GET request to the login page" should {
-        implicit lazy val request = FakeRequest(GET, whitelistedUrl).withSession(session: _*)
+        implicit lazy val request = addCSRFToken(FakeRequest(GET, whitelistedUrl).withSession(session: _*))
 
         "ignore the session timeout" in new Setup {
-          session.get(lastRequestTimestamp) shouldBe Some(timestamp)
+          outputSession.get(lastRequestTimestamp) shouldBe Some(fixedPointInThePast)
         }
 
         "preserve the session's auth token" in new Setup {
-          session.get(authToken) shouldBe Some(token)
+          outputSession.get(authToken) shouldBe Some(token)
         }
       }
 
       "making a POST request to the login page" should {
-        implicit lazy val request = FakeRequest(POST, whitelistedUrl).withSession(session: _*).withFormUrlEncodedBody(postBody: _*)
+        implicit lazy val request = addCSRFToken(FakeRequest(POST, whitelistedUrl).withSession(session: _*).withFormUrlEncodedBody(postBody: _*))
 
-//        "ignore the session timeout" in new Setup {
-//          session.get(lastRequestTimestamp) shouldBe Some(timestamp)
-//        }
+        "ignore the session timeout" in new Setup {
+          outputSession.get(lastRequestTimestamp) shouldBe Some(fixedPointInThePast)
+        }
 
-//        "preserve the session's auth token" in new Setup {
-//          session.get(authToken) shouldBe Some(token)
-//        }
+        "preserve the session's auth token" in new Setup {
+          outputSession.get(authToken) shouldBe Some(token)
+        }
       }
 
       "making a request to a url not in the whitelist" should {
-        implicit lazy val request = FakeRequest(GET, notWhitelistedUrl).withSession(session: _*)
+        implicit lazy val request = addCSRFToken(FakeRequest(GET, notWhitelistedUrl).withSession(session: _*))
 
-//        "update the session timeout" in new Setup {
-//          session.get(lastRequestTimestamp) shouldBe Some(now.getMillis.toString)
-//        }
+        "update the session timeout" in new Setup {
+          outputSession.get(lastRequestTimestamp) shouldBe Some(fixedTime.getMillis.toString)
+        }
 
         "preserve the session's auth token" in new Setup {
-          session.get(authToken) shouldBe Some(token)
+          outputSession.get(authToken) shouldBe Some(token)
         }
       }
     }
 
-    "the session has expired" when {
-      val timestamp = now.minusSeconds(sessionTimeoutSeconds * 2).getMillis.toString
-      val session = Seq(lastRequestTimestamp -> timestamp, authToken -> token)
+    "if session has expired" when {
+      val fixedPointInTheDistantPast = fixedTime.minusSeconds(sessionTimeoutSeconds * 2).getMillis.toString
+      val session = Seq(lastRequestTimestamp -> fixedPointInTheDistantPast, authToken -> token)
 
       "making a GET request to the login page" should {
-        implicit lazy val request = FakeRequest(GET, whitelistedUrl).withSession(session: _*)
+        implicit lazy val request = addCSRFToken(FakeRequest(GET, whitelistedUrl).withSession(session: _*))
 
         "ignore the session timeout" in new Setup {
-          session.get(lastRequestTimestamp) shouldBe Some(timestamp)
+          outputSession.get(lastRequestTimestamp) shouldBe Some(fixedPointInTheDistantPast)
         }
 
         "preserve the session's auth token" in new Setup {
-          session.get(authToken) shouldBe Some(token)
+          outputSession.get(authToken) shouldBe Some(token)
         }
       }
 
       "making a POST request to the login page" should {
-        implicit lazy val request = FakeRequest(POST, whitelistedUrl).withSession(session: _*).withFormUrlEncodedBody(postBody: _*)
+        implicit lazy val request = addCSRFToken(FakeRequest(POST, whitelistedUrl).withSession(session: _*).withFormUrlEncodedBody(postBody: _*))
 
-//        "ignore the session timeout" in new Setup {
-//          session.get(lastRequestTimestamp) shouldBe Some(timestamp)
-//        }
+        "ignore the session timeout" in new Setup {
+          outputSession.get(lastRequestTimestamp) shouldBe Some(fixedPointInTheDistantPast)
+        }
 
-//        "preserve the session's auth token" in new Setup {
-//          session.get(authToken) shouldBe Some(token)
-//        }
+        "preserve the session's auth token" in new Setup {
+          outputSession.get(authToken) shouldBe Some(token)
+        }
       }
 
       "making a request to a url not in the whitelist" should {
-        implicit lazy val request = FakeRequest(GET, notWhitelistedUrl).withSession(session: _*)
+        import play.api.http.HeaderNames.HOST
+        implicit lazy val request = addCSRFToken(FakeRequest(GET, notWhitelistedUrl).withSession(session: _*).withHeaders(HOST -> "localhost", AUTHORIZATION -> authToken))
 
-//        "update the session timeout" in new Setup {
-//          session.get(lastRequestTimestamp) shouldBe Some(now.getMillis.toString)
-//        }
-//
-//        "wipe the session's auth token" in new Setup {
-//          session.get(authToken) shouldBe None
-//        }
+        println(s"request headers: ${request.headers}")
+
+        "update the session timeout" in new Setup {
+          outputSession.get(lastRequestTimestamp) should not be Some(fixedPointInTheDistantPast)
+
+          outputSession.get(lastRequestTimestamp) shouldBe Some(fixedTime.getMillis.toString)
+        }
+
+        "wipe the session's auth token" in new Setup {
+          outputSession.get(authToken) shouldBe None
+        }
       }
     }
   }

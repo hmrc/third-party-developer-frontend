@@ -29,11 +29,16 @@ case class WhitelistedCall(uri: String, method: String)
 class SessionTimeoutFilterWithWhitelist @Inject()(config: SessionTimeoutFilterConfig)(implicit ec: ExecutionContext, override val mat: Materializer)
   extends SessionTimeoutFilter(config) {
 
-  val loginUrl = controllers.routes.UserLoginAccount.login().url
+  val loginUrl = "/developer/login" //controllers.routes.UserLoginAccount.login().url
   val whitelistedCalls: Set[WhitelistedCall] = Set(WhitelistedCall(loginUrl, "GET"), WhitelistedCall(loginUrl, "POST"))
 
   override def apply(f: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
+    println("in SessionTimeoutFilterWithWhitelist.apply - Checking whitelist")
     if (whitelistedCalls.contains(WhitelistedCall(rh.path, rh.method))) f(rh)
-    else super.apply(f)(rh)
+    else {
+      println("in SessionTimeoutFilterWithWhitelist.apply - Delegate")
+      println(s"CLOCK : ${super.clock().getMillis.toString}")
+      super.apply(f)(rh)
+    }
   }
 }
