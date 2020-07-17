@@ -30,15 +30,15 @@ import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Headers
+import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
+import play.filters.csrf.CSRF
 import uk.gov.hmrc.play.test.UnitSpec
-import play.api.test.CSRFTokenHelper._
-import play.filters.csrf.{AddCSRFTokenAction, CSRF}
 
 class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with MockitoSugar {
-  private val config = Configuration("play.filters.csrf.token.sign" -> false)
+  private val config = Configuration( "play.filters.csrf.token.sign" -> false)
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
@@ -71,6 +71,8 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
     val userPassword = "password1!"
     val headers = Headers(AUTHORIZATION -> "AUTH_TOKEN")
     val loginRequest = FakeRequest(POST, "/developer/login").withHeaders(headers)
+    val loginRequestWithCSRF = new FakeRequest(addCSRFToken(FakeRequest(POST, "/developer/login").withHeaders(headers)))
+    val csrftoken = CSRF.getToken(loginRequestWithCSRF)
   }
 
   "CSRF handling for login" when {
@@ -130,8 +132,8 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
         setupThirdPartyApplicationSearchApplicationByEmailStub()
 
-        private val request = addCSRFToken(loginRequest
-          .withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword))
+        private val request = loginRequestWithCSRF.withFormUrlEncodedBody(
+          "emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
         private val result = await(route(app, request)).get
 
@@ -158,8 +160,8 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
         setupThirdPartyApplicationSearchApplicationByEmailStub()
 
-        private val request = addCSRFToken(loginRequest
-          .withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> ))
+        private val request = loginRequestWithCSRF.withFormUrlEncodedBody(
+          "emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
         private val result = await(route(app, request)).get
 
