@@ -49,26 +49,26 @@ object FeatureSuite {
   @AfterClass
   def afterCukesRun() {
     Env.shutdown()
-  //   reporting()
+//     reporting()
   }
-  // def reporting() {
-  //   Runtime.getRuntime().addShutdownHook(new Thread() {
-  //     @Override
-  //     override def run() {
-  //       val cucumberDetail = new CucumberDetailedResults()
-  //       cucumberDetail.setOutputDirectory("target/")
-  //       cucumberDetail.setOutputName("cucumber-results/cucumber-non-sandbox-results")
-  //       cucumberDetail.setSourceFile("target/component-reports/cucumber.json")
-  //       cucumberDetail.execute(true, Array[String]("PDF"))
-  //       val resultsOverview = new CucumberResultsOverview()
-  //       resultsOverview.setOutputDirectory("target/")
-  //       resultsOverview.setOutputName("cucumber-results/cucumber-non-sandbox-results")
-  //       resultsOverview.setSourceFile("target/component-reports/cucumber.json")
-  //       resultsOverview.execute()
-  //       reportingNetMasterThought()
-  //     }
-  //   })
-  // }
+//   def reporting() {
+//     Runtime.getRuntime().addShutdownHook(new Thread() {
+//       @Override
+//       override def run() {
+//         val cucumberDetail = new CucumberDetailedResults()
+//         cucumberDetail.setOutputDirectory("target/")
+//         cucumberDetail.setOutputName("cucumber-results/cucumber-non-sandbox-results")
+//         cucumberDetail.setSourceFile("target/component-reports/cucumber.json")
+//         cucumberDetail.execute(true, Array[String]("PDF"))
+//         val resultsOverview = new CucumberResultsOverview()
+//         resultsOverview.setOutputDirectory("target/")
+//         resultsOverview.setOutputName("cucumber-results/cucumber-non-sandbox-results")
+//         resultsOverview.setSourceFile("target/component-reports/cucumber.json")
+//         resultsOverview.execute()
+//         reportingNetMasterThought()
+//       }
+//     })
+//   }
 
   def reportingNetMasterThought() {
     val reportOutputDirectory = new File("target/cucumber-results/cucumber-non-sandbox-results")

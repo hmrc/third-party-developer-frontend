@@ -33,11 +33,8 @@ class SessionTimeoutFilterWithWhitelist @Inject()(config: SessionTimeoutFilterCo
   val whitelistedCalls: Set[WhitelistedCall] = Set(WhitelistedCall(loginUrl, "GET"), WhitelistedCall(loginUrl, "POST"))
 
   override def apply(f: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-    println("in SessionTimeoutFilterWithWhitelist.apply - Checking whitelist")
     if (whitelistedCalls.contains(WhitelistedCall(rh.path, rh.method))) f(rh)
     else {
-      println("in SessionTimeoutFilterWithWhitelist.apply - Delegate")
-      println(s"CLOCK : ${super.clock().getMillis.toString}")
       super.apply(f)(rh)
     }
   }

@@ -81,11 +81,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                 userAuthenticationResponse: UserAuthenticationResponse,
                                 playSession: PlaySession)(implicit request: Request[AnyContent]): Future[Result] = {
 
-    println("In UserLoginAccount.routeToLoginOr2SV")
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     userAuthenticationResponse.session match {
       case Some(session) if session.loggedInState.isLoggedIn => audit(LoginSucceeded, DeveloperSession.apply(session))
-        println("In UserLoginAccount.routeToLoginOr2SV - 1st case")
         successful(
           withSessionCookie(
             Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
@@ -94,7 +92,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         )
 
       case None => {
-        println("In UserLoginAccount.routeToLoginOr2SV - 2nd case")
         successful(
           Redirect(
             routes.UserLoginAccount.enterTotp(), SEE_OTHER
@@ -105,7 +102,6 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       }
 
       case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA => {
-        println("In UserLoginAccount.routeToLoginOr2SV - 3rd case")
         successful(
           withSessionCookie(
             Redirect(routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
@@ -129,19 +125,15 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         } yield response
       } recover {
         case _: InvalidEmail =>
-          println("In UserLoginAccount.authenticate case InvalidEmail")
           audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
           Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
         case _: InvalidCredentials =>
-          println("In UserLoginAccount.authenticate case InvalidCredentials")
           audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
           Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
         case _: LockedAccount =>
-          println("In UserLoginAccount.authenticate case LockedAccount")
           audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
           Locked(accountLockedView())
         case _: UnverifiedAccount =>
-          println("In UserLoginAccount.authenticate case UnverifiedAccount")
           Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
             .withSession("email" -> login.emailaddress)
       }

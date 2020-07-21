@@ -270,7 +270,6 @@ class ApplicationService @Inject() (
   }
 
   def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
-    println(s"In ApplicationService.fetchByTeamMemberEmail")
     def fetchProductionApplications = connectorWrapper.productionApplicationConnector.fetchByTeamMemberEmail(email)
 
     def fetchSandboxApplications: Future[Seq[Application]] = {
@@ -284,10 +283,7 @@ class ApplicationService @Inject() (
 
     for {
       productionApplications <- productionApplicationsFuture
-      sandboxApplications <- {
-        println(s"In ApplicationService.fetchByTeamMemberEmail - productionApplications: $productionApplications")
-        sandboxApplicationsFuture
-      }
+      sandboxApplications <- sandboxApplicationsFuture
     } yield (productionApplications ++ sandboxApplications).sorted
   }
 
