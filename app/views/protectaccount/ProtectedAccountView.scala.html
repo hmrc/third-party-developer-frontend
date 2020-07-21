@@ -20,7 +20,7 @@
 @this(devMain: DevMain)
 
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "secure-account")
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages)
 
 @devMain(
     title = "Protected account",

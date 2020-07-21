@@ -17,7 +17,7 @@
 @import controllers.checkpages.{CheckYourAnswersData,DummyCheckYourAnswersForm}
 @import domain.{DeveloperSession, SaveSubsFieldsPageMode}
 
-@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages)
+@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], messages: Messages)
 
 @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.answersPageAction(data.appId), 'class -> "form") {
   @helper.CSRF.formField

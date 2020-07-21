@@ -118,7 +118,6 @@ class ManageTeam @Inject()(val sessionService: SessionService,
   }
 
   def removeTeamMemberAction(applicationId: String) = canEditTeamMembers(applicationId) { implicit request =>
-    val application = request.application
 
     def handleValidForm(form: RemoveTeamMemberConfirmationForm) = {
       form.confirm match {

@@ -22,7 +22,7 @@
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
-@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, submitAction: Call, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, submitAction: Call, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @pageHeading = @{ "Confirm which APIs you want to use" }
 

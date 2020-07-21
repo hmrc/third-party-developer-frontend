@@ -22,7 +22,7 @@
 @this(devMain: DevMain)
 
 @(applicationId: String, app: Application)(
-        implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "credentials")
+        implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig)
 
 @pageHeading = @{s"Request received"}
 

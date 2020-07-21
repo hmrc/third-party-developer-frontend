@@ -19,7 +19,7 @@
 
 @this(devMain: DevMain)
 
-@(secret: String, qrImg: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages, navSection: String = "protect-account")
+@(secret: String, qrImg: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages)
 
 @devMain(
     title = "Set up your device",

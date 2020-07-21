@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import domain.{Application, DeveloperSession, Role, SubscriptionRedirect}
+@import domain.{Application, Role, SubscriptionRedirect}
 @import views.html.include.SubscriptionsGroup
 
 @this(subscriptionsGroup: SubscriptionsGroup)
@@ -24,7 +24,7 @@
         app: Application,
         afterUnsubscribeRedirectTo: SubscriptionRedirect,
         showSubscriptionFields: Boolean)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig)
+        implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @if(subscriptions.exampleApi.nonEmpty) {
     <h2 class="heading-large">Example API</h2>

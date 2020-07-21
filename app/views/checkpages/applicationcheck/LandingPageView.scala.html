@@ -21,7 +21,7 @@
 
 @this(devMain: DevMain)
 
-@(applicationView: ApplicationViewModel, form: Form[CheckInformationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "credentials")
+@(applicationView: ApplicationViewModel, form: Form[CheckInformationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @app = @{ applicationView.application }
 

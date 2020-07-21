@@ -24,7 +24,7 @@
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
 @(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, environment: Environment, subscriptions: Option[GroupedSubscriptions])(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
     application.deployedTo.isProduction && (

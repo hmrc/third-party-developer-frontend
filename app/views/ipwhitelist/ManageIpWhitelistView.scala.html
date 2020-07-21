@@ -22,7 +22,7 @@
 @this(devMain: DevMain)
 
 @(app: Application, roleOfLoggedIn: Role)(
-implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-ip-whitelist")
+implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
     title = "Manage whitelisted IPs",
