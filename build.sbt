@@ -121,27 +121,27 @@ lazy val microservice = Project(appName, file("."))
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
   .settings(
-    unmanagedSourceDirectories in Test := (baseDirectory in Test) (base => Seq(base / "test", base / "test-utils")).value,
-    testOptions in Test := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
+    Test / unmanagedSourceDirectories := (baseDirectory in Test) (base => Seq(base / "test", base / "test-utils")).value,
+    Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
-    testOptions in IntegrationTest := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it", base / "test-utils")).value,
-    unmanagedResourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
-    parallelExecution in IntegrationTest := false
+    IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    IntegrationTest / unmanagedSourceDirectories := (baseDirectory in IntegrationTest) (base => Seq(base / "it", base / "test-utils")).value,
+    IntegrationTest / unmanagedResourceDirectories := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
+    IntegrationTest / parallelExecution := false
   )
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
-    testOptions in ComponentTest := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "component", base / "test-utils")).value,
-    unmanagedResourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
-    unmanagedResourceDirectories in ComponentTest += baseDirectory(_ / "target/web/public/test").value,
-    testOptions in ComponentTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
-    testGrouping in ComponentTest := oneForkedJvmPerTest((definedTests in ComponentTest).value),
-    parallelExecution in ComponentTest := false
+    ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    ComponentTest / unmanagedSourceDirectories := (baseDirectory in ComponentTest) (base => Seq(base / "component", base / "test-utils")).value,
+    ComponentTest / unmanagedResourceDirectories := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
+    ComponentTest / unmanagedResourceDirectories += baseDirectory(_ / "target/web/public/test").value,
+    ComponentTest / testOptions += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
+    ComponentTest / testGrouping := oneForkedJvmPerTest((definedTests in ComponentTest).value),
+    ComponentTest / parallelExecution := false
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
