@@ -24,19 +24,18 @@ import java.util.Calendar
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-import stubs.AuditStub
 import io.cucumber.scala.{EN, ScalaDsl, Scenario}
-import io.cucumber.datatable.DataTable
 import org.apache.commons.io.FileUtils
+import org.openqa.selenium.{Dimension, OutputType, TakesScreenshot, WebDriver}
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxProfile}
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
-import org.openqa.selenium.{Dimension, OutputType, TakesScreenshot, WebDriver}
 import org.scalatest.Matchers
+import play.api.{Logger, Mode}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
-import play.api.{Logger, Mode}
 import play.core.server.ServerConfig
+import stubs.AuditStub
 import utils.BrowserStackCaps
 
 import scala.util.{Properties, Try}

@@ -16,14 +16,11 @@
 
 package js
 
-import java.io._
-
-import steps.Env
-import org.junit.runner.RunWith
-import org.junit.{AfterClass, BeforeClass}
-
 import io.cucumber.junit.{Cucumber, CucumberOptions}
 import io.cucumber.junit.CucumberOptions.SnippetType.CAMELCASE
+import org.junit.{AfterClass, BeforeClass}
+import org.junit.runner.RunWith
+import steps.Env
 
 @RunWith(classOf[Cucumber])
   @CucumberOptions(
@@ -31,7 +28,6 @@ import io.cucumber.junit.CucumberOptions.SnippetType.CAMELCASE
     glue = Array("steps"),
     dryRun= false,
     snippets= CAMELCASE,
-    strict = true,
     plugin = Array("pretty",
       "html:target/component-reports/cucumber",
       "json:target/component-reports/cucumber.json"
@@ -41,52 +37,9 @@ import io.cucumber.junit.CucumberOptions.SnippetType.CAMELCASE
 class FeatureSuite
 
 object FeatureSuite {
-  import scala.collection.JavaConverters._
-
   @BeforeClass
   def beforeCukesRun() = Env.startServer()
 
   @AfterClass
-  def afterCukesRun() {
-    Env.shutdown()
-//     reporting()
-  }
-//   def reporting() {
-//     Runtime.getRuntime().addShutdownHook(new Thread() {
-//       @Override
-//       override def run() {
-//         val cucumberDetail = new CucumberDetailedResults()
-//         cucumberDetail.setOutputDirectory("target/")
-//         cucumberDetail.setOutputName("cucumber-results/cucumber-non-sandbox-results")
-//         cucumberDetail.setSourceFile("target/component-reports/cucumber.json")
-//         cucumberDetail.execute(true, Array[String]("PDF"))
-//         val resultsOverview = new CucumberResultsOverview()
-//         resultsOverview.setOutputDirectory("target/")
-//         resultsOverview.setOutputName("cucumber-results/cucumber-non-sandbox-results")
-//         resultsOverview.setSourceFile("target/component-reports/cucumber.json")
-//         resultsOverview.execute()
-//         reportingNetMasterThought()
-//       }
-//     })
-//   }
-
-  def reportingNetMasterThought() {
-    val reportOutputDirectory = new File("target/cucumber-results/cucumber-non-sandbox-results")
-//    val jenkinsBasePath : String= ""
-    val buildNumber : String = "1"
-    val projectName :String= "Third-party-developer-frontend"
-//    val skippedFails = true
-//    val pendingFails = false
-//    val undefinedFails = true
-//    val missingFails = true
-//    val runWithJenkins = false
-//    val parallelTesting = false
-    val jsonReportList = List("target/component-reports/cucumber.json")
-    val configuration = new net.masterthought.cucumber.Configuration(reportOutputDirectory, projectName)
-    // TODO: Check these are defaulted to false
-//    configuration.setParallelTesting(parallelTesting)
-//    configuration.setRunWithJenkins(runWithJenkins)
-    configuration.setBuildNumber(buildNumber)
-    new net.masterthought.cucumber.ReportBuilder(jsonReportList.asJava, configuration).generateReports()
-  }
+  def afterCukesRun() = Env.shutdown()
 }

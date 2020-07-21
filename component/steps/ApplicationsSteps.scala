@@ -18,32 +18,27 @@ package steps
 
 import java.util.UUID.randomUUID
 
-import matchers.CustomMatchers
-import pages._
-import stubs.ApplicationStub.configureUserApplications
-import stubs._
-import io.cucumber.datatable.DataTable
-import io.cucumber.scala.Implicits._
-import io.cucumber.scala.{EN, ScalaDsl}
-import domain.Environment.PRODUCTION
 import domain._
+import domain.Environment.PRODUCTION
+import io.cucumber.datatable.DataTable
+import io.cucumber.scala.{EN, ScalaDsl}
+import io.cucumber.scala.Implicits._
+import matchers.CustomMatchers
 import org.openqa.selenium.By
 import org.scalatest.Matchers
+import pages._
 import play.api.http.Status._
 import play.api.libs.json.Json
+import stubs._
+import stubs.ApplicationStub.configureUserApplications
 import uk.gov.hmrc.time.DateTimeUtils
 
-import scala.collection.JavaConverters._
-
-
 object AppWorld {
-
   var userApplicationsOnBackend: List[Application] = Nil
   var tokens: Map[String, ApplicationToken] = Map.empty
 }
 
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar {
-
   implicit val webDriver = Env.driver
 
   val applicationId = "applicationId"

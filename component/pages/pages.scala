@@ -16,11 +16,9 @@
 
 package pages
 
-import steps.{Env, Form}
 import org.openqa.selenium.By
 import play.api.Logger
-
-import scala.collection.mutable
+import steps.{Env, Form}
 
 trait FormPage extends WebPage {
   val pageHeading: String

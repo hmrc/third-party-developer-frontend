@@ -19,17 +19,17 @@ package steps
 import java.net.URLEncoder
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import matchers.CustomMatchers
-import pages._
-import stubs.{DeveloperStub, Stubs}
-import io.cucumber.scala.Implicits._
+import domain._
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
-import domain._
+import io.cucumber.scala.Implicits._
+import matchers.CustomMatchers
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
+import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
+import stubs.{DeveloperStub, Stubs}
 
 case class MfaSecret(secret: String)
 
@@ -38,14 +38,13 @@ object MfaSecret {
 }
 
 object TestContext {
-  var developer: Developer = null
+  var developer: Developer = _
 
   var sessionIdForLoggedInUser: String = ""
   var sessionIdForMfaMandatingUser: String = ""
 }
 
 class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers {
-
   implicit val webDriver: WebDriver = Env.driver
 
   private val accessCode = "123456"
@@ -175,7 +174,6 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
 
   def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
-
     val sessionId = "sessionId_" + loggedInState.toString
 
     val session = Session(sessionId, developer, loggedInState)

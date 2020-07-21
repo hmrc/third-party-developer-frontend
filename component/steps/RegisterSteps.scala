@@ -16,20 +16,19 @@
 
 package steps
 
-import matchers.CustomMatchers
-import pages._
-import stubs.DeveloperStub
+import domain.Registration
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
-import domain.Registration
-import org.openqa.selenium.interactions.Actions
+import matchers.CustomMatchers
 import org.openqa.selenium.{By, WebDriver}
+import org.openqa.selenium.interactions.Actions
 import org.scalatest.Matchers
-import org.scalatest.selenium.WebBrowser
+import org.scalatestplus.selenium.WebBrowser
+import pages._
 import play.api.http.Status
+import stubs.DeveloperStub
 
 object Form extends WebBrowser {
-
   def populate(a: Map[String, String])(implicit driver: WebDriver) = a.foreach {
     case (field, value) if field.toLowerCase.contains("password") =>
       val f = field.replaceAll(" ", "")

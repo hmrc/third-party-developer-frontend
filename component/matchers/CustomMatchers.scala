@@ -21,9 +21,7 @@ import org.scalatest.matchers.{MatchResult, Matcher}
 object CustomMatchers extends CustomMatchers
 
 trait CustomMatchers {
-
   class ContainsAllTextsInOrderMatcher(toFind: List[String]) extends Matcher[String] {
-
     def apply(left: String) = containsAllTextsInOrder(left, toFind)
   }
 
@@ -40,5 +38,4 @@ trait CustomMatchers {
     case x :: xs if text.contains(x)  => containsAllTextsInOrder(text.substring(text.indexOf(x) + x.length), xs)
     case x :: _ => MatchResult(matches = false, s"Could not find '$x' in:\n$text", "Found text")
   }
-
 }

@@ -66,8 +66,6 @@ lazy val test = Seq(
   //[warn] circular dependency found: batik#batik-script;1.6-1->batik#batik-bridge;1.6-1->...
   // "batik" % "batik-script" % "1.6-1" % testScope exclude("batik", "batik-bridge"),
   // "com.github.mkolisnyk" % "cucumber-runner" % "1.3.5" % testScope exclude("batik", "batik-script"),
-  "net.masterthought" % "cucumber-reporting" % "5.3.0" % testScope,
-  "net.masterthought" % "cucumber-sandwich" % "5.3.0" % testScope,
   "com.assertthat" % "selenium-shutterbug" % "0.2" % testScope
 )
 

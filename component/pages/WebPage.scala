@@ -16,12 +16,10 @@
 
 package pages
 
-
-import steps.Env
 import org.openqa.selenium.WebDriver
 import org.scalatest._
-import org.scalatest.selenium.{Page, WebBrowser}
-
+import org.scalatestplus.selenium.{Page, WebBrowser}
+import steps.Env
 
 case class Link(href: String, text: String)
 
@@ -32,11 +30,9 @@ trait WebLink extends Page with WebBrowser with Matchers {
 }
 
 trait WebPage extends WebLink {
-
   def isCurrentPage: Boolean
 
   def heading = tagName("h1").element.text
 
   def bodyText = tagName("body").element.text
-
 }

@@ -16,14 +16,15 @@
 
 package steps
 
-import matchers.CustomMatchers
-import pages._
 import io.cucumber.datatable.DataTable
-import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
-import org.openqa.selenium.interactions.Actions
+import io.cucumber.scala.Implicits._
+import matchers.CustomMatchers
 import org.openqa.selenium.{By, WebDriver, WebElement}
+import org.openqa.selenium.interactions.Actions
 import org.scalatest.Matchers
+import pages._
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -42,7 +43,6 @@ object TableMisuseAdapters {
 }
 
 class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers {
-
   implicit val webDriver: WebDriver = Env.driver
 
   val pages: Map[String, WebPage] = Map(
