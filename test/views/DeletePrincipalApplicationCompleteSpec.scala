@@ -42,7 +42,7 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
 
-      val page = deletePrincipalApplicationCompleteView.render(application, request, loggedInUser, messagesProvider, appConfig, "details")
+      val page = deletePrincipalApplicationCompleteView.render(application, request, loggedInUser, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

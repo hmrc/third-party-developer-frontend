@@ -43,7 +43,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
     "render with no errors" in {
 
       val page = deletePrincipalApplicationConfirmView.render(
-        application, DeletePrincipalApplicationForm.form, request, loggedInUser, messagesProvider, appConfig, "details")
+        application, DeletePrincipalApplicationForm.form, request, loggedInUser, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -57,7 +57,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
 
       val formWithErrors = DeletePrincipalApplicationForm.form.withError("confirmation", "Confirmation error message")
 
-      val page = deletePrincipalApplicationConfirmView.render(application, formWithErrors, request, loggedInUser, messagesProvider, appConfig, "details")
+      val page = deletePrincipalApplicationConfirmView.render(application, formWithErrors, request, loggedInUser, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

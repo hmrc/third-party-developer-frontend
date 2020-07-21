@@ -32,7 +32,7 @@ class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {
     val request = FakeRequest().withCSRFToken
 
     "render with no errors when the form is valid" in {
-      val page = registrationView.render(RegistrationForm.form, flash, request, messagesProvider, appConfig)
+      val page = registrationView.render(RegistrationForm.form, request, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -49,7 +49,7 @@ class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {
         .withError("confirmpassword", "Confirm password error message")
         .withError("organisation", "Organisation error message")
 
-      val page = registrationView.render(formWithErrors, flash, request, messagesProvider, appConfig)
+      val page = registrationView.render(formWithErrors, request, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

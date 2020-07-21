@@ -43,7 +43,7 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
 
-      val page = deleteSubordinateApplicationCompleteView.render(application, request, loggedInUser, messagesProvider, appConfig, "details")
+      val page = deleteSubordinateApplicationCompleteView.render(application, request, loggedInUser, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

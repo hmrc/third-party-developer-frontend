@@ -38,7 +38,7 @@ class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      addApplicationNameView.render(form, subordinateEnvironment, request, loggedInUser, messagesProvider, appConfig, "nav-section")
+      addApplicationNameView.render(form, subordinateEnvironment, request, loggedInUser, messagesProvider, appConfig)
     }
 
     "show an error when application name is invalid" in {
@@ -52,7 +52,7 @@ class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      addApplicationNameView.render(form, principalEnvironment, request, loggedInUser, messagesProvider, appConfig, "nav-section")
+      addApplicationNameView.render(form, principalEnvironment, request, loggedInUser, messagesProvider, appConfig)
     }
 
     "show an error when application name is invalid" in {

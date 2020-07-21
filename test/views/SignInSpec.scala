@@ -35,7 +35,7 @@ class SignInSpec extends CommonViewSpec with WithCSRFAddToken {
   "Sign in page" should {
     def renderPage(form: Form[LoginForm] = LoginForm.form) = {
       val request = FakeRequest().withCSRFToken
-      signInView.render("heading", form, endOfJourney = true, request, Flash(), messagesProvider, appConfig)
+      signInView.render("heading", form, endOfJourney = true, request, messagesProvider, appConfig)
     }
 
     "show an error when email address is invalid" in {

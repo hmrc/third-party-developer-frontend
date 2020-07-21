@@ -46,7 +46,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
       "on Production" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(prodApp, ADMINISTRATOR, request, loggedInUser, messagesProvider, appConfig, "details")
+        val page = deleteApplicationView.render(prodApp, ADMINISTRATOR, request, loggedInUser, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -58,7 +58,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
       "on Sandbox" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(sandboxApp, ADMINISTRATOR, request, loggedInUser, messagesProvider, appConfig, "details")
+        val page = deleteApplicationView.render(sandboxApp, ADMINISTRATOR, request, loggedInUser, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -72,7 +72,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
         Seq(prodApp, sandboxApp) foreach { application =>
           val request = FakeRequest().withCSRFToken
 
-          val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInUser, messagesProvider, appConfig, "details")
+          val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInUser, messagesProvider, appConfig)
 
           page.contentType should include("text/html")
           val document = Jsoup.parse(page.body)
@@ -90,7 +90,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
           .foreach { application =>
             val request = FakeRequest().withCSRFToken
 
-            val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInUser, messagesProvider, appConfig, "details")
+            val page = deleteApplicationView.render(application, DEVELOPER, request, loggedInUser, messagesProvider, appConfig)
 
             page.contentType should include("text/html")
             val document = Jsoup.parse(page.body)

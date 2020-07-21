@@ -41,7 +41,7 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
 
     "show link and text to confirm deletion" in {
 
-      val page = deleteSubordinateApplicationConfirmView.render(application, request, loggedInUser, messagesProvider, appConfig, "details")
+      val page = deleteSubordinateApplicationConfirmView.render(application, request, loggedInUser, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

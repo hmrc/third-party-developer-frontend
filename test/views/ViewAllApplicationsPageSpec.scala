@@ -20,7 +20,6 @@ import controllers.ApplicationSummary
 import domain._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
@@ -44,7 +43,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
-      manageApplicationsView.render(appSummaries, request, Flash(), loggedIn, messagesProvider, appConfig, "nav-section")
+      manageApplicationsView.render(appSummaries, request, loggedIn, messagesProvider, appConfig, "nav-section")
     }
 
     "show the applications page if there is more than 0 sandbox applications" in {
@@ -144,7 +143,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
 
-      addApplicationSubordinateEmptyNestView.render(request, Flash(), loggedIn, messagesProvider, appConfig, "nav-section")
+      addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section")
     }
 
     "show the empty nest page when there are no applications" in {
