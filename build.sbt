@@ -145,7 +145,7 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
-  .settings(logLevel := Level.Error)
+//  .settings(logLevel := Level.Error)
   .settings(
     inConfig(IntegrationTest)(BloopDefaults.configSettings),
     inConfig(TemplateTest)(BloopDefaults.configSettings),

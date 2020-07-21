@@ -77,7 +77,6 @@ class ManageSubscriptions @Inject() (val sessionService: SessionService,
 
   def listApiSubscriptions(applicationId: String): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
-      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
       val details = definitionsRequest
@@ -90,7 +89,6 @@ class ManageSubscriptions @Inject() (val sessionService: SessionService,
 
   def editApiMetadataPage(applicationId: String, context: String, version: String, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
     subFieldsDefinitionsExistActionByApi(applicationId, context, version) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
-      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
       val role = definitionsRequest.applicationRequest.role
@@ -105,10 +103,9 @@ class ManageSubscriptions @Inject() (val sessionService: SessionService,
   def saveSubscriptionFields(applicationId: String,
                              apiContext: String,
                              apiVersion: String,
-                             mode: SaveSubsFieldsPageMode) : Action[AnyContent] = 
+                             mode: SaveSubsFieldsPageMode) : Action[AnyContent] =
       subFieldsDefinitionsExistActionByApi(applicationId, apiContext, apiVersion) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
  
-    implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
     implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
     import SaveSubsFieldsPageMode._
@@ -155,7 +152,6 @@ class ManageSubscriptions @Inject() (val sessionService: SessionService,
 
       definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] => {
 
-        implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
         implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
         val details = definitionsRequest
@@ -169,7 +165,6 @@ class ManageSubscriptions @Inject() (val sessionService: SessionService,
 
   def subscriptionConfigurationPage(applicationId: String, pageNumber: Int) : Action[AnyContent] =
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
-      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
@@ -215,7 +210,6 @@ class ManageSubscriptions @Inject() (val sessionService: SessionService,
     }
 
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
-      implicit val rq: Request[AnyContent] = definitionsRequest.applicationRequest.request
 
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
