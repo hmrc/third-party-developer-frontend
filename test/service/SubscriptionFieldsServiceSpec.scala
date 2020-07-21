@@ -129,7 +129,6 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
       val definition1 = buildSubscriptionFieldValue("field1", accessRequirements = access).definition
       val definition2 = buildSubscriptionFieldValue("field2", accessRequirements = access).definition
 
-      val value1 = SubscriptionFieldValue(definition1, "oldValue1")
       val value2 = SubscriptionFieldValue(definition2, "oldValue2")
 
       val oldValues = Seq(

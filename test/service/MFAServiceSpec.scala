@@ -57,7 +57,7 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     }
 
     "not call enable mfa when totp verification fails" in new FailedTotpVerification {
-      val result = await(service.enableMfa(email, totpCode)(HeaderCarrier()))
+      await(service.enableMfa(email, totpCode)(HeaderCarrier()))
       verify(connector, never).enableMfa(eqTo(email))(any[HeaderCarrier])
     }
 
@@ -67,7 +67,7 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     }
 
     "enable MFA totp when totp verification passes" in new SuccessfulTotpVerification {
-      val result = await(service.enableMfa(email, totpCode)(HeaderCarrier()))
+      await(service.enableMfa(email, totpCode)(HeaderCarrier()))
       verify(connector, times(1)).enableMfa(eqTo(email))(any[HeaderCarrier])
     }
 
@@ -86,7 +86,7 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     }
 
     "not call remove mfa when totp verification fails" in new FailedTotpVerification {
-      val result: MFAResponse = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
+      await(service.removeMfa(email, totpCode)(HeaderCarrier()))
       verify(connector, never).removeMfa(eqTo(email))(any[HeaderCarrier])
     }
 
@@ -97,7 +97,7 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     }
 
     "remove MFA when totp verification passes" in new SuccessfulTotpVerification {
-      val result: MFAResponse = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
+      await(service.removeMfa(email, totpCode)(HeaderCarrier()))
 
       verify(connector, times(1)).removeMfa(eqTo(email))(any[HeaderCarrier])
     }

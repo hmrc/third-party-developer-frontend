@@ -23,9 +23,9 @@ import builder._
 import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
-import domain._
 import domain.APIStatus._
 import domain.ApiSubscriptionFields._
+import domain._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -239,8 +239,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       val subscriptionFieldDefinitions = Seq(value1.definition, value2.definition)
       val subscriptionFieldsWithValue = Seq(value1, value2)
 
-      
-      private val fieldDefinitionsResponse = Seq(subscriptionFieldDefinitions)
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
 
@@ -421,8 +419,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
         private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, ""))
-
-        private val fields: Fields = fieldDefinitions.map(definition => (definition.name, "")).toMap
 
         theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
 

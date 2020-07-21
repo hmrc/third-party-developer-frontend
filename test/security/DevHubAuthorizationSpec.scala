@@ -51,11 +51,11 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
     val underTest = new TestDevHubAuthorization(mcc)
     val sessionId = "sessionId"
 
-    val loggedInAction = underTest.loggedInAction { implicit request =>
+    val loggedInAction = underTest.loggedInAction { _ =>
       Future.successful(Ok(EmptyContent()))
     }
 
-    val atLeastPartLoggedInAction = underTest.atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    val atLeastPartLoggedInAction = underTest.atLeastPartLoggedInEnablingMfaAction { _ =>
       Future.successful(Ok(EmptyContent()))
     }
 

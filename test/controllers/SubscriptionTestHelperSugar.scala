@@ -46,7 +46,6 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {    
     val sfv = buildSubscriptionFieldValue("the value")
-    val sfd = sfv.definition
 
     val context = "individual-employment-context-2"
     val version = "1.0"

@@ -16,7 +16,6 @@
 
 package views
 
-import config.ApplicationConfig
 import play.api.test.FakeRequest
 import views.helper.CommonViewSpec
 import views.html.AccountVerifiedView
@@ -26,7 +25,6 @@ class AccountVerifiedSpec extends CommonViewSpec {
   val accountVerifiedView = app.injector.instanceOf[AccountVerifiedView]
 
   "Account verified view" should {
-    implicit val mockConfig = mock[ApplicationConfig]
     implicit val request = FakeRequest()
 
     "contain a google analytics event (via the data-journey attribute)" in {

@@ -16,14 +16,12 @@
 
 package controllers
 
-import java.util.UUID.randomUUID
-
 import domain.AddTeamMemberPageMode.ManageTeamMembers
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
 import helpers.string._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify}
@@ -33,9 +31,8 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.time.DateTimeUtils
-import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
+import utils.{TestApplications, WithCSRFAddToken}
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
@@ -102,7 +99,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
   "manageTeam" should {
     "show the add team member page when logged in as an admin" in new Setup {
-      val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
       val result = await(underTest.manageTeam(appId)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
@@ -126,7 +123,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
   "addTeamMember" should {
     "show the add team member page when logged in as an admin" in new Setup {
-      val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
       val result = await(underTest.addTeamMember(appId)(loggedInRequest.withCSRFToken))
 
       status(result) shouldBe OK
@@ -267,7 +264,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     }
 
     "reject invalid email address" in new Setup {
-      val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
+      givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
       val result = await(underTest.addTeamMemberAction(appId, ManageTeamMembers)
                         (loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress")))
 
@@ -403,7 +400,4 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       }
     }
   }
-
-  private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
-
 }

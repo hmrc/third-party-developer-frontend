@@ -18,17 +18,15 @@ package views
 
 import controllers.RegistrationForm
 import org.jsoup.Jsoup
-import play.api.mvc.Flash
 import play.api.test.FakeRequest
-import utils.WithCSRFAddToken
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.RegistrationView
 
 class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {
   "Registration page" should {
     val registrationView = app.injector.instanceOf[RegistrationView]
-    val flash = mock[Flash]
     val request = FakeRequest().withCSRFToken
 
     "render with no errors when the form is valid" in {

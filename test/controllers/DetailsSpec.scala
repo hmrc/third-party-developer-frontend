@@ -285,7 +285,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         givenApplicationExists(application)
 
-        val result = application.withName(newName).callChangeDetailsAction
+        application.withName(newName).callChangeDetailsAction
 
         val updatedApplication = captureUpdatedApplication
         updatedApplication.name shouldBe application.name
@@ -314,7 +314,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val application = aSandboxApplication(adminEmail = loggedInUser.email)
         givenApplicationExists(application)
 
-        val result = application.withName(newName).callChangeDetailsAction
+        application.withName(newName).callChangeDetailsAction
 
         verify(underTest.applicationService).update(any[UpdateApplicationRequest])(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(application), any[CheckInformation])(any[HeaderCarrier])

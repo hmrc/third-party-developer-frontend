@@ -47,9 +47,9 @@ class ProxiedHttpClientSpec extends UnitSpec with ScalaFutures with MockitoSugar
     val mockRunMode: RunMode = mock[RunMode]
 
     when(mockEnvironment.mode).thenReturn(Mode.Test)
-    when(mockConfig.getString(any(), any())).thenReturn(Some(""))
-    when(mockConfig.getInt(any())).thenReturn(Some(0))
-    when(mockConfig.getBoolean("Test.proxy.proxyRequiredForThisEnvironment")).thenReturn(Some(true))
+    when(mockConfig.getString(any(), any())).thenReturn(Some(any()))
+    when(mockConfig.getOptional[Int](any())).thenReturn(Some(0))
+    when(mockConfig.getOptional[Boolean]("Test.proxy.proxyRequiredForThisEnvironment")).thenReturn(Some(true))
     when(mockWsClient.url(url)).thenReturn(mock[WSRequest])
 
     val underTest = new ProxiedHttpClient(mockConfig, mockHttpAuditing, mockWsClient, mockEnvironment, actorSystem, mockRunMode)
