@@ -28,7 +28,6 @@ import play.api.test.FakeRequest
 import play.api.mvc.AnyContentAsEmpty
 import utils.WithLoggedInSession._
 
-// TODO: Look at removing this and instead putting it in ActionBuildersSpec
 trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding {
   this: BaseControllerSpec =>
     val sessionService = mock[SessionService]
