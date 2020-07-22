@@ -54,7 +54,8 @@ class SpliceCSRFTokenSpec @Inject()(csrfConfigProvider: CSRFConfigProvider)
       call.url shouldBe "https://example.com/abcd?csrfToken=token"
     }
 
-    // TODO: Sort the ReSigned tokens/tags out
+    // TODO: Play 2.6 doesn't have knowledge of ReSigned CSRF tokens/tags
+    // Leaving this commented out in case it is needed
 //    "add a CSRF token (preferring re-signed request tag) to a call with no query params" in {
 //      implicit val rh = mock[RequestHeader]
 //      when(rh.tags).thenReturn(Map(NameRequestTag -> "csrfToken", ReSignedRequestTag -> "resigned", RequestTag -> "token"))
