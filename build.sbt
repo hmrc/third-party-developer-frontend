@@ -15,7 +15,6 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 import scala.util.Properties
-import bloop.integrations.sbt.BloopDefaults
 
 lazy val appName = "third-party-developer-frontend"
 
@@ -145,12 +144,6 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
-//  .settings(logLevel := Level.Error)
-  .settings(
-    inConfig(IntegrationTest)(BloopDefaults.configSettings),
-    inConfig(TemplateTest)(BloopDefaults.configSettings),
-    inConfig(ComponentTest)(BloopDefaults.configSettings),
-  )
 
 lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
 lazy val IntegrationTest = config("it") extend Test
@@ -164,9 +157,6 @@ lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
   publishArtifact in(Compile, packageSrc) := false
 ) ++
   publishAllArtefacts
-
-// Note that this task has to be scoped globally
-bloopAggregateSourceDependencies in Global := true
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
   tests map { test =>
