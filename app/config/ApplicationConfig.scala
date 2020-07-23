@@ -33,13 +33,13 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   val betaFeedbackUnauthenticatedUrl = "/contact/beta-feedback-unauthenticated"
   val thirdPartyDeveloperUrl = baseUrl("third-party-developer")
   val thirdPartyApplicationProductionUrl = thirdPartyApplicationUrl("third-party-application-production")
-  val thirdPartyApplicationProductionBearerToken = getConfigDefaulted("third-party-application-production.bearer-token", "")
+  val thirdPartyApplicationProductionBearerToken = getConfString("third-party-application-production.bearer-token", "")
   val thirdPartyApplicationProductionUseProxy = useProxy("third-party-application-production")
   val thirdPartyApplicationSandboxUrl = thirdPartyApplicationUrl("third-party-application-sandbox")
-  val thirdPartyApplicationSandboxBearerToken = getConfigDefaulted("third-party-application-sandbox.bearer-token", "")
+  val thirdPartyApplicationSandboxBearerToken = getConfString("third-party-application-sandbox.bearer-token", "")
   val thirdPartyApplicationSandboxUseProxy = useProxy("third-party-application-sandbox")
-  val thirdPartyApplicationProductionApiKey = getConfigDefaulted("third-party-application-production.api-key", "")
-  val thirdPartyApplicationSandboxApiKey = getConfigDefaulted("third-party-application-sandbox.api-key", "")
+  val thirdPartyApplicationProductionApiKey = getConfString("third-party-application-production.api-key", "")
+  val thirdPartyApplicationSandboxApiKey = getConfString("third-party-application-sandbox.api-key", "")
   val deskproUrl = baseUrl("hmrc-deskpro")
 
   lazy val contactPath = getConfigDefaulted(s"$env.contactPath", "")
@@ -72,13 +72,13 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
 
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl = apiSubscriptionFieldsUrl("api-subscription-fields-production")
-  val apiSubscriptionFieldsProductionBearerToken = getConfigDefaulted("api-subscription-fields-production.bearer-token", "")
-  val apiSubscriptionFieldsProductionApiKey = getConfigDefaulted("api-subscription-fields-production.api-key", "")
+  val apiSubscriptionFieldsProductionBearerToken = getConfString("api-subscription-fields-production.bearer-token", "")
+  val apiSubscriptionFieldsProductionApiKey = getConfString("api-subscription-fields-production.api-key", "")
   val apiSubscriptionFieldsProductionUseProxy = useProxy("api-subscription-fields-production")
   val apiSubscriptionFieldsSandboxUrl = apiSubscriptionFieldsUrl("api-subscription-fields-sandbox")
-  val apiSubscriptionFieldsSandboxBearerToken = getConfigDefaulted("api-subscription-fields-sandbox.bearer-token", "")
+  val apiSubscriptionFieldsSandboxBearerToken = getConfString("api-subscription-fields-sandbox.bearer-token", "")
   val apiSubscriptionFieldsSandboxUseProxy = useProxy("api-subscription-fields-sandbox")
-  val apiSubscriptionFieldsSandboxApiKey = getConfigDefaulted("api-subscription-fields-sandbox.api-key", "")
+  val apiSubscriptionFieldsSandboxApiKey = getConfString("api-subscription-fields-sandbox.api-key", "")
 
   private def buildUrl(key: String) = {
     (getConfigDefaulted(s"$env.$key.protocol", ""), getConfigDefaulted(s"$env.$key.host", "")) match {
