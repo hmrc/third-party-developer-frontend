@@ -16,26 +16,21 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.AddTeamMemberForm
 import domain._
 import helpers.string._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
+import utils.WithCSRFAddToken
 import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
+import views.helper.CommonViewSpec
+import views.html.manageTeamViews.ManageTeamView
 
-class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig = mock[ApplicationConfig]
   val appId = "1234"
   val clientId = "clientId123"
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
@@ -46,15 +41,17 @@ class ManageTeamViewSpec extends UnitSpec with OneServerPerSuite with SharedMetr
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
   "manageTeam view" should {
+    val manageTeamView = app.injector.instanceOf[ManageTeamView]
 
     def renderPage(role: Role = Role.ADMINISTRATOR, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
-      views.html.manageTeamViews.manageTeam.render(
+
+      manageTeamView.render(
         ApplicationViewModel(application, hasSubscriptionsFields = false),
         role,
         form,
         request,
-        applicationMessages,
+        messagesProvider,
         appConfig,
         "nav-section",
         loggedInUser)

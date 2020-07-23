@@ -16,29 +16,24 @@
 
 package views
 
-import config.ApplicationConfig
 import domain._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
-import views.html.credentials
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.CredentialsView
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
-class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
-    val appConfig: ApplicationConfig = mock[ApplicationConfig]
+    val credentialsView = app.injector.instanceOf[CredentialsView]
 
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
-      doc.select(elementType).exists(node => node.text.trim == elementText)
+      doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
     }
   }
 
@@ -64,7 +59,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
     val sandboxApplication = application.copy(deployedTo = Environment.SANDBOX)
 
     "display the credentials page for admins" in new Setup {
-      val page: Html = credentials.render(application, request, developer, applicationMessages, appConfig)
+      val page: Html = credentialsView.render(application, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
@@ -74,7 +69,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     "display the credentials page for non admins if the app is in sandbox" in new Setup {
       val developerApp: Application = sandboxApplication.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER)))
-      val page: Html = credentials.render(developerApp, request, developer, applicationMessages, appConfig)
+      val page: Html = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
@@ -84,7 +79,7 @@ class CredentialsSpec extends UnitSpec with OneServerPerSuite with SharedMetrics
 
     "tell the user they don't have access to credentials when the logged in user is not an admin and the app is not in sandbox" in new Setup {
       val developerApp: Application = application.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER)))
-      val page: Html = credentials.render(developerApp, request, developer, applicationMessages, appConfig)
+      val page: Html = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

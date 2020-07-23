@@ -32,12 +32,13 @@ import play.filters.csrf.CSRF.TokenProvider
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future._
+import scala.concurrent.Future.successful
 
 class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
@@ -85,6 +86,12 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val manageSubscriptionsView = app.injector.instanceOf[ManageSubscriptionsView]
+    val addAppSubscriptionsView = app.injector.instanceOf[AddAppSubscriptionsView]
+    val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
+    val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
+    val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
+
     val underTest = new Subscriptions(
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
@@ -93,8 +100,13 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       applicationServiceMock,
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      manageSubscriptionsView,
+      addAppSubscriptionsView,
+      changeSubscriptionConfirmationView,
+      unsubscribeRequestSubmittedView,
+      subscribeRequestSubmittedView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -104,7 +116,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
     givenApplicationHasNoSubs(activeApplication)
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }

@@ -1,0 +1,65 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import model.Crumb
+@import uk.gov.hmrc.urls.Link
+@import controllers.ChangeRedirectForm
+@import model.ApplicationViewModel
+
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
+
+@(applicationViewModel: ApplicationViewModel, form: Form[ChangeRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+
+@application = @{applicationViewModel.application}
+
+@devMain(
+    title = "Change a redirect URI",
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb("Change a redirect URI"),
+        Crumb.application(application),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
+    developerSession = Some(loggedIn)
+) {
+    @errorSummary(form)
+
+    <h1 class="heading-xlarge">Change a redirect URI</h1>
+
+    @appEnvironment(application)
+    <br>
+
+    @helper.form(action = controllers.routes.Redirects.changeRedirectAction(application.id), 'class -> "form") {
+        @helper.CSRF.formField
+        <div class="form-group @if(form.errors("newRedirectUri").nonEmpty) {form-group-error}">
+            <label class="form-label-bold" for="newRedirectUri">Redirect URI</label>
+            <span class="form-hint">Must be a valid @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/reference-guide#redirect-uris", value = Some("redirect URI")).toHtml. </span>
+            @fieldError(form.errors, "newRedirectUri")
+            <input class="form-control @if(form.errors("newRedirectUri").nonEmpty) {form-control-error}" type="text" id="newRedirectUri" name="newRedirectUri" value="@form.data.get("newRedirectUri")">
+            <input id="originalRedirectUri" name="originalRedirectUri" class="form-control" hidden aria-hidden="true" type="text" value="@form.data.get("originalRedirectUri")">
+        </div>
+
+        <div class="form-group">
+            <button id="add" class="button" type="submit">Continue</button>
+            <a href="@routes.Redirects.redirects(application.id)" class="secondary-button">Cancel</a>
+        </div>
+    }
+}

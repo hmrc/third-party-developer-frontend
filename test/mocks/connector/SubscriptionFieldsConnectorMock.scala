@@ -16,21 +16,14 @@
 
 package mocks.connector
 
-import domain._
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
-import service.ApplicationService
-import uk.gov.hmrc.http.HeaderCarrier
-import org.mockito.BDDMockito.given
-
-import java.util.UUID
-import java.util.UUID.randomUUID
-
-import scala.concurrent.Future.{failed, successful}
 import connectors.AbstractSubscriptionFieldsConnector
-import scala.concurrent.Future
 import domain.ApiSubscriptionFields.SubscriptionFieldValue
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.BDDMockito.given
+import org.scalatestplus.mockito.MockitoSugar
+import uk.gov.hmrc.http.HeaderCarrier
+
+import scala.concurrent.Future
 
 trait SubscriptionFieldsConnectorMock extends MockitoSugar {
   val mockSubscriptionFieldsConnector = mock[AbstractSubscriptionFieldsConnector]

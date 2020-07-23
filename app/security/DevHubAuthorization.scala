@@ -20,30 +20,26 @@ import java.security.MessageDigest
 
 import cats.implicits._
 import config.ApplicationConfig
-import controllers.{routes, HeaderCarrierConversion, MaybeUserRequest, UserRequest}
+import controllers.{routes, BaseController, MaybeUserRequest, UserRequest}
 import domain.{DeveloperSession, LoggedInState}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
+import play.api.mvc.{Action, AnyContent, Cookie, DiscardingCookie, MessagesRequest, Request, RequestHeader, Result, Results}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.FrontendHeaderCarrierProvider
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait DevHubAuthorization extends Results with HeaderCarrierConversion with CookieEncoding {
+trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider with CookieEncoding {
+  self: BaseController =>
+
   private val alwaysTrueFilter: DeveloperSession => Boolean = _ => true
   private val onlyTrueIfLoggedInFilter: DeveloperSession => Boolean = _.loggedInState == LoggedInState.LOGGED_IN
 
   implicit val appConfig: ApplicationConfig
 
   val sessionService: SessionService
-
-  private[security] val cookieName = "PLAY2AUTH_SESS_ID"
-  private[security] val cookieSecureOption: Boolean = appConfig.securedCookie
-  private[security] val cookieHttpOnlyOption: Boolean = true
-  private[security] val cookieDomainOption: Option[String] = None
-  private[security] val cookiePathOption: String = "/"
-  private[security] val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
 
   implicit def loggedIn(implicit req: UserRequest[_]): DeveloperSession = {
     req.developerSession
@@ -63,7 +59,7 @@ trait DevHubAuthorization extends Results with HeaderCarrierConversion with Cook
 
     val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
 
-    implicit request: Request[AnyContent] =>
+    implicit request: MessagesRequest[AnyContent] =>
       loadSession.flatMap(maybeSession => {
         maybeSession
           .filter(filter)
@@ -73,7 +69,7 @@ trait DevHubAuthorization extends Results with HeaderCarrierConversion with Cook
 
   def maybeAtLeastPartLoggedInEnablingMfa(body: MaybeUserRequest[AnyContent] => Future[Result])
                                          (implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
-    implicit request: Request[AnyContent] =>
+    implicit request: MessagesRequest[AnyContent] =>
       loadSession.flatMap(
         maybeDeveloperSession => body(MaybeUserRequest(maybeDeveloperSession, request))
       )
@@ -92,24 +88,13 @@ trait DevHubAuthorization extends Results with HeaderCarrierConversion with Cook
       .fetch(sessionId)
       .map(maybeSession => maybeSession.map(DeveloperSession(_)))
   }
-
-  def createCookie(sessionId: String): Cookie = {
-    Cookie(
-      cookieName,
-      encodeCookie(sessionId),
-      cookieMaxAge,
-      cookiePathOption,
-      cookieDomainOption,
-      cookieSecureOption,
-      cookieHttpOnlyOption
-    )
-  }
 }
 
 trait ExtendedDevHubAuthorization extends DevHubAuthorization {
-  def loggedOutAction(body: Request[AnyContent] => Future[Result])
+  self: BaseController =>
+  def loggedOutAction(body: MessagesRequest[AnyContent] => Future[Result])
                    (implicit ec: ExecutionContext) : Action[AnyContent] = Action.async {
-  implicit request: Request[AnyContent] =>
+  implicit request: MessagesRequest[AnyContent] =>
     loadSession.flatMap{
       case Some(developerSession) if developerSession.loggedInState.isLoggedIn => loginSucceeded(request)
       case _ => body(request)
@@ -144,8 +129,28 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
 }
 
 trait CookieEncoding {
+  implicit val appConfig: ApplicationConfig
+
+  private[security] lazy val cookieName = "PLAY2AUTH_SESS_ID"
+  private[security] lazy val cookieSecureOption: Boolean = appConfig.securedCookie
+  private[security] lazy val cookieHttpOnlyOption: Boolean = true
+  private[security] lazy val cookieDomainOption: Option[String] = None
+  private[security] lazy val cookiePathOption: String = "/"
+  private[security] lazy val cookieMaxAge = appConfig.sessionTimeoutInSeconds.some
 
   val cookieSigner : CookieSigner
+
+  def createCookie(sessionId: String): Cookie = {
+    Cookie(
+      cookieName,
+      encodeCookie(sessionId),
+      cookieMaxAge,
+      cookiePathOption,
+      cookieDomainOption,
+      cookieSecureOption,
+      cookieHttpOnlyOption
+    )
+  }
 
   def encodeCookie(token : String) : String = {
     cookieSigner.sign(token) + token

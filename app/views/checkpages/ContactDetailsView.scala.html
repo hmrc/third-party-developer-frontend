@@ -1,0 +1,102 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain._
+@import include._
+@import controllers.checkpages.ContactForm
+
+@this(devMain: DevMain)
+
+@(app: Application,form: Form[ContactForm], action: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
+@pageHeading = @{ "Who to contact about your application" }
+
+@devMain(
+    title = titleError + pageHeading,
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
+) {
+
+    @errorSummary(form)
+
+    <heading>
+        <h1 class="heading-xlarge">@pageHeading</h1>
+    </heading>
+
+    @helper.form(action = action, 'class -> "form") {
+        @helper.CSRF.formField
+        <p>This should be the person in your organisation who can answer questions about how your software is built.</p>
+        <fieldset>
+        <div class="form-group">
+            <div class="multiple-choice">
+                <input id="useregistered" type="checkbox" name="useregistered" value="useregistered" onchange="checkboxChange()">
+                <label class="block-label selection-button-checkbox" for="useregistered">Use my details</label>
+            </div>
+        </div>
+        <div class="form-group @if(form.errors("fullname").nonEmpty){form-group-error}">
+            <label class="form-label-bold" for="fullname" id="fullname-label">Full name</label>
+            @fieldError(form.errors, "fullname", true)
+            <input type="text"
+                   id="fullname"
+                   name="fullname"
+                   value="@form.data.getOrElse("fullname", "")"
+                   class="form-control @if(form.errors("fullname").nonEmpty){form-control-error}"
+                   aria-labelledby="fullname-label"
+                   aria-required="true"/>
+        </div>
+        <div class="form-group @if(form.errors("email").nonEmpty){form-group-error}">
+            <label class="form-label-bold" for="email" id="email-label">Email address</label>
+            @fieldError(form.errors, "email", true)
+            <input type="text"
+                   id="email"
+                   name="email"
+                   value="@form.data.getOrElse("email", "")"
+                   class="form-control @if(form.errors("email").nonEmpty){form-control-error}"
+                   aria-labelledby="email-label"
+                   aria-required="true"/>
+        </div>
+        <div class="form-group @if(form.errors("telephone").nonEmpty){form-group-error}">
+            <label class="form-label-bold" for="telephone" id="telephone-label">Telephone number</label>
+            @fieldError(form.errors, "telephone", true)
+            <input type="text"
+                   id="telephone"
+                   name="telephone"
+                   value="@form.data.getOrElse("telephone", "")"
+                   class="form-control @if(form.errors("telephone").nonEmpty){form-control-error}"
+                   aria-labelledby="telephone-label"
+                   aria-required="true"/>
+        </div>
+        </fieldset>
+
+        <div class="form-group">
+            <button id="submit" class="button" type="submit">Save and continue</button>
+        </div>
+
+        <script type="text/javascript">
+            function checkboxChange(){
+            let checkbox = document.getElementById('useregistered')
+            if (checkbox.checked){
+                document.getElementById("fullname").value = "@loggedIn.loggedInName";
+                document.getElementById("email").value = "@loggedIn.email";
+            }
+        }
+        </script>
+    }
+}

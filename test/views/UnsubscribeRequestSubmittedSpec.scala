@@ -16,25 +16,20 @@
 
 package views
 
-import config.ApplicationConfig
 import domain._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.UnsubscribeRequestSubmittedView
 
-class UnsubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Unsubscribe request submitted page" should {
     "render with no errors" in {
 
-      val appConfig = mock[ApplicationConfig]
       val request = FakeRequest().withCSRFToken
 
       val appId = "1234"
@@ -46,7 +41,9 @@ class UnsubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite wi
         Set(Collaborator(developer.email, Role.ADMINISTRATOR)), state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-      val page = views.html.unsubscribeRequestSubmitted.render(ApplicationViewModel(application, false), apiName, apiVersion, request, developer, applicationMessages, appConfig, "subscriptions")
+      val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
+
+      val page = unsubscribeRequestSubmittedView.render(ApplicationViewModel(application, false), apiName, apiVersion, request, developer, messagesProvider, appConfig, "subscriptions")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

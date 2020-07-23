@@ -27,14 +27,15 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.CSRFTokenHelper._
 import utils.TestApplications._
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmationView, RedirectsView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RedirectsSpec extends BaseControllerSpec {
+class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   val applicationId = "1234"
   val clientId = "clientId123"
@@ -48,17 +49,26 @@ class RedirectsSpec extends BaseControllerSpec {
   val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val redirectsView = app.injector.instanceOf[RedirectsView]
+    val addRedirectView = app.injector.instanceOf[AddRedirectView]
+    val deleteRedirectConfirmationView = app.injector.instanceOf[DeleteRedirectConfirmationView]
+    val changeRedirectView = app.injector.instanceOf[ChangeRedirectView]
+
     val underTest = new Redirects(
       applicationServiceMock,
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      redirectsView,
+      addRedirectView,
+      deleteRedirectConfirmationView,
+      changeRedirectView
     )
 
     implicit val hc = HeaderCarrier()
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 

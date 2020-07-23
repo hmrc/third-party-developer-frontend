@@ -16,22 +16,18 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.DeleteProfileForm
 import domain._
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.ProfileDeleteConfirmationView
 
-class ProfileDeleteConfirmationSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class ProfileDeleteConfirmationSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appConfig = mock[ApplicationConfig]
+  val profileDeleteConfirmation = app.injector.instanceOf[ProfileDeleteConfirmationView]
 
   "Profile delete confirmation page" should {
     "render with no errors" in {
@@ -39,7 +35,7 @@ class ProfileDeleteConfirmationSpec extends UnitSpec with OneServerPerSuite with
 
       val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
-      val page = views.html.profileDeleteConfirmation.render(DeleteProfileForm.form, request, developer, appConfig, applicationMessages, "details")
+      val page = profileDeleteConfirmation.render(DeleteProfileForm.form, request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -55,7 +51,7 @@ class ProfileDeleteConfirmationSpec extends UnitSpec with OneServerPerSuite with
 
       val formWithErrors = DeleteProfileForm.form.withError("confirmation", "Tell us if you want us to delete your account")
 
-      val page = views.html.profileDeleteConfirmation.render(formWithErrors, request, developer, appConfig, applicationMessages, "details")
+      val page = profileDeleteConfirmation.render(formWithErrors, request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

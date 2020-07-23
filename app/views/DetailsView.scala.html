@@ -1,0 +1,153 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.{DeveloperSession, TermsOfUseStatus}
+@import helpers.DateFormatter.{formatDate, formatLastAccessDate}
+@import include._
+@import model.Crumb
+@import org.joda.time.format.DateTimeFormat
+@import model.ApplicationViewModel
+
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
+
+@(applicationViewModel: ApplicationViewModel)(
+        implicit request: play.api.mvc.Request[Any],
+        loggedIn: DeveloperSession,
+        messagesProvider: MessagesProvider,
+        appConfig: ApplicationConfig,
+        navSection: String = "details"
+)
+@app = @{applicationViewModel.application}
+
+@title = @{ "Application details" }
+
+@devMain(
+    title = title,
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb(title),
+        Crumb.application(applicationViewModel.application),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
+    developerSession = Some(loggedIn)
+) {
+    <header>
+        <h1 class="heading-xlarge">@title</h1>
+    </header>
+
+    @appEnvironment(app)
+
+    <div class="metadata-wrapper"></div>
+    <p class="metadata">
+        Created @{formatDate(app.createdOn)}
+    </p>
+    <p class="metadata">
+    @{formatLastAccessDate(app.lastAccess, app.createdOn) match {
+        case Some(formattedDate) => s"Last API call $formattedDate"
+        case _ => "No API called"
+    }}
+    </p>
+    <br>
+
+    @if(app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED && app.isPermittedToEditAppDetails(loggedIn.developer)) {
+        <div id="termsOfUseWarning" class="notice">
+            <i class="icon icon-important"><span class="visually-hidden">Warning</span></i>
+            <strong class="bold-small">You must agree to the terms of use on this application.</strong>
+        </div>
+        <br>
+    }
+
+    <table>
+        <colgroup>
+            <col width="40%">
+            <col width="60%">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>Application details</th>
+                <td class="numeric">
+                    @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
+                        <a id="change" href="@controllers.routes.Details.changeDetails(app.id)">Change <span class="visually-hidden">application details</span></a>
+                    }
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Application ID</th>
+                <td id="applicationId">@{app.id}</td>
+            </tr>
+            <tr>
+                <th>Application name</th>
+                <td id="applicationName">@{app.name}</td>
+            </tr>
+            <tr>
+                <th>Application description</th>
+                <td id="description">@if(app.description.nonEmpty) {@{app.description}} else {None}</td>
+            </tr>
+            <tr>
+                <th>Privacy policy URL</th>
+                <td id="privacyPolicyUrl">@{app.privacyPolicyUrl.getOrElse("None")}</td>
+            </tr>
+            <tr>
+                <th>Terms and conditions URL</th>
+                <td id="termsAndConditionsUrl">@{app.termsAndConditionsUrl.getOrElse("None")}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    @if(app.termsOfUseStatus != TermsOfUseStatus.NOT_APPLICABLE) {
+        <br>
+        <table id="termsOfUse">
+            <colgroup>
+                <col width="40%">
+                <col width="30%">
+                <col width="30%">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Terms of use</th>
+                    <th class="numeric"></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Terms of use</td>
+                    <td id="termsOfUseAagreementDetails">
+                        @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
+                            Agreed by @{app.termsOfUseAgreements.head.emailAddress} on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(app.termsOfUseAgreements.head.timeStamp)}
+                        } else {
+                            Not agreed
+                        }
+                    </td>
+                    <td class="numeric">
+                      @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
+                          @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
+                              <a id="termsOfUseReadLink" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a>
+                          } else {
+                              <a id="termsOfUseReadLink" class="button" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>
+                          }
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+}

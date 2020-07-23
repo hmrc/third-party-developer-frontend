@@ -20,12 +20,11 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain.TicketId
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Request}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
 import security.ExtendedDevHubAuthorization
 import service.{ApplicationService, DeskproService, SessionService}
-import views.html.signoutSurvey
+import views.html.{LogoutConfirmationView, SignoutSurveyView}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -34,13 +33,16 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
                                   val sessionService: SessionService,
                                   val applicationService: ApplicationService,
                                   val errorHandler: ErrorHandler,
-                                  val messagesApi: MessagesApi,
-                                  val cookieSigner: CookieSigner)
+                                  mcc: MessagesControllerComponents,
+                                  val cookieSigner: CookieSigner,
+                                  signoutSurveyView: SignoutSurveyView,
+                                  logoutConfirmationView: LogoutConfirmationView
+                                 )
                                  (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController with ExtendedDevHubAuthorization {
+  extends LoggedInController(mcc) with ExtendedDevHubAuthorization {
 
   def logoutSurvey = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    val page = signoutSurvey("Are you sure you want to sign out?", SignOutSurveyForm.form)
+    val page = signoutSurveyView("Are you sure you want to sign out?", SignOutSurveyForm.form)
 
     Future.successful(Ok(page))
   }
@@ -62,10 +64,10 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
     }
   }
 
-  def logout = Action.async { implicit request: Request[AnyContent] =>
+  def logout = Action.async { implicit request: MessagesRequest[AnyContent] =>
     destroySession(request)
       .getOrElse(Future.successful(()))
-      .map(_ => Ok(views.html.logoutConfirmation()).withNewSession)
+      .map(_ => Ok(logoutConfirmationView()).withNewSession)
       .map(removeCookieFromResult)
   }
 }

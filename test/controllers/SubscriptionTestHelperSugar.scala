@@ -16,7 +16,6 @@
 
 package controllers
 
-import cats.data.NonEmptyList
 import domain._
 import domain.APIStatus._
 import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
@@ -47,7 +46,6 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {    
     val sfv = buildSubscriptionFieldValue("the value")
-    val sfd = sfv.definition
 
     val context = "individual-employment-context-2"
     val version = "1.0"

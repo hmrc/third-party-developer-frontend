@@ -18,10 +18,9 @@ package connectors
 
 import config.ApplicationConfig
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsString, JsValue, Json}
 import uk.gov.hmrc.play.test.UnitSpec
-
 
 class PayloadEncryptionSpec extends UnitSpec with MockitoSugar {
 

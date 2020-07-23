@@ -22,18 +22,16 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.{APIIdentifier, AccessRequirements, Environment}
+import domain.{AccessRequirements, APIIdentifier, Environment}
 import domain.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
-import play.api.libs.json.{Format, JsPath, JsSuccess, Json, Reads}
+import play.api.libs.json.{Format, Json, JsSuccess}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import cats.data.{NonEmptyList => NEL}
-import service.SubscriptionFieldsService._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -180,7 +178,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 }
 
 object SubscriptionFieldsConnector {
-
   def toDomain(f: FieldDefinition): SubscriptionFieldDefinition = {
     SubscriptionFieldDefinition(
       name = f.name,

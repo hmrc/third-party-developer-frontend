@@ -1,0 +1,56 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import domain._
+@import controllers.ManageSubscriptions.ApiDetails
+
+@this(devMain: DevMain)
+
+@(application: Application, apis: Seq[ApiDetails])(
+        implicit request: play.api.mvc.Request[Any],
+        loggedIn: DeveloperSession,
+        messages: Messages,
+        applicationConfig: config.ApplicationConfig)
+
+@pageHeading = @{
+  "Configure your API subscriptions"
+}
+
+@devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  back = BackButtonWithJavaScript
+) {
+  <header>
+    <h1 class="heading-xlarge">@pageHeading</h1>
+  </header>
+
+  <p>These APIs you have subscribed to require additional configuration.
+  </p>
+  <ul class="list list-bullet">
+    @for(api <- apis) {
+      <li>
+        @{api.name} @{api.version} @{api.displayedStatus}
+      </li>
+    }
+  </ul>
+  <p>
+    <a href="@{controllers.routes.ManageSubscriptions.subscriptionConfigurationPage(application.id, 1)}" class="button">Continue</a>
+  </p>
+
+}

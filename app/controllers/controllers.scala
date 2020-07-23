@@ -20,7 +20,6 @@ import domain.Environment
 import play.api.data.Forms
 import play.api.data.Forms.{optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import service.ApplicationService
 import uk.gov.hmrc.emailaddress.EmailAddress
 
 import scala.util.Try

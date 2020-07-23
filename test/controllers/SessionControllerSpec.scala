@@ -23,12 +23,13 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.{Developer, LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import play.api.http.Status._
-import play.api.i18n.MessagesApi
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import play.api.test.Helpers.redirectLocation
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import utils.WithLoggedInSession._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout {
 
@@ -38,7 +39,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout 
       sessionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[ErrorHandler],
-      mock[MessagesApi],
+      mcc,
       cookieSigner
     )
   }
@@ -49,7 +50,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout 
       val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
       val sessionId = UUID.randomUUID().toString
       val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-      val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+      val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
       fetchSessionByIdReturns(sessionId, session)
 

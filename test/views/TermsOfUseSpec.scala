@@ -16,24 +16,21 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.TermsOfUseForm
 import domain._
 import model.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
-import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.TermsOfUseView
 
-class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown {
+class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
+  val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
+
   case class Page(doc: Appendable) {
     lazy val body = Jsoup.parse(doc.body)
     lazy val title = body.title
@@ -44,7 +41,6 @@ class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneSe
   }
 
   "Terms of use view" when {
-    implicit val mockConfig = mock[ApplicationConfig]
     implicit val request = FakeRequest().withCSRFToken
     implicit val loggedIn = utils.DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection = "details"
@@ -64,7 +60,7 @@ class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneSe
         val version = "1.0"
         val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(emailAddress, timeStamp, version)))
         val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(views.html.termsOfUse(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
+        val page: Page = Page(termsOfUseView(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {
@@ -89,7 +85,7 @@ class TermsOfUseSpec extends UnitSpec with Matchers with MockitoSugar with OneSe
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
         val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(views.html.termsOfUse(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
+        val page: Page = Page(termsOfUseView(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {

@@ -23,7 +23,7 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.{Developer, LoggedInState, Session, UpdateLoggedInStateRequest}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito._
 import org.mockito.Mockito.verify
 import org.scalatest.Assertion
@@ -38,7 +38,10 @@ import service.{MfaMandateService, MFAResponse, MFAService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.{Add2SVView, UserDidNotAdd2SVView}
+import views.html.protectaccount._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
@@ -54,15 +57,37 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     def loggedInState: LoggedInState
 
+    val protectAccountSetupView = app.injector.instanceOf[ProtectAccountSetupView]
+    val protectedAccountView = app.injector.instanceOf[ProtectedAccountView]
+    val protectAccountView = app.injector.instanceOf[ProtectAccountView]
+    val protectAccountAccessCodeView = app.injector.instanceOf[ProtectAccountAccessCodeView]
+    val protectAccountCompletedView = app.injector.instanceOf[ProtectAccountCompletedView]
+    val protectAccountRemovalConfirmationView = app.injector.instanceOf[ProtectAccountRemovalConfirmationView]
+    val protectAccountRemovalAccessCodeView = app.injector.instanceOf[ProtectAccountRemovalAccessCodeView]
+    val protectAccountRemovalCompleteView = app.injector.instanceOf[ProtectAccountRemovalCompleteView]
+    val userDidNotAdd2SVView = app.injector.instanceOf[UserDidNotAdd2SVView]
+    val add2SVView = app.injector.instanceOf[Add2SVView]
+
     val underTest: ProtectAccount = new ProtectAccount(
       mock[ThirdPartyDeveloperConnector],
       mock[OtpAuthUri],
       mock[MFAService],
       sessionServiceMock,
-      messagesApi,
+      mcc,
       mock[ErrorHandler],
       mock[MfaMandateService],
-      cookieSigner) {
+      cookieSigner,
+      protectAccountSetupView,
+      protectedAccountView,
+      protectAccountView,
+      protectAccountAccessCodeView,
+      protectAccountCompletedView,
+      protectAccountRemovalConfirmationView,
+      protectAccountRemovalAccessCodeView,
+      protectAccountRemovalCompleteView,
+      userDidNotAdd2SVView,
+      add2SVView
+    ) {
       override val qrCode: QRCode = mock[QRCode]
     }
 
@@ -71,25 +96,25 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     def protectAccountRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       FakeRequest().
         withLoggedIn(underTest, implicitly)(sessionId).
-        withSession("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken).
+        withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken).
         withFormUrlEncodedBody("accessCode" -> code)
     }
   }
 
   trait SetupUnprotectedAccount extends Setup {
-    given(underTest.thirdPartyDeveloperConnector.fetchDeveloper(mockEq(loggedInUser.email))(any[HeaderCarrier])).
+    given(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier])).
       willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None)))
   }
 
   trait SetupProtectedAccount extends Setup {
-    given(underTest.thirdPartyDeveloperConnector.fetchDeveloper(mockEq(loggedInUser.email))(any[HeaderCarrier])).
+    given(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier])).
       willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None, Some(true))))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
     given(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).willReturn(otpUri)
     given(underTest.qrCode.generateDataImageBase64(otpUri.toString)).willReturn(qrImage)
-    given(underTest.thirdPartyDeveloperConnector.createMfaSecret(mockEq(loggedInUser.email))(any[HeaderCarrier])).willReturn(secret)
+    given(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInUser.email))(any[HeaderCarrier])).willReturn(secret)
   }
 
   trait PartLogged extends Setup {
@@ -106,7 +131,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    given(underTest.mfaService.enableMfa(mockEq(loggedInUser.email), mockEq(correctCode))(any[HeaderCarrier])).
+    given(underTest.mfaService.enableMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).
       willReturn(Future.successful(MFAResponse(true)))
   }
 
@@ -116,7 +141,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    given(underTest.mfaService.removeMfa(mockEq(loggedInUser.email), mockEq(correctCode))(any[HeaderCarrier])).
+    given(underTest.mfaService.removeMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).
       willReturn(Future.successful(MFAResponse(true)))
   }
 
@@ -126,7 +151,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         val invalidSessionId = "notASessionId"
 
-        given(underTest.sessionService.fetch(mockEq(invalidSessionId))(any[HeaderCarrier]))
+        given(underTest.sessionService.fetch(eqTo(invalidSessionId))(any[HeaderCarrier]))
           .willReturn(Future.successful(None))
 
         private val request = FakeRequest().
@@ -224,7 +249,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         redirectLocation(result) shouldBe Some(routes.ProtectAccount.getProtectAccountCompletedPage().url)
 
         verify(underTest.thirdPartyDeveloperConnector)
-          .updateSessionLoggedInState(mockEq(sessionId), mockEq(UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)))(any[HeaderCarrier])
+          .updateSessionLoggedInState(eqTo(sessionId), eqTo(UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)))(any[HeaderCarrier])
       }
     }
 
@@ -277,7 +302,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
           bodyOf(result) should include("Add 2-step verification")
           bodyOf(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
 
-          verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(mockEq(loggedInUser.email))(any[HeaderCarrier])
+          verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.email))(any[HeaderCarrier])
         }
       }
     }
@@ -301,7 +326,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         bodyOf(result) should include("Add 2-step verification")
         bodyOf(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
 
-        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(mockEq(loggedInUser.email))(any[HeaderCarrier])
+        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.email))(any[HeaderCarrier])
       }
     }
   }

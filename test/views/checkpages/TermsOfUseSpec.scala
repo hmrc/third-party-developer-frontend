@@ -21,24 +21,16 @@ import controllers.TermsOfUseForm
 import domain._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.i18n.Messages.Implicits._
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
-import views.html.checkpages.termsOfUse
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.checkpages.TermsOfUseView
 
-class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
+class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  override def fakeApplication(): play.api.Application =
-    GuiceApplicationBuilder()
-      .configure(("metrics.jvm", false))
-      .build()
-
-  val appConfig: ApplicationConfig = mock[ApplicationConfig]
+  val termsOfUse = app.injector.instanceOf[TermsOfUseView]
 
   "Terms of use view" must {
     val thirdPartyApplication =
@@ -72,13 +64,13 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
         landingPageRoute = mock[Call],
         request,
         developer,
-        applicationMessages,
+        messagesProvider,
         appConfig)
-      page.contentType must include("text/html")
+      page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
-      document.getElementById("termsOfUseAgreed") mustNot be(null)
-      document.getElementById("termsOfUseAgreed").attr("checked") mustNot be("checked")
+      document.getElementById("termsOfUseAgreed") shouldNot be(null)
+      document.getElementById("termsOfUseAgreed").attr("checked") shouldNot be("checked")
     }
 
     "show terms of use agreement page that already has the correct terms of use agreed" in {
@@ -102,9 +94,9 @@ class TermsOfUseSpec extends PlaySpec with OneAppPerSuite with MockitoSugar {
         developer,
         implicitly,
         appConfigMock)
-      page.contentType must include("text/html")
+      page.contentType should include("text/html")
 
-      page.body.contains("Terms of use agreed by email@example.com") mustBe true
+      page.body.contains("Terms of use agreed by email@example.com") shouldBe true
     }
   }
 }

@@ -28,9 +28,9 @@ class  CSRFErrorHandler @Inject()(errorHandler: ErrorHandler) extends CSRF.Error
   override def handle(req: RequestHeader, msg: String): Future[Result] = {
     val login = controllers.routes.UserLoginAccount.login()
 
-    if (req.path == login.url)
-      Future.successful(Redirect(login))
-    else
+    if (req.path == login.url) Future.successful(Redirect(login))
+    else {
       errorHandler.onClientError(req, FORBIDDEN, msg)
+    }
   }
 }

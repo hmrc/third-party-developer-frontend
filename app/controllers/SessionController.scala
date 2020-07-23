@@ -19,9 +19,8 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{AuditService, SessionService}
 
 import scala.concurrent.ExecutionContext
@@ -32,12 +31,12 @@ class SessionController @Inject()(val auditService: AuditService,
                         val sessionService: SessionService,
                         val connector: ThirdPartyDeveloperConnector,
                         val errorHandler: ErrorHandler,
-                        val messagesApi: MessagesApi,
+                        mcc: MessagesControllerComponents,
                         val cookieSigner : CookieSigner)
                          (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController with PasswordChange {
+  extends LoggedInController(mcc) with PasswordChange {
 
-  def keepAlive(): Action[AnyContent] = loggedInAction { implicit request =>
+  def keepAlive(): Action[AnyContent] = loggedInAction { _ =>
     successful(NoContent)
   }
 }

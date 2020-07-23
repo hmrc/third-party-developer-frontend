@@ -10,8 +10,8 @@ Feature: Sign in
   Scenario: Signing with a valid credentials and no MFA mandated or setup
     Given I navigate to the 'Sign in' page
     And I enter all the fields:
-      | email address | john.smith@example.com |
-      | password | StrongPassword1! |
+      | email address          | password         |
+      | john.smith@example.com | StrongPassword1! |
     When I click on the button with id 'submit'
     Then I am on the 'Recommend Mfa' page
     When I click on the button with id 'skip'
@@ -24,8 +24,8 @@ Feature: Sign in
     Given application with name 'My Admin Production App' can be created
     Given I navigate to the 'Sign in' page
     And I enter all the fields:
-      | email address | john.smith@example.com |
-      | password | StrongPassword1! |
+      | email address          | password         |
+      | john.smith@example.com | StrongPassword1! |
     When I click on the button with id 'submit'
     Then I am on the 'Protect Account' page
     When I click on the button with id 'submit'
@@ -43,7 +43,8 @@ Feature: Sign in
     Given I navigate to the 'Sign in' page
     Given I click on the button with id 'forgottenPassword'
     And I enter all the fields:
-      | email address | john.smith@example.com |
+      | email address          |
+      | john.smith@example.com |
     When I click on the button with id 'submit'
     Then I am on the 'Password reset confirmation' page
     Then I should be sent an email with a link to reset for 'john.smith@example.com'

@@ -1,0 +1,91 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.DeveloperSession
+@import model.{ApplicationViewModel, Crumb}
+@import include.{DevMain, _}
+
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
+
+@(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
+    implicit request: play.api.mvc.Request[Any],
+    loggedIn: DeveloperSession,
+    messagesProvider: MessagesProvider,
+    applicationConfig: ApplicationConfig,
+    navSection: String = "subscriptions"
+)
+
+@app = @{applicationView.application}
+
+@test(section: String) = {
+    @if(section == "credentials") {
+        Manage credentials
+    } else {
+        Manage API subscriptions
+    }
+}
+
+@title = @{
+  if (subscribed) "Confirm unsubscribe" else "Confirm subscribe"
+}
+
+@devMain(
+    title = title,
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb(test(navSection).toString),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
+    developerSession = Some(loggedIn)
+) {
+
+    @errorSummary(form)
+    <h1 class="heading-xlarge">Manage API subscriptions</h1>
+
+    <div class="panel panel-border-wide"><p>For security reasons we must approve any API subscription changes. This takes up to 2 working days.</p></div>
+
+    @helper.form(action = routes.Subscriptions.changeLockedApiSubscriptionAction(app.id, name, context, version, redirectTo.toString), 'class -> "no-fields-subscription") {
+        <fieldset class="inline @if(form.errors("confirm").nonEmpty) {form-group-error}">
+          <div class="form-group">
+                @if(subscribed) {
+                    <h2 class="heading-large">Are you sure you want to request to unsubscribe from @name @version?</h2>
+                } else {
+                    <h2 class="heading-large">Are you sure you want to request to subscribe to @name @version?</h2>
+                }
+                <fieldset id="confirm" class="inline">
+                    @helper.CSRF.formField
+                    @fieldError(form.errors, "confirm")
+                    <div class="multiple-choice">
+                        <input id="confirm-yes" type="radio" name="confirm" value="true">
+                        <label for="confirm-yes">Yes</label>
+                    </div>
+                    <div class="multiple-choice">
+                        <input id="confirm-no" type="radio" name="confirm" value="false">
+                        <label for="confirm-no">No</label>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="form-group">
+                <button id="submit" class="button" type="submit">Submit</button>
+                <a href="@routes.Subscriptions.manageSubscriptions(app.id)" class="secondary-button">Cancel</a>
+            </div>
+        </fieldset>
+    }
+}

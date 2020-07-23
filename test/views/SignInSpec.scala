@@ -16,31 +16,25 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.LoginForm
 import domain.LoggedInState
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
-import play.api.mvc.Flash
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.SignInView
 
-class SignInSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class SignInSpec extends CommonViewSpec with WithCSRFAddToken {
+  val signInView = app.injector.instanceOf[SignInView]
 
-  val appConfig = mock[ApplicationConfig]
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
 
   "Sign in page" should {
-
-    def renderPage(form: Form[LoginForm] = LoginForm.form) = {
+    def renderPage(form: Form[LoginForm]) = {
       val request = FakeRequest().withCSRFToken
-      views.html.signIn.render("heading", form, endOfJourney = true, request, Flash(), applicationMessages, appConfig)
+      signInView.render("heading", form, endOfJourney = true, request, messagesProvider, appConfig)
     }
 
     "show an error when email address is invalid" in {

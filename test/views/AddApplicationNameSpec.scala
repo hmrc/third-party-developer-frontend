@@ -16,24 +16,20 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.AddApplicationNameForm
 import domain.{Environment, LoggedInState}
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.AddApplicationNameView
 
-class AddApplicationNameSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 
+  val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
-  val appConfig = mock[ApplicationConfig]
   val subordinateEnvironment = Environment.SANDBOX
   val appId = "1234"
   val principalEnvironment = Environment.PRODUCTION
@@ -42,7 +38,7 @@ class AddApplicationNameSpec extends UnitSpec with OneServerPerSuite with Shared
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      views.html.addApplicationName.render(form, subordinateEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
+      addApplicationNameView.render(form, subordinateEnvironment, request, loggedInUser, messagesProvider, appConfig)
     }
 
     "show an error when application name is invalid" in {
@@ -56,7 +52,7 @@ class AddApplicationNameSpec extends UnitSpec with OneServerPerSuite with Shared
 
     def renderPage(form: Form[AddApplicationNameForm]) = {
       val request = FakeRequest().withCSRFToken
-      views.html.addApplicationName.render(form, principalEnvironment, request, loggedInUser, applicationMessages, appConfig, "nav-section")
+      addApplicationNameView.render(form, principalEnvironment, request, loggedInUser, messagesProvider, appConfig)
     }
 
     "show an error when application name is invalid" in {

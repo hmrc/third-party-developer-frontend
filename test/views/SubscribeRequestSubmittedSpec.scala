@@ -20,20 +20,16 @@ import config.ApplicationConfig
 import domain._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.SubscribeRequestSubmittedView
 
-class SubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Subscribe request submitted page" should {
     "render with no errors" in {
-
       val appConfig = mock[ApplicationConfig]
       val request = FakeRequest().withCSRFToken
 
@@ -46,13 +42,15 @@ class SubscribeRequestSubmittedSpec extends UnitSpec with OneServerPerSuite with
         Set(Collaborator(developer.email, Role.ADMINISTRATOR)), state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
-      val page = views.html.subscribeRequestSubmitted.render(
+      val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
+
+      val page = subscribeRequestSubmittedView.render(
         ApplicationViewModel(application,hasSubscriptionsFields = false),
         apiName,
         apiVersion,
         request,
         developer,
-        applicationMessages,
+        messagesProvider,
         appConfig,
         "subscriptions")
 

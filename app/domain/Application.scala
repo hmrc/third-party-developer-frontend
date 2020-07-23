@@ -29,6 +29,9 @@ import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.time.DateTimeUtils
 import helpers.string._
 
+import play.api.libs.json.JodaReads._
+import play.api.libs.json.JodaWrites._
+
 case class UpliftRequest(applicationName: String, requestedByEmailAddress: String)
 
 object UpliftRequest {

@@ -18,56 +18,64 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys.appNameField
-import domain.Environment.{PRODUCTION, SANDBOX}
 import domain.{Environment, _}
+import domain.Environment.{PRODUCTION, SANDBOX}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service._
+import views.html._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
-import scala.util.control.NonFatal
 
 @Singleton
 class AddApplication @Inject()(val applicationService: ApplicationService,
                                val sessionService: SessionService,
                                val auditService: AuditService,
                                val errorHandler: ErrorHandler,
-                               val messagesApi: MessagesApi,
-                               val cookieSigner : CookieSigner)
-                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController {
+                               mcc: MessagesControllerComponents,
+                               val cookieSigner : CookieSigner,
+                               addApplicationSubordinateEmptyNestView: AddApplicationSubordinateEmptyNestView,
+                               manageApplicationsView: ManageApplicationsView,
+                               accessTokenSwitchView: AccessTokenSwitchView,
+                               usingPrivilegedApplicationCredentialsView: UsingPrivilegedApplicationCredentialsView,
+                               tenDaysWarningView: TenDaysWarningView,
+                               addApplicationStartSubordinateView: AddApplicationStartSubordinateView,
+                               addApplicationStartPrincipalView: AddApplicationStartPrincipalView,
+                               addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
+                               addApplicationNameView: AddApplicationNameView)
+                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>
       if (apps.isEmpty) {
-        successful(Ok(views.html.addApplicationSubordinateEmptyNest()))
+        successful(Ok(addApplicationSubordinateEmptyNestView()))
       } else {
-        successful(Ok(views.html.manageApplications(apps.map(ApplicationSummary.from(_, loggedIn.email)))))
+        successful(Ok(manageApplicationsView(apps.map(ApplicationSummary.from(_, loggedIn.email)))))
       }
     }
   }
 
   def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(views.html.accessTokenSwitch()))
+    successful(Ok(accessTokenSwitchView()))
   }
 
   def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(views.html.usingPrivilegedApplicationCredentials()))
+    successful(Ok(usingPrivilegedApplicationCredentialsView()))
   }
 
   def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(views.html.tenDaysWarning()))
+    successful(Ok(tenDaysWarningView()))
   }
 
   def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(views.html.addApplicationStartSubordinate()))
+    successful(Ok(addApplicationStartSubordinateView()))
   }
 
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(views.html.addApplicationStartPrincipal()))
+    successful(Ok(addApplicationStartPrincipalView()))
   }
 
   def addApplicationSuccess(applicationId: String): Action[AnyContent] =
@@ -76,7 +84,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
 
       successful(
         deployedTo match {
-          case SANDBOX => Ok(views.html.addApplicationSubordinateSuccess(application.name, applicationId))
+          case SANDBOX => Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
           case PRODUCTION => NotFound(errorHandler.notFoundTemplate(request))
         }
       )
@@ -84,7 +92,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
 
   def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
-    successful(Ok(views.html.addApplicationName(form, environment)))
+    successful(Ok(addApplicationNameView(form, environment)))
   }
 
   def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction {
@@ -93,7 +101,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
       val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
 
       def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
-        successful(Ok(views.html.addApplicationName(errors, environment)))
+        successful(Ok(addApplicationNameView(errors, environment)))
 
       def addApplication(form: AddApplicationNameForm) = {
         applicationService
@@ -117,7 +125,7 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
             case invalid: Invalid =>
               def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-              successful(BadRequest(views.html.addApplicationName(invalidApplicationNameForm, environment)))
+              successful(BadRequest(addApplicationNameView(invalidApplicationNameForm, environment)))
           }
 
       requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)

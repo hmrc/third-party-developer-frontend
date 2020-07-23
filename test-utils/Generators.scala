@@ -16,11 +16,8 @@
 
 package utils
 
-import org.scalacheck.Gen
 import org.scalacheck.Arbitrary.arbitrary
-
-import scala.collection.convert.wrapAsScala._
-
+import org.scalacheck.Gen
 import scala.util.Random
 
 object Generators {

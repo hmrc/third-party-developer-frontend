@@ -17,24 +17,19 @@
 package views.include
 
 import builder.SubscriptionsBuilder
-import config.ApplicationConfig
 import controllers.APISubscriptions
 import domain._
-import domain.ApiSubscriptionFields._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.include.SubscriptionsGroup
 
-class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown with SubscriptionsBuilder {
-  val request = FakeRequest().withCSRFToken
-  val appConfig = mock[ApplicationConfig]
+class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with SubscriptionsBuilder {
+  implicit val request = FakeRequest().withCSRFToken
+
   val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
   val applicationId = "1234"
   val clientId = "clientId123"
@@ -49,20 +44,22 @@ class SubscriptionsGroupSpec extends UnitSpec with MockitoSugar with OneServerPe
 
   val apiSubscriptions = Seq(APISubscriptions(apiName, apiName, apiContext, Seq(subscriptionStatus)))
 
+  val subscriptionsGroup = app.injector.instanceOf[SubscriptionsGroup]
+
   case class Page(role: Role, environment: Environment, state: ApplicationState) {
     lazy val body: Document = {
       val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, None, environment, Some("Description 1"),
         Set(Collaborator(loggedInUser.email, role)), state = state,
         access = Standard(redirectUris = Seq("https://red1.example.com", "https://red2.example.con"), termsAndConditionsUrl = Some("http://tnc-url.example.com")))
 
-      Jsoup.parse(views.html.include.subscriptionsGroup.render(
+      Jsoup.parse(subscriptionsGroup.render(
         role,
         application,
         apiSubscriptions,
         group = "Example",
         afterSubscriptionRedirectTo = SubscriptionRedirect.MANAGE_PAGE,
         showSubscriptionFields = true,
-        applicationMessages,
+        messagesProvider,
         appConfig,
         request).body)
     }

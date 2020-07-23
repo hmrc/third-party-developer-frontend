@@ -16,10 +16,10 @@
 
 package connectors
 
-import domain.DevhubAccessRequirement.NoOne
 import connectors.SubscriptionFieldsConnector.{ApiFieldDefinitions, FieldDefinition}
 import domain.{AccessRequirements, DevhubAccessRequirements}
-import play.api.libs.json.{Format, JsSuccess, Json}
+import domain.DevhubAccessRequirement.NoOne
+import play.api.libs.json.{Json, JsSuccess}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class ApiFieldDefinitionsSpec extends UnitSpec {

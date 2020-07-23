@@ -7,7 +7,7 @@ import play.sbt.PlayImport._
 import play.sbt.routes.RoutesKeys.routesGenerator
 import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
-import sbt._
+import sbt.{Resolver, _}
 import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.PublishingSettings._
 import uk.gov.hmrc.SbtAutoBuildPlugin
@@ -20,37 +20,41 @@ lazy val appName = "third-party-developer-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = compile ++ test
 
-lazy val cucumberVersion = "1.2.5"
+lazy val cucumberVersion = "6.2.2"
 lazy val seleniumVersion = "2.53.1"
-lazy val enumeratumVersion = "1.5.11"
+lazy val enumeratumVersion = "1.5.12"
+
+val testScope = "test, it"
 
 lazy val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "5.3.0",
-  "uk.gov.hmrc" %% "govuk-template" % "5.55.0-play-25",
-  "uk.gov.hmrc" %% "play-ui" % "8.11.0-play-25",
-  "uk.gov.hmrc" %% "url-builder" % "3.4.0-play-25",
-  "uk.gov.hmrc" %% "play-json-union-formatter" % "1.7.0",
-  "uk.gov.hmrc" %% "http-metrics" % "1.4.0",
-  "uk.gov.hmrc" %% "json-encryption" % "4.8.0-play-25",
+  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.8.0",
+  "uk.gov.hmrc" %% "govuk-template" % "5.55.0-play-26",
+  "uk.gov.hmrc" %% "play-ui" % "8.11.0-play-26",
+  "uk.gov.hmrc" %% "url-builder" % "3.4.0-play-26",
+  "uk.gov.hmrc" %% "play-json-union-formatter" % "1.11.0",
+  "uk.gov.hmrc" %% "http-metrics" % "1.10.0",
+  "uk.gov.hmrc" %% "json-encryption" % "4.8.0-play-26",
   "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
-  "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.2.0-play-25",
+  "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.2.0-play-26",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.google.zxing" % "core" % "3.2.1",
-  "org.typelevel" %% "cats-core" % "2.0.0"
+  "org.typelevel" %% "cats-core" % "2.0.0",
+  "com.typesafe.play" %% "play-json" % "2.7.4",
+  "com.typesafe.play" %% "play-json-joda" % "2.7.4"
 )
 
-val testScope = "test, it"
 lazy val test = Seq(
-  "info.cukes" %% "cucumber-scala" % cucumberVersion % testScope,
-  "info.cukes" % "cucumber-junit" % cucumberVersion % testScope,
-  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-25" % testScope,
+  "io.cucumber" %% "cucumber-scala" % cucumberVersion % testScope,
+  "io.cucumber" % "cucumber-junit" % cucumberVersion % testScope,
+  "io.cucumber" % "cucumber-java8" % cucumberVersion % testScope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % testScope,
   "junit" % "junit" % "4.12" % testScope,
   "org.jsoup" % "jsoup" % "1.10.2" % testScope,
   "org.pegdown" % "pegdown" % "1.6.0" % testScope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % testScope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % testScope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % testScope,
   "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
   "com.github.tomakehurst" % "wiremock" % "1.58" % testScope,
   "org.mockito" % "mockito-core" % "2.23.0" % testScope,
@@ -59,13 +63,12 @@ lazy val test = Seq(
   // batik-bridge has a circular dependency on itself via transitive batik-script. Avoid that to work with updated build tools
   //[warn] circular dependency found: batik#batik-bridge;1.6-1->batik#batik-script;1.6-1->...
   //[warn] circular dependency found: batik#batik-script;1.6-1->batik#batik-bridge;1.6-1->...
-    "com.github.mkolisnyk" % "cucumber-runner" % "1.0.9" % testScope exclude("batik", "batik-script"),
-    "batik" % "batik-script" % "1.6-1" % testScope exclude("batik", "batik-bridge"),
-  "net.masterthought" % "cucumber-reporting" % "3.3.0" % testScope,
-  "net.masterthought" % "cucumber-sandwich" % "3.3.0" % testScope,
+  // "batik" % "batik-script" % "1.6-1" % testScope exclude("batik", "batik-bridge"),
+  // "com.github.mkolisnyk" % "cucumber-runner" % "1.3.5" % testScope exclude("batik", "batik-script"),
   "com.assertthat" % "selenium-shutterbug" % "0.2" % testScope
 )
-lazy val overrideDependencies = Set(
+
+lazy val overrideDependencies = Seq(
   "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
   "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % testScope
 )
@@ -104,34 +107,40 @@ lazy val microservice = Project(appName, file("."))
     fork in Test := false,
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
-    scalaVersion := "2.11.12",
-    resolvers += Resolver.jcenterRepo,
+    scalaVersion := "2.12.11",
     routesImport += "connectors.binders._"
+  )
+  .settings(
+    resolvers := Seq(
+      Resolver.bintrayRepo("hmrc", "releases"),
+      Resolver.typesafeRepo("releases"),
+      Resolver.jcenterRepo
+    )
   )
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
   .settings(
-    unmanagedSourceDirectories in Test := (baseDirectory in Test) (base => Seq(base / "test", base / "test-utils")).value,
-    testOptions in Test := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
+    Test / unmanagedSourceDirectories := (baseDirectory in Test) (base => Seq(base / "test", base / "test-utils")).value,
+    Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
-    testOptions in IntegrationTest := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it", base / "test-utils")).value,
-    unmanagedResourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
-    parallelExecution in IntegrationTest := false
+    IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    IntegrationTest / unmanagedSourceDirectories := (baseDirectory in IntegrationTest) (base => Seq(base / "it", base / "test-utils")).value,
+    IntegrationTest / unmanagedResourceDirectories := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
+    IntegrationTest / parallelExecution := false
   )
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
-    testOptions in ComponentTest := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    unmanagedSourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "component", base / "test-utils")).value,
-    unmanagedResourceDirectories in ComponentTest := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
-    unmanagedResourceDirectories in ComponentTest += baseDirectory(_ / "target/web/public/test").value,
-    testOptions in ComponentTest += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
-    testGrouping in ComponentTest := oneForkedJvmPerTest((definedTests in ComponentTest).value),
-    parallelExecution in ComponentTest := false
+    ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    ComponentTest / unmanagedSourceDirectories := (baseDirectory in ComponentTest) (base => Seq(base / "component", base / "test-utils")).value,
+    ComponentTest / unmanagedResourceDirectories := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
+    ComponentTest / unmanagedResourceDirectories += baseDirectory(_ / "target/web/public/test").value,
+    ComponentTest / testOptions += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
+    ComponentTest / testGrouping := oneForkedJvmPerTest((definedTests in ComponentTest).value),
+    ComponentTest / parallelExecution := false
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
@@ -149,18 +158,14 @@ lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
 ) ++
   publishAllArtefacts
 
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
+def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
   tests map { test =>
     Group(
       test.name,
       Seq(test),
       SubProcess(
-        ForkOptions(
-          runJVMOptions = Seq(
-            "-Dtest.name=" + test.name,
-            s"-Dtest_driver=${Properties.propOrElse("test_driver", "chrome")}"
-          )
-        )
+        ForkOptions().withRunJVMOptions(
+          Vector(s"-Dtest.name={test.name}", s"-Dtest_driver=${Properties.propOrElse("test_driver", "chrome")}"))
       )
     )
   }
@@ -168,5 +173,5 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
 // Coverage configuration
 coverageMinimum := 85
 coverageFailOnMinimum := true
-coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;app.*;uk.gov.hmrc.BuildInfo"
+coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;app.*;uk.gov.hmrc.BuildInfo;.*javascript"
 

@@ -20,12 +20,11 @@ import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.{EmailAlreadyInUse, RegistrationSuccessful}
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, Request}
+import play.api.mvc.{MessagesControllerComponents, Request}
 import service.SessionService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
-import views.html.signIn
+import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,11 +32,17 @@ import scala.concurrent.{ExecutionContext, Future}
 class Registration @Inject()(override val sessionService: SessionService,
                              val connector: ThirdPartyDeveloperConnector,
                              val errorHandler: ErrorHandler,
-                             val messagesApi: MessagesApi,
-                             val cookieSigner : CookieSigner
+                             mcc: MessagesControllerComponents,
+                             val cookieSigner : CookieSigner,
+                             registrationView: RegistrationView,
+                             signInView: SignInView,
+                             accountVerifiedView: AccountVerifiedView,
+                             expiredVerificationLinkView: ExpiredVerificationLinkView,
+                             confirmationView: ConfirmationView,
+                             resendConfirmationView: ResendConfirmationView
                              )
                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController {
+  extends LoggedOutController(mcc) {
 
   import ErrorFormBuilder.GlobalError
   import play.api.data._
@@ -45,7 +50,7 @@ class Registration @Inject()(override val sessionService: SessionService,
   val regForm: Form[RegisterForm] = RegistrationForm.form
 
   def registration() = loggedOutAction { implicit request =>
-    Future.successful(Ok(views.html.registration(regForm)))
+    Future.successful(Ok(registrationView(regForm)))
   }
 
   def register() = Action.async {
@@ -53,7 +58,7 @@ class Registration @Inject()(override val sessionService: SessionService,
       val requestForm: Form[RegisterForm] = regForm.bindFromRequest
       requestForm.fold(
         formWithErrors => {
-          Future.successful(BadRequest(views.html.registration(
+          Future.successful(BadRequest(registrationView(
             formWithErrors.firstnameGlobal().lastnameGlobal().emailaddressGlobal().passwordGlobal().passwordNoMatchField()
           )))
         },
@@ -62,7 +67,7 @@ class Registration @Inject()(override val sessionService: SessionService,
             domain.Registration(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
           connector.register(registration).map {
             case RegistrationSuccessful => Redirect(controllers.routes.Registration.confirmation()).addingToSession("email" -> userData.emailaddress)
-            case EmailAlreadyInUse => BadRequest(views.html.registration(requestForm.emailAddressAlreadyInUse))
+            case EmailAlreadyInUse => BadRequest(registrationView(requestForm.emailAddressAlreadyInUse))
           }
         }
       )
@@ -70,7 +75,7 @@ class Registration @Inject()(override val sessionService: SessionService,
 
   def resendVerification = Action.async {
     implicit request =>
-      request.session.get("email").fold(Future.successful(BadRequest(signIn("Sign in", LoginForm.form)))) { email =>
+      request.session.get("email").fold(Future.successful(BadRequest(signInView("Sign in", LoginForm.form)))) { email =>
         connector.resendVerificationEmail(email) map {
           case status if status >= 200 && status < 300 => Redirect(controllers.routes.Registration.confirmation())
           case _ => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
@@ -90,18 +95,18 @@ class Registration @Inject()(override val sessionService: SessionService,
     (for {
       _ <- ensureLoggedOut
       _ <- connector.verify(code)
-    } yield Ok(views.html.accountVerified())) recover {
-      case _: BadRequestException => BadRequest(views.html.expiredVerificationLink())
+    } yield Ok(accountVerifiedView())) recover {
+      case _: BadRequestException => BadRequest(expiredVerificationLinkView())
     }
   }
 
   def confirmation = Action.async {
     implicit request =>
-      Future.successful(Ok(views.html.confirmation()))
+      Future.successful(Ok(confirmationView()))
   }
 
   def resendConfirmation = Action.async {
     implicit request =>
-      Future.successful(Ok(views.html.resendConfirmation()))
+      Future.successful(Ok(resendConfirmationView()))
   }
 }

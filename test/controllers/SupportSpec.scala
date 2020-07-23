@@ -31,19 +31,27 @@ import service.DeskproService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.{SupportEnquiryView, SupportThankyouView}
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup extends SessionServiceMock {
+    val supportEnquiryView = app.injector.instanceOf[SupportEnquiryView]
+    val supportThankYouView = app.injector.instanceOf[SupportThankyouView]
+
     val underTest = new Support(
       mock[DeskproService],
       sessionServiceMock,
       mock[ErrorHandler],
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      supportEnquiryView,
+      supportThankYouView
       )
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
 
     val sessionId = "sessionId"

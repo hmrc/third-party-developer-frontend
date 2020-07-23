@@ -21,10 +21,10 @@ import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
 import domain.Session._
 import domain.{UpdateLoggedInStateRequest, _}
-import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status
@@ -91,7 +91,6 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
     }
 
     "successfully verify a developer" in new Setup {
-      val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
       val code = "A1234"
 
       when(mockHttp.GET(endpoint(s"verification?code=$code"))).
@@ -210,7 +209,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
       connector.resendVerificationEmail(email).futureValue shouldBe Status.OK
 
-      verify(mockHttp).POSTEmpty(meq(endpoint(s"$email/resend-verification")),any())(any(),any(),any())
+      verify(mockHttp).POSTEmpty(eqTo(endpoint(s"$email/resend-verification")),any())(any(),any(),any())
     }
   }
 
@@ -221,7 +220,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
       connector.requestReset(email).futureValue
 
-      verify(mockHttp).POSTEmpty(meq(endpoint(s"$email/password-reset-request")),any())(any(),any(),any())
+      verify(mockHttp).POSTEmpty(eqTo(endpoint(s"$email/password-reset-request")),any())(any(),any(),any())
     }
 
     "successfully validate reset code" in new Setup {
@@ -256,7 +255,6 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
     val checkPasswordRequest = PasswordCheckRequest(email, password)
 
     "successfully return if called with an encrypted payload" in new Setup {
-      val checkPassword = PasswordCheckRequest(email, password)
 
       when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).
         thenReturn(Future.successful(HttpResponse(Status.NO_CONTENT)))
@@ -371,7 +369,7 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
       connector.createMfaSecret(email).futureValue shouldBe expectedSecret
 
-      verify(mockHttp).POSTEmpty(meq(endpoint(s"developer/$email/mfa")), any())(any(),any(),any())
+      verify(mockHttp).POSTEmpty(eqTo(endpoint(s"developer/$email/mfa")), any())(any(),any(),any())
 
     }
 

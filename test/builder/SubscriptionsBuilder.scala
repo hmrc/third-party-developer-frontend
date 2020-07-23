@@ -20,16 +20,12 @@ import domain._
 import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import domain.ApiSubscriptionFields.SubscriptionFieldValue
 import domain.ApiSubscriptionFields.SubscriptionFieldDefinition
-import cats.data.NonEmptyList
-
-// import model.SubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
-// import model.{APIStatus, APIVersion, Subscription, VersionSubscription}
 
 trait SubscriptionsBuilder {
 
-  def buildSubscription(name: String) = { 
+  def buildSubscription(name: String) = {
     APISubscription(name, s"service-$name", s"context-$name", Seq.empty, Some(false), false)
-  }  
+  }
 
   def buildAPISubscriptionStatus(name: String, context: Option[String] = None, fields: Option[SubscriptionFieldsWrapper] = None) : APISubscriptionStatus = {
 
@@ -46,7 +42,7 @@ trait SubscriptionsBuilder {
       subscribed = true,
       requiresTrust = false,
       fields = f,
-      isTestSupport = false) 
+      isTestSupport = false)
   }
 
   def emptySubscriptionFieldsWrapper(applicationId: String, clientId: String, context : String, version: String) = {

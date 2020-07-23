@@ -248,6 +248,9 @@ object ApplicationConnector {
   private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
   private[connectors] case class DeleteClientSecretRequest(actorEmailAddress: String)
 
+  import play.api.libs.json.JodaReads._
+  import play.api.libs.json.JodaWrites._
+
   object JsonFormatters {
     implicit val formatTPAClientSecret: Format[TPAClientSecret] = Json.format[TPAClientSecret]
     implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]

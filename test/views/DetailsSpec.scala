@@ -16,25 +16,23 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.routes
 import domain._
 import model.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
-import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.{SharedMetricsClearDown, TestApplications}
+import utils.{TestApplications, WithCSRFAddToken}
+import views.helper.CommonViewSpec
+import views.html.DetailsView
 
-class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServerPerSuite with SharedMetricsClearDown with TestApplications {
+class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddToken {
+
+  val detailsView = app.injector.instanceOf[DetailsView]
 
   case class Page(doc: Appendable) {
     lazy val body: Document = Jsoup.parse(doc.body)
@@ -45,7 +43,6 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
   }
 
   "Application details view" when {
-    implicit val mockConfig: ApplicationConfig = mock[ApplicationConfig]
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     implicit val loggedIn: DeveloperSession = utils.DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection: String = "details"
@@ -58,7 +55,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
           val application = anApplication(environment = deployedTo)
             .withTeamMember(loggedIn.developer.email, Role.DEVELOPER)
 
-          val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
           page.termsOfUse shouldBe null
         }
@@ -67,7 +64,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
           val application = anApplication(environment = deployedTo)
             .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
 
-          val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
           page.termsOfUse shouldBe null
         }
@@ -84,7 +81,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
             val application = anApplication(environment = deployedTo, access = access)
               .withTeamMember(loggedIn.developer.email, Role.DEVELOPER)
 
-            val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
             page.termsOfUse shouldBe null
           }
@@ -93,7 +90,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
             val application = anApplication(environment = deployedTo, access = access)
               .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
 
-            val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
             page.termsOfUse shouldBe null
           }
@@ -106,7 +103,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
             val application = anApplication(environment = deployedTo, access = access)
               .withTeamMember(loggedIn.developer.email, Role.DEVELOPER)
 
-            val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
             page.termsOfUse shouldBe null
           }
@@ -115,7 +112,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
             val application = anApplication(environment = deployedTo, access = access)
               .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
 
-            val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
             page.termsOfUse shouldBe null
           }
@@ -132,7 +129,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
                 .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
                 .withCheckInformation(checkInformation)
 
-              val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+              val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
               page.agreementDetails.text shouldBe "Not agreed"
               page.readLink shouldBe null
@@ -149,7 +146,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
                 .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
                 .withCheckInformation(checkInformation)
 
-              val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+              val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
               page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
               page.readLink shouldBe null
@@ -167,7 +164,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
                 .withTeamMembers(collaborators)
                 .withCheckInformation(checkInformation)
 
-              val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+              val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
               page.agreementDetails.text shouldBe "Not agreed"
               page.readLink.text shouldBe "Read and agree"
@@ -186,7 +183,7 @@ class DetailsSpec extends UnitSpec with Matchers with MockitoSugar with OneServe
                 .withTeamMembers(collaborators)
                 .withCheckInformation(checkInformation)
 
-              val page = Page(views.html.details(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+              val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
 
               page.agreementDetails.text shouldBe s"Agreed by $emailAddress on $expectedTimeStamp"
               page.readLink.text shouldBe "Read"

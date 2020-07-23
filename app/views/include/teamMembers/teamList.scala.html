@@ -14,13 +14,7 @@
  * limitations under the License.
  *@
 
-@import domain.Application
-@import domain.Role
-@import domain.DeveloperSession
-@import helpers.string._
-
-@import domain.AnchorStyle
-@import domain.Button
+@import domain.{AnchorStyle, Application, Button, DeveloperSession, Role}
 
 @(app: Application,role: Role, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (String, String) => Call)(implicit request: play.api.mvc.Request[Any])
 

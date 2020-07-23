@@ -19,10 +19,9 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.UserNavLinks
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
-import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent}
 import play.api.libs.crypto.CookieSigner
+import play.api.libs.json._
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{ApplicationService, SessionService}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,11 +29,11 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class Navigation @Inject()(val sessionService: SessionService,
                            val applicationService: ApplicationService,
-                           val messagesApi: MessagesApi,
+                           mcc: MessagesControllerComponents,
                            val errorHandler: ErrorHandler,
                            val cookieSigner : CookieSigner)
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController {
+  extends ApplicationController(mcc) {
 
   def navLinks: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request: MaybeUserRequest[AnyContent] =>
     val username = request.developerSession.flatMap(_.loggedInName)

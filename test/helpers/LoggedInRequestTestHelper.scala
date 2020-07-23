@@ -18,8 +18,7 @@ package helpers
 
 import mocks.service.SessionServiceMock
 import controllers.BaseControllerSpec
-import uk.gov.hmrc.play.test.WithFakeApplication
-import security.DevHubAuthorization
+import security.CookieEncoding
 import domain.Developer
 import service.SessionService
 import domain.LoggedInState
@@ -29,8 +28,8 @@ import play.api.test.FakeRequest
 import play.api.mvc.AnyContentAsEmpty
 import utils.WithLoggedInSession._
 
-trait LoggedInRequestTestHelper extends SessionServiceMock with WithFakeApplication with DevHubAuthorization {
-  this: BaseControllerSpec =>    
+trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding {
+  this: BaseControllerSpec =>
     val sessionService = mock[SessionService]
 
     val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
@@ -40,7 +39,7 @@ trait LoggedInRequestTestHelper extends SessionServiceMock with WithFakeApplicat
     fetchSessionByIdReturns(sessionId, session)
    
     private val sessionParams = Seq(
-      "csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken
+      "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
     )
 
     lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()

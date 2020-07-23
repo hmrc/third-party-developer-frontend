@@ -24,31 +24,37 @@ import org.mockito.BDDMockito.`given`
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK}
-import play.filters.csrf.CSRF.TokenProvider
 import service.DeskproService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{TestApplications, WithCSRFAddToken}
-import utils.CSRFTokenHelper._
 import utils.WithLoggedInSession._
+import utils.{TestApplications, WithCSRFAddToken}
+import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.failed
 
 class IpWhitelistSpec extends BaseControllerSpec with TestApplications with WithCSRFAddToken {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val mockDeskproService = mock[DeskproService]
+    val manageIpWhitelistView = app.injector.instanceOf[ManageIpWhitelistView]
+    val changeIpWhitelistView = app.injector.instanceOf[ChangeIpWhitelistView]
+    val changeIpWhitelistSuccessView = app.injector.instanceOf[ChangeIpWhitelistSuccessView]
+
     val underTest = new IpWhitelist(
       mockDeskproService,
       applicationServiceMock,
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      manageIpWhitelistView,
+      changeIpWhitelistView,
+      changeIpWhitelistSuccessView
     )
 
     val sessionId = "sessionId"
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
     val admin: Developer = Developer("admin@example.com", "Joe", "Bloggs")
     val developer: Developer = Developer("developer@example.com", "John", "Doe")

@@ -16,16 +16,18 @@
 
 package controllers.checkpages
 
-import controllers.{ApplicationController, ApplicationRequest}
+import controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
 import domain.{CheckInformation, SubscriptionData, _}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
+import views.html.checkpages.ApiSubscriptionsView
 
 import scala.concurrent.Future
-import controllers.APISubscriptions
 
 trait ApiSubscriptionsPartialController  {
   self: ApplicationController with CanUseCheckActions =>
+
+  val apiSubscriptionsViewTemplate: ApiSubscriptionsView
 
   private def asSubscriptionData(applicationRequest: ApplicationRequest[AnyContent]) =
     SubscriptionData(applicationRequest.role, applicationRequest.application, APISubscriptions.groupSubscriptions(applicationRequest.subscriptions))
@@ -60,7 +62,7 @@ trait ApiSubscriptionsPartialController  {
     subscriptionData: SubscriptionData,
     form: Option[Form[DummySubscriptionsForm]] = None
     )(implicit request: ApplicationRequest[AnyContent]) = {
-      views.html.checkpages.apiSubscriptions(
+    apiSubscriptionsViewTemplate(
         app,
         subscriptionData.role,
         subscriptionData.subscriptions,

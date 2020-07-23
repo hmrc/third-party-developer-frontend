@@ -16,31 +16,25 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.ProfileForm
 import domain._
 import org.jsoup.Jsoup
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
+import utils.WithCSRFAddToken
 import utils.ViewHelpers._
+import views.helper.CommonViewSpec
+import views.html.{ChangeProfileView, ProfileView}
 
-class ProfileSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
-
-  val appConfig = mock[ApplicationConfig]
+class ProfileSpec extends CommonViewSpec with WithCSRFAddToken {
   private val request = FakeRequest().withCSRFToken
 
   val developer = utils.DeveloperSession("developer@example.com", "FirstName", "LastName", Some("TestOrganisation"), loggedInState = LoggedInState.LOGGED_IN)
 
   "Profile page" should {
+    val profileView = app.injector.instanceOf[ProfileView]
 
     "render" in {
-
-      val page = views.html.profile.render(request, developer, appConfig, applicationMessages, "details")
+      val page = profileView.render(request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -51,14 +45,14 @@ class ProfileSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClea
   }
 
   "Change profile page" should {
+    val changeProfileView = app.injector.instanceOf[ChangeProfileView]
 
     "error for invalid form" in {
-
       val formWithErrors = ProfileForm.form
         .withError("firstname", "First name error message")
         .withError("lastname", "Last name error message")
 
-      val page = views.html.changeProfile.render(formWithErrors, request, developer, appConfig, applicationMessages, "details")
+      val page = changeProfileView.render(formWithErrors, request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

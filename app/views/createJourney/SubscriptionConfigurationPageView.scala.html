@@ -1,0 +1,50 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import domain._
+@import model.EditManageSubscription.EditApiConfigurationViewModel
+
+@this(devMain: DevMain)
+
+@(app: Application, pageNumber: Int, viewModel: EditApiConfigurationViewModel)(
+  implicit request: play.api.mvc.Request[Any],
+  loggedIn: DeveloperSession,
+  messages: Messages,
+  applicationConfig: config.ApplicationConfig)
+
+@pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion} ${viewModel.displayedStatus}" }
+
+@devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  back = BackButtonWithJavaScript
+) {
+
+  @errorSummaryForFormErrors(viewModel.errors)
+
+
+  <header>
+    <h2 class="heading-large">@pageHeading</h2>
+  </header>
+
+  @editApiMetadataPartial(app,
+    viewModel,
+    routes.ManageSubscriptions.subscriptionConfigurationPagePost(app.id, pageNumber),
+    Some(routes.ManageSubscriptions.subscriptionConfigurationStepPage(app.id, pageNumber))
+  )
+}

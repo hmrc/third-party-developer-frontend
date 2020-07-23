@@ -16,32 +16,29 @@
 
 package views
 
-import config.ApplicationConfig
 import domain.{Developer, DeveloperSession, LoggedInState, Session}
 import model.MfaMandateDetails
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
+import play.twirl.api.Html
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.Add2SVView
 
-class Add2SVSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
-  private implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
+  val add2SVView = app.injector.instanceOf[Add2SVView]
 
-  private def renderPage(mfaMandateDetails: MfaMandateDetails) = {
-    val request = FakeRequest().withCSRFToken
+  implicit val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
+  implicit val request = FakeRequest().withCSRFToken
 
-    val developer = Developer("email", "firstName", "lastName")
-    val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
-    val developerSession = DeveloperSession(session)
+  val developer = Developer("email", "firstName", "lastName")
+  val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
+  implicit val developerSession = DeveloperSession(session)
 
-    views.html.add2SV.render(mfaMandateDetails, applicationMessages, developerSession, request, appConfig)
+  private def renderPage(mfaMandateDetails: MfaMandateDetails): Html = {
+    add2SVView.render(mfaMandateDetails, messagesProvider, developerSession, request, appConfig)
   }
 
   "MFA Admin warning" should {

@@ -1,0 +1,70 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain.Application
+@import domain.Role
+@import domain.DeveloperSession
+@import views.html.include.teamMembers._
+@import helpers.string._
+@import config.ApplicationConfig
+@import domain.BackButtonWithJavaScript
+@import domain.Link
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
+@(app: Application, role: Role, loggedIn: DeveloperSession)(
+        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
+
+
+@pageHeading = @{ "Tell us your team members" }
+
+@devMain(
+ title = pageHeading,
+ userFullName = loggedIn.loggedInName,
+ back = BackButtonWithJavaScript,
+ developerSession = Some(loggedIn)
+) {
+
+
+ <header>
+  <h1 class="heading-xlarge">@pageHeading</h1>
+ </header>
+
+ <section>
+ <p>
+ Add members of your organisation and give them permissions to access this application.
+ </p>
+
+ @{
+  def createRemoveLink(appId: String, emailAddress: String) = {
+   controllers.checkpages.routes.CheckYourAnswers.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
+  }
+  teamList(app, role, loggedIn, controllers.checkpages.routes.CheckYourAnswers.teamAddMember(app.id), Link, createRemoveLink)
+ }
+
+ </br>
+
+ </section>
+
+ @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.teamAction(app.id), 'class -> "form") {
+  @helper.CSRF.formField
+
+  <div class="form-group">
+   <button id="submit" class="button" type="submit">Save and return</button>
+  </div>
+ }
+}

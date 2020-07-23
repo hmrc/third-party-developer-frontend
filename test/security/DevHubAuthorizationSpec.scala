@@ -17,15 +17,15 @@
 package security
 
 import cats.implicits._
-import config.ApplicationConfig
-import controllers.{routes, BaseControllerSpec}
+import config.{ApplicationConfig, ErrorHandler}
+import controllers.{routes, BaseController, BaseControllerSpec}
 import domain.{DeveloperSession, LoggedInState}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.scalatest.Matchers
 import play.api.http.Status._
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.Cookie
+import play.api.mvc.{Cookie, MessagesControllerComponents}
 import play.api.mvc.Results.{EmptyContent, _}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{defaultAwaitTimeout, redirectLocation}
@@ -34,25 +34,28 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.{DeveloperSession => DeveloperSessionBuilder}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
-  class TestDevHubAuthorization(implicit val appConfig: ApplicationConfig) extends ExtendedDevHubAuthorization {
+  class TestDevHubAuthorization(mcc: MessagesControllerComponents)
+                               (implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)
+    extends BaseController(mcc) with ExtendedDevHubAuthorization {
     override val sessionService: SessionService = mock[SessionService]
-    override val cookieSigner: CookieSigner = fakeApplication.injector.instanceOf[CookieSigner]
+    override val errorHandler: ErrorHandler = mock[ErrorHandler]
+    override val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
   }
 
   class Setup(developerSession: Option[DeveloperSession]) {
     given(appConfig.securedCookie).willReturn(false)
 
-    val underTest = new TestDevHubAuthorization()
+    val underTest = new TestDevHubAuthorization(mcc)
     val sessionId = "sessionId"
 
-    val loggedInAction = underTest.loggedInAction { implicit request =>
+    val loggedInAction = underTest.loggedInAction { _ =>
       Future.successful(Ok(EmptyContent()))
     }
 
-    val atLeastPartLoggedInAction = underTest.atLeastPartLoggedInEnablingMfaAction { implicit request =>
+    val atLeastPartLoggedInAction = underTest.atLeastPartLoggedInEnablingMfaAction { _ =>
       Future.successful(Ok(EmptyContent()))
     }
 

@@ -21,13 +21,14 @@ import controllers.checkpages.HasUrl._
 import domain._
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
-import views.html.checkpages.privacyPolicy
+import views.html.checkpages.PrivacyPolicyView
 
 import scala.concurrent.Future
 
 trait PrivacyPolicyPartialController {
   self: ApplicationController with CanUseCheckActions =>
 
+  val privacyPolicyView: PrivacyPolicyView
 
   def privacyPolicyPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
@@ -37,8 +38,8 @@ trait PrivacyPolicyPartialController {
         val form = PrivacyPolicyForm(
           hasUrl(std.privacyPolicyUrl, app.checkInformation.map(_.providedPrivacyPolicyURL)),
           std.privacyPolicyUrl)
-        Ok(privacyPolicy(app, PrivacyPolicyForm.form.fill(form), privacyPolicyActionRoute(app.id)))
-      case _ => Ok(privacyPolicy(app, PrivacyPolicyForm.form, privacyPolicyActionRoute(app.id)))
+        Ok(privacyPolicyView(app, PrivacyPolicyForm.form.fill(form), privacyPolicyActionRoute(app.id)))
+      case _ => Ok(privacyPolicyView(app, PrivacyPolicyForm.form, privacyPolicyActionRoute(app.id)))
     })
   }
 
@@ -47,7 +48,7 @@ trait PrivacyPolicyPartialController {
     val app = request.application
 
     def withFormErrors(form: Form[PrivacyPolicyForm]) = {
-      Future.successful(BadRequest(privacyPolicy(app, form, privacyPolicyActionRoute(app.id))))
+      Future.successful(BadRequest(privacyPolicyView(app, form, privacyPolicyActionRoute(app.id))))
     }
 
     def updateUrl(form: PrivacyPolicyForm) = {

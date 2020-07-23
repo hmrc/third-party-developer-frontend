@@ -16,7 +16,6 @@
 
 package controllers
 
-import connectors.ThirdPartyDeveloperConnector
 import domain._
 import mocks.service._
 import org.jsoup.Jsoup
@@ -29,13 +28,17 @@ import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import service.{AuditService, SessionService}
+import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.{ChangeDetailsView, DetailsView}
+import views.html.application.PendingApprovalView
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
 
@@ -282,7 +285,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         givenApplicationExists(application)
 
-        val result = application.withName(newName).callChangeDetailsAction
+        application.withName(newName).callChangeDetailsAction
 
         val updatedApplication = captureUpdatedApplication
         updatedApplication.name shouldBe application.name
@@ -311,7 +314,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val application = aSandboxApplication(adminEmail = loggedInUser.email)
         givenApplicationExists(application)
 
-        val result = application.withName(newName).callChangeDetailsAction
+        application.withName(newName).callChangeDetailsAction
 
         verify(underTest.applicationService).update(any[UpdateApplicationRequest])(any[HeaderCarrier])
         verify(underTest.applicationService, never).updateCheckInformation(mockEq(application), any[CheckInformation])(any[HeaderCarrier])
@@ -320,14 +323,21 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait Setup extends ApplicationServiceMock {
+    val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
+    val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
+    val detailsView = app.injector.instanceOf[DetailsView]
+    val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
+
     val underTest = new Details (
-      mock[ThirdPartyDeveloperConnector],
-      mock[AuditService],
       applicationServiceMock,
       mock[SessionService],
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      unauthorisedAppDetailsView,
+      pendingApprovalView,
+      detailsView,
+      changeDetailsView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

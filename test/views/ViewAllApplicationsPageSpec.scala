@@ -16,28 +16,20 @@
 
 package views
 
-import config.ApplicationConfig
 import controllers.ApplicationSummary
 import domain._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
-import play.api.i18n.Messages.Implicits.applicationMessages
-import play.api.mvc.Flash
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
-import utils.SharedMetricsClearDown
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
+import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
+import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
 
-class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
-
-  val appConfig: ApplicationConfig = mock[ApplicationConfig]
-
+class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document) : Boolean ={
-    val href = controllers.routes.AddApplication.addApplicationPrincipal.url
+    val href = controllers.routes.AddApplication.addApplicationPrincipal().url
 
     val greenButtons = document.select(s"a[href=$href][class=button]")
 
@@ -49,7 +41,9 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request = FakeRequest()
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
-      views.html.manageApplications.render(appSummaries, request, Flash(), loggedIn, applicationMessages, appConfig, "nav-section")
+      val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
+
+      manageApplicationsView.render(appSummaries, request, loggedIn, messagesProvider, appConfig, "nav-section")
     }
 
     "show the applications page if there is more than 0 sandbox applications" in {
@@ -147,7 +141,9 @@ class ViewAllApplicationsPageSpec extends UnitSpec with OneServerPerSuite with S
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request = FakeRequest().withCSRFToken
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
-      views.html.addApplicationSubordinateEmptyNest.render(request, Flash(), loggedIn, applicationMessages, appConfig, "nav-section")
+      val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
+
+      addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section")
     }
 
     "show the empty nest page when there are no applications" in {

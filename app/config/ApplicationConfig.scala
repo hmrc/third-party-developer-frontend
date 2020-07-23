@@ -18,75 +18,72 @@ package config
 
 import javax.inject.{Inject, Singleton}
 import org.joda.time._
-import play.api.{Configuration, Environment}
+import play.api.{ConfigLoader, Configuration}
 import service.MfaMandateService
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 @Singleton
-class ApplicationConfig @Inject()(override val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig {
+class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) extends ServicesConfig(config, runMode) {
+  def getConfigDefaulted[A](key: String, default: A)(implicit loader: ConfigLoader[A]) = config.getOptional[A](key)(loader).getOrElse(default)
 
-  override protected def mode = environment.mode
+  val env = runMode.env
 
   val contactFormServiceIdentifier = "API"
   val betaFeedbackUrl = "/contact/beta-feedback"
   val betaFeedbackUnauthenticatedUrl = "/contact/beta-feedback-unauthenticated"
   val thirdPartyDeveloperUrl = baseUrl("third-party-developer")
   val thirdPartyApplicationProductionUrl = thirdPartyApplicationUrl("third-party-application-production")
-  val thirdPartyApplicationProductionBearerToken = bearerToken("third-party-application-production")
+  val thirdPartyApplicationProductionBearerToken = getConfigDefaulted("third-party-application-production.bearer-token", "")
   val thirdPartyApplicationProductionUseProxy = useProxy("third-party-application-production")
   val thirdPartyApplicationSandboxUrl = thirdPartyApplicationUrl("third-party-application-sandbox")
-  val thirdPartyApplicationSandboxBearerToken = bearerToken("third-party-application-sandbox")
+  val thirdPartyApplicationSandboxBearerToken = getConfigDefaulted("third-party-application-sandbox.bearer-token", "")
   val thirdPartyApplicationSandboxUseProxy = useProxy("third-party-application-sandbox")
-  val thirdPartyApplicationProductionApiKey = apiKey("third-party-application-production")
-  val thirdPartyApplicationSandboxApiKey = apiKey("third-party-application-sandbox")
+  val thirdPartyApplicationProductionApiKey = getConfigDefaulted("third-party-application-production.api-key", "")
+  val thirdPartyApplicationSandboxApiKey = getConfigDefaulted("third-party-application-sandbox.api-key", "")
   val deskproUrl = baseUrl("hmrc-deskpro")
 
-  lazy val contactPath = runModeConfiguration.getString(s"$env.contactPath").getOrElse("")
+  lazy val contactPath = getConfigDefaulted(s"$env.contactPath", "")
+
   lazy val reportAProblemPartialUrl = s"$contactPath/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   lazy val reportAProblemNonJSUrl = s"$contactPath/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  lazy val apiDocumentationFrontendUrl = buildUrl("platform.frontend").getOrElse(baseUrl("api-documentation-frontend"))
-  lazy val thirdPartyDeveloperFrontendUrl = buildUrl("platform.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
+  lazy val apiDocumentationFrontendUrl = baseUrl("api-documentation-frontend")
+  lazy val thirdPartyDeveloperFrontendUrl = baseUrl("third-party-developer-frontend")
   lazy val productionApiBaseUrl = buildUrl("platform.api.production")
   lazy val sandboxApiBaseUrl = buildUrl("platform.api.sandbox")
-  lazy val sessionTimeoutInSeconds = getConfig("session.timeoutSeconds", runModeConfiguration.getInt)
-  lazy val analyticsToken = runModeConfiguration.getString(s"$env.google-analytics.token")
-  lazy val analyticsHost = runModeConfiguration.getString(s"$env.google-analytics.host").getOrElse("auto")
-  lazy val securedCookie = runModeConfiguration.getBoolean(s"$env.cookie.secure").getOrElse(true)
+
+  lazy val sessionTimeoutInSeconds = getInt("session.timeoutSeconds")
+  lazy val analyticsToken = config.getOptional[String](s"$env.google-analytics.token").filterNot(_ == "")
+  lazy val analyticsHost = getConfigDefaulted(s"$env.google-analytics.host", "auto")
+  lazy val securedCookie = getConfigDefaulted(s"$env.cookie.secure", true)
   lazy val title = "Developer Hub"
-  lazy val jsonEncryptionKey = getConfig("json.encryption.key")
-  lazy val hasSandbox = runModeConfiguration.getBoolean("hasSandbox").getOrElse(false)
-  lazy val currentTermsOfUseVersion = runModeConfiguration.getString("currentTermsOfUseVersion").getOrElse("")
-  lazy val currentTermsOfUseDate = DateTime.parse(runModeConfiguration.getString("currentTermsOfUseDate").getOrElse(""))
-  lazy val retryCount = runModeConfiguration.getInt("retryCount").getOrElse(0)
-  lazy val retryDelayMilliseconds = runModeConfiguration.getInt("retryDelayMilliseconds").getOrElse(500)
+  lazy val jsonEncryptionKey = getString("json.encryption.key")
+  lazy val hasSandbox = getConfigDefaulted("hasSandbox", false)
+  lazy val currentTermsOfUseVersion = getConfigDefaulted("currentTermsOfUseVersion", "")
+  lazy val currentTermsOfUseDate = DateTime.parse(getConfigDefaulted("currentTermsOfUseDate", ""))
+  lazy val retryCount = getConfigDefaulted("retryCount", 0)
+  lazy val retryDelayMilliseconds = getConfigDefaulted("retryDelayMilliseconds", 500)
+
   lazy val dateOfAdminMfaMandate: Option[LocalDate] = {
-    MfaMandateService.parseLocalDate(runModeConfiguration.getString("dateOfAdminMfaMandate"))
+    config.getOptional[String]("dateOfAdminMfaMandate") match {
+      case Some(s) => MfaMandateService.parseLocalDate(s)
+      case None => None
+    }
   }
 
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl = apiSubscriptionFieldsUrl("api-subscription-fields-production")
-  val apiSubscriptionFieldsProductionBearerToken = bearerToken("api-subscription-fields-production")
-  val apiSubscriptionFieldsProductionApiKey = apiKey("api-subscription-fields-production")
+  val apiSubscriptionFieldsProductionBearerToken = getConfigDefaulted("api-subscription-fields-production.bearer-token", "")
+  val apiSubscriptionFieldsProductionApiKey = getConfigDefaulted("api-subscription-fields-production.api-key", "")
   val apiSubscriptionFieldsProductionUseProxy = useProxy("api-subscription-fields-production")
   val apiSubscriptionFieldsSandboxUrl = apiSubscriptionFieldsUrl("api-subscription-fields-sandbox")
-  val apiSubscriptionFieldsSandboxBearerToken = bearerToken("api-subscription-fields-sandbox")
+  val apiSubscriptionFieldsSandboxBearerToken = getConfigDefaulted("api-subscription-fields-sandbox.bearer-token", "")
   val apiSubscriptionFieldsSandboxUseProxy = useProxy("api-subscription-fields-sandbox")
-  val apiSubscriptionFieldsSandboxApiKey = apiKey("api-subscription-fields-sandbox")
-
-  private def getConfig(key: String) =
-    runModeConfiguration.getString(key).getOrElse {
-      sys.error(s"[$key] is not configured!")
-    }
-
-  private def getConfig[T](key: String, block: String => Option[T]) =
-    block(key).getOrElse {
-      sys.error(s"[$key] is not configured!")
-    }
+  val apiSubscriptionFieldsSandboxApiKey = getConfigDefaulted("api-subscription-fields-sandbox.api-key", "")
 
   private def buildUrl(key: String) = {
-    (runModeConfiguration.getString(s"$env.$key.protocol"), runModeConfiguration.getString(s"$env.$key.host")) match {
-      case (Some(protocol), Some(host)) => Some(s"$protocol://$host")
-      case (None, Some(host)) => Some(s"https://$host")
+    (getConfigDefaulted(s"$env.$key.protocol", ""), getConfigDefaulted(s"$env.$key.host", "")) match {
+      case (p, h) if !p.isEmpty && !h.isEmpty => Some(s"$p://$h")
+      case (p, h) if p.isEmpty => Some(s"https://$h")
       case _ => None
     }
   }
@@ -101,8 +98,4 @@ class ApplicationConfig @Inject()(override val runModeConfiguration: Configurati
   private def thirdPartyApplicationUrl = serviceUrl("third-party-application")(_)
 
   private def useProxy(serviceName: String) = getConfBool(s"$serviceName.use-proxy", false)
-
-  private def bearerToken(serviceName: String) = getConfString(s"$serviceName.bearer-token", "")
-
-  private def apiKey(serviceName: String) = getConfString(s"$serviceName.api-key", "")
 }

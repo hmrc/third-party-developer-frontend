@@ -1,0 +1,74 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.{DeveloperSession, Role}
+@import helpers.string._
+@import include._
+@import model.Crumb
+@import include.teamMembers._
+
+@import domain.Button
+@import model.ApplicationViewModel
+@import views.html.include.DevMain
+
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
+
+@(applicationView: ApplicationViewModel, role: Role, form: Form[controllers.AddTeamMemberForm])(
+        implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
+@app = @{applicationView.application}
+
+@devMain(
+    title = titleError + "Manage team members",
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb("Manage team members"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
+    developerSession = Some(loggedIn)
+) {
+
+
+
+    @errorSummary(form)
+
+    <header>
+        <h1 class="heading-xlarge">Manage team members</h1>
+    </header>
+
+    @appEnvironment(app)
+    <br>
+
+    <section class="hard--top flush--bottom">
+        <h2 class="heading-large">Team members</h2>
+
+
+    @{
+        def createRemoveLink(appId: String, emailAddress: String) = {
+            controllers.routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
+        }
+
+        teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button, createRemoveLink)
+    }
+
+    </section>
+}
+

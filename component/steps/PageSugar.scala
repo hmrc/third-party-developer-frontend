@@ -20,7 +20,6 @@ import org.openqa.selenium._
 import org.openqa.selenium.support.ui.{ExpectedCondition, WebDriverWait}
 
 trait PageSugar {
-
   implicit val webDriver: WebDriver
   val seconds = 5
 

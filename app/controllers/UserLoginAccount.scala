@@ -19,10 +19,8 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain._
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Request, Result}
-import play.api.mvc.{Session => PlaySession}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result, Session => PlaySession}
 import service.AuditAction._
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -50,20 +48,25 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val errorHandler: ErrorHandler,
                                  val sessionService: SessionService,
                                  val applicationService: ApplicationService,
-                                 val messagesApi: MessagesApi,
+                                 mcc: MessagesControllerComponents,
                                  val mfaMandateService: MfaMandateService,
-                                 val cookieSigner : CookieSigner)
+                                 val cookieSigner : CookieSigner,
+                                 signInView: SignInView,
+                                 accountLockedView: AccountLockedView,
+                                 logInAccessCodeView: LogInAccessCodeView,
+                                 protectAccountNoAccessCodeView: ProtectAccountNoAccessCodeView,
+                                 protectAccountNoAccessCodeCompleteView: ProtectAccountNoAccessCodeCompleteView
+                                )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedOutController with Auditing {
+  extends LoggedOutController(mcc) with Auditing {
 
   import play.api.data._
 
   val loginForm: Form[LoginForm] = LoginForm.form
   val changePasswordForm: Form[ChangePasswordForm] = ChangePasswordForm.form
 
-
   def login: Action[AnyContent] = loggedOutAction { implicit request =>
-    successful(Ok(signIn("Sign in", loginForm)))
+    successful(Ok(signInView("Sign in", loginForm)))
   }
 
   def accountLocked: Action[AnyContent] = Action.async { implicit request =>
@@ -71,7 +74,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       _ <- extractSessionIdFromCookie(request)
         .map(sessionService.destroy)
         .getOrElse(successful(()))
-    } yield Locked(views.html.accountLocked())
+    } yield Locked(accountLockedView())
   }
 
   private def routeToLoginOr2SV(login: LoginForm,
@@ -88,7 +91,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
           )
         )
 
-      case None =>
+      case None => {
         successful(
           Redirect(
             routes.UserLoginAccount.enterTotp(), SEE_OTHER
@@ -96,14 +99,16 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
             playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)
           )
         )
+      }
 
-      case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA =>
+      case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA => {
         successful(
           withSessionCookie(
             Redirect(routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
             session.sessionId
           )
         )
+      }
     }
   }
 
@@ -111,7 +116,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     val requestForm = loginForm.bindFromRequest
 
     requestForm.fold(
-      errors => successful(BadRequest(signIn("Sign in", errors))),
+      errors => successful(BadRequest(signInView("Sign in", errors))),
       login => {
 
         for {
@@ -121,26 +126,27 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       } recover {
         case _: InvalidEmail =>
           audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> login.emailaddress))
-          Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+          Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
         case _: InvalidCredentials =>
           audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> login.emailaddress))
-          Unauthorized(signIn("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
+          Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, login.emailaddress)))
         case _: LockedAccount =>
           audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> login.emailaddress))
-          Locked(views.html.accountLocked())
-        case _: UnverifiedAccount => Forbidden(signIn("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
-          .withSession("email" -> login.emailaddress)
+          Locked(accountLockedView())
+        case _: UnverifiedAccount =>
+          Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, login.emailaddress)))
+            .withSession("email" -> login.emailaddress)
       }
     )
   }
 
   def enterTotp: Action[AnyContent] = Action.async { implicit request =>
-      Future.successful(Ok(logInAccessCode(ProtectAccountForm.form)))
+      Future.successful(Ok(logInAccessCodeView(ProtectAccountForm.form)))
   }
 
   def authenticateTotp: Action[AnyContent] = Action.async { implicit request =>
     ProtectAccountForm.form.bindFromRequest.fold(
-      errors => successful(BadRequest(logInAccessCode(errors))),
+      errors => successful(BadRequest(logInAccessCodeView(errors))),
       validForm => {
         val email = request.session.get("emailAddress").get
         sessionService.authenticateTotp(email, validForm.accessCode, request.session.get("nonce").get) flatMap { session =>
@@ -149,21 +155,21 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
         } recover {
           case _: InvalidCredentials =>
             audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email))
-            Unauthorized(logInAccessCode(ProtectAccountForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code")))
+            Unauthorized(logInAccessCodeView(ProtectAccountForm.form.fill(validForm).withError("accessCode", "You have entered an incorrect access code")))
         }
       }
     )
   }
 
   def get2SVHelpConfirmationPage(): Action[AnyContent] = loggedOutAction { implicit request =>
-    successful(Ok(protectAccountNoAccessCode()))
+    successful(Ok(protectAccountNoAccessCodeView()))
   }
 
   def get2SVHelpCompletionPage(): Action[AnyContent] = loggedOutAction { implicit request =>
-    successful(Ok(protectAccountNoAccessCodeComplete()))
+    successful(Ok(protectAccountNoAccessCodeCompleteView()))
   }
 
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
-    applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeComplete()))
+    applicationService.request2SVRemoval(request.session.get("emailAddress").getOrElse("")).map(_ => Ok(protectAccountNoAccessCodeCompleteView()))
   }
 }

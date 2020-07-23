@@ -22,15 +22,17 @@ import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import uk.gov.hmrc.time.DateTimeUtils
-import views.html.checkpages.termsOfUse
+import views.html.checkpages.TermsOfUseView
 
 import scala.concurrent.Future
 
 trait TermsOfUsePartialController {
+
   self: ApplicationController with CanUseCheckActions =>
+  val termsOfUseView: TermsOfUseView
 
   private def createTermsOfUse(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm], appId: String)(implicit request: controllers.ApplicationRequest[AnyContent]) = {
-    termsOfUse(
+    termsOfUseView(
       applicationViewModel,
       form,
       submitButtonLabel = submitButtonLabel,

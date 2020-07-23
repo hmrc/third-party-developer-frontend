@@ -16,22 +16,33 @@
 
 package steps
 
+import io.cucumber.datatable.DataTable
+import io.cucumber.scala.{EN, ScalaDsl}
+import io.cucumber.scala.Implicits._
 import matchers.CustomMatchers
-import pages._
-import cucumber.api.DataTable
-import cucumber.api.scala.{EN, ScalaDsl}
-import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.{By, WebDriver, WebElement}
+import org.openqa.selenium.interactions.Actions
 import org.scalatest.Matchers
+import pages._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.duration._
 
+object TableMisuseAdapters {
+  def asListOfKV(dataTable: DataTable): Map[String,String] = {
+    dataTable.asScalaRawLists[String].map( _.toList match {
+      case a :: b :: c  => a -> b
+      case _ => throw new RuntimeException("Badly constructed table")
+    }).toMap
+  }
+
+  def valuesInColumn(n: Int)(data: DataTable): List[String] = {
+    data.asLists().asScala.map(_.get(n)).toList
+  }
+}
+
 class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers {
-
-  import scala.collection.JavaConverters._
-
   implicit val webDriver: WebDriver = Env.driver
 
   val pages: Map[String, WebPage] = Map(
@@ -62,7 +73,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   }
 
   Given( """^I enter all the fields:$""") { (data: DataTable) =>
-    val form: mutable.Map[String, String] = data.asMap(classOf[String], classOf[String]).asScala
+    val form: Map[String,String] = data.asScalaRawMaps[String,String].head
     Form.populate(form)
   }
 
@@ -87,7 +98,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   }
 
   Then( """^I see:$""") { (labels: DataTable) =>
-    val textsToFind = labels.raw().flatten.toList
+    val textsToFind: List[String] = TableMisuseAdapters.valuesInColumn(0)(labels)
     eventually {
     CurrentPage.bodyText should containInOrder(textsToFind) }
   }
@@ -102,7 +113,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   }
 
   Then( """^I see on current page:$""") { (labels: DataTable) =>
-    val textsToFind = labels.raw().flatten.toList
+    val textsToFind = TableMisuseAdapters.valuesInColumn(0)(labels)
     Env.driver.findElement(By.tagName("body")).getText should containInOrder(textsToFind)
   }
 

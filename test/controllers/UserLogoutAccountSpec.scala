@@ -20,7 +20,7 @@ import java.util.UUID
 
 import domain._
 import mocks.service.SessionServiceMock
-import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
 import play.api.mvc.Request
@@ -32,7 +32,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.{LogoutConfirmationView, SignoutSurveyView}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
@@ -44,23 +46,29 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   val developerSession: DeveloperSession = DeveloperSession(session)
 
   trait Setup extends SessionServiceMock {
+    val signoutSurveyView = app.injector.instanceOf[SignoutSurveyView]
+    val logoutConfirmationView = app.injector.instanceOf[LogoutConfirmationView]
+
     val underTest = new UserLogoutAccount(
       mock[DeskproService],
       sessionServiceMock,
       mock[ApplicationService],
       mock[config.ErrorHandler],
-      messagesApi,
-      cookieSigner)
+      mcc,
+      cookieSigner,
+      signoutSurveyView,
+      logoutConfirmationView
+    )
 
-    given(underTest.sessionService.destroy(meq(session.sessionId))(any[HeaderCarrier]))
+    given(underTest.sessionService.destroy(eqTo(session.sessionId))(any[HeaderCarrier]))
         .willReturn(Future.successful(NO_CONTENT))
 
     def givenUserLoggedIn() =
       given(underTest.sessionService
-        .fetch(meq(session.sessionId))(any[HeaderCarrier]))
+        .fetch(eqTo(session.sessionId))(any[HeaderCarrier]))
         .willReturn(Future.successful(Some(session)))
 
-    val sessionParams = Seq("csrfToken" ->  fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" ->  app.injector.instanceOf[TokenProvider].generateToken)
 
     val loggedInRequestWithCsrfToken = FakeRequest()
       .withLoggedIn(underTest, implicitly)(sessionId)
@@ -93,7 +101,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       implicit val request = loggedInRequestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
       val result = await(underTest.logout()(request))
 
-      verify(underTest.sessionService, atLeastOnce()).destroy(meq(session.sessionId))(any[HeaderCarrier])
+      verify(underTest.sessionService, atLeastOnce()).destroy(eqTo(session.sessionId))(any[HeaderCarrier])
       result.session.data shouldBe Map.empty
     }
   }
@@ -153,8 +161,8 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/developer/logout")
 
-      verify(underTest.deskproService).submitSurvey(meq(form))(any[Request[AnyRef]], any[HeaderCarrier])
-      verify(underTest.applicationService).userLogoutSurveyCompleted(meq(developerSession.developer.email), meq("John Doe"), meq("2"), meq("no suggestions"))(any[HeaderCarrier])
+      verify(underTest.deskproService).submitSurvey(eqTo(form))(any[Request[AnyRef]], any[HeaderCarrier])
+      verify(underTest.applicationService).userLogoutSurveyCompleted(eqTo(developerSession.developer.email), eqTo("John Doe"), eqTo("2"), eqTo("no suggestions"))(any[HeaderCarrier])
     }
 
     "submit the survey and redirect to logout confirmation page if the user is logged in and has not given a satisfaction rating" in new Setup {
@@ -178,8 +186,8 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/developer/logout")
 
-      verify(underTest.deskproService).submitSurvey(meq(form))(any[Request[AnyRef]], any[HeaderCarrier])
-      verify(underTest.applicationService).userLogoutSurveyCompleted(meq(developerSession.developer.email), meq("John Doe"), meq(""), meq("no suggestions"))(any[HeaderCarrier])
+      verify(underTest.deskproService).submitSurvey(eqTo(form))(any[Request[AnyRef]], any[HeaderCarrier])
+      verify(underTest.applicationService).userLogoutSurveyCompleted(eqTo(developerSession.developer.email), eqTo("John Doe"), eqTo(""), eqTo("no suggestions"))(any[HeaderCarrier])
     }
   }
 }

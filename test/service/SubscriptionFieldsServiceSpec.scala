@@ -16,32 +16,23 @@
 
 package service
 
-import java.util.UUID
-
+import builder.SubscriptionsBuilder
 import connectors.ThirdPartyApplicationConnector
-import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SaveSubscriptionFieldsSuccessResponse, SaveSubscriptionFieldsAccessDeniedResponse, SubscriptionFieldValue}
-import domain.{APIIdentifier, Application, Environment}
-import org.joda.time.DateTime
-import org.mockito.ArgumentMatchers.{any, anyString, eq => meq}
-import org.mockito.Mockito.{never,verify}
-import org.mockito.BDDMockito.given
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import play.api.http.Status.CREATED
-import service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.test.UnitSpec
+import domain.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
+import domain.DevhubAccessRequirement.NoOne
+import domain._
 import mocks.connector.SubscriptionFieldsConnectorMock
+import org.joda.time.DateTime
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.BDDMockito.given
+import org.mockito.Mockito.{never, verify}
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatestplus.mockito.MockitoSugar
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import builder.SubscriptionsBuilder
-import domain.AccessRequirements
-import domain.DevhubAccessRequirements
-import domain.DevhubAccessRequirement.{NoOne, Anyone}
-import domain.Role
-import service.SubscriptionFieldsService.ValidateAgainstRole
-import service.SubscriptionFieldsService.SkipRoleValidation
 
 class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar with SubscriptionsBuilder {
 
@@ -69,7 +60,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
 
     given(
       mockThirdPartyApplicationConnector
-        .fetchApplicationById(meq(applicationId))(any[HeaderCarrier])
+        .fetchApplicationById(eqTo(applicationId))(any[HeaderCarrier])
     ).willReturn(
       Future.successful(
         Some(
@@ -138,7 +129,6 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
       val definition1 = buildSubscriptionFieldValue("field1", accessRequirements = access).definition
       val definition2 = buildSubscriptionFieldValue("field2", accessRequirements = access).definition
 
-      val value1 = SubscriptionFieldValue(definition1, "oldValue1")
       val value2 = SubscriptionFieldValue(definition2, "oldValue2")
 
       val oldValues = Seq(
@@ -167,10 +157,10 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
 
       verify(mockSubscriptionFieldsConnector)
         .saveFieldValues(
-          meq(clientId),
-          meq(apiContext),
-          meq(apiVersion),
-          meq(newFields1))(any[HeaderCarrier])
+          eqTo(clientId),
+          eqTo(apiContext),
+          eqTo(apiVersion),
+          eqTo(newFields1))(any[HeaderCarrier])
     }
 
     "save the fields fails with write access denied" in new Setup {
@@ -214,10 +204,10 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
       
        verify(mockSubscriptionFieldsConnector)
         .saveFieldValues(
-          meq(clientId),
-          meq(apiContext),
-          meq(apiVersion),
-          meq(expectedSavedFields))(any[HeaderCarrier])
+          eqTo(clientId),
+          eqTo(apiContext),
+          eqTo(apiVersion),
+          eqTo(expectedSavedFields))(any[HeaderCarrier])
     }
 
     "dont save when old values are populated" in new Setup {

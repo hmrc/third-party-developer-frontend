@@ -20,12 +20,13 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.RegistrationSuccessful
 import mocks.service.SessionServiceMock
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{eq => meq, _}
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.BDDMockito._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import views.html.{AccountVerifiedView, ConfirmationView, ExpiredVerificationLinkView, RegistrationView, ResendConfirmationView, SignInView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.failed
@@ -35,15 +36,28 @@ class RegistrationSpec extends BaseControllerSpec {
   var userPassword = "Password1!"
 
   trait Setup extends SessionServiceMock {
+    val registrationView = app.injector.instanceOf[RegistrationView]
+    val signInView = app.injector.instanceOf[SignInView]
+    val accountVerifiedView = app.injector.instanceOf[AccountVerifiedView]
+    val expiredVerificationLinkView = app.injector.instanceOf[ExpiredVerificationLinkView]
+    val confirmationView = app.injector.instanceOf[ConfirmationView]
+    val resendConfirmationView = app.injector.instanceOf[ResendConfirmationView]
+
     val underTest = new Registration(
       sessionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      registrationView,
+      signInView,
+      accountVerifiedView,
+      expiredVerificationLinkView,
+      confirmationView,
+      resendConfirmationView
     )
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
   }
 
   "registration" should {
@@ -93,7 +107,7 @@ class RegistrationSpec extends BaseControllerSpec {
     val code = "verificationCode"
 
     "redirect the user to login if their verification link matches an account" in new Setup {
-      given(underTest.connector.verify(meq(code))(any[HeaderCarrier])).willReturn(OK)
+      given(underTest.connector.verify(eqTo(code))(any[HeaderCarrier])).willReturn(OK)
       val result = await(underTest.verify(code)(FakeRequest()))
 
       status(result) shouldBe OK
@@ -101,7 +115,7 @@ class RegistrationSpec extends BaseControllerSpec {
     }
 
     "invite user to register again when the verification link has expired" in new Setup {
-      given(underTest.connector.verify(meq(code))(any[HeaderCarrier])).willReturn(failed(new BadRequestException("")))
+      given(underTest.connector.verify(eqTo(code))(any[HeaderCarrier])).willReturn(failed(new BadRequestException("")))
 
       val result = await(underTest.verify(code)(FakeRequest()))
 
@@ -113,7 +127,7 @@ class RegistrationSpec extends BaseControllerSpec {
       val email = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
       val request = FakeRequest().withSession(newSessionParams: _*)
-      given(underTest.connector.resendVerificationEmail(meq(email))(any[HeaderCarrier])).willReturn(NO_CONTENT)
+      given(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).willReturn(NO_CONTENT)
       val result = await(underTest.resendVerification()(request))
 
       status(result) shouldBe SEE_OTHER
@@ -123,7 +137,7 @@ class RegistrationSpec extends BaseControllerSpec {
       val email = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
       val request = FakeRequest().withSession(newSessionParams: _*)
-      given(underTest.connector.resendVerificationEmail(meq(email))(any[HeaderCarrier])).willReturn(NOT_FOUND)
+      given(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).willReturn(NOT_FOUND)
       val result = await(underTest.resendVerification()(request))
 
       status(result) shouldBe NOT_FOUND

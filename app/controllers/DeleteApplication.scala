@@ -17,29 +17,30 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import connectors.ThirdPartyDeveloperConnector
 import domain.Capabilities.SupportsDeletion
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, Result}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
 import service._
+import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnector,
-                                  auditService: AuditService,
-                                  val applicationService: ApplicationService,
+class DeleteApplication @Inject()(val applicationService: ApplicationService,
                                   val sessionService: SessionService,
                                   val errorHandler: ErrorHandler,
-                                  val messagesApi: MessagesApi,
-                                  val cookieSigner : CookieSigner
-                                  )
+                                  mcc: MessagesControllerComponents,
+                                  val cookieSigner : CookieSigner,
+                                  deleteApplicationView: DeleteApplicationView,
+                                  deletePrincipalApplicationConfirmView: DeletePrincipalApplicationConfirmView,
+                                  deletePrincipalApplicationCompleteView: DeletePrincipalApplicationCompleteView,
+                                  deleteSubordinateApplicationConfirmView: DeleteSubordinateApplicationConfirmView,
+                                  deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView)
                                  (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController {
+  extends ApplicationController(mcc) {
 
   private def canDeleteApplicationAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     checkActionForApprovedApps(SupportsDeletion,AdministratorOnly)(applicationId)(fun)
@@ -50,13 +51,13 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
 
   def deleteApplication(applicationId: String, error: Option[String] = None) =
     canViewDeleteApplicationAction(applicationId) { implicit request =>
-      val view = views.html.deleteApplication(request.application, request.role)
+      val view = deleteApplicationView(request.application, request.role)
       Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
     }
 
   def deletePrincipalApplicationConfirm(applicationId: String, error: Option[String] = None) =
     canDeleteApplicationAction(applicationId) { implicit request =>
-      val view = views.html.deletePrincipalApplicationConfirm(request.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
+      val view = deletePrincipalApplicationConfirmView(request.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
       Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
     }
 
@@ -64,12 +65,12 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
     val application = request.application
 
     def handleInvalidForm(formWithErrors: Form[DeletePrincipalApplicationForm]) =
-      Future(BadRequest(views.html.deletePrincipalApplicationConfirm(application, formWithErrors)))
+      Future(BadRequest(deletePrincipalApplicationConfirmView(application, formWithErrors)))
 
     def handleValidForm(validForm: DeletePrincipalApplicationForm) = {
       validForm.deleteConfirm match {
         case Some("Yes") => applicationService.requestPrincipalApplicationDeletion(request.user, application)
-          .map(_ => Ok(views.html.deletePrincipalApplicationComplete(application)))
+          .map(_ => Ok(deletePrincipalApplicationCompleteView(application)))
         case _ => Future(Redirect(routes.Details.details(applicationId)))
       }
     }
@@ -78,14 +79,14 @@ class DeleteApplication @Inject()(developerConnector: ThirdPartyDeveloperConnect
   }
 
   def deleteSubordinateApplicationConfirm(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
-    Future(Ok(views.html.deleteSubordinateApplicationConfirm(request.application)))
+    Future(Ok(deleteSubordinateApplicationConfirmView(request.application)))
   }
 
   def deleteSubordinateApplicationAction(applicationId: String) = canDeleteApplicationAction(applicationId) { implicit request =>
     val application = request.application
 
     applicationService.deleteSubordinateApplication(request.user, application)
-      .map(_ => Ok(views.html.deleteSubordinateApplicationComplete(application)))
+      .map(_ => Ok(deleteSubordinateApplicationCompleteView(application)))
 
   }
 

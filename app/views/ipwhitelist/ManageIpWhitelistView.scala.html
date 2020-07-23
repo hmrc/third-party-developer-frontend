@@ -1,0 +1,85 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.{Application, BackButtonWithJavaScript, DeveloperSession, Role}
+@import include._
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
+@(app: Application, roleOfLoggedIn: Role)(
+implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+
+@devMain(
+    title = "Manage whitelisted IPs",
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
+) {
+
+    <div class="ip-whitelist">
+        <header>
+            <h1 class="heading-xlarge">Manage whitelisted IPs</h1>
+            @appEnvironment(app)
+            <br>
+        </header>
+
+        <h2 class="heading-small">
+            API requests can only be made from these whitelisted IPs
+        </h2>
+        <table>
+            <tbody>
+            @for(ipRange <-app.ipWhitelist.toSeq.sorted) {
+                <tr><td>@ipRange</td></tr>
+            }
+            </tbody>
+        </table>
+        <div class="actions">
+            @if(roleOfLoggedIn == Role.ADMINISTRATOR) {
+                <p>
+                    Check with all your <a href="@routes.ManageTeam.manageTeam(app.id, None)">
+                    team members</a> before changing whitelisted IPs.
+                </p>
+
+                <a class="button" href="@controllers.routes.IpWhitelist.changeIpWhitelist(app.id)">
+                    Change whitelisted IPs</a>
+            } else {
+                <div class="panel panel-border-wide">
+                    <p>
+                        You cannot manage whitelisted IPs for this application because you're not an administrator.
+                    </p>
+                </div>
+                @defining(app.collaborators.filter(_.role.isAdministrator)) { administrators =>
+                    @if(administrators.size == 1) {
+                        <p>
+                            Ask the administrator <a href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> to request the change.
+                        </p>
+                    } else {
+                        <p>
+                            Ask one of these administrators to request the change:
+                        </p>
+                        <ul class="list list-bullet">
+                        @for(admin <- administrators) {
+                            <li><a href="mailto:@admin.emailAddress">@admin.emailAddress</a></li>
+                        }
+                        </ul>
+                    }
+                }
+            }
+        </div>
+    </div>
+}

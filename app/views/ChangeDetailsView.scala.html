@@ -1,0 +1,132 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.DeveloperSession
+@import include._
+@import model.Crumb
+@import domain.Capabilities.SupportChangingAppDetails
+
+@import model.ApplicationViewModel
+
+@this(devMain: DevMain, leftHandNav: LeftHandNav)
+
+@(form: Form[controllers.EditApplicationForm], applicationViewModel: ApplicationViewModel)(
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "details")
+@titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
+
+@app = @{applicationViewModel.application}
+
+@devMain(
+    title = titleError + "Change application details",
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb("Change application details"),
+        Crumb.application(app),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
+    developerSession = Some(loggedIn)
+) {
+    @errorSummary(form)
+
+    <header>
+        <h1 class="heading-xlarge">Change application details</h1>
+    </header>
+
+    @appEnvironment(app)
+    <br>
+
+    @helper.form(action = controllers.routes.Details.changeDetailsAction(app.id), 'class -> "form") {
+        @helper.CSRF.formField
+        <input type="hidden" id="applicationId" name="applicationId" value="@form.data("applicationId")"/>
+        @if(app.hasCapability(SupportChangingAppDetails)) {
+            <div class="form-group @if(form.errors("applicationName").nonEmpty) {form-group-error}">
+                <label id="applicationName-label" class="form-label-bold" for="applicationName">
+                    Application name
+                    @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
+                </label>
+                <input type="text"
+                       id="applicationName"
+                       name="applicationName"
+                       aria-labelledby="applicationName-label"
+                       value="@form.data("applicationName")"
+                       class="form-control @if(form.errors("applicationName").nonEmpty) {form-control-error}"/>
+            </div>
+        } else {
+            <input type="hidden" id="applicationName" name="applicationName" value="@form.data("applicationName")"/>
+        }
+        <div class="form-group @if(form.errors("description").nonEmpty) {form-group-error}">
+            <label id=description-label" class="form-label-bold" for="description">
+                Application description (optional)
+                <span class="form-hint">We will not show this to users.</span>
+                @fieldError(form.errors, "description", form.error("submissionError").isEmpty)
+            </label>
+            <textarea class="js-char-count form-control @if(form.errors("description").nonEmpty) {form-control-error}"
+                      id="description"
+                      name="description"
+                      cols="50"
+                      rows="3"
+                      maxlength="250"
+                      aria-labelledby="description-label">@form.data.get("description")</textarea>
+        </div>
+
+        <div class="form-group @if(form.errors("privacyPolicyUrl").nonEmpty) {form-group-error}">
+            <label id="privacyPolicyUrl-label" class="form-label-bold" for="privacyPolicyUrl">
+                Privacy policy URL (optional)
+                <span class="form-hint">We will show this to users when your application requests access to their data, making them more likely to agree.</span>
+                @fieldError(form.errors, "privacyPolicyUrl", form.error("submissionError").isEmpty)
+            </label>
+            <input type="text"
+                   id="privacyPolicyUrl"
+                   name="privacyPolicyUrl"
+                   aria-labelledby="privacyPolicyUrl-label"
+                   value="@form.data.get("privacyPolicyUrl")"
+                   class="form-control @if(form.errors("privacyPolicyUrl").nonEmpty) {form-control-error}"/>
+        </div>
+
+        <div class="form-group @if(form.errors("termsAndConditionsUrl").nonEmpty) {form-group-error}">
+            <label id="termsAndConditionsUrl-label" class="form-label-bold" for="termsAndConditionsUrl">
+                Terms and conditions URL (optional)
+                <span class="form-hint">We will show this to users when your application requests access to their data, making them more likely to agree.</span>
+                @fieldError(form.errors, "termsAndConditionsUrl", form.error("submissionError").isEmpty)
+            </label>
+            <input type="text"
+                   id="termsAndConditionsUrl"
+                   name="termsAndConditionsUrl"
+                   aria-labelledby="termsAndConditionsUrl-label"
+                   value="@form.data.get("termsAndConditionsUrl")"
+                   class="form-control @if(form.errors("termsAndConditionsUrl").nonEmpty) {form-control-error}"/>
+        </div>
+
+        <div class="form-group">
+            <button id="submit" class="button" type="submit">Save changes</button>
+            <a href="@controllers.routes.Details.details(app.id)" class="secondary-button">Cancel</a>
+        </div>
+    }
+}
+
+
+
+
+
+
+
+
+
+
+

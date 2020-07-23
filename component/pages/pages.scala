@@ -16,11 +16,9 @@
 
 package pages
 
-import steps.{Env, Form}
 import org.openqa.selenium.By
 import play.api.Logger
-
-import scala.collection.mutable
+import steps.{Env, Form}
 
 trait FormPage extends WebPage {
   val pageHeading: String
@@ -152,7 +150,7 @@ case object Setup2svEnterAccessCodePage extends FormPage {
   override val url: String = s"${Env.host}/developer/profile/protect-account/access-code"
 
   def enterAccessCode(accessCode: String) = {
-    val formData = mutable.Map("accessCode" -> accessCode)
+    val formData = Map("accessCode" -> accessCode)
 
     Form.populate(formData)
   }

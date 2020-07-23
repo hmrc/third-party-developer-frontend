@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers.any
 import helpers.FutureTimeoutSupportImpl
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -46,7 +46,6 @@ class SubscriptionFieldsConnectorProxySpec extends UnitSpec with MockitoSugar wi
   private val testActorSystem = ActorSystem("test-actor-system")
 
   class Setup(proxyEnabled: Boolean = false) {
-    private val fieldsId = UUID.randomUUID()
     val testApiKey: String = UUID.randomUUID().toString
     val mockHttpClient: HttpClient = mock[HttpClient]
     val mockProxiedHttpClient: ProxiedHttpClient = mock[ProxiedHttpClient]

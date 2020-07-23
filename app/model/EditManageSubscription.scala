@@ -16,14 +16,8 @@
 
 package model
 
-import play.api.data.Form
-import play.api.data.Forms._
-import domain.APISubscriptionStatusWithSubscriptionFields
-import domain.Role
-import domain.DevhubAccessLevel
-import domain.ApiSubscriptionFields.SubscriptionFieldValue
+import domain.{APISubscriptionStatusWithSubscriptionFields, DevhubAccessLevel, Role}
 import play.api.data.FormError
-import scala.annotation.meta.field
 
 object EditManageSubscription {
 

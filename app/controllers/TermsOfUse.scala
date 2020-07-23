@@ -23,12 +23,11 @@ import domain.{Application, CheckInformation, TermsOfUseAgreement, TermsOfUseSta
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form
-import play.api.i18n.MessagesApi
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
-import views.html.partials
+import views.html.{TermsOfUseView, partials}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,11 +35,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
                            val sessionService: SessionService,
                            val applicationService: ApplicationService,
-                           val messagesApi: MessagesApi,
-                           val cookieSigner : CookieSigner
+                           mcc: MessagesControllerComponents,
+                           val cookieSigner : CookieSigner,
+                           termsOfUseView: TermsOfUseView
                            )
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController() with ApplicationHelper {
+  extends ApplicationController(mcc) with ApplicationHelper {
 
   def canChangeTermsOfUseAction(applicationId: String)
                                 (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
@@ -54,7 +54,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
     if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
       Future.successful(BadRequest(errorHandler.badRequestTemplate))
     } else {
-      Future.successful(Ok(views.html.termsOfUse(applicationViewModelFromApplicationRequest, TermsOfUseForm.form)))
+      Future.successful(Ok(termsOfUseView(applicationViewModelFromApplicationRequest, TermsOfUseForm.form)))
     }
   }
 
@@ -75,7 +75,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
     }
 
     def handleInvalidForm(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm]) = {
-      Future.successful(BadRequest(views.html.termsOfUse(applicationViewModel, form)))
+      Future.successful(BadRequest(termsOfUseView(applicationViewModel, form)))
     }
 
     TermsOfUseForm.form.bindFromRequest.fold(

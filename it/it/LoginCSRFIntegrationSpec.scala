@@ -24,18 +24,21 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import connectors.{ConnectorMetrics, NoopConnectorMetrics}
 import controllers.routes
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.Headers
+import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
+import play.filters.csrf.CSRF
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.CSRFTokenHelper._
 
 class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with MockitoSugar {
-  private val config = Configuration("play.filters.csrf.token.sign" -> false)
+  private val config = Configuration( "play.filters.csrf.token.sign" -> false)
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
@@ -66,7 +69,10 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
   trait Setup {
     val userEmail = "thirdpartydeveloper@example.com"
     val userPassword = "password1!"
-    val loginRequest = FakeRequest(POST, "/developer/login")
+    val headers = Headers(AUTHORIZATION -> "AUTH_TOKEN")
+    val loginRequest = FakeRequest(POST, "/developer/login").withHeaders(headers)
+    val loginRequestWithCSRF = new FakeRequest(addCSRFToken(FakeRequest(POST, "/developer/login").withHeaders(headers)))
+    val csrftoken = CSRF.getToken(loginRequestWithCSRF)
   }
 
   "CSRF handling for login" when {
@@ -82,7 +88,7 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
     "there is no CSRF token in the request body but it is present in the headers" should {
       "redirect back to the login page" in new Setup {
-        private val request = loginRequest.withCSRFToken.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
+        private val request = addCSRFToken(loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword))
         private val result = await(route(app, request)).get
 
         status(result) shouldBe SEE_OTHER
@@ -126,8 +132,8 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
         setupThirdPartyApplicationSearchApplicationByEmailStub()
 
-        private val request = loginRequest.withCSRFToken
-          .withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
+        private val request = loginRequestWithCSRF.withFormUrlEncodedBody(
+          "emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
         private val result = await(route(app, request)).get
 
@@ -154,8 +160,8 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
 
         setupThirdPartyApplicationSearchApplicationByEmailStub()
 
-        private val request = loginRequest.withCSRFToken
-          .withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
+        private val request = loginRequestWithCSRF.withFormUrlEncodedBody(
+          "emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
         private val result = await(route(app, request)).get
 

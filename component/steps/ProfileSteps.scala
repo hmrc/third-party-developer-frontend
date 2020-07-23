@@ -16,16 +16,15 @@
 
 package steps
 
-import pages._
-import stubs.{DeveloperStub, Stubs}
-import cucumber.api.scala.{EN, ScalaDsl}
 import domain.UpdateProfileRequest
+import io.cucumber.scala.{EN, ScalaDsl}
 import org.openqa.selenium.WebDriver
 import org.scalatest.Matchers
+import pages._
 import play.api.http.Status._
+import stubs.{DeveloperStub, Stubs}
 
 class ProfileSteps extends ScalaDsl with EN with Matchers with NavigationSugar {
-
   implicit val webDriver: WebDriver = Env.driver
 
   Given( """^I want to successfully change my profile$""") { () =>

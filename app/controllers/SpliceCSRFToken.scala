@@ -17,8 +17,7 @@
 package controllers
 
 import play.api.mvc.{Call, RequestHeader}
-import play.filters.csrf.CSRF.Token
-import play.filters.csrf.CSRF.Token._
+import play.filters.csrf.CSRF._
 
 object SpliceCSRFToken {
   // Not materially different from play's play.filters.csrf.CSRF helper, but rather than
@@ -29,13 +28,5 @@ object SpliceCSRFToken {
               else s"${call.url}?${token.name}=${token.value}"
 
     call.copy(url = url)
-  }
-
-  def getToken(implicit request: RequestHeader): Option[Token] = {
-    // Try to get the re-signed token first, then get the "new" token.
-    for {
-      name <- request.tags.get(NameRequestTag)
-      value <- request.tags.get(ReSignedRequestTag) orElse request.tags.get(RequestTag)
-    } yield Token(name, value)
   }
 }

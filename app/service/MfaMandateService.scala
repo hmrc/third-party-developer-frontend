@@ -17,7 +17,6 @@
 package service
 
 import config.ApplicationConfig
-import domain.{Application, Environment, Role}
 import javax.inject.{Inject, Singleton}
 import org.joda.time.{Days, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -44,12 +43,13 @@ class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicat
   }
 
   private def isAdminOnProductionApplication(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    applicationService.fetchByTeamMemberEmail(email).map(applications =>
+    applicationService.fetchByTeamMemberEmail(email).map(applications => {
       applications
-        .filter(app => app.deployedTo.isProduction)
+        .filter(app => app.deployedTo.isProduction())
         .flatMap(app => app.collaborators)
         .filter(collaborators => collaborators.emailAddress == email)
         .exists(collaborator => collaborator.role.isAdministrator)
+    }
     )
   }
 
@@ -67,13 +67,11 @@ class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicat
 }
 
 object MfaMandateService {
-  def parseLocalDate(value: Option[String]): Option[LocalDate] = {
-    value.flatMap((configValue: String) => {
-      configValue.trim match {
-        case "" => None
-        case _ => Some(LocalDate.parse(configValue))
-      }
-    })
+  def parseLocalDate(value: String): Option[LocalDate] = {
+    value.trim match {
+      case "" => None
+      case _ => Some(LocalDate.parse(value))
+    }
   }
 }
 

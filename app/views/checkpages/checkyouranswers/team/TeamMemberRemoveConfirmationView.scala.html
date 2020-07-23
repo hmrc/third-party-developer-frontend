@@ -1,0 +1,57 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain.DeveloperSession
+@import config.ApplicationConfig
+@import domain.BackButtonWithJavaScript
+@import domain.Application
+@import views.html.include.DevMain
+
+@this(devMain: DevMain)
+
+@(app: Application, loggedIn: DeveloperSession, email: String)(
+        implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
+
+@pageHeading = @{ "Are you sure you want to remove this team member from your application?" }
+
+@devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
+) {
+  <header>
+   <h1 class="heading-xlarge">@pageHeading</h1>
+  </header>
+
+  <section>
+
+  <div>
+   <strong class="bold">Team member:</strong> @email
+  </div>
+
+  <br/>
+
+  @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.teamMemberRemoveAction(app.id)) {
+   @helper.CSRF.formField
+   <input type="hidden" name="email" value="@email">
+
+    <button id="submit" class="button button--padded" type="submit">Delete team member</button>
+    <a href="@controllers.checkpages.routes.CheckYourAnswers.team(app.id)" class="secondary-button">Cancel</a>
+  }
+  </section>
+
+ }

@@ -18,9 +18,10 @@ package controllers
 
 import java.util.UUID.randomUUID
 
+import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
-import domain._
 import domain.Role._
+import domain._
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -37,9 +38,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import builder._
+import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
+import views.html.checkpages.applicationcheck.LandingPageView
+import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
+import views.html.checkpages.checkyouranswers.CheckYourAnswersView
+import views.html.checkpages.checkyouranswers.team.TeamView
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future.successful
 
 class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder{
 
@@ -97,13 +103,36 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     exampleApi = None)
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val checkYourAnswersView = app.injector.instanceOf[CheckYourAnswersView]
+    val landingPageView = app.injector.instanceOf[LandingPageView]
+    val teamView = app.injector.instanceOf[TeamView]
+    val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
+    val teamMemberRemoveConfirmationView = app.injector.instanceOf[TeamMemberRemoveConfirmationView]
+    val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
+    val confirmNameView = app.injector.instanceOf[ConfirmNameView]
+    val termsAndConditionsView = app.injector.instanceOf[TermsAndConditionsView]
+    val privacyPolicyView = app.injector.instanceOf[PrivacyPolicyView]
+    val apiSubscriptionsViewTemplate = app.injector.instanceOf[ApiSubscriptionsView]
+    val contactDetailsView = app.injector.instanceOf[ContactDetailsView]
+
     val underTest = new CheckYourAnswers(
       applicationServiceMock,
       mock[ApplicationCheck],
       sessionServiceMock,
       mockErrorHandler,
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      checkYourAnswersView,
+      landingPageView,
+      teamView,
+      teamMemberAddView,
+      teamMemberRemoveConfirmationView,
+      termsOfUseView,
+      confirmNameView,
+      termsAndConditionsView,
+      privacyPolicyView,
+      apiSubscriptionsViewTemplate,
+      contactDetailsView
     )
 
     fetchSessionByIdReturns(sessionId, session)
@@ -143,7 +172,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     implicit val hc = HeaderCarrier()
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
     val loggedInRequestWithFormBody = loggedInRequest.withFormUrlEncodedBody()

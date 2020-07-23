@@ -19,18 +19,17 @@ package steps
 import java.net.URLEncoder
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import matchers.CustomMatchers
-import pages._
-import stubs.{DeveloperStub, Stubs}
-import cucumber.api.DataTable
-import cucumber.api.scala.{EN, ScalaDsl}
 import domain._
+import io.cucumber.datatable.DataTable
+import io.cucumber.scala.{EN, ScalaDsl}
+import io.cucumber.scala.Implicits._
+import matchers.CustomMatchers
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
+import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-
-import scala.collection.mutable
+import stubs.{DeveloperStub, Stubs}
 
 case class MfaSecret(secret: String)
 
@@ -39,16 +38,13 @@ object MfaSecret {
 }
 
 object TestContext {
-  var developer: Developer = null
+  var developer: Developer = _
 
   var sessionIdForLoggedInUser: String = ""
   var sessionIdForMfaMandatingUser: String = ""
 }
 
 class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers {
-
-  import scala.collection.JavaConverters._
-
   implicit val webDriver: WebDriver = Env.driver
 
   private val accessCode = "123456"
@@ -57,7 +53,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     goOn(SignInPage.default)
     webDriver.manage().deleteAllCookies()
     webDriver.navigate().refresh()
-    Form.populate(mutable.Map("email address" -> email, "password" -> password))
+    Form.populate(Map("email address" -> email, "password" -> password))
     click on id("submit")
     on(RecommendMfaPage)
     click on waitForElement(By.id("skip")) // Skip the 2SV reminder screen
@@ -66,14 +62,14 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Given("""^I am registered with$""") { data: DataTable =>
-    val result = data.asMaps(classOf[String], classOf[String]).get(0)
+    val result: Map[String,String] = data.asScalaRawMaps[String, String].head
 
-    val password = result.get("Password")
+    val password = result("Password")
 
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
     Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
 
-    val developer = Developer(result.get("Email address"), result.get("First name"), result.get("Last name"), None)
+    val developer = Developer(result("Email address"), result("First name"), result("Last name"), None)
 
     TestContext.developer = developer
 
@@ -136,7 +132,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Given("""^I fill in the login form with$""") { (data: DataTable) =>
-    val form = data.asMaps(classOf[String], classOf[String]).get(0).asScala
+    val form = data.asScalaRawMaps[String, String].head
     Form.populate(form)
   }
 
@@ -178,7 +174,6 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
 
   def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
-
     val sessionId = "sessionId_" + loggedInState.toString
 
     val session = Session(sessionId, developer, loggedInState)

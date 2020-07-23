@@ -28,6 +28,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class AddApplicationSuccessSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
@@ -53,13 +56,33 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com")))
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
+    val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
+    val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
+    val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
+    val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
+    val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
+    val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
+    val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+
+
     val underTest = new AddApplication(
       applicationServiceMock,
       sessionServiceMock,
       mock[AuditService],
       mock[ErrorHandler],
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      addApplicationSubordinateEmptyNestView,
+      manageApplicationsView,
+      accessTokenSwitchView,
+      usingPrivilegedApplicationCredentialsView,
+      tenDaysWarningView,
+      addApplicationStartSubordinateView,
+      addApplicationStartPrincipalView,
+      addApplicationSubordinateSuccessView,
+      addApplicationNameView
     )
 
     implicit val hc = HeaderCarrier()
@@ -68,7 +91,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 
-    private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest, implicitly)(sessionId)

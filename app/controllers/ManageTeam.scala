@@ -17,7 +17,6 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import connectors.ThirdPartyDeveloperConnector
 import domain.AddTeamMemberPageMode.{ApplicationCheck, CheckYourAnswers, ManageTeamMembers}
 import domain.Capabilities.SupportsTeamMembers
 import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
@@ -25,11 +24,12 @@ import domain._
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Result}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import service._
+import views.html.checkpages.applicationcheck.team.TeamMemberAddView
+import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,14 +37,17 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ManageTeam @Inject()(val sessionService: SessionService,
                            val auditService: AuditService,
-                           developerConnector: ThirdPartyDeveloperConnector,
                            val applicationService: ApplicationService,
                            val errorHandler: ErrorHandler,
-                           val messagesApi: MessagesApi,
-                           val cookieSigner : CookieSigner
+                           mcc: MessagesControllerComponents,
+                           val cookieSigner : CookieSigner,
+                           manageTeamView: ManageTeamView,
+                           addTeamMemberView: AddTeamMemberView,
+                           teamMemberAddView: TeamMemberAddView,
+                           removeTeamMemberView: RemoveTeamMemberView
                            )
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController {
+  extends ApplicationController(mcc) {
 
   private def whenAppSupportsTeamMembers(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)
@@ -56,12 +59,12 @@ class ManageTeam @Inject()(val sessionService: SessionService,
       checkActionForApprovedApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
 
   def manageTeam(applicationId: String, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    val view = views.html.manageTeamViews.manageTeam(applicationViewModelFromApplicationRequest, request.role, AddTeamMemberForm.form)
+    val view = manageTeamView(applicationViewModelFromApplicationRequest, request.role, AddTeamMemberForm.form)
     Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
   def addTeamMember(applicationId: String) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    Future.successful(Ok(views.html.manageTeamViews.addTeamMember(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
+    Future.successful(Ok(addTeamMemberView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
   }
 
   def addTeamMemberAction(applicationId: String, addTeamMemberPageMode: AddTeamMemberPageMode) =
@@ -75,9 +78,9 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
     def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]) : Result = {
       val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
-        case ManageTeamMembers => views.html.manageTeamViews.addTeamMember.apply
-        case ApplicationCheck => views.html.checkpages.applicationcheck.team.teamMemberAdd.apply
-        case CheckYourAnswers => views.html.checkpages.checkyouranswers.team.teamMemberAdd.apply
+        case ManageTeamMembers => addTeamMemberView.apply
+        case ApplicationCheck => teamMemberAddView.apply
+        case CheckYourAnswers => teamMemberAddView.apply
 
       }
 
@@ -109,13 +112,12 @@ class ManageTeam @Inject()(val sessionService: SessionService,
 
       application.findCollaboratorByHash(teamMemberHash) match {
         case Some(collaborator) =>
-          successful(Ok(views.html.manageTeamViews.removeTeamMember(applicationViewModelFromApplicationRequest, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
+          successful(Ok(removeTeamMemberView(applicationViewModelFromApplicationRequest, RemoveTeamMemberConfirmationForm.form, collaborator.emailAddress)))
         case None => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }
   }
 
   def removeTeamMemberAction(applicationId: String) = canEditTeamMembers(applicationId) { implicit request =>
-    val application = request.application
 
     def handleValidForm(form: RemoveTeamMemberConfirmationForm) = {
       form.confirm match {
@@ -127,7 +129,7 @@ class ManageTeam @Inject()(val sessionService: SessionService,
     }
 
     def handleInvalidForm(form: Form[RemoveTeamMemberConfirmationForm]) =
-      successful(BadRequest(views.html.manageTeamViews.removeTeamMember(applicationViewModelFromApplicationRequest, form, form("email").value.getOrElse(""))))
+      successful(BadRequest(removeTeamMemberView(applicationViewModelFromApplicationRequest, form, form("email").value.getOrElse(""))))
 
     RemoveTeamMemberConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }

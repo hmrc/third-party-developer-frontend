@@ -23,7 +23,7 @@ import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.{never, verify, when}
 import play.api.test.FakeRequest
@@ -33,24 +33,29 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html.TermsOfUseView
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
+
     val underTest = new TermsOfUse(
       mockErrorHandler,
       sessionServiceMock,
       applicationServiceMock,
-      messagesApi,
-      cookieSigner
-      )
+      mcc,
+      cookieSigner,
+      termsOfUseView
+    )
 
     val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
     val sessionId = "sessionId"
     val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
@@ -71,12 +76,12 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     
         fetchByApplicationIdReturns(application.id, application)
       
-        given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(Seq.empty[APISubscriptionStatus])
+        given(underTest.applicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier])).willReturn(Seq.empty[APISubscriptionStatus])
       
         application
     }
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
+    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).willReturn(Some(session))
   }
 
   "termsOfUsePartial" should {
@@ -152,7 +157,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       val application = givenApplicationExists()
       val captor: ArgumentCaptor[CheckInformation] = ArgumentCaptor.forClass(classOf[CheckInformation])
-      given(underTest.applicationService.updateCheckInformation(mockEq(application), captor.capture())(any())).willReturn(Future.successful(ApplicationUpdateSuccessful))
+      given(underTest.applicationService.updateCheckInformation(eqTo(application), captor.capture())(any())).willReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result = await(addToken(underTest.agreeTermsOfUse(appId))(request))

@@ -28,13 +28,14 @@ import org.mockito.Mockito.verify
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.CSRFTokenHelper._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.html._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
@@ -57,13 +58,32 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
+    val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
+    val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
+    val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
+    val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
+    val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
+    val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
+    val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
+    val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+
     val underTest = new AddApplication(
       applicationServiceMock,
       sessionServiceMock,
       mock[AuditService],
       mock[ErrorHandler],
-      messagesApi,
-      cookieSigner
+      mcc,
+      cookieSigner,
+      addApplicationSubordinateEmptyNestView,
+      manageApplicationsView,
+      accessTokenSwitchView,
+      usingPrivilegedApplicationCredentialsView,
+      tenDaysWarningView,
+      addApplicationStartSubordinateView,
+      addApplicationStartPrincipalView,
+      addApplicationSubordinateSuccessView,
+      addApplicationNameView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -78,15 +98,11 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
     givenApplicationNameIsValid()
 
-    private val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
-      .withSession(sessionParams: _*)
 
   }
 
@@ -131,7 +147,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
         givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
-        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
+        private val request = loggedInRequest
           .withCSRFToken
           .withFormUrlEncodedBody(
             ("applicationName", invalidApplicationName),
@@ -193,7 +209,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
         givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
-        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
+        private val request = loggedInRequest
           .withCSRFToken
           .withFormUrlEncodedBody(
             ("applicationName", invalidApplicationName),
@@ -217,7 +233,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
         givenApplicationNameIsInvalid(Invalid(invalidName = false, duplicateName = true))
 
-        private val request = utils.CSRFTokenHelper.CSRFRequestHeader(loggedInRequest)
+        private val request = loggedInRequest
           .withCSRFToken
           .withFormUrlEncodedBody(
             ("applicationName", applicationName),

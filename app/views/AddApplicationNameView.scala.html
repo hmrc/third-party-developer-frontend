@@ -1,0 +1,74 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import domain.DeveloperSession
+@import include._
+@import domain.Environment
+@import model.Crumb
+
+@this(devMain: DevMain)
+
+@(form: Form[controllers.AddApplicationNameForm], environment: Environment
+)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+
+@pageHeading = @{ "What's the name of your application?" }
+
+@devMain(
+    title = pageHeading,
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb(pageHeading),
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    developerSession = Some(loggedIn)
+) {
+
+    @errorSummary(form)
+
+    <Header>
+        <h1 class="heading-xlarge">@pageHeading</h1>
+    </Header>
+
+    @if(environment.isProduction()) {
+    <p>We show this name to your users when they authorise your software to interact with HMRC.</p>
+    <p>It must comply with our
+        <a href="/api-documentation/docs/using-the-hub/name-guidelines">naming guidelines</a>.</p>
+    <br>
+    }
+
+    @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(environment)) {
+
+    @helper.CSRF.formField
+
+    <div class="form-group @if(form.errors("applicationName").nonEmpty) {form-group-error}">
+        <label class="form-label" for="applicationName" id="applicationName-label">Application name</label>
+        @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
+        <input type="text"
+            id="applicationName"
+            name="applicationName"
+            aria-labelledby="applicationName-label"
+            value="@form.data.get("applicationName")"
+        class="form-control @if(form.errors("applicationName").nonEmpty) {form-control-error}"
+        maxLength="50"/>
+    </div>
+
+    <div class="form-group">
+        <button id="submit" class="button" type="submit">Continue</button>
+    </div>
+
+    }
+}

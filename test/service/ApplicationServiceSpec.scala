@@ -18,8 +18,8 @@ package service
 
 import java.util.UUID
 import java.util.UUID.randomUUID
+
 import builder._
-import cats.data.NonEmptyList
 import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
@@ -32,20 +32,18 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status.OK
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future._
-import scala.util.Random
-import service.SubscriptionFieldsService.SkipRoleValidation
+import scala.concurrent.Future.successful
 
 class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures with SubscriptionsBuilder {
 
@@ -241,8 +239,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       val subscriptionFieldDefinitions = Seq(value1.definition, value2.definition)
       val subscriptionFieldsWithValue = Seq(value1, value2)
 
-      
-      private val fieldDefinitionsResponse = Seq(subscriptionFieldDefinitions)
       theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
       given(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).willReturn(apis)
 
@@ -423,8 +419,6 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
         private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, ""))
-
-        private val fields: Fields = fieldDefinitions.map(definition => (definition.name, "")).toMap
 
         theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
 
