@@ -43,7 +43,6 @@ import scala.util.Success
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
-  import ApplicationConnector.JsonFormatters._
   import ApplicationConnector._
 
   protected val httpClient: HttpClient
@@ -184,7 +183,8 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def updateApproval(id: String,
-                     approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+                     approvalInformation: CheckInformation)
+                    (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST(s"$serviceBaseUrl/application/$id/check-information", Json.toJson(approvalInformation)) map {
       _ => ApplicationUpdateSuccessful
     } recover recovery
@@ -192,6 +192,8 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def addClientSecrets(id: String,
                        clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
+    import ApplicationConnector.JsonFormatters._
+
     http.POST[ClientSecretRequest, AddClientSecretResponse](s"$serviceBaseUrl/application/$id/client-secret", clientSecretRequest) map { response =>
       // API-4275: Once actual secret is only returned by TPA for new ones, will be able to find based on 'secret' field being defined
 //      val newSecret: TPAClientSecret = response.clientSecrets.find(_.secret.isDefined).getOrElse(throw new NotFoundException("New Client Secret Not Found"))
@@ -205,6 +207,8 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def deleteClientSecret(applicationId: UUID,
                          clientSecretId: String,
                          actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+    import ApplicationConnector.JsonFormatters._
+
     http.POST(s"$serviceBaseUrl/application/${applicationId.toString}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
@@ -248,10 +252,11 @@ object ApplicationConnector {
   private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
   private[connectors] case class DeleteClientSecretRequest(actorEmailAddress: String)
 
-  import play.api.libs.json.JodaReads._
-  import play.api.libs.json.JodaWrites._
 
   object JsonFormatters {
+    import play.api.libs.json.JodaReads._
+    import play.api.libs.json.JodaWrites._
+
     implicit val formatTPAClientSecret: Format[TPAClientSecret] = Json.format[TPAClientSecret]
     implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]
     implicit val formatDeleteClientSecretRequest: Format[DeleteClientSecretRequest] = Json.format[DeleteClientSecretRequest]

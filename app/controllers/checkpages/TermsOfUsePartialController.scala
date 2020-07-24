@@ -27,11 +27,10 @@ import views.html.checkpages.TermsOfUseView
 import scala.concurrent.Future
 
 trait TermsOfUsePartialController {
-
   self: ApplicationController with CanUseCheckActions =>
   val termsOfUseView: TermsOfUseView
 
-  private def createTermsOfUse(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm], appId: String)(implicit request: controllers.ApplicationRequest[AnyContent]) = {
+  private def createTermsOfUse(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm])(implicit request: controllers.ApplicationRequest[AnyContent]) = {
     termsOfUseView(
       applicationViewModel,
       form,
@@ -46,18 +45,17 @@ trait TermsOfUsePartialController {
     val checkInformation = app.checkInformation.getOrElse(CheckInformation())
     val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
 
-    Future.successful(Ok(createTermsOfUse(applicationViewModelFromApplicationRequest, TermsOfUseForm.form.fill(termsOfUseForm),appId)))
+    Future.successful(Ok(createTermsOfUse(applicationViewModelFromApplicationRequest, TermsOfUseForm.form.fill(termsOfUseForm))))
   }
 
   def termsOfUseAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-
     val version = appConfig.currentTermsOfUseVersion
     val app = request.application
 
     val requestForm = TermsOfUseForm.form.bindFromRequest
 
     def withFormErrors(form: Form[TermsOfUseForm]) = {
-      Future.successful(BadRequest(createTermsOfUse(applicationViewModelFromApplicationRequest, form, app.id)))
+      Future.successful(BadRequest(createTermsOfUse(applicationViewModelFromApplicationRequest, form)))
     }
 
     def withValidForm(form: TermsOfUseForm) = {

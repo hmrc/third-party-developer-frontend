@@ -67,8 +67,6 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     with CheckInformationFormHelper
     {
 
-//      override val termsOfUseView: TermsOfUseView = termsOfUseViewTemmplate
-
   def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val form = createCheckFormForApplication(request)
     Future.successful(Ok(landingPageView(applicationViewModelFromApplicationRequest(),form)))
