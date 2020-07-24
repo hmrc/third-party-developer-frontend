@@ -59,7 +59,6 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
   }
 
   def agreeTermsOfUse(id: String) = canChangeTermsOfUseAction(id) { implicit request =>
-
     def handleValidForm(app: Application, form: TermsOfUseForm) = {
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {
         val information = app.checkInformation.getOrElse(CheckInformation())

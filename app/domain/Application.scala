@@ -29,9 +29,6 @@ import uk.gov.hmrc.play.json.Union
 import uk.gov.hmrc.time.DateTimeUtils
 import helpers.string._
 
-import play.api.libs.json.JodaReads._
-import play.api.libs.json.JodaWrites._
-
 case class UpliftRequest(applicationName: String, requestedByEmailAddress: String)
 
 object UpliftRequest {
@@ -46,6 +43,9 @@ case class ApplicationState(
 )
 
 object ApplicationState {
+  import play.api.libs.json.JodaReads._
+  import play.api.libs.json.JodaWrites._
+
   implicit val format = Json.format[ApplicationState]
 
   val testing = ApplicationState(State.TESTING, None)
@@ -69,13 +69,16 @@ object Collaborator {
 case class ClientSecret(id: String, name: String, createdOn: DateTime, lastAccess: Option[DateTime] = None)
 
 object ClientSecret {
+  import play.api.libs.json.JodaReads._
+  import play.api.libs.json.JodaWrites._
+
   implicit val format = Json.format[ClientSecret]
 }
 
 case class ClientSecretRequest(actorEmailAddress: String)
 
 object ClientSecretRequest {
-  implicit val format2 = Json.format[ClientSecretRequest]
+  implicit val format = Json.format[ClientSecretRequest]
 }
 
 case class ApplicationToken(clientId: String,
@@ -84,7 +87,6 @@ case class ApplicationToken(clientId: String,
 
 object ApplicationToken {
   implicit val format = Json.format[ApplicationToken]
-  implicit val format1 = Json.format[ClientSecret]
 }
 
 case class OverrideFlag(overrideType: String)
@@ -245,6 +247,11 @@ object ContactDetails {
 case class TermsOfUseAgreement(emailAddress: String, timeStamp: DateTime, version: String)
 
 object TermsOfUseAgreement {
+  import play.api.libs.json.JodaReads._
+  import play.api.libs.json.JodaWrites.JodaDateTimeNumberWrites
+
+  implicit val numberWrites = JodaDateTimeNumberWrites
+
   implicit val format = Json.format[TermsOfUseAgreement]
 }
 
@@ -382,6 +389,9 @@ case class Application(id: String,
 }
 
 object Application {
+  import play.api.libs.json.JodaReads._
+  import play.api.libs.json.JodaWrites._
+
   implicit val applicationFormat = Json.format[Application]
 
   implicit val ordering: Ordering[Application] = Ordering.by(_.name)
