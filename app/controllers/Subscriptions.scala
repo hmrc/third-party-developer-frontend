@@ -34,6 +34,7 @@ import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRe
 import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.Permissions.TeamMembersOnly
 
 @Singleton
 class Subscriptions @Inject() (
@@ -59,7 +60,7 @@ class Subscriptions @Inject() (
     checkActionForAllStates(ManageLockedSubscriptions, AdministratorOnly)(applicationId)(fun)
 
   private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    checkActionForAllStates(SupportsSubscriptions, SandboxOrAdmin)(applicationId)(fun)
+    checkActionForAllStates(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
 
   def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
