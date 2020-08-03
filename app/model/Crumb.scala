@@ -41,4 +41,6 @@ object Crumb {
 
   def applicationMetadata(application: Application) =
     Crumb("Subscription configuration", s"${routes.ManageSubscriptions.listApiSubscriptions(application.id)}", Some("data-breadcrumb-app-metadata"))
+
+  def manageProfile = Crumb("Manage profile", s"${routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
 }
