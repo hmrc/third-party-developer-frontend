@@ -32,7 +32,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  emailPreferencesSummaryView: EmailPreferencesSummaryView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
-
   def emailPreferencesSummaryPage: Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(emailPreferencesSummaryView()))
   }

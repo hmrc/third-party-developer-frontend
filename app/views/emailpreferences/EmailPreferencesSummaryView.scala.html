@@ -15,10 +15,10 @@
  *@
 
 @import config.ApplicationConfig
+@import domain.DeveloperSession
 @import include._
-@import domain.{BackButtonWithJavaScript, DeveloperSession}
-@import uk.gov.hmrc.urls.Link
 @import model.Crumb
+@import uk.gov.hmrc.urls.Link
 
 @this(devMain: DevMain)
 
@@ -51,21 +51,42 @@
                 <tr>
                     <th strong class="col-30 bold-small">Category</th>
                     <td>None</td>
+                    <td>
+                        <div align="right">
+                            <a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the type of APIs you're interested in</span></a>
+                        </div>
+                    </td>
                 </tr>
                 <tr>
                     <th strong class="col-30 bold-small">APIs</th>
                     <td>None</td>
+                    <td>
+                        <div align="right">
+                            <a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a>
+                        </div>
+                    </td>
                 </tr>
                 <tr>
                     <th strong class="bold-small">Topics</th>
-                    <td>None</td>
+                    <td>
+                        @for(topicName <- loggedIn.developer.emailPreferences.topics.map(_.displayName).toList.sorted) {
+                            @topicName
+                            <br />
+                        }
+                    </td>
+                    <td>
+                        <div align="right"><a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the type of emails you want to receive</span></a>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
     </table>
 
     <br />
 
-    <p>Check the @Link.toExternalPage(url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml.</p>
+    <p>Check the @{Link.toExternalPage(url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml}.</p>
+
+    <p><a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Unsubscribe from Developer Hub emails</a></p>
 
     <p><a href="@routes.AddApplication.manageApps()">View all applications</a></p>
 }
