@@ -17,8 +17,8 @@
 package views
 
 import controllers.DeletePrincipalApplicationForm
-import domain._
-import domain.models.applications.Standard
+import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils

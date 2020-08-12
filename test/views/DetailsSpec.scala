@@ -17,9 +17,9 @@
 package views
 
 import controllers.routes
-import domain._
 import domain.models.applications
-import domain.models.applications.{CheckInformation, Privileged, ROPC, Standard, TermsOfUseAgreement}
+import domain.models.applications.{CheckInformation, Collaborator, Environment, Privileged, ROPC, Role, Standard, TermsOfUseAgreement}
+import domain.models.developers.{DeveloperSession, LoggedInState}
 import model.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup

@@ -16,8 +16,8 @@
 
 package views
 
-import domain._
-import domain.models.applications.Standard
+import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.developers.LoggedInState
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document

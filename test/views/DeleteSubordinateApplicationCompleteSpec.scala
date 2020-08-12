@@ -16,8 +16,9 @@
 
 package views
 
-import domain._
-import domain.models.applications.Standard
+import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.developers.LoggedInState
+import io.cucumber.java8.Ro
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils

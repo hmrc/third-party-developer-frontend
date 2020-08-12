@@ -17,8 +17,8 @@
 package views.include
 
 import controllers.Credentials.serverTokenCutoffDate
-import domain._
-import domain.models.applications.Standard
+import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest

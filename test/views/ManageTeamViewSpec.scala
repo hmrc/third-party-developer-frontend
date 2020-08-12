@@ -17,8 +17,8 @@
 package views
 
 import controllers.AddTeamMemberForm
-import domain._
-import domain.models.applications.{Role, Standard}
+import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.developers.LoggedInState
 import helpers.string._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup

@@ -16,9 +16,9 @@
 
 package views
 
-import domain.Environment.PRODUCTION
-import domain._
-import domain.models.applications.{Privileged, ROPC, Standard}
+import domain.models.applications.Environment.PRODUCTION
+import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Privileged, ROPC, Role, Standard}
+import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document

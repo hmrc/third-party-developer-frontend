@@ -18,8 +18,8 @@ package views.checkpages
 
 import config.ApplicationConfig
 import controllers.TermsOfUseForm
-import domain._
-import domain.models.applications.{CheckInformation, Standard, TermsOfUseAgreement}
+import domain.models.applications.{Application, ApplicationState, CheckInformation, Collaborator, Environment, Role, Standard, State, TermsOfUseAgreement}
+import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Call}

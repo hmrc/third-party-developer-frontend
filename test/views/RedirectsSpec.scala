@@ -16,9 +16,9 @@
 
 package views
 
-import domain.Role.{ADMINISTRATOR, DEVELOPER}
-import domain._
-import domain.models.applications.{Role, Standard}
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest

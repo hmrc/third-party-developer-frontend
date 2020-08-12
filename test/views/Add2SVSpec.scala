@@ -16,8 +16,7 @@
 
 package views
 
-import domain.models.developers.Session
-import domain.{Developer, DeveloperSession, LoggedInState}
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import model.MfaMandateDetails
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given

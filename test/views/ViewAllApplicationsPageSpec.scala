@@ -17,7 +17,9 @@
 package views
 
 import controllers.ApplicationSummary
-import domain._
+import domain.models.apidefinitions.AccessType
+import domain.models.applications.{Role, State, TermsOfUseStatus}
+import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest

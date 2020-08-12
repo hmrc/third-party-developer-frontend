@@ -17,8 +17,8 @@
 package views
 
 import controllers.EditApplicationForm
-import domain._
-import domain.models.applications.{ApplicationState, Standard}
+import domain.models.applications.{Application, ApplicationState, Environment, Standard}
+import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
