@@ -18,7 +18,14 @@ package controllers
 
 import java.util.UUID.randomUUID
 
+import builder._
 import controllers.checkpages.ApplicationCheck
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.applications
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.ApplicationUpliftSuccessful
+import domain.models.applications._
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -34,29 +41,13 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import builder._
-import domain.models.apidefinitions.{APISubscriptionStatus, APIVersion}
-import domain.models.applications
-import domain.models.applications.{Access, ApplicationState, ApplicationToken, CheckInformation, ContactDetails, Invalid, Role, Standard, TermsOfUseAgreement, UpdateApplicationRequest}
-import domain.models.developers.Session
+import views.html.checkpages._
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
-import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
 import views.html.editapplication.NameSubmittedView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.developers.Developer
-import domain.models.developers.LoggedInState
-import domain.models.developers.DeveloperSession
-import domain.models.apidefinitions.APIStatus
-import domain.models.applications.Application
-import domain.models.applications.Environment
-import domain.models.applications.Collaborator
-import domain.models.applications.Role.ADMINISTRATOR
-import domain.models.applications.Role.DEVELOPER
-import domain.ApplicationUpliftSuccessful
-import domain.models.applications.ClientSecret
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
 

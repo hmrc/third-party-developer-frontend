@@ -20,9 +20,12 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
-import domain.models.apidefinitions.{APISubscriptionStatus, APIVersion}
-import domain.models.applications.{Access, ApplicationState, CheckInformation, ContactDetails, Role, Standard, TermsOfUseAgreement}
-import domain.models.developers.Session
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.applications._
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.subscriptions.APISubscription
+import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -39,7 +42,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
+import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
@@ -47,20 +50,6 @@ import views.html.checkpages.checkyouranswers.team.TeamView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.applications.ClientSecret
-import domain.models.developers.Developer
-import domain.models.developers.LoggedInState
-import domain.models.developers.DeveloperSession
-import domain.models.applications.Application
-import domain.models.applications.Environment
-import domain.models.applications.Collaborator
-import domain.models.applications.ApplicationToken
-import domain.models.apidefinitions.APIStatus
-import domain.models.subscriptions.APISubscription
-import domain.ApplicationUpliftSuccessful
-import domain.DeskproTicketCreationFailed
-import domain.ApplicationAlreadyExists
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 
 class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder{
 

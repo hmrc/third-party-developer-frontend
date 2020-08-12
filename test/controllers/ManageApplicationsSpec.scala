@@ -19,8 +19,8 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain.models.applications.Standard
-import domain.models.developers.Session
+import domain.models.applications._
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import play.api.mvc.AnyContentAsEmpty
@@ -34,16 +34,6 @@ import utils.WithLoggedInSession._
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.models.developers.Developer
-import domain.models.developers.LoggedInState
-import domain.models.developers.DeveloperSession
-import domain.models.applications.Environment
-import domain.models.applications.Application
-import domain.models.applications.ApplicationToken
-import domain.models.applications.Collaborator
-import domain.models.applications.ApplicationState
-import domain.models.applications.ClientSecret
-import domain.models.applications.Role
 
 class ManageApplicationsSpec
   extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
