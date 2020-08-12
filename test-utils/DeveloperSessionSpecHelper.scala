@@ -18,8 +18,8 @@ package utils
 
 import java.util.UUID
 
-import domain.Developer
 import domain.models.developers.LoggedInState
+import domain.models.developers.Developer
 
 object DeveloperSession {
 
@@ -28,11 +28,11 @@ object DeveloperSession {
             lastName: String,
             organisation: Option[String] = None,
             mfaEnabled: Option[Boolean] = None,
-            loggedInState: LoggedInState): domain.DeveloperSession = {
+            loggedInState: LoggedInState): domain.models.developers.DeveloperSession = {
 
     val sessionId: String = UUID.randomUUID().toString
 
-    domain.DeveloperSession(
+    domain.models.developers.DeveloperSession(
       loggedInState,
       sessionId,
       Developer(email,
