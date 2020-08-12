@@ -16,7 +16,6 @@
 
 package controllers
 
-import domain._
 import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications.Standard
 import domain.models.connectors.TicketCreated
@@ -37,6 +36,14 @@ import views.html._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.developers.DeveloperSession
+import domain.models.applications.Application
+import domain.models.applications.Environment
+import domain.models.applications.Collaborator
+import domain.models.applications.Role
+import domain.models.applications.ApplicationState
 
 class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken with TestApplications with ErrorHandlerMock {
 
