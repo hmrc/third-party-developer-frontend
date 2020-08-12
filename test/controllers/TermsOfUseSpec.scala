@@ -16,13 +16,13 @@
 
 package controllers
 
-import domain._
-import domain.Environment._
-import domain.Role._
+import domain.ApplicationUpdateSuccessful
 import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications
-import domain.models.applications.{Access, CheckInformation, Environment, Privileged, ROPC, Role, Standard, TermsOfUseAgreement}
-import domain.models.developers.Session
+import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import domain.models.applications.Role.ADMINISTRATOR
+import domain.models.applications.{Access, Application, ApplicationState, CheckInformation, Collaborator, Environment, Privileged, ROPC, Role, Standard, TermsOfUseAgreement}
+import domain.models.developers.{Developer, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat

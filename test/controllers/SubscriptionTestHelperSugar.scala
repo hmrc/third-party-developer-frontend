@@ -16,12 +16,12 @@
 
 package controllers
 
-import domain._
-import domain.APIStatus._
+import domain.models.apidefinitions.APIStatus._
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.play.test.UnitSpec
 import builder._
 import domain.models.apidefinitions.{APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.applications.Application
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
