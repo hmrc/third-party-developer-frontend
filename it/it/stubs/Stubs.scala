@@ -24,11 +24,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import domain.models.apidefinitions.DefinitionFormats._
-import domain._
 import domain.models.apidefinitions.APIIdentifier
-import domain.models.applications.{ApplicationToken, Environment}
+import domain.models.applications.{Application, ApplicationToken, Environment}
 import domain.models.connectors.UserAuthenticationResponse
 import domain.models.developers.{Registration, Session, UpdateProfileRequest}
+import domain.models.subscriptions.APISubscription
 import org.scalatest.Matchers
 import play.api.Logger
 import play.api.libs.json.{Json, Writes}
