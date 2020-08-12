@@ -17,6 +17,10 @@
 package controllers
 
 import domain._
+import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applications.Standard
+import domain.models.connectors.TicketCreated
+import domain.models.developers.Session
 import mocks.service._
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}

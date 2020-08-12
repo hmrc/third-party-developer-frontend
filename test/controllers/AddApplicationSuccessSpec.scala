@@ -18,6 +18,8 @@ package controllers
 
 import config.ErrorHandler
 import domain._
+import domain.models.applications.Standard
+import domain.models.developers.Session
 import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest

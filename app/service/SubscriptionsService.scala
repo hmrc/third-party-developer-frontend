@@ -17,7 +17,9 @@
 package service
 
 import connectors.DeskproConnector
-import domain.{Application, DeskproTicket, DeveloperSession, TicketResult}
+import domain.models.applications.Application
+import domain.models.connectors.{DeskproTicket, TicketResult}
+import domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 

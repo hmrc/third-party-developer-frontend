@@ -20,6 +20,8 @@ import java.util.UUID.randomUUID
 
 import config.ErrorHandler
 import domain._
+import domain.models.applications.Standard
+import domain.models.developers.Session
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import play.api.mvc.AnyContentAsEmpty

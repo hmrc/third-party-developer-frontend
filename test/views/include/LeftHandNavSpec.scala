@@ -18,6 +18,7 @@ package views.include
 
 import controllers.Credentials.serverTokenCutoffDate
 import domain._
+import domain.models.applications.Standard
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest

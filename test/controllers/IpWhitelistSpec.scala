@@ -17,6 +17,7 @@
 package controllers
 
 import domain._
+import domain.models.developers.Session
 import mocks.service._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any

@@ -20,6 +20,8 @@ import java.util.UUID.randomUUID
 
 import domain._
 import domain.Environment.PRODUCTION
+import domain.models.apidefinitions.{APIAccess, APIAccessType, APIStatus, APIVersion, VersionSubscription}
+import domain.models.applications.{ApplicationToken, ClientSecret, Collaborator, Privileged, ROPC, Standard}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._

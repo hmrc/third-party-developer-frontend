@@ -18,7 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import domain.{DeveloperSession, UpdateProfileRequest}
+import domain.models.developers.{DeveloperSession, UpdateProfileRequest}
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}

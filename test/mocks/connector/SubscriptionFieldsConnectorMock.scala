@@ -17,7 +17,7 @@
 package mocks.connector
 
 import connectors.AbstractSubscriptionFieldsConnector
-import domain.ApiSubscriptionFields.SubscriptionFieldValue
+import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.scalatestplus.mockito.MockitoSugar

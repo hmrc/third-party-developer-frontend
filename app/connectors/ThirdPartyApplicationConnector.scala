@@ -22,9 +22,13 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
-import domain.DefinitionFormats._
+import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
+import domain.models.apidefinitions.DefinitionFormats._
 import domain._
+import domain.models.apidefinitions.APIIdentifier
+import domain.models.applications
+import domain.models.applications.{Application, ApplicationNameValidation, ApplicationToken, CheckInformation, ClientSecret, ClientSecretRequest, CreateApplicationRequest, Environment, UpdateApplicationRequest, UpliftRequest}
+import domain.models.subscriptions.APISubscription
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
@@ -246,7 +250,7 @@ object ApplicationConnector {
     ApplicationToken(addClientSecretResponse.clientId, addClientSecretResponse.clientSecrets.map(toDomain), addClientSecretResponse.accessToken)
 
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
-    ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
+    applications.ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
 
   private[connectors] case class AddClientSecretResponse(clientId: String, accessToken: String, clientSecrets: List[TPAClientSecret])
   private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])

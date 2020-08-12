@@ -17,7 +17,7 @@
 package service
 
 import config.ApplicationConfig
-import domain.{Application, Collaborator, Environment, Role}
+import domain.{Application, Collaborator}
 import org.joda.time.{DateTime, Duration, Instant, LocalDate}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito._

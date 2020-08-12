@@ -17,7 +17,8 @@
 package service
 
 import connectors.ThirdPartyDeveloperConnector
-import domain._
+import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
+import domain.models.developers.{Session, SessionInvalid}
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 

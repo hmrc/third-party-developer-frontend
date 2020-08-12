@@ -19,9 +19,11 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain._
-import domain.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
-import domain.Permissions.{AdministratorOnly, SandboxOrAdmin}
-import domain.SubscriptionRedirect._
+import domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
+import domain.models.views.SubscriptionRedirect._
+import domain.models.applications.{Application, CheckInformation, Environment, Role}
+import domain.models.developers.DeveloperSession
+import domain.models.views.SubscriptionRedirect
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -34,7 +36,7 @@ import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRe
 import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.Permissions.TeamMembersOnly
+import domain.models.applications.Permissions.{TeamMembersOnly, AdministratorOnly}
 
 @Singleton
 class Subscriptions @Inject() (
@@ -46,7 +48,7 @@ class Subscriptions @Inject() (
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
     mcc: MessagesControllerComponents,
-    val cookieSigner : CookieSigner,
+    val cookieSigner: CookieSigner,
     manageSubscriptionsView: ManageSubscriptionsView,
     addAppSubscriptionsView: AddAppSubscriptionsView,
     changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
@@ -95,10 +97,10 @@ class Subscriptions @Inject() (
   }
 
   private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
-    case Some(MANAGE_PAGE)              => Redirect(routes.Details.details(applicationId))
-    case Some(APPLICATION_CHECK_PAGE)   => Redirect(controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
-    case Some(API_SUBSCRIPTIONS_PAGE)   => Redirect(routes.Subscriptions.manageSubscriptions(applicationId))
-    case None                           => Redirect(routes.Details.details(applicationId))
+    case Some(MANAGE_PAGE)            => Redirect(routes.Details.details(applicationId))
+    case Some(APPLICATION_CHECK_PAGE) => Redirect(controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
+    case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.manageSubscriptions(applicationId))
+    case None                         => Redirect(routes.Details.details(applicationId))
   }
 
   def changeApiSubscription(applicationId: String, apiContext: String, apiVersion: String, redirectTo: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
@@ -129,7 +131,17 @@ class Subscriptions @Inject() (
       applicationService
         .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)
         .map(subscribed =>
-          Ok(changeSubscriptionConfirmationView(applicationViewModelFromApplicationRequest, ChangeSubscriptionConfirmationForm.form, apiName, apiContext, apiVersion, subscribed, redirectTo))
+          Ok(
+            changeSubscriptionConfirmationView(
+              applicationViewModelFromApplicationRequest,
+              ChangeSubscriptionConfirmationForm.form,
+              apiName,
+              apiContext,
+              apiVersion,
+              subscribed,
+              redirectTo
+            )
+          )
         )
     }
 
@@ -153,7 +165,9 @@ class Subscriptions @Inject() (
       }
 
       def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
-        Future.successful(BadRequest(changeSubscriptionConfirmationView(applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo)))
+        Future.successful(
+          BadRequest(changeSubscriptionConfirmationView(applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo))
+        )
 
       applicationService
         .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)

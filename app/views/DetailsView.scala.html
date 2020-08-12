@@ -15,12 +15,13 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{DeveloperSession, TermsOfUseStatus}
 @import helpers.DateFormatter.{formatDate, formatLastAccessDate}
 @import include._
 @import model.Crumb
 @import org.joda.time.format.DateTimeFormat
 @import model.ApplicationViewModel
+@import domain.models.developers.DeveloperSession
+@import domain.models.applications.TermsOfUseStatus
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
@@ -31,6 +32,7 @@
         appConfig: ApplicationConfig,
         navSection: String = "details"
 )
+
 @app = @{applicationViewModel.application}
 
 @title = @{ "Application details" }

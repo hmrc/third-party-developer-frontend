@@ -20,6 +20,7 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 import domain._
+import domain.models.applications.Standard
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document

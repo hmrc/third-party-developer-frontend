@@ -19,7 +19,8 @@ package service
 import config.ApplicationConfig
 import connectors.DeskproConnector
 import controllers.{SignOutSurveyForm, SupportEnquiryForm}
-import domain.{DeskproTicket, Feedback, TicketCreated, TicketId}
+import domain.models.connectors.{Feedback, TicketId}
+import domain.{DeskproTicket, TicketCreated}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.Matchers

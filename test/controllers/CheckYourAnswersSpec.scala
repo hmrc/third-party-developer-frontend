@@ -22,6 +22,9 @@ import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
 import domain.Role._
 import domain._
+import domain.models.apidefinitions.{APISubscriptionStatus, APIVersion}
+import domain.models.applications.{Access, ApplicationState, CheckInformation, ContactDetails, Role, Standard, TermsOfUseAgreement}
+import domain.models.developers.Session
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone

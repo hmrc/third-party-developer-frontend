@@ -14,15 +14,16 @@
  * limitations under the License.
  *@
 
-@import domain.DeveloperSession
+@import domain.models.developers.DeveloperSession
+@import domain.models.applications.Environment
 @import include._
-@import domain.Environment
 @import model.Crumb
 
 @this(devMain: DevMain)
 
 @(form: Form[controllers.AddApplicationNameForm], environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
+
 
 @pageHeading = @{ "What's the name of your application?" }
 

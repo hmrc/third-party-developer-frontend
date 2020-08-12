@@ -19,6 +19,7 @@ package controllers.checkpages
 import controllers.ApplicationController
 import controllers.checkpages.HasUrl._
 import domain._
+import domain.models.applications.{CheckInformation, Standard, UpdateApplicationRequest}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import views.html.checkpages.TermsAndConditionsView

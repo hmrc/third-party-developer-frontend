@@ -17,6 +17,8 @@
 package controllers
 
 import domain._
+import domain.models.applications.{Standard, UpdateApplicationRequest}
+import domain.models.developers.Session
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor

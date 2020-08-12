@@ -19,6 +19,8 @@ package controllers
 import java.util.UUID
 
 import domain._
+import domain.models.connectors.TicketId
+import domain.models.developers.Session
 import mocks.service.SessionServiceMock
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given

@@ -16,7 +16,8 @@
 
 package views
 
-import domain.{Environment, LoggedInState}
+import domain.LoggedInState
+import domain.models.applications.Environment
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest

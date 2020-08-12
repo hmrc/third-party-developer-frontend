@@ -20,6 +20,8 @@ import java.util.UUID
 
 import config.ErrorHandler
 import domain._
+import domain.models.connectors.UserAuthenticationResponse
+import domain.models.developers.Session
 import mocks.service.SessionServiceMock
 import org.mockito.ArgumentMatchers.{any, eq => eqTo, _}
 import org.mockito.BDDMockito.given

@@ -17,9 +17,10 @@
 package connectors
 
 import connectors.SubscriptionFieldsConnector.{ApiFieldDefinitions, FieldDefinition}
-import domain.{AccessRequirements, DevhubAccessRequirements}
-import domain.DevhubAccessRequirement.NoOne
-import play.api.libs.json.{Json, JsSuccess}
+import domain.DevhubAccessRequirements
+import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
+import domain.models.subscriptions.DevhubAccessRequirement.NoOne
+import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class ApiFieldDefinitionsSpec extends UnitSpec {

@@ -18,6 +18,8 @@ package service
 
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
+import domain.models.developers.{Session, SessionInvalid}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito._

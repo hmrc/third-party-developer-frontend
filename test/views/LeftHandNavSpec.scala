@@ -18,6 +18,7 @@ package views
 
 import domain.Environment.PRODUCTION
 import domain._
+import domain.models.applications.{Privileged, ROPC, Standard}
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document

@@ -17,7 +17,7 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.DeveloperSession
+import domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner

@@ -18,6 +18,7 @@ package controllers
 
 import domain.APIStatus._
 import domain._
+import domain.models.apidefinitions.{APIAccess, APISubscriptionStatus, APIVersion}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class APISubscriptionsSpec extends UnitSpec with SubscriptionTestHelperSugar {

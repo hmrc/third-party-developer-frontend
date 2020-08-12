@@ -18,6 +18,7 @@ package views
 
 import controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
 import domain._
+import domain.models.applications.{Environment, Role, Standard}
 import model.ApplicationViewModel
 import org.joda.time.DateTime
 import org.jsoup.Jsoup

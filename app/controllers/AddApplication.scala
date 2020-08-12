@@ -18,8 +18,8 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys.appNameField
-import domain.{Environment, _}
-import domain.Environment.{PRODUCTION, SANDBOX}
+import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import domain.models.applications.{CreateApplicationRequest, Environment, Invalid, Valid}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner

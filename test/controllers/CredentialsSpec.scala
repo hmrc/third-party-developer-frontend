@@ -23,6 +23,8 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.ApplicationState.pendingGatekeeperApproval
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
+import domain.models.applications.{Access, ApplicationState, Environment, Role, Standard}
+import domain.models.developers.Session
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}

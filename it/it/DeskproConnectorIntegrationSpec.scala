@@ -18,7 +18,8 @@ package it
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.{ConnectorMetrics, DeskproConnector, NoopConnectorMetrics}
-import domain.{DeskproTicket, Feedback, TicketCreated, TicketId}
+import domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId}
+import domain.TicketCreated
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder

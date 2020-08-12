@@ -18,8 +18,10 @@ package controllers
 
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.ApiSubscriptionFields._
-import domain.{APISubscriptionStatusWithSubscriptionFields, Application, CheckInformation, SaveSubsFieldsPageMode}
+import domain.models.apidefinitions.APISubscriptionStatusWithSubscriptionFields
+import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.applications.{Application, CheckInformation}
+import domain.models.controllers.SaveSubsFieldsPageMode
 import model.EditManageSubscription._
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data.FormError

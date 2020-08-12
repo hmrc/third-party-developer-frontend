@@ -18,6 +18,7 @@ package views
 
 import controllers.DeletePrincipalApplicationForm
 import domain._
+import domain.models.applications.Standard
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils

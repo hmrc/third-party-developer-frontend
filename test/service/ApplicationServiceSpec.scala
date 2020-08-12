@@ -24,8 +24,11 @@ import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
 import domain.APIStatus._
-import domain.ApiSubscriptionFields._
+import domain.models.subscriptions.ApiSubscriptionFields._
 import domain._
+import domain.models.apidefinitions.{APIIdentifier, APIStatus, APISubscriptionStatus, APIVersion, VersionSubscription}
+import domain.models.applications.{ClientSecretRequest, ROPC, UpdateApplicationRequest, Valid}
+import domain.models.subscriptions.ApiSubscriptionFields
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}

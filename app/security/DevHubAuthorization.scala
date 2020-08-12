@@ -20,8 +20,8 @@ import java.security.MessageDigest
 
 import cats.implicits._
 import config.ApplicationConfig
-import controllers.{routes, BaseController, MaybeUserRequest, UserRequest}
-import domain.{DeveloperSession, LoggedInState}
+import controllers.{BaseController, MaybeUserRequest, UserRequest, routes}
+import domain.models.developers.{DeveloperSession, LoggedInState}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, Cookie, DiscardingCookie, MessagesRequest, Request, RequestHeader, Result, Results}

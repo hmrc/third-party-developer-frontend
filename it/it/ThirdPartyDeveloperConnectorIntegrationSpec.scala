@@ -19,6 +19,8 @@ package it
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors._
 import domain._
+import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
+import domain.models.developers.{Session, SessionInvalid}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
@@ -61,13 +63,13 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "return the session" in new Setup {
 
-      stubFor(get(urlPathEqualTo(s"/session/$sessionId"))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              s"""{
+      stubFor(
+        get(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""{
                  |  "sessionId": "$sessionId",
                  |  "loggedInState": "LOGGED_IN",
                  |  "developer": {
@@ -76,7 +78,8 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                  |    "lastName": "Doe"
                  |  }
                  |}""".stripMargin)
-        ))
+          )
+      )
 
       private val result = await(underTest.fetchSession(sessionId))
 
@@ -85,22 +88,25 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
 
-      stubFor(get(urlPathEqualTo(s"/session/$sessionId"))
-        .willReturn(
-          aResponse()
-            .withStatus(NOT_FOUND)
-        ))
-
+      stubFor(
+        get(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
 
       intercept[SessionInvalid](await(underTest.fetchSession(sessionId)))
     }
 
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
-      stubFor(get(urlPathEqualTo(s"/session/$sessionId"))
-        .willReturn(
-          aResponse()
-            .withStatus(INTERNAL_SERVER_ERROR)
-        ))
+      stubFor(
+        get(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
 
       intercept[Upstream5xxResponse] {
         await(underTest.fetchSession(sessionId))
@@ -138,14 +144,14 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "return the session containing the user when the credentials are valid and MFA is disabled" in new Setup {
 
-      stubFor(post(urlEqualTo("/authenticate"))
-        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              s"""
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""
                  |{
                  |  "accessCodeRequired": false,
                  |  "session": {
@@ -158,31 +164,31 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                  |    }
                  |  }
                  |}""".stripMargin)
-        ))
+          )
+      )
 
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
-      result shouldBe UserAuthenticationResponse(
-        accessCodeRequired = false,
-        session = Some(Session(sessionId, Developer(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)))
+      result shouldBe UserAuthenticationResponse(accessCodeRequired = false, session = Some(Session(sessionId, Developer(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)))
     }
 
     "return the nonce when the credentials are valid and MFA is enabled" in new Setup {
 
-      stubFor(post(urlEqualTo("/authenticate"))
-        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              s"""
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""
                  |{
                  |  "accessCodeRequired": true,
                  |  "nonce": "$nonce"
                  |}""".stripMargin)
-        ))
+          )
+      )
 
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
@@ -191,26 +197,30 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {
-      stubFor(post(urlEqualTo("/authenticate"))
-        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
-        .willReturn(
-          aResponse()
-            .withStatus(UNAUTHORIZED)
-            .withHeader("Content-Type", "application/json")
-        ))
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(UNAUTHORIZED)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
 
       intercept[InvalidCredentials](await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false))))
     }
 
     "throw LockedAccount exception when the account is locked" in new Setup {
 
-      stubFor(post(urlEqualTo("/authenticate"))
-        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
-        .willReturn(
-          aResponse()
-            .withStatus(LOCKED)
-            .withHeader("Content-Type", "application/json")
-        ))
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(LOCKED)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
 
       intercept[LockedAccount] {
         await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
@@ -219,13 +229,15 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "throw UnverifiedAccount exception when the account is unverified" in new Setup {
 
-      stubFor(post(urlEqualTo("/authenticate"))
-        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
-        .willReturn(
-          aResponse()
-            .withStatus(FORBIDDEN)
-            .withHeader("Content-Type", "application/json")
-        ))
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(FORBIDDEN)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
 
       intercept[UnverifiedAccount] {
         await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
@@ -234,12 +246,14 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
 
-      stubFor(post(urlEqualTo("/authenticate"))
-        .withRequestBody(equalToJson(encryptedLoginRequest.toString))
-        .willReturn(
-          aResponse()
-            .withStatus(INTERNAL_SERVER_ERROR)
-        ))
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
 
       intercept[Upstream5xxResponse] {
         await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
@@ -251,14 +265,14 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "return the session containing the user when the TOTP and nonce are valid" in new Setup {
 
-      stubFor(post(urlEqualTo("/authenticate-totp"))
-        .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              s"""
+      stubFor(
+        post(urlEqualTo("/authenticate-totp"))
+          .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""
                  |{
                  |  "sessionId": "$sessionId",
                  |  "loggedInState": "LOGGED_IN",
@@ -268,7 +282,8 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                  |    "lastName": "Doe"
                  |  }
                  |}""".stripMargin)
-        ))
+          )
+      )
 
       val result: Session = await(underTest.authenticateTotp(totpAuthenticationRequest))
 
@@ -277,25 +292,29 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {
-      stubFor(post(urlEqualTo("/authenticate-totp"))
-        .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
-        .willReturn(
-          aResponse()
-            .withStatus(BAD_REQUEST)
-            .withHeader("Content-Type", "application/json")
-        ))
+      stubFor(
+        post(urlEqualTo("/authenticate-totp"))
+          .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
 
       intercept[InvalidCredentials](await(underTest.authenticateTotp(totpAuthenticationRequest)))
     }
 
     "throw InvalidEmail when the email is not found" in new Setup {
-      stubFor(post(urlEqualTo("/authenticate-totp"))
-        .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
-        .willReturn(
-          aResponse()
-            .withStatus(NOT_FOUND)
-            .withHeader("Content-Type", "application/json")
-        ))
+      stubFor(
+        post(urlEqualTo("/authenticate-totp"))
+          .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
 
       intercept[InvalidEmail](await(underTest.authenticateTotp(totpAuthenticationRequest)))
     }

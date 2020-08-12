@@ -22,8 +22,8 @@ import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Credentials.serverTokenCutoffDate
 import domain._
-import domain.Capabilities.{ChangeClientSecret, ViewCredentials}
-import domain.Permissions.{SandboxOrAdmin, TeamMembersOnly}
+import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
+import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import play.api.libs.crypto.CookieSigner

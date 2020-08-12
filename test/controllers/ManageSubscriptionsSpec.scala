@@ -20,7 +20,12 @@ import java.util.UUID.randomUUID
 
 import config.ErrorHandler
 import domain._
-import domain.ApiSubscriptionFields._
+import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applications.{CheckInformation, Privileged, Standard}
+import domain.models.controllers.SaveSubsFieldsPageMode
+import domain.models.developers.Session
+import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirements}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -36,8 +41,8 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
-import domain.DevhubAccessRequirement.NoOne
-import domain.DevhubAccessRequirement.Anyone
+import domain.models.subscriptions.DevhubAccessRequirement.NoOne
+import domain.models.subscriptions.DevhubAccessRequirement.Anyone
 import utils.TestApplications
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
 import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}

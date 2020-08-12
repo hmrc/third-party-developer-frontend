@@ -17,7 +17,9 @@
 package controllers.checkpages
 
 import controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
-import domain.{CheckInformation, SubscriptionData, _}
+import domain.models
+import domain.models.applications.{Application, CheckInformation}
+import domain.models.controllers.SubscriptionData
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import views.html.checkpages.ApiSubscriptionsView
@@ -30,7 +32,7 @@ trait ApiSubscriptionsPartialController  {
   val apiSubscriptionsViewTemplate: ApiSubscriptionsView
 
   private def asSubscriptionData(applicationRequest: ApplicationRequest[AnyContent]) =
-    SubscriptionData(applicationRequest.role, applicationRequest.application, APISubscriptions.groupSubscriptions(applicationRequest.subscriptions))
+    models.controllers.SubscriptionData(applicationRequest.role, applicationRequest.application, APISubscriptions.groupSubscriptions(applicationRequest.subscriptions))
 
   def apiSubscriptionsPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application

@@ -19,6 +19,8 @@ package views.include
 import builder.SubscriptionsBuilder
 import controllers.APISubscriptions
 import domain._
+import domain.models.apidefinitions.{APISubscriptionStatus, APIVersion}
+import domain.models.applications.{Environment, Role, Standard}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest

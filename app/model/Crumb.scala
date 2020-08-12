@@ -18,7 +18,7 @@ package model
 
 import config.ApplicationConfig
 import controllers.routes
-import domain.Application
+import domain.models.applications.Application
 
 case class Crumb(name: String, url: String = "", dataAttribute: Option[String] = None)
 

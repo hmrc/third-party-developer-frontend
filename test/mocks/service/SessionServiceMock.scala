@@ -16,7 +16,7 @@
 
 package mocks.service
 
-import domain.Session
+import domain.models.developers.Session
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar

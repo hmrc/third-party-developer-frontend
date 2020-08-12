@@ -18,7 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import domain.{EmailAlreadyInUse, RegistrationSuccessful}
+import domain.models.developers.{EmailAlreadyInUse, Registration, RegistrationSuccessful}
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
@@ -64,7 +64,7 @@ class Registration @Inject()(override val sessionService: SessionService,
         },
         userData => {
           val registration =
-            domain.Registration(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
+            Registration(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
           connector.register(registration).map {
             case RegistrationSuccessful => Redirect(controllers.routes.Registration.confirmation()).addingToSession("email" -> userData.emailaddress)
             case EmailAlreadyInUse => BadRequest(registrationView(requestForm.emailAddressAlreadyInUse))

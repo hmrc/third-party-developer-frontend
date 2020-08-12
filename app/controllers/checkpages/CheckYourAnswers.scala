@@ -20,7 +20,12 @@ import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys.applicationNameAlreadyExistsKey
 import controllers.ManageSubscriptions.FieldValue
 import controllers._
-import domain._
+import domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
+import domain.models.apidefinitions._
+import domain.models.controllers._
+import domain.models.subscriptions._
+import domain.models.applications._
+import domain.models.apidefinitions.APISubscriptionStatus
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form

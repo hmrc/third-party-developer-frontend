@@ -18,6 +18,7 @@ package domain
 
 import java.util.UUID
 
+import domain.models.developers.Session
 import uk.gov.hmrc.play.test.UnitSpec
 
 class DevelopersSessionSpec extends UnitSpec {

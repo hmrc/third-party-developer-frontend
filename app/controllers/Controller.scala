@@ -19,7 +19,9 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
-import domain._
+import domain.models.apidefinitions.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields}
+import domain.models.applications.{Application, Capabilities, Capability, Environment, Permission, Role, State}
+import domain.models.developers.DeveloperSession
 import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
 import play.api.mvc._
 import security.{DevHubAuthorization, ExtendedDevHubAuthorization}

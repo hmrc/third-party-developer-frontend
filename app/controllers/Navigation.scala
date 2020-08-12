@@ -17,7 +17,7 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.UserNavLinks
+import domain.models.views.UserNavLinks
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json._

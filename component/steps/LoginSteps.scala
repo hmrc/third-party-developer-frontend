@@ -20,6 +20,8 @@ import java.net.URLEncoder
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import domain._
+import domain.models.connectors.{LoginRequest, UserAuthenticationResponse, VerifyMfaRequest}
+import domain.models.developers.{LoggedInState, Session}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._

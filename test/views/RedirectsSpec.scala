@@ -18,6 +18,7 @@ package views
 
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
+import domain.models.applications.{Role, Standard}
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest

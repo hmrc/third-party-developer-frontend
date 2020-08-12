@@ -18,6 +18,7 @@ package views
 
 import controllers.AddTeamMemberForm
 import domain._
+import domain.models.applications.{Role, Standard}
 import helpers.string._
 import model.ApplicationViewModel
 import org.jsoup.Jsoup

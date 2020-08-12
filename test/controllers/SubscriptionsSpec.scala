@@ -20,6 +20,8 @@ import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import domain.models.applications.{CheckInformation, Privileged, ROPC, Standard}
+import domain.models.developers.Session
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}

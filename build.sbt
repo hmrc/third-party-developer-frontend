@@ -108,7 +108,7 @@ lazy val microservice = Project(appName, file("."))
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     scalaVersion := "2.12.11",
-    routesImport += "connectors.binders._"
+    routesImport += "controllers.binders._"
   )
   .settings(
     resolvers := Seq(

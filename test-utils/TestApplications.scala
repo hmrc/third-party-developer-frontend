@@ -19,6 +19,7 @@ package utils
 import java.util.UUID.randomUUID
 
 import domain._
+import domain.models.applications.{Access, ApplicationState, ApplicationToken, CheckInformation, Collaborator, Environment, Privileged, ROPC, Role, Standard}
 import org.joda.time.DateTimeZone
 import uk.gov.hmrc.time.DateTimeUtils
 

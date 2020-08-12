@@ -22,8 +22,7 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import connectors.SubscriptionFieldsConnector._
-import domain.{APIIdentifier, AccessRequirements, Environment}
-import domain.ApiSubscriptionFields._
+import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.FutureTimeoutSupportImpl
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, when}
@@ -36,8 +35,12 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import builder.SubscriptionsBuilder
+import domain.models.apidefinitions.APIIdentifier
+import domain.models.applications.Environment
+import domain.models.subscriptions.AccessRequirements
+import helpers.AsyncHmrcSpec
+import helpers.Retries.EBRIDGE_FAILURE_EXCEPTION
 
 class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar with SubscriptionsBuilder {
   def fields(tpl: (String, String)*): Map[String, String] =
@@ -122,7 +125,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   }
 
   "fetchFieldsValuesWithPrefetchedDefinitions" should {
-    
+
     val subscriptionFieldValue = buildSubscriptionFieldValue("my-name", Some("my-value"))
     val subscriptionDefinition = subscriptionFieldValue.definition
 
@@ -373,9 +376,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
 
     "return field values" in new Setup {
       val expectedDefinitions =
-        definitionsFromRestService.map(d =>
-          SubscriptionFieldDefinition(d.name, d.description, d.shortDescription, d.hint, d.`type`, AccessRequirements.Default)
-        )
+        definitionsFromRestService.map(d => SubscriptionFieldDefinition(d.name, d.description, d.shortDescription, d.hint, d.`type`, AccessRequirements.Default))
       val expectedFieldValues =
         expectedDefinitions.map(definition => SubscriptionFieldValue(definition, "my-value"))
 

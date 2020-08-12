@@ -17,7 +17,7 @@
 package views
 
 import controllers.DeleteProfileForm
-import domain._
+import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import utils.ViewHelpers._

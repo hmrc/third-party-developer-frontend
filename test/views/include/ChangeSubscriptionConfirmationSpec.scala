@@ -17,7 +17,8 @@
 package views.include
 
 import controllers.ChangeSubscriptionConfirmationForm
-import domain.{SubscriptionRedirect, _}
+import domain._
+import domain.models.applications.Standard
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form

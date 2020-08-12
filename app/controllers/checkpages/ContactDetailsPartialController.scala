@@ -18,6 +18,7 @@ package controllers.checkpages
 
 import controllers.ApplicationController
 import domain._
+import domain.models.applications.{CheckInformation, ContactDetails}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import views.html.checkpages.ContactDetailsView

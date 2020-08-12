@@ -20,7 +20,7 @@ import java.net.URI
 
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
-import domain.{Developer, LoggedInState, Session, UpdateLoggedInStateRequest}
+import domain.{Developer, UpdateLoggedInStateRequest}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}

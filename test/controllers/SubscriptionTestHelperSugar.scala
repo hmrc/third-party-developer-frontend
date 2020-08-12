@@ -18,9 +18,10 @@ package controllers
 
 import domain._
 import domain.APIStatus._
-import domain.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
+import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.play.test.UnitSpec
 import builder._
+import domain.models.apidefinitions.{APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 

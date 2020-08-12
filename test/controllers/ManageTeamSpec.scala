@@ -19,6 +19,8 @@ package controllers
 import domain.AddTeamMemberPageMode.ManageTeamMembers
 import domain.Role.{ADMINISTRATOR, DEVELOPER}
 import domain._
+import domain.models.applications.{ApplicationState, Role}
+import domain.models.developers.Session
 import helpers.string._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime

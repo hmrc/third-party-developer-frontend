@@ -18,6 +18,7 @@ package views
 
 import controllers.TermsOfUseForm
 import domain._
+import domain.models.applications.{CheckInformation, TermsOfUseAgreement}
 import model.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
 import org.jsoup.Jsoup

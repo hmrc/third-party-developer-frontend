@@ -18,7 +18,8 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import domain.{LoggedInState, UpdateLoggedInStateRequest}
+import domain.models.connectors.UpdateLoggedInStateRequest
+import domain.models.developers.LoggedInState
 import javax.inject.{Inject, Singleton}
 import model.MfaMandateDetails
 import play.api.data.Form

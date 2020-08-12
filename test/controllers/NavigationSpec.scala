@@ -18,6 +18,7 @@ package controllers
 
 import config.ErrorHandler
 import domain._
+import domain.models.developers.{LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import play.api.http.Status.OK
 import play.api.mvc.Result

@@ -18,7 +18,8 @@ package utils
 
 import java.util.UUID
 
-import domain.{Developer, LoggedInState}
+import domain.Developer
+import domain.models.developers.LoggedInState
 
 object DeveloperSession {
 

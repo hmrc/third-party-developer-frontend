@@ -22,8 +22,10 @@ import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
-
 import java.util.UUID
+
+import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applications.{CheckInformation, Invalid, UpdateApplicationRequest, Valid}
 
 import scala.concurrent.Future.{failed, successful}
 

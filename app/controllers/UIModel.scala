@@ -17,8 +17,9 @@
 package controllers
 
 import controllers.APISubscriptions.subscriptionNumberLabel
-import domain.APIGroup._
-import domain._
+import domain.models.apidefinitions.APIGroup._
+import domain.models.apidefinitions.{APISubscriptionStatus, AccessType}
+import domain.models.applications.{Application, Role, State, TermsOfUseStatus}
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.NotFoundException
