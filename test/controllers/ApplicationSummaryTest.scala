@@ -16,11 +16,15 @@
 
 package controllers
 
-import domain.Role.DEVELOPER
-import domain.State.TESTING
-import domain._
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
+import domain.models.applications.Role.DEVELOPER
+import domain.models.applications.TermsOfUseStatus
+import domain.models.applications.State.TESTING
+import domain.models.apidefinitions.AccessType
+import domain.models.applications.Collaborator
+import domain.models.applications.Application
+import domain.models.applications.Environment
 
 class ApplicationSummaryTest extends WordSpec with Matchers {
 

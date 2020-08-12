@@ -19,8 +19,6 @@ package controllers
 import java.util.UUID.randomUUID
 
 import controllers.checkpages.ApplicationCheck
-import domain._
-import domain.Role._
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -48,6 +46,17 @@ import views.html.editapplication.NameSubmittedView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.developers.DeveloperSession
+import domain.models.apidefinitions.APIStatus
+import domain.models.applications.Application
+import domain.models.applications.Environment
+import domain.models.applications.Collaborator
+import domain.models.applications.Role.ADMINISTRATOR
+import domain.models.applications.Role.DEVELOPER
+import domain.ApplicationUpliftSuccessful
+import domain.models.applications.ClientSecret
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
 

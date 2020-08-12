@@ -17,8 +17,6 @@
 package controllers
 
 import config.ErrorHandler
-import domain._
-import domain.models.applications.Standard
 import domain.models.developers.Session
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import play.api.mvc.AnyContentAsEmpty
@@ -32,6 +30,15 @@ import utils.WithLoggedInSession._
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.developers.DeveloperSession
+import domain.models.applications.Collaborator
+import domain.models.applications.Role
+import domain.models.applications.Application
+import domain.models.applications.Environment
+import domain.models.applications.ApplicationState
+import domain.models.applications.Standard
 
 class AddApplicationStartSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
