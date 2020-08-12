@@ -16,7 +16,6 @@
 
 package controllers
 
-import domain._
 import domain.models.applications.{Standard, UpdateApplicationRequest}
 import domain.models.developers.Session
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
@@ -36,6 +35,11 @@ import utils.WithLoggedInSession._
 import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmationView, RedirectsView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.applications.Application
+import domain.models.developers.DeveloperSession
+import domain.models.applications.Environment
 
 class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
 

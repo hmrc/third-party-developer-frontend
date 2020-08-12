@@ -18,7 +18,6 @@ package controllers
 
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
-import domain._
 import domain.models.connectors.ChangePassword
 import domain.models.developers.{Session, UpdateProfileRequest}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
@@ -39,6 +38,9 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.InvalidCredentials
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 

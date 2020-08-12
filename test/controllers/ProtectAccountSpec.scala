@@ -20,7 +20,6 @@ import java.net.URI
 
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
-import domain.{Developer, UpdateLoggedInStateRequest}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -43,6 +42,10 @@ import views.html.protectaccount._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.developers.Session
+import domain.models.connectors.UpdateLoggedInStateRequest
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
