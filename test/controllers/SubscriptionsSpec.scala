@@ -40,6 +40,9 @@ import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
+import domain.models.applications.ApplicationToken
+import domain.models.connectors.TicketResult
+import domain.models.applications.ClientSecret
 
 class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
