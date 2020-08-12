@@ -19,7 +19,8 @@ package controllers
 import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.models.applications.{Application, ApplicationState, CheckInformation, Collaborator, Environment, Privileged, ROPC, Role, Standard}
+import domain.models.applications.{Application, ApplicationState, ApplicationToken, CheckInformation, ClientSecret, Collaborator, Environment, Privileged, ROPC, Role, Standard}
+import domain.models.connectors.TicketResult
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
