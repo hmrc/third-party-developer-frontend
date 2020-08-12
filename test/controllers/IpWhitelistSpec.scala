@@ -16,7 +16,6 @@
 
 package controllers
 
-import domain._
 import domain.models.developers.Session
 import mocks.service._
 import org.mockito.ArgumentCaptor
@@ -33,6 +32,11 @@ import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistVi
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.failed
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.applications.Application
+import domain.DeskproTicketCreationFailed
+import domain.models.connectors.TicketCreated
 
 class IpWhitelistSpec extends BaseControllerSpec with TestApplications with WithCSRFAddToken {
 

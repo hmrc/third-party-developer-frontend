@@ -43,6 +43,13 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
+import domain.models.applications.ApplicationState
+import domain.models.applications.Application
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.developers.DeveloperSession
+import domain.models.applications.Environment
+import domain.models.applications.State
 
 class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
