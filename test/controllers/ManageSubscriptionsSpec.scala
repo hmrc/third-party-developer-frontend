@@ -19,7 +19,6 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain._
 import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications.{CheckInformation, Privileged, Standard}
 import domain.models.controllers.SaveSubsFieldsPageMode
@@ -48,6 +47,17 @@ import views.html.createJourney.{SubscriptionConfigurationPageView, Subscription
 import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import domain.ApplicationNotFound
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.developers.DeveloperSession
+import domain.models.applications.Application
+import domain.models.applications.Role
+import domain.models.applications.Environment
+import domain.models.applications.Collaborator
+import domain.models.applications.ApplicationState
+import domain.models.applications.ApplicationToken
+import domain.models.applications.ClientSecret
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = Future.failed(new ApplicationNotFound)

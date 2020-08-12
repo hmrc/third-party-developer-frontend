@@ -16,9 +16,6 @@
 
 package controllers
 
-import domain.AddTeamMemberPageMode.ManageTeamMembers
-import domain.Role.{ADMINISTRATOR, DEVELOPER}
-import domain._
 import domain.models.applications.{ApplicationState, Role}
 import domain.models.developers.Session
 import helpers.string._
@@ -40,6 +37,18 @@ import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeam
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.developers.DeveloperSession
+import domain.models.applications.Application
+import domain.models.applications.Collaborator
+import domain.AddTeamMemberResponse
+import domain.ApplicationUpdateSuccessful
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
+import domain.TeamMemberAlreadyExists
+import domain.ApplicationNotFound
+import domain.models.controllers.AddTeamMemberPageMode
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
