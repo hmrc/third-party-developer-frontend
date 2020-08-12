@@ -23,12 +23,14 @@ import builder._
 import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
-import domain.APIStatus._
+import domain.{AddTeamMemberRequest, AddTeamMemberResponse, ApplicationAlreadyExists, ApplicationNeedsAdmin, ApplicationNotFound, ApplicationUpdateSuccessful, ApplicationUpliftSuccessful, ApplicationVerificationFailed, ApplicationVerificationSuccessful, ClientSecretLimitExceeded, TeamMemberAlreadyExists}
+import domain.models.apidefinitions.APIStatus._
 import domain.models.subscriptions.ApiSubscriptionFields._
-import domain._
-import domain.models.apidefinitions.{APIIdentifier, APIStatus, APISubscriptionStatus, APIVersion, VersionSubscription}
-import domain.models.applications.{ClientSecretRequest, ROPC, UpdateApplicationRequest, Valid}
-import domain.models.subscriptions.ApiSubscriptionFields
+import domain.models.apidefinitions._
+import domain.models.applications._
+import domain.models.connectors.{DeskproTicket, TicketCreated}
+import domain.models.developers.{Developer, LoggedInState, User}
+import domain.models.subscriptions.{APISubscription, ApiSubscriptionFields}
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}

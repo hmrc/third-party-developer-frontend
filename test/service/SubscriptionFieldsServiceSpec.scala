@@ -20,8 +20,8 @@ import builder.SubscriptionsBuilder
 import connectors.ThirdPartyApplicationConnector
 import domain.models.subscriptions.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
-import domain._
 import domain.models.apidefinitions.APIIdentifier
+import domain.models.applications.{Application, Environment, Role}
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import mocks.connector.SubscriptionFieldsConnectorMock
 import org.joda.time.DateTime
