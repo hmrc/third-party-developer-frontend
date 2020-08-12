@@ -16,6 +16,7 @@
 
 package domain
 
+import domain.models.views.{NavLink, StaticNavLinks, UserNavLinks}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class NavLinkSpec extends UnitSpec {

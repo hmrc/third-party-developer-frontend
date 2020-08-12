@@ -17,8 +17,9 @@
 package domain
 
 import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
-import domain.models.applications.{Access, ApplicationState, Environment, Privileged, ROPC, Standard}
+import domain.models.applications.{Access, Application, ApplicationState, Collaborator, Environment, Privileged, ROPC, Role, Standard}
 import domain.models.applications.Permissions.SandboxOrAdmin
+import domain.models.developers.Developer
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
 import helpers.string._

@@ -18,7 +18,7 @@ package domain
 
 import uk.gov.hmrc.play.test.UnitSpec
 import builder._
-import domain.models.apidefinitions.{APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
 
 class APISubscriptionStatusTest extends UnitSpec with SubscriptionsBuilder{
 

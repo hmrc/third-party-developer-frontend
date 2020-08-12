@@ -25,7 +25,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import java.util.UUID
 
 import domain.models.apidefinitions.APISubscriptionStatus
-import domain.models.applications.{CheckInformation, Invalid, UpdateApplicationRequest, Valid}
+import domain.models.applications.{Application, ApplicationToken, CheckInformation, Invalid, UpdateApplicationRequest, Valid}
+import domain.models.developers.DeveloperSession
+import domain.models.subscriptions.APISubscription
 
 import scala.concurrent.Future.{failed, successful}
 

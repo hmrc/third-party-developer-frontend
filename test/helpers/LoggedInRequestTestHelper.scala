@@ -22,7 +22,7 @@ import security.CookieEncoding
 import domain.Developer
 import service.SessionService
 import domain.models.applications.LoggedInState
-import domain.models.developers.Session
+import domain.models.developers.{Developer, LoggedInState, Session}
 import play.filters.csrf.CSRF.TokenProvider
 import play.api.test.FakeRequest
 import play.api.mvc.AnyContentAsEmpty
