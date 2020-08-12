@@ -25,8 +25,9 @@ import domain.models.applications.ApplicationNameValidationJson.ApplicationNameV
 import domain.models.apidefinitions.DefinitionFormats._
 import domain._
 import domain.models.apidefinitions.APIIdentifier
-import domain.models.applications.{ApplicationToken, Environment}
+import domain.models.applications.{Application, ApplicationToken, Environment}
 import domain.models.developers.{Registration, UpdateProfileRequest}
+import domain.models.subscriptions.APISubscription
 import org.scalatest.Matchers
 import play.api.Logger
 import play.api.libs.json.{Json, Writes}
