@@ -19,8 +19,8 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain.models.applications.{CreateApplicationRequest, Invalid, Standard}
-import domain.models.developers.Session
+import domain.models.applications._
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -37,16 +37,6 @@ import utils.WithLoggedInSession._
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.models.developers.Developer
-import domain.models.developers.LoggedInState
-import domain.models.developers.DeveloperSession
-import domain.models.applications.Application
-import domain.models.applications.Environment
-import domain.models.applications.ApplicationState
-import domain.models.applications.Role
-import domain.models.applications.ApplicationToken
-import domain.models.applications.ClientSecret
-import domain.models.applications.Collaborator
 
 class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
