@@ -17,7 +17,6 @@
 package connectors
 
 import connectors.SubscriptionFieldsConnector.{ApiFieldDefinitions, FieldDefinition}
-import domain.DevhubAccessRequirements
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import play.api.libs.json.{JsSuccess, Json}

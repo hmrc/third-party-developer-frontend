@@ -39,8 +39,6 @@ import builder.SubscriptionsBuilder
 import domain.models.apidefinitions.APIIdentifier
 import domain.models.applications.Environment
 import domain.models.subscriptions.AccessRequirements
-import helpers.AsyncHmrcSpec
-import helpers.Retries.EBRIDGE_FAILURE_EXCEPTION
 
 class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar with SubscriptionsBuilder {
   def fields(tpl: (String, String)*): Map[String, String] =

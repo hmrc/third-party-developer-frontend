@@ -19,8 +19,6 @@ package connectors
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
-import domain.Session._
-import domain.{UpdateLoggedInStateRequest, _}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -38,11 +36,16 @@ import uk.gov.hmrc.play.test.UnitSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
-import connectors.ThirdPartyDeveloperConnector.SecretResponse
-import connectors.ThirdPartyDeveloperConnector.EmailWrapper
 import ThirdPartyDeveloperConnector._
 import domain.models.connectors.{AccountSetupRequest, ChangePassword, PasswordCheckRequest, PasswordReset, VerifyMfaRequest}
 import domain.models.developers.{EmailAlreadyInUse, Registration, RegistrationSuccessful, Session, SessionInvalid, UpdateProfileRequest}
+import domain.models.connectors.UpdateLoggedInStateRequest
+import domain.models.developers.LoggedInState
+import domain.models.developers.Developer
+import domain.VerifyPasswordSuccessful
+import domain.InvalidCredentials
+import domain.UnverifiedAccount
+import domain.LockedAccount
 
 class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 

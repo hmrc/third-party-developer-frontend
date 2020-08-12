@@ -46,6 +46,13 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.applications.Role
+import domain.models.applications.Application
+import domain.models.subscriptions.APISubscription
+import domain.models.applications.UpliftRequest
+import domain.models.apidefinitions.APIStatus
+import domain.models.applications.ClientSecret
+import domain.models.applications.State
 
 class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
