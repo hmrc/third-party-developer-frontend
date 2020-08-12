@@ -20,10 +20,8 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.ApplicationState.pendingGatekeeperApproval
-import domain.Role.{ADMINISTRATOR, DEVELOPER}
-import domain._
 import domain.models.applications.{Access, ApplicationState, Environment, Role, Standard}
+import domain.models.applications.ApplicationState._
 import domain.models.developers.Session
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.{DateTime, DateTimeZone}
@@ -42,6 +40,15 @@ import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerToken
 import play.api.test.CSRFTokenHelper._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.developers.DeveloperSession
+import domain.models.applications.ApplicationToken
+import domain.models.applications.Application
+import domain.models.applications.Collaborator
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.ClientSecretLimitExceeded
+import domain.models.applications.ClientSecret
 
 class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
 
