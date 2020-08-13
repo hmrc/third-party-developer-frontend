@@ -22,13 +22,12 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.apidefinitions.DefinitionFormats._
-import domain._
 import domain.models.apidefinitions.APIIdentifier
-import domain.models.applications
-import domain.models.applications.{Application, ApplicationNameValidation, ApplicationToken, CheckInformation, ClientSecret, ClientSecretRequest, CreateApplicationRequest, Environment, UpdateApplicationRequest, UpliftRequest}
+import domain.models.applications._
+import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.subscriptions.APISubscription
+import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
@@ -44,6 +43,14 @@ import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
+import domain.ApplicationCreatedResponse
+import domain.ApplicationUpdateSuccessful
+import domain.TeamMemberAlreadyExists
+import domain.ApplicationNeedsAdmin
+import domain.ApplicationNotFound
+import domain.ApplicationUpliftSuccessful
+import domain.ApplicationAlreadyExists
+import domain.ClientSecretLimitExceeded
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
@@ -178,11 +185,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } recover recovery
   }
 
-  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationSuccessful] = metrics.record(api) {
+  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
     http.POSTEmpty(s"$serviceBaseUrl/verify-uplift/$verificationCode") map {
       _ => ApplicationVerificationSuccessful
     } recover {
-      case _: BadRequestException => throw new ApplicationVerificationFailed(verificationCode)
+      case _: BadRequestException => ApplicationVerificationFailed
     } recover recovery
   }
 
@@ -250,7 +257,7 @@ object ApplicationConnector {
     ApplicationToken(addClientSecretResponse.clientId, addClientSecretResponse.clientSecrets.map(toDomain), addClientSecretResponse.accessToken)
 
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
-    applications.ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
+    ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
 
   private[connectors] case class AddClientSecretResponse(clientId: String, accessToken: String, clientSecrets: List[TPAClientSecret])
   private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])

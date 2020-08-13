@@ -21,7 +21,7 @@ import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
 import domain.models.connectors._
 import domain.models.developers._
-import domain.{InvalidCredentials, LockedAccount, UnverifiedAccount, VerifyPasswordSuccessful}
+import domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -236,45 +236,6 @@ class ThirdPartyDeveloperConnectorSpec extends UnitSpec with ScalaFutures with M
 
       verify(mockPayloadEncryption).encrypt(Json.toJson(passwordReset))
       verify(mockHttp).POST(endpoint("reset-password"), encryptedBody, Seq("Content-Type" -> "application/json"))
-    }
-  }
-
-  "checkPassword" should {
-    val email = "john.smith@example.com"
-    val password = "MyPassword1"
-
-    val checkPasswordRequest = PasswordCheckRequest(email, password)
-
-    "successfully return if called with an encrypted payload" in new Setup {
-
-      when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json"))).thenReturn(Future.successful(HttpResponse(Status.NO_CONTENT)))
-
-      await(connector.checkPassword(checkPasswordRequest)) shouldBe VerifyPasswordSuccessful
-      verify(mockPayloadEncryption).encrypt(Json.toJson(checkPasswordRequest))
-    }
-
-    "should throw InvalidCredentials if the response is 401" in new Setup {
-      when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json")))
-        .thenReturn(Future.failed(Upstream4xxResponse("401 error", Status.UNAUTHORIZED, Status.UNAUTHORIZED)))
-
-      await(connector.checkPassword(checkPasswordRequest).failed) shouldBe a[InvalidCredentials]
-      verify(mockPayloadEncryption).encrypt(Json.toJson(checkPasswordRequest))
-    }
-
-    "should throw UnverifiedAccount if the response is 403" in new Setup {
-      when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json")))
-        .thenReturn(Future.failed(Upstream4xxResponse("403 error", Status.FORBIDDEN, Status.FORBIDDEN)))
-
-      await(connector.checkPassword(checkPasswordRequest).failed) shouldBe a[UnverifiedAccount]
-      verify(mockPayloadEncryption).encrypt(Json.toJson(checkPasswordRequest))
-    }
-
-    "should throw LockedAccount if the response is 423" in new Setup {
-      when(mockHttp.POST(endpoint("check-password"), encryptedBody, Seq("Content-Type" -> "application/json")))
-        .thenReturn(Future.failed(Upstream4xxResponse("423 error", Status.LOCKED, Status.LOCKED)))
-
-      await(connector.checkPassword(checkPasswordRequest).failed) shouldBe a[LockedAccount]
-      verify(mockPayloadEncryption).encrypt(Json.toJson(checkPasswordRequest))
     }
   }
 

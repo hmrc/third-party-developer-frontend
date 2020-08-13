@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package domain.models.connectors
+package domain.models.applications
 
-import play.api.libs.json.Json
+sealed trait ApplicationVerificationResponse
 
-case class PasswordReset(email: String, newPassword: String)
-object PasswordReset {
-  implicit val format = Json.format[PasswordReset]
-}
+case object ApplicationVerificationSuccessful extends ApplicationVerificationResponse
 
-case class ChangePassword(email:String, oldPassword:String, newPassword:String)
-object ChangePassword {
-  implicit val format = Json.format[ChangePassword]
-}
+case object ApplicationVerificationFailed extends ApplicationVerificationResponse

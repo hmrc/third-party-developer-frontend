@@ -26,7 +26,7 @@ import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.apidefinitions.{APIDefinition, APIIdentifier, APISubscriptionStatus, AccessType, VersionSubscription}
 import domain.models.applications._
-import domain.models.connectors.{DeskproTicket, TicketResult}
+import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketResult}
 import domain.models.developers.DeveloperSession
 import domain.models.subscriptions.APISubscription
 import javax.inject.{Inject, Singleton}
@@ -236,7 +236,7 @@ class ApplicationService @Inject() (
   def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector =
     if (application.deployedTo == PRODUCTION) productionApplicationConnector else sandboxApplicationConnector
 
-  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationSuccessful] = {
+  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
   }
 
@@ -252,7 +252,7 @@ class ApplicationService @Inject() (
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email)
       developer <- developerConnector.fetchDeveloper(teamMember.emailAddress)
       _ <- if (developer.isEmpty) developerConnector.createUnregisteredUser(teamMember.emailAddress) else Future.successful(())
-      request = AddTeamMemberRequest(requestingEmail, teamMember, developer.isDefined, adminsToEmail.toSet)
+      request = domain.models.connectors.AddTeamMemberRequest(requestingEmail, teamMember, developer.isDefined, adminsToEmail.toSet)
       connector = connectorWrapper.forEnvironment(app.deployedTo)
       appConnector = connector.thirdPartyApplicationConnector
       response <- appConnector.addTeamMember(app.id, request)
@@ -355,7 +355,7 @@ object ApplicationService {
     def unsubscribeFromApi(applicationId: String, context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationToken]
     def requestUplift(applicationId: String, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful]
-    def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationSuccessful]
+    def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse]
     def updateApproval(id: String, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def addClientSecrets(id: String, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)]
     def deleteClientSecret(applicationId: UUID,

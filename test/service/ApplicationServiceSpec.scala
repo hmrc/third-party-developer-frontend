@@ -23,7 +23,7 @@ import builder._
 import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
-import domain.{AddTeamMemberRequest, AddTeamMemberResponse, ApplicationAlreadyExists, ApplicationNeedsAdmin, ApplicationNotFound, ApplicationUpdateSuccessful, ApplicationUpliftSuccessful, ApplicationVerificationFailed, ApplicationVerificationSuccessful, ClientSecretLimitExceeded, TeamMemberAlreadyExists}
+import domain.{ApplicationAlreadyExists, ApplicationNeedsAdmin, ApplicationNotFound, ApplicationUpdateSuccessful, ApplicationUpliftSuccessful, ClientSecretLimitExceeded, TeamMemberAlreadyExists}
 import domain.models.apidefinitions.APIStatus._
 import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.apidefinitions._
@@ -49,6 +49,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import domain.models.connectors.AddTeamMemberRequest
+import domain.models.connectors.AddTeamMemberResponse
 
 class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures with SubscriptionsBuilder {
 
@@ -599,9 +601,9 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "verify an uplift with failure" in new Setup {
       given(mockProductionApplicationConnector.verify(verificationCode))
-        .willReturn(Future.failed(new ApplicationVerificationFailed(verificationCode)))
+        .willReturn(Future.successful(ApplicationVerificationFailed))
 
-      intercept[ApplicationVerificationFailed](await(applicationService.verify(verificationCode)))
+      await(applicationService.verify(verificationCode)) shouldBe ApplicationVerificationFailed
     }
   }
 

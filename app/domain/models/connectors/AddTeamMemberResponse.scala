@@ -16,14 +16,9 @@
 
 package domain.models.connectors
 
-import play.api.libs.json.Json
+case class AddTeamMemberResponse(registeredUser: Boolean)
 
-case class PasswordReset(email: String, newPassword: String)
-object PasswordReset {
-  implicit val format = Json.format[PasswordReset]
-}
-
-case class ChangePassword(email:String, oldPassword:String, newPassword:String)
-object ChangePassword {
-  implicit val format = Json.format[ChangePassword]
+object AddTeamMemberResponse {
+  import play.api.libs.json._
+  implicit val format = Json.format[AddTeamMemberResponse]
 }
