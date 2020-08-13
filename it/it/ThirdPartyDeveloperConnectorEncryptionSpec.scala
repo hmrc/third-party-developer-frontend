@@ -19,7 +19,7 @@ package it
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.{ConnectorMetrics, NoopConnectorMetrics, ThirdPartyDeveloperConnector}
 import domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}
-import domain.models.connectors.{ChangePassword, PasswordCheckRequest, PasswordReset}
+import domain.models.connectors.{ChangePassword, PasswordReset}
 import domain.models.developers.Registration
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
@@ -166,25 +166,6 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       intercept[InvalidCredentials] {
         await(underTest.changePassword(ChangePassword("email@email.com", "oldPassword", "newPassword")))
       }
-    }
-  }
-
-  "check-password" should {
-    "send request with encrypted payload" in new Setup {
-      stubFor(
-        post(urlEqualTo("/check-password"))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
-          )
-      )
-      val result = await(underTest.checkPassword(new PasswordCheckRequest("email@example.com", "password")))
-      verify(
-        1,
-        postRequestedFor(urlMatching("/check-password"))
-          .withRequestBody(equalTo("""{"data":"k7hutBek3t8KfWDBIKTCQ9BO8Louz2xXjyXu2ERSQ9l7E5dh1C0hI7iuNNT7kfgfFZOK/NlNGY89EBB/xaaxiA=="}"""))
-      )
     }
   }
 }

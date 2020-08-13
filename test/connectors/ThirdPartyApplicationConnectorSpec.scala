@@ -62,6 +62,10 @@ import domain.models.applications.UpliftRequest
 import domain.models.apidefinitions.APIStatus
 import domain.models.applications.ClientSecret
 import domain.models.applications.State
+import domain.models.connectors.AddTeamMemberRequest
+import domain.models.connectors.AddTeamMemberResponse
+import domain.models.applications.ApplicationVerificationFailed
+import domain.models.applications.ApplicationVerificationSuccessful
 
 class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
@@ -429,9 +433,9 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(failed(new BadRequestException("")))
 
-      intercept[ApplicationVerificationFailed](
-        await(connector.verify(verificationCode))
-      )
+        val result = await(connector.verify(verificationCode))
+
+        result shouldEqual ApplicationVerificationFailed
     }
   }
 

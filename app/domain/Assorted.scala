@@ -16,30 +16,6 @@
 
 package domain
 
-import domain.models.applications.{Access, Application, Capability, CheckInformation, ClientSecret, Collaborator, ContactDetails, Environment, OverrideFlag, Permission, Role, Standard, State, TermsOfUseAgreement, TermsOfUseStatus}
-import domain.models.developers.DeveloperSession
-
-case class AddTeamMemberRequest(adminEmail: String, collaborator: Collaborator, isRegistered: Boolean, adminsToEmail: Set[String])
-
-object AddTeamMemberRequest {
-  import play.api.libs.json._
-  implicit val format = Json.format[AddTeamMemberRequest]
-}
-
-case class AddTeamMemberResponse(registeredUser: Boolean)
-
-object AddTeamMemberResponse {
-  import play.api.libs.json._
-  implicit val format = Json.format[AddTeamMemberResponse]
-}
-
-case class ClientSecretResponse(clientSecret: String)
-
-object ClientSecretResponse {
-  import play.api.libs.json._
-  implicit val format = Json.format[ClientSecretResponse]
-}
-
 class ApplicationAlreadyExists extends RuntimeException
 
 class ApplicationNotFound extends RuntimeException
@@ -60,23 +36,7 @@ sealed trait ApplicationUpdateSuccessful
 
 case object ApplicationUpdateSuccessful extends ApplicationUpdateSuccessful
 
-
 sealed trait ApplicationUpliftSuccessful
 
 case object ApplicationUpliftSuccessful extends ApplicationUpliftSuccessful
 
-sealed trait ApplicationVerificationSuccessful
-
-case object ApplicationVerificationSuccessful extends ApplicationVerificationSuccessful
-
-class ApplicationVerificationFailed(verificationCode: String) extends RuntimeException
-
-sealed trait VerifyPasswordSuccessful
-
-case object VerifyPasswordSuccessful extends VerifyPasswordSuccessful
-
-final case class DeleteApplicationRequest(requester: DeveloperSession)
-object DeleteApplicationRequest {
-  import play.api.libs.json._
-  implicit val format = Json.format[DeleteApplicationRequest]
-}

@@ -24,15 +24,11 @@ import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
 import domain.{
-  AddTeamMemberRequest,
-  AddTeamMemberResponse,
   ApplicationAlreadyExists,
   ApplicationNeedsAdmin,
   ApplicationNotFound,
   ApplicationUpdateSuccessful,
   ApplicationUpliftSuccessful,
-  ApplicationVerificationFailed,
-  ApplicationVerificationSuccessful,
   ClientSecretLimitExceeded,
   TeamMemberAlreadyExists
 }
@@ -56,6 +52,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 import scala.concurrent.Future.failed
+import domain.models.connectors.AddTeamMemberRequest
+import domain.models.connectors.AddTeamMemberResponse
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
@@ -607,9 +605,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     "verify an uplift with failure" in new Setup {
       when(mockProductionApplicationConnector.verify(verificationCode))
-        .thenReturn(failed(new ApplicationVerificationFailed(verificationCode)))
+        .thenReturn(successful(ApplicationVerificationFailed))
 
-      intercept[ApplicationVerificationFailed](await(applicationService.verify(verificationCode)))
+      await(applicationService.verify(verificationCode)) shouldBe ApplicationVerificationFailed
     }
   }
 

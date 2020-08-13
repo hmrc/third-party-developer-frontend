@@ -38,13 +38,13 @@ import domain.models.developers.LoggedInState
 import domain.models.developers.DeveloperSession
 import domain.models.applications.Application
 import domain.models.applications.Collaborator
-import domain.AddTeamMemberResponse
 import domain.ApplicationUpdateSuccessful
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 import domain.TeamMemberAlreadyExists
 import domain.ApplicationNotFound
 import domain.models.controllers.AddTeamMemberPageMode
+import domain.models.connectors.AddTeamMemberResponse
 
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}

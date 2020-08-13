@@ -16,14 +16,11 @@
 
 package domain.models.connectors
 
-import play.api.libs.json.Json
+import domain.models.applications.Collaborator
 
-case class PasswordReset(email: String, newPassword: String)
-object PasswordReset {
-  implicit val format = Json.format[PasswordReset]
-}
+case class AddTeamMemberRequest(adminEmail: String, collaborator: Collaborator, isRegistered: Boolean, adminsToEmail: Set[String])
 
-case class ChangePassword(email:String, oldPassword:String, newPassword:String)
-object ChangePassword {
-  implicit val format = Json.format[ChangePassword]
+object AddTeamMemberRequest {
+  import play.api.libs.json._
+  implicit val format = Json.format[AddTeamMemberRequest]
 }
