@@ -33,48 +33,6 @@ object AddTeamMemberResponse {
   implicit val format = Json.format[AddTeamMemberResponse]
 }
 
-
-
-
-
-
-
-
-
-case class CheckInformationForm(apiSubscriptionsComplete: Boolean = false,
-                                apiSubscriptionConfigurationsComplete: Boolean = false,
-                                contactDetailsComplete: Boolean = false,
-                                teamConfirmedComplete: Boolean = false,
-                                confirmedNameComplete: Boolean = false,
-                                providedPrivacyPolicyURLComplete: Boolean = false,
-                                providedTermsAndConditionsURLComplete: Boolean = false,
-                                termsOfUseAgreementComplete: Boolean = false)
-
-
-
-
-
-object CheckInformationForm {
-  def fromCheckInformation(checkInformation: CheckInformation) = {
-    CheckInformationForm(
-      confirmedNameComplete = checkInformation.confirmedName,
-      apiSubscriptionsComplete = checkInformation.apiSubscriptionsConfirmed,
-      apiSubscriptionConfigurationsComplete = checkInformation.apiSubscriptionConfigurationsConfirmed,
-      contactDetailsComplete = checkInformation.contactDetails.isDefined,
-      providedPrivacyPolicyURLComplete = checkInformation.providedPrivacyPolicyURL,
-      providedTermsAndConditionsURLComplete = checkInformation.providedTermsAndConditionsURL,
-      teamConfirmedComplete = checkInformation.teamConfirmed,
-      termsOfUseAgreementComplete = checkInformation.termsOfUseAgreements.exists(terms => terms.version.nonEmpty)
-    )
-  }
-}
-
-
-
-
-
-
-
 case class ClientSecretResponse(clientSecret: String)
 
 object ClientSecretResponse {
