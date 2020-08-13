@@ -122,10 +122,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   }
 
   def version(version: String, status: APIStatus, subscribed: Boolean): VersionSubscription =
-    VersionSubscription(APIVersion(version, status), subscribed)
+    VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   def api(name: String, context: String, requiresTrust: Option[Boolean], versions: VersionSubscription*): APISubscription =
-    APISubscription(name, name, context, versions, requiresTrust)
+    APISubscription(name, name, ApiContext(context), versions, requiresTrust)
 
   val productionApplicationId = "Application ID"
   val productionClientId = s"client-id-${randomUUID().toString}"
@@ -140,7 +140,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       appId: String,
       clientId: String,
       name: String,
-      context: String,
+      context: ApiContext,
       version: String,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
@@ -150,7 +150,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       name = name,
       serviceName = name,
       context = context,
-      apiVersion = APIVersion(version, status),
+      apiVersion = ApiVersionDefinition(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -160,7 +160,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       appId: String,
       clientId: String,
       name: String,
-      context: String,
+      context: ApiContext,
       version: String,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
@@ -171,7 +171,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       name = name,
       serviceName = name,
       context = context,
-      apiVersion = APIVersion(version, status),
+      apiVersion = ApiVersionDefinition(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, context, version, subscriptionFieldWithValues)
@@ -237,10 +237,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   "Fetch api subscriptions" should {
 
     "identify subscribed apis from available definitions" in new Setup {
-      private val apiIdentifier1 = APIIdentifier("api-1/ctx", "1.0")
+      private val apiIdentifier1 = ApiIdentifier(ApiContext("api-1/ctx"), "1.0")
 
       val apis = Seq(
-        api("api-1", apiIdentifier1.context, None, version(apiIdentifier1.version, STABLE, subscribed = true), version("2.0", BETA, subscribed = false)),
+        api("api-1", apiIdentifier1.context.value, None, version(apiIdentifier1.version, STABLE, subscribed = true), version("2.0", BETA, subscribed = false)),
         api("api-2", "api-2/ctx", None, version("1.0", BETA, subscribed = true), version("1.0-RC", STABLE, subscribed = false))
       )
 
@@ -277,8 +277,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
           subscribed = true,
           subscriptionFieldWithValues = subscriptionFieldsWithValue
         ),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0-RC", STABLE),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0", BETA, subscribed = true)
+        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0-RC", STABLE),
+        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0", BETA, subscribed = true)
       )
     }
 
@@ -299,10 +299,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       result.size shouldBe 4
 
       result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "2.0", BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "1.0", STABLE),
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "0.1", DEPRECATED, subscribed = true),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0", BETA, subscribed = true)
+        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "2.0", BETA),
+        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "1.0", STABLE),
+        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "0.1", DEPRECATED, subscribed = true),
+        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0", BETA, subscribed = true)
       )
     }
 
@@ -323,9 +323,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       result.size shouldBe 3
 
       result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "2.0", BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "1.0", STABLE, subscribed = true),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0", BETA, subscribed = true)
+        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "2.0", BETA),
+        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "1.0", STABLE, subscribed = true),
+        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0", BETA, subscribed = true)
       )
     }
 
@@ -346,9 +346,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       result.size shouldBe 3
 
       result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "2.0", BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "1.0", STABLE, subscribed = true),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0", BETA, subscribed = true)
+        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "2.0", BETA),
+        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "1.0", STABLE, subscribed = true),
+        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0", BETA, subscribed = true)
       )
     }
 
@@ -368,10 +368,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   "Subscribe to API" should {
     "with no subscription fields definitions" in new Setup {
 
-      private val context = "api1"
+      private val context = ApiContext("api1")
       private val version = "1.0"
 
-      private val subscription = APIIdentifier(context, version)
+      private val subscription = ApiIdentifier(context, version)
 
       private val fieldDefinitions = Seq.empty
 
@@ -386,15 +386,15 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
 
       verify(mockProductionApplicationConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier])
-      verify(mockSubscriptionFieldsService, never).saveBlankFieldValues(*, *, *, *)(any[HeaderCarrier])
+      verify(mockSubscriptionFieldsService, never).saveBlankFieldValues(*, *[ApiContext], *, *)(any[HeaderCarrier])
     }
 
     "with subscription fields definitions" should {
       "save blank subscription values" in new Setup {
-        private val context = "api1"
+        private val context = ApiContext("api1")
         private val version = "1.0"
 
-        private val subscription = APIIdentifier(context, version)
+        private val subscription = ApiIdentifier(context, version)
 
         private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
@@ -409,7 +409,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
         when(mockProductionApplicationConnector.subscribeToApi(eqTo(productionApplicationId), *)(any[HeaderCarrier]))
           .thenReturn(successful(ApplicationUpdateSuccessful))
-        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *, *, *)(any[HeaderCarrier]))
+        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *, *)(any[HeaderCarrier]))
           .thenReturn(successful(SaveSubscriptionFieldsSuccessResponse))
 
         await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
@@ -422,10 +422,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       }
 
       "but fails to save subscription fields" in new Setup {
-        private val context = "api1"
+        private val context = ApiContext("api1")
         private val version = "1.0"
 
-        private val subscription = APIIdentifier(context, version)
+        private val subscription = ApiIdentifier(context, version)
 
         private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
@@ -443,7 +443,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
         val errors = Map("fieldName" -> "failure reason")
 
-        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *, *, *)(any[HeaderCarrier]))
+        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *, *)(any[HeaderCarrier]))
           .thenReturn(successful(SaveSubscriptionFieldsFailureResponse(errors)))
 
         private val exception = intercept[RuntimeException](
@@ -458,7 +458,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
   "Unsubscribe from API" should {
     "unsubscribe application from an API version" in new Setup {
-      private val context = "api1"
+      private val context = ApiContext("api1")
       private val version = "1.0"
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
@@ -955,25 +955,25 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       APISubscription(
         "First API",
         "",
-        "first context",
+        ApiContext("first context"),
         Seq(
-          VersionSubscription(APIVersion("1.0", APIStatus.STABLE), subscribed = true),
-          VersionSubscription(APIVersion("2.0", APIStatus.BETA), subscribed = false)
+          VersionSubscription(ApiVersionDefinition("1.0", APIStatus.STABLE), subscribed = true),
+          VersionSubscription(ApiVersionDefinition("2.0", APIStatus.BETA), subscribed = false)
         ),
         None
       ),
       APISubscription(
         "Second API",
         "",
-        "second context",
-        Seq(VersionSubscription(APIVersion("1.0", APIStatus.ALPHA), subscribed = true)),
+        ApiContext("second context"),
+        Seq(VersionSubscription(ApiVersionDefinition("1.0", APIStatus.ALPHA), subscribed = true)),
         None
       )
     )
 
     "return false when the application has no subscriptions to the requested api version" in new Setup {
       val apiName = "Third API"
-      val apiContext = "third context"
+      val apiContext = ApiContext("third context")
       val apiVersion = "3.0"
 
       when(mockProductionApplicationConnector.fetchSubscriptions(eqTo(productionApplication.id))(eqTo(hc)))
@@ -986,7 +986,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     "return false when the application has unsubscribed to the requested api version" in new Setup {
       val apiName = "First API"
-      val apiContext = "first context"
+      val apiContext = ApiContext("first context")
       val apiVersion = "2.0"
 
       when(mockProductionApplicationConnector.fetchSubscriptions(eqTo(productionApplication.id))(eqTo(hc)))
@@ -999,7 +999,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     "return true when the application is subscribed to the requested api version" in new Setup {
       val apiName = "First API"
-      val apiContext = "first context"
+      val apiContext = ApiContext("first context")
       val apiVersion = "1.0"
 
       when(mockProductionApplicationConnector.fetchSubscriptions(eqTo(productionApplication.id))(eqTo(hc)))

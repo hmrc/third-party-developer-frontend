@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.apidefinitions.ApiContext
 
 trait HeaderEnricher {
   def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]) : HeaderCarrier =
@@ -150,7 +151,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
     }
   }
 
-  def subFieldsDefinitionsExistActionByApi(applicationId: String, context: String, version: String)
+  def subFieldsDefinitionsExistActionByApi(applicationId: String, context: ApiContext, version: String)
                                                    (fun: ApplicationWithSubscriptionFields[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions

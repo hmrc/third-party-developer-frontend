@@ -20,8 +20,9 @@ import domain.models.apidefinitions.APIStatus._
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import utils.AsyncHmrcSpec
 import builder._
-import domain.models.apidefinitions.{APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIAccess, APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications.Application
+import domain.models.apidefinitions.ApiContext
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
@@ -40,9 +41,18 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       fields: Option[SubscriptionFieldsWrapper] = None
   ) = {
 
-    val mappedFields = fields.getOrElse(emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version))
+    val mappedFields = fields.getOrElse(emptySubscriptionFieldsWrapper("myAppId", "myClientId", ApiContext(context), version))
 
-    APISubscriptionStatus(apiName, serviceName, context, APIVersion(version, status, access), subscribed, requiresTrust, isTestSupport = isTestSupport, fields = mappedFields)
+    APISubscriptionStatus(
+      apiName,
+      serviceName,
+      ApiContext(context),
+      ApiVersionDefinition(version, status, access),
+      subscribed,
+      requiresTrust,
+      isTestSupport = isTestSupport,
+      fields = mappedFields
+    )
   }
 
   val sampleSubscriptions: Seq[APISubscriptionStatus] = {
@@ -57,12 +67,12 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {
     val sfv = buildSubscriptionFieldValue("the value")
 
-    val context = "individual-employment-context-2"
+    val context = ApiContext("individual-employment-context-2")
     val version = "1.0"
     val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, context, version, Seq(sfv))
 
     Seq(
-      subscriptionStatus("Individual Employment 2", "individual-employment-2", context, version, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
+      subscriptionStatus("Individual Employment 2", "individual-employment-2", context.value, version, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
     )
   }
 
@@ -70,7 +80,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       applicationSubscription: APISubscriptions,
       expectedApiHumanReadableAppName: String,
       expectedApiServiceName: String,
-      expectedVersions: Seq[APIVersion]
+      expectedVersions: Seq[ApiVersionDefinition]
   ) {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
     applicationSubscription.apiServiceName shouldBe expectedApiServiceName
@@ -100,15 +110,15 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     SubscriptionFieldsWrapper(
       applicationId = WHO_CARES,
       clientId = WHO_CARES,
-      apiContext = WHO_CARES,
+      apiContext = ApiContext(WHO_CARES),
       apiVersion = WHO_CARES,
       fields = fields
     )
   }
 
   val onlyApiExampleMicroserviceSubscribedTo: APISubscriptionStatus = {
-    val context = "example-api"
-    val version = APIVersion("1.0", APIStatus.STABLE)
+    val context = ApiContext("example-api")
+    val version = ApiVersionDefinition("1.0", APIStatus.STABLE)
     val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version.version)
 
     APISubscriptionStatus(
@@ -124,8 +134,8 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   }
 
   def exampleSubscriptionWithoutFields(prefix: String): APISubscriptionStatus = {
-    val context = s"/$prefix-api"
-    val version = APIVersion("1.0", APIStatus.STABLE)
+    val context = ApiContext(s"/$prefix-api")
+    val version = ApiVersionDefinition("1.0", APIStatus.STABLE)
     val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version.version)
 
     val subscriptinFieldInxed = 1

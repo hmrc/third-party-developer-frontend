@@ -16,8 +16,10 @@
 
 package views.helper
 
+import domain.models.apidefinitions.ApiContext
+
 object IdFormatter {
   def replaceNonAlphaNumeric(str: String, replacement: String = "_") = { str.replaceAll("\\W", replacement)}
 
-  def identifier(context: String, suffix: String) = { s"${replaceNonAlphaNumeric(context)}-${replaceNonAlphaNumeric(suffix)}" }
+  def identifier(context: ApiContext, suffix: String) = { s"${replaceNonAlphaNumeric(context.value)}-${replaceNonAlphaNumeric(suffix)}" }
 }

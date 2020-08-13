@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.APISubscription
@@ -47,6 +47,7 @@ import views.html.checkpages.checkyouranswers.team.TeamView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
+import domain.models.apidefinitions.ApiContext
 
 class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder {
 
@@ -84,19 +85,19 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
-  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", "context", "version")
+  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", ApiContext("context"), "version")
 
   val exampleApiSubscription = Some(
     APISubscriptions(
       "Example API",
       "api-example-microservice",
-      "exampleContext",
+      ApiContext("exampleContext"),
       Seq(
         APISubscriptionStatus(
           "API1",
           "api-example-microservice",
-          "exampleContext",
-          APIVersion("version", APIStatus.STABLE),
+          ApiContext("exampleContext"),
+          ApiVersionDefinition("version", APIStatus.STABLE),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
@@ -109,15 +110,15 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     Seq.empty,
     Seq(
       APISubscriptions(
-        "API1",
         "ServiceName",
         "apiContent",
+        ApiContext("context"),
         Seq(
           APISubscriptionStatus(
             "API1",
             "subscriptionServiceName",
-            "context",
-            APIVersion("version", APIStatus.STABLE),
+            ApiContext("context"),
+            ApiVersionDefinition("version", APIStatus.STABLE),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
@@ -176,7 +177,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     givenUpdateCheckInformationSucceeds(application)
 
-    val context = "apiContent"
+    val context = ApiContext("apiContent")
     val version = "version"
     val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version)
 
@@ -190,7 +191,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
             "API1",
             "subscriptionServiceName",
             context,
-            APIVersion(version, APIStatus.STABLE),
+            ApiVersionDefinition(version, APIStatus.STABLE),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
@@ -281,10 +282,9 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
 
     when(underTest.applicationService.requestUplift(eqTo(appId), eqTo(application.name), eqTo(loggedInUser))(any[HeaderCarrier]))
-      .thenAnswer( (i: InvocationOnMock) => {
-          failed(new ApplicationAlreadyExists)
-        }
-      )
+      .thenAnswer((i: InvocationOnMock) => {
+        failed(new ApplicationAlreadyExists)
+      })
     givenUpdateCheckInformationSucceeds(application, expectedCheckInformation)
 
     private val result = addToken(underTest.answersPageAction(appId))(requestWithFormBody)

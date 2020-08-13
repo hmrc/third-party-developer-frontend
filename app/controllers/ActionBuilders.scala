@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.apidefinitions.ApiContext
 
 trait ActionBuilders {
 
@@ -110,7 +111,7 @@ trait ActionBuilders {
     }
   }
 
-  def subscriptionFieldsRefiner(context: String, version: String)(implicit ec: ExecutionContext):
+  def subscriptionFieldsRefiner(context: ApiContext, version: String)(implicit ec: ExecutionContext):
     ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFields]
       = new ActionRefiner[ApplicationWithFieldDefinitionsRequest, ApplicationWithSubscriptionFields] {
     override protected def executionContext: ExecutionContext = ec

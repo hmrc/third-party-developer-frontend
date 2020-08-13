@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.ApplicationCheck
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
@@ -48,6 +48,7 @@ import scala.concurrent.Future
 import play.api.test.Helpers._
 
 import scala.concurrent.Future.successful
+import domain.models.apidefinitions.ApiContext
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
 
@@ -55,6 +56,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val appName: String = "app"
   val clientId = "clientIdzzz"
   val sessionId = "sessionId"
+
+  val exampleContext = ApiContext("exampleContext")
 
   val developerDto: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session: Session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
@@ -67,20 +70,20 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
 
-  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "clientId", "exampleContext", "api-example-microservice")
+  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "clientId", exampleContext, "api-example-microservice")
 
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
   val exampleApiSubscription: Some[APISubscriptions] = Some(
     APISubscriptions(
       "Example API",
       "api-example-microservice",
-      "exampleContext",
+      exampleContext,
       Seq(
         APISubscriptionStatus(
           "API1",
           "api-example-microservice",
-          "exampleContext",
-          APIVersion("version", APIStatus.STABLE),
+          exampleContext,
+          ApiVersionDefinition("version", APIStatus.STABLE),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
@@ -388,11 +391,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")
+              Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
             )
           )
         )
-      )
 
       when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
         .thenReturn(successful(ApplicationUpliftSuccessful))
@@ -415,11 +417,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")
+              Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
             )
           )
         )
-      )
 
       when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
         .thenReturn(successful(ApplicationUpliftSuccessful))

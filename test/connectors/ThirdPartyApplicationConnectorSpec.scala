@@ -25,7 +25,7 @@ import config.ApplicationConfig
 import connectors.ApplicationConnector.{AddClientSecretResponse, DeleteClientSecretRequest, TPAClientSecret}
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain._
-import domain.models.apidefinitions.{APIIdentifier, APIVersion, VersionSubscription}
+import domain.models.apidefinitions.{ApiIdentifier, ApiVersionDefinition, VersionSubscription}
 import domain.models.applications.{
   ApplicationState,
   ApplicationToken,
@@ -52,7 +52,7 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 import utils.AsyncHmrcSpec
 import uk.gov.hmrc.time.DateTimeUtils
-import scala.concurrent.Future.{successful,failed}
+import scala.concurrent.Future.{successful, failed}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import domain.models.applications.Role
@@ -66,6 +66,7 @@ import domain.models.connectors.AddTeamMemberRequest
 import domain.models.connectors.AddTeamMemberResponse
 import domain.models.applications.ApplicationVerificationFailed
 import domain.models.applications.ApplicationVerificationSuccessful
+import domain.models.apidefinitions.ApiContext
 
 class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
@@ -310,8 +311,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   "fetch subscriptions for application" should {
 
-    val apiSubscription1 = createApiSubscription("api", "1.0", subscribed = true)
-    val apiSubscription2 = createApiSubscription("api", "2.0", subscribed = false)
+    val apiSubscription1 = createApiSubscription(ApiContext("api"), "1.0", subscribed = true)
+    val apiSubscription2 = createApiSubscription(ApiContext("api"), "2.0", subscribed = false)
     val subscriptions = Seq(apiSubscription1, apiSubscription2)
     val url = baseUrl + s"/application/$applicationId/subscription"
 
@@ -360,14 +361,14 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "subscribe to api" should {
-    val apiIdentifier = APIIdentifier("app1", "2.0")
+    val apiIdentifier = ApiIdentifier(ApiContext("app1"), "2.0")
     val url = baseUrl + s"/application/$applicationId/subscription"
 
     "subscribe application to an api" in new Setup {
 
       when(
         mockHttpClient
-          .POST[APIIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
       ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.subscribeToApi(applicationId, apiIdentifier))
@@ -379,7 +380,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
       when(
         mockHttpClient
-          .POST[APIIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
       ).thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](
@@ -389,7 +390,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "unsubscribe from api" should {
-    val context = "app1"
+    val context = ApiContext("app1")
     val version = "2.0"
     val url = baseUrl + s"/application/$applicationId/subscription?context=$context&version=$version"
 
@@ -433,9 +434,9 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(failed(new BadRequestException("")))
 
-        val result = await(connector.verify(verificationCode))
+      val result = await(connector.verify(verificationCode))
 
-        result shouldEqual ApplicationVerificationFailed
+      result shouldEqual ApplicationVerificationFailed
     }
   }
 
@@ -781,12 +782,12 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
-  private def createApiSubscription(context: String, version: String, subscribed: Boolean) = {
+  private def createApiSubscription(context: ApiContext, version: String, subscribed: Boolean) = {
     APISubscription(
       "a",
       "b",
       context,
-      Seq(VersionSubscription(APIVersion(version, APIStatus.STABLE, None), subscribed)),
+      Seq(VersionSubscription(ApiVersionDefinition(version, APIStatus.STABLE, None), subscribed)),
       None
     )
   }

@@ -16,55 +16,42 @@
 
 package builder
 
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications.Application
 import domain.models.subscriptions.{AccessRequirements, APISubscription}
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
+import domain.models.apidefinitions.ApiContext
 
 trait SubscriptionsBuilder {
 
   def buildSubscription(name: String) = {
-    APISubscription(name, s"service-$name", s"context-$name", Seq.empty, Some(false), false)
+    APISubscription(name, s"service-$name", ApiContext(s"context-$name"), Seq.empty, Some(false), false)
   }
 
-  def buildAPISubscriptionStatus(name: String, context: Option[String] = None, fields: Option[SubscriptionFieldsWrapper] = None) : APISubscriptionStatus = {
+  def buildAPISubscriptionStatus(name: String, context: Option[ApiContext] = None, fields: Option[SubscriptionFieldsWrapper] = None): APISubscriptionStatus = {
 
-    val contextName  =  context.getOrElse(s"context-$name")
-    val version = APIVersion("version", APIStatus.STABLE)
+    val contextName = context.getOrElse(ApiContext(s"context-$name"))
+    val version = ApiVersionDefinition("version", APIStatus.STABLE)
 
     val f = fields.getOrElse(SubscriptionFieldsWrapper("fake-appId", "fake-clientId", contextName, version.version, Seq.empty))
 
-    APISubscriptionStatus(
-      name,
-      s"serviceName-$name",
-      contextName,
-      version,
-      subscribed = true,
-      requiresTrust = false,
-      fields = f,
-      isTestSupport = false)
+    APISubscriptionStatus(name, s"serviceName-$name", contextName, version, subscribed = true, requiresTrust = false, fields = f, isTestSupport = false)
   }
 
-  def emptySubscriptionFieldsWrapper(applicationId: String, clientId: String, context : String, version: String) = {
-      SubscriptionFieldsWrapper(applicationId, clientId, context, version, Seq.empty)
+  def emptySubscriptionFieldsWrapper(applicationId: String, clientId: String, context: ApiContext, version: String) = {
+    SubscriptionFieldsWrapper(applicationId, clientId, context, version, Seq.empty)
   }
 
   def buildSubscriptionFieldsWrapper(application: Application, fields: Seq[SubscriptionFieldValue]) = {
 
     val applicationId = application.id
 
-    SubscriptionFieldsWrapper(applicationId, s"clientId-$applicationId", s"context-$applicationId", s"apiVersion-$applicationId", fields = fields)
+    SubscriptionFieldsWrapper(applicationId, s"clientId-$applicationId", ApiContext(s"context-$applicationId"), s"apiVersion-$applicationId", fields = fields)
   }
 
-  def buildSubscriptionFieldValue(name: String, value: Option[String] = None, accessRequirements: AccessRequirements = AccessRequirements.Default ) : SubscriptionFieldValue = {
+  def buildSubscriptionFieldValue(name: String, value: Option[String] = None, accessRequirements: AccessRequirements = AccessRequirements.Default): SubscriptionFieldValue = {
 
-    val definitnion = SubscriptionFieldDefinition(
-      name,
-      s"description-$name",
-      s"hint-$name",
-      "STRING",
-      s"shortDescription-$name",
-      accessRequirements)
+    val definitnion = SubscriptionFieldDefinition(name, s"description-$name", s"hint-$name", "STRING", s"shortDescription-$name", accessRequirements)
 
     SubscriptionFieldValue(definitnion, value.getOrElse(s"value-$name"))
   }

@@ -30,6 +30,7 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
+import domain.models.apidefinitions.ApiContext
 
 class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite {
   private val baseUrl = "https://example.com"
@@ -38,7 +39,7 @@ class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndA
 
   implicit val hc = HeaderCarrier()
   val clientId: String = UUID.randomUUID().toString
-  val apiContext: String = "i-am-a-test"
+  val apiContext: ApiContext = ApiContext("i-am-a-test")
   val apiVersion: String = "1.0"
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
   private val testActorSystem = ActorSystem("test-actor-system")

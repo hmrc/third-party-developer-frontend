@@ -24,7 +24,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import domain.models.apidefinitions.DefinitionFormats._
-import domain.models.apidefinitions.APIIdentifier
+import domain.models.apidefinitions.ApiIdentifier
 import domain.models.applications.{Application, ApplicationToken, Environment}
 import domain.models.connectors.UserAuthenticationResponse
 import domain.models.developers.{Registration, Session, UpdateProfileRequest}
@@ -140,7 +140,7 @@ object ApplicationStub {
   def setUpExecuteSubscription(id: String, api: String, version: String, status: Int) = {
     stubFor(
       post(urlEqualTo(s"/application/$id/subscription"))
-        .withRequestBody(equalToJson(Json.toJson(APIIdentifier(api, version)).toString()))
+        .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(api, version)).toString()))
         .willReturn(aResponse().withStatus(status))
     )
   }
@@ -233,22 +233,22 @@ object ThirdPartyDeveloperStub {
 
 object ApiSubscriptionFieldsStub {
 
-  def setUpDeleteSubscriptionFields(clientId: String, apiContext: String, apiVersion: String) = {
+  def setUpDeleteSubscriptionFields(clientId: String, apiContext: ApiContext, apiVersion: String) = {
     stubFor(
       delete(urlEqualTo(fieldValuesUrl(clientId, apiContext, apiVersion)))
         .willReturn(aResponse().withStatus(NO_CONTENT))
     )
   }
 
-  private def fieldValuesUrl(clientId: String, apiContext: String, apiVersion: String) = {
-    s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
+  private def fieldValuesUrl(clientId: String, apiContext: ApiContext, apiVersion: String) = {
+    s"/field/application/$clientId/context/${apiContext.value}/version/$apiVersion"
   }
 
-  def noSubscriptionFields(apiContext: String, version: String): Any = {
+  def noSubscriptionFields(apiContext: ApiContext, version: String): Any = {
     stubFor(get(urlEqualTo(fieldDefinitionsUrl(apiContext, version))).willReturn(aResponse().withStatus(NOT_FOUND)))
   }
 
-  private def fieldDefinitionsUrl(apiContext: String, version: String) = {
-    s"/definition/context/$apiContext/version/$version"
+  private def fieldDefinitionsUrl(apiContext: ApiContext, version: String) = {
+    s"/definition/context/${apiContext.value}/version/$version"
   }
 }

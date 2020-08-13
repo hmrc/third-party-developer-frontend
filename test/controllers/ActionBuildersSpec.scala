@@ -27,39 +27,35 @@ import service.{ApplicationService, SessionService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.apidefinitions.ApiContext
 
-class TestController( val cookieSigner: CookieSigner,
-                      val mcc: MessagesControllerComponents,
-                      val sessionService: SessionService,
-                      val errorHandler: ErrorHandler,
-                      val applicationService: ApplicationService)
-                      (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController(mcc) {}
+class TestController(
+    val cookieSigner: CookieSigner,
+    val mcc: MessagesControllerComponents,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends ApplicationController(mcc) {}
 
-class ActionBuildersSpec extends BaseControllerSpec
-  with ApplicationServiceMock
-  with builder.ApplicationBuilder
-  with builder.SubscriptionsBuilder
-  with LoggedInRequestTestHelper {
+class ActionBuildersSpec extends BaseControllerSpec with ApplicationServiceMock with builder.ApplicationBuilder with builder.SubscriptionsBuilder with LoggedInRequestTestHelper {
 
   trait Setup {
     val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
     val application = buildApplication(developer.email)
     val subscriptionWithoutSubFields = buildAPISubscriptionStatus("api name")
-    val subscriptionWithSubFields = buildAPISubscriptionStatus(
-        "api name",
-        fields = Some(buildSubscriptionFieldsWrapper(application,Seq(buildSubscriptionFieldValue("field1")))))
-  
+    val subscriptionWithSubFields = buildAPISubscriptionStatus("api name", fields = Some(buildSubscriptionFieldsWrapper(application, Seq(buildSubscriptionFieldValue("field1")))))
+
     val underTest = new TestController(cookieSigner, mcc, sessionServiceMock, errorHandler, applicationServiceMock)
 
     fetchByApplicationIdReturns(application)
 
-    def runTestAction(context: String, version: String, expectedStatus: Int) = {
+    def runTestAction(context: ApiContext, version: String, expectedStatus: Int) = {
       val testResultBody = "was called"
-     
-      val result = underTest.subFieldsDefinitionsExistActionByApi(application.id, context, version) {
-        definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
-            Future.successful(underTest.Ok(testResultBody))
+
+      val result = underTest.subFieldsDefinitionsExistActionByApi(application.id, context, version) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
+        Future.successful(underTest.Ok(testResultBody))
       }(loggedInRequest)
 
       status(result) shouldBe expectedStatus
@@ -70,7 +66,7 @@ class ActionBuildersSpec extends BaseControllerSpec
       }
     }
   }
-  
+
   "subFieldsDefinitionsExistActionByApi" should {
     "Found one" in new Setup {
       givenApplicationHasSubs(application, Seq(subscriptionWithSubFields))
@@ -81,7 +77,7 @@ class ActionBuildersSpec extends BaseControllerSpec
     "Wrong context" in new Setup {
       givenApplicationHasSubs(application, Seq(subscriptionWithSubFields))
 
-      runTestAction("wrong-context", subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
+      runTestAction(ApiContext("wrong-context"), subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
     }
 
     "Wrong version" in new Setup {
