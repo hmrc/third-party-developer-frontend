@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.APISubscription
@@ -82,7 +82,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   val exampleApiSubscription = Some(APISubscriptions("Example API", "api-example-microservice", "exampleContext",
     Seq(APISubscriptionStatus("API1", "api-example-microservice", "exampleContext",
-      APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false,
+      ApiVersionDefinition("version", APIStatus.STABLE), subscribed = true, requiresTrust = false,
       fields = emptyFields))))
 
   val groupedSubs = GroupedSubscriptions(Seq.empty,
@@ -91,7 +91,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
         "API1",
         "subscriptionServiceName",
         "context",
-        APIVersion("version", APIStatus.STABLE),
+        ApiVersionDefinition("version", APIStatus.STABLE),
         subscribed = true,
         requiresTrust = false,
         fields = emptyFields)))))
@@ -162,7 +162,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
             "API1",
             "subscriptionServiceName",
             context,
-            APIVersion(version, APIStatus.STABLE),
+            ApiVersionDefinition(version, APIStatus.STABLE),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields

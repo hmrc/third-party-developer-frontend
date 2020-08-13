@@ -20,7 +20,7 @@ import builder.SubscriptionsBuilder
 import connectors.ThirdPartyApplicationConnector
 import domain.models.subscriptions.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
-import domain.models.apidefinitions.APIIdentifier
+import domain.models.apidefinitions.ApiIdentifier
 import domain.models.applications.{Application, Environment, Role}
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import mocks.connector.SubscriptionFieldsConnectorMock
@@ -38,7 +38,7 @@ import scala.concurrent.Future
 
 class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar with SubscriptionsBuilder {
 
-  val apiContext: String = "sub-ser-test"
+  val apiContext: ApiContext = "sub-ser-test"
   val apiVersion: String = "1.0"
   val applicationName: String = "third-party-application"
   val applicationId: String = "application-id"
@@ -78,7 +78,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
         underTest.fetchFieldsValues(
           application,
           fieldDefinitions = Seq.empty,
-          APIIdentifier("context", "version-1")
+          ApiIdentifier("context", "version-1")
         )
       )
 
@@ -86,7 +86,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
     }
 
     "find and return matching values" in new Setup {
-      private val apiIdentifier: APIIdentifier = APIIdentifier("context1", "version-1")
+      private val apiIdentifier: ApiIdentifier = ApiIdentifier("context1", "version-1")
 
       private val subscriptionFieldValue1 = buildSubscriptionFieldValue("value1")
       private val subscriptionFieldValue2 = buildSubscriptionFieldValue("value2")
@@ -105,7 +105,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with ScalaFutures with Mock
     }
 
     "find no matching values" in new Setup {
-      private val apiIdentifier: APIIdentifier = APIIdentifier("context1", "version-1")
+      private val apiIdentifier: ApiIdentifier = ApiIdentifier("context1", "version-1")
 
       private val subscriptionFieldValue = buildSubscriptionFieldValue("value")
       

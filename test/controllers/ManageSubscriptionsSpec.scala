@@ -69,7 +69,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
   val sessionId = "sessionId"
   val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-  val apiContext = "test"
+  val apiContext = ApiContext("test")
   val apiVersion = "1.0"
 
   val loggedInUser: DeveloperSession = DeveloperSession(session)

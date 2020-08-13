@@ -36,7 +36,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 import builder.SubscriptionsBuilder
-import domain.models.apidefinitions.APIIdentifier
+import domain.models.apidefinitions.ApiIdentifier
 import domain.models.applications.Environment
 import domain.models.subscriptions.AccessRequirements
 
@@ -47,9 +47,9 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private val clientId = UUID.randomUUID().toString
-  private val apiContext = "i-am-a-test"
+  private val apiContext = ApiContext("i-am-a-test")
   private val apiVersion = "1.0"
-  private val apiIdentifier = APIIdentifier(apiContext, apiVersion)
+  private val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   private val fieldsId = UUID.randomUUID()
   private val urlPrefix = "/field"
   private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
@@ -142,7 +142,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
       Map(apiIdentifier -> Seq(subscriptionDefinition))
 
     val getUrl =
-      s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
+      s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/$apiVersion"
 
     "return subscription fields for an API" in new Setup {
       when(
@@ -302,7 +302,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   }
 
   "fetchFieldDefinitions" should {
-    val url = s"/definition/context/$apiContext/version/$apiVersion"
+    val url = s"/definition/context/${apiContext.value}/version/$apiVersion"
 
     val definitionsFromRestService = List(
       FieldDefinition("field1", "desc1", "sdesc2", "hint1", "some type", AccessRequirements.Default)
@@ -361,9 +361,9 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   }
 
   "fetchFieldValues" should {
-    val definitionsUrl = s"/definition/context/$apiContext/version/$apiVersion"
+    val definitionsUrl = s"/definition/context/${apiContext.value}/version/$apiVersion"
     val valuesUrl =
-      s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
+      s"/field/application/$clientId/context/${apiContext.value}/version/$apiVersion"
 
     val definitionsFromRestService = List(
       FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default)
@@ -451,7 +451,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
       fieldsValues
     )
 
-    val putUrl = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
+    val putUrl = s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/$apiVersion"
 
     "save the fields" in new Setup {
       val response = HttpResponse(OK)
@@ -543,7 +543,7 @@ class SubscriptionFieldsConnectorSpec extends UnitSpec with ScalaFutures with Mo
   "deleteFieldValues" should {
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    val url = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
+    val url = s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/$apiVersion"
 
     "return success after delete call has returned 204 NO CONTENT" in new Setup {
       when(mockHttpClient.DELETE(url))

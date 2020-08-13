@@ -119,9 +119,9 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   }
 
   def version(version: String, status: APIStatus, subscribed: Boolean): VersionSubscription =
-    VersionSubscription(APIVersion(version, status), subscribed)
+    VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
-  def api(name: String, context: String, requiresTrust: Option[Boolean], versions: VersionSubscription*): APISubscription =
+  def api(name: String, context: ApiContext, requiresTrust: Option[Boolean], versions: VersionSubscription*): APISubscription =
     APISubscription(name, name, context, versions, requiresTrust)
 
   val productionApplicationId = "Application ID"
@@ -136,7 +136,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       appId: String,
       clientId: String,
       name: String,
-      context: String,
+      context: ApiContext,
       version: String,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
@@ -146,7 +146,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       name = name,
       serviceName = name,
       context = context,
-      apiVersion = APIVersion(version, status),
+      apiVersion = ApiVersionDefinition(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -156,7 +156,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       appId: String,
       clientId: String,
       name: String,
-      context: String,
+      context: ApiContext,
       version: String,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
@@ -167,7 +167,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       name = name,
       serviceName = name,
       context = context,
-      apiVersion = APIVersion(version, status),
+      apiVersion = ApiVersionDefinition(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, context, version, subscriptionFieldWithValues)
@@ -233,7 +233,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
   "Fetch api subscriptions" should {
 
     "identify subscribed apis from available definitions" in new Setup {
-      private val apiIdentifier1 = APIIdentifier("api-1/ctx", "1.0")
+      private val apiIdentifier1 = ApiIdentifier("api-1/ctx", "1.0")
 
       val apis = Seq(
         api("api-1", apiIdentifier1.context, None, version(apiIdentifier1.version, STABLE, subscribed = true), version("2.0", BETA, subscribed = false)),
@@ -367,7 +367,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
       private val context = "api1"
       private val version = "1.0"
 
-      private val subscription = APIIdentifier(context, version)
+      private val subscription = ApiIdentifier(context, version)
 
       private val fieldDefinitions = Seq.empty
 
@@ -390,7 +390,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         private val context = "api1"
         private val version = "1.0"
 
-        private val subscription = APIIdentifier(context, version)
+        private val subscription = ApiIdentifier(context, version)
 
         private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
@@ -421,7 +421,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         private val context = "api1"
         private val version = "1.0"
 
-        private val subscription = APIIdentifier(context, version)
+        private val subscription = ApiIdentifier(context, version)
 
         private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
@@ -953,8 +953,8 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         "",
         "first context",
         Seq(
-          VersionSubscription(APIVersion("1.0", APIStatus.STABLE), subscribed = true),
-          VersionSubscription(APIVersion("2.0", APIStatus.BETA), subscribed = false)
+          VersionSubscription(ApiVersionDefinition("1.0", APIStatus.STABLE), subscribed = true),
+          VersionSubscription(ApiVersionDefinition("2.0", APIStatus.BETA), subscribed = false)
         ),
         None
       ),
@@ -962,14 +962,14 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
         "Second API",
         "",
         "second context",
-        Seq(VersionSubscription(APIVersion("1.0", APIStatus.ALPHA), subscribed = true)),
+        Seq(VersionSubscription(ApiVersionDefinition("1.0", APIStatus.ALPHA), subscribed = true)),
         None
       )
     )
 
     "return false when the application has no subscriptions to the requested api version" in new Setup {
       val apiName = "Third API"
-      val apiContext = "third context"
+      val apiContext = ApiContext("third context")
       val apiVersion = "3.0"
 
       given(mockProductionApplicationConnector.fetchSubscriptions(eqTo(productionApplication.id))(eqTo(hc)))
@@ -982,7 +982,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "return false when the application has unsubscribed to the requested api version" in new Setup {
       val apiName = "First API"
-      val apiContext = "first context"
+      val apiContext = ApiContext("first context")
       val apiVersion = "2.0"
 
       given(mockProductionApplicationConnector.fetchSubscriptions(eqTo(productionApplication.id))(eqTo(hc)))
@@ -995,7 +995,7 @@ class ApplicationServiceSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "return true when the application is subscribed to the requested api version" in new Setup {
       val apiName = "First API"
-      val apiContext = "first context"
+      val apiContext = ApiContext("first context")
       val apiVersion = "1.0"
 
       given(mockProductionApplicationConnector.fetchSubscriptions(eqTo(productionApplication.id))(eqTo(hc)))

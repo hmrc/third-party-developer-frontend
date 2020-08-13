@@ -20,13 +20,14 @@ import domain.models.apidefinitions.APISubscriptionStatusWithSubscriptionFields
 import domain.models.subscriptions.DevhubAccessLevel
 import domain.models.applications.Role
 import play.api.data.FormError
+import domain.models.apidefinitions.ApiContext
 
 object EditManageSubscription {
 
   case class EditApiConfigurationViewModel(
       apiName: String,
       apiVersion: String,
-      apiContext: String,
+      apiContext: ApiContext,
       displayedStatus: String,
       fields: Seq[SubscriptionFieldViewModel],
       errors: Seq[FormError])

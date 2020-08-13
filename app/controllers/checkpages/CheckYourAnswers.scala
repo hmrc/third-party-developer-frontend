@@ -161,7 +161,7 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 
 case class CheckYourSubscriptionData(
   name: String,
-  apiContext: String,
+  apiContext: ApiContext,
   apiVersion: String,
   displayedStatus:String,
   fields: Seq[FieldValue]

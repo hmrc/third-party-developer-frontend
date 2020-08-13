@@ -18,14 +18,14 @@ package domain
 
 import uk.gov.hmrc.play.test.UnitSpec
 import builder._
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 
 class APISubscriptionStatusTest extends UnitSpec with SubscriptionsBuilder{
 
   def aSubscription(name: String = "name",
                     service: String = "service",
-                    context: String = "context",
-                    version: APIVersion = APIVersion("1.0", APIStatus.STABLE),
+                    context: ApiContext = "context",
+                    version: ApiVersionDefinition = ApiVersionDefinition("1.0", APIStatus.STABLE),
                     subscribed: Boolean = true,
                     requiresTrust: Boolean = false) = {
     val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version.version)
@@ -37,12 +37,12 @@ class APISubscriptionStatusTest extends UnitSpec with SubscriptionsBuilder{
 
     "be true if user is an ADMINISTRATOR or DEVELOPER, and the API is not deprecated" in {
       APIStatus.values.filterNot(_ == APIStatus.DEPRECATED) foreach { s =>
-        aSubscription(version = APIVersion("2.0", s)).canUnsubscribe shouldBe true
+        aSubscription(version = ApiVersionDefinition("2.0", s)).canUnsubscribe shouldBe true
       }
     }
 
     "be false if the API version is deprecated" in {
-      aSubscription(version = APIVersion("2.0", APIStatus.DEPRECATED)).canUnsubscribe shouldBe false
+      aSubscription(version = ApiVersionDefinition("2.0", APIStatus.DEPRECATED)).canUnsubscribe shouldBe false
     }
   }
 }

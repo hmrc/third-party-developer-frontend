@@ -65,19 +65,19 @@ trait ApplicationServiceMock extends MockitoSugar {
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(any())).thenReturn(successful(tokens))
 
-  def givenSubscribeToApiSucceeds(app: Application, apiContext: String, apiVersion: String) =
+  def givenSubscribeToApiSucceeds(app: Application, apiContext: ApiContext, apiVersion: String) =
     when(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(ApplicationUpdateSuccessful))
 
   def givenSubscribeToApiSucceeds() =
     when(applicationServiceMock.subscribeToApi(any(),any(),any())(any())).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def ungivenSubscribeToApiSucceeds(app: Application, apiContext: String, apiVersion: String) =
+  def ungivenSubscribeToApiSucceeds(app: Application, apiContext: ApiContext, apiVersion: String) =
     when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenAppIsSubscribedToApi(app: Application, apiName: String, apiContext: String, apiVersion: String) =
+  def givenAppIsSubscribedToApi(app: Application, apiName: String, apiContext: ApiContext, apiVersion: String) =
     when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(true))
 
-  def givenAppIsNotSubscribedToApi(app: Application, apiName: String, apiContext: String, apiVersion: String) =
+  def givenAppIsNotSubscribedToApi(app: Application, apiName: String, apiContext: ApiContext, apiVersion: String) =
     when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(any())).thenReturn(successful(false))
 
   def givenApplicationNameIsValid() =

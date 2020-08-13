@@ -16,7 +16,7 @@
 
 package builder
 
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications.Application
 import domain.models.subscriptions.{AccessRequirements, APISubscription}
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
@@ -30,7 +30,7 @@ trait SubscriptionsBuilder {
   def buildAPISubscriptionStatus(name: String, context: Option[String] = None, fields: Option[SubscriptionFieldsWrapper] = None) : APISubscriptionStatus = {
 
     val contextName  =  context.getOrElse(s"context-$name")
-    val version = APIVersion("version", APIStatus.STABLE)
+    val version = ApiVersionDefinition("version", APIStatus.STABLE)
 
     val f = fields.getOrElse(SubscriptionFieldsWrapper("fake-appId", "fake-clientId", contextName, version.version, Seq.empty))
 

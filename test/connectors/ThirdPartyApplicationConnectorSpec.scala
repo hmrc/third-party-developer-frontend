@@ -25,7 +25,7 @@ import config.ApplicationConfig
 import connectors.ApplicationConnector.{AddClientSecretResponse, DeleteClientSecretRequest, TPAClientSecret}
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain._
-import domain.models.apidefinitions.{APIIdentifier, APIVersion, VersionSubscription}
+import domain.models.apidefinitions.{ApiIdentifier, ApiVersionDefinition, VersionSubscription}
 import domain.models.applications.{ApplicationState, ApplicationToken, CheckInformation, ClientSecretRequest, Collaborator, ContactDetails, CreateApplicationRequest, Environment, Invalid, Standard, UpdateApplicationRequest, Valid}
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
@@ -350,13 +350,13 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
   }
 
   "subscribe to api" should {
-    val apiIdentifier = APIIdentifier("app1", "2.0")
+    val apiIdentifier = ApiIdentifier("app1", "2.0")
     val url = baseUrl + s"/application/$applicationId/subscription"
 
     "subscribe application to an api" in new Setup {
 
       when(mockHttpClient
-        .POST[APIIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
+        .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.subscribeToApi(applicationId, apiIdentifier))
@@ -367,7 +367,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
 
       when(mockHttpClient
-        .POST[APIIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
+        .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](
@@ -755,12 +755,12 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
-  private def createApiSubscription(context: String, version: String, subscribed: Boolean) = {
+  private def createApiSubscription(context: ApiContext, version: String, subscribed: Boolean) = {
     APISubscription(
       "a",
       "b",
       context,
-      Seq(VersionSubscription(APIVersion(version, APIStatus.STABLE, None), subscribed)),
+      Seq(VersionSubscription(ApiVersionDefinition(version, APIStatus.STABLE, None), subscribed)),
       None
     )
   }

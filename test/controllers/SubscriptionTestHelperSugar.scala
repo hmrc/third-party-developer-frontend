@@ -20,20 +20,20 @@ import domain.models.apidefinitions.APIStatus._
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.play.test.UnitSpec
 import builder._
-import domain.models.apidefinitions.{APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIAccess, APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications.Application
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   self: UnitSpec =>
 
-  def subscriptionStatus( apiName: String, serviceName: String, context: String, version: String,
+  def subscriptionStatus( apiName: String, serviceName: String, context: ApiContext, version: String,
                           status: APIStatus = STABLE, subscribed: Boolean = false, requiresTrust: Boolean = false, access: Option[APIAccess] = None, isTestSupport: Boolean = false,
                           fields: Option[SubscriptionFieldsWrapper] = None) = {
 
     val mappedFields = fields.getOrElse(emptySubscriptionFieldsWrapper("myAppId","myClientId",context, version))
 
-    APISubscriptionStatus(apiName, serviceName, context, APIVersion(version, status, access), subscribed, requiresTrust, isTestSupport = isTestSupport, fields = mappedFields)
+    APISubscriptionStatus(apiName, serviceName, context, ApiVersionDefinition(version, status, access), subscribed, requiresTrust, isTestSupport = isTestSupport, fields = mappedFields)
   }
   
   val sampleSubscriptions: Seq[APISubscriptionStatus] = {
@@ -57,7 +57,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     )
   }
 
-  def verifyApplicationSubscription(applicationSubscription: APISubscriptions, expectedApiHumanReadableAppName: String, expectedApiServiceName: String, expectedVersions: Seq[APIVersion]) {
+  def verifyApplicationSubscription(applicationSubscription: APISubscriptions, expectedApiHumanReadableAppName: String, expectedApiServiceName: String, expectedVersions: Seq[ApiVersionDefinition]) {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
     applicationSubscription.apiServiceName shouldBe expectedApiServiceName
     applicationSubscription.subscriptions.map(_.apiVersion) shouldBe expectedVersions
@@ -86,7 +86,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     SubscriptionFieldsWrapper(
       applicationId = WHO_CARES,
       clientId = WHO_CARES,
-      apiContext = WHO_CARES,
+      apiContext = ApiContext(WHO_CARES),
       apiVersion = WHO_CARES,
       fields = fields
     )
@@ -94,7 +94,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   val onlyApiExampleMicroserviceSubscribedTo: APISubscriptionStatus = {
     val context = "example-api"
-    val version = APIVersion("1.0", APIStatus.STABLE)
+    val version = ApiVersionDefinition("1.0", APIStatus.STABLE)
     val emptyFields = emptySubscriptionFieldsWrapper("myAppId","myClientId",context, version.version)
 
     APISubscriptionStatus(
@@ -111,7 +111,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def exampleSubscriptionWithoutFields(prefix: String): APISubscriptionStatus = {
     val context = s"/$prefix-api"
-    val version = APIVersion("1.0", APIStatus.STABLE)
+    val version = ApiVersionDefinition("1.0", APIStatus.STABLE)
     val emptyFields = emptySubscriptionFieldsWrapper("myAppId","myClientId",context, version.version)
 
     val subscriptinFieldInxed = 1

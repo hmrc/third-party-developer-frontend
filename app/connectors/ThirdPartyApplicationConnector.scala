@@ -23,7 +23,7 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import domain.models.apidefinitions.DefinitionFormats._
-import domain.models.apidefinitions.APIIdentifier
+import domain.models.apidefinitions.ApiIdentifier
 import domain.models.applications._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.subscriptions.APISubscription
@@ -51,6 +51,7 @@ import domain.ApplicationNotFound
 import domain.ApplicationUpliftSuccessful
 import domain.ApplicationAlreadyExists
 import domain.ClientSecretLimitExceeded
+import domain.models.apidefinitions.ApiContext
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
@@ -157,14 +158,14 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
 
   def subscribeToApi(applicationId: String,
-                     apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+                     apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST(s"$serviceBaseUrl/application/$applicationId/subscription", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
   }
 
   def unsubscribeFromApi(applicationId: String,
-                         context: String, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+                         context: ApiContext, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.DELETE(s"$serviceBaseUrl/application/$applicationId/subscription?context=$context&version=$version") map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery

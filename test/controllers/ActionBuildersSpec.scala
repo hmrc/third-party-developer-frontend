@@ -53,7 +53,7 @@ class ActionBuildersSpec extends BaseControllerSpec
 
     fetchByApplicationIdReturns(application)
 
-    def runTestAction(context: String, version: String, expectedStatus: Int) = {
+    def runTestAction(context: ApiContext, version: String, expectedStatus: Int) = {
       val testResultBody = "was called"
      
       val result = await(underTest.subFieldsDefinitionsExistActionByApi(application.id, context, version) {

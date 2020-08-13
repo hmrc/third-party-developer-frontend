@@ -17,6 +17,7 @@
 package domain.models.subscriptions
 
 import play.api.libs.json.{Format, Json}
+import domain.models.apidefinitions.ApiContext
 
 object ApiSubscriptionFields {
 
@@ -40,7 +41,7 @@ object ApiSubscriptionFields {
   case class SubscriptionFieldsWrapper(
                                         applicationId: String,
                                         clientId: String,
-                                        apiContext: String,
+                                        apiContext: ApiContext,
                                         apiVersion: String,
                                         fields: Seq[SubscriptionFieldValue]
                                       )
@@ -53,7 +54,7 @@ object ApiSubscriptionFields {
 
   case class SubscriptionFieldsPutRequest(
                                            clientId: String,
-                                           apiContext: String,
+                                           apiContext: ApiContext,
                                            apiVersion: String,
                                            fields: Map[String, String]
                                          )

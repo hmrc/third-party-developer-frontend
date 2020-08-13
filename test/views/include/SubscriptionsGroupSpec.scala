@@ -18,7 +18,7 @@ package views.include
 
 import builder.SubscriptionsBuilder
 import controllers.APISubscriptions
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
 import domain.models.developers.LoggedInState
 import domain.models.views.SubscriptionRedirect
@@ -38,12 +38,12 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
   val clientId = "clientId123"
   val applicationName = "Test Application"
   val apiName = "Test API"
-  val apiContext = "test"
+  val apiContext = ApiContext("test")
   val apiVersion = "1.0"
 
   val emptyFields = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 
-  val subscriptionStatus = APISubscriptionStatus(apiName, apiName, apiContext, APIVersion(apiVersion, APIStatus.STABLE, None), false, false, fields = emptyFields)
+  val subscriptionStatus = APISubscriptionStatus(apiName, apiName, apiContext, ApiVersionDefinition(apiVersion, APIStatus.STABLE, None), false, false, fields = emptyFields)
 
   val apiSubscriptions = Seq(APISubscriptions(apiName, apiName, apiContext, Seq(subscriptionStatus)))
 

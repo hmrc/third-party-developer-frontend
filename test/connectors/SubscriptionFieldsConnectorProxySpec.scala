@@ -40,7 +40,7 @@ class SubscriptionFieldsConnectorProxySpec extends UnitSpec with MockitoSugar wi
 
   implicit val hc = HeaderCarrier()
   val clientId: String = UUID.randomUUID().toString
-  val apiContext: String = "i-am-a-test"
+  val apiContext: ApiContext = ApiContext("i-am-a-test")
   val apiVersion: String = "1.0"
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
   private val testActorSystem = ActorSystem("test-actor-system")

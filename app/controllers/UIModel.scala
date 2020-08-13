@@ -25,6 +25,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
+import domain.models.apidefinitions.ApiContext
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions])
 
@@ -42,7 +43,7 @@ object ApplicationSummary {
 
 case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISubscriptions], exampleApi: Option[APISubscriptions] = None)
 
-case class APISubscriptions(apiHumanReadableAppName: String, apiServiceName: String, apiContext: String,
+case class APISubscriptions(apiHumanReadableAppName: String, apiServiceName: String, apiContext: ApiContext,
                             subscriptions: Seq[APISubscriptionStatus]) {
 
   lazy val subscriptionNumberText = subscriptionNumberLabel(subscriptions)
@@ -85,7 +86,7 @@ case class AjaxSubscriptionResponse(apiName: String, group: String, numberOfSubs
 object AjaxSubscriptionResponse{
   implicit val format = Json.format[AjaxSubscriptionResponse]
 
-  def from(context: String, version: String, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
+  def from(context: ApiContext, version: String, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
     val versionAccessType = subscriptions.find(s => s.context == context && s.apiVersion.version == version).map(_.apiVersion.accessType)
       .getOrElse(throw new IllegalStateException(s"subscription should exist for $context $version"))
 
@@ -98,6 +99,6 @@ object AjaxSubscriptionResponse{
 
     val apiSubscriptions = subscriptions.filter(s => s.context == context && s.apiVersion.accessType == versionAccessType)
 
-    AjaxSubscriptionResponse(context, group.toString, subscriptionNumberLabel(apiSubscriptions))
+    AjaxSubscriptionResponse(context.value, group.toString, subscriptionNumberLabel(apiSubscriptions))
   }
 }

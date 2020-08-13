@@ -16,7 +16,7 @@
 
 package controllers
 
-import domain.models.apidefinitions.{APIAccess, APIAccessType, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIAccess, APIAccessType, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.apidefinitions.APIStatus.{BETA, STABLE}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -39,8 +39,8 @@ class APISubscriptionsSpec extends UnitSpec with SubscriptionTestHelperSugar {
       groupedSubscriptions.apis.size shouldBe 1
       groupedSubscriptions.exampleApi.isDefined shouldBe false
       verifyApplicationSubscription(groupedSubscriptions.apis.head, "Individual Employment", "individual-employment",
-        Seq(APIVersion("1.0", STABLE), APIVersion("2.0", BETA, publicAccess), APIVersion("3.0", BETA, privateAccess), APIVersion("4.0", BETA, privateAccess)))
-      verifyApplicationSubscription(groupedSubscriptions.testApis.head, "Individual Tax", "individual-tax", Seq(APIVersion("1.0", STABLE)))
+        Seq(ApiVersionDefinition("1.0", STABLE), ApiVersionDefinition("2.0", BETA, publicAccess), ApiVersionDefinition("3.0", BETA, privateAccess), ApiVersionDefinition("4.0", BETA, privateAccess)))
+      verifyApplicationSubscription(groupedSubscriptions.testApis.head, "Individual Tax", "individual-tax", Seq(ApiVersionDefinition("1.0", STABLE)))
     }
 
     "group subscriptions based on api service-name" in {
@@ -53,8 +53,8 @@ class APISubscriptionsSpec extends UnitSpec with SubscriptionTestHelperSugar {
       groupedSubscriptions.apis.size shouldBe 2
       groupedSubscriptions.testApis.size shouldBe 0
       groupedSubscriptions.exampleApi.isDefined shouldBe false
-      verifyApplicationSubscription(groupedSubscriptions.apis.head, "Individual Employment", "individual-employment", Seq(APIVersion("1.0", STABLE), APIVersion("2.0", BETA)))
-      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", Seq(APIVersion("1.0", STABLE)))
+      verifyApplicationSubscription(groupedSubscriptions.apis.head, "Individual Employment", "individual-employment", Seq(ApiVersionDefinition("1.0", STABLE), ApiVersionDefinition("2.0", BETA)))
+      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", Seq(ApiVersionDefinition("1.0", STABLE)))
     }
 
 
@@ -67,7 +67,7 @@ class APISubscriptionsSpec extends UnitSpec with SubscriptionTestHelperSugar {
       groupedSubscriptions.apis.size shouldBe 1
       groupedSubscriptions.testApis.size shouldBe 0
       groupedSubscriptions.exampleApi.isDefined shouldBe false
-      verifyApplicationSubscription(groupedSubscriptions.apis.head, "Individual Employment", "individual-employment", Seq(APIVersion("1.0", STABLE), APIVersion("2.0", BETA)))
+      verifyApplicationSubscription(groupedSubscriptions.apis.head, "Individual Employment", "individual-employment", Seq(ApiVersionDefinition("1.0", STABLE), ApiVersionDefinition("2.0", BETA)))
     }
 
     "return None if no subscriptions" in {
@@ -84,7 +84,7 @@ class APISubscriptionsSpec extends UnitSpec with SubscriptionTestHelperSugar {
       groupedSubscriptions.testApis.size shouldBe 0
       groupedSubscriptions.apis.size shouldBe 0
       groupedSubscriptions.exampleApi.isDefined shouldBe true
-      verifyApplicationSubscription(groupedSubscriptions.exampleApi.get, "Hello World", "api-example-microservice", Seq(APIVersion("1.0", STABLE)))
+      verifyApplicationSubscription(groupedSubscriptions.exampleApi.get, "Hello World", "api-example-microservice", Seq(ApiVersionDefinition("1.0", STABLE)))
     }
   }
 
@@ -212,5 +212,5 @@ class APISubscriptionsSpec extends UnitSpec with SubscriptionTestHelperSugar {
     }
   }
 
-  def apiSubscription(apiName: String, serviceName: String, context: String, subscriptions: Seq[APISubscriptionStatus]) = APISubscriptions(apiName, serviceName, context, subscriptions)
+  def apiSubscription(apiName: String, serviceName: String, context: ApiContext, subscriptions: Seq[APISubscriptionStatus]) = APISubscriptions(apiName, serviceName, context, subscriptions)
 }

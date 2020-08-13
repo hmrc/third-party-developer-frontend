@@ -157,7 +157,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   When("""^I am on the unsubcribe request submitted page for application with id '(.*)' and api with name '(.*)', context '(.*)' and version '(.*)'$""") { (id: String, apiName: String, apiContext: String, apiVersion: String) =>
-    webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=MANAGE_PAGE"
+    webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/unsubscribe?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=MANAGE_PAGE"
   }
 
   When( """^I am on the subscriptions page for application with id '(.*)'$""") { (id: String) =>
@@ -173,7 +173,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     VersionSubscription(APIVersion(version, apiStatus, Some(APIAccess(access))), subscribed)
   }
 
-  private def aApiSubscription(context: String, versions: Seq[VersionSubscription], requiresTrust: Option[Boolean] = None) = {
+  private def aApiSubscription(context: ApiContext, versions: Seq[VersionSubscription], requiresTrust: Option[Boolean] = None) = {
     APISubscription(context, s"service-$context", context, versions, requiresTrust)
   }
 }

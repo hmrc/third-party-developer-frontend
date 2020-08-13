@@ -50,7 +50,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   val appId = "1234"
   val apiName = "api-1"
   val apiVersion = "1.0"
-  val apiContext = "Context"
+  val apiContext = ApiContext("Context")
   val displayStatus = "Status"
   val clientId = "clientId123"
 
@@ -179,7 +179,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "return 400 Bad Request" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId,app)
@@ -195,7 +195,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "successfully subscribe to an API and redirect" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId,app)
@@ -215,7 +215,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "successfully unsubscribe from an API and redirect" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
         fetchByApplicationIdReturns(appId,app)
@@ -235,7 +235,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "return a Bad Request without changing the subscription when requesting a change to the subscription when the form is invalid" in new Setup {
         val redirectTo = "APPLICATION_CHECK_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         fetchByApplicationIdReturns(appId,app)
@@ -256,7 +256,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "successfully subscribe to an API, update the check information and redirect" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId,app)
@@ -276,7 +276,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "successfully unsubscribe from an API, update the check information and redirect" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
         fetchByApplicationIdReturns(appId,app)
@@ -297,7 +297,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "return a Bad Request without changing the subscription or check information when requesting a change to the subscription when the form is invalid" in new Setup {
         val redirectTo = "APPLICATION_CHECK_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         fetchByApplicationIdReturns(appId,app)
@@ -330,7 +330,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       s"return $expectedStatus" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
-          "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
 
         fetchByApplicationIdReturns(appId,app)
@@ -358,7 +358,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "render the subscribe to locked subscription page when changing an unsubscribed api" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
-          "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
 
         fetchByApplicationIdReturns(appId,app)
@@ -377,7 +377,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "render the unsubscribe from locked subscription page when changing a subscribed api" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
-          "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          "GET", s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
 
         fetchByApplicationIdReturns(appId,app)
@@ -409,7 +409,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "return 403 Forbidden" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         fetchByApplicationIdReturns(appId,app)
@@ -429,7 +429,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "return 400 Bad Request" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         fetchByApplicationIdReturns(appId,app)
@@ -449,7 +449,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "successfully request to subscribe to the api" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         fetchByApplicationIdReturns(appId,app)
@@ -474,7 +474,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "successfully request to unsubscribe from the api" in new Setup {
         val redirectTo = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         fetchByApplicationIdReturns(appId,app)
@@ -498,7 +498,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       "return a Bad Request without requesting a change to the subscription when the form is invalid" in new Setup {
         val redirectTo = "APPLICATION_CHECK_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=$redirectTo"
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=$apiVersion&redirectTo=$redirectTo"
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         fetchByApplicationIdReturns(appId,app)
@@ -542,7 +542,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       givenApplicationHasNoSubs(alteredActiveApplication)
 
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET",
-        s"developer/applications/$appId/subscribe?context=$apiContext&version=$apiVersion&accessType=$apiAccessType&tab=subscriptions"
+        s"developer/applications/$appId/subscribe?context=${apiContext.value}&version=$apiVersion&accessType=$apiAccessType&tab=subscriptions"
       ).withLoggedIn(underTest, implicitly)(sessionId)
 
       val result: Result = await(underTest.changeApiSubscription(appId, apiContext, apiVersion, apiAccessType)(request))

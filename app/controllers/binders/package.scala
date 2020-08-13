@@ -19,8 +19,37 @@ package controllers
 import domain.models.applications.Environment
 import domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
 import play.api.mvc.PathBindable
+import domain.models.apidefinitions.ApiContext
+import play.api.mvc.QueryStringBindable
 
 package object binders {
+  implicit def apiContextPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiContext] = new PathBindable[ApiContext] {
+    override def bind(key: String, value: String): Either[String, ApiContext] = {
+      textBinder.bind(key, value).map(ApiContext(_))
+    }
+
+    override def unbind(key: String, apiContext: ApiContext): String = {
+      apiContext.value
+    }
+  }
+
+  implicit def apiContextQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[ApiContext] {
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, ApiContext]] = {
+      for {
+        context <- textBinder.bind("context", params)
+      } yield {
+        context match {
+          case Right(context) => Right(ApiContext(context))
+          case _                        => Left("Unable to bind an api context")
+        }
+      }
+    }
+    override def unbind(key: String, context: ApiContext): String = {
+      textBinder.unbind("context", context.value)
+    }
+  }
+
+  
   implicit def environmentPathBinder(implicit textBinder: PathBindable[String]): PathBindable[Environment] = new PathBindable[Environment] {
     override def bind(key: String, value: String): Either[String, Environment] = {
       for {

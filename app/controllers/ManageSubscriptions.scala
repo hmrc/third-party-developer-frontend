@@ -18,7 +18,7 @@ package controllers
 
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.models.apidefinitions.APISubscriptionStatusWithSubscriptionFields
+import domain.models.apidefinitions.{ApiContext,APISubscriptionStatusWithSubscriptionFields}
 import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.applications.{Application, CheckInformation}
 import domain.models.controllers.SaveSubsFieldsPageMode
@@ -35,12 +35,13 @@ import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptions
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import domain.models.apidefinitions.ApiContext
 
 object ManageSubscriptions {
 
   case class FieldValue(name: String, value: String)
 
-  case class ApiDetails(name: String, context: String, version: String, displayedStatus: String, subsValues: Seq[FieldValue])
+  case class ApiDetails(name: String, context: ApiContext, version: String, displayedStatus: String, subsValues: Seq[FieldValue])
 
   def toFieldValue(sfv: SubscriptionFieldValue): FieldValue = {
     def default(in: String, default: String) = if (in.isEmpty) default else in
@@ -89,7 +90,7 @@ class ManageSubscriptions @Inject() (val sessionService: SessionService,
       successful(Ok(listApiSubscriptionsView(definitionsRequest.applicationRequest.application, details)))
     }
 
-  def editApiMetadataPage(applicationId: String, context: String, version: String, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
+  def editApiMetadataPage(applicationId: String, context: ApiContext, version: String, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
     subFieldsDefinitionsExistActionByApi(applicationId, context, version) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
@@ -103,7 +104,7 @@ class ManageSubscriptions @Inject() (val sessionService: SessionService,
     }
 
   def saveSubscriptionFields(applicationId: String,
-                             apiContext: String,
+                             apiContext: ApiContext,
                              apiVersion: String,
                              mode: SaveSubsFieldsPageMode) : Action[AnyContent] =
       subFieldsDefinitionsExistActionByApi(applicationId, apiContext, apiVersion) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
@@ -122,7 +123,7 @@ class ManageSubscriptions @Inject() (val sessionService: SessionService,
     )
   }
 
-  private def subscriptionConfigurationSave(apiContext: String,
+  private def subscriptionConfigurationSave(apiContext: ApiContext,
                                             apiVersion: String,
                                             apiSubscription: APISubscriptionStatusWithSubscriptionFields,
                                             successRedirect: Call,

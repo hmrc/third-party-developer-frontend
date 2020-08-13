@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.ApplicationCheck
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
@@ -73,7 +73,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
   val exampleApiSubscription: Some[APISubscriptions] = Some(APISubscriptions("Example API", "api-example-microservice", "exampleContext",
     Seq(APISubscriptionStatus("API1", "api-example-microservice", "exampleContext",
-      APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false, fields = emptyFields))))
+      ApiVersionDefinition("version", APIStatus.STABLE), subscribed = true, requiresTrust = false, fields = emptyFields))))
 
   val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
