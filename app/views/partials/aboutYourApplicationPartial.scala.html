@@ -14,8 +14,8 @@
  * limitations under the License.
  *@
 
-@import controllers.checkpages.{CheckYourAnswersData,DummyCheckYourAnswersForm}
-@import domain.{DeveloperSession, SaveSubsFieldsPageMode}
+@import controllers.checkpages.{CheckYourAnswersData, DummyCheckYourAnswersForm}
+@import domain.models.controllers.SaveSubsFieldsPageMode
 
 @(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], messages: Messages)
 

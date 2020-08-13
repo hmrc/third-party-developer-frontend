@@ -19,7 +19,7 @@ package service
 import config.ApplicationConfig
 import connectors.DeskproConnector
 import controllers.{SignOutSurveyForm, SupportEnquiryForm}
-import domain.{DeskproTicket, Feedback, TicketId, TicketResult}
+import domain.models.connectors.{DeskproTicket, Feedback, TicketId, TicketResult}
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.Request
 

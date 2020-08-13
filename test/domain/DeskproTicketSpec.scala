@@ -17,6 +17,7 @@
 package domain
 
 import controllers.SupportEnquiryForm
+import domain.models.connectors.DeskproTicket
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 

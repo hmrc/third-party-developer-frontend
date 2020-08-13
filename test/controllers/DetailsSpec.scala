@@ -17,6 +17,8 @@
 package controllers
 
 import domain._
+import domain.models.applications._
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor

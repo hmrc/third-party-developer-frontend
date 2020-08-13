@@ -14,17 +14,17 @@
  * limitations under the License.
  *@
 
-@import domain.DeveloperSession
-@import domain.BackButtonWithJavaScript
+@import domain.models.developers.DeveloperSession
 @import config.ApplicationConfig
 @import views.html.include.teamMembers.addTeamMemberPartial
-@import domain.AddTeamMemberPageMode.ApplicationCheck
+@import domain.models.views.BackButtonWithJavaScript
 @import model.ApplicationViewModel
 @import views.html.include.DevMain
+@import domain.models.controllers.AddTeamMemberPageMode.ApplicationCheck
 
 @this(devMain: DevMain)
 
-@(applicationViewModel: ApplicationViewModel, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
+@(applicationViewModel: ApplicationViewModel, form: Form[AddTeamMemberForm], loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 
 @app = @{applicationViewModel.application}

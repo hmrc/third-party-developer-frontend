@@ -20,8 +20,12 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
-import domain.Role._
-import domain._
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.applications._
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.subscriptions.APISubscription
+import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -38,7 +42,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
+import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView

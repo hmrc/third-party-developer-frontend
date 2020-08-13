@@ -15,17 +15,18 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.DeveloperSession
 @import include._
 @import model.Crumb
-@import domain.Capabilities.SupportChangingAppDetails
+@import domain.models.applications.Capabilities.SupportChangingAppDetails
 
 @import model.ApplicationViewModel
+@import domain.models.developers.DeveloperSession
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(form: Form[controllers.EditApplicationForm], applicationViewModel: ApplicationViewModel)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "details")
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @app = @{applicationViewModel.application}

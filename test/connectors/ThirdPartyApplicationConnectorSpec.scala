@@ -23,8 +23,10 @@ import java.util.UUID.randomUUID
 import akka.actor.ActorSystem
 import config.ApplicationConfig
 import connectors.ApplicationConnector.{AddClientSecretResponse, DeleteClientSecretRequest, TPAClientSecret}
-import domain.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
+import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain._
+import domain.models.apidefinitions.{APIIdentifier, APIVersion, VersionSubscription}
+import domain.models.applications.{ApplicationState, ApplicationToken, CheckInformation, ClientSecretRequest, Collaborator, ContactDetails, CreateApplicationRequest, Environment, Invalid, Standard, UpdateApplicationRequest, Valid}
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -44,6 +46,13 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.applications.Role
+import domain.models.applications.Application
+import domain.models.subscriptions.APISubscription
+import domain.models.applications.UpliftRequest
+import domain.models.apidefinitions.APIStatus
+import domain.models.applications.ClientSecret
+import domain.models.applications.State
 
 class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 

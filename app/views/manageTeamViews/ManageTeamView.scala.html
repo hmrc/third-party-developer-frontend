@@ -15,20 +15,22 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{DeveloperSession, Role}
+@import domain.models.views.Button
 @import helpers.string._
 @import include._
 @import model.Crumb
 @import include.teamMembers._
-
-@import domain.Button
 @import model.ApplicationViewModel
 @import views.html.include.DevMain
+@import domain.models.applications.Role
+@import domain.models.developers.DeveloperSession
+
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, role: Role, form: Form[controllers.AddTeamMemberForm])(
         implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @app = @{applicationView.application}

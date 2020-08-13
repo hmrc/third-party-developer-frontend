@@ -20,14 +20,17 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.ApplicationState.pendingGatekeeperApproval
-import domain.Role.{ADMINISTRATOR, DEVELOPER}
-import domain._
+import domain.models.applications.ApplicationState._
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.ClientSecretLimitExceeded
+import domain.models.applications._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify}
 import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -35,9 +38,8 @@ import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithLoggedInSession._
-import views.html.editapplication.DeleteClientSecretView
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
-import play.api.test.CSRFTokenHelper._
+import views.html.editapplication.DeleteClientSecretView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

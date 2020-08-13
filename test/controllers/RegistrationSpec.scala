@@ -17,7 +17,8 @@
 package controllers
 
 import connectors.ThirdPartyDeveloperConnector
-import domain.RegistrationSuccessful
+import domain.models.developers
+import domain.models.developers.RegistrationSuccessful
 import mocks.service.SessionServiceMock
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
@@ -71,7 +72,7 @@ class RegistrationSpec extends BaseControllerSpec {
         ("organisation", "org")
       )
 
-      val requestCaptor: ArgumentCaptor[domain.Registration] = ArgumentCaptor.forClass(classOf[domain.Registration])
+      val requestCaptor: ArgumentCaptor[developers.Registration] = ArgumentCaptor.forClass(classOf[developers.Registration])
       given(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).willReturn(RegistrationSuccessful)
 
       val result = await(underTest.register()(request))
@@ -94,7 +95,7 @@ class RegistrationSpec extends BaseControllerSpec {
         ("confirmpassword", "VALID@1q2w3e")
       )
 
-      val requestCaptor: ArgumentCaptor[domain.Registration] = ArgumentCaptor.forClass(classOf[domain.Registration])
+      val requestCaptor: ArgumentCaptor[developers.Registration] = ArgumentCaptor.forClass(classOf[developers.Registration])
       given(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).willReturn(RegistrationSuccessful)
 
       await(underTest.register()(request))

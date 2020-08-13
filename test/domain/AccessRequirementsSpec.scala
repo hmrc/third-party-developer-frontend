@@ -16,8 +16,9 @@
 
 package domain
 
-import domain.DevhubAccessLevel._
-import domain.DevhubAccessRequirement._
+import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirement, DevhubAccessRequirements}
+import domain.models.subscriptions.DevhubAccessLevel._
+import domain.models.subscriptions.DevhubAccessRequirement._
 import org.scalatest.{Matchers, WordSpec}
 
 class AccessRequirementsSpec extends WordSpec with Matchers {

@@ -17,9 +17,9 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.Capabilities.SupportsTermsOfUse
-import domain.Permissions.SandboxOrAdmin
-import domain.{Application, CheckInformation, TermsOfUseAgreement, TermsOfUseStatus}
+import domain.models.applications.Capabilities.SupportsTermsOfUse
+import domain.models.applications.Permissions.SandboxOrAdmin
+import domain.models.applications.{Application, CheckInformation, TermsOfUseAgreement, TermsOfUseStatus}
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form

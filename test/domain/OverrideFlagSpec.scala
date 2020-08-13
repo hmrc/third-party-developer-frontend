@@ -16,6 +16,7 @@
 
 package domain
 
+import domain.models.applications.OverrideFlag
 import play.api.libs.json.{JsError, JsString, Json}
 import uk.gov.hmrc.play.test.UnitSpec
 

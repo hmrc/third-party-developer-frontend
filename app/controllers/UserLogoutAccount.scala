@@ -17,7 +17,7 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.TicketId
+import domain.models.connectors.TicketId
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
@@ -27,19 +27,21 @@ import service.{ApplicationService, DeskproService, SessionService}
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
-class UserLogoutAccount @Inject()(val deskproService: DeskproService,
-                                  val sessionService: SessionService,
-                                  val applicationService: ApplicationService,
-                                  val errorHandler: ErrorHandler,
-                                  mcc: MessagesControllerComponents,
-                                  val cookieSigner: CookieSigner,
-                                  signoutSurveyView: SignoutSurveyView,
-                                  logoutConfirmationView: LogoutConfirmationView
-                                 )
-                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends LoggedInController(mcc) with ExtendedDevHubAuthorization {
+class UserLogoutAccount @Inject() (
+    val deskproService: DeskproService,
+    val sessionService: SessionService,
+    val applicationService: ApplicationService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    signoutSurveyView: SignoutSurveyView,
+    logoutConfirmationView: LogoutConfirmationView
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends LoggedInController(mcc)
+    with ExtendedDevHubAuthorization {
 
   def logoutSurvey = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     val page = signoutSurveyView("Are you sure you want to sign out?", SignOutSurveyForm.form)
@@ -55,9 +57,11 @@ class UserLogoutAccount @Inject()(val deskproService: DeskproService,
           case _ => Logger.error("Failed to create deskpro ticket")
         }
 
-        applicationService.userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions).flatMap(_ => {
-          Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
-        })
+        applicationService
+          .userLogoutSurveyCompleted(form.email, form.name, form.rating.getOrElse("").toString, form.improvementSuggestions)
+          .flatMap(_ => {
+            Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))
+          })
       case None =>
         Logger.error("Survey form invalid.")
         Future.successful(Redirect(controllers.routes.UserLogoutAccount.logout()))

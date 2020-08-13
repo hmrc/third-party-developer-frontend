@@ -14,21 +14,20 @@
  * limitations under the License.
  *@
 
-@import domain.Application
-@import domain.Role
-@import domain.DeveloperSession
 @import views.html.include.teamMembers._
 @import helpers.string._
 @import config.ApplicationConfig
-@import domain.BackButtonWithJavaScript
-@import domain.Link
+@import domain.models.applications.Role
 @import views.html.include.DevMain
+@import domain.models.views.BackButtonWithJavaScript
+@import domain.models.views.Link
+@import domain.models.applications.Application
+@import domain.models.developers.DeveloperSession
 
 @this(devMain: DevMain)
 
 @(app: Application, role: Role, loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
-
 
 @pageHeading = @{ "Tell us your team members" }
 

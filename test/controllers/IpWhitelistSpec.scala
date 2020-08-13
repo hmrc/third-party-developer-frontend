@@ -16,7 +16,10 @@
 
 package controllers
 
-import domain._
+import domain.models.applications.Application
+import domain.models.developers.{Developer, LoggedInState, Session}
+import domain.DeskproTicketCreationFailed
+import domain.models.connectors.TicketCreated
 import mocks.service._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
@@ -26,8 +29,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK}
 import service.DeskproService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.WithLoggedInSession._
 import utils.{TestApplications, WithCSRFAddToken}
+import utils.WithLoggedInSession._
 import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}
 
 import scala.concurrent.ExecutionContext.Implicits.global

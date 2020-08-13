@@ -19,7 +19,8 @@ package controllers.checkpages
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys._
 import controllers._
-import domain.{ApplicationRequest => _, _}
+import domain._
+import domain.models.applications.CheckInformation
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}

@@ -15,8 +15,9 @@
  *@
 
 @import include._
-@import domain._
+@import domain.models.views.{BackButton, NoBackButton, StaticNavLinks, UserNavLinks}
 @import model.Crumb
+@import domain.models.developers.DeveloperSession
 
 @this(main: Main)
 
@@ -35,7 +36,7 @@
 )
 
 
-@userBanner = {
+    @userBanner = {
     <div id="user-nav-links" class="header__menu__proposition--sub-header" data-ej>
         <ul class="header__menu__proposition-links">
             @headerNavLinks(UserNavLinks(userFullName, isRegistering), anchorClass=Some("link-style"))

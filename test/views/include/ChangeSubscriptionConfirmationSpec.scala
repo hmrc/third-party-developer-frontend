@@ -17,7 +17,9 @@
 package views.include
 
 import controllers.ChangeSubscriptionConfirmationForm
-import domain.{SubscriptionRedirect, _}
+import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.developers.LoggedInState
+import domain.models.views.SubscriptionRedirect
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.data.Form

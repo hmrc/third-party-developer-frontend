@@ -17,7 +17,7 @@
 package views.include
 
 import config.ApplicationConfig
-import domain.{Application, Environment}
+import domain.models.applications.{Application, Environment}
 import model.Crumb
 import org.jsoup.Jsoup
 import org.scalatestplus.mockito.MockitoSugar

@@ -16,7 +16,7 @@
 
 package controllers
 
-import domain.{Application, Standard}
+import domain.models.applications.{Application, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
 

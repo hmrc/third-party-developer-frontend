@@ -16,9 +16,13 @@
 
 package controllers
 
-import domain._
-import domain.Environment._
-import domain.Role._
+import domain.ApplicationUpdateSuccessful
+import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applications
+import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import domain.models.applications.Role.ADMINISTRATOR
+import domain.models.applications.{Access, Application, ApplicationState, CheckInformation, Collaborator, Environment, Privileged, ROPC, Role, Standard, TermsOfUseAgreement}
+import domain.models.developers.{Developer, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -177,7 +181,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "return a bad request if the app already has terms of use agreed" in new Setup {
-      val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))
+      val checkInformation = CheckInformation(termsOfUseAgreements = Seq(applications.TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))
       givenApplicationExists(checkInformation = Some(checkInformation))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")

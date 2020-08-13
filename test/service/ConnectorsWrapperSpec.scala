@@ -18,7 +18,7 @@ package service
 
 import config.ApplicationConfig
 import connectors._
-import domain._
+import domain.models.applications.{Application, Environment}
 import org.mockito.BDDMockito.given
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar

@@ -21,9 +21,14 @@ import java.util.UUID
 import config.ApplicationConfig
 import connectors._
 import domain._
-import domain.APIStatus._
-import domain.ApiSubscriptionFields._
-import domain.Environment.{PRODUCTION, SANDBOX}
+import domain.models.apidefinitions.APIStatus._
+import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import domain.models.apidefinitions.{APIDefinition, APIIdentifier, APISubscriptionStatus, AccessType, VersionSubscription}
+import domain.models.applications._
+import domain.models.connectors.{DeskproTicket, TicketResult}
+import domain.models.developers.DeveloperSession
+import domain.models.subscriptions.APISubscription
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.DefinitionsByApiVersion

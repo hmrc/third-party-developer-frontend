@@ -16,10 +16,10 @@
 
 package builder
 
-import domain._
-import domain.ApiSubscriptionFields.SubscriptionFieldsWrapper
-import domain.ApiSubscriptionFields.SubscriptionFieldValue
-import domain.ApiSubscriptionFields.SubscriptionFieldDefinition
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.applications.Application
+import domain.models.subscriptions.{AccessRequirements, APISubscription}
+import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
 
 trait SubscriptionsBuilder {
 

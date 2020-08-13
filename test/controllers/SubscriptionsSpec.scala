@@ -19,7 +19,9 @@ package controllers
 import java.util.UUID.randomUUID
 
 import connectors.ThirdPartyDeveloperConnector
-import domain._
+import domain.models.applications.{Application, ApplicationState, ApplicationToken, CheckInformation, ClientSecret, Collaborator, Environment, Privileged, ROPC, Role, Standard}
+import domain.models.connectors.TicketResult
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -39,6 +41,9 @@ import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
+import domain.models.applications.ApplicationToken
+import domain.models.connectors.TicketResult
+import domain.models.applications.ClientSecret
 
 class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 

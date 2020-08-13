@@ -15,8 +15,9 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.{AccessType, Application}
+@import domain.models.applications.Application
 
+@import domain.models.apidefinitions.AccessType
 @(app: Application)(implicit appConfig: ApplicationConfig)
 
 @if(app.access.accessType.isNotStandard) {

@@ -16,9 +16,10 @@
 
 package controllers
 
-import domain.Role.DEVELOPER
-import domain.State.TESTING
-import domain._
+import domain.models.apidefinitions.AccessType
+import domain.models.applications.Role.DEVELOPER
+import domain.models.applications.State.TESTING
+import domain.models.applications.{Application, Collaborator, Environment, TermsOfUseStatus}
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
 

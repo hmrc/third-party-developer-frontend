@@ -17,7 +17,7 @@
 package connectors
 
 import connectors.SubscriptionFieldsConnector.{AllApiFieldDefinitions, ApiFieldDefinitions, FieldDefinition}
-import domain.{AccessRequirements, DevhubAccessRequirement, DevhubAccessRequirements}
+import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirement, DevhubAccessRequirements}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
@@ -42,7 +42,7 @@ trait FieldDefinitionFormatters extends AccessRequirementsFormatters{
 }
 
 trait AccessRequirementsFormatters {
-  import DevhubAccessRequirement._
+  import domain.models.subscriptions.DevhubAccessRequirement._
 
   def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
     if(value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))

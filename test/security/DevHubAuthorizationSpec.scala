@@ -19,7 +19,7 @@ package security
 import cats.implicits._
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.{routes, BaseController, BaseControllerSpec}
-import domain.{DeveloperSession, LoggedInState}
+import domain.models.developers.{DeveloperSession, LoggedInState}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
 import org.scalatest.Matchers

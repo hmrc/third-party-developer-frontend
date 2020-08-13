@@ -18,11 +18,12 @@ package utils
 
 import java.util.UUID.randomUUID
 
-import domain._
+import domain.models.applications.{Access, Application, ApplicationState, ApplicationToken, CheckInformation, ClientSecret, Collaborator, Environment, Privileged, ROPC, Role, Standard, State}
 import org.joda.time.DateTimeZone
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.util.Random
+import domain.models.apidefinitions.AccessType
 
 trait TestApplications {
 

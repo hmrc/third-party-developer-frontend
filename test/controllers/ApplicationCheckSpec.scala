@@ -18,9 +18,14 @@ package controllers
 
 import java.util.UUID.randomUUID
 
+import builder._
 import controllers.checkpages.ApplicationCheck
-import domain._
-import domain.Role._
+import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.applications
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.ApplicationUpliftSuccessful
+import domain.models.applications._
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -36,10 +41,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import builder._
+import views.html.checkpages._
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
-import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
 import views.html.editapplication.NameSubmittedView
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -362,7 +366,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
           teamConfirmed = true,
-          Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
+          Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))))
 
       given(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
         .willReturn(ApplicationUpliftSuccessful)
@@ -383,7 +387,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
             providedPrivacyPolicyURL = true,
             providedTermsAndConditionsURL = true,
             teamConfirmed = true,
-            Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))
+            Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")))
           )
         )
 

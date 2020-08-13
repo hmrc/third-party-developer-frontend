@@ -17,7 +17,8 @@
 package views
 
 import controllers.AddApplicationNameForm
-import domain.{Environment, LoggedInState}
+import domain.models.applications.Environment
+import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest

@@ -17,10 +17,13 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.AddTeamMemberPageMode.{ApplicationCheck, CheckYourAnswers, ManageTeamMembers}
-import domain.Capabilities.SupportsTeamMembers
-import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
+import domain.models.controllers.AddTeamMemberPageMode._
+import domain.models.applications.Capabilities.SupportsTeamMembers
+import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain._
+import domain.models.applications.{Collaborator, Role}
+import domain.models.controllers.AddTeamMemberPageMode
+import domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form

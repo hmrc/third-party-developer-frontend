@@ -16,7 +16,7 @@
 
 package steps
 
-import domain.Registration
+import domain.models.developers.Registration
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers

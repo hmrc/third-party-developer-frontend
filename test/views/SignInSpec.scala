@@ -17,7 +17,7 @@
 package views
 
 import controllers.LoginForm
-import domain.LoggedInState
+import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest

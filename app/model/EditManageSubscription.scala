@@ -16,7 +16,9 @@
 
 package model
 
-import domain.{APISubscriptionStatusWithSubscriptionFields, DevhubAccessLevel, Role}
+import domain.models.apidefinitions.APISubscriptionStatusWithSubscriptionFields
+import domain.models.subscriptions.DevhubAccessLevel
+import domain.models.applications.Role
 import play.api.data.FormError
 
 object EditManageSubscription {

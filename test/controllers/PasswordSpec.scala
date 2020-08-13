@@ -18,7 +18,8 @@ package controllers
 
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
-import domain.{ChangePassword, InvalidResetCode, PasswordReset, UnverifiedAccount}
+import domain.models.connectors.{ChangePassword, PasswordReset}
+import domain.{InvalidResetCode, UnverifiedAccount}
 import mocks.service.SessionServiceMock
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.BDDMockito.given

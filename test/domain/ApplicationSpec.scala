@@ -16,8 +16,10 @@
 
 package domain
 
-import domain.Capabilities.{ChangeClientSecret, ViewCredentials}
-import domain.Permissions.SandboxOrAdmin
+import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
+import domain.models.applications.{Access, Application, ApplicationState, Collaborator, Environment, Privileged, ROPC, Role, Standard}
+import domain.models.applications.Permissions.SandboxOrAdmin
+import domain.models.developers.Developer
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
 import helpers.string._
@@ -38,34 +40,30 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.SANDBOX, Standard(), administrator, true),
       (Environment.PRODUCTION, Standard(), developer, false),
       (Environment.PRODUCTION, Standard(), administrator, true),
-
       (Environment.SANDBOX, ROPC(), developer, true),
       (Environment.SANDBOX, ROPC(), administrator, true),
       (Environment.PRODUCTION, ROPC(), developer, false),
       (Environment.PRODUCTION, ROPC(), administrator, true),
-
       (Environment.SANDBOX, Privileged(), developer, true),
       (Environment.SANDBOX, Privileged(), administrator, true),
       (Environment.PRODUCTION, Privileged(), developer, false),
       (Environment.PRODUCTION, Privileged(), administrator, true)
     )
 
-    runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(ViewCredentials,user, SandboxOrAdmin) })
+    runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(ViewCredentials, user, SandboxOrAdmin) })
   }
 
-  describe("Application.isPermittedToEditAppDetails"){
+  describe("Application.isPermittedToEditAppDetails") {
 
     val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
       (Environment.SANDBOX, Standard(), developer, true),
       (Environment.SANDBOX, Standard(), administrator, true),
       (Environment.PRODUCTION, Standard(), developer, false),
       (Environment.PRODUCTION, Standard(), administrator, true),
-
       (Environment.SANDBOX, ROPC(), developer, false),
       (Environment.SANDBOX, ROPC(), administrator, false),
       (Environment.PRODUCTION, ROPC(), developer, false),
       (Environment.PRODUCTION, ROPC(), administrator, false),
-
       (Environment.SANDBOX, Privileged(), developer, false),
       (Environment.SANDBOX, Privileged(), administrator, false),
       (Environment.PRODUCTION, Privileged(), developer, false),
@@ -81,19 +79,17 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.SANDBOX, Standard(), administrator, true),
       (Environment.PRODUCTION, Standard(), developer, false),
       (Environment.PRODUCTION, Standard(), administrator, true),
-
       (Environment.SANDBOX, ROPC(), developer, true),
       (Environment.SANDBOX, ROPC(), administrator, true),
       (Environment.PRODUCTION, ROPC(), developer, false),
       (Environment.PRODUCTION, ROPC(), administrator, true),
-
       (Environment.SANDBOX, Privileged(), developer, true),
       (Environment.SANDBOX, Privileged(), administrator, true),
       (Environment.PRODUCTION, Privileged(), developer, false),
       (Environment.PRODUCTION, Privileged(), administrator, true)
     )
 
-    runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(ChangeClientSecret,user, SandboxOrAdmin)  })
+    runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(ChangeClientSecret, user, SandboxOrAdmin) })
   }
 
   describe("Application.canViewServerToken()") {
@@ -102,12 +98,10 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.SANDBOX, Standard(), administrator, true),
       (Environment.PRODUCTION, Standard(), developer, false),
       (Environment.PRODUCTION, Standard(), administrator, true),
-
       (Environment.SANDBOX, ROPC(), developer, false),
       (Environment.SANDBOX, ROPC(), administrator, false),
       (Environment.PRODUCTION, ROPC(), developer, false),
       (Environment.PRODUCTION, ROPC(), administrator, false),
-
       (Environment.SANDBOX, Privileged(), developer, false),
       (Environment.SANDBOX, Privileged(), administrator, false),
       (Environment.PRODUCTION, Privileged(), developer, false),
@@ -123,12 +117,10 @@ class ApplicationSpec extends FunSpec with Matchers {
       (Environment.SANDBOX, Standard(), administrator, false),
       (Environment.PRODUCTION, Standard(), developer, false),
       (Environment.PRODUCTION, Standard(), administrator, true),
-
       (Environment.SANDBOX, ROPC(), developer, false),
       (Environment.SANDBOX, ROPC(), administrator, false),
       (Environment.PRODUCTION, ROPC(), developer, false),
       (Environment.PRODUCTION, ROPC(), administrator, false),
-
       (Environment.SANDBOX, Privileged(), developer, false),
       (Environment.SANDBOX, Privileged(), administrator, false),
       (Environment.PRODUCTION, Privileged(), developer, false),
@@ -141,11 +133,11 @@ class ApplicationSpec extends FunSpec with Matchers {
   describe("Application.findCollaboratorByHash()") {
     val app = createApp(Environment.PRODUCTION, Standard(), productionApplicationState)
 
-    it("should find when an email sha matches"){
+    it("should find when an email sha matches") {
       app.findCollaboratorByHash(developer.email.toSha256) shouldBe Some(developerCollaborator)
     }
 
-    it("should not find when an email sha doesn't match"){
+    it("should not find when an email sha doesn't match") {
       app.findCollaboratorByHash("not a matching sha") shouldBe None
     }
   }
@@ -156,7 +148,8 @@ class ApplicationSpec extends FunSpec with Matchers {
       Collaborator(administrator.email, Role.ADMINISTRATOR)
     )
 
-    val app = Application("id",
+    val app = Application(
+      "id",
       "clientId",
       "app name",
       DateTime.now(),
@@ -166,12 +159,12 @@ class ApplicationSpec extends FunSpec with Matchers {
       description = None,
       collaborators = collaborators,
       access = access,
-      state = defaultApplicationState)
+      state = defaultApplicationState
+    )
     app
   }
 
-  def runTableTests(data: Seq[(Environment, Access, Developer, Boolean)], defaultApplicationState: ApplicationState)
-                   (fn: (Application, Developer) => Boolean): Unit = {
+  def runTableTests(data: Seq[(Environment, Access, Developer, Boolean)], defaultApplicationState: ApplicationState)(fn: (Application, Developer) => Boolean): Unit = {
 
     data.zipWithIndex.foreach {
       case ((environment, applicationType, user, accessAllowed), index) =>

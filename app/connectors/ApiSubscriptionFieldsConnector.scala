@@ -22,13 +22,15 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.{AccessRequirements, APIIdentifier, Environment}
-import domain.ApiSubscriptionFields._
+import domain.models.apidefinitions.APIIdentifier
+import domain.models.applications.Environment
+import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.subscriptions.AccessRequirements
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
-import play.api.libs.json.{Format, Json, JsSuccess}
+import play.api.libs.json.{Format, JsSuccess, Json}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient

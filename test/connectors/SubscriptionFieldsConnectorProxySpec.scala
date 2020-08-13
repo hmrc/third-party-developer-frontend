@@ -20,7 +20,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import config.ApplicationConfig
-import domain.Environment
+import domain.models.applications.Environment
 import org.mockito.ArgumentMatchers.any
 import helpers.FutureTimeoutSupportImpl
 import org.mockito.Mockito.{verify, when}

@@ -20,7 +20,8 @@ import java.util.UUID
 
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
-import domain.{Developer, LoggedInState, Session}
+import domain.models.developers.Session
+import domain.models.developers.{Developer, LoggedInState}
 import mocks.service.SessionServiceMock
 import play.api.http.Status._
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}

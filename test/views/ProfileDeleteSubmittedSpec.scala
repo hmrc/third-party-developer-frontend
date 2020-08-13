@@ -16,7 +16,7 @@
 
 package views
 
-import domain._
+import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken

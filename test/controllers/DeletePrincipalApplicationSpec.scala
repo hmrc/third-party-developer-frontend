@@ -16,7 +16,10 @@
 
 package controllers
 
-import domain._
+import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applications._
+import domain.models.connectors.TicketCreated
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
@@ -26,8 +29,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.WithLoggedInSession._
 import utils.{TestApplications, WithCSRFAddToken}
+import utils.WithLoggedInSession._
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global

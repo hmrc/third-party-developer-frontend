@@ -19,8 +19,8 @@ package service
 import com.google.inject.name.Named
 import config.ApplicationConfig
 import connectors._
-import domain.Environment.PRODUCTION
-import domain._
+import domain.models.applications.{Application, Environment}
+import domain.models.applications.Environment.PRODUCTION
 import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.HeaderCarrier

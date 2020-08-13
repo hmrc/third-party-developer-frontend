@@ -19,6 +19,7 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain._
+import domain.models.connectors.{ChangePassword, PasswordReset}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.data.Form

@@ -15,13 +15,12 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.DeveloperSession
 @import include._
 @import model.Crumb
-
 @import views.html.include.teamMembers.addTeamMemberPartial
+@import domain.models.developers.DeveloperSession
 
-@import domain.AddTeamMemberPageMode.ManageTeamMembers
+@import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 @import model.ApplicationViewModel
 @import views.html.include.DevMain
 
@@ -29,6 +28,8 @@
 
 @(applicationView: ApplicationViewModel, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
 implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
+
+
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @app = @{applicationView.application}

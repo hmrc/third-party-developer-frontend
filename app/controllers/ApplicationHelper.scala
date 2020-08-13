@@ -16,7 +16,8 @@
 
 package controllers
 
-import domain.{Application, ApplicationNotFound, Role}
+import domain.ApplicationNotFound
+import domain.models.applications.{Application, Role}
 import service.ApplicationService
 
 trait ApplicationHelper {

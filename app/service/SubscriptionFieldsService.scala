@@ -17,8 +17,10 @@
 package service
 
 import cats.implicits._
-import domain.ApiSubscriptionFields._
-import domain._
+import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.apidefinitions.APIIdentifier
+import domain.models.applications.{Application, Environment, Role}
+import domain.models.subscriptions.DevhubAccessLevel
 import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.HeaderCarrier

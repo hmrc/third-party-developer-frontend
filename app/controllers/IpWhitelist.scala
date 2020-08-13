@@ -17,8 +17,8 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.Capabilities.SupportsIpWhitelist
-import domain.Permissions.{AdministratorOnly, TeamMembersOnly}
+import domain.models.applications.Capabilities.SupportsIpWhitelist
+import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}

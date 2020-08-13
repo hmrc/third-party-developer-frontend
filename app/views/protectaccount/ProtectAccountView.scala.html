@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
-@import domain._
+@import domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain
+@import domain.models.developers.DeveloperSession
 
 @this(devMain: DevMain)
-
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig, messages: Messages)
 

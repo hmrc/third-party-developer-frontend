@@ -16,6 +16,6 @@
 
 package model
 
-import domain.Application
+import domain.models.applications.Application
 
 case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean)

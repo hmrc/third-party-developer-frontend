@@ -19,8 +19,12 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain._
-import domain.ApiSubscriptionFields._
+import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applications.{CheckInformation, Privileged, Standard}
+import domain.models.controllers.SaveSubsFieldsPageMode
+import domain.models.developers.Session
+import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirements}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -36,13 +40,24 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 
 import scala.concurrent.Future
-import domain.DevhubAccessRequirement.NoOne
-import domain.DevhubAccessRequirement.Anyone
+import domain.models.subscriptions.DevhubAccessRequirement.NoOne
+import domain.models.subscriptions.DevhubAccessRequirement.Anyone
 import utils.TestApplications
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
 import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import domain.ApplicationNotFound
+import domain.models.developers.Developer
+import domain.models.developers.LoggedInState
+import domain.models.developers.DeveloperSession
+import domain.models.applications.Application
+import domain.models.applications.Role
+import domain.models.applications.Environment
+import domain.models.applications.Collaborator
+import domain.models.applications.ApplicationState
+import domain.models.applications.ApplicationToken
+import domain.models.applications.ClientSecret
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = Future.failed(new ApplicationNotFound)

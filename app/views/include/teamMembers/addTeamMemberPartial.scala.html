@@ -14,12 +14,11 @@
  * limitations under the License.
  *@
 
-@import domain.Application
-@import domain.DeveloperSession
-
+@import domain.models.controllers.AddTeamMemberPageMode
 @import views.html.include.fieldError
+@import domain.models.applications.Application
+@import domain.models.developers.DeveloperSession
 
-@import domain.AddTeamMemberPageMode
 @(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean, addTeamMemberPageMode: AddTeamMemberPageMode)(
         implicit request: play.api.mvc.Request[Any], messages: Messages)
 

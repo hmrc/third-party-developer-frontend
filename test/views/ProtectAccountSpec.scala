@@ -16,7 +16,7 @@
 
 package views
 
-import domain.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec

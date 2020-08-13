@@ -72,14 +72,14 @@ GET         /applications/add/production/10-days                                
 GET         /applications/add/sandbox                                                       controllers.AddApplication.addApplicationSubordinate
 GET         /applications/add/production                                                    controllers.AddApplication.addApplicationPrincipal
 
-GET         /applications/add/:environment/name                                             controllers.AddApplication.addApplicationName(environment: domain.Environment)
-POST        /applications/add/:environment/name                                             controllers.AddApplication.editApplicationNameAction(environment: domain.Environment)
+GET         /applications/add/:environment/name                                             controllers.AddApplication.addApplicationName(environment: domain.models.applications.Environment)
+POST        /applications/add/:environment/name                                             controllers.AddApplication.editApplicationNameAction(environment: domain.models.applications.Environment)
 
 GET         /applications/:id/add/success                                                   controllers.AddApplication.addApplicationSuccess(id: String)
 
 GET         /applications/:id/team-members                                                  controllers.ManageTeam.manageTeam(id: String, error: Option[String])
 GET         /applications/:id/team-members/add                                              controllers.ManageTeam.addTeamMember(id: String)
-POST        /applications/:id/team-members/add/:addTeamMemberPageMode                       controllers.ManageTeam.addTeamMemberAction(id: String, addTeamMemberPageMode: domain.AddTeamMemberPageMode)
+POST        /applications/:id/team-members/add/:addTeamMemberPageMode                       controllers.ManageTeam.addTeamMemberAction(id: String, addTeamMemberPageMode: domain.models.controllers.AddTeamMemberPageMode)
 GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation              controllers.ManageTeam.removeTeamMember(id: String, teamMemberHash: String)
 POST        /applications/:id/team-members/remove                                           controllers.ManageTeam.removeTeamMemberAction(id: String)
 
@@ -174,8 +174,8 @@ GET         /applications/:id/check-your-answers                                
 POST        /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPageAction(id: String)
 
 GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: String)
-GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.editApiMetadataPage(id: String, context: String, version: String, saveSubsFieldsPageMode: domain.SaveSubsFieldsPageMode)
-POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: String, version: String, saveSubsFieldsPageMode: domain.SaveSubsFieldsPageMode)
+GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.editApiMetadataPage(id: String, context: String, version: String, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
+POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: String, version: String, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
 
 GET         /applications/:id/add/subscriptions                                             controllers.Subscriptions.addAppSubscriptions(id: String)
 

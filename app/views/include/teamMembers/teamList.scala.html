@@ -14,10 +14,13 @@
  * limitations under the License.
  *@
 
-@import domain.{AnchorStyle, Application, Button, DeveloperSession, Role}
+@import domain.models.applications.Role
+@import domain.models.views.{AnchorStyle, Button}
+@import domain.models.developers.DeveloperSession
+
+@import domain.models.applications.Application
 
 @(app: Application,role: Role, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (String, String) => Call)(implicit request: play.api.mvc.Request[Any])
-
 
 @if(role.isDeveloper) {
  <p class="alert alert--info">You need admin rights to add or remove team members.</p>

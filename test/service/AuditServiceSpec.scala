@@ -17,7 +17,7 @@
 package service
 
 import config.ApplicationConfig
-import domain.LoggedInState
+import domain.models.developers.LoggedInState
 import org.mockito.ArgumentMatcher
 import org.mockito.ArgumentMatchers.{any, argThat}
 import org.mockito.Mockito._

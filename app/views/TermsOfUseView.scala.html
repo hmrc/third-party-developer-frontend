@@ -15,13 +15,14 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.DeveloperSession
-@import domain.TermsOfUseStatus._
+@import domain.models.developers.DeveloperSession
 @import include._
 @import model.Crumb
 @import org.joda.time.format.DateTimeFormat
 @import controllers.TermsOfUseForm
 @import model.ApplicationViewModel
+@import domain.models.applications.TermsOfUseStatus.AGREEMENT_REQUIRED
+@import domain.models.applications.TermsOfUseStatus.AGREED
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 

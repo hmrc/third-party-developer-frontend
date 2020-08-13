@@ -18,7 +18,9 @@ package it
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.{ConnectorMetrics, NoopConnectorMetrics, ThirdPartyDeveloperConnector}
-import domain._
+import domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}
+import domain.models.connectors.{ChangePassword, PasswordCheckRequest, PasswordReset}
+import domain.models.developers.Registration
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.http.Status._

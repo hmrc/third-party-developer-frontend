@@ -19,7 +19,8 @@ package views
 import java.util.UUID.randomUUID
 
 import config.ApplicationConfig
-import domain._
+import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.developers.LoggedInState
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document

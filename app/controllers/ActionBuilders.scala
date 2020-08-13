@@ -19,7 +19,9 @@ package controllers
 import cats.data.{NonEmptyList, OptionT}
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.toDetails
-import domain._
+import domain.models.apidefinitions.APISubscriptionStatusWithSubscriptionFields
+import domain.models.applications.{Capability, Permission, State}
+import domain.models.developers.DeveloperSession
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.mvc.Results._
 import play.api.mvc._

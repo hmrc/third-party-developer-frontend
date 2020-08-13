@@ -19,10 +19,8 @@ package helpers
 import mocks.service.SessionServiceMock
 import controllers.BaseControllerSpec
 import security.CookieEncoding
-import domain.Developer
 import service.SessionService
-import domain.LoggedInState
-import domain.Session
+import domain.models.developers.{Developer, LoggedInState, Session}
 import play.filters.csrf.CSRF.TokenProvider
 import play.api.test.FakeRequest
 import play.api.mvc.AnyContentAsEmpty

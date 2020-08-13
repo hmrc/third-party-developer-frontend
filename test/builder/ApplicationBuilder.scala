@@ -16,19 +16,16 @@
 
 package builder
 
-import domain.Application
 import uk.gov.hmrc.time.DateTimeUtils
-import domain.Environment
-import domain.Collaborator
-import domain.ApplicationState
-import domain.Standard
-import domain.Role
 import java.util.UUID.randomUUID
+
+import domain.models.applications.{ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications.Application
 
 trait ApplicationBuilder {
 
   def buildApplication(appOwnerEmail : String) : Application = {
-  
+
     val appId = "appid-" + randomUUID.toString
     val clientId =  "clientid-" + randomUUID.toString
 

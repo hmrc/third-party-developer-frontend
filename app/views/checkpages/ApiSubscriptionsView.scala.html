@@ -14,17 +14,21 @@
  * limitations under the License.
  *@
 
-@import domain.SubscriptionRedirect._
-@import domain._
+@import controllers.checkpages.DummySubscriptionsForm
+@import domain.models.views.SubscriptionRedirect._
+@import domain.models.applications._
+@import domain.models.subscriptions._
 @import include._
 @import config.ApplicationConfig
 @import controllers.checkpages.DummySubscriptionsForm
+@import domain.models.views.BackButtonWithJavaScript
+@import domain.models.developers.DeveloperSession
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
-
 @(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, submitAction: Call, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
-@pageHeading = @{ "Confirm which APIs you want to use" }
+@import domain.models.applications.Role
+    @pageHeading = @{ "Confirm which APIs you want to use" }
 
 @devMain(
     title = pageHeading,

@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.FormKeys.termsOfUseAgreeKey
-import domain.CheckInformation
+import domain.models.applications.CheckInformation
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping}
 

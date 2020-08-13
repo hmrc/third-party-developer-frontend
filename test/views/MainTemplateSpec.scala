@@ -16,7 +16,8 @@
 
 package views
 
-import domain._
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.views.NoBackButton
 import org.mockito.BDDMockito.given
 import play.twirl.api.{Html, HtmlFormat}
 import views.helper.CommonViewSpec

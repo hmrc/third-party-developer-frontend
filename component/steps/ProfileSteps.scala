@@ -16,7 +16,7 @@
 
 package steps
 
-import domain.UpdateProfileRequest
+import domain.models.developers.UpdateProfileRequest
 import io.cucumber.scala.{EN, ScalaDsl}
 import org.openqa.selenium.WebDriver
 import org.scalatest.Matchers

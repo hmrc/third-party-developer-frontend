@@ -14,12 +14,13 @@
  * limitations under the License.
  *@
 
-@import domain.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, DeveloperSession, NoBackButton}
+@import domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, NoBackButton}
 @import model.Crumb
 @import play.twirl.api.HtmlFormat
 @import views.html.layouts.GovUkTemplate
 @import uk.gov.hmrc.play.views.html.layouts.{BetaBanner, Footer, Head, HeaderNav, MainContentHeader, ServiceInfo}
 @import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
+@import domain.models.developers.DeveloperSession
 
 @this(layoutsHead: Head,
         layoutsFooter: Footer,
