@@ -19,21 +19,16 @@ package service
 import config.ApplicationConfig
 import domain.models.developers.LoggedInState
 import org.mockito.ArgumentMatcher
-import org.mockito.ArgumentMatchers.{any, argThat}
-import org.mockito.Mockito._
-import org.scalatest.Matchers
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuditServiceSpec extends UnitSpec with Matchers with MockitoSugar with ScalaFutures {
+class AuditServiceSpec extends AsyncHmrcSpec {
 
   val developer = utils.DeveloperSession("email@example.com", "Paul", "Smith", loggedInState = LoggedInState.LOGGED_IN)
 

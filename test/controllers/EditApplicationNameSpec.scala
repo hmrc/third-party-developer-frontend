@@ -23,10 +23,8 @@ import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito
-import org.mockito.Mockito.verify
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import service.AuditService
@@ -52,9 +50,19 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession: Session = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val application: Application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+  val application: Application = Application(
+    appId,
+    clientId,
+    "App name 1",
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    None,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
 
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
@@ -111,30 +119,30 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
 
-      fetchByTeamMemberEmailReturns(loggedInUser.email,List(application))
+      fetchByTeamMemberEmailReturns(loggedInUser.email, List(application))
 
-      private val result = await(underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken))
+      private val result = underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      bodyOf(result) should include("What&#x27;s the name of your application?")
-      bodyOf(result) should include(loggedInUser.displayedName)
-      bodyOf(result) should include("Continue")
-      bodyOf(result) should include("Application name")
-      bodyOf(result) should not include "Sign in"
+      contentAsString(result) should include("What&#x27;s the name of your application?")
+      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include("Continue")
+      contentAsString(result) should include("Application name")
+      contentAsString(result) should not include "Sign in"
     }
 
     "return to the login page when the user is not logged in" in new Setup {
 
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-      private val result = await(underTest.addApplicationName(Environment.SANDBOX)(request))
+      private val result = underTest.addApplicationName(Environment.SANDBOX)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when part logged in" in new Setup {
-      val result: Result = await(underTest.addApplicationName(Environment.SANDBOX)(partLoggedInRequest))
+      val result = underTest.addApplicationName(Environment.SANDBOX)(partLoggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -148,19 +156,15 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
         givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
-        private val request = loggedInRequest
-          .withCSRFToken
-          .withFormUrlEncodedBody(
-            ("applicationName", invalidApplicationName),
-            ("environment", "SANDBOX"),
-            ("description", ""))
+        private val request = loggedInRequest.withCSRFToken
+          .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "SANDBOX"), ("description", ""))
 
-        private val result = await(underTest.editApplicationNameAction(Environment.SANDBOX)(request))
+        private val result = underTest.editApplicationNameAction(Environment.SANDBOX)(request)
 
         status(result) shouldBe BAD_REQUEST
-        bodyOf(result) should include("Application name must not include HMRC or HM Revenue and Customs")
+        contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
-        verify(applicationServiceMock, Mockito.times(0))
+        verify(applicationServiceMock, times(0))
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
 
         verify(applicationServiceMock)
@@ -173,30 +177,30 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
 
-      fetchByTeamMemberEmailReturns(loggedInUser.email,List(application))
+      fetchByTeamMemberEmailReturns(loggedInUser.email, List(application))
 
-      private val result = await(underTest.addApplicationName( Environment.PRODUCTION)(loggedInRequest.withCSRFToken))
+      private val result = underTest.addApplicationName(Environment.PRODUCTION)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      bodyOf(result) should include("What&#x27;s the name of your application?")
-      bodyOf(result) should include(loggedInUser.displayedName)
-      bodyOf(result) should include("We show this name to your users when they authorise your software to interact with HMRC.")
-      bodyOf(result) should include("It must comply with our")
-      bodyOf(result) should not include "Sign in"
+      contentAsString(result) should include("What&#x27;s the name of your application?")
+      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include("We show this name to your users when they authorise your software to interact with HMRC.")
+      contentAsString(result) should include("It must comply with our")
+      contentAsString(result) should not include "Sign in"
     }
 
     "return to the login page when the user is not logged in" in new Setup {
 
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-      private val result = await(underTest.addApplicationName(Environment.PRODUCTION)(request))
+      private val result = underTest.addApplicationName(Environment.PRODUCTION)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when part logged in" in new Setup {
-      val result: Result = await(underTest.addApplicationName(Environment.PRODUCTION)(partLoggedInRequest))
+      val result = underTest.addApplicationName(Environment.PRODUCTION)(partLoggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -210,23 +214,19 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
         givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
-        private val request = loggedInRequest
-          .withCSRFToken
-          .withFormUrlEncodedBody(
-            ("applicationName", invalidApplicationName),
-            ("environment", "PRODUCTION"),
-            ("description", ""))
+        private val request = loggedInRequest.withCSRFToken
+          .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "PRODUCTION"), ("description", ""))
 
-        private val result = await(underTest.editApplicationNameAction(Environment.PRODUCTION)(request))
+        private val result = underTest.editApplicationNameAction(Environment.PRODUCTION)(request)
 
         status(result) shouldBe BAD_REQUEST
-        bodyOf(result) should include("Application name must not include HMRC or HM Revenue and Customs")
+        contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
         verify(applicationServiceMock, Mockito.times(0))
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.PRODUCTION), any())(any[HeaderCarrier])
+          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.PRODUCTION), *)(any[HeaderCarrier])
       }
 
       "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
@@ -234,23 +234,19 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
         givenApplicationNameIsInvalid(Invalid(invalidName = false, duplicateName = true))
 
-        private val request = loggedInRequest
-          .withCSRFToken
-          .withFormUrlEncodedBody(
-            ("applicationName", applicationName),
-            ("environment", "PRODUCTION"),
-            ("description", ""))
+        private val request = loggedInRequest.withCSRFToken
+          .withFormUrlEncodedBody(("applicationName", applicationName), ("environment", "PRODUCTION"), ("description", ""))
 
-        private val result = await(underTest.editApplicationNameAction(Environment.PRODUCTION)(request))
+        private val result = underTest.editApplicationNameAction(Environment.PRODUCTION)(request)
 
         status(result) shouldBe BAD_REQUEST
-        bodyOf(result) should include("That application name already exists. Enter a unique name for your application")
+        contentAsString(result) should include("That application name already exists. Enter a unique name for your application")
 
         verify(applicationServiceMock, Mockito.times(0))
           .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), any())(any[HeaderCarrier])
+          .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), *)(any[HeaderCarrier])
       }
 
     }

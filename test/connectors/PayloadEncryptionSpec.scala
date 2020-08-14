@@ -17,12 +17,10 @@
 package connectors
 
 import config.ApplicationConfig
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsString, JsValue, Json}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class PayloadEncryptionSpec extends UnitSpec with MockitoSugar {
+class PayloadEncryptionSpec extends AsyncHmrcSpec {
 
   trait Setup {
     val mockAppConfig = mock[ApplicationConfig]

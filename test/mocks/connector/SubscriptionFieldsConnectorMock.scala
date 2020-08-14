@@ -18,21 +18,15 @@ package mocks.connector
 
 import connectors.AbstractSubscriptionFieldsConnector
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.BDDMockito.given
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-trait SubscriptionFieldsConnectorMock extends MockitoSugar {
+trait SubscriptionFieldsConnectorMock extends MockitoSugar with ArgumentMatchersSugar {
   val mockSubscriptionFieldsConnector = mock[AbstractSubscriptionFieldsConnector]
 
-  def fetchFieldValuesReturns(clientId: String, context:String, version: String)(toReturn: Seq[SubscriptionFieldValue]) : Unit =
-     given(
-        mockSubscriptionFieldsConnector.fetchFieldValues(
-          eqTo(clientId),
-          eqTo(context),
-          eqTo(version))(any[HeaderCarrier]))
-     .willReturn(Future.successful(toReturn))
+  def fetchFieldValuesReturns(clientId: String, context: String, version: String)(toReturn: Seq[SubscriptionFieldValue]): Unit =
+    when(mockSubscriptionFieldsConnector.fetchFieldValues(eqTo(clientId), eqTo(context), eqTo(version))(any[HeaderCarrier]))
+      .thenReturn(Future.successful(toReturn))
 }

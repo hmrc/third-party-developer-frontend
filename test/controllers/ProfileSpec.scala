@@ -22,10 +22,8 @@ import domain.models.connectors.ChangePassword
 import domain.models.developers.{Session, UpdateProfileRequest}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
+import play.api.test.Helpers._
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => meq}
-import org.mockito.BDDMockito._
-import org.mockito.Mockito.verify
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
@@ -41,6 +39,8 @@ import scala.concurrent.Future
 import domain.models.developers.Developer
 import domain.models.developers.LoggedInState
 import domain.InvalidCredentials
+
+import scala.concurrent.Future.failed
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -88,10 +88,10 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))
 
-      given(underTest.connector.updateProfile(meq(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier]))
-        .willReturn(Future.successful(OK))
+      when(underTest.connector.updateProfile(eqTo(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(OK))
 
-      val result = await(addToken(underTest.updateProfile())(request))
+      val result = addToken(underTest.updateProfile())(request)
 
       status(result) shouldBe 200
       requestCaptor.getValue.firstName shouldBe "first"
@@ -108,14 +108,17 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
           ("confirmpassword", "StrongNewPwd!2")
         )
 
-      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
-      given(underTest.connector.changePassword(meq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
-        .willReturn(Future.failed(new InvalidCredentials()))
+      when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
+      when(underTest.connector.changePassword(eqTo(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
+        .thenReturn(failed(new InvalidCredentials()))
 
-      val result = await(addToken(underTest.updatePassword())(request))
+      val result = addToken(underTest.updatePassword())(request)
 
       status(result) shouldBe 401
-      verify(underTest.auditService).audit(meq(PasswordChangeFailedDueToInvalidCredentials(loggedInUser.email)), meq(null))(any[HeaderCarrier])
+
+      await(result) // Before we verify !
+      verify(underTest.auditService).audit(eqTo(PasswordChangeFailedDueToInvalidCredentials(loggedInUser.email)), eqTo(Map.empty))(any[HeaderCarrier])
     }
 
     "Password updated should have correct page title" in new Setup {
@@ -128,14 +131,14 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
           ("confirmpassword", "StrongNewPwd!2")
         )
 
-      given(underTest.sessionService.fetch(meq(sessionId))(any[HeaderCarrier])).willReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
-      given(underTest.connector.changePassword(meq(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
-        .willReturn(Future.successful(OK))
+      when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
+      when(underTest.connector.changePassword(eqTo(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(OK))
 
-      val result = await(addToken(underTest.updatePassword())(request))
+      val result = addToken(underTest.updatePassword())(request)
 
       status(result) shouldBe OK
-      val dom = Jsoup.parse(bodyOf(result))
+      val dom = Jsoup.parse(contentAsString(result))
       dom.getElementsByClass("heading-xlarge").get(0).text shouldEqual "Password changed"
 
     }

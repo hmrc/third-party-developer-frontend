@@ -18,19 +18,16 @@ package controllers
 
 import config.ApplicationConfig
 import mocks.service.ErrorHandlerMock
-import org.mockito.Mockito.when
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 import utils.SharedMetricsClearDown
 
-class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
+class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
 
   override lazy val app: Application = fakeApplication()
 

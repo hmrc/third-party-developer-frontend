@@ -30,10 +30,7 @@ import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{verify, when}
 import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
@@ -49,9 +46,9 @@ import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.Future.{failed, successful}
 
-class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder{
+class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder {
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
@@ -59,7 +56,6 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val appName: String = "app"
   val clientId = "clientIdzzz"
   val sessionId = "sessionId"
-
 
   val developerDto = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
@@ -72,39 +68,68 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val testing: ApplicationState = ApplicationState.testing.copy(updatedOn = DateTimeUtils.now.minusMinutes(1))
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+  val application = Application(
+    appId,
+    clientId,
+    "App name 1",
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    None,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
-  val emptyFields = emptySubscriptionFieldsWrapper("myAppId","myClientId", "context", "version")
+  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", "context", "version")
 
-  val exampleApiSubscription = Some(APISubscriptions("Example API", "api-example-microservice", "exampleContext",
-    Seq(APISubscriptionStatus("API1", "api-example-microservice", "exampleContext",
-      APIVersion("version", APIStatus.STABLE), subscribed = true, requiresTrust = false,
-      fields = emptyFields))))
+  val exampleApiSubscription = Some(
+    APISubscriptions(
+      "Example API",
+      "api-example-microservice",
+      "exampleContext",
+      Seq(
+        APISubscriptionStatus(
+          "API1",
+          "api-example-microservice",
+          "exampleContext",
+          APIVersion("version", APIStatus.STABLE),
+          subscribed = true,
+          requiresTrust = false,
+          fields = emptyFields
+        )
+      )
+    )
+  )
 
-  val groupedSubs = GroupedSubscriptions(Seq.empty,
-    Seq(APISubscriptions("API1", "ServiceName", "apiContent",
-      Seq(APISubscriptionStatus(
+  val groupedSubs = GroupedSubscriptions(
+    Seq.empty,
+    Seq(
+      APISubscriptions(
         "API1",
-        "subscriptionServiceName",
-        "context",
-        APIVersion("version", APIStatus.STABLE),
-        subscribed = true,
-        requiresTrust = false,
-        fields = emptyFields)))))
+        "ServiceName",
+        "apiContent",
+        Seq(
+          APISubscriptionStatus(
+            "API1",
+            "subscriptionServiceName",
+            "context",
+            APIVersion("version", APIStatus.STABLE),
+            subscribed = true,
+            requiresTrust = false,
+            fields = emptyFields
+          )
+        )
+      )
+    )
+  )
 
-  val groupedSubsSubscribedToExampleOnly = GroupedSubscriptions(
-    testApis = Seq.empty,
-    apis = Seq.empty,
-    exampleApi = exampleApiSubscription)
+  val groupedSubsSubscribedToExampleOnly = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = exampleApiSubscription)
 
-  val groupedSubsSubscribedToNothing = GroupedSubscriptions(
-    testApis = Seq.empty,
-    apis = Seq.empty,
-    exampleApi = None)
+  val groupedSubsSubscribedToNothing = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = None)
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val checkYourAnswersView = app.injector.instanceOf[CheckYourAnswersView]
@@ -153,10 +178,13 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     val context = "apiContent"
     val version = "version"
-    val emptyFields = emptySubscriptionFieldsWrapper("myAppId","myClientId",context, version)
+    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version)
 
     val subscriptions = Seq(
-      APISubscriptions("API1", "ServiceName", context,
+      APISubscriptions(
+        "API1",
+        "ServiceName",
+        context,
         Seq(
           APISubscriptionStatus(
             "API1",
@@ -166,9 +194,12 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
-          ))))
+          )
+        )
+      )
+    )
 
-    val groupedSubs = GroupedSubscriptions(Seq.empty,subscriptions)
+    val groupedSubs = GroupedSubscriptions(Seq.empty, subscriptions)
 
     fetchAllSubscriptionsReturns(Seq(mock[APISubscription]))
 
@@ -183,69 +214,85 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
-    def givenApplicationExists(appId: String = appId, clientId: String = clientId, userRole: Role = ADMINISTRATOR,
-      state: ApplicationState = testing,
-      checkInformation: Option[CheckInformation] = None,
-      access: Access = Standard()): Application = {
+    def givenApplicationExists(
+        appId: String = appId,
+        clientId: String = clientId,
+        userRole: Role = ADMINISTRATOR,
+        state: ApplicationState = testing,
+        checkInformation: Option[CheckInformation] = None,
+        access: Access = Standard()
+    ): Application = {
 
       val collaborators = Set(
         Collaborator(loggedInUser.email, userRole),
         Collaborator(anotherCollaboratorEmail, Role.DEVELOPER)
       )
 
-      val application = Application(appId, clientId, appName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION,
-        collaborators = collaborators, access = access, state = state, checkInformation = checkInformation)
+      val application = Application(
+        appId,
+        clientId,
+        appName,
+        DateTimeUtils.now,
+        DateTimeUtils.now,
+        None,
+        Environment.PRODUCTION,
+        collaborators = collaborators,
+        access = access,
+        state = state,
+        checkInformation = checkInformation
+      )
 
       fetchByApplicationIdReturns(application.id, application)
-      fetchCredentialsReturns(application,tokens)
+      fetchCredentialsReturns(application, tokens)
       givenApplicationHasNoSubs(application)
       givenUpdateCheckInformationSucceeds(application)
 
       application
     }
     def mockRequestUplift() {
-      when(underTest.applicationService.requestUplift (eqTo (appId), any[String], any[DeveloperSession] ) (any[HeaderCarrier] ) )
-      .thenReturn (ApplicationUpliftSuccessful)
+      when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
+        .thenReturn(successful(ApplicationUpliftSuccessful))
     }
 
     def failedToCreateDeskproTicket() {
-      when(underTest.applicationService.requestUplift (eqTo (appId), any[String], any[DeveloperSession] ) (any[HeaderCarrier] ) )
-      .thenReturn(Future.failed(new DeskproTicketCreationFailed("Failed")))
+      when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
+        .thenReturn(failed(new DeskproTicketCreationFailed("Failed")))
     }
 
   }
 
   "validate failure when application name already exists" in new Setup {
     private val application = givenApplicationExists(
-      checkInformation = Some(CheckInformation(
-        confirmedName = true,
-        apiSubscriptionsConfirmed = true,
-        apiSubscriptionConfigurationsConfirmed = true,
-        Some(ContactDetails("Example Name", "name@example.com", "012346789")),
-        providedPrivacyPolicyURL = true,
-        providedTermsAndConditionsURL = true,
-        teamConfirmed = true,
-        Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
-      ))
+      checkInformation = Some(
+        CheckInformation(
+          confirmedName = true,
+          apiSubscriptionsConfirmed = true,
+          apiSubscriptionConfigurationsConfirmed = true,
+          Some(ContactDetails("Example Name", "name@example.com", "012346789")),
+          providedPrivacyPolicyURL = true,
+          providedTermsAndConditionsURL = true,
+          teamConfirmed = true,
+          Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+        )
+      )
     )
     private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
 
     val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
 
     when(underTest.applicationService.requestUplift(eqTo(appId), eqTo(application.name), eqTo(loggedInUser))(any[HeaderCarrier]))
-      .thenAnswer(new Answer[Future[ApplicationUpliftSuccessful]]() {
-        def answer(invocation: InvocationOnMock): Future[ApplicationUpliftSuccessful] = {
-          Future.failed(new ApplicationAlreadyExists)
+      .thenAnswer( (i: InvocationOnMock) => {
+          failed(new ApplicationAlreadyExists)
         }
-      })
+      )
     givenUpdateCheckInformationSucceeds(application, expectedCheckInformation)
 
-    private val result = await(addToken(underTest.answersPageAction(appId))(requestWithFormBody))
+    private val result = addToken(underTest.answersPageAction(appId))(requestWithFormBody)
 
     status(result) shouldBe CONFLICT
     verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
 
-    private val errorMessageElement = Jsoup.parse(bodyOf(result)).select("td#confirmedName span.error-message")
+    private val errorMessageElement = Jsoup.parse(contentAsString(result)).select("td#confirmedName span.error-message")
     errorMessageElement.text() shouldBe "That application name already exists. Enter a unique name for your application."
   }
 
@@ -254,7 +301,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       givenApplicationExists()
       mockRequestUplift()
 
-      private val result = await(underTest.answersPageAction(appId)(loggedInRequest))
+      private val result = underTest.answersPageAction(appId)(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(checkpages.routes.ApplicationCheck.credentialsRequested(appId).url)
@@ -262,7 +309,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     "return forbidden when not logged in" in new Setup {
       givenApplicationExists()
-      private val result = await(underTest.answersPageAction(appId)(loggedOutRequest))
+      private val result = underTest.answersPageAction(appId)(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/login")
@@ -274,10 +321,10 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
+      private val result = addToken(underTest.answersPage(appId))(loggedInRequest)
 
       status(result) shouldBe OK
-      private val body = bodyOf(result)
+      private val body = contentAsString(result)
 
       body should include("Check your answers before requesting credentials")
       body should include("About your application")
@@ -286,7 +333,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return forbidden when accessed without being an admin" in new Setup {
       givenApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
+      private val result = addToken(underTest.answersPage(appId))(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -296,8 +343,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequest))
-
+      private val result = addToken(underTest.answersPageAction(appId))(loggedInRequest)
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
 
@@ -306,7 +352,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
+      private val result = addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
     }
@@ -314,7 +360,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return forbidden when accessing action without being an admin" in new Setup {
       givenApplicationExists(userRole = DEVELOPER)
 
-      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
+      private val result = addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -322,7 +368,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return bad request when the app is already approved" in new Setup {
       givenApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
+      private val result = addToken(underTest.answersPage(appId))(loggedInRequest)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -330,7 +376,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return bad request when the app is pending check" in new Setup {
       givenApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.answersPage(appId))(loggedInRequest))
+      private val result = addToken(underTest.answersPage(appId))(loggedInRequest)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -338,15 +384,14 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
       givenApplicationExists(state = production)
 
-      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
-
+      private val result = addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
       givenApplicationExists(state = pendingApproval)
 
-      private val result = await(addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody))
+      private val result = addToken(underTest.answersPageAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -356,18 +401,18 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "return manage team list page when check page is navigated to" in new Setup {
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.team(appId))(loggedInRequest))
+      private val result = addToken(underTest.team(appId))(loggedInRequest)
 
       status(result) shouldBe OK
 
-      bodyOf(result) should include("Add members of your organisation and give them permissions to access this application")
-      bodyOf(result) should include(developerDto.email)
+      contentAsString(result) should include("Add members of your organisation and give them permissions to access this application")
+      contentAsString(result) should include(developerDto.email)
     }
 
     "not return the manage team list page when not logged in" in new Setup {
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.team(appId))(loggedOutRequest))
+      private val result = addToken(underTest.team(appId))(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/login")
@@ -376,7 +421,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "team post redirect to check landing page" in new Setup {
       val application = givenApplicationExists(checkInformation = Some(CheckInformation()))
 
-      private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
+      private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
@@ -388,72 +433,70 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     "team post doesn't redirect to the check landing page when not logged in" in new Setup {
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.teamAction(appId))(loggedOutRequest))
+      private val result = addToken(underTest.teamAction(appId))(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/login")
     }
 
-
-    "return add team member page when check page is navigated to" in new Setup{
+    "return add team member page when check page is navigated to" in new Setup {
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.teamAddMember(appId))(loggedInRequest))
+      private val result = addToken(underTest.teamAddMember(appId))(loggedInRequest)
 
       status(result) shouldBe OK
 
-      bodyOf(result) should include("Add a team member")
+      contentAsString(result) should include("Add a team member")
     }
 
     "not return the add team member page when not logged in" in new Setup {
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.teamAddMember(appId))(loggedOutRequest))
+      private val result = addToken(underTest.teamAddMember(appId))(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/login")
     }
 
-    "return remove team member confirmation page when navigated to" in new Setup{
+    "return remove team member confirmation page when navigated to" in new Setup {
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedInRequest))
+      private val result = addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedInRequest)
 
       status(result) shouldBe OK
 
-      bodyOf(result) should include("Are you sure you want to remove this team member from your application?")
+      contentAsString(result) should include("Are you sure you want to remove this team member from your application?")
 
-      bodyOf(result) should include(anotherCollaboratorEmail)
+      contentAsString(result) should include(anotherCollaboratorEmail)
     }
 
     "not return the remove team member confirmation page when not logged in" in new Setup {
       givenApplicationExists()
 
-      private val result = await(addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedOutRequest))
+      private val result = addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/login")
     }
 
-
-    "redirect to the team member list when the remove confirmation post is executed" in new Setup{
+    "redirect to the team member list when the remove confirmation post is executed" in new Setup {
       val application = givenApplicationExists()
 
       val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail)
 
-      private val result = await(addToken(underTest.teamMemberRemoveAction(appId))(request))
+      private val result = addToken(underTest.teamMemberRemoveAction(appId))(request)
 
       status(result) shouldBe SEE_OTHER
 
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers/team")
 
-      verify(underTest.applicationService).removeTeamMember(eqTo(application),eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
       val application = givenApplicationExists(checkInformation = None)
 
-      private val result = await(addToken(underTest.teamAction(appId))(loggedInRequest))
+      private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")

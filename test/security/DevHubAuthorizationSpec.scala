@@ -18,53 +18,47 @@ package security
 
 import cats.implicits._
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.{routes, BaseController, BaseControllerSpec}
+import controllers.{BaseController, BaseControllerSpec, routes}
 import domain.models.developers.{DeveloperSession, LoggedInState}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.BDDMockito.given
 import org.scalatest.Matchers
-import play.api.http.Status._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Cookie, MessagesControllerComponents}
 import play.api.mvc.Results.{EmptyContent, _}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{defaultAwaitTimeout, redirectLocation}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{DeveloperSession => DeveloperSessionBuilder}
+import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
-  class TestDevHubAuthorization(mcc: MessagesControllerComponents)
-                               (implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)
-    extends BaseController(mcc) with ExtendedDevHubAuthorization {
+  class TestDevHubAuthorization(mcc: MessagesControllerComponents)(implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)
+      extends BaseController(mcc)
+      with ExtendedDevHubAuthorization {
     override val sessionService: SessionService = mock[SessionService]
     override val errorHandler: ErrorHandler = mock[ErrorHandler]
     override val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
   }
 
   class Setup(developerSession: Option[DeveloperSession]) {
-    given(appConfig.securedCookie).willReturn(false)
+    when(appConfig.securedCookie).thenReturn(false)
 
     val underTest = new TestDevHubAuthorization(mcc)
     val sessionId = "sessionId"
 
-    val loggedInAction = underTest.loggedInAction { _ =>
-      Future.successful(Ok(EmptyContent()))
-    }
+    val loggedInAction = underTest.loggedInAction { _ => Future.successful(Ok(EmptyContent())) }
 
-    val atLeastPartLoggedInAction = underTest.atLeastPartLoggedInEnablingMfaAction { _ =>
-      Future.successful(Ok(EmptyContent()))
-    }
+    val atLeastPartLoggedInAction = underTest.atLeastPartLoggedInEnablingMfaAction { _ => Future.successful(Ok(EmptyContent())) }
 
     val request = FakeRequest().withCookies(underTest.createCookie(sessionId))
     val requestWithNoCookie = FakeRequest()
-    val requestWithInvalidCookie = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID","InvalidCookieValue"))
+    val requestWithInvalidCookie = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID", "InvalidCookieValue"))
     val requestWithNoRealSession = FakeRequest().withCookies(underTest.createCookie(sessionId))
 
-    given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).willReturn(developerSession.map(ds => ds.session))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(developerSession.map(ds => ds.session)))
   }
 
   val loggedInDeveloperSession = DeveloperSessionBuilder("Email", "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
@@ -74,7 +68,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
     "the user is logged in and" when {
       "controller action is decorated with loggedInAction" should {
         "successfully execute action" in new Setup(loggedInDeveloperSession.some) {
-          val result = await(loggedInAction()(request))
+          val result = loggedInAction()(request)
 
           status(result) shouldBe OK
         }
@@ -82,7 +76,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
 
       "controller action is decorated with atLeastPartLoggedInEnablingMfaAction" should {
         "successfully execute action" in new Setup(loggedInDeveloperSession.some) {
-          val result = await(atLeastPartLoggedInAction()(request))
+          val result = atLeastPartLoggedInAction()(request)
 
           status(result) shouldBe OK
         }
@@ -92,7 +86,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
     "the user is part logged in and" when {
       "controller action is decorated with loggedInAction" should {
         "redirect to login page" in new Setup(partLoggedInDeveloperSession.some) {
-          val result = await(loggedInAction()(request))
+          val result = loggedInAction()(request)
 
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
@@ -101,7 +95,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
 
       "controller action is decorated with atLeastPartLoggedInEnablingMfaAction" should {
         "successfully execute action" in new Setup(partLoggedInDeveloperSession.some) {
-          val result = await(atLeastPartLoggedInAction()(request))
+          val result = atLeastPartLoggedInAction()(request)
 
           status(result) shouldBe OK
         }
@@ -110,24 +104,24 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
 
     "the user is not logged in" when {
       "they have no cookie" in new Setup(None) {
-        val result = await(atLeastPartLoggedInAction()(requestWithNoCookie))
+        val result = atLeastPartLoggedInAction()(requestWithNoCookie)
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
       }
 
       "they have a cookie but it is invalid" in new Setup(None) {
-        val result = await(atLeastPartLoggedInAction()(requestWithInvalidCookie))
+        val result = atLeastPartLoggedInAction()(requestWithInvalidCookie)
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
       }
 
       "they have a valid cookie but it does not exist in the session service" in new Setup(None) {
-        given(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
-          .willReturn(None)
+        when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
+          .thenReturn(successful(None))
 
-        val result = await(atLeastPartLoggedInAction()(requestWithNoRealSession))
+        val result = atLeastPartLoggedInAction()(requestWithNoRealSession)
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
       }

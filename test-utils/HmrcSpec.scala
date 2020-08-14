@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package helpers
+package utils
 
-import utils.AsyncHmrcSpec
+import org.scalatest.{Matchers, OptionValues, WordSpec}
+import org.scalatestplus.play.WsScalaTestClient
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-class PluralizeHelperSpec extends AsyncHmrcSpec {
-  "1" should {
-    "be singular" in {
-      PluralizeHelper.pluralize(1, "cat", "cats") shouldBe "cat"
-    }
-  }
+abstract class HmrcSpec extends WordSpec with Matchers with OptionValues with WsScalaTestClient with MockitoSugar with ArgumentMatchersSugar
 
-  "2" should {
-    "be plural" in {
-      PluralizeHelper.pluralize(2, "cat", "cats") shouldBe "cats"
-    }
-  }
-}
+abstract class AsyncHmrcSpec extends HmrcSpec with DefaultAwaitTimeout with FutureAwaits {}

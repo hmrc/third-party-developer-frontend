@@ -21,16 +21,15 @@ import java.util.Locale
 import config.ApplicationConfig
 import org.mockito.Mockito.when
 import org.scalatest.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 import utils.SharedMetricsClearDown
 
-trait CommonViewSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with SharedMetricsClearDown with Matchers {
+trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers {
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
   val messagesApi = mcc.messagesApi
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)

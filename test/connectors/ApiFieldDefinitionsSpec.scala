@@ -20,9 +20,9 @@ import connectors.SubscriptionFieldsConnector.{ApiFieldDefinitions, FieldDefinit
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class ApiFieldDefinitionsSpec extends UnitSpec {
+class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
 
   private def basicFieldDefinitionJson =
     """{
@@ -41,11 +41,7 @@ class ApiFieldDefinitionsSpec extends UnitSpec {
        |}""".stripMargin
 
   private val basicFieldDefinition: ApiFieldDefinitions = {
-    ApiFieldDefinitions("my-context", "1.0", List(FieldDefinition("field-name",
-      "my-description",
-      "my-shortDescription",
-      "my-hint",
-      "STRING", AccessRequirements.Default)))
+    ApiFieldDefinitions("my-context", "1.0", List(FieldDefinition("field-name", "my-description", "my-shortDescription", "my-hint", "STRING", AccessRequirements.Default)))
   }
 
   private def fieldDefinitionWithAccessJson =
@@ -77,12 +73,20 @@ class ApiFieldDefinitionsSpec extends UnitSpec {
 
     "for field definition with access" in {
       val apiFieldDefinitionsWithAccess: ApiFieldDefinitions = {
-        ApiFieldDefinitions("my-context", "1.0", List(FieldDefinition(name = "field-name",
-          description = "my-description",
-          shortDescription = "my-shortDescription",
-          hint = "my-hint",
-          `type` = "STRING",
-          access = AccessRequirements(devhub = DevhubAccessRequirements(NoOne, NoOne)))))
+        ApiFieldDefinitions(
+          "my-context",
+          "1.0",
+          List(
+            FieldDefinition(
+              name = "field-name",
+              description = "my-description",
+              shortDescription = "my-shortDescription",
+              hint = "my-hint",
+              `type` = "STRING",
+              access = AccessRequirements(devhub = DevhubAccessRequirements(NoOne, NoOne))
+            )
+          )
+        )
       }
 
       Json.fromJson[ApiFieldDefinitions](Json.parse(fieldDefinitionWithAccessJson)) shouldBe JsSuccess(apiFieldDefinitionsWithAccess)

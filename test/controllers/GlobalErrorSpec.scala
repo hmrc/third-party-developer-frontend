@@ -19,9 +19,9 @@ package controllers
 import controllers.ErrorFormBuilder.GlobalError
 import org.scalatest.Matchers
 import play.api.data.{Form, FormError, Forms}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class GlobalErrorSpec extends UnitSpec with Matchers {
+class GlobalErrorSpec extends AsyncHmrcSpec with Matchers {
 
   "firstnameGlobal" should {
 
@@ -79,12 +79,9 @@ class GlobalErrorSpec extends UnitSpec with Matchers {
 
   "firstnameGlobal and emailaddressGlobal" should {
     "add to 2 global form errors 'firstname.error.required.global' and 'emailaddress.error.required.global' " in {
-      val testForm = Form(Forms.tuple(
-        "firstname" -> firstnameValidator, "emailaddress" -> emailValidator())
-      ).bind(Map("firstname" -> "testName"))
+      val testForm = Form(Forms.tuple("firstname" -> firstnameValidator, "emailaddress" -> emailValidator())).bind(Map("firstname" -> "testName"))
 
-      val boundWithGlobalErrors = testForm.bind(Map("firstname" -> "", "emailaddress" -> "")).
-        firstnameGlobal().emailaddressGlobal()
+      val boundWithGlobalErrors = testForm.bind(Map("firstname" -> "", "emailaddress" -> "")).firstnameGlobal().emailaddressGlobal()
 
       boundWithGlobalErrors.globalErrors shouldBe Seq(
         FormError("", "firstname.error.required.global"),
@@ -96,13 +93,15 @@ class GlobalErrorSpec extends UnitSpec with Matchers {
   "passwordNoMatchField" should {
     "generate a password.error.no.match.field validation error when a global error is present" in {
 
-      val boundWithErrors = RegistrationForm.form.bind(Map(
-        "firstname" -> "john",
-        "lastname" -> "smith",
-        "emailaddress" -> "john@example.com",
-        "password" -> "A1@wwwwwwwww",
-        "confirmpassword" -> "www"
-      ))
+      val boundWithErrors = RegistrationForm.form.bind(
+        Map(
+          "firstname" -> "john",
+          "lastname" -> "smith",
+          "emailaddress" -> "john@example.com",
+          "password" -> "A1@wwwwwwwww",
+          "confirmpassword" -> "www"
+        )
+      )
 
       boundWithErrors.errors("password") shouldBe Nil
       boundWithErrors.globalErrors shouldBe List(FormError("", "password.error.no.match.global"))
@@ -118,7 +117,6 @@ class GlobalErrorSpec extends UnitSpec with Matchers {
 
       testForm.isEmailAddressAlreadyUse shouldBe true
     }
-
 
     "return false when the email address is already used" in {
       val testForm = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> "test@example.com"))

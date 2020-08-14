@@ -18,7 +18,6 @@ package views
 
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.views.NoBackButton
-import org.mockito.BDDMockito.given
 import play.twirl.api.{Html, HtmlFormat}
 import views.helper.CommonViewSpec
 import views.html.include.Main
@@ -32,7 +31,7 @@ class MainTemplateSpec extends CommonViewSpec {
     implicit val developerSession = DeveloperSession(session)
 
     "Application title meta data set by configuration" in {
-      given(appConfig.title).willReturn("Application Title")
+      when(appConfig.title).thenReturn("Application Title")
 
       val view: Html = mainView.render(
         title = "Test",

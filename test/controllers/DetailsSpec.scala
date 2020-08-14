@@ -21,10 +21,7 @@ import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.jsoup.Jsoup
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.{never, verify}
+import org.mockito.captor.ArgCaptor
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
@@ -46,7 +43,7 @@ import scala.concurrent.Future._
 
 class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  Helpers.running(fakeApplication) {
+  Helpers.running(fakeApplication()) {
     "details" when {
       "logged in as a Developer on an application" should {
         "return the view for a standard production app with no change link" in new Setup {
@@ -85,11 +82,11 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
           givenApplicationExists(pendingApprovalApplication)
 
-          val result = await(addToken(underTest.details(pendingApprovalApplication.id))(loggedInRequest))
+          val result = addToken(underTest.details(pendingApprovalApplication.id))(loggedInRequest)
 
           status(result) shouldBe OK
 
-          val document = Jsoup.parse(bodyOf(result))
+          val document = Jsoup.parse(contentAsString(result))
           elementExistsByText(document, "h1", "Credentials requested") shouldBe true
           elementExistsByText(document, "span", pendingApprovalApplication.name) shouldBe true
         }
@@ -99,11 +96,11 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
           givenApplicationExists(pendingVerificationApplication)
 
-          val result = await(addToken(underTest.details(pendingVerificationApplication.id))(loggedInRequest))
+          val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInRequest)
 
           status(result) shouldBe OK
           
-          val document = Jsoup.parse(bodyOf(result))
+          val document = Jsoup.parse(contentAsString(result))
           elementExistsByText(document, "h1", "Credentials requested") shouldBe true
           elementExistsByText(document, "span", pendingVerificationApplication.name) shouldBe true
         }
@@ -182,7 +179,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val application = anROPCApplication()
         givenApplicationExists(application)
 
-        val result = await(underTest.details(application.id)(loggedInRequest))
+        val result = underTest.details(application.id)(loggedInRequest)
 
         status(result) shouldBe NOT_FOUND
       }
@@ -191,7 +188,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val application = aPrivilegedApplication()
         givenApplicationExists(application)
 
-        val result = await(underTest.details(application.id)(loggedInRequest))
+        val result = underTest.details(application.id)(loggedInRequest)
 
         status(result) shouldBe NOT_FOUND
       }
@@ -217,8 +214,8 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "update name which contain HMRC should fail" in new Setup {
-        given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-          .willReturn(Future.successful(Invalid.invalidName))
+        when(underTest.applicationService.isApplicationNameValid(*, *, *)(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Invalid.invalidName))
 
         val application = anApplication(adminEmail = loggedInUser.email)
         givenApplicationExists(application)
@@ -228,9 +225,9 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe BAD_REQUEST
 
         verify(underTest.applicationService).isApplicationNameValid(
-          mockEq("my invalid HMRC application name"),
-          mockEq(application.deployedTo),
-          mockEq(Some(application.id)))(any[HeaderCarrier])
+          eqTo("my invalid HMRC application name"),
+          eqTo(application.deployedTo),
+          eqTo(Some(application.id)))(any[HeaderCarrier])
       }
     }
 
@@ -316,10 +313,10 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         val application = aSandboxApplication(adminEmail = loggedInUser.email)
         givenApplicationExists(application)
 
-        application.withName(newName).callChangeDetailsAction
+        await(application.withName(newName).callChangeDetailsAction)
 
         verify(underTest.applicationService).update(any[UpdateApplicationRequest])(any[HeaderCarrier])
-        verify(underTest.applicationService, never).updateCheckInformation(mockEq(application), any[CheckInformation])(any[HeaderCarrier])
+        verify(underTest.applicationService, never).updateCheckInformation(eqTo(application), any[CheckInformation])(any[HeaderCarrier])
       }
     }
   }
@@ -355,29 +352,29 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     val newTermsUrl = Some("http://example.com/new-terms")
     val newPrivacyUrl = Some("http://example.com/new-privacy")
 
-    given(underTest.applicationService.isApplicationNameValid(any(), any(), any())(any[HeaderCarrier]))
-      .willReturn(Future.successful(Valid))
+    when(underTest.applicationService.isApplicationNameValid(*, *, *)(any[HeaderCarrier]))
+      .thenReturn(Future.successful(Valid))
 
-    given(underTest.sessionService.fetch(mockEq(sessionId))(any[HeaderCarrier]))
-      .willReturn(Some(session))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
+      .thenReturn(successful(Some(session)))
 
-    given(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
-      .willReturn(successful(ApplicationUpdateSuccessful))
+    when(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
+      .thenReturn(successful(ApplicationUpdateSuccessful))
 
-    given(underTest.applicationService.updateCheckInformation(any[Application], any[CheckInformation])(any[HeaderCarrier]))
-      .willReturn(successful(ApplicationUpdateSuccessful))
+    when(underTest.applicationService.updateCheckInformation(any[Application], any[CheckInformation])(any[HeaderCarrier]))
+      .thenReturn(successful(ApplicationUpdateSuccessful))
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> fakeApplication().injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
     def captureUpdatedApplication: UpdateApplicationRequest = {
-      val captor = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
-      verify(underTest.applicationService).update(captor.capture())(any[HeaderCarrier])
-      captor.getValue
+      val captor = ArgCaptor[UpdateApplicationRequest]
+      verify(underTest.applicationService).update(captor)(*)
+      captor.value
     }
 
-    def redirectsToLogin(result: Result) = {
+    def redirectsToLogin(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
@@ -388,7 +385,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result = application.callDetails
 
       status(result) shouldBe OK
-      val doc = Jsoup.parse(bodyOf(result))
+      val doc = Jsoup.parse(contentAsString(result))
       linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
       elementIdentifiedByIdContainsText(doc, "applicationId", application.id) shouldBe true
       elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
@@ -403,7 +400,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result = application.callChangeDetails
 
       status(result) shouldBe OK
-      val doc = Jsoup.parse(bodyOf(result))
+      val doc = Jsoup.parse(contentAsString(result))
       formExistsWithAction(doc, routes.Details.changeDetailsAction(application.id).url) shouldBe true
       linkExistsWithHref(doc, routes.Details.details(application.id).url) shouldBe true
       inputExistsWithValue(doc, "applicationId", "hidden", application.id) shouldBe true
@@ -429,12 +426,12 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     def changeDetailsShouldUpdateTheApplication(application: Application) = {
       givenApplicationExists(application)
 
-      application
+      await(application
         .withName(newName)
         .withDescription(newDescription)
         .withTermsAndConditionsUrl(newTermsUrl)
         .withPrivacyPolicyUrl(newPrivacyUrl)
-        .callChangeDetailsAction
+        .callChangeDetailsAction)
 
       val updatedApplication = captureUpdatedApplication
       updatedApplication.name shouldBe newName
@@ -456,20 +453,20 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       final def toForm = EditApplicationForm(app.id, app.name, app.description,
         appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl)
 
-      final def callDetails: Result = await(underTest.details(app.id)(loggedInRequest))
+      final def callDetails: Future[Result] = underTest.details(app.id)(loggedInRequest)
 
-      final def callDetailsNotLoggedIn: Result = await(underTest.details(app.id)(loggedOutRequest))
+      final def callDetailsNotLoggedIn: Future[Result] = underTest.details(app.id)(loggedOutRequest)
 
-      final def callChangeDetails: Result = await(addToken(underTest.changeDetails(app.id))(loggedInRequest))
+      final def callChangeDetails: Future[Result] = addToken(underTest.changeDetails(app.id))(loggedInRequest)
 
-      final def callChangeDetailsNotLoggedIn: Result = await(addToken(underTest.changeDetails(app.id))(loggedOutRequest))
+      final def callChangeDetailsNotLoggedIn: Future[Result] = addToken(underTest.changeDetails(app.id))(loggedOutRequest)
 
-      final def callChangeDetailsAction: Result = callChangeDetailsAction(loggedInRequest)
+      final def callChangeDetailsAction: Future[Result] = callChangeDetailsAction(loggedInRequest)
 
-      final def callChangeDetailsActionNotLoggedIn: Result = callChangeDetailsAction(loggedOutRequest)
+      final def callChangeDetailsActionNotLoggedIn: Future[Result] = callChangeDetailsAction(loggedOutRequest)
 
-      private final def callChangeDetailsAction[T](request: FakeRequest[T]): Result = {
-        await(addToken(underTest.changeDetailsAction(app.id))(request.withJsonBody(Json.toJson(app.toForm))))
+      private final def callChangeDetailsAction[T](request: FakeRequest[T]): Future[Result] = {
+        addToken(underTest.changeDetailsAction(app.id))(request.withJsonBody(Json.toJson(app.toForm)))
       }
     }
   }

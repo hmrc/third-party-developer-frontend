@@ -20,15 +20,13 @@ import config.ApplicationConfig
 import domain.models.applications.{Application, Environment}
 import model.Crumb
 import org.jsoup.Jsoup
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import uk.gov.hmrc.play.test.UnitSpec
+import play.api.test.Helpers.{contentAsString, contentType}
+import play.twirl.api.Html
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.SharedMetricsClearDown
+import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class BreadcrumbsSpec extends UnitSpec with GuiceOneServerPerSuite with SharedMetricsClearDown with MockitoSugar {
+class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with SharedMetricsClearDown {
 
   val appConfig = mock[ApplicationConfig]
 
@@ -37,14 +35,14 @@ class BreadcrumbsSpec extends UnitSpec with GuiceOneServerPerSuite with SharedMe
 
       val applicationName = "An Application Name"
       val application = Application("appId123", "clientId123", applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION)
-      val crumbs: Array[Crumb] = Array(Crumb("Another Breadcrumb"), Crumb.application(application), Crumb.viewAllApplications, Crumb.home(appConfig))
+      val crumbs = Array(Crumb("Another Breadcrumb"), Crumb.application(application), Crumb.viewAllApplications, Crumb.home(appConfig))
 
-      val page = views.html.include.breadcrumbs.render(crumbs)
+      val page: Html = views.html.include.breadcrumbs.render(crumbs)
 
-      page.contentType should include("text/html")
+      contentType(page) shouldBe "text/html"
 
-      val document = Jsoup.parse(page.body)
-      val breadcrumbText = await(document.body.select("li").map(_.text))
+      val document = Jsoup.parse(contentAsString(page))
+      val breadcrumbText = document.body.select("li").text()
 
       breadcrumbText shouldBe List("Home", "View all applications", "An Application Name", "Another Breadcrumb").mkString(" ")
 

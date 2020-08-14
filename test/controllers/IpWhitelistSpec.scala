@@ -22,8 +22,6 @@ import domain.DeskproTicketCreationFailed
 import domain.models.connectors.TicketCreated
 import mocks.service._
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.BDDMockito.`given`
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK}
@@ -32,9 +30,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
 import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}
+import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.failed
+import scala.concurrent.Future.{failed, successful}
 
 class IpWhitelistSpec extends BaseControllerSpec with TestApplications with WithCSRFAddToken {
 
@@ -79,10 +78,10 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithIpWhitelist)
 
-      val result: Result = await(underTest.manageIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest))
+      val result = underTest.manageIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest)
 
       status(result) shouldBe OK
-      val body: String = bodyOf(result)
+      val body: String = contentAsString(result)
       body should include("Manage whitelisted IPs")
       body should include("API requests can only be made from these whitelisted IPs")
     }
@@ -91,7 +90,7 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithoutIpWhitelist)
 
-      val result: Result = await(underTest.manageIpWhitelist(anApplicationWithoutIpWhitelist.id)(loggedInRequest))
+      val result = underTest.manageIpWhitelist(anApplicationWithoutIpWhitelist.id)(loggedInRequest)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -100,10 +99,10 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(developer)
       givenApplicationExists(anApplicationWithIpWhitelist)
 
-      val result: Result = await(underTest.manageIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest))
+      val result = underTest.manageIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest)
 
       status(result) shouldBe OK
-      val body: String = bodyOf(result)
+      val body: String = contentAsString(result)
       body should include("Manage whitelisted IPs")
       body should include("API requests can only be made from these whitelisted IPs")
     }
@@ -114,10 +113,10 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithIpWhitelist)
 
-      val result: Result = await(underTest.changeIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken))
+      val result = underTest.changeIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      val body: String = bodyOf(result)
+      val body: String = contentAsString(result)
       body should include("Change whitelisted IPs")
       body should include("Tell us what you want to change")
     }
@@ -126,7 +125,7 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithoutIpWhitelist)
 
-      val result: Result = await(underTest.changeIpWhitelist(anApplicationWithoutIpWhitelist.id)(loggedInRequest.withCSRFToken))
+      val result = underTest.changeIpWhitelist(anApplicationWithoutIpWhitelist.id)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -135,7 +134,7 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(developer)
       givenApplicationExists(anApplicationWithIpWhitelist)
 
-      val result: Result = await(underTest.changeIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken))
+      val result = underTest.changeIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -145,14 +144,14 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     "send deskpro ticket for admins" in new Setup {
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithIpWhitelist)
-      given(mockDeskproService.submitSupportEnquiry(supportEnquiryFormCaptor.capture())(any[Request[AnyRef]], any[HeaderCarrier])).willReturn(TicketCreated)
+      when(mockDeskproService.submitSupportEnquiry(supportEnquiryFormCaptor.capture())(any[Request[AnyRef]], any[HeaderCarrier])).thenReturn(successful(TicketCreated))
       val expectedComments = "add 1.1.2.0/24 to the whitelist"
 
-      val result: Result = await(underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
-        .withFormUrlEncodedBody("description" -> expectedComments)))
+      val result = underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
+        .withFormUrlEncodedBody("description" -> expectedComments))
 
       status(result) shouldBe OK
-      val body: String = bodyOf(result)
+      val body: String = contentAsString(result)
       body should include("Request received")
       body should include("You requested to change your whitelisted IP addresses.")
       supportEnquiryFormCaptor.getValue.fullname shouldBe "Joe Bloggs"
@@ -163,8 +162,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     "propagate exception from deskpro" in new Setup {
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithIpWhitelist)
-      given(mockDeskproService.submitSupportEnquiry(any[SupportEnquiryForm])(any[Request[AnyRef]], any[HeaderCarrier]))
-        .willReturn(failed(new DeskproTicketCreationFailed("unexpected error")))
+      when(mockDeskproService.submitSupportEnquiry(any[SupportEnquiryForm])(any[Request[AnyRef]], any[HeaderCarrier]))
+        .thenReturn(failed(new DeskproTicketCreationFailed("unexpected error")))
 
       val exception: DeskproTicketCreationFailed = intercept[DeskproTicketCreationFailed] {
         await(underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
@@ -178,8 +177,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithoutIpWhitelist)
 
-      val result: Result = await(underTest.changeIpWhitelistAction(anApplicationWithoutIpWhitelist.id)(loggedInRequest.withCSRFToken
-        .withFormUrlEncodedBody("description" -> "add 1.1.2.0/24 to the whitelist")))
+      val result = underTest.changeIpWhitelistAction(anApplicationWithoutIpWhitelist.id)(loggedInRequest.withCSRFToken
+        .withFormUrlEncodedBody("description" -> "add 1.1.2.0/24 to the whitelist"))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -188,8 +187,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(developer)
       givenApplicationExists(anApplicationWithIpWhitelist)
 
-      val result: Result = await(underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
-        .withFormUrlEncodedBody("description" -> "add 1.1.2.0/24 to the whitelist")))
+      val result = underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
+        .withFormUrlEncodedBody("description" -> "add 1.1.2.0/24 to the whitelist"))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -198,7 +197,7 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithIpWhitelist)
 
-      val result: Result = await(underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken))
+      val result = underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -207,8 +206,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithIpWhitelist)
 
-      val result: Result = await(underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
-        .withFormUrlEncodedBody("description" -> "")))
+      val result = underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
+        .withFormUrlEncodedBody("description" -> ""))
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -217,8 +216,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
       givenTheUserIsLoggedInAs(admin)
       givenApplicationExists(anApplicationWithIpWhitelist)
 
-      val result: Result = await(underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
-        .withFormUrlEncodedBody("description" -> "a" * 3001)))
+      val result = underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
+        .withFormUrlEncodedBody("description" -> "a" * 3001))
 
       status(result) shouldBe BAD_REQUEST
     }

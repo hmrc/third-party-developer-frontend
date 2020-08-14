@@ -22,6 +22,7 @@ import mocks.service.ApplicationServiceMock
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents}
+import play.api.test.Helpers._
 import service.{ApplicationService, SessionService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -56,16 +57,16 @@ class ActionBuildersSpec extends BaseControllerSpec
     def runTestAction(context: String, version: String, expectedStatus: Int) = {
       val testResultBody = "was called"
      
-      val result = await(underTest.subFieldsDefinitionsExistActionByApi(application.id, context, version) {
+      val result = underTest.subFieldsDefinitionsExistActionByApi(application.id, context, version) {
         definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
             Future.successful(underTest.Ok(testResultBody))
-      }(loggedInRequest))
-        
+      }(loggedInRequest)
+
       status(result) shouldBe expectedStatus
       if (expectedStatus == OK) {
-        bodyOf(result) shouldBe testResultBody
+        contentAsString(result) shouldBe testResultBody
       } else {
-        bodyOf(result) should not be testResultBody
+        contentAsString(result) should not be testResultBody
       }
     }
   }

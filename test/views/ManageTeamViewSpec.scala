@@ -44,7 +44,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
   "manageTeam view" should {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
 
-    def renderPage(role: Role = Role.ADMINISTRATOR, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
+    def renderPage(role: Role, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
 
       manageTeamView.render(

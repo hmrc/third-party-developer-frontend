@@ -20,7 +20,6 @@ import config.ErrorHandler
 import domain.models.developers.{LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import play.api.http.Status.OK
-import play.api.mvc.Result
 import play.api.test.FakeRequest
 import utils.WithLoggedInSession._
 
@@ -28,6 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import domain.models.developers.Developer
 import domain.models.developers.DeveloperSession
 import domain.models.views.NavLink
+import play.api.test.Helpers._
 
 class NavigationSpec extends BaseControllerSpec {
 
@@ -59,8 +59,8 @@ class NavigationSpec extends BaseControllerSpec {
         FakeRequest()
       }
 
-    val result: Result = await(underTest.navLinks()(request))
-    val links: Seq[NavLink] = jsonBodyOf(result).as[Seq[NavLink]]
+    val result = underTest.navLinks()(request)
+    val links: Seq[NavLink] = contentAsJson(result).as[Seq[NavLink]]
   }
 
   "navigation" when {

@@ -17,15 +17,13 @@
 package controllers
 
 import javax.inject.Inject
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.{Call, RequestHeader}
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.{Token, TokenInfo}
 import play.filters.csrf.CSRFConfigProvider
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class SpliceCSRFTokenSpec @Inject()(csrfConfigProvider: CSRFConfigProvider)
-  extends UnitSpec with MockitoSugar {
+class SpliceCSRFTokenSpec @Inject() (csrfConfigProvider: CSRFConfigProvider) extends AsyncHmrcSpec {
 
   trait Setup {
     implicit val requestHeaderWithToken = mock[RequestHeader]

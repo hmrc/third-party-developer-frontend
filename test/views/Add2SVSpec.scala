@@ -19,7 +19,6 @@ package views
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import model.MfaMandateDetails
 import org.joda.time.LocalDate
-import org.mockito.BDDMockito.given
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import utils.WithCSRFAddToken
@@ -50,7 +49,7 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken {
     }
 
     "is displayed with plural 'days remaining'" in {
-      given(appConfig.dateOfAdminMfaMandate).willReturn(Some(new LocalDate().plusDays(1)))
+      when(appConfig.dateOfAdminMfaMandate).thenReturn(Some(new LocalDate().plusDays(1)))
 
       val daysRemaining = 10
       val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = daysRemaining))
@@ -61,7 +60,7 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken {
     }
 
     "is displayed with singular 'day remaining'" in {
-      given(appConfig.dateOfAdminMfaMandate).willReturn(Some(new LocalDate().plusDays(1)))
+      when(appConfig.dateOfAdminMfaMandate).thenReturn(Some(new LocalDate().plusDays(1)))
 
       val daysRemaining = 1
       val page = renderPage(MfaMandateDetails(showAdminMfaMandatedMessage = true, daysTillAdminMfaMandate = daysRemaining))
