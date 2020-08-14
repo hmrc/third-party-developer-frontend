@@ -55,10 +55,10 @@
         @applicationList(applications)
         @if(noProductionApplications(applications)) {
             </br>
-            <p>After testing in the sandbox, you can apply for production credentials.</p>
+            <p>After testing in @if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {the sandbox} else {appConfig.nameOfSubordinateEnvironment}, you can apply for @appConfig.nameOfPrincipalEnvironment credentials.</p>
 
             <div>
-               <a class="button" href="@routes.AddApplication.addApplicationPrincipal">Get production credentials</a>
+               <a class="button" href="@routes.AddApplication.addApplicationPrincipal">Get @appConfig.nameOfPrincipalEnvironment credentials</a>
             </div>
         }
         @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
@@ -70,12 +70,12 @@
 
 @applicationList(applications: Seq[controllers.ApplicationSummary]) = {
     @defining(applications.partition(_.environment == "Production")) { case (productionApps, sandboxApps) =>
-        @applicationTable(productionApps)
-        @applicationTable(sandboxApps)
+        @applicationTable(productionApps, appConfig.nameOfPrincipalEnvironment)
+        @applicationTable(sandboxApps, appConfig.nameOfSubordinateEnvironment)
     }
 }
 
-@applicationTable(applications: Seq[controllers.ApplicationSummary]) = {
+@applicationTable(applications: Seq[controllers.ApplicationSummary], environmentName: String) = {
     @if(applications.nonEmpty) {
         <table>
             <caption class="visually-hidden">Applications</caption>
@@ -85,9 +85,7 @@
                 <col width="30%"/>
             </colgroup>
             <thead>
-                <th>@{
-                    applications.head.environment
-                } applications</th>
+                <th>@environmentName applications</th>
                 <th>Your role</th>
                 <th>Last API call</th>
             </thead>

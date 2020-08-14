@@ -30,7 +30,7 @@
         Crumb("Manage profile"),
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(None, Option(navSection))(request, loggedIn)),
+    leftNav = Some(leftHandNav(None, Option(navSection))(request, loggedIn, appConfig)),
     developerSession = Some(loggedIn)
 ) {
 
