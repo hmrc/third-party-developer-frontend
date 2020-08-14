@@ -66,8 +66,7 @@ class ApplicationService @Inject() (
 
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
-    def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription, fieldDefinitions: DefinitionsByApiVersion):
-        Future[APISubscriptionStatus] = {
+    def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription, fieldDefinitions: DefinitionsByApiVersion): Future[APISubscriptionStatus] = {
 
       val apiIdentifier = ApiIdentifier(api.context, version.version.version)
 
@@ -112,15 +111,15 @@ class ApplicationService @Inject() (
     object HasSucceeded extends HasSucceeded
 
     def ensureEmptyValuesWhenNoneExists(fieldDefinitions: Seq[SubscriptionFieldDefinition]): Future[HasSucceeded] = {
-      
+
       for {
         oldValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
         saveResponse <- subscriptionFieldsService.saveBlankFieldValues(application, context, version, oldValues)
       } yield saveResponse match {
-          case SaveSubscriptionFieldsSuccessResponse => HasSucceeded
-          case error =>
-            val errorMessage = s"Failed to save blank subscription field values: $error"
-            throw new RuntimeException(errorMessage)
+        case SaveSubscriptionFieldsSuccessResponse => HasSucceeded
+        case error =>
+          val errorMessage = s"Failed to save blank subscription field values: $error"
+          throw new RuntimeException(errorMessage)
       }
     }
 
@@ -169,15 +168,11 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actorEmailAddress))
   }
 
-  def deleteClientSecret(application: Application,
-                         clientSecretId: String,
-                         actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    connectorWrapper.forEnvironment(application.deployedTo)
-      .thirdPartyApplicationConnector.deleteClientSecret(UUID.fromString(application.id), clientSecretId, actorEmailAddress)
+  def deleteClientSecret(application: Application, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.deleteClientSecret(UUID.fromString(application.id), clientSecretId, actorEmailAddress)
 
   def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    connectorWrapper.forEnvironment(application.deployedTo)
-      .thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
+    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
   }
 
   def requestUplift(applicationId: String, applicationName: String, requestedBy: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = {
@@ -346,10 +341,9 @@ object ApplicationService {
     def update(applicationId: String, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]]
     def addTeamMember(applicationId: String, teamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse]
-    def removeTeamMember(applicationId: String,
-                         teamMemberToDelete: String,
-                         requestingEmail: String,
-                         adminsToEmail: Seq[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def removeTeamMember(applicationId: String, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Seq[String])(
+        implicit hc: HeaderCarrier
+    ): Future[ApplicationUpdateSuccessful]
     def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]]
     def fetchSubscriptions(id: String)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]]
     def subscribeToApi(applicationId: String, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
@@ -359,9 +353,7 @@ object ApplicationService {
     def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse]
     def updateApproval(id: String, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def addClientSecrets(id: String, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)]
-    def deleteClientSecret(applicationId: UUID,
-                           clientSecretId: String,
-                           actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def deleteClientSecret(applicationId: UUID, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def validateName(name: String, selfApplicationId: Option[String])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
     def deleteApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Unit]
   }

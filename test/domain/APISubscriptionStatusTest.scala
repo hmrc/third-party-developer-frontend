@@ -26,14 +26,14 @@ class APISubscriptionStatusTest extends AsyncHmrcSpec with SubscriptionsBuilder 
   def aSubscription(
       name: String = "name",
       service: String = "service",
-      context: String = "context",
+      context: ApiContext = ApiContext("context"),
       version: ApiVersionDefinition = ApiVersionDefinition("1.0", APIStatus.STABLE),
       subscribed: Boolean = true,
       requiresTrust: Boolean = false
   ) = {
-    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", ApiContext(context), version.version)
+    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version.version)
 
-    APISubscriptionStatus(name, service, ApiContext(context), version, subscribed, requiresTrust, emptyFields)
+    APISubscriptionStatus(name, service, context, version, subscribed, requiresTrust, emptyFields)
   }
 
   "canUnsubscribe" should {

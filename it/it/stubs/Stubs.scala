@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- // TODO remove duplication
+// TODO remove duplication
 
 package it.stubs
 
@@ -24,7 +24,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import domain.models.apidefinitions.DefinitionFormats._
-import domain.models.apidefinitions.ApiIdentifier
+import domain.models.apidefinitions.{ApiIdentifier, ApiContext}
 import domain.models.applications.{Application, ApplicationToken, Environment}
 import domain.models.connectors.UserAuthenticationResponse
 import domain.models.developers.{Registration, Session, UpdateProfileRequest}
@@ -140,7 +140,7 @@ object ApplicationStub {
   def setUpExecuteSubscription(id: String, api: String, version: String, status: Int) = {
     stubFor(
       post(urlEqualTo(s"/application/$id/subscription"))
-        .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(api, version)).toString()))
+        .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(ApiContext(api), version)).toString()))
         .willReturn(aResponse().withStatus(status))
     )
   }
@@ -224,7 +224,7 @@ object ThirdPartyDeveloperStub {
         .willReturn(
           aResponse()
             .withStatus(OK)
-            .withBody(Json.toJson(UserAuthenticationResponse(false,None,session)).toString())
+            .withBody(Json.toJson(UserAuthenticationResponse(false, None, session)).toString())
             .withHeader("content-type", "application/json")
         )
     )

@@ -100,7 +100,7 @@ object APISubscriptions {
   }
 }
 
-case class AjaxSubscriptionResponse(apiName: String, group: String, numberOfSubscriptionText: String)
+case class AjaxSubscriptionResponse(apiName: ApiContext, group: String, numberOfSubscriptionText: String)
 
 object AjaxSubscriptionResponse {
   implicit val format = Json.format[AjaxSubscriptionResponse]
@@ -122,6 +122,6 @@ object AjaxSubscriptionResponse {
 
     val apiSubscriptions = subscriptions.filter(s => s.context == context && s.apiVersion.accessType == versionAccessType)
 
-    AjaxSubscriptionResponse(context.value, group.toString, subscriptionNumberLabel(apiSubscriptions))
+    AjaxSubscriptionResponse(context, group.toString, subscriptionNumberLabel(apiSubscriptions))
   }
 }

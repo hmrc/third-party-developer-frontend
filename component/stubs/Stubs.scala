@@ -23,8 +23,6 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import domain.models.apidefinitions.DefinitionFormats._
-import domain._
-import domain.models.apidefinitions.APIIdentifier
 import domain.models.applications.{Application, ApplicationToken, Environment}
 import domain.models.developers.{Registration, UpdateProfileRequest}
 import domain.models.subscriptions.APISubscription
@@ -32,6 +30,8 @@ import org.scalatest.Matchers
 import play.api.Logger
 import play.api.libs.json.{Json, Writes}
 import play.api.http.Status._
+import domain.models.apidefinitions.ApiIdentifier
+import domain.models.apidefinitions.ApiContext
 
 object Stubs {
 
@@ -139,7 +139,7 @@ object ApplicationStub {
   def setUpExecuteSubscription(id: String, api: String, version: String, status: Int) = {
     stubFor(
       post(urlEqualTo(s"/application/$id/subscription"))
-        .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(api, version)).toString()))
+        .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(ApiContext(api), version)).toString()))
         .willReturn(aResponse().withStatus(status))
     )
   }

@@ -31,7 +31,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   def subscriptionStatus(
       apiName: String,
       serviceName: String,
-      context: String,
+      context: ApiContext,
       version: String,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
@@ -41,12 +41,12 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       fields: Option[SubscriptionFieldsWrapper] = None
   ) = {
 
-    val mappedFields = fields.getOrElse(emptySubscriptionFieldsWrapper("myAppId", "myClientId", ApiContext(context), version))
+    val mappedFields = fields.getOrElse(emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version))
 
     APISubscriptionStatus(
       apiName,
       serviceName,
-      ApiContext(context),
+      context,
       ApiVersionDefinition(version, status, access),
       subscribed,
       requiresTrust,
@@ -57,10 +57,10 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   val sampleSubscriptions: Seq[APISubscriptionStatus] = {
     Seq(
-      subscriptionStatus("Individual Employment", "individual-employment", "individual-employment-context", "1.0", STABLE, subscribed = true),
-      subscriptionStatus("Individual Employment", "individual-employment", "individual-employment-context", "2.0", BETA),
-      subscriptionStatus("Individual Tax", "individual-tax", "individual-tax-context", "1.0", STABLE),
-      subscriptionStatus("Individual Tax", "individual-tax", "individual-tax-context", "2.0", BETA)
+      subscriptionStatus("Individual Employment", "individual-employment", ApiContext("individual-employment-context"), "1.0", STABLE, subscribed = true),
+      subscriptionStatus("Individual Employment", "individual-employment", ApiContext("individual-employment-context"), "2.0", BETA),
+      subscriptionStatus("Individual Tax", "individual-tax", ApiContext("individual-tax-context"), "1.0", STABLE),
+      subscriptionStatus("Individual Tax", "individual-tax", ApiContext("individual-tax-context"), "2.0", BETA)
     )
   }
 
@@ -72,7 +72,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, context, version, Seq(sfv))
 
     Seq(
-      subscriptionStatus("Individual Employment 2", "individual-employment-2", context.value, version, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
+      subscriptionStatus("Individual Employment 2", "individual-employment-2", context, version, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
     )
   }
 

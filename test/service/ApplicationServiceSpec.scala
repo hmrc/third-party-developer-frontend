@@ -140,7 +140,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       appId: String,
       clientId: String,
       name: String,
-      context: ApiContext,
+      context: String,
       version: String,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
@@ -149,18 +149,18 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
     APISubscriptionStatus(
       name = name,
       serviceName = name,
-      context = context,
+      context = ApiContext(context),
       apiVersion = ApiVersionDefinition(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
-      fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
+      fields = emptySubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version)
     )
 
   def subStatus(
       appId: String,
       clientId: String,
       name: String,
-      context: ApiContext,
+      context: String,
       version: String,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
@@ -170,11 +170,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
     APISubscriptionStatus(
       name = name,
       serviceName = name,
-      context = context,
+      context = ApiContext(context),
       apiVersion = ApiVersionDefinition(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
-      fields = SubscriptionFieldsWrapper(appId, clientId, context, version, subscriptionFieldWithValues)
+      fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)
     )
   }
 
@@ -266,19 +266,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       result.size shouldBe 4
 
       result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", apiIdentifier1.context, "2.0", BETA),
+        subStatus(productionApplicationId, productionClientId, "api-1", apiIdentifier1.context.value, "2.0", BETA),
         subStatus(
           productionApplicationId,
           productionClientId,
           "api-1",
-          apiIdentifier1.context,
+          apiIdentifier1.context.value,
           apiIdentifier1.version,
           STABLE,
           subscribed = true,
           subscriptionFieldWithValues = subscriptionFieldsWithValue
         ),
-        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0-RC", STABLE),
-        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0", BETA, subscribed = true)
+        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0-RC", STABLE),
+        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0", BETA, subscribed = true)
       )
     }
 
@@ -299,10 +299,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       result.size shouldBe 4
 
       result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "2.0", BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "1.0", STABLE),
-        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "0.1", DEPRECATED, subscribed = true),
-        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0", BETA, subscribed = true)
+        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "2.0", BETA),
+        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "1.0", STABLE),
+        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "0.1", DEPRECATED, subscribed = true),
+        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0", BETA, subscribed = true)
       )
     }
 
@@ -323,9 +323,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       result.size shouldBe 3
 
       result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "2.0", BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "1.0", STABLE, subscribed = true),
-        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0", BETA, subscribed = true)
+        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "2.0", BETA),
+        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "1.0", STABLE, subscribed = true),
+        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0", BETA, subscribed = true)
       )
     }
 
@@ -346,9 +346,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       result.size shouldBe 3
 
       result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "2.0", BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", ApiContext("api-1"), "1.0", STABLE, subscribed = true),
-        subStatus(productionApplicationId, productionClientId, "api-2", ApiContext("api-2/ctx"), "1.0", BETA, subscribed = true)
+        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "2.0", BETA),
+        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", "1.0", STABLE, subscribed = true),
+        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", "1.0", BETA, subscribed = true)
       )
     }
 

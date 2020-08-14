@@ -57,7 +57,6 @@ class ActionBuildersSpec extends BaseControllerSpec with ApplicationServiceMock 
       val result = underTest.subFieldsDefinitionsExistActionByApi(application.id, context, version) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
         Future.successful(underTest.Ok(testResultBody))
       }(loggedInRequest)
-
       status(result) shouldBe expectedStatus
       if (expectedStatus == OK) {
         contentAsString(result) shouldBe testResultBody
