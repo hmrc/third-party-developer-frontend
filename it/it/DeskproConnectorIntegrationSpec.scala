@@ -57,10 +57,14 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
       val expectedBody = Json.toJson(ticket).toString()
 
       "create a ticket when DeskPro returns Ok (200)" in new Setup {
-        stubFor(post(urlEqualTo(ticketPath)).willReturn(
-          aResponse().withStatus(200)
-            .withHeader("Content-Type", "application/json")
-            .withBody( """{"ticket_id":12345}""")))
+        stubFor(
+          post(urlEqualTo(ticketPath)).willReturn(
+            aResponse()
+              .withStatus(200)
+              .withHeader("Content-Type", "application/json")
+              .withBody("""{"ticket_id":12345}""")
+          )
+        )
 
         await(connector.createTicket(ticket)) shouldBe TicketCreated
         verify(1, postRequestedFor(urlEqualTo(ticketPath)).withRequestBody(equalTo(expectedBody)))
@@ -69,36 +73,47 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
 
     "Submitting feedback" should {
 
-      val feedback = Feedback(name = "Test", email = "Test@example.com", subject = "subject",
-        rating = "5", message = "Test feedback", referrer = "Referrer", javascriptEnabled = "true",
-        userAgent = "userAgent", authId = "authId", areaOfTax= "areaOfTax", sessionId = "sessionId",
-        service = Some("Test Service"))
-
+      val feedback = Feedback(
+        name = "Test",
+        email = "Test@example.com",
+        subject = "subject",
+        rating = "5",
+        message = "Test feedback",
+        referrer = "Referrer",
+        javascriptEnabled = "true",
+        userAgent = "userAgent",
+        authId = "authId",
+        areaOfTax = "areaOfTax",
+        sessionId = "sessionId",
+        service = Some("Test Service")
+      )
 
       val feedbackPath = "/deskpro/feedback"
       val expectedBody = Json.toJson(feedback).toString()
 
       "create a ticket when DeskPro returns Ok (200)" in new Setup {
-        stubFor(post(urlEqualTo(feedbackPath)).willReturn(
-          aResponse().withStatus(200)
-            .withHeader("Content-Type", "application/json")
-            .withBody( """{"ticket_id":12345}""")))
+        stubFor(
+          post(urlEqualTo(feedbackPath)).willReturn(
+            aResponse()
+              .withStatus(200)
+              .withHeader("Content-Type", "application/json")
+              .withBody("""{"ticket_id":12345}""")
+          )
+        )
 
         await(connector.createFeedback(feedback)) shouldBe TicketId(12345)
         verify(1, postRequestedFor(urlEqualTo(feedbackPath)).withRequestBody(equalTo(expectedBody)))
       }
 
       "throw Upstream5xxResponse for an 500 response" in new Setup {
-        stubFor(post(urlEqualTo(feedbackPath)).willReturn(
-          aResponse().withStatus(500)))
+        stubFor(post(urlEqualTo(feedbackPath)).willReturn(aResponse().withStatus(500)))
 
         intercept[Upstream5xxResponse](await(connector.createFeedback(feedback)))
         verify(1, postRequestedFor(urlEqualTo(feedbackPath)).withRequestBody(equalTo(expectedBody)))
       }
 
       "throw BadRequestException for an 400 response" in new Setup {
-        stubFor(post(urlEqualTo(feedbackPath)).willReturn(
-          aResponse().withStatus(400)))
+        stubFor(post(urlEqualTo(feedbackPath)).willReturn(aResponse().withStatus(400)))
 
         intercept[BadRequestException](await(connector.createFeedback(feedback)))
         verify(1, postRequestedFor(urlEqualTo(feedbackPath)).withRequestBody(equalTo(expectedBody)))

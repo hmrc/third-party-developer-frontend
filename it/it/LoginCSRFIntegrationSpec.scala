@@ -16,7 +16,6 @@
 
 package it
 
-import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -24,7 +23,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import connectors.{ConnectorMetrics, NoopConnectorMetrics}
 import controllers.routes
 import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.inject.bind
@@ -35,9 +33,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
 import play.filters.csrf.CSRF
-import utils.AsyncHmrcSpec
 
-class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
+class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
   private val config = Configuration("play.filters.csrf.token.sign" -> false)
 
   override def fakeApplication(): Application =
@@ -47,10 +44,10 @@ class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite wi
       .in(Mode.Test)
       .build()
 
-  private val stubPort = sys.env.getOrElse("WIREMOCK", "11111").toInt
-  val stubHost = "localhost"
-  val wireMockUrl = s"http://$stubHost:$stubPort"
-  val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
+  override val stubPort = sys.env.getOrElse("WIREMOCK", "11111").toInt
+  override val stubHost = "localhost"
+  override val wireMockUrl = s"http://$stubHost:$stubPort"
+  override val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
   val sessionId = "1234567890"
 
   private val contentType = "Content-Type"
@@ -79,7 +76,7 @@ class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite wi
     "there is no CSRF token" should {
       "redirect back to the login page" in new Setup {
         private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword)
-        private val result = await(route(app, request)).get
+        private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -89,7 +86,7 @@ class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite wi
     "there is no CSRF token in the request body but it is present in the headers" should {
       "redirect back to the login page" in new Setup {
         private val request = addCSRFToken(loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword))
-        private val result = await(route(app, request)).get
+        private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -99,7 +96,7 @@ class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite wi
     "there is a CSRF token in the request body but not in the headers" should {
       "redirect back to the login page" in new Setup {
         private val request = loginRequest.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> "test")
-        private val result = await(route(app, request)).get
+        private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -108,7 +105,6 @@ class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite wi
 
     "there is a valid CSRF token" should {
       "redirect to the 2SV sign-up reminder if user does not have it set up" in new Setup {
-        implicit val materializer: Materializer = fakeApplication().materializer
 
         stubFor(
           post(urlEqualTo("/authenticate"))
@@ -136,7 +132,7 @@ class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite wi
 
         private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
-        private val result = await(route(app, request)).get
+        private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2svRecommendationPage().url)
@@ -145,7 +141,6 @@ class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite wi
       }
 
       "redirect to the 2SV code entry page if user has it configured" in new Setup {
-        implicit val materializer: Materializer = fakeApplication().materializer
 
         stubFor(
           post(urlEqualTo("/authenticate"))
@@ -165,7 +160,7 @@ class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite wi
 
         private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
-        private val result = await(route(app, request)).get
+        private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp().url)

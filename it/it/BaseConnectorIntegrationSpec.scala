@@ -20,11 +20,22 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
-import utils.AsyncHmrcSpec
+import org.scalatest.Matchers
+import org.scalatest.OptionValues
+import org.scalatestplus.play.WsScalaTestClient
+import org.scalatest.WordSpec
+import play.api.test.DefaultAwaitTimeout
+import play.api.test.FutureAwaits
 
-trait BaseConnectorIntegrationSpec extends AsyncHmrcSpec with BeforeAndAfterAll with BeforeAndAfterEach {
+trait BaseConnectorIntegrationSpec
+    extends WordSpec
+    with Matchers
+    with OptionValues
+    with WsScalaTestClient
+    with DefaultAwaitTimeout
+    with FutureAwaits
+    with BeforeAndAfterAll
+    with BeforeAndAfterEach {
   val stubPort = sys.env.getOrElse("WIREMOCK", "22222").toInt
   val stubHost = "localhost"
   val wireMockUrl = s"http://$stubHost:$stubPort"

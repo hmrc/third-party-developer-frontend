@@ -18,16 +18,16 @@ package pages
 
 import config.ApplicationConfig
 import connectors.{EncryptedJson, LocalCrypto, PayloadEncryption}
-import org.mockito.Mockito.when
 import org.openqa.selenium.WebDriver
-import org.scalatest._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.selenium.WebBrowser
 import org.scalatestplus.selenium.WebBrowser.{go => goo}
+import org.scalatest.Assertions
+import org.scalatest.Matchers
+import org.mockito.MockitoSugar
 
-trait NavigationSugar extends WebBrowser with Eventually with Assertions with Matchers {
+trait NavigationSugar extends WebBrowser with Eventually with Assertions with Matchers with MockitoSugar {
   private val mockAppConfig = mock[ApplicationConfig]
   when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
 

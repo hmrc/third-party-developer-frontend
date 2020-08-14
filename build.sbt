@@ -14,6 +14,8 @@ import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
+import bloop.integrations.sbt.BloopDefaults
+
 import scala.util.Properties
 
 lazy val appName = "third-party-developer-frontend"
@@ -24,7 +26,7 @@ lazy val cucumberVersion = "6.2.2"
 lazy val seleniumVersion = "2.53.1"
 lazy val enumeratumVersion = "1.5.12"
 
-val testScope = "test, it"
+val testScope = "test, it, component"
 
 lazy val compile = Seq(
   ws,
@@ -59,11 +61,6 @@ lazy val test = Seq(
   "org.mockito" %% "mockito-scala-scalatest" % "1.7.1" % testScope,
   "org.scalaj" %% "scalaj-http" % "2.3.0" % testScope,
   "org.scalacheck" %% "scalacheck" % "1.13.5" % testScope,
-  // batik-bridge has a circular dependency on itself via transitive batik-script. Avoid that to work with updated build tools
-  //[warn] circular dependency found: batik#batik-bridge;1.6-1->batik#batik-script;1.6-1->...
-  //[warn] circular dependency found: batik#batik-script;1.6-1->batik#batik-bridge;1.6-1->...
-  // "batik" % "batik-script" % "1.6-1" % testScope exclude("batik", "batik-bridge"),
-  // "com.github.mkolisnyk" % "cucumber-runner" % "1.3.5" % testScope exclude("batik", "batik-script"),
   "com.assertthat" % "selenium-shutterbug" % "0.2" % testScope
 )
 
@@ -132,6 +129,7 @@ lazy val microservice = Project(appName, file("."))
   )
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
+  .settings(inConfig(ComponentTest)(BloopDefaults.configSettings))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     ComponentTest / unmanagedSourceDirectories := (baseDirectory in ComponentTest)(base => Seq(base / "component", base / "test-utils")).value,
