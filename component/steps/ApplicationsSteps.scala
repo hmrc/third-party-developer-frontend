@@ -172,7 +172,4 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   //   VersionSubscription(ApiVersionDefinition(version, apiStatus, Some(APIAccess(access))), subscribed)
   // }
 
-  // private def aApiSubscription(context: ApiContext, versions: Seq[VersionSubscription], requiresTrust: Option[Boolean] = None) = {
-  //   APISubscription(context, s"service-$context", context, versions, requiresTrust)
-  // }
 }

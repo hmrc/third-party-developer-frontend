@@ -140,7 +140,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       appId: String,
       clientId: String,
       name: String,
-      context: String,
+      context: ApiContext,
       version: String,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
@@ -149,11 +149,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
     APISubscriptionStatus(
       name = name,
       serviceName = name,
-      context = ApiContext(context),
+      context = context,
       apiVersion = ApiVersionDefinition(version, status),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
-      fields = emptySubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version)
+      fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
     )
 
   def subStatus(
