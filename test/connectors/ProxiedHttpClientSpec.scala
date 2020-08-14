@@ -19,19 +19,15 @@ package connectors
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.{Configuration, Environment, Mode}
 import play.api.libs.ws.{WSClient, WSRequest}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.bootstrap.config.RunMode
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class ProxiedHttpClientSpec extends UnitSpec with ScalaFutures with MockitoSugar {
+class ProxiedHttpClientSpec extends AsyncHmrcSpec {
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
   private val actorSystem = ActorSystem("test-actor-system")
@@ -47,8 +43,8 @@ class ProxiedHttpClientSpec extends UnitSpec with ScalaFutures with MockitoSugar
     val mockRunMode: RunMode = mock[RunMode]
 
     when(mockEnvironment.mode).thenReturn(Mode.Test)
-    when(mockConfig.getString(any(), any())).thenReturn(Some(any()))
-    when(mockConfig.getOptional[Int](any())).thenReturn(Some(0))
+    when(mockConfig.getString(*, *)).thenReturn(Some(*))
+    when(mockConfig.getOptional[Int](*)).thenReturn(Some(0))
     when(mockConfig.getOptional[Boolean]("Test.proxy.proxyRequiredForThisEnvironment")).thenReturn(Some(true))
     when(mockWsClient.url(url)).thenReturn(mock[WSRequest])
 

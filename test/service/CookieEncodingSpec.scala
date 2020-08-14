@@ -18,17 +18,15 @@ package service
 
 import config.ApplicationConfig
 import connectors.{ConnectorMetrics, NoopConnectorMetrics}
-import org.scalatest.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Mode}
 import play.api.libs.crypto.CookieSigner
 import security.CookieEncoding
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class CookieEncodingSpec extends UnitSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
+class CookieEncodingSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite {
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
@@ -79,5 +77,3 @@ class CookieEncodingSpec extends UnitSpec with Matchers with MockitoSugar with G
     cookie shouldBe expectedCookieValue
   }
 }
-
-

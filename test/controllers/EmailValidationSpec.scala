@@ -18,9 +18,9 @@ package controllers
 
 import org.scalatest.Matchers
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class EmailValidationSpec extends UnitSpec with Matchers{
+class EmailValidationSpec extends AsyncHmrcSpec with Matchers {
   "emailValidator for the field email" should {
     val testForm = Form("emailaddress" -> emailValidator())
 
@@ -44,8 +44,7 @@ class EmailValidationSpec extends UnitSpec with Matchers{
       )
     }
 
-    val ValidEmailAddresses = Seq("prettyandsimple@example.com", "very.common@example.com",
-      "disposable.style.email.with+symbol@example.com", "other.email-with-dash@example.com")
+    val ValidEmailAddresses = Seq("prettyandsimple@example.com", "very.common@example.com", "disposable.style.email.with+symbol@example.com", "other.email-with-dash@example.com")
 
     ValidEmailAddresses foreach { emailAddress =>
       s"accept a valid email address [$emailAddress]" in {
@@ -54,17 +53,20 @@ class EmailValidationSpec extends UnitSpec with Matchers{
       }
     }
 
-    val notValidEmailAddresses = Map("Abc.example.com" -> "no @ character",
+    val notValidEmailAddresses = Map(
+      "Abc.example.com" -> "no @ character",
       "A@b@c@example.com" -> "only one @ is allowed outside quotation marks",
       """a\"b(c)d,e:f;g<h>i[j\\k]l@example.com""" -> "none of the special characters in this local part are allowed outside quotation marks",
       "john.doe@example..com" -> "double dot after @",
-      "john.doe@example." -> "dot at the end")
+      "john.doe@example." -> "dot at the end"
+    )
 
-    notValidEmailAddresses foreach { case (emailAddress, notValidReason) =>
-      s"generate an error for not valid email address [$emailAddress] due to [$notValidReason]" in {
-        val res = testForm.bind(Map("emailaddress" -> emailAddress))
-        res.errors shouldBe List(FormError("emailaddress", "emailaddress.error.not.valid.field"))
-      }
+    notValidEmailAddresses foreach {
+      case (emailAddress, notValidReason) =>
+        s"generate an error for not valid email address [$emailAddress] due to [$notValidReason]" in {
+          val res = testForm.bind(Map("emailaddress" -> emailAddress))
+          res.errors shouldBe List(FormError("emailaddress", "emailaddress.error.not.valid.field"))
+        }
     }
   }
 

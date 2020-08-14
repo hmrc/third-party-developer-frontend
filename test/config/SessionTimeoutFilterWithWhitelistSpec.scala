@@ -19,29 +19,23 @@ package config
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import org.joda.time.{DateTime, DateTimeZone, Duration}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.concurrent.ScalaFutures.whenReady
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilterConfig
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.SharedMetricsClearDown
+import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication with SharedMetricsClearDown {
+class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown {
 
   trait Setup {
     implicit val sys = ActorSystem("SessionTimeoutFilterWithWhitelistSpec")
     implicit val mat = ActorMaterializer()
-    val config = SessionTimeoutFilterConfig(
-      timeoutDuration = Duration.standardSeconds(1),
-      onlyWipeAuthToken = false)
+    val config = SessionTimeoutFilterConfig(timeoutDuration = Duration.standardSeconds(1), onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
     val whitelistedUrl = controllers.routes.UserLoginAccount.login().url
@@ -53,12 +47,9 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
       override val whitelistedCalls = Set(WhitelistedCall(whitelistedUrl, "GET"))
     }
 
-
-    when(nextOperationFunction.apply(any())).thenAnswer(new Answer[Future[Result]] {
-      override def answer(invocation: InvocationOnMock): Future[Result] = {
+    when(nextOperationFunction.apply(*)).thenAnswer( (invocation: InvocationOnMock) => {
         val headers = invocation.getArguments.head.asInstanceOf[RequestHeader]
         Future.successful(Results.Ok.withSession(headers.session + ("authToken" -> bearerToken)))
-      }
     })
 
     def now: String = {
@@ -84,7 +75,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
-      verify(nextOperationFunction).apply(any())
+      verify(nextOperationFunction).apply(*)
     }
 
     "leave the access_uri intact when path not in whitelist" in new Setup {
@@ -99,7 +90,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
-      verify(nextOperationFunction).apply(any())
+      verify(nextOperationFunction).apply(*)
     }
 
     "leave the access_uri intact when path in whitelist with different method" in new Setup {
@@ -114,7 +105,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
-      verify(nextOperationFunction).apply(any())
+      verify(nextOperationFunction).apply(*)
     }
   }
 
@@ -132,7 +123,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
-      verify(nextOperationFunction).apply(any())
+      verify(nextOperationFunction).apply(*)
     }
 
     "remove the access_uri when path not in whitelist" in new Setup {
@@ -145,7 +136,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
-      verify(nextOperationFunction).apply(any())
+      verify(nextOperationFunction).apply(*)
     }
 
     "remove the session keys when path in whitelist with different method" in new Setup {
@@ -158,7 +149,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
-      verify(nextOperationFunction).apply(any())
+      verify(nextOperationFunction).apply(*)
     }
   }
 
@@ -175,7 +166,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
         sessionData("access_uri") shouldBe accessUri
       }
 
-      verify(nextOperationFunction).apply(any())
+      verify(nextOperationFunction).apply(*)
     }
 
     "leave the access_uri intact when path not in whitelist" in new Setup {
@@ -190,7 +181,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
-      verify(nextOperationFunction).apply(any())
+      verify(nextOperationFunction).apply(*)
     }
 
     "leave the access_uri intact when path in whitelist with different method" in new Setup {
@@ -205,7 +196,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends UnitSpec with MockitoSugar w
         sessionData.isDefinedAt("ts") shouldBe true
       }
 
-      verify(nextOperationFunction).apply(any())
+      verify(nextOperationFunction).apply(*)
     }
   }
 }

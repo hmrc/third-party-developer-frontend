@@ -19,9 +19,9 @@ package domain
 import controllers.SupportEnquiryForm
 import domain.models.connectors.DeskproTicket
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class DeskproTicketSpec extends UnitSpec {
+class DeskproTicketSpec extends AsyncHmrcSpec {
 
   implicit val fakeRequest = FakeRequest()
 

@@ -21,9 +21,6 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.{ChangePassword, PasswordReset}
 import domain.{InvalidResetCode, UnverifiedAccount}
 import mocks.service.SessionServiceMock
-import org.mockito.ArgumentMatchers.{any, eq => meq}
-import org.mockito.BDDMockito.given
-import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -68,28 +65,28 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
 
     def mockRequestResetFor(email: String) =
-      given(mockConnector.requestReset(meq(email))(any[HeaderCarrier]))
-        .willReturn(Future.successful(OK))
+      when(mockConnector.requestReset(eqTo(email))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(OK))
 
     def mockConnectorUnverifiedForReset(email: String, password: String) =
-      given(mockConnector.reset(meq(PasswordReset(email, password)))(any[HeaderCarrier]))
-        .willReturn(failed(new UnverifiedAccount))
+      when(mockConnector.reset(eqTo(PasswordReset(email, password)))(any[HeaderCarrier]))
+        .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForRequestReset(email: String) =
-      given(mockConnector.requestReset(meq(email))(any[HeaderCarrier]))
-        .willReturn(failed(new UnverifiedAccount))
+      when(mockConnector.requestReset(eqTo(email))(any[HeaderCarrier]))
+        .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForChangePassword(email: String, oldPassword: String, newPassword: String) =
-      given(mockConnector.changePassword(meq(ChangePassword(email, oldPassword, newPassword)))(any[HeaderCarrier]))
-        .willReturn(failed(new UnverifiedAccount))
+      when(mockConnector.changePassword(eqTo(ChangePassword(email, oldPassword, newPassword)))(any[HeaderCarrier]))
+        .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForValidateReset(code: String) =
-      given(mockConnector.fetchEmailForResetCode(meq(code))(any[HeaderCarrier]))
-        .willReturn(failed(new UnverifiedAccount))
+      when(mockConnector.fetchEmailForResetCode(eqTo(code))(any[HeaderCarrier]))
+        .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorInvalidResetCodeForValidateReset(code: String) =
-      given(mockConnector.fetchEmailForResetCode(meq(code))(any[HeaderCarrier]))
-        .willReturn(failed(new InvalidResetCode))
+      when(mockConnector.fetchEmailForResetCode(eqTo(code))(any[HeaderCarrier]))
+        .thenReturn(failed(new InvalidResetCode))
 
     val emailFieldName = "emailaddress"
     val passwordFieldName = "password"
@@ -108,88 +105,90 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "validate reset unverified user" in new Setup {
       mockConnectorUnverifiedForValidateReset(developerCode)
-      val result: Result = await(addToken(underTest.validateReset(developerEmail, developerCode))(request))
+      val result = addToken(underTest.validateReset(developerEmail, developerCode))(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
-      result.newFlash.get.get("error").mkString shouldBe "UnverifiedAccount"
+      await(result).newFlash.get.get("error").mkString shouldBe "UnverifiedAccount"
     }
 
     "validate reset invalid reset code" in new Setup {
       mockConnectorInvalidResetCodeForValidateReset(developerCode)
-      val result = await(addToken(underTest.validateReset(developerEmail, developerCode))(request))
+      val result = addToken(underTest.validateReset(developerEmail, developerCode))(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
-      result.newFlash.get.get("error").mkString shouldBe "InvalidResetCode"
+      await(result).newFlash.get.get("error").mkString shouldBe "InvalidResetCode"
     }
 
     "process password changed unverified user" in new Setup {
       mockConnectorUnverifiedForChangePassword(developerEmail, developerPassword, developerPassword)
-      val requestWithPassword = request.withFormUrlEncodedBody((currentPasswordFieldName, developerPassword),
-        (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
+      val requestWithPassword = request
+        .withFormUrlEncodedBody((currentPasswordFieldName, developerPassword), (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
         .withSession((emailSessionName, developerEmail))
-      val result = await(underTest.processPasswordChange(
-        developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, implicitly))
+      val result =
+        underTest.processPasswordChange(developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, implicitly)
       status(result) shouldBe FORBIDDEN
-      result.session(requestWithPassword).get("email").mkString shouldBe developerEmail
+      await(result).session(requestWithPassword).get("email").mkString shouldBe developerEmail
     }
 
     "request reset unverified user" in new Setup {
       mockConnectorUnverifiedForRequestReset(developerEmail)
-      val requestWithPasswordAndEmail = request.withFormUrlEncodedBody((emailFieldName, developerEmail))
+      val requestWithPasswordAndEmail = request
+        .withFormUrlEncodedBody((emailFieldName, developerEmail))
         .withSession((emailSessionName, developerEmail))
-      val result = await(addToken(underTest.requestReset())(requestWithPasswordAndEmail))
+      val result = addToken(underTest.requestReset())(requestWithPasswordAndEmail)
       status(result) shouldBe FORBIDDEN
-      result.session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail
+      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail
     }
 
     "reset unverified user" in new Setup {
       mockConnectorUnverifiedForReset(developerEmail, developerPassword)
-      val requestWithPasswordAndEmail = request.withFormUrlEncodedBody((passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
+      val requestWithPasswordAndEmail = request
+        .withFormUrlEncodedBody((passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
         .withSession((emailSessionName, developerEmail))
-      val result = await(addToken(underTest.resetPassword())(requestWithPasswordAndEmail))
+      val result = addToken(underTest.resetPassword())(requestWithPasswordAndEmail)
       status(result) shouldBe FORBIDDEN
-      result.session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail
+      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail
     }
 
     "show the forgot password page" in new Setup {
-      val result = await(addToken(underTest.showForgotPassword())(request))
+      val result = addToken(underTest.showForgotPassword())(request)
       status(result) shouldBe OK
-      bodyOf(result) should include("Reset your password")
+      contentAsString(result) should include("Reset your password")
     }
 
     "show the sent reset link page" in new Setup {
       mockRequestResetFor(developerEmail)
       val requestWithEmail = request.withFormUrlEncodedBody((emailFieldName, developerEmail))
-      val result = await(addToken(underTest.requestReset())(requestWithEmail))
+      val result = addToken(underTest.requestReset())(requestWithEmail)
       status(result) shouldBe OK
-      bodyOf(result) should include(s"We have sent an email to $developerEmail")
+      contentAsString(result) should include(s"We have sent an email to $developerEmail")
     }
 
     "show the reset password page with errors for unverified email" in new Setup {
       val requestWithunverifiedEmail = request.withFlash("error" -> "UnverifiedAccount", "email" -> developerEmail)
-      val result = await(addToken(underTest.resetPasswordError())(requestWithunverifiedEmail))
+      val result = addToken(underTest.resetPasswordError())(requestWithunverifiedEmail)
       status(result) shouldBe FORBIDDEN
-      bodyOf(result) should include("Reset your password")
-      bodyOf(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
+      contentAsString(result) should include("Reset your password")
+      contentAsString(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
     }
 
     "show the reset password page with no errors" in new Setup {
       val requestWithVerifiedEmail = request.withSession("email" -> developerEmail)
-      val result = await(addToken(underTest.resetPasswordChange())(requestWithVerifiedEmail))
+      val result = addToken(underTest.resetPasswordChange())(requestWithVerifiedEmail)
       status(result) shouldBe OK
-      bodyOf(result) should include("Create a new password")
+      contentAsString(result) should include("Create a new password")
     }
 
     "show the reset password error page for invalid reset code" in new Setup {
       val requestWithInvalidResetCode = request.withFlash("error" -> "InvalidResetCode")
-      val result = await(addToken(underTest.resetPasswordError())(requestWithInvalidResetCode))
+      val result = addToken(underTest.resetPasswordError())(requestWithInvalidResetCode)
       status(result) shouldBe BAD_REQUEST
-      bodyOf(result) should include("Reset password link no longer valid")
-      bodyOf(result) should include("Reset password again")
+      contentAsString(result) should include("Reset password link no longer valid")
+      contentAsString(result) should include("Reset password again")
     }
 
     "redirect to an error page if no email is found to reset password" in new Setup {
-      val result = await(addToken(underTest.resetPasswordChange())(request))
+      val result = addToken(underTest.resetPasswordChange())(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
     }

@@ -49,7 +49,6 @@ lazy val test = Seq(
   "io.cucumber" %% "cucumber-scala" % cucumberVersion % testScope,
   "io.cucumber" % "cucumber-junit" % cucumberVersion % testScope,
   "io.cucumber" % "cucumber-java8" % cucumberVersion % testScope,
-  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % testScope,
   "junit" % "junit" % "4.12" % testScope,
   "org.jsoup" % "jsoup" % "1.10.2" % testScope,
   "org.pegdown" % "pegdown" % "1.6.0" % testScope,
@@ -57,7 +56,7 @@ lazy val test = Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % testScope,
   "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
   "com.github.tomakehurst" % "wiremock" % "1.58" % testScope,
-  "org.mockito" % "mockito-core" % "2.23.0" % testScope,
+  "org.mockito" %% "mockito-scala-scalatest" % "1.7.1" % testScope,
   "org.scalaj" %% "scalaj-http" % "2.3.0" % testScope,
   "org.scalacheck" %% "scalacheck" % "1.13.5" % testScope,
   // batik-bridge has a circular dependency on itself via transitive batik-script. Avoid that to work with updated build tools
@@ -120,23 +119,23 @@ lazy val microservice = Project(appName, file("."))
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
   .settings(
-    Test / unmanagedSourceDirectories := (baseDirectory in Test) (base => Seq(base / "test", base / "test-utils")).value,
+    Test / unmanagedSourceDirectories := (baseDirectory in Test)(base => Seq(base / "test", base / "test-utils")).value,
     Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
     IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    IntegrationTest / unmanagedSourceDirectories := (baseDirectory in IntegrationTest) (base => Seq(base / "it", base / "test-utils")).value,
-    IntegrationTest / unmanagedResourceDirectories := (baseDirectory in IntegrationTest) (base => Seq(base / "test")).value,
+    IntegrationTest / unmanagedSourceDirectories := (baseDirectory in IntegrationTest)(base => Seq(base / "it", base / "test-utils")).value,
+    IntegrationTest / unmanagedResourceDirectories := (baseDirectory in IntegrationTest)(base => Seq(base / "test")).value,
     IntegrationTest / parallelExecution := false
   )
   .configs(ComponentTest)
   .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    ComponentTest / unmanagedSourceDirectories := (baseDirectory in ComponentTest) (base => Seq(base / "component", base / "test-utils")).value,
-    ComponentTest / unmanagedResourceDirectories := (baseDirectory in ComponentTest) (base => Seq(base / "test")).value,
+    ComponentTest / unmanagedSourceDirectories := (baseDirectory in ComponentTest)(base => Seq(base / "component", base / "test-utils")).value,
+    ComponentTest / unmanagedResourceDirectories := (baseDirectory in ComponentTest)(base => Seq(base / "test")).value,
     ComponentTest / unmanagedResourceDirectories += baseDirectory(_ / "target/web/public/test").value,
     ComponentTest / testOptions += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
     ComponentTest / testGrouping := oneForkedJvmPerTest((definedTests in ComponentTest).value),
@@ -150,11 +149,9 @@ lazy val IntegrationTest = config("it") extend Test
 lazy val ComponentTest = config("component") extend Test
 lazy val TemplateTest = config("tt") extend Test
 lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
-
   credentials += SbtCredentials,
-
-  publishArtifact in(Compile, packageDoc) := false,
-  publishArtifact in(Compile, packageSrc) := false
+  publishArtifact in (Compile, packageDoc) := false,
+  publishArtifact in (Compile, packageSrc) := false
 ) ++
   publishAllArtefacts
 
@@ -164,8 +161,7 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
       test.name,
       Seq(test),
       SubProcess(
-        ForkOptions().withRunJVMOptions(
-          Vector(s"-Dtest.name={test.name}", s"-Dtest_driver=${Properties.propOrElse("test_driver", "chrome")}"))
+        ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name={test.name}", s"-Dtest_driver=${Properties.propOrElse("test_driver", "chrome")}"))
       )
     )
   }
@@ -174,4 +170,3 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
 coverageMinimum := 85
 coverageFailOnMinimum := true
 coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;app.*;uk.gov.hmrc.BuildInfo;.*javascript"
-

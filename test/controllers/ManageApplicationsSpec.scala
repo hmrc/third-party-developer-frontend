@@ -103,19 +103,19 @@ class ManageApplicationsSpec
     "return the manage Applications page with the user logged in" in new Setup {
       fetchByTeamMemberEmailReturns(loggedInUser.email, List(application))
 
-      private val result = await(addApplicationController.manageApps()(loggedInRequest))
+      private val result = addApplicationController.manageApps()(loggedInRequest)
 
       status(result) shouldBe OK
-      bodyOf(result) should include(loggedInUser.displayedName)
-      bodyOf(result) should include("Sign out")
-      bodyOf(result) should include("App name 1")
-      bodyOf(result) should not include "Sign in"
+      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include("Sign out")
+      contentAsString(result) should include("App name 1")
+      contentAsString(result) should not include "Sign in"
     }
 
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()
 
-      private val result = await(addApplicationController.manageApps()(request))
+      private val result = addApplicationController.manageApps()(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -124,18 +124,18 @@ class ManageApplicationsSpec
 
   "tenDaysWarning" should {
     "return the 10 days warning interrupt page when the user is logged in" in new Setup {
-      private val result = await(addApplicationController.tenDaysWarning()(loggedInRequest))
+      private val result = addApplicationController.tenDaysWarning()(loggedInRequest)
 
       status(result) shouldBe OK
-      bodyOf(result) should include("We will check your application")
-      bodyOf(result) should include("This takes up to 10 working days, and we may ask you to demonstrate it.")
-      bodyOf(result) should not include "Sign in"
+      contentAsString(result) should include("We will check your application")
+      contentAsString(result) should include("This takes up to 10 working days, and we may ask you to demonstrate it.")
+      contentAsString(result) should not include "Sign in"
     }
 
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()
 
-      private val result = await(addApplicationController.tenDaysWarning()(request))
+      private val result = addApplicationController.tenDaysWarning()(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")

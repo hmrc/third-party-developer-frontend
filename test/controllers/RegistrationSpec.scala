@@ -21,8 +21,6 @@ import domain.models.developers
 import domain.models.developers.RegistrationSuccessful
 import mocks.service.SessionServiceMock
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.BDDMockito._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -30,7 +28,7 @@ import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import views.html.{AccountVerifiedView, ConfirmationView, ExpiredVerificationLinkView, RegistrationView, ResendConfirmationView, SignInView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.failed
+import scala.concurrent.Future.{failed, successful}
 
 class RegistrationSpec extends BaseControllerSpec {
 
@@ -73,9 +71,9 @@ class RegistrationSpec extends BaseControllerSpec {
       )
 
       val requestCaptor: ArgumentCaptor[developers.Registration] = ArgumentCaptor.forClass(classOf[developers.Registration])
-      given(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).willReturn(RegistrationSuccessful)
+      when(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).thenReturn(successful(RegistrationSuccessful))
 
-      val result = await(underTest.register()(request))
+      val result = underTest.register()(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/confirmation")
@@ -96,7 +94,7 @@ class RegistrationSpec extends BaseControllerSpec {
       )
 
       val requestCaptor: ArgumentCaptor[developers.Registration] = ArgumentCaptor.forClass(classOf[developers.Registration])
-      given(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).willReturn(RegistrationSuccessful)
+      when(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).thenReturn(successful(RegistrationSuccessful))
 
       await(underTest.register()(request))
 
@@ -108,28 +106,28 @@ class RegistrationSpec extends BaseControllerSpec {
     val code = "verificationCode"
 
     "redirect the user to login if their verification link matches an account" in new Setup {
-      given(underTest.connector.verify(eqTo(code))(any[HeaderCarrier])).willReturn(OK)
-      val result = await(underTest.verify(code)(FakeRequest()))
+      when(underTest.connector.verify(eqTo(code))(any[HeaderCarrier])).thenReturn(successful(OK))
+      val result = underTest.verify(code)(FakeRequest())
 
       status(result) shouldBe OK
-      bodyOf(result) should include("Email address verified")
+      contentAsString(result) should include("Email address verified")
     }
 
     "invite user to register again when the verification link has expired" in new Setup {
-      given(underTest.connector.verify(eqTo(code))(any[HeaderCarrier])).willReturn(failed(new BadRequestException("")))
+      when(underTest.connector.verify(eqTo(code))(any[HeaderCarrier])).thenReturn(failed(new BadRequestException("")))
 
-      val result = await(underTest.verify(code)(FakeRequest()))
+      val result = underTest.verify(code)(FakeRequest())
 
       status(result) shouldBe BAD_REQUEST
-      bodyOf(result) should include("Your account verification link has expired")
+      contentAsString(result) should include("Your account verification link has expired")
     }
 
     "redirect the user to confirmation page when resending verification" in new Setup {
       val email = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
       val request = FakeRequest().withSession(newSessionParams: _*)
-      given(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).willReturn(NO_CONTENT)
-      val result = await(underTest.resendVerification()(request))
+      when(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(NO_CONTENT))
+      val result = underTest.resendVerification()(request)
 
       status(result) shouldBe SEE_OTHER
     }
@@ -138,8 +136,8 @@ class RegistrationSpec extends BaseControllerSpec {
       val email = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
       val request = FakeRequest().withSession(newSessionParams: _*)
-      given(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).willReturn(NOT_FOUND)
-      val result = await(underTest.resendVerification()(request))
+      when(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(NOT_FOUND))
+      val result = underTest.resendVerification()(request)
 
       status(result) shouldBe NOT_FOUND
     }

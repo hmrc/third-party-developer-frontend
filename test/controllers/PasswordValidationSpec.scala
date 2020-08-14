@@ -18,9 +18,9 @@ package controllers
 
 import org.scalatest.Matchers
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class PasswordValidationSpec extends UnitSpec with Matchers{
+class PasswordValidationSpec extends AsyncHmrcSpec with Matchers {
   "passwordValidator for the field password" should {
     val testForm = Form("password" -> passwordValidator)
 
@@ -52,9 +52,9 @@ class PasswordValidationSpec extends UnitSpec with Matchers{
     }
 
     val specialCharacters = """ !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"""
-    specialCharacters.toCharArray.foreach(specialChar=>
+    specialCharacters.toCharArray.foreach(specialChar =>
       s"accept special character [$specialChar] in password" in {
-            testForm.bind(Map("password" -> s"A1${specialChar}wwwwwwwww")).errors shouldBe List()
+        testForm.bind(Map("password" -> s"A1${specialChar}wwwwwwwww")).errors shouldBe List()
       }
     )
   }

@@ -17,19 +17,15 @@
 package service
 
 import connectors.ThirdPartyDeveloperConnector
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito._
 import org.scalatest.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 
-class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
+class MFAServiceSpec extends AsyncHmrcSpec with Matchers {
 
   trait Setup {
     val email = "bob.smith@example.com"
@@ -81,7 +77,7 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
 
   "removeMfa" should {
     "return failed totp when totp verification fails" in new FailedTotpVerification {
-      val result: Future[MFAResponse] = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
+      val result: MFAResponse = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
       result.totpVerified shouldBe false
     }
 
@@ -91,7 +87,7 @@ class MFAServiceSpec extends UnitSpec with Matchers with MockitoSugar {
     }
 
     "return successful totp when totp verification passes" in new SuccessfulTotpVerification {
-      val result: Future[MFAResponse] = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
+      val result: MFAResponse = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
 
       result.totpVerified shouldBe true
     }

@@ -23,12 +23,12 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.models.developers.Session
 import domain.models.developers.{Developer, LoggedInState}
 import mocks.service.SessionServiceMock
-import play.api.http.Status._
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import play.api.test.Helpers.redirectLocation
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import utils.WithLoggedInSession._
+import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -59,7 +59,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout 
         .withLoggedIn(sessionController,implicitly)(session.sessionId)
         .withSession(sessionParams: _*)
 
-      val result = await(sessionController.keepAlive()(loggedInRequest))
+      val result = sessionController.keepAlive()(loggedInRequest)
 
       status(result) shouldBe NO_CONTENT
     }
@@ -67,7 +67,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout 
     "return not authenticated if not logged in" in new Setup {
       val request = FakeRequest()
 
-      val result = await(sessionController.keepAlive()(request))
+      val result = sessionController.keepAlive()(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")

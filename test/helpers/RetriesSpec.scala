@@ -21,18 +21,16 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{ActorSystem, Scheduler}
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import org.mockito.Mockito.when
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.BadRequestException
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
+import scala.concurrent.Future.failed
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
+class RetriesSpec extends AsyncHmrcSpec {
 
   trait Setup {
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -45,19 +43,15 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
       }
     }
 
-    private val app = new GuiceApplicationBuilder().configure("metrics.jvm"-> false).build()
+    private val app = new GuiceApplicationBuilder().configure("metrics.jvm" -> false).build()
     implicit val actorSystem: ActorSystem = app.actorSystem
     implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
     def underTest = new RetryTestConnector(mockFutureTimeoutSupport, mockAppConfig)
   }
 
-  class RetryTestConnector(val futureTimeout: FutureTimeoutSupport,
-                           val appConfig: ApplicationConfig)
-                           (implicit val ec : ExecutionContext, val actorSystem: ActorSystem)
-   extends Retries {
-
-  }
+  class RetryTestConnector(val futureTimeout: FutureTimeoutSupport, val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext, val actorSystem: ActorSystem)
+      extends Retries {}
 
   "Retries" should {
 
@@ -69,7 +63,7 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
       intercept[BadRequestException] {
         await(underTest.retry {
-          Future.failed(new BadRequestException(""))
+          failed(new BadRequestException(""))
         })
       }
       actualDelay shouldBe Some(expectedDelay)
@@ -85,9 +79,8 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
       private val response: Unit = await(underTest.retry {
         if (actualRetries < expectedRetries) {
           actualRetries += 1
-          Future.failed(new BadRequestException(""))
-        }
-        else Future.successful(())
+          failed(new BadRequestException(""))
+        } else Future.successful(())
       })
 
       response shouldBe ((): Unit)
@@ -100,11 +93,10 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
       when(mockAppConfig.retryCount).thenReturn(expectedRetries)
       var actualCalls = 0
 
-      intercept[BadRequestException](
-        await(underTest.retry {
-          actualCalls += 1
-          Future.failed(new BadRequestException(""))
-        }))
+      intercept[BadRequestException](await(underTest.retry {
+        actualCalls += 1
+        failed(new BadRequestException(""))
+      }))
 
       actualCalls shouldBe 1
     }
@@ -115,11 +107,10 @@ class RetriesSpec extends UnitSpec with ScalaFutures with MockitoSugar {
       when(mockAppConfig.retryCount).thenReturn(expectedRetries)
       var actualCalls = 0
 
-      intercept[RuntimeException](
-        await(underTest.retry {
-          actualCalls += 1
-          Future.failed(new RuntimeException(""))
-        }))
+      intercept[RuntimeException](await(underTest.retry {
+        actualCalls += 1
+        failed(new RuntimeException(""))
+      }))
 
       actualCalls shouldBe 1
     }

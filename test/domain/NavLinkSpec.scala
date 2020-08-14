@@ -17,23 +17,19 @@
 package domain
 
 import domain.models.views.{NavLink, StaticNavLinks, UserNavLinks}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class NavLinkSpec extends UnitSpec {
+class NavLinkSpec extends AsyncHmrcSpec {
 
   "NavigationHelper" should {
     "return user nav links if username is given" in {
       UserNavLinks(Some("User Name")) shouldBe
-        Seq(
-          NavLink("User Name", "/developer/profile"),
-          NavLink("Sign out", "/developer/logout/survey"))
+        Seq(NavLink("User Name", "/developer/profile"), NavLink("Sign out", "/developer/logout/survey"))
     }
 
     "return logged out nav links if username is not given" in {
       UserNavLinks(None) shouldBe
-        Seq(
-          NavLink("Register", "/developer/registration"),
-          NavLink("Sign in", "/developer/login"))
+        Seq(NavLink("Register", "/developer/registration"), NavLink("Sign in", "/developer/login"))
     }
 
     "return static navlinks for devhub" in {
@@ -42,7 +38,8 @@ class NavLinkSpec extends UnitSpec {
           NavLink("Documentation", "http://localhost:9680/api-documentation/docs/using-the-hub"),
           NavLink("Applications", "http://localhost:9685/developer/applications"),
           NavLink("Support", "http://localhost:9685/developer/support"),
-          NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true))
+          NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true)
+        )
     }
   }
 }

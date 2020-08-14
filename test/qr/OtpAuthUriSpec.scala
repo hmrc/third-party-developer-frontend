@@ -16,9 +16,9 @@
 
 package qr
 
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class OtpAuthUriSpec extends UnitSpec {
+class OtpAuthUriSpec extends AsyncHmrcSpec {
 
   "apply" should {
     "generate otpauth uri" in {

@@ -22,9 +22,9 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-trait BaseConnectorIntegrationSpec extends UnitSpec with ScalaFutures with MockitoSugar with BeforeAndAfterAll with BeforeAndAfterEach {
+trait BaseConnectorIntegrationSpec extends AsyncHmrcSpec with BeforeAndAfterAll with BeforeAndAfterEach {
   val stubPort = sys.env.getOrElse("WIREMOCK", "22222").toInt
   val stubHost = "localhost"
   val wireMockUrl = s"http://$stubHost:$stubPort"

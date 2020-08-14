@@ -35,10 +35,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
 import play.filters.csrf.CSRF
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with MockitoSugar {
-  private val config = Configuration( "play.filters.csrf.token.sign" -> false)
+class LoginCSRFIntegrationSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
+  private val config = Configuration("play.filters.csrf.token.sign" -> false)
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
@@ -110,13 +110,13 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
       "redirect to the 2SV sign-up reminder if user does not have it set up" in new Setup {
         implicit val materializer: Materializer = fakeApplication().materializer
 
-        stubFor(post(urlEqualTo("/authenticate"))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withHeader(contentType, contentTypeApplicationJson)
-              .withBody(
-                s"""
+        stubFor(
+          post(urlEqualTo("/authenticate"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader(contentType, contentTypeApplicationJson)
+                .withBody(s"""
                    |{
                    |  "accessCodeRequired": false,
                    |  "session": {
@@ -128,12 +128,13 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
                    |      "lastName": "Doe"
                    |    }
                    |  }
-                   |}""".stripMargin)))
+                   |}""".stripMargin)
+            )
+        )
 
         setupThirdPartyApplicationSearchApplicationByEmailStub()
 
-        private val request = loginRequestWithCSRF.withFormUrlEncodedBody(
-          "emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
+        private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
         private val result = await(route(app, request)).get
 
@@ -146,22 +147,23 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
       "redirect to the 2SV code entry page if user has it configured" in new Setup {
         implicit val materializer: Materializer = fakeApplication().materializer
 
-        stubFor(post(urlEqualTo("/authenticate"))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withHeader(contentType, contentTypeApplicationJson)
-              .withBody(
-                s"""
+        stubFor(
+          post(urlEqualTo("/authenticate"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader(contentType, contentTypeApplicationJson)
+                .withBody(s"""
                    |{
                    |  "accessCodeRequired": true,
                    |  "nonce": "123456"
-                   |}""".stripMargin)))
+                   |}""".stripMargin)
+            )
+        )
 
         setupThirdPartyApplicationSearchApplicationByEmailStub()
 
-        private val request = loginRequestWithCSRF.withFormUrlEncodedBody(
-          "emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
+        private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
         private val result = await(route(app, request)).get
 
@@ -172,10 +174,14 @@ class LoginCSRFIntegrationSpec extends UnitSpec with GuiceOneAppPerSuite with Be
   }
 
   private def setupThirdPartyApplicationSearchApplicationByEmailStub(): Unit = {
-    stubFor(get(urlEqualTo("/developer/applications?emailAddress=thirdpartydeveloper%40example.com&environment=PRODUCTION"))
-      .willReturn(
-        aResponse()
-          .withStatus(OK)
-          .withHeader(contentType, contentTypeApplicationJson).withBody("[]")))
+    stubFor(
+      get(urlEqualTo("/developer/applications?emailAddress=thirdpartydeveloper%40example.com&environment=PRODUCTION"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withHeader(contentType, contentTypeApplicationJson)
+            .withBody("[]")
+        )
+    )
   }
 }

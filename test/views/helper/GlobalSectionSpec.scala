@@ -17,9 +17,9 @@
 package views.helper
 
 import org.scalatest.Matchers
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class GlobalSectionSpec extends UnitSpec with Matchers {
+class GlobalSectionSpec extends AsyncHmrcSpec with Matchers {
 
   "dataAttribute" should {
     Seq(
@@ -33,7 +33,6 @@ class GlobalSectionSpec extends UnitSpec with Matchers {
       "password.error.not.valid.global" -> "data-global-error-password",
       "password.error.no.match.global" -> "data-global-error-password",
       "emailaddress.already.registered.global" -> "data-global-error-emailaddress"
-
     ).foreach {
       case (k, v) =>
         s"generate the data attribute '$v' when the error is '$k'" in {
@@ -49,8 +48,6 @@ class GlobalSectionSpec extends UnitSpec with Matchers {
       GlobalSection.dataAttribute("something not expected") shouldBe "data-global-error-undefined"
     }
   }
-
-
 
   "anchor" should {
     Seq(
@@ -79,6 +76,5 @@ class GlobalSectionSpec extends UnitSpec with Matchers {
       GlobalSection.anchor("something not expected") shouldBe "#section-undefined"
     }
   }
-
 
 }

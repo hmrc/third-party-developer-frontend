@@ -19,11 +19,9 @@ package helpers
 import helpers.DateFormatter.initialLastAccessDate
 import org.joda.time.{DateTime, DateTimeUtils}
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class DateFormatterSpec extends UnitSpec with ScalaFutures with MockitoSugar with BeforeAndAfterAll {
+class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll {
   val FixedTimeNow: DateTime = new DateTime("2019-09-01T00:30:00.000")
   override def beforeAll(): Unit = {
     super.beforeAll()

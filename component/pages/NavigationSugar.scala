@@ -27,7 +27,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.selenium.WebBrowser
 import org.scalatestplus.selenium.WebBrowser.{go => goo}
 
-trait NavigationSugar extends WebBrowser with Eventually with Assertions with Matchers with MockitoSugar {
+trait NavigationSugar extends WebBrowser with Eventually with Assertions with Matchers {
   private val mockAppConfig = mock[ApplicationConfig]
   when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
 

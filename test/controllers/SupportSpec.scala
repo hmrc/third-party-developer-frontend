@@ -23,8 +23,6 @@ import domain.models.developers.{Developer, LoggedInState}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.BDDMockito._
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -36,6 +34,8 @@ import utils.WithLoggedInSession._
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
 
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -68,7 +68,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-      val result: Result = await(addToken(underTest.raiseSupportEnquiry())(request))
+      val result = addToken(underTest.raiseSupportEnquiry())(request)
 
       assertFullNameAndEmail(result,"John Doe", "thirdpartydeveloper@example.com")
     }
@@ -79,7 +79,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       fetchSessionByIdReturnsNone(sessionId)
 
-      val result = await(addToken(underTest.raiseSupportEnquiry())(request))
+      val result = addToken(underTest.raiseSupportEnquiry())(request)
       assertFullNameAndEmail(result, "", "")
     }
 
@@ -90,7 +90,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))
 
-      val result = await(addToken(underTest.raiseSupportEnquiry())(request))
+      val result = addToken(underTest.raiseSupportEnquiry())(request)
 
       assertFullNameAndEmail(result, "","")
     }
@@ -104,9 +104,9 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
           "comments" -> "A+++, good seller, would buy again")
 
       val captor: ArgumentCaptor[SupportEnquiryForm] = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])
-      given(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], any[HeaderCarrier])).willReturn(TicketCreated)
+      when(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], any[HeaderCarrier])).thenReturn(successful(TicketCreated))
 
-      val result = await(addToken(underTest.submitSupportEnquiry())(request))
+      val result = addToken(underTest.submitSupportEnquiry())(request)
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/developer/support/submitted")
@@ -123,14 +123,14 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
           "fullname" -> "Peter Smith",
           "comments" -> "A+++, good seller, would buy again")
 
-     val result = await(addToken(underTest.submitSupportEnquiry())(request))
+     val result = addToken(underTest.submitSupportEnquiry())(request)
       status(result) shouldBe 400
     }
   }
 
-  private def assertFullNameAndEmail(result: Result, fullName: String, email: String): Any = {
+  private def assertFullNameAndEmail(result: Future[Result], fullName: String, email: String): Any = {
     status(result) shouldBe 200
-    val dom = Jsoup.parse(bodyOf(result))
+    val dom = Jsoup.parse(contentAsString(result))
 
     dom.getElementsByAttributeValue("name", "fullname").attr("value") shouldEqual fullName
     dom.getElementsByAttributeValue("name", "emailaddress").attr("value") shouldEqual email
