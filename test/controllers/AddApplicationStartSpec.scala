@@ -20,6 +20,7 @@ import config.ErrorHandler
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import org.mockito.Mockito.when
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
@@ -94,10 +95,12 @@ class AddApplicationStartSpec extends BaseControllerSpec
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
+
+
   }
 
     "Add subordinate applications start page" should {
-      "return the add applications page with the user logged in" in new Setup {
+      "return the add applications page with the user logged in and environmennt is Prod/Sandbox" in new Setup {
         private val result = await(underTest.addApplicationSubordinate()(loggedInRequest))
 
         status(result) shouldBe OK
@@ -110,6 +113,24 @@ class AddApplicationStartSpec extends BaseControllerSpec
         bodyOf(result) should include("Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:")
         bodyOf(result) should not include "Sign in"
       }
+
+      "return the add applications page with the user logged in and environmennt is QA/Dev" in new Setup {
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+        private val result = await(underTest.addApplicationSubordinate()(loggedInRequest))
+
+        status(result) shouldBe OK
+        bodyOf(result) should include("Add an application to development")
+        bodyOf(result) should include(loggedInUser.displayedName)
+        bodyOf(result) should include("Sign out")
+        bodyOf(result) should include("get its development credentials")
+        bodyOf(result) should include("use its credentials for integration testing")
+        bodyOf(result) should include("In production, your application will need to comply with the expectations set out in our")
+        bodyOf(result) should include("Once you add your application and subscribe it to the development APIs you want to integrate with you can:")
+        bodyOf(result) should not include "Sign in"
+      }
+
 
       "return to the login page when the user is not logged in" in new Setup {
         val request = FakeRequest()

@@ -18,6 +18,7 @@ package controllers
 
 import config.ApplicationConfig
 import mocks.service.ErrorHandlerMock
+import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -34,6 +35,9 @@ class BaseControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures wi
   override lazy val app: Application = fakeApplication()
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
+
+  when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+  when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 

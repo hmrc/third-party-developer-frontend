@@ -19,6 +19,7 @@ package views.helper
 import java.util.Locale
 
 import config.ApplicationConfig
+import org.mockito.Mockito.when
 import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -34,6 +35,9 @@ trait CommonViewSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar
   val messagesApi = mcc.messagesApi
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
+
+  when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+  when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

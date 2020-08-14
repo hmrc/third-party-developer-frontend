@@ -23,6 +23,10 @@
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-account")
 
+@theSandbox = @{"the sandbox"}
+@subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
+@subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else subordinateEnvName}
+
 @devMain(
     title = "View all applications",
     userFullName = loggedIn.loggedInName,
@@ -34,14 +38,14 @@
     developerSession = Some(loggedIn)
 ) {
 
-    <h1 class="heading-xlarge">Add an application to the sandbox</h1>
+    <h1 class="heading-xlarge">Add an application to @subordinateWording</h1>
     <p>To start using our RESTful APIs with your application, you'll need to:</p>
     <ol class="list list-number">
         <li>
-            add it to our test environment (sandbox)
+            add it to our test environment (@subordinateEnvName)
         </li>
         <li>
-            choose which sandbox APIs you want to use
+            choose which @subordinateEnvName APIs you want to use
         </li>
         <li>
             get credentials your application needs to interact with our APIs

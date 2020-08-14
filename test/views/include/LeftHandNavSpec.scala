@@ -113,8 +113,6 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
 
     "on the View all applications page" should {
       "render correct wording for default environment config" in new Setup {
-        when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
-        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
         val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
         println(page)
         page.contentType should include("text/html")

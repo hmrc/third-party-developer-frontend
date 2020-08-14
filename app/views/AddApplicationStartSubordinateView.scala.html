@@ -23,9 +23,14 @@
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
-@pageHeading = @{"Add an application to the sandbox"}
+@subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
+@theSandbox = @{"the sandbox"}
+@subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else subordinateEnvName}
+@pageHeading = @{s"Add an application to $subordinateWording"}
 
-@devMain(
+
+
+    @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
@@ -40,12 +45,12 @@
         <h1 class="heading-xlarge">@pageHeading</h1>
     </header>
 
-    <p>Add your application to the sandbox so you can test it.</p>
+    <p>Add your application to @subordinateWording so you can test it.</p>
 
-    <p>Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:</p>
+    <p>Once you add your application and subscribe it to the @subordinateEnvName APIs you want to integrate with you can:</p>
 
     <ul class="list list-bullet">
-        <li>get its sandbox credentials</li>
+        <li>get its @subordinateEnvName credentials</li>
         <li>use its credentials for integration testing</li>
     </ul>
 
