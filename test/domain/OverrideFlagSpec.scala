@@ -18,9 +18,9 @@ package domain
 
 import domain.models.applications.OverrideFlag
 import play.api.libs.json.{JsError, JsString, Json}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class OverrideFlagSpec extends UnitSpec {
+class OverrideFlagSpec extends AsyncHmrcSpec {
 
   "OverrideFlag" should {
     "parse from the new format" in {

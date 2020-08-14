@@ -22,9 +22,6 @@ import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.BDDMockito._
-import org.mockito.Mockito.verify
 import org.scalatest.Assertion
 import play.api.http.Status
 import play.api.http.Status.{BAD_REQUEST, SEE_OTHER}
@@ -33,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import qr.{OtpAuthUri, QRCode}
-import service.{MfaMandateService, MFAResponse, MFAService}
+import service.{MFAResponse, MFAService, MfaMandateService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
@@ -46,6 +43,8 @@ import domain.models.developers.Developer
 import domain.models.developers.LoggedInState
 import domain.models.developers.Session
 import domain.models.connectors.UpdateLoggedInStateRequest
+
+import scala.concurrent.Future.successful
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -97,27 +96,28 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, loggedInState))
 
     def protectAccountRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
-      FakeRequest().
-        withLoggedIn(underTest, implicitly)(sessionId).
-        withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken).
-        withFormUrlEncodedBody("accessCode" -> code)
+      FakeRequest()
+        .withLoggedIn(underTest, implicitly)(sessionId)
+        .withSession("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+        .withFormUrlEncodedBody("accessCode" -> code)
     }
   }
 
   trait SetupUnprotectedAccount extends Setup {
-    given(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier])).
-      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None)))
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier]))
+      .thenReturn(successful(Some(Developer(loggedInUser.email, "Bob", "Smith", None))))
   }
 
   trait SetupProtectedAccount extends Setup {
-    given(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier])).
-      willReturn(Some(Developer(loggedInUser.email, "Bob", "Smith", None, Some(true))))
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier]))
+      .thenReturn(successful(Some(Developer(loggedInUser.email, "Bob", "Smith", None, Some(true)))))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
-    given(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).willReturn(otpUri)
-    given(underTest.qrCode.generateDataImageBase64(otpUri.toString)).willReturn(qrImage)
-    given(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInUser.email))(any[HeaderCarrier])).willReturn(secret)
+    when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).thenReturn(otpUri)
+    when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
+    when(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInUser.email))(any[HeaderCarrier]))
+      .thenReturn(successful(secret))
   }
 
   trait PartLogged extends Setup {
@@ -129,23 +129,19 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait SetupFailedVerification extends Setup {
-    given(underTest.mfaService.enableMfa(any[String], any[String])(any[HeaderCarrier])).
-      willReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.enableMfa(any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    given(underTest.mfaService.enableMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).
-      willReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.enableMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   trait SetupFailedRemoval extends Setup {
-    given(underTest.mfaService.removeMfa(any[String], any[String])(any[HeaderCarrier])).
-      willReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.removeMfa(any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    given(underTest.mfaService.removeMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).
-      willReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.removeMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   "Given a user is not logged in" when {
@@ -154,13 +150,12 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         val invalidSessionId = "notASessionId"
 
-        given(underTest.sessionService.fetch(eqTo(invalidSessionId))(any[HeaderCarrier]))
-          .willReturn(Future.successful(None))
+        when(underTest.sessionService.fetch(eqTo(invalidSessionId))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(None))
 
-        private val request = FakeRequest().
-          withLoggedIn(underTest, implicitly)(invalidSessionId)
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(invalidSessionId)
 
-        private val result = await(underTest.getQrCode()(request))
+        private val result = underTest.getQrCode()(request)
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/login")
@@ -171,13 +166,12 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   "Given a user is part logged in and enabling Mfa" when {
     "getQrCode() is called it" should {
       "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV with PartLogged {
-        private val request = FakeRequest().
-          withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-        private val result = await(underTest.getQrCode()(request))
+        private val result = underTest.getQrCode()(request)
 
         status(result) shouldBe 200
-        private val dom = Jsoup.parse(bodyOf(result))
+        private val dom = Jsoup.parse(contentAsString(result))
         dom.getElementById("secret").html() shouldBe "abcd efgh"
         dom.getElementById("qrCode").attr("src") shouldBe qrImage
       }
@@ -187,13 +181,12 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   "Given a user is logged in" when {
     "getQrCode() is called it" should {
       "return secureAccountSetupPage with secret from third party developer" in new SetupSuccessfulStart2SV with LoggedIn {
-        private val request = FakeRequest().
-          withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-        private val result = await(underTest.getQrCode()(request))
+        private val result = underTest.getQrCode()(request)
 
         status(result) shouldBe 200
-        private val dom = Jsoup.parse(bodyOf(result))
+        private val dom = Jsoup.parse(contentAsString(result))
         dom.getElementById("secret").html() shouldBe "abcd efgh"
         dom.getElementById("qrCode").attr("src") shouldBe qrImage
       }
@@ -201,26 +194,23 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "getProtectAccount() is called it" should {
       "return protect account page for user without MFA enabled" in new SetupUnprotectedAccount with LoggedIn {
-        private val request = FakeRequest().
-          withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-        private val result = await(addToken(underTest.getProtectAccount())(request))
+        private val result = addToken(underTest.getProtectAccount())(request)
 
         status(result) shouldBe OK
-        bodyOf(result) should include("Set up 2-step verification to protect your Developer Hub account and application details from being compromised.")
+        contentAsString(result) should include("Set up 2-step verification to protect your Developer Hub account and application details from being compromised.")
       }
 
       "return protected account page for user with MFA enabled" in new SetupProtectedAccount with LoggedIn {
-        private val request = FakeRequest().
-          withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-        private val result = await(addToken(underTest.getProtectAccount())(request))
+        private val result = addToken(underTest.getProtectAccount())(request)
 
         status(result) shouldBe OK
-        bodyOf(result) should include(
-          "Your Developer Hub account is currently protected with 2-step verification. This is linked to your smartphone or tablet.")
+        contentAsString(result) should include("Your Developer Hub account is currently protected with 2-step verification. This is linked to your smartphone or tablet.")
 
-        bodyOf(result) should include("You must remove 2-step verification before you can add it to a new smartphone or tablet.")
+        contentAsString(result) should include("You must remove 2-step verification before you can add it to a new smartphone or tablet.")
       }
     }
 
@@ -228,7 +218,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       "return error when access code in invalid format" in new SetupSuccessfulStart2SV with LoggedIn {
         private val request = protectAccountRequest("abc")
 
-        private val result = await(addToken(underTest.protectAccount())(request))
+        private val result = addToken(underTest.protectAccount())(request)
 
         status(result) shouldBe BAD_REQUEST
         assertIncludesOneError(result, "You have entered an invalid access code")
@@ -237,7 +227,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       "return error when verification fails" in new SetupFailedVerification with LoggedIn {
         private val request = protectAccountRequest(correctCode)
 
-        private val result = await(addToken(underTest.protectAccount())(request))
+        private val result = addToken(underTest.protectAccount())(request)
 
         status(result) shouldBe BAD_REQUEST
         assertIncludesOneError(result, "You have entered an incorrect access code")
@@ -246,7 +236,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       "redirect to getProtectAccountCompletedAction" in new SetupSuccessfulVerification with LoggedIn {
         private val request = protectAccountRequest(correctCode)
 
-        private val result = await(addToken(underTest.protectAccount())(request))
+        private val result = addToken(underTest.protectAccount())(request)
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ProtectAccount.getProtectAccountCompletedPage().url)
@@ -260,7 +250,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       "return error when totpCode in invalid format" in new SetupSuccessfulRemoval with LoggedIn {
         private val request = protectAccountRequest("abc")
 
-        private val result = await(addToken(underTest.remove2SV())(request))
+        private val result = addToken(underTest.remove2SV())(request)
 
         status(result) shouldBe BAD_REQUEST
         assertIncludesOneError(result, "You have entered an invalid access code")
@@ -269,7 +259,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       "return error when verification fails" in new SetupFailedRemoval with LoggedIn {
         private val request = protectAccountRequest(correctCode)
 
-        private val result = await(addToken(underTest.remove2SV())(request))
+        private val result = addToken(underTest.remove2SV())(request)
 
         assertIncludesOneError(result, "You have entered an incorrect access code")
       }
@@ -277,7 +267,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       "redirect to 2SV removal completed action" in new SetupSuccessfulRemoval with LoggedIn {
         private val request = protectAccountRequest(correctCode)
 
-        private val result = await(addToken(underTest.remove2SV())(request))
+        private val result = addToken(underTest.remove2SV())(request)
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2SVRemovalCompletePage().url)
@@ -288,22 +278,21 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       "they have logged in when MFA is mandated in the future" should {
         "be shown the MFA recommendation with 10 days warning" in new LoggedIn {
 
-          given(underTest.mfaMandateService.showAdminMfaMandatedMessage(any())(any[HeaderCarrier]))
-            .willReturn(Future.successful(true))
+          when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*)(any[HeaderCarrier]))
+            .thenReturn(Future.successful(true))
 
           private val daysInTheFuture = 10
-          given(underTest.mfaMandateService.daysTillAdminMfaMandate)
-            .willReturn(Some(daysInTheFuture))
+          when(underTest.mfaMandateService.daysTillAdminMfaMandate)
+            .thenReturn(Some(daysInTheFuture))
 
-          private val request = FakeRequest().
-            withLoggedIn(underTest, implicitly)(sessionId)
+          private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-          private val result = await(underTest.get2svRecommendationPage()(request))
+          private val result = underTest.get2svRecommendationPage()(request)
 
           status(result) shouldBe OK
 
-          bodyOf(result) should include("Add 2-step verification")
-          bodyOf(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
+          contentAsString(result) should include("Add 2-step verification")
+          contentAsString(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
 
           verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.email))(any[HeaderCarrier])
         }
@@ -312,31 +301,30 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "they have logged in when MFA is mandated yet" should {
       "they have logged in when MFA is mandated is not configured" in new LoggedIn {
-        given(underTest.mfaMandateService.showAdminMfaMandatedMessage(any())(any[HeaderCarrier]))
-          .willReturn(Future.successful(true))
+        when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*)(any[HeaderCarrier]))
+          .thenReturn(Future.successful(true))
 
         private val mfaMandateNotConfigured = None
-        given(underTest.mfaMandateService.daysTillAdminMfaMandate)
-          .willReturn(mfaMandateNotConfigured)
+        when(underTest.mfaMandateService.daysTillAdminMfaMandate)
+          .thenReturn(mfaMandateNotConfigured)
 
-        private val request = FakeRequest().
-          withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-        private val result = await(underTest.get2svRecommendationPage()(request))
+        private val result = underTest.get2svRecommendationPage()(request)
 
         status(result) shouldBe OK
 
-        bodyOf(result) should include("Add 2-step verification")
-        bodyOf(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
+        contentAsString(result) should include("Add 2-step verification")
+        contentAsString(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
 
         verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.email))(any[HeaderCarrier])
       }
     }
   }
 
-  private def assertIncludesOneError(result: Result, message: String): Assertion = {
+  private def assertIncludesOneError(result: Future[Result], message: String): Assertion = {
 
-    val body = bodyOf(result)
+    val body = contentAsString(result)
 
     body should include(message)
     assert(Jsoup.parse(body).getElementsByClass("form-field--error").size == 1)

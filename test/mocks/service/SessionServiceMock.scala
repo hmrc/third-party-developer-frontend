@@ -17,15 +17,13 @@
 package mocks.service
 
 import domain.models.developers.Session
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future.successful
 
-trait SessionServiceMock extends MockitoSugar {
+trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val sessionServiceMock = mock[SessionService]
 
   private def fetchSessionById(sessionId: String, returns: Option[Session]) =

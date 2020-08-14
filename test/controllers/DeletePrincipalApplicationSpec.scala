@@ -22,9 +22,6 @@ import domain.models.connectors.TicketCreated
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.joda.time.DateTime
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.verify
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -78,7 +75,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
 
     fetchSessionByIdReturns(sessionId, session)
     fetchByApplicationIdReturns(application.id, application)
-    given(underTest.applicationService.apisWithSubscriptions(mockEq(application))(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
+    when(underTest.applicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier])).thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest,implicitly)(sessionId).withSession(sessionParams: _*)
@@ -87,10 +84,10 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
   "delete application page" should {
     "return delete application page" in new Setup {
 
-      val result = await(addToken(underTest.deleteApplication(application.id, None))(loggedInRequest))
+      val result = addToken(underTest.deleteApplication(application.id, None))(loggedInRequest)
 
       status(result) shouldBe OK
-      val body = bodyOf(result)
+      val body = contentAsString(result)
 
       body should include("Delete application")
       body should include("Request deletion")
@@ -100,10 +97,10 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
   "delete application confirm page" should {
     "return delete application confirm page" in new Setup {
 
-      val result = await(addToken(underTest.deletePrincipalApplicationConfirm(application.id, None))(loggedInRequest))
+      val result = addToken(underTest.deletePrincipalApplicationConfirm(application.id, None))(loggedInRequest)
 
       status(result) shouldBe OK
-      val body = bodyOf(result)
+      val body = contentAsString(result)
 
       body should include("Delete application")
       body should include("Are you sure you want us to delete this application?")
@@ -116,24 +113,24 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
-      given(underTest.applicationService.requestPrincipalApplicationDeletion(mockEq(loggedInUser), mockEq(application))(any[HeaderCarrier]))
-        .willReturn(Future.successful(TicketCreated))
+      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(loggedInUser), eqTo(application))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(TicketCreated))
 
-      val result = await(addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody))
+      val result = addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody)
 
       status(result) shouldBe OK
-      val body = bodyOf(result)
+      val body = contentAsString(result)
 
       body should include("Delete application")
       body should include("Request submitted")
-      verify(underTest.applicationService).requestPrincipalApplicationDeletion(mockEq(loggedInUser), mockEq(application))(any[HeaderCarrier])
+      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(loggedInUser), eqTo(application))(any[HeaderCarrier])
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No"))
 
-      val result = await(addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody))
+      val result = addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
 
@@ -146,34 +143,34 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       val nonApprovedApplication = aStandardNonApprovedApplication(loggedInUser.email)
 
       fetchByApplicationIdReturns(nonApprovedApplication)
-      given(underTest.applicationService.apisWithSubscriptions(any())(any[HeaderCarrier])).willReturn(successful(Seq.empty[APISubscriptionStatus]))
+      when(underTest.applicationService.apisWithSubscriptions(*)(any[HeaderCarrier])).thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
-      given(underTest.applicationService.requestPrincipalApplicationDeletion(any(), any())(any[HeaderCarrier]))
-        .willReturn(Future.successful(TicketCreated))
+      when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(any[HeaderCarrier]))
+        .thenReturn(Future.successful(TicketCreated))
     }
 
     "deleteApplication action is called" in new UnapprovedApplicationSetup {
-      val result = await(addToken(underTest.deleteApplication(nonApprovedApplication.id, None))(loggedInRequest))
+      val result = addToken(underTest.deleteApplication(nonApprovedApplication.id, None))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
 
     "deletePrincipalApplicationConfirm action is called" in new UnapprovedApplicationSetup {
-      val result = await(addToken(underTest.deletePrincipalApplicationConfirm(nonApprovedApplication.id, None))(loggedInRequest))
+      val result = addToken(underTest.deletePrincipalApplicationConfirm(nonApprovedApplication.id, None))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
 
     "deletePrincipalApplicationAction action is called" in new UnapprovedApplicationSetup {
-      val result = await(addToken(underTest.deletePrincipalApplicationAction(nonApprovedApplication.id))(loggedInRequest))
+      val result = addToken(underTest.deletePrincipalApplicationAction(nonApprovedApplication.id))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
 
     "deleteSubordinateApplicationConfirm action is called" in new UnapprovedApplicationSetup {
-      val result = await(addToken(underTest.deleteSubordinateApplicationConfirm(nonApprovedApplication.id))(loggedInRequest))
+      val result = addToken(underTest.deleteSubordinateApplicationConfirm(nonApprovedApplication.id))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
     
     "deleteSubordinateApplicationAction action is called" in new UnapprovedApplicationSetup {
-      val result = await(addToken(underTest.deleteSubordinateApplicationAction(nonApprovedApplication.id))(loggedInRequest))
+      val result = addToken(underTest.deleteSubordinateApplicationAction(nonApprovedApplication.id))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
   }

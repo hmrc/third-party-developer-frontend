@@ -18,7 +18,6 @@ package views
 
 import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
 import domain.models.developers.LoggedInState
-import io.cucumber.java8.Ro
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
@@ -26,7 +25,6 @@ import utils.ViewHelpers.elementExistsByText
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeleteSubordinateApplicationCompleteView
-
 
 class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -40,10 +38,19 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
       val appId = "1234"
       val clientId = "clientId123"
       val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
-      val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-        access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
-
+      val application = Application(
+        appId,
+        clientId,
+        "App name 1",
+        DateTimeUtils.now,
+        DateTimeUtils.now,
+        None,
+        Environment.SANDBOX,
+        Some("Description 1"),
+        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+        state = ApplicationState.production(loggedInUser.email, ""),
+        access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+      )
 
       val page = deleteSubordinateApplicationCompleteView.render(application, request, loggedInUser, messagesProvider, appConfig)
       page.contentType should include("text/html")

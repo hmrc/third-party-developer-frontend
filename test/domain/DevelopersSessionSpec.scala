@@ -19,9 +19,9 @@ package domain
 import java.util.UUID
 
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class DevelopersSessionSpec extends UnitSpec {
+class DevelopersSessionSpec extends AsyncHmrcSpec {
   val email = "thirdpartydeveloper@example.com"
   val firstName = "John"
   val lastName = "Doe"

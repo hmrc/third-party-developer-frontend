@@ -20,19 +20,14 @@ import config.ApplicationConfig
 import connectors.DeskproConnector
 import controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
-import org.scalatest.Matchers
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DeskproServiceSpec extends UnitSpec with Matchers with MockitoSugar with ScalaFutures {
+class DeskproServiceSpec extends AsyncHmrcSpec {
   val underTest = new DeskproService(
     mock[DeskproConnector],
     mock[ApplicationConfig]

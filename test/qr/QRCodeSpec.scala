@@ -16,9 +16,9 @@
 
 package qr
 
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class QRCodeSpec extends UnitSpec {
+class QRCodeSpec extends AsyncHmrcSpec {
 
   "generateDataImageBase64" should {
     "generate a base64 encoded image of a QR code" in {

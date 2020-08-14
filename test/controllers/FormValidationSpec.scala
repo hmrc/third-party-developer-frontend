@@ -18,9 +18,9 @@ package controllers
 
 import org.scalatest.Matchers
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
-class FormValidationSpec extends UnitSpec with Matchers {
+class FormValidationSpec extends AsyncHmrcSpec with Matchers {
   "ForgotPasswordForm " should {
     val validForgotPasswordForm = Map("emailaddress" -> "john.smith@example.com")
 
@@ -137,7 +137,6 @@ class FormValidationSpec extends UnitSpec with Matchers {
       "confirmpassword" -> "A1@wwwwwwwww"
     )
 
-
     "validate a valid form" in {
       val boundForm = RegistrationForm.form.bind(validRegistrationForm)
       boundForm.errors shouldBe List()
@@ -151,18 +150,21 @@ class FormValidationSpec extends UnitSpec with Matchers {
     }
 
     "validate all fields with error" in {
-      val boundForm = RegistrationForm.form.bind(validRegistrationForm
-        + ("firstname" -> "")
-        + ("lastname" -> "")
-        + ("emailaddress" -> "")
-        + ("password" -> "")
-        + ("confirmpassword" -> ""))
+      val boundForm = RegistrationForm.form.bind(
+        validRegistrationForm
+          + ("firstname" -> "")
+          + ("lastname" -> "")
+          + ("emailaddress" -> "")
+          + ("password" -> "")
+          + ("confirmpassword" -> "")
+      )
       boundForm.errors shouldBe List(
         FormError("firstname", List("firstname.error.required.field")),
         FormError("lastname", List("lastname.error.required.field")),
         FormError("emailaddress", List("emailaddress.error.required.field")),
         FormError("password", List("password.error.not.valid.field")),
-        FormError("password", List("password.error.required.field")))
+        FormError("password", List("password.error.required.field"))
+      )
       boundForm.globalErrors shouldBe List()
     }
 
@@ -221,7 +223,8 @@ class FormValidationSpec extends UnitSpec with Matchers {
       "description" -> "Application description",
       "redirectUris[0]" -> "https://redirect-url.gov.uk",
       "privacyPolicyUrl" -> "http://redirectprivacy-policy.gov.uk",
-      "termsAndConditionsUrl" -> "http://termsandconditions.gov.uk")
+      "termsAndConditionsUrl" -> "http://termsandconditions.gov.uk"
+    )
 
     "validate a valid form" in {
       val boundForm = EditApplicationForm.form.bind(validEditApplicationForm)
@@ -236,39 +239,38 @@ class FormValidationSpec extends UnitSpec with Matchers {
     }
 
     "validate a valid form with empty optional fields" in {
-      val boundForm = EditApplicationForm.form.bind(validEditApplicationForm +
-        ("description" -> "",
+      val boundForm = EditApplicationForm.form.bind(
+        validEditApplicationForm +
+          ("description" -> "",
           "privacyPolicyUrl" -> "",
-          "termsAndConditionsUrl" -> ""))
+          "termsAndConditionsUrl" -> "")
+      )
       boundForm.errors shouldBe List()
       boundForm.globalErrors shouldBe List()
     }
   }
 
   "SubmitApplicationNameForm" should {
-     val validSubmitApplicationNameForm = Map(
-       "applicationId" -> "Application ID",
-       "applicationName" -> "Application name",
-       "originalApplicationName" -> "Application name",
-       "password" -> "A2@wwwwwwwww")
+    val validSubmitApplicationNameForm =
+      Map("applicationId" -> "Application ID", "applicationName" -> "Application name", "originalApplicationName" -> "Application name", "password" -> "A2@wwwwwwwww")
 
-        "validate a valid form" in {
-          val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm)
-          boundForm.errors shouldBe List()
-          boundForm.globalErrors shouldBe List()
-        }
+    "validate a valid form" in {
+      val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm)
+      boundForm.errors shouldBe List()
+      boundForm.globalErrors shouldBe List()
+    }
 
-        "validate name in wrong format and generate error when an name is not valid" in {
-          val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm + ("applicationName" -> "a"))
-          boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.and.characters")))
-          boundForm.globalErrors shouldBe List()
-        }
+    "validate name in wrong format and generate error when an name is not valid" in {
+      val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm + ("applicationName" -> "a"))
+      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.and.characters")))
+      boundForm.globalErrors shouldBe List()
+    }
 
-        "validate password and generate error if empty" in {
-          val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm + ("password" -> ""))
-          boundForm.errors shouldBe List(FormError("password", List("error.required")))
-          boundForm.globalErrors shouldBe List()
-        }
+    "validate password and generate error if empty" in {
+      val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm + ("password" -> ""))
+      boundForm.errors shouldBe List(FormError("password", List("error.required")))
+      boundForm.globalErrors shouldBe List()
+    }
   }
 
   "SignoutSurveyForm" should {
@@ -278,8 +280,7 @@ class FormValidationSpec extends UnitSpec with Matchers {
       boundForm.globalErrors shouldBe List()
     }
 
-    val VALID_FORM: Map[String, String] = Map("rating" -> "", "improvementSuggestions" -> "",
-      "name" -> "", "email" -> "", "isJavascript" -> "false")
+    val VALID_FORM: Map[String, String] = Map("rating" -> "", "improvementSuggestions" -> "", "name" -> "", "email" -> "", "isJavascript" -> "false")
 
     "accept no improvement suggestions and no ratings" in {
       val emptySignoutSurveyForm: Map[String, String] = VALID_FORM
@@ -295,11 +296,10 @@ class FormValidationSpec extends UnitSpec with Matchers {
     }
 
     "accept a rating between 1 and 5 inclusive" in {
-      Seq("1", "2", "3", "4", "5").foreach( x => {
+      Seq("1", "2", "3", "4", "5").foreach(x => {
         val ratingSignoutSurveyForm = VALID_FORM + ("rating" -> x)
         validateNoErrors(ratingSignoutSurveyForm)
-      }
-      )
+      })
     }
 
     "reject an improvement suggestion with more than 2000 charaters" in {
@@ -327,14 +327,13 @@ class FormValidationSpec extends UnitSpec with Matchers {
     }
 
     "reject any rating outside of the 1 to 5 range" in {
-      Seq(("-1", "error.min"), ("0", "error.min"), ("6", "error.max")).foreach(
-        Function.tupled((x: String, err: String) => {
-          val ratingSignoutSurveyForm = VALID_FORM + ("rating" -> x)
-          val boundForm = SignOutSurveyForm.form.bind(ratingSignoutSurveyForm)
-          val error = boundForm.errors.head
-          error.key shouldBe "rating"
-          error.messages shouldBe List(err)
-        }))
+      Seq(("-1", "error.min"), ("0", "error.min"), ("6", "error.max")).foreach(Function.tupled((x: String, err: String) => {
+        val ratingSignoutSurveyForm = VALID_FORM + ("rating" -> x)
+        val boundForm = SignOutSurveyForm.form.bind(ratingSignoutSurveyForm)
+        val error = boundForm.errors.head
+        error.key shouldBe "rating"
+        error.messages shouldBe List(err)
+      }))
     }
   }
 
@@ -345,10 +344,7 @@ class FormValidationSpec extends UnitSpec with Matchers {
       boundForm.globalErrors shouldBe List()
     }
 
-    val VALID_FORM = Map(
-      "fullname" -> "Terry Jones",
-      "emailaddress" -> "test@example.com",
-      "comments" -> "this is fine")
+    val VALID_FORM = Map("fullname" -> "Terry Jones", "emailaddress" -> "test@example.com", "comments" -> "this is fine")
 
     "accept valid form" in {
       validateNoErrors(VALID_FORM)
@@ -415,10 +411,7 @@ class FormValidationSpec extends UnitSpec with Matchers {
       boundForm.globalErrors shouldBe List()
     }
 
-    val VALID_FORM = Map(
-      "firstname" -> "Terry",
-      "lastname" -> "Jones",
-      "organisation" -> "HMRC")
+    val VALID_FORM = Map("firstname" -> "Terry", "lastname" -> "Jones", "organisation" -> "HMRC")
 
     "accept valid form" in {
       validateNoErrors(VALID_FORM)

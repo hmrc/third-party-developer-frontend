@@ -30,6 +30,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html._
+import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -108,28 +109,28 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     "return the page with the user is logged in" in new Setup {
       givenApplicationExists(subordinateApp)
 
-      private val result = await(underTest.addApplicationSuccess(appId)(loggedInRequest))
+      private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
       status(result) shouldBe OK
-      bodyOf(result) should include(loggedInUser.displayedName)
-      bodyOf(result) should include("You can now use its credentials to test with sandbox APIs.")
-      bodyOf(result) should include("Read the guidance on")
-      bodyOf(result) should include("to find out which endpoints to use, creating a test user and types of test data.")
-      bodyOf(result) should not include "Sign in"
+      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include("You can now use its credentials to test with sandbox APIs.")
+      contentAsString(result) should include("Read the guidance on")
+      contentAsString(result) should include("to find out which endpoints to use, creating a test user and types of test data.")
+      contentAsString(result) should not include "Sign in"
     }
 
     "return to the login page when the user is not logged in" in new Setup {
 
       val request = FakeRequest()
 
-      private val result = await(underTest.addApplicationSubordinate()(request))
+      private val result = underTest.addApplicationSubordinate()(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when partly logged" in new Setup {
-      private val result = await(underTest.addApplicationSubordinate()(partLoggedInRequest))
+      private val result = underTest.addApplicationSubordinate()(partLoggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")

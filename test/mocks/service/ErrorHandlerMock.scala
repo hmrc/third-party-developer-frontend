@@ -16,15 +16,13 @@
 
 package mocks.service
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import config.ErrorHandler
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import play.twirl.api.Html
 
-trait ErrorHandlerMock extends MockitoSugar {
+trait ErrorHandlerMock extends MockitoSugar with ArgumentMatchersSugar {
   val mockErrorHandler = mock[ErrorHandler]
-  when(mockErrorHandler.notFoundTemplate(any())).thenReturn(Html(""))
-  when(mockErrorHandler.badRequestTemplate(any())).thenReturn(Html(""))
-  when(mockErrorHandler.forbiddenTemplate(any())).thenReturn(Html(""))
+  when(mockErrorHandler.notFoundTemplate(*)).thenReturn(Html(""))
+  when(mockErrorHandler.badRequestTemplate(*)).thenReturn(Html(""))
+  when(mockErrorHandler.forbiddenTemplate(*)).thenReturn(Html(""))
 }

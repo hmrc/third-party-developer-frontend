@@ -26,14 +26,23 @@ import connectors.ApplicationConnector.{AddClientSecretResponse, DeleteClientSec
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain._
 import domain.models.apidefinitions.{APIIdentifier, APIVersion, VersionSubscription}
-import domain.models.applications.{ApplicationState, ApplicationToken, CheckInformation, ClientSecretRequest, Collaborator, ContactDetails, CreateApplicationRequest, Environment, Invalid, Standard, UpdateApplicationRequest, Valid}
+import domain.models.applications.{
+  ApplicationState,
+  ApplicationToken,
+  CheckInformation,
+  ClientSecretRequest,
+  Collaborator,
+  ContactDetails,
+  CreateApplicationRequest,
+  Environment,
+  Invalid,
+  Standard,
+  UpdateApplicationRequest,
+  Valid
+}
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito
-import org.mockito.Mockito.{verify, when}
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status._
@@ -41,9 +50,9 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 import uk.gov.hmrc.time.DateTimeUtils
-
+import scala.concurrent.Future.{successful,failed}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import domain.models.applications.Role
@@ -54,7 +63,7 @@ import domain.models.apidefinitions.APIStatus
 import domain.models.applications.ClientSecret
 import domain.models.applications.State
 
-class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with MockitoSugar {
+class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   private val applicationId = "applicationId"
   private val baseUrl = "https://example.com"
@@ -140,9 +149,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val applicationId = "applicationId"
       val url = baseUrl + "/application"
 
-      when(mockHttpClient
-        .POST[JsValue, HttpResponse](eqTo(url), eqTo(createApplicationRequestJsValue), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(OK, Some(Json.toJson(applicationResponse(applicationId, "appName"))))))
+      when(
+        mockHttpClient
+          .POST[JsValue, HttpResponse](eqTo(url), eqTo(createApplicationRequestJsValue), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(Future.successful(HttpResponse(OK, Some(Json.toJson(applicationResponse(applicationId, "appName"))))))
 
       val result = await(connector.create(createApplicationRequest))
 
@@ -157,9 +167,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     "successfully update an application" in new Setup {
 
       val url = baseUrl + s"/application/$applicationId"
-      when(mockHttpClient
-        .POST[JsValue, HttpResponse](eqTo(url), eqTo(updateApplicationRequestJsValue), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(
+        mockHttpClient
+          .POST[JsValue, HttpResponse](eqTo(url), eqTo(updateApplicationRequestJsValue), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.update(applicationId, updateApplicationRequest))
 
@@ -170,16 +181,15 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
   "fetch by teamMember email" should {
     val email = "email@email.com"
     val url = baseUrl + "/developer/applications"
-    val applicationResponses = List(
-      applicationResponse("app id 1", "client id 1", "app 1"),
-      applicationResponse("app id 2", "client id 2", "app 2"))
+    val applicationResponses = List(applicationResponse("app id 1", "client id 1", "app 1"), applicationResponse("app id 2", "client id 2", "app 2"))
 
     val response: Seq[String] = Seq("app 1", "app 2")
 
     "return list of applications" in new Setup {
-      when(mockHttpClient
-        .GET[Seq[Application]](eqTo(url), eqTo(Seq("emailAddress" -> email, "environment" -> environmentName)))(any(), any(), any()))
-        .thenReturn(Future.successful(applicationResponses))
+      when(
+        mockHttpClient
+          .GET[Seq[Application]](eqTo(url), eqTo(Seq("emailAddress" -> email, "environment" -> environmentName)))(*, *, *)
+      ).thenReturn(Future.successful(applicationResponses))
 
       val result = await(connector.fetchByTeamMemberEmail(email))
 
@@ -189,8 +199,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "when retry logic is enabled should retry on failure" in new Setup {
       when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[Seq[Application]](eqTo(url), eqTo(Seq("emailAddress" -> email, "environment" -> environmentName)))(any(), any(), any())).thenReturn(
-        Future.failed(new BadRequestException("")),
+      when(mockHttpClient.GET[Seq[Application]](eqTo(url), eqTo(Seq("emailAddress" -> email, "environment" -> environmentName)))(*, *, *)).thenReturn(
+        failed(new BadRequestException("")),
         Future.successful(applicationResponses)
       )
 
@@ -208,7 +218,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     val appName = "app name"
 
     "return an application" in new Setup {
-      when(mockHttpClient.GET[Application](eqTo(url))(any(), any(), any()))
+      when(mockHttpClient.GET[Application](eqTo(url))(*, *, *))
         .thenReturn(Future.successful(applicationResponse(applicationId, "client-id", appName)))
 
       val result = await(connector.fetchApplicationById(applicationId))
@@ -220,8 +230,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return None if the application cannot be found" in new Setup {
 
-      when(mockHttpClient.GET[Application](eqTo(url))(any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(mockHttpClient.GET[Application](eqTo(url))(*, *, *))
+        .thenReturn(failed(new NotFoundException("")))
 
       val result = await(connector.fetchApplicationById(applicationId))
 
@@ -230,8 +240,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "when retry logic is enabled should retry on failure" in new Setup {
       when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[Application](eqTo(url))(any(), any(), any())).thenReturn(
-        Future.failed(new BadRequestException("")),
+      when(mockHttpClient.GET[Application](eqTo(url))(*, *, *)).thenReturn(
+        failed(new BadRequestException("")),
         Future.successful(applicationResponse(applicationId, "client-id", appName))
       )
 
@@ -243,7 +253,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
 
     "when useProxy is enabled returns an application from proxy" in new Setup(proxyEnabled = true) {
-      when(mockProxiedHttpClient.GET[Application](eqTo(url))(any(), any(), any()))
+      when(mockProxiedHttpClient.GET[Application](eqTo(url))(*, *, *))
         .thenReturn(Future.successful(applicationResponse(applicationId, "client-id", appName)))
       when(connector.http).thenReturn(mockProxiedHttpClient)
 
@@ -263,7 +273,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return credentials" in new Setup {
 
-      when(mockHttpClient.GET[ApplicationToken](eqTo(url))(any(), any(), any()))
+      when(mockHttpClient.GET[ApplicationToken](eqTo(url))(*, *, *))
         .thenReturn(Future.successful(tokens))
 
       val result = await(connector.fetchCredentials(applicationId))
@@ -273,8 +283,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
 
-      when(mockHttpClient.GET[ApplicationToken](eqTo(url))(any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(mockHttpClient.GET[ApplicationToken](eqTo(url))(*, *, *))
+        .thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](
         await(connector.fetchCredentials(applicationId))
@@ -283,8 +293,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "when retry logic is enabled should retry on failure" in new Setup {
       when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[ApplicationToken](eqTo(url))(any(), any(), any())).thenReturn(
-        Future.failed(new BadRequestException("")),
+      when(mockHttpClient.GET[ApplicationToken](eqTo(url))(*, *, *)).thenReturn(
+        failed(new BadRequestException("")),
         Future.successful(tokens)
       )
 
@@ -303,7 +313,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return the subscriptions when they are successfully retrieved" in new Setup {
 
-      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(any(), any(), any()))
+      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(*, *, *))
         .thenReturn(Future.successful(subscriptions))
 
       val result = await(connector.fetchSubscriptions(applicationId))
@@ -313,8 +323,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return an empty sequence when an error occurs retrieving the subscriptions" in new Setup {
 
-      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(any(), any(), any()))
-        .thenReturn(Future.failed(upstream500Response))
+      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(*, *, *))
+        .thenReturn(failed(upstream500Response))
 
       val result = await(connector.fetchSubscriptions(applicationId))
 
@@ -323,8 +333,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
 
-      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(*, *, *))
+        .thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](
         await(connector.fetchSubscriptions(applicationId))
@@ -333,8 +343,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "when retry logic is enabled should retry on failure" in new Setup {
       when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(any(), any(), any())).thenReturn(
-        Future.failed(new BadRequestException("")),
+      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(*, *, *)).thenReturn(
+        failed(new BadRequestException("")),
         Future.successful(subscriptions)
       )
 
@@ -351,9 +361,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "subscribe application to an api" in new Setup {
 
-      when(mockHttpClient
-        .POST[APIIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(
+        mockHttpClient
+          .POST[APIIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.subscribeToApi(applicationId, apiIdentifier))
 
@@ -362,9 +373,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
 
-      when(mockHttpClient
-        .POST[APIIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(
+        mockHttpClient
+          .POST[APIIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](
         await(connector.subscribeToApi(applicationId, apiIdentifier))
@@ -390,7 +402,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
 
       when(mockHttpClient.DELETE(url))
-        .thenReturn(Future.failed(new NotFoundException("")))
+        .thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](
         await(connector.unsubscribeFromApi(applicationId, context, version))
@@ -404,7 +416,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return success response in case of a 204 NO CONTENT on backend" in new Setup {
 
-      when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url),any())(any(), any(), any()))
+      when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.verify(verificationCode))
@@ -414,8 +426,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return failure response in case of a 400 on backend" in new Setup {
 
-      when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url),any())(any(), any(), any()))
-        .thenReturn(Future.failed(new BadRequestException("")))
+      when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *))
+        .thenReturn(failed(new BadRequestException("")))
 
       intercept[ApplicationVerificationFailed](
         await(connector.verify(verificationCode))
@@ -432,9 +444,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return success response in case of a 204 NO CONTENT on backend " in new Setup {
 
-      when(mockHttpClient
-        .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(
+        mockHttpClient
+          .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.requestUplift(applicationId, upliftRequest))
 
@@ -443,9 +456,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "return ApplicationAlreadyExistsResponse response in case of a 409 CONFLICT on backend " in new Setup {
 
-      when(mockHttpClient
-        .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.failed(upstream409Response))
+      when(
+        mockHttpClient
+          .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(failed(upstream409Response))
 
       intercept[ApplicationAlreadyExists] {
         await(connector.requestUplift(applicationId, upliftRequest))
@@ -453,9 +467,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
 
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      when(mockHttpClient
-        .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(
+        mockHttpClient
+          .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound] {
         await(connector.requestUplift(applicationId, upliftRequest))
@@ -469,18 +484,20 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     val url = s"$baseUrl/application/$applicationId/check-information"
 
     "return success response in case of a 204 on backend " in new Setup {
-      when(mockHttpClient
-        .POST[JsValue, HttpResponse](eqTo(url), eqTo(Json.toJson(updateRequest)), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(
+        mockHttpClient
+          .POST[JsValue, HttpResponse](eqTo(url), eqTo(Json.toJson(updateRequest)), *)(*, *, *, *)
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.updateApproval(applicationId, updateRequest))
       result shouldEqual ApplicationUpdateSuccessful
     }
 
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      when(mockHttpClient
-        .POST[JsValue, HttpResponse](eqTo(url), eqTo(Json.toJson(updateRequest)), any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(
+        mockHttpClient
+          .POST[JsValue, HttpResponse](eqTo(url), eqTo(Json.toJson(updateRequest)), *)(*, *, *, *)
+      ).thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound] {
         await(connector.updateApproval(applicationId, updateRequest))
@@ -501,9 +518,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     "return success" in new Setup {
       val addTeamMemberResponse = AddTeamMemberResponse(true)
 
-      when(mockHttpClient
-        .POST[AddTeamMemberRequest, HttpResponse](eqTo(url), eqTo(addTeamMemberRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(OK, Some(Json.toJson(addTeamMemberResponse)))))
+      when(
+        mockHttpClient
+          .POST[AddTeamMemberRequest, HttpResponse](eqTo(url), eqTo(addTeamMemberRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(Future.successful(HttpResponse(OK, Some(Json.toJson(addTeamMemberResponse)))))
 
       val result = await(connector.addTeamMember(applicationId, addTeamMemberRequest))
 
@@ -511,9 +529,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
 
     "return teamMember already exists response" in new Setup {
-      when(mockHttpClient
-        .POST[AddTeamMemberRequest, HttpResponse](eqTo(url), eqTo(addTeamMemberRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("409 exception", CONFLICT, CONFLICT)))
+      when(
+        mockHttpClient
+          .POST[AddTeamMemberRequest, HttpResponse](eqTo(url), eqTo(addTeamMemberRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(failed(Upstream4xxResponse("409 exception", CONFLICT, CONFLICT)))
 
       intercept[TeamMemberAlreadyExists] {
         await(connector.addTeamMember(applicationId, addTeamMemberRequest))
@@ -521,9 +540,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
 
     "return application not found response" in new Setup {
-      when(mockHttpClient
-        .POST[AddTeamMemberRequest, HttpResponse](eqTo(url), eqTo(addTeamMemberRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(
+        mockHttpClient
+          .POST[AddTeamMemberRequest, HttpResponse](eqTo(url), eqTo(addTeamMemberRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound] {
         await(connector.addTeamMember(applicationId, addTeamMemberRequest))
@@ -540,26 +560,29 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     val url = s"$baseUrl/application/$applicationId/collaborator/${urlEncode(email)}?$queryParams"
 
     "return success" in new Setup {
-      when(mockHttpClient
-        .DELETE[HttpResponse](eqTo(url),any())(any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(
+        mockHttpClient
+          .DELETE[HttpResponse](eqTo(url), *)(*, *, *)
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail))
       result shouldEqual ApplicationUpdateSuccessful
     }
 
     "return application needs administrator response" in new Setup {
-      when(mockHttpClient
-        .DELETE[HttpResponse](eqTo(url),any())(any(), any(), any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
+      when(
+        mockHttpClient
+          .DELETE[HttpResponse](eqTo(url), *)(*, *, *)
+      ).thenReturn(failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
 
       intercept[ApplicationNeedsAdmin](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
     }
 
     "return application not found response" in new Setup {
-      when(mockHttpClient
-        .DELETE[HttpResponse](eqTo(url),any())(any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(
+        mockHttpClient
+          .DELETE[HttpResponse](eqTo(url), *)(*, *, *)
+      ).thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
     }
@@ -579,14 +602,12 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val newClientSecretValue = UUID.randomUUID().toString
       val newClientSecret = tpaClientSecret(newClientSecretId, Some(newClientSecretValue))
       val response =
-        AddClientSecretResponse(
-          UUID.randomUUID().toString,
-          UUID.randomUUID().toString,
-          List(tpaClientSecret("old-secret-1"), tpaClientSecret("old-secret-2"), newClientSecret))
+        AddClientSecretResponse(UUID.randomUUID().toString, UUID.randomUUID().toString, List(tpaClientSecret("old-secret-1"), tpaClientSecret("old-secret-2"), newClientSecret))
 
-      when(mockHttpClient
-        .POST[ClientSecretRequest, AddClientSecretResponse](eqTo(url), eqTo(clientSecretRequest), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(response))
+      when(
+        mockHttpClient
+          .POST[ClientSecretRequest, AddClientSecretResponse](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(Future.successful(response))
 
       val result = await(connector.addClientSecrets(applicationId, clientSecretRequest))
 
@@ -595,9 +616,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
 
     "throw an ApplicationNotFound exception when the application does not exist" in new Setup {
-      when(mockHttpClient
-        .POST[ClientSecretRequest, ApplicationToken](eqTo(url), eqTo(clientSecretRequest), any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(
+        mockHttpClient
+          .POST[ClientSecretRequest, ApplicationToken](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound] {
         await(connector.addClientSecrets(applicationId, clientSecretRequest))
@@ -605,9 +627,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
 
     "throw a ClientSecretLimitExceeded exception when the max number of client secret has been exceeded" in new Setup {
-      when(mockHttpClient
-        .POST[ClientSecretRequest, ApplicationToken](eqTo(url), eqTo(clientSecretRequest), any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
+      when(
+        mockHttpClient
+          .POST[ClientSecretRequest, ApplicationToken](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
 
       intercept[ClientSecretLimitExceeded] {
         await(connector.addClientSecrets(applicationId, clientSecretRequest))
@@ -623,9 +646,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     val url = s"$baseUrl/application/${applicationId.toString}/client-secret/$clientSecretId"
 
     "delete a client secret" in new Setup {
-      when(mockHttpClient
-        .POST[DeleteClientSecretRequest, HttpResponse](eqTo(url), eqTo(expectedDeleteClientSecretRequest), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(
+        mockHttpClient
+          .POST[DeleteClientSecretRequest, HttpResponse](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
 
@@ -633,9 +657,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
     }
 
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      when(mockHttpClient
-        .POST[DeleteClientSecretRequest, HttpResponse](eqTo(url), eqTo(expectedDeleteClientSecretRequest), any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(
+        mockHttpClient
+          .POST[DeleteClientSecretRequest, HttpResponse](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound] {
         await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
@@ -651,7 +676,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val applicationName = "my valid application name"
       val appId = randomUUID().toString
 
-      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](*, *, *)(*, *, *, *))
         .thenReturn(Future.successful(ApplicationNameValidationResult(None)))
 
       val result = await(connector.validateName(applicationName, Some(appId)))
@@ -661,14 +686,14 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val expectedRequest = ApplicationNameValidationRequest(applicationName, Some(appId))
 
       verify(mockHttpClient)
-        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](eqTo(url), eqTo(expectedRequest), any())(any(), any(), any(), any())
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](eqTo(url), eqTo(expectedRequest), *)(*, *, *, *)
     }
 
     "returns a invalid response" in new Setup {
 
       val applicationName = "my invalid application name"
 
-      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](*, *, *)(*, *, *, *))
         .thenReturn(Future.successful(ApplicationNameValidationResult(Some(Errors(invalidName = true, duplicateName = false)))))
 
       val result = await(connector.validateName(applicationName, None))
@@ -678,9 +703,8 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val expectedRequest = ApplicationNameValidationRequest(applicationName, None)
 
       verify(mockHttpClient)
-        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](eqTo(url), eqTo(expectedRequest), any())(any(), any(), any(), any())
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](eqTo(url), eqTo(expectedRequest), *)(*, *, *, *)
     }
-
 
     "when retry logic is enabled should retry on failure" in new Setup {
       val applicationName = "my valid application name"
@@ -688,9 +712,9 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
       when(mockAppConfig.retryCount).thenReturn(1)
 
-      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](any(), any(), any())(any(), any(), any(), any()))
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](*, *, *)(*, *, *, *))
         .thenReturn(
-          Future.failed(new BadRequestException("")),
+          failed(new BadRequestException("")),
           Future.successful(ApplicationNameValidationResult(None))
         )
 
@@ -701,7 +725,7 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
       val expectedRequest = ApplicationNameValidationRequest(applicationName, Some(appId))
 
       verify(mockHttpClient, Mockito.atLeastOnce)
-        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](eqTo(url), eqTo(expectedRequest), any())(any(), any(), any(), any())
+        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](eqTo(url), eqTo(expectedRequest), *)(*, *, *, *)
     }
   }
 
@@ -728,9 +752,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "successfully delete the application" in new Setup {
 
-      when(mockHttpClient
-        .POSTEmpty[HttpResponse](eqTo(url), any())(any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(
+        mockHttpClient
+          .POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *)
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
       val result = await(connector.deleteApplication(applicationId))
 
@@ -739,9 +764,10 @@ class ThirdPartyApplicationConnectorSpec extends UnitSpec with ScalaFutures with
 
     "throw exception response if error on back end" in new Setup {
 
-      when(mockHttpClient
-        .POSTEmpty[HttpResponse](eqTo(url),any())(any(), any(), any()))
-        .thenReturn(Future.failed(new Exception("error deleting subordinate application")))
+      when(
+        mockHttpClient
+          .POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *)
+      ).thenReturn(failed(new Exception("error deleting subordinate application")))
 
       intercept[Exception] {
         await(connector.deleteApplication(applicationId))

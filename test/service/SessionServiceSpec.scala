@@ -19,19 +19,13 @@ package service
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
 import domain.models.developers.{Developer, LoggedInState, Session, SessionInvalid}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito._
-import org.scalatest.Matchers
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.Future.{failed, successful}
 
-class SessionServiceSpec extends UnitSpec with Matchers  with MockitoSugar with ScalaFutures {
+class SessionServiceSpec extends AsyncHmrcSpec {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -52,9 +46,9 @@ class SessionServiceSpec extends UnitSpec with Matchers  with MockitoSugar with 
   "authenticate" should {
     "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is false" in new Setup {
 
-      given(underTest.mfaMandateService.isMfaMandatedForUser(any())(any())).willReturn(false)
-      given(underTest.thirdPartyDeveloperConnector.authenticate(any())(any()))
-        .willReturn(userAuthenticationResponse)
+      when(underTest.mfaMandateService.isMfaMandatedForUser(*)(*)).thenReturn(successful(false))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
+        .thenReturn(successful(userAuthenticationResponse))
 
       await(underTest.authenticate(email, password)) shouldBe userAuthenticationResponse
 
@@ -63,9 +57,9 @@ class SessionServiceSpec extends UnitSpec with Matchers  with MockitoSugar with 
     }
 
     "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is true" in new Setup {
-      given(underTest.mfaMandateService.isMfaMandatedForUser(any())(any())).willReturn(true)
-      given(underTest.thirdPartyDeveloperConnector.authenticate(any())(any()))
-        .willReturn(userAuthenticationResponse)
+      when(underTest.mfaMandateService.isMfaMandatedForUser(*)(*)).thenReturn(successful(true))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
+        .thenReturn(successful(userAuthenticationResponse))
 
       await(underTest.authenticate(email, password)) shouldBe userAuthenticationResponse
 
@@ -74,8 +68,8 @@ class SessionServiceSpec extends UnitSpec with Matchers  with MockitoSugar with 
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password, mfaMandatedForUser = false)))
-        .willThrow(new RuntimeException)
+      when(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password, mfaMandatedForUser = false)))
+        .thenThrow(new RuntimeException)
 
       intercept[RuntimeException](await(underTest.authenticate(email, password)))
     }
@@ -83,14 +77,14 @@ class SessionServiceSpec extends UnitSpec with Matchers  with MockitoSugar with 
 
   "authenticateTotp" should {
     "return the new session from the connector when the authentication succeeds" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce))).willReturn(session)
+      when(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce))).thenReturn(successful(session))
 
       await(underTest.authenticateTotp(email, totp, nonce)) shouldBe session
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce)))
-        .willThrow(new RuntimeException)
+      when(underTest.thirdPartyDeveloperConnector.authenticateTotp(TotpAuthenticationRequest(email, totp, nonce)))
+        .thenThrow(new RuntimeException)
 
       intercept[RuntimeException](await(underTest.authenticateTotp(email, totp, nonce)))
     }
@@ -98,15 +92,15 @@ class SessionServiceSpec extends UnitSpec with Matchers  with MockitoSugar with 
 
   "fetchUser" should {
     "return the developer when it exists" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
-        .willReturn(session)
+      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
+        .thenReturn(successful(session))
 
       await(underTest.fetch(sessionId)) shouldBe Some(session)
     }
 
     "return None when its does not exist" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
-        .willReturn(Future.failed(new SessionInvalid))
+      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
+        .thenReturn(failed(new SessionInvalid))
 
       private val result = await(underTest.fetch(sessionId))
 
@@ -114,8 +108,8 @@ class SessionServiceSpec extends UnitSpec with Matchers  with MockitoSugar with 
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      given(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
-        .willThrow(new RuntimeException)
+      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
+        .thenThrow(new RuntimeException)
 
       intercept[RuntimeException](await(underTest.fetch(sessionId)))
 

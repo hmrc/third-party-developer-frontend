@@ -22,12 +22,12 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.validation.{Invalid, ValidationError, ValidationResult}
-import uk.gov.hmrc.play.test.UnitSpec
+import utils.AsyncHmrcSpec
 import utils.Generators._
 
 import scala.collection.JavaConverters._
 
-class ValidatorsSpec extends UnitSpec with ScalaCheckPropertyChecks with Matchers {
+class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Matchers {
 
   "firstnameValidator for the field firstname" should {
     val testForm = Form("firstname" -> firstnameValidator)
@@ -36,7 +36,6 @@ class ValidatorsSpec extends UnitSpec with ScalaCheckPropertyChecks with Matcher
       val res = testForm.bind(Map("firstname" -> ""))
       res.errors shouldBe List(FormError("firstname", "firstname.error.required.field"))
     }
-
 
     "generate a field form error 'firstname.error.maxLength.field' when string longer than 30 characters" in {
       val res = testForm.bind(Map("firstname" -> "1234567890123456789012345678901"))
@@ -59,14 +58,13 @@ class ValidatorsSpec extends UnitSpec with ScalaCheckPropertyChecks with Matcher
     }
   }
 
-
   "emailValidator for the field emailaddress" should {
 
     val myForm = Form("emailaddress" -> emailValidator())
 
     "generate a field form error 'emailaddress.error.required.field' when empty string is provided" in {
       val res = myForm.bind(Map("emailaddress" -> ""))
-      res.errors shouldBe List( FormError("emailaddress", "emailaddress.error.required.field"))
+      res.errors shouldBe List(FormError("emailaddress", "emailaddress.error.required.field"))
     }
 
     "generate a field form error 'emailaddress.error.not.valid.field' when an invalid email is provided" in {
@@ -92,15 +90,17 @@ class ValidatorsSpec extends UnitSpec with ScalaCheckPropertyChecks with Matcher
 
   "password validation" should {
     val requiredCharacters: Gen[Seq[Char]] =
-      Gen.sequence(Seq(asciiLower, asciiUpper, asciiDigit, asciiSpecial))
+      Gen
+        .sequence(Seq(asciiLower, asciiUpper, asciiDigit, asciiSpecial))
         .map(_.asScala.toSeq)
 
-    def passwordPaddedToLength(n: Int) = for {
-      required <- requiredCharacters
-      padding <- Gen.listOfN(n - required.length, asciiPrintable)
-      padded = required ++ padding
-      shuffled <- shuffle(padded)
-    } yield shuffled.mkString
+    def passwordPaddedToLength(n: Int) =
+      for {
+        required <- requiredCharacters
+        padding <- Gen.listOfN(n - required.length, asciiPrintable)
+        padded = required ++ padding
+        shuffled <- shuffle(padded)
+      } yield shuffled.mkString
 
     val password =
       Gen.choose(12, 1000).flatMap(passwordPaddedToLength)
@@ -144,7 +144,7 @@ class ValidatorsSpec extends UnitSpec with ScalaCheckPropertyChecks with Matcher
 
       res match {
         case v: Invalid => v.errors shouldBe List(ValidationError("password.error.no.match.global"))
-        case _ => fail("passwords matching validation should have failed")
+        case _          => fail("passwords matching validation should have failed")
       }
     }
 
@@ -153,7 +153,7 @@ class ValidatorsSpec extends UnitSpec with ScalaCheckPropertyChecks with Matcher
 
       res match {
         case v: Invalid => v.errors shouldBe List(ValidationError("password.error.no.match.global"))
-        case _ => fail("passwords matching validation should have failed")
+        case _          => fail("passwords matching validation should have failed")
       }
     }
 
@@ -162,7 +162,7 @@ class ValidatorsSpec extends UnitSpec with ScalaCheckPropertyChecks with Matcher
 
       res match {
         case v: Invalid => v.errors shouldBe List(ValidationError("password.error.no.match.global"))
-        case _ => fail("passwords matching validation should have failed")
+        case _          => fail("passwords matching validation should have failed")
       }
     }
 
@@ -171,7 +171,7 @@ class ValidatorsSpec extends UnitSpec with ScalaCheckPropertyChecks with Matcher
 
       res match {
         case v: Invalid => fail("passwords matching validation should have succeeded")
-        case _ =>
+        case _          =>
       }
     }
   }
