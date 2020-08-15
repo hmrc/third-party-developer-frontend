@@ -19,7 +19,7 @@ package controllers
 import domain.models.apidefinitions.{APIAccess, APIAccessType, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.apidefinitions.APIStatus.{BETA, STABLE}
 import utils.AsyncHmrcSpec
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSugar {
 

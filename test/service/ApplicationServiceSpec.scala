@@ -121,7 +121,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
     }
   }
 
-  def version(version: String, status: APIStatus, subscribed: Boolean): VersionSubscription =
+  def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
 
   def api(name: String, context: String, requiresTrust: Option[Boolean], versions: VersionSubscription*): APISubscription =
@@ -141,7 +141,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       clientId: String,
       name: String,
       context: ApiContext,
-      version: String,
+      version: ApiVersion,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false
@@ -161,7 +161,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       clientId: String,
       name: String,
       context: String,
-      version: String,
+      apiVersion: ApiVersion,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,

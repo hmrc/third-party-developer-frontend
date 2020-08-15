@@ -29,7 +29,7 @@ import utils.WithCSRFAddToken
 import utils.ViewHelpers.elementExistsByText
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken {
   val request = FakeRequest().withCSRFToken

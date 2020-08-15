@@ -29,7 +29,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.SubscriptionsGroup
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with SubscriptionsBuilder {
   implicit val request = FakeRequest().withCSRFToken

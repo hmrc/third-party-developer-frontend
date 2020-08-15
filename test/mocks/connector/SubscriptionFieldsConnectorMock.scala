@@ -22,12 +22,12 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 trait SubscriptionFieldsConnectorMock extends MockitoSugar with ArgumentMatchersSugar {
   val mockSubscriptionFieldsConnector = mock[AbstractSubscriptionFieldsConnector]
 
-  def fetchFieldValuesReturns(clientId: String, context: ApiContext, version: String)(toReturn: Seq[SubscriptionFieldValue]): Unit =
+  def fetchFieldValuesReturns(clientId: String, context: ApiContext, version: ApiVersion)(toReturn: Seq[SubscriptionFieldValue]): Unit =
     when(mockSubscriptionFieldsConnector.fetchFieldValues(eqTo(clientId), eqTo(context), eqTo(version))(any[HeaderCarrier]))
       .thenReturn(Future.successful(toReturn))
 }

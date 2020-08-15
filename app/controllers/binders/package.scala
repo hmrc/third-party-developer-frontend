@@ -19,7 +19,7 @@ package controllers
 import domain.models.applications.Environment
 import domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
 import play.api.mvc.PathBindable
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import play.api.mvc.QueryStringBindable
 
 package object binders {
@@ -40,7 +40,7 @@ package object binders {
       } yield {
         context match {
           case Right(context) => Right(ApiContext(context))
-          case _                        => Left("Unable to bind an api context")
+          case _              => Left("Unable to bind an api context")
         }
       }
     }
@@ -49,7 +49,32 @@ package object binders {
     }
   }
 
-  
+  implicit def apiVersionPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiVersion] = new PathBindable[ApiVersion] {
+    override def bind(key: String, value: String): Either[String, ApiVersion] = {
+      textBinder.bind(key, value).map(ApiVersion(_))
+    }
+
+    override def unbind(key: String, apiVersion: ApiVersion): String = {
+      apiVersion.value
+    }
+  }
+
+  implicit def apiVersionQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[ApiVersion] {
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, ApiVersion]] = {
+      for {
+        version <- textBinder.bind("version", params)
+      } yield {
+        version match {
+          case Right(version) => Right(ApiVersion(version))
+          case _              => Left("Unable to bind an api version")
+        }
+      }
+    }
+    override def unbind(key: String, version: ApiVersion): String = {
+      textBinder.unbind("version", version.value)
+    }
+  }
+
   implicit def environmentPathBinder(implicit textBinder: PathBindable[String]): PathBindable[Environment] = new PathBindable[Environment] {
     override def bind(key: String, value: String): Either[String, Environment] = {
       for {

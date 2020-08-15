@@ -37,7 +37,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 @Singleton
 class ApplicationService @Inject() (
@@ -102,7 +102,7 @@ class ApplicationService @Inject() (
     } yield apiVersions
   }
 
-  def subscribeToApi(application: Application, context: ApiContext, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def subscribeToApi(application: Application, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val connectors = connectorWrapper.forEnvironment(application.deployedTo)
 
     val apiIdentifier = ApiIdentifier(context, version)
@@ -139,12 +139,12 @@ class ApplicationService @Inject() (
       .flatMap(_ => subscribeResponse)
   }
 
-  def unsubscribeFromApi(application: Application, context: ApiContext, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def unsubscribeFromApi(application: Application, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val connectors = connectorWrapper.forEnvironment(application.deployedTo)
     connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, context, version)
   }
 
-  def isSubscribedToApi(application: Application, apiName: String, apiContext: ApiContext, apiVersion: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def isSubscribedToApi(application: Application, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val thirdPartyAppConnector = connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
     for {
@@ -347,7 +347,7 @@ object ApplicationService {
     def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]]
     def fetchSubscriptions(id: String)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]]
     def subscribeToApi(applicationId: String, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
-    def unsubscribeFromApi(applicationId: String, context: ApiContext, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def unsubscribeFromApi(applicationId: String, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationToken]
     def requestUplift(applicationId: String, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful]
     def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse]

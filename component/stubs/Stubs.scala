@@ -31,7 +31,7 @@ import play.api.Logger
 import play.api.libs.json.{Json, Writes}
 import play.api.http.Status._
 import domain.models.apidefinitions.ApiIdentifier
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 object Stubs {
 
@@ -129,14 +129,14 @@ object ApplicationStub {
     )
   }
 
-  def setUpDeleteSubscription(id: String, api: String, version: String, status: Int) = {
+  def setUpDeleteSubscription(id: String, api: String, version: ApiVersion, status: Int) = {
     stubFor(
-      delete(urlEqualTo(s"/application/$id/subscription?context=$api&version=$version"))
+      delete(urlEqualTo(s"/application/$id/subscription?context=$api&version=${version.value}"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def setUpExecuteSubscription(id: String, api: String, version: String, status: Int) = {
+  def setUpExecuteSubscription(id: String, api: String, version: ApiVersion, status: Int) = {
     stubFor(
       post(urlEqualTo(s"/application/$id/subscription"))
         .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(ApiContext(api), version)).toString()))
@@ -218,22 +218,22 @@ object AuditStub extends Matchers {
 
 object ApiSubscriptionFieldsStub {
 
-  def setUpDeleteSubscriptionFields(clientId: String, apiContext: ApiContext, apiVersion: String) = {
+  def setUpDeleteSubscriptionFields(clientId: String, apiContext: ApiContext, apiVersion: ApiVersion) = {
     stubFor(
       delete(urlEqualTo(fieldValuesUrl(clientId, apiContext, apiVersion)))
         .willReturn(aResponse().withStatus(NO_CONTENT))
     )
   }
 
-  private def fieldValuesUrl(clientId: String, apiContext: ApiContext, apiVersion: String) = {
+  private def fieldValuesUrl(clientId: String, apiContext: ApiContext, apiVersion: ApiVersion) = {
     s"/field/application/$clientId/context/${apiContext.value}/version/$apiVersion"
   }
 
-  def noSubscriptionFields(apiContext: ApiContext, version: String): Any = {
+  def noSubscriptionFields(apiContext: ApiContext, version: ApiVersion): Any = {
     stubFor(get(urlEqualTo(fieldDefinitionsUrl(apiContext, version))).willReturn(aResponse().withStatus(NOT_FOUND)))
   }
 
-  private def fieldDefinitionsUrl(apiContext: ApiContext, version: String) = {
+  private def fieldDefinitionsUrl(apiContext: ApiContext, version: ApiVersion) = {
     s"/definition/context/${apiContext.value}/version/$version"
   }
 }

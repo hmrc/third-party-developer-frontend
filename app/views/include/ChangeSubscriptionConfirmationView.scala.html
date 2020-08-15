@@ -16,13 +16,13 @@
 
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
-@import domain.models.apidefinitions.ApiContext
+@import domain.models.apidefinitions.{ApiContext, ApiVersion}
 @import model.{ApplicationViewModel, Crumb}
 @import include._
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
-@(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: ApiContext, version: String, subscribed: Boolean, redirectTo: String)(
+@(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: ApiContext, version: ApiVersion, subscribed: Boolean, redirectTo: String)(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messagesProvider: MessagesProvider,

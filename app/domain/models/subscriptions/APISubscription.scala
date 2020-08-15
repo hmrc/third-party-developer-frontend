@@ -17,6 +17,13 @@
 package domain.models.subscriptions
 
 import domain.models.apidefinitions.VersionSubscription
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
-case class APISubscription(name: String, serviceName: String, context: ApiContext, versions: Seq[VersionSubscription], requiresTrust: Option[Boolean], isTestSupport: Boolean = false)
+case class APISubscription(
+    name: String,
+    serviceName: String,
+    context: ApiContext,
+    versions: Seq[VersionSubscription],
+    requiresTrust: Option[Boolean],
+    isTestSupport: Boolean = false
+)

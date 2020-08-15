@@ -30,12 +30,12 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
   val apiContext: ApiContext = ApiContext("sub-ser-test")
-  val apiVersion: String = "1.0"
+  val apiVersion: ApiVersion = "1.0"
   val applicationName: String = "third-party-application"
   val applicationId: String = "application-id"
   val clientId = "clientId"

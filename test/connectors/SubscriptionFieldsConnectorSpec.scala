@@ -35,7 +35,7 @@ import builder.SubscriptionsBuilder
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.applications.Environment
 import domain.models.subscriptions.AccessRequirements
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   def fields(tpl: (String, String)*): Map[String, String] =

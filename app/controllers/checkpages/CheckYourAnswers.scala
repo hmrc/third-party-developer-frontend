@@ -42,26 +42,26 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
-                                 val applicationCheck: ApplicationCheck,
-                                 val sessionService: SessionService,
-                                 val errorHandler: ErrorHandler,
-                                 mcc: MessagesControllerComponents,
-                                 val cookieSigner : CookieSigner,
-                                 checkYourAnswersView: CheckYourAnswersView,
-                                 landingPageView: LandingPageView,
-                                 teamView: TeamView,
-                                 teamMemberAddView: TeamMemberAddView,
-                                 teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView,
-                                 val termsOfUseView: TermsOfUseView,
-                                 val confirmNameView: ConfirmNameView,
-                                 val termsAndConditionsView: TermsAndConditionsView,
-                                 val privacyPolicyView: PrivacyPolicyView,
-                                 val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
-                                 val contactDetailsView: ContactDetailsView
-                                )
-                                (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc)
+class CheckYourAnswers @Inject() (
+    val applicationService: ApplicationService,
+    val applicationCheck: ApplicationCheck,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    checkYourAnswersView: CheckYourAnswersView,
+    landingPageView: LandingPageView,
+    teamView: TeamView,
+    teamMemberAddView: TeamMemberAddView,
+    teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView,
+    val termsOfUseView: TermsOfUseView,
+    val confirmNameView: ConfirmNameView,
+    val termsAndConditionsView: TermsAndConditionsView,
+    val privacyPolicyView: PrivacyPolicyView,
+    val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
+    val contactDetailsView: ContactDetailsView
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends ApplicationController(mcc)
     with ApplicationHelper
     with CanUseCheckActions
     with ConfirmNamePartialController
@@ -105,12 +105,9 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
       }
   }
 
-  def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    Future.successful(Ok(teamView(request.application, request.role, request.user)))
-  }
+  def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request => Future.successful(Ok(teamView(request.application, request.role, request.user))) }
 
   def teamAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
       _ <- applicationService.updateCheckInformation(request.application, information.copy(teamConfirmed = true))
@@ -122,13 +119,15 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
   }
 
   def teamMemberRemoveConfirmation(appId: String, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    successful(request.application.findCollaboratorByHash(teamMemberHash)
-      .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.user, collaborator.emailAddress)))
-      .getOrElse(Redirect(routes.CheckYourAnswers.team(appId))))
+    successful(
+      request.application
+        .findCollaboratorByHash(teamMemberHash)
+        .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.user, collaborator.emailAddress)))
+        .getOrElse(Redirect(routes.CheckYourAnswers.team(appId)))
+    )
   }
 
   def teamMemberRemoveAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
       applicationService
         .removeTeamMember(request.application, form.email, request.user.email)
@@ -160,25 +159,25 @@ class CheckYourAnswers @Inject()(val applicationService: ApplicationService,
 }
 
 case class CheckYourSubscriptionData(
-  name: String,
-  apiContext: ApiContext,
-  apiVersion: String,
-  displayedStatus:String,
-  fields: Seq[FieldValue]
+    name: String,
+    apiContext: ApiContext,
+    apiVersion: ApiVersion,
+    displayedStatus: String,
+    fields: Seq[FieldValue]
 )
 
 case class CheckYourAnswersData(
-                                 appId: String,
-                                 softwareName: String,
-                                 fullName: Option[String],
-                                 email: Option[String],
-                                 telephoneNumber: Option[String],
-                                 teamMembers: Set[String],
-                                 privacyPolicyUrl: Option[String],
-                                 termsAndConditionsUrl: Option[String],
-                                 acceptedTermsOfUse: Boolean,
-                                 subscriptions: Seq[CheckYourSubscriptionData]
-                               )
+    appId: String,
+    softwareName: String,
+    fullName: Option[String],
+    email: Option[String],
+    telephoneNumber: Option[String],
+    teamMembers: Set[String],
+    privacyPolicyUrl: Option[String],
+    termsAndConditionsUrl: Option[String],
+    acceptedTermsOfUse: Boolean,
+    subscriptions: Seq[CheckYourSubscriptionData]
+)
 
 object CheckYourAnswersData {
   def apply(application: Application, subs: Seq[APISubscriptionStatus]): CheckYourAnswersData = {
@@ -197,13 +196,10 @@ object CheckYourAnswersData {
     CheckYourAnswersData(
       appId = application.id,
       softwareName = application.name,
-
       fullName = contactDetails.map(_.fullname),
       email = contactDetails.map(_.email),
       telephoneNumber = contactDetails.map(_.telephoneNumber),
-
       teamMembers = application.collaborators.map(_.emailAddress),
-
       privacyPolicyUrl = application.privacyPolicyUrl,
       termsAndConditionsUrl = application.termsAndConditionsUrl,
       acceptedTermsOfUse = application.checkInformation.fold(false)(_.termsOfUseAgreements.nonEmpty),
@@ -218,11 +214,10 @@ object CheckYourAnswersForm {
   import play.api.data.Forms.{ignored, mapping}
 
   def form: Form[DummyCheckYourAnswersForm] = {
-    Form(mapping(
-      "dummy" -> ignored("dummy")
-    )
-    (DummyCheckYourAnswersForm.apply)
-    (DummyCheckYourAnswersForm.unapply)
+    Form(
+      mapping(
+        "dummy" -> ignored("dummy")
+      )(DummyCheckYourAnswersForm.apply)(DummyCheckYourAnswersForm.unapply)
     )
   }
 }

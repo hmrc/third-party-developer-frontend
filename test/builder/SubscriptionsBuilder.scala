@@ -20,7 +20,7 @@ import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersio
 import domain.models.applications.Application
 import domain.models.subscriptions.{AccessRequirements, APISubscription}
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 trait SubscriptionsBuilder {
 
@@ -38,7 +38,7 @@ trait SubscriptionsBuilder {
     APISubscriptionStatus(name, s"serviceName-$name", contextName, version, subscribed = true, requiresTrust = false, fields = f, isTestSupport = false)
   }
 
-  def emptySubscriptionFieldsWrapper(applicationId: String, clientId: String, context: ApiContext, version: String) = {
+  def emptySubscriptionFieldsWrapper(applicationId: String, clientId: String, context: ApiContext, version: ApiVersion) = {
     SubscriptionFieldsWrapper(applicationId, clientId, context, version, Seq.empty)
   }
 

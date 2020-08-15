@@ -51,7 +51,7 @@ import domain.ApplicationNotFound
 import domain.ApplicationUpliftSuccessful
 import domain.ApplicationAlreadyExists
 import domain.ClientSecretLimitExceeded
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
@@ -72,51 +72,46 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   val api = API("third-party-application")
 
   def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application", Json.toJson(request), Seq(CONTENT_TYPE -> JSON)) map { result =>
-      ApplicationCreatedResponse((result.json \ "id").as[String])
-    }
+    http.POST(s"$serviceBaseUrl/application", Json.toJson(request), Seq(CONTENT_TYPE -> JSON)) map { result => ApplicationCreatedResponse((result.json \ "id").as[String]) }
   }
 
   def update(applicationId: String, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/$applicationId", Json.toJson(request), Seq(CONTENT_TYPE -> JSON)) map { _ =>
-      ApplicationUpdateSuccessful
-    }
+    http.POST(s"$serviceBaseUrl/application/$applicationId", Json.toJson(request), Seq(CONTENT_TYPE -> JSON)) map { _ => ApplicationUpdateSuccessful }
   }
 
   def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
-    if(isEnabled) {
+    if (isEnabled) {
       metrics.record(api) {
         retry {
-        val url = s"$serviceBaseUrl/developer/applications"
+          val url = s"$serviceBaseUrl/developer/applications"
 
-        Logger.debug(s"fetchByTeamMemberEmail() - About to call $url for $email in ${environment.toString}")
+          Logger.debug(s"fetchByTeamMemberEmail() - About to call $url for $email in ${environment.toString}")
 
-        http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
-          .andThen {
-          case Success(_) =>
-          Logger.debug(s"fetchByTeamMemberEmail() - done call to $url for $email in ${environment.toString}")
-          case _ =>
-          Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
+          http
+            .GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
+            .andThen {
+              case Success(_) =>
+                Logger.debug(s"fetchByTeamMemberEmail() - done call to $url for $email in ${environment.toString}")
+              case _ =>
+                Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
+            }
         }
       }
+    } else {
+      Future.successful(Seq.empty)
     }
-  }
-  else {
-    Future.successful(Seq.empty)
-  }
 
   def addTeamMember(applicationId: String, teamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse] = metrics.record(api) {
-      http.POST(s"$serviceBaseUrl/application/$applicationId/collaborator", teamMember, Seq(CONTENT_TYPE -> JSON)) map { result =>
-    result.json.as[AddTeamMemberResponse]
-  } recover {
-    case e: Upstream4xxResponse if e.upstreamResponseCode == 409 => throw new TeamMemberAlreadyExists
+    http.POST(s"$serviceBaseUrl/application/$applicationId/collaborator", teamMember, Seq(CONTENT_TYPE -> JSON)) map { result =>
+      result.json.as[AddTeamMemberResponse]
+    } recover {
+      case e: Upstream4xxResponse if e.upstreamResponseCode == 409 => throw new TeamMemberAlreadyExists
     } recover recovery
   }
 
-  def removeTeamMember(applicationId: String,
-                       teamMemberToDelete: String,
-                       requestingEmail: String,
-                       adminsToEmail: Seq[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+  def removeTeamMember(applicationId: String, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Seq[String])(
+      implicit hc: HeaderCarrier
+  ): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     val url = s"$serviceBaseUrl/application/$applicationId/collaborator/${urlEncode(teamMemberToDelete)}" +
       s"?admin=${urlEncode(requestingEmail)}&adminsToEmail=${urlEncode(adminsToEmail.mkString(","))}"
     http.DELETE(url) map { _ =>
@@ -127,7 +122,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] =
-    if(isEnabled) {
+    if (isEnabled) {
       metrics.record(api) {
         retry {
           http.GET[Application](s"$serviceBaseUrl/application/$id") map {
@@ -137,35 +132,31 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
           }
         }
       }
-    }
-    else {
+    } else {
       Future.successful(None)
     }
 
   def fetchSubscriptions(id: String)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]] =
-    if(isEnabled) {
+    if (isEnabled) {
       metrics.record(api) {
         retry {
           http.GET[Seq[APISubscription]](s"$serviceBaseUrl/application/$id/subscription") recover {
             case _: Upstream5xxResponse => Seq.empty
-            case _: NotFoundException => throw new ApplicationNotFound
+            case _: NotFoundException   => throw new ApplicationNotFound
           }
         }
       }
-    }
-    else {
+    } else {
       Future.successful(Seq.empty)
     }
 
-  def subscribeToApi(applicationId: String,
-                     apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+  def subscribeToApi(applicationId: String, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST(s"$serviceBaseUrl/application/$applicationId/subscription", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
   }
 
-  def unsubscribeFromApi(applicationId: String,
-                         context: ApiContext, version: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+  def unsubscribeFromApi(applicationId: String, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.DELETE(s"$serviceBaseUrl/application/$applicationId/subscription?context=$context&version=$version") map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
@@ -177,33 +168,29 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
   }
 
-  def requestUplift(applicationId: String,
-                    upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/$applicationId/request-uplift", upliftRequest, Seq(CONTENT_TYPE -> JSON)) map {
-      _ => ApplicationUpliftSuccessful
+  def requestUplift(applicationId: String, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
+    http.POST(s"$serviceBaseUrl/application/$applicationId/request-uplift", upliftRequest, Seq(CONTENT_TYPE -> JSON)) map { _ =>
+      ApplicationUpliftSuccessful
     } recover {
       case e: Upstream4xxResponse if e.upstreamResponseCode == 409 => throw new ApplicationAlreadyExists
     } recover recovery
   }
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
-    http.POSTEmpty(s"$serviceBaseUrl/verify-uplift/$verificationCode") map {
-      _ => ApplicationVerificationSuccessful
+    http.POSTEmpty(s"$serviceBaseUrl/verify-uplift/$verificationCode") map { _ =>
+      ApplicationVerificationSuccessful
     } recover {
       case _: BadRequestException => ApplicationVerificationFailed
     } recover recovery
   }
 
-  def updateApproval(id: String,
-                     approvalInformation: CheckInformation)
-                    (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/$id/check-information", Json.toJson(approvalInformation)) map {
-      _ => ApplicationUpdateSuccessful
+  def updateApproval(id: String, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+    http.POST(s"$serviceBaseUrl/application/$id/check-information", Json.toJson(approvalInformation)) map { _ =>
+      ApplicationUpdateSuccessful
     } recover recovery
   }
 
-  def addClientSecrets(id: String,
-                       clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
+  def addClientSecrets(id: String, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
     import ApplicationConnector.JsonFormatters._
 
     http.POST[ClientSecretRequest, AddClientSecretResponse](s"$serviceBaseUrl/application/$id/client-secret", clientSecretRequest) map { response =>
@@ -216,15 +203,14 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } recover recovery
   }
 
-  def deleteClientSecret(applicationId: UUID,
-                         clientSecretId: String,
-                         actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    import ApplicationConnector.JsonFormatters._
+  def deleteClientSecret(applicationId: UUID, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
+    metrics.record(api) {
+      import ApplicationConnector.JsonFormatters._
 
-    http.POST(s"$serviceBaseUrl/application/${applicationId.toString}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
-      ApplicationUpdateSuccessful
-    } recover recovery
-  }
+      http.POST(s"$serviceBaseUrl/application/${applicationId.toString}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
+        ApplicationUpdateSuccessful
+      } recover recovery
+    }
 
   def validateName(name: String, selfApplicationId: Option[String])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
     val body = ApplicationNameValidationRequest(name, selfApplicationId)
@@ -245,11 +231,14 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def deleteApplication(applicationId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete")
-      .map(response => response.status match {
-        case NO_CONTENT => ()
-        case _ => throw new Exception("error deleting subordinate application")
-      })
+    http
+      .POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/$applicationId/delete")
+      .map(response =>
+        response.status match {
+          case NO_CONTENT => ()
+          case _          => throw new Exception("error deleting subordinate application")
+        }
+      )
   }
 }
 
@@ -264,7 +253,6 @@ object ApplicationConnector {
   private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
   private[connectors] case class DeleteClientSecretRequest(actorEmailAddress: String)
 
-
   object JsonFormatters {
     import play.api.libs.json.JodaReads._
     import play.api.libs.json.JodaWrites._
@@ -276,13 +264,15 @@ object ApplicationConnector {
 }
 
 @Singleton
-class ThirdPartyApplicationSandboxConnector @Inject()(val httpClient: HttpClient,
-                                                      val proxiedHttpClient: ProxiedHttpClient,
-                                                      val actorSystem: ActorSystem,
-                                                      val futureTimeout: FutureTimeoutSupport,
-                                                      val appConfig: ApplicationConfig,
-                                                      val metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
-  extends ThirdPartyApplicationConnector(appConfig, metrics) {
+class ThirdPartyApplicationSandboxConnector @Inject() (
+    val httpClient: HttpClient,
+    val proxiedHttpClient: ProxiedHttpClient,
+    val actorSystem: ActorSystem,
+    val futureTimeout: FutureTimeoutSupport,
+    val appConfig: ApplicationConfig,
+    val metrics: ConnectorMetrics
+)(implicit val ec: ExecutionContext)
+    extends ThirdPartyApplicationConnector(appConfig, metrics) {
 
   val environment = Environment.SANDBOX
   val serviceBaseUrl = appConfig.thirdPartyApplicationSandboxUrl
@@ -294,13 +284,15 @@ class ThirdPartyApplicationSandboxConnector @Inject()(val httpClient: HttpClient
 }
 
 @Singleton
-class ThirdPartyApplicationProductionConnector @Inject()(val httpClient: HttpClient,
-                                                         val proxiedHttpClient: ProxiedHttpClient,
-                                                         val actorSystem: ActorSystem,
-                                                         val futureTimeout: FutureTimeoutSupport,
-                                                         val appConfig: ApplicationConfig,
-                                                         val metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
-  extends ThirdPartyApplicationConnector(appConfig, metrics) {
+class ThirdPartyApplicationProductionConnector @Inject() (
+    val httpClient: HttpClient,
+    val proxiedHttpClient: ProxiedHttpClient,
+    val actorSystem: ActorSystem,
+    val futureTimeout: FutureTimeoutSupport,
+    val appConfig: ApplicationConfig,
+    val metrics: ConnectorMetrics
+)(implicit val ec: ExecutionContext)
+    extends ThirdPartyApplicationConnector(appConfig, metrics) {
 
   val environment = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl

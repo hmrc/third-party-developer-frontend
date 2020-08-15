@@ -24,28 +24,22 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import domain.models.apidefinitions.ApiVersion
 
 @Singleton
-class SubscriptionsService @Inject()(deskproConnector: DeskproConnector,
-                                     auditService: AuditService) {
+class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, auditService: AuditService) {
 
-  private def doRequest(requester: DeveloperSession, application: Application, apiName: String, apiVersion: String)
-                       (f: (String, String, String, String, String, String) => DeskproTicket)
-                       (implicit hc: HeaderCarrier) = {
-    f(requester.displayedName, requester.email, application.name, application.id, apiName, apiVersion)
+  private def doRequest(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(
+      f: (String, String, String, String, String, String) => DeskproTicket
+  )(implicit hc: HeaderCarrier) = {
+    f(requester.displayedName, requester.email, application.name, application.id, apiName, apiVersion.value)
   }
 
-  def requestApiSubscription(requester: DeveloperSession,
-                             application: Application,
-                             apiName: String,
-                             apiVersion: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestApiSubscription(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     deskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiSubscribe))
   }
 
-  def requestApiUnsubscribe(requester: DeveloperSession,
-                            application: Application,
-                            apiName: String,
-                            apiVersion: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestApiUnsubscribe(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     deskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiUnsubscribe))
   }
 }

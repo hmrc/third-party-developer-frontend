@@ -40,10 +40,10 @@ import scala.concurrent.Future.successful
 import domain.models.applications.ApplicationToken
 import domain.models.connectors.TicketResult
 import domain.models.applications.ClientSecret
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 import scala.concurrent.Future
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 

@@ -27,7 +27,7 @@ import service.{ApplicationService, SessionService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class TestController(
     val cookieSigner: CookieSigner,
@@ -51,7 +51,7 @@ class ActionBuildersSpec extends BaseControllerSpec with ApplicationServiceMock 
 
     fetchByApplicationIdReturns(application)
 
-    def runTestAction(context: ApiContext, version: String, expectedStatus: Int) = {
+    def runTestAction(context: ApiContext, version: ApiVersion, expectedStatus: Int) = {
       val testResultBody = "was called"
 
       val result = underTest.subFieldsDefinitionsExistActionByApi(application.id, context, version) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>

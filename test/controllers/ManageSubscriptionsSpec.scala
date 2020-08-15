@@ -49,7 +49,7 @@ import domain.models.developers._
 import domain.models.applications._
 
 import scala.concurrent.Future.{failed, successful}
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)

@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions])
 
@@ -105,7 +105,7 @@ case class AjaxSubscriptionResponse(apiName: ApiContext, group: String, numberOf
 object AjaxSubscriptionResponse {
   implicit val format = Json.format[AjaxSubscriptionResponse]
 
-  def from(context: ApiContext, version: String, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
+  def from(context: ApiContext, version: ApiVersion, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
     val versionAccessType = subscriptions
       .find(s => s.context == context && s.apiVersion.version == version)
       .map(_.apiVersion.accessType)

@@ -22,7 +22,7 @@ import utils.AsyncHmrcSpec
 import builder._
 import domain.models.apidefinitions.{APIAccess, APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.applications.Application
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
@@ -32,7 +32,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       apiName: String,
       serviceName: String,
       context: ApiContext,
-      version: String,
+      apiVersion: ApiVersion,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,

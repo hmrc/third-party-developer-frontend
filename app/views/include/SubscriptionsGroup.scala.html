@@ -46,7 +46,7 @@
                     </a>
                 </div>
                 <div class="accordion__row__right">
-                    <span id="subscriptions-@IdFormatter.identifier(apiSubscription.apiContext, group)" data-api-subscriptions="@IdFormatter.identifier(apiSubscription.apiContext, group)" class="text--right display-block bold-xsmall subscription-count flush--top @if(!apiSubscription.hasSubscriptions){subscription-count--empty}" aria-live="polite">
+                    <span id="subscriptions-@IdFormatter.contextSuffix(apiSubscription.apiContext, group)" data-api-subscriptions="@IdFormatter.contextSuffix(apiSubscription.apiContext, group)" class="text--right display-block bold-xsmall subscription-count flush--top @if(!apiSubscription.hasSubscriptions){subscription-count--empty}" aria-live="polite">
                     @apiSubscription.subscriptionNumberText
                     </span>
                 </div>

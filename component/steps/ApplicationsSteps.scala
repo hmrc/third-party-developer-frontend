@@ -155,7 +155,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   When("""^I select the confirmation option with id '(.*)'$""") { (id: String) => webDriver.findElement(By.cssSelector(s"[id=$id]")).click() }
 
   When("""^I am on the unsubcribe request submitted page for application with id '(.*)' and api with name '(.*)', context '(.*)' and version '(.*)'$""") {
-    (id: String, apiName: String, apiContext: String, apiVersion: String) =>
+    (id: String, apiName: String, apiContext: String, apiVersion: ApiVersion) =>
       webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=MANAGE_PAGE"
   }
 
@@ -168,7 +168,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     on(SubscriptionPage(id))
   }
 
-  // private def aVersionSubscription(version: String, apiStatus: APIStatus, subscribed: Boolean, access: APIAccessType) = {
+  // private def aVersionSubscription(apiVersion: ApiVersion, apiStatus: APIStatus, subscribed: Boolean, access: APIAccessType) = {
   //   VersionSubscription(ApiVersionDefinition(version, apiStatus, Some(APIAccess(access))), subscribed)
   // }
 

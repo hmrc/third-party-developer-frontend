@@ -48,7 +48,7 @@ import scala.concurrent.Future
 import play.api.test.Helpers._
 
 import scala.concurrent.Future.successful
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
 

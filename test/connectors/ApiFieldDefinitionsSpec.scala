@@ -21,7 +21,7 @@ import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import play.api.libs.json.{JsSuccess, Json}
 import utils.AsyncHmrcSpec
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
 

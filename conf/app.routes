@@ -111,10 +111,10 @@ POST        /applications/:id/ip-whitelist/change                               
 
 GET         /applications/:id/subscriptions                                                 controllers.Subscriptions.manageSubscriptions(id: String)
 
-POST        /applications/:id/change-subscription                                           controllers.Subscriptions.changeApiSubscription(id: String, context: domain.models.apidefinitions.ApiContext, version: String, redirectTo: String)
+POST        /applications/:id/change-subscription                                           controllers.Subscriptions.changeApiSubscription(id: String, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, redirectTo: String)
 
-GET         /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: domain.models.apidefinitions.ApiContext, version: String, redirectTo: String)
-POST        /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscriptionAction(id: String, name: String, context: domain.models.apidefinitions.ApiContext, version: String, redirectTo: String)
+GET         /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscription(id: String, name: String, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, redirectTo: String)
+POST        /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscriptionAction(id: String, name: String, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, redirectTo: String)
 
 GET         /applications/:id/credentials                                                   controllers.Credentials.credentials(id: String)
 GET         /applications/:id/client-id                                                     controllers.Credentials.clientId(id: String)
@@ -174,8 +174,8 @@ GET         /applications/:id/check-your-answers                                
 POST        /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPageAction(id: String)
 
 GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: String)
-GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.editApiMetadataPage(id: String, context: domain.models.apidefinitions.ApiContext, version: String, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
-POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: domain.models.apidefinitions.ApiContext, version: String, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
+GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.editApiMetadataPage(id: String, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
+POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.saveSubscriptionFields(id: String, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
 
 GET         /applications/:id/add/subscriptions                                             controllers.Subscriptions.addAppSubscriptions(id: String)
 

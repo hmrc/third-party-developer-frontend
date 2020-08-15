@@ -66,7 +66,7 @@ import domain.models.connectors.AddTeamMemberRequest
 import domain.models.connectors.AddTeamMemberResponse
 import domain.models.applications.ApplicationVerificationFailed
 import domain.models.applications.ApplicationVerificationSuccessful
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
@@ -782,7 +782,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
-  private def createApiSubscription(context: ApiContext, version: String, subscribed: Boolean) = {
+  private def createApiSubscription(context: ApiContext, version: ApiVersion, subscribed: Boolean) = {
     APISubscription(
       "a",
       "b",

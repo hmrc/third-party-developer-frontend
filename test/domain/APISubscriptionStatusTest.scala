@@ -19,7 +19,7 @@ package domain
 import utils.AsyncHmrcSpec
 import builder._
 import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class APISubscriptionStatusTest extends AsyncHmrcSpec with SubscriptionsBuilder {
 

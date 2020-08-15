@@ -37,7 +37,7 @@ import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.applications.Permissions.{TeamMembersOnly, AdministratorOnly}
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 @Singleton
 class Subscriptions @Inject() (
@@ -104,7 +104,7 @@ class Subscriptions @Inject() (
     case None                         => Redirect(routes.Details.details(applicationId))
   }
 
-  def changeApiSubscription(applicationId: String, apiContext: ApiContext, apiVersion: String, redirectTo: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
+  def changeApiSubscription(applicationId: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
     implicit request =>
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
@@ -127,7 +127,7 @@ class Subscriptions @Inject() (
       ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
   }
 
-  def changeLockedApiSubscription(applicationId: String, apiName: String, apiContext: ApiContext, apiVersion: String, redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscription(applicationId: String, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
       applicationService
         .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)
@@ -146,7 +146,7 @@ class Subscriptions @Inject() (
         )
     }
 
-  def changeLockedApiSubscriptionAction(applicationId: String, apiName: String, apiContext: ApiContext, apiVersion: String, redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscriptionAction(applicationId: String, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
       def requestChangeSubscription(subscribed: Boolean) = {
         if (subscribed) {
