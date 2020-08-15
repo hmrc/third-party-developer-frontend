@@ -58,6 +58,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val sessionId = "sessionId"
 
   val exampleContext = ApiContext("exampleContext")
+  val version = ApiVersion("version")
 
   val developerDto: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session: Session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
@@ -70,7 +71,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
 
-  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "clientId", exampleContext, "api-example-microservice")
+  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "clientId", exampleContext, ApiVersion("api-example-microservice")) // TODO - this is wierd
 
   val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
   val exampleApiSubscription: Some[APISubscriptions] = Some(
@@ -83,7 +84,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
           "API1",
           "api-example-microservice",
           exampleContext,
-          ApiVersionDefinition("version", APIStatus.STABLE),
+          ApiVersionDefinition(version, APIStatus.STABLE),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields

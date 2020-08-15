@@ -40,7 +40,7 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
   val applicationName = "Test Application"
   val apiName = "Test API"
   val apiContext = ApiContext("test")
-  val apiVersion = "1.0"
+  val apiVersion = ApiVersion("1.0")
 
   val emptyFields = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 

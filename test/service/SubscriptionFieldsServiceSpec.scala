@@ -35,7 +35,8 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
   val apiContext: ApiContext = ApiContext("sub-ser-test")
-  val apiVersion: ApiVersion = "1.0"
+  val apiVersion: ApiVersion = ApiVersion("1.0")
+  val versionOne: ApiVersion = ApiVersion("version-1")
   val applicationName: String = "third-party-application"
   val applicationId: String = "application-id"
   val clientId = "clientId"
@@ -74,7 +75,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
         underTest.fetchFieldsValues(
           application,
           fieldDefinitions = Seq.empty,
-          ApiIdentifier(ApiContext("context"), "version-1")
+          ApiIdentifier(ApiContext("context"), versionOne)
         )
       )
 
@@ -82,7 +83,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     }
 
     "find and return matching values" in new Setup {
-      private val apiIdentifier: ApiIdentifier = ApiIdentifier(ApiContext("context1"), "version-1")
+      private val apiIdentifier: ApiIdentifier = ApiIdentifier(ApiContext("context1"), versionOne)
 
       private val subscriptionFieldValue1 = buildSubscriptionFieldValue("value1")
       private val subscriptionFieldValue2 = buildSubscriptionFieldValue("value2")
@@ -101,7 +102,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     }
 
     "find no matching values" in new Setup {
-      private val apiIdentifier: ApiIdentifier = ApiIdentifier(ApiContext("context1"), "version-1")
+      private val apiIdentifier: ApiIdentifier = ApiIdentifier(ApiContext("context1"), versionOne)
 
       private val subscriptionFieldValue = buildSubscriptionFieldValue("value")
 
@@ -137,7 +138,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       val newValue1 = "newValue"
       val newValuesMap = Map(definition1.name -> newValue1)
 
-      when(mockSubscriptionFieldsConnector.saveFieldValues(*, *[ApiContext], *, *)(any[HeaderCarrier]))
+      when(mockSubscriptionFieldsConnector.saveFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       val result = await(underTest.saveFieldValues(developerRole, application, apiContext, apiVersion, oldValues, newValuesMap))
@@ -170,7 +171,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       result shouldBe SaveSubscriptionFieldsAccessDeniedResponse
 
       verify(mockSubscriptionFieldsConnector, never)
-        .saveFieldValues(*, *[ApiContext], *, *)(any[HeaderCarrier])
+        .saveFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier])
     }
   }
 
@@ -178,7 +179,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     "save when old values are empty" in new Setup {
       val emptyOldValue = SubscriptionFieldValue(buildSubscriptionFieldValue("field-name").definition, "")
 
-      when(mockSubscriptionFieldsConnector.saveFieldValues(*, *[ApiContext], *, *)(any[HeaderCarrier]))
+      when(mockSubscriptionFieldsConnector.saveFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       val result = await(underTest.saveBlankFieldValues(application, apiContext, apiVersion, Seq(emptyOldValue)))
@@ -195,14 +196,14 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     "dont save when old values are populated" in new Setup {
       val populatedValue = buildSubscriptionFieldValue("field-name")
 
-      when(mockSubscriptionFieldsConnector.saveFieldValues(*, *[ApiContext], *, *)(any[HeaderCarrier]))
+      when(mockSubscriptionFieldsConnector.saveFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       val result = await(underTest.saveBlankFieldValues(application, apiContext, apiVersion, Seq(populatedValue)))
       result shouldBe SaveSubscriptionFieldsSuccessResponse
 
       verify(mockSubscriptionFieldsConnector, never)
-        .saveFieldValues(*, *[ApiContext], *, *)(any[HeaderCarrier])
+        .saveFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier])
     }
   }
 }

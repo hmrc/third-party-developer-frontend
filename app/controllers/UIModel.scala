@@ -109,7 +109,7 @@ object AjaxSubscriptionResponse {
     val versionAccessType = subscriptions
       .find(s => s.context == context && s.apiVersion.version == version)
       .map(_.apiVersion.accessType)
-      .getOrElse(throw new IllegalStateException(s"subscription should exist for $context $version"))
+      .getOrElse(throw new IllegalStateException(s"subscription should exist for ${context.value} ${version.value}"))
 
     val group = subscriptions
       .find(s => s.context == context && s.apiVersion.version == version)
@@ -118,7 +118,7 @@ object AjaxSubscriptionResponse {
         else if (sub.isTestSupport) TEST_API
         else API
       )
-      .getOrElse(throw new IllegalStateException(s"subscription should exist for $context $version"))
+      .getOrElse(throw new IllegalStateException(s"subscription should exist for ${context.value} ${version.value}"))
 
     val apiSubscriptions = subscriptions.filter(s => s.context == context && s.apiVersion.accessType == versionAccessType)
 

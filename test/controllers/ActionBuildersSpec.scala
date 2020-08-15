@@ -82,7 +82,7 @@ class ActionBuildersSpec extends BaseControllerSpec with ApplicationServiceMock 
     "Wrong version" in new Setup {
       givenApplicationHasSubs(application, Seq(subscriptionWithSubFields))
 
-      runTestAction(subscriptionWithSubFields.context, "wrong-version", NOT_FOUND)
+      runTestAction(subscriptionWithSubFields.context, ApiVersion("wrong-version"), NOT_FOUND)
     }
 
     "Subscription with no fields" in new Setup {

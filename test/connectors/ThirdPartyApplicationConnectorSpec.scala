@@ -311,8 +311,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   "fetch subscriptions for application" should {
 
-    val apiSubscription1 = createApiSubscription(ApiContext("api"), "1.0", subscribed = true)
-    val apiSubscription2 = createApiSubscription(ApiContext("api"), "2.0", subscribed = false)
+    val apiSubscription1 = createApiSubscription(ApiContext("api"), ApiVersion("1.0"), subscribed = true)
+    val apiSubscription2 = createApiSubscription(ApiContext("api"), ApiVersion("2.0"), subscribed = false)
     val subscriptions = Seq(apiSubscription1, apiSubscription2)
     val url = baseUrl + s"/application/$applicationId/subscription"
 
@@ -361,7 +361,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "subscribe to api" should {
-    val apiIdentifier = ApiIdentifier(ApiContext("app1"), "2.0")
+    val apiIdentifier = ApiIdentifier(ApiContext("app1"), ApiVersion("2.0"))
     val url = baseUrl + s"/application/$applicationId/subscription"
 
     "subscribe application to an api" in new Setup {
@@ -391,8 +391,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   "unsubscribe from api" should {
     val context = ApiContext("app1")
-    val version = "2.0"
-    val url = baseUrl + s"/application/$applicationId/subscription?context=$context&version=$version"
+    val version = ApiVersion("2.0")
+    val url = baseUrl + s"/application/$applicationId/subscription?context=${context.value}&version=${version.value}"
 
     "unsubscribe application from an api" in new Setup {
 

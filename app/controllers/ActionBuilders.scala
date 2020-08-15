@@ -125,7 +125,7 @@ trait ActionBuilders {
           apiSubscription match {
             case Nil               => Left(NotFound(errorHandler.notFoundTemplate))
             case apiDetails :: Nil => Right(ApplicationWithSubscriptionFields(apiDetails, input.applicationRequest))
-            case _                 => throw new RuntimeException(s"Too many APIs match for; context: $context version: $version")
+            case _                 => throw new RuntimeException(s"Too many APIs match for; context: ${context.value} version: ${version.value}")
           }
         })
       }

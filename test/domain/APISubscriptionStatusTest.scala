@@ -27,7 +27,7 @@ class APISubscriptionStatusTest extends AsyncHmrcSpec with SubscriptionsBuilder 
       name: String = "name",
       service: String = "service",
       context: ApiContext = ApiContext("context"),
-      version: ApiVersionDefinition = ApiVersionDefinition("1.0", APIStatus.STABLE),
+      version: ApiVersionDefinition = ApiVersionDefinition(ApiVersion("1.0"), APIStatus.STABLE),
       subscribed: Boolean = true,
       requiresTrust: Boolean = false
   ) = {
@@ -39,11 +39,11 @@ class APISubscriptionStatusTest extends AsyncHmrcSpec with SubscriptionsBuilder 
   "canUnsubscribe" should {
 
     "be true if user is an ADMINISTRATOR or DEVELOPER, and the API is not deprecated" in {
-      APIStatus.values.filterNot(_ == APIStatus.DEPRECATED) foreach { s => aSubscription(version = ApiVersionDefinition("2.0", s)).canUnsubscribe shouldBe true }
+      APIStatus.values.filterNot(_ == APIStatus.DEPRECATED) foreach { s => aSubscription(version = ApiVersionDefinition(ApiVersion("2.0"), s)).canUnsubscribe shouldBe true }
     }
 
     "be false if the API version is deprecated" in {
-      aSubscription(version = ApiVersionDefinition("2.0", APIStatus.DEPRECATED)).canUnsubscribe shouldBe false
+      aSubscription(version = ApiVersionDefinition(ApiVersion("2.0"), APIStatus.DEPRECATED)).canUnsubscribe shouldBe false
     }
   }
 }

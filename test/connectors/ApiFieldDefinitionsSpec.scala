@@ -44,7 +44,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
   private val basicFieldDefinition: ApiFieldDefinitions = {
     ApiFieldDefinitions(
       ApiContext("my-context"),
-      "1.0",
+      ApiVersion("1.0"),
       List(FieldDefinition("field-name", "my-description", "my-shortDescription", "my-hint", "STRING", AccessRequirements.Default))
     )
   }
@@ -80,7 +80,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
       val apiFieldDefinitionsWithAccess: ApiFieldDefinitions = {
         ApiFieldDefinitions(
           ApiContext("my-context"),
-          "1.0",
+          ApiVersion("1.0"),
           List(
             FieldDefinition(
               name = "field-name",

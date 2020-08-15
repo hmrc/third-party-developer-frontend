@@ -157,7 +157,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def unsubscribeFromApi(applicationId: String, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.DELETE(s"$serviceBaseUrl/application/$applicationId/subscription?context=$context&version=$version") map { _ =>
+    http.DELETE(s"$serviceBaseUrl/application/$applicationId/subscription?context=${context.value}&version=${version.value}") map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery
   }

@@ -57,6 +57,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val appName: String = "app"
   val clientId = "clientIdzzz"
   val sessionId = "sessionId"
+  val apiVersion = ApiVersion("version")
 
   val developerDto = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
@@ -85,7 +86,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
-  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", ApiContext("context"), "version")
+  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", ApiContext("context"), apiVersion)
 
   val exampleApiSubscription = Some(
     APISubscriptions(
@@ -97,7 +98,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
           "API1",
           "api-example-microservice",
           ApiContext("exampleContext"),
-          ApiVersionDefinition("version", APIStatus.STABLE),
+          ApiVersionDefinition(apiVersion, APIStatus.STABLE),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
@@ -118,7 +119,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
             "API1",
             "subscriptionServiceName",
             ApiContext("context"),
-            ApiVersionDefinition("version", APIStatus.STABLE),
+            ApiVersionDefinition(apiVersion, APIStatus.STABLE),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
@@ -178,8 +179,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     givenUpdateCheckInformationSucceeds(application)
 
     val context = ApiContext("apiContent")
-    val version = "version"
-    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version)
+    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, apiVersion)
 
     val subscriptions = Seq(
       APISubscriptions(
@@ -191,7 +191,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
             "API1",
             "subscriptionServiceName",
             context,
-            ApiVersionDefinition(version, APIStatus.STABLE),
+            ApiVersionDefinition(apiVersion, APIStatus.STABLE),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields

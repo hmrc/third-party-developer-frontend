@@ -241,7 +241,7 @@ object ApiSubscriptionFieldsStub {
   }
 
   private def fieldValuesUrl(clientId: String, apiContext: ApiContext, apiVersion: ApiVersion) = {
-    s"/field/application/$clientId/context/${apiContext.value}/version/$apiVersion"
+    s"/field/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
   }
 
   def noSubscriptionFields(apiContext: ApiContext, version: ApiVersion): Any = {
@@ -249,6 +249,6 @@ object ApiSubscriptionFieldsStub {
   }
 
   private def fieldDefinitionsUrl(apiContext: ApiContext, version: ApiVersion) = {
-    s"/definition/context/${apiContext.value}/version/$version"
+    s"/definition/context/${apiContext.value}/version/${version.value}"
   }
 }

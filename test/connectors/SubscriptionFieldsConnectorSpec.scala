@@ -45,7 +45,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
   private val clientId = UUID.randomUUID().toString
   private val apiContext = ApiContext("i-am-a-test")
-  private val apiVersion = "1.0"
+  private val apiVersion = ApiVersion("1.0")
   private val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   private val fieldsId = UUID.randomUUID()
   private val urlPrefix = "/field"
@@ -139,7 +139,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       Map(apiIdentifier -> Seq(subscriptionDefinition))
 
     val getUrl =
-      s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/$apiVersion"
+      s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
 
     "return subscription fields for an API" in new Setup {
       when(
@@ -299,7 +299,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   }
 
   "fetchFieldDefinitions" should {
-    val url = s"/definition/context/${apiContext.value}/version/$apiVersion"
+    val url = s"/definition/context/${apiContext.value}/version/${apiVersion.value}"
 
     val definitionsFromRestService = List(
       FieldDefinition("field1", "desc1", "sdesc2", "hint1", "some type", AccessRequirements.Default)
@@ -358,9 +358,9 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   }
 
   "fetchFieldValues" should {
-    val definitionsUrl = s"/definition/context/${apiContext.value}/version/$apiVersion"
+    val definitionsUrl = s"/definition/context/${apiContext.value}/version/${apiVersion.value}"
     val valuesUrl =
-      s"/field/application/$clientId/context/${apiContext.value}/version/$apiVersion"
+      s"/field/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
 
     val definitionsFromRestService = List(
       FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default)
@@ -448,7 +448,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       fieldsValues
     )
 
-    val putUrl = s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/$apiVersion"
+    val putUrl = s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
 
     "save the fields" in new Setup {
       val response = HttpResponse(OK)
@@ -538,12 +538,11 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   }
 
   "deleteFieldValues" should {
-    import scala.concurrent.ExecutionContext.Implicits.global
 
-    val url = s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/$apiVersion"
+    val url = s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
 
     "return success after delete call has returned 204 NO CONTENT" in new Setup {
-      when(mockHttpClient.DELETE(url))
+      when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(successful(HttpResponse(NO_CONTENT)))
 
       private val result = await(
@@ -555,7 +554,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     }
 
     "return failure if api-subscription-fields returns unexpected status" in new Setup {
-      when(mockHttpClient.DELETE(url))
+      when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(successful(HttpResponse(ACCEPTED)))
 
       private val result = await(
@@ -568,7 +567,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
     "return failure when api-subscription-fields returns a 500" in new Setup {
 
-      when(mockHttpClient.DELETE(url))
+      when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(failed(upstream500Response))
 
       private val result = await(
@@ -580,7 +579,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     }
 
     "return success when api-subscription-fields returns a 404" in new Setup {
-      when(mockHttpClient.DELETE(url))
+      when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(failed(new NotFoundException("")))
 
       private val result = await(

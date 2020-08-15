@@ -40,7 +40,7 @@ class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndA
   implicit val hc = HeaderCarrier()
   val clientId: String = UUID.randomUUID().toString
   val apiContext: ApiContext = ApiContext("i-am-a-test")
-  val apiVersion: ApiVersion = "1.0"
+  val apiVersion: ApiVersion = ApiVersion("1.0")
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
   private val testActorSystem = ActorSystem("test-actor-system")
 

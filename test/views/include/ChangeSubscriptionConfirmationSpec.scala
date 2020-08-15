@@ -39,7 +39,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
   val applicationName = "Test Application"
   val apiName = "Test API"
   val apiContext = ApiContext("test")
-  val apiVersion = "1.0"
+  val apiVersion = ApiVersion("1.0")
 
   val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
