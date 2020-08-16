@@ -26,19 +26,35 @@ import domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_RE
 import helpers.string.Digest
 import org.joda.time.DateTime
 
-case class Application(id: String,
-                       clientId: String,
-                       name: String,
-                       createdOn: DateTime,
-                       lastAccess: DateTime,
-                       lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
-                       deployedTo: Environment,
-                       description: Option[String] = None,
-                       collaborators: Set[Collaborator] = Set.empty,
-                       access: Access = Standard(),
-                       state: ApplicationState = ApplicationState.testing,
-                       checkInformation: Option[CheckInformation] = None,
-                       ipWhitelist: Set[String] = Set.empty) {
+case class ApplicationId(value: String) extends AnyVal
+
+object ApplicationId {
+  import play.api.libs.json.Json
+  implicit val applicationIdFormat = Json.valueFormat[ApplicationId]
+}
+
+case class ClientId(value: String) extends AnyVal
+
+object ClientId {
+  import play.api.libs.json.Json
+  implicit val clientIdFormat = Json.valueFormat[ClientId]
+}
+
+case class Application(
+    id: ApplicationId,
+    clientId: ClientId,
+    name: String,
+    createdOn: DateTime,
+    lastAccess: DateTime,
+    lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
+    deployedTo: Environment,
+    description: Option[String] = None,
+    collaborators: Set[Collaborator] = Set.empty,
+    access: Access = Standard(),
+    state: ApplicationState = ApplicationState.testing,
+    checkInformation: Option[CheckInformation] = None,
+    ipWhitelist: Set[String] = Set.empty
+) {
 
   def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
 
@@ -68,12 +84,12 @@ case class Application(id: String,
 
   def privacyPolicyUrl = access match {
     case x: Standard => x.privacyPolicyUrl
-    case _ => None
+    case _           => None
   }
 
   def termsAndConditionsUrl = access match {
     case x: Standard => x.termsAndConditionsUrl
-    case _ => None
+    case _           => None
   }
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOrAdmin)
@@ -85,19 +101,19 @@ case class Application(id: String,
 
   def canPerformApprovalProcess(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (SANDBOX, _, _, _) => false
-      case (PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR)) => true
-      case (PRODUCTION, STANDARD, PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR)) => true
+      case (SANDBOX, _, _, _)                                                          => false
+      case (PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR))                        => true
+      case (PRODUCTION, STANDARD, PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
       case (PRODUCTION, STANDARD, PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
-      case _ => false
+      case _                                                                           => false
     }
   }
 
   def canViewServerToken(developer: Developer): Boolean = {
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (SANDBOX, STANDARD, State.PRODUCTION, _) => true
+      case (SANDBOX, STANDARD, State.PRODUCTION, _)                      => true
       case (PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
-      case _ => false
+      case _                                                             => false
     }
   }
 
@@ -105,12 +121,12 @@ case class Application(id: String,
 
   def canAddRedirectUri: Boolean = access match {
     case s: Standard => s.redirectUris.lengthCompare(maximumNumberOfRedirectUris) < 0
-    case _ => false
+    case _           => false
   }
 
   def hasRedirectUri(redirectUri: String): Boolean = access match {
     case s: Standard => s.redirectUris.contains(redirectUri)
-    case _ => false
+    case _           => false
   }
 
   def hasLockedSubscriptions = deployedTo.isProduction && state.name != State.TESTING

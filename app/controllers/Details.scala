@@ -22,7 +22,7 @@ import controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, Dummy
 import domain._
 import domain.models.applications.Capabilities.SupportsDetails
 import domain.models.applications.Permissions.SandboxOrAdmin
-import domain.models.applications.{Application, CheckInformation, Invalid, Standard, State, UpdateApplicationRequest, Valid}
+import domain.models.applications.{ApplicationId, Application, CheckInformation, Invalid, Standard, State, UpdateApplicationRequest, Valid}
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form
@@ -36,23 +36,23 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class Details @Inject()(val applicationService: ApplicationService,
-                        val sessionService: SessionService,
-                        val errorHandler: ErrorHandler,
-                        mcc: MessagesControllerComponents,
-                        val cookieSigner : CookieSigner,
-                        unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
-                        pendingApprovalView: PendingApprovalView,
-                        detailsView: DetailsView,
-                        changeDetailsView: ChangeDetailsView)
-                       (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc) {
+class Details @Inject() (
+    val applicationService: ApplicationService,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
+    pendingApprovalView: PendingApprovalView,
+    detailsView: DetailsView,
+    changeDetailsView: ChangeDetailsView
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends ApplicationController(mcc) {
 
-  def canChangeDetailsAndIsApprovedAction(applicationId: String)
-                                          (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, SandboxOrAdmin)(applicationId)(fun)
-  
-  def details(applicationId: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
+
+  def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
 
     Future.successful(request.application.state.name match {
@@ -62,15 +62,15 @@ class Details @Inject()(val applicationService: ApplicationService,
       case State.TESTING if request.role.isDeveloper =>
         Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
 
-      case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => 
+      case State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION =>
         Ok(pendingApprovalView(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))))
 
-      case State.PRODUCTION => 
+      case State.PRODUCTION =>
         Ok(detailsView(applicationViewModelFromApplicationRequest))
     })
   }
 
-  def changeDetails(applicationId: String): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
+  def changeDetails(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
     Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest)))
   }
 
@@ -100,12 +100,11 @@ class Details @Inject()(val applicationService: ApplicationService,
     )
   }
 
-  private def updateApplication(updateRequest: UpdateApplicationRequest)
-                               (implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
+  private def updateApplication(updateRequest: UpdateApplicationRequest)(implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
     applicationService.update(updateRequest)
   }
 
-  def changeDetailsAction(applicationId: String): Action[AnyContent] =
+  def changeDetailsAction(applicationId: ApplicationId): Action[AnyContent] =
     canChangeDetailsAndIsApprovedAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
       val application = request.application
 
@@ -120,7 +119,8 @@ class Details @Inject()(val applicationService: ApplicationService,
       def handleValidForm(form: EditApplicationForm): Future[Result] = {
         val requestForm = EditApplicationForm.form.bindFromRequest
 
-        applicationService.isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
+        applicationService
+          .isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
           .flatMap({
 
             case Valid =>
@@ -130,7 +130,7 @@ class Details @Inject()(val applicationService: ApplicationService,
                 _ <- updateCheckInformation(updateRequest)
               } yield Redirect(controllers.routes.Details.details(applicationId))
 
-            case invalid : Invalid =>
+            case invalid: Invalid =>
               def invalidNameCheckForm: Form[EditApplicationForm] =
                 requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
@@ -144,7 +144,6 @@ class Details @Inject()(val applicationService: ApplicationService,
       EditApplicationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
     }
 
-  private def errorView(id: String, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)
-                       (implicit request: ApplicationRequest[_]): Future[Result] =
+  private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
     Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))
 }

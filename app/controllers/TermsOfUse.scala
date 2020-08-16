@@ -19,7 +19,7 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.models.applications.Capabilities.SupportsTermsOfUse
 import domain.models.applications.Permissions.SandboxOrAdmin
-import domain.models.applications.{Application, CheckInformation, TermsOfUseAgreement, TermsOfUseStatus}
+import domain.models.applications.{ApplicationId, Application, CheckInformation, TermsOfUseAgreement, TermsOfUseStatus}
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form
@@ -32,25 +32,25 @@ import views.html.{TermsOfUseView, partials}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
-                           val sessionService: SessionService,
-                           val applicationService: ApplicationService,
-                           mcc: MessagesControllerComponents,
-                           val cookieSigner : CookieSigner,
-                           termsOfUseView: TermsOfUseView
-                           )
-                          (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc) with ApplicationHelper {
+class TermsOfUse @Inject() (
+    val errorHandler: ErrorHandler,
+    val sessionService: SessionService,
+    val applicationService: ApplicationService,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    termsOfUseView: TermsOfUseView
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends ApplicationController(mcc)
+    with ApplicationHelper {
 
-  def canChangeTermsOfUseAction(applicationId: String)
-                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  def canChangeTermsOfUseAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTermsOfUse, SandboxOrAdmin)(applicationId)(fun)
 
   def termsOfUsePartial() = Action {
     Ok(partials.termsOfUse())
   }
 
-  def termsOfUse(id: String) = canChangeTermsOfUseAction(id) { implicit request =>
+  def termsOfUse(id: ApplicationId) = canChangeTermsOfUseAction(id) { implicit request =>
     if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
       Future.successful(BadRequest(errorHandler.badRequestTemplate))
     } else {
@@ -58,15 +58,16 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
     }
   }
 
-  def agreeTermsOfUse(id: String) = canChangeTermsOfUseAction(id) { implicit request =>
+  def agreeTermsOfUse(id: ApplicationId) = canChangeTermsOfUseAction(id) { implicit request =>
     def handleValidForm(app: Application, form: TermsOfUseForm) = {
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {
         val information = app.checkInformation.getOrElse(CheckInformation())
         val updatedInformation = information.copy(
-          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(
-            request.user.email, DateTimeUtils.now, appConfig.currentTermsOfUseVersion))
+          termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.user.email, DateTimeUtils.now, appConfig.currentTermsOfUseVersion)
+        )
 
-        applicationService.updateCheckInformation(app, updatedInformation)
+        applicationService
+          .updateCheckInformation(app, updatedInformation)
           .map(_ => Redirect(routes.Details.details(app.id)))
       } else {
         Future.successful(BadRequest(errorHandler.badRequestTemplate))
@@ -77,8 +78,7 @@ class TermsOfUse @Inject()(val errorHandler: ErrorHandler,
       Future.successful(BadRequest(termsOfUseView(applicationViewModel, form)))
     }
 
-    TermsOfUseForm.form.bindFromRequest.fold(
-      invalidForm => handleInvalidForm(applicationViewModelFromApplicationRequest, invalidForm),
-      validForm => handleValidForm(request.application, validForm))
+    TermsOfUseForm.form.bindFromRequest
+      .fold(invalidForm => handleInvalidForm(applicationViewModelFromApplicationRequest, invalidForm), validForm => handleValidForm(request.application, validForm))
   }
 }

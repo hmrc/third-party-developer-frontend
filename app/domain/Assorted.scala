@@ -16,6 +16,8 @@
 
 package domain
 
+import domain.models.applications.ApplicationId
+
 class ApplicationAlreadyExists extends RuntimeException
 
 class ApplicationNotFound extends RuntimeException
@@ -30,7 +32,7 @@ class TeamMemberAlreadyExists extends RuntimeException("This user is already a t
 
 class ApplicationNeedsAdmin extends RuntimeException
 
-case class ApplicationCreatedResponse(id: String)
+case class ApplicationCreatedResponse(id: ApplicationId)
 
 sealed trait ApplicationUpdateSuccessful
 
@@ -39,4 +41,3 @@ case object ApplicationUpdateSuccessful extends ApplicationUpdateSuccessful
 sealed trait ApplicationUpliftSuccessful
 
 case object ApplicationUpliftSuccessful extends ApplicationUpliftSuccessful
-

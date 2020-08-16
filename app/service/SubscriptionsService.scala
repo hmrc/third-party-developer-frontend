@@ -32,7 +32,7 @@ class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, auditS
   private def doRequest(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(
       f: (String, String, String, String, String, String) => DeskproTicket
   )(implicit hc: HeaderCarrier) = {
-    f(requester.displayedName, requester.email, application.name, application.id, apiName, apiVersion.value)
+    f(requester.displayedName, requester.email, application.name, application.id.value, apiName, apiVersion.value)
   }
 
   def requestApiSubscription(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[TicketResult] = {

@@ -18,6 +18,7 @@ package domain.models.subscriptions
 
 import play.api.libs.json.{Format, Json}
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.{ClientId, ApplicationId}
 
 object ApiSubscriptionFields {
 
@@ -39,8 +40,8 @@ object ApiSubscriptionFields {
   case object FieldsDeleteFailureResult extends FieldsDeleteResult
 
   case class SubscriptionFieldsWrapper(
-      applicationId: String,
-      clientId: String,
+      applicationId: ApplicationId,
+      clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
       fields: Seq[SubscriptionFieldValue]
@@ -53,7 +54,7 @@ object ApiSubscriptionFields {
   }
 
   case class SubscriptionFieldsPutRequest(
-      clientId: String,
+      clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
       fields: Map[String, String]

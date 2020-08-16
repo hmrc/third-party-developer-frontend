@@ -54,7 +54,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   val appId = "1234"
   val appName: String = "app"
-  val clientId = "clientIdzzz"
+  val clientId = ClientId("clientIdzzz")
   val sessionId = "sessionId"
 
   val exampleContext = ApiContext("exampleContext")
@@ -126,8 +126,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   def createFullyConfigurableApplication(
       collaborators: Set[Collaborator],
-      appId: String = appId,
-      clientId: String = clientId,
+      appId: ApplicationId = appId,
+      clientId: ClientId = clientId,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
       access: Access = Standard()
@@ -149,8 +149,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   }
 
   def createPartiallyConfigurableApplication(
-      appId: String = appId,
-      clientId: String = clientId,
+      appId: ApplicationId = appId,
+      clientId: clientId = clientId,
       userRole: Role = ADMINISTRATOR,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,

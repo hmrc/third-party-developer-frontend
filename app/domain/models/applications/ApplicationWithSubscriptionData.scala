@@ -18,8 +18,6 @@ package domain.models.applications
 
 import org.joda.time.DateTime
 
-case class ClientId(value: String) extends AnyVal
-
 case class FieldName(value: String) extends AnyVal
 
 case class FieldValue(value: String) extends AnyVal

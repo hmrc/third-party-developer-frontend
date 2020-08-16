@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
 import domain.models.apidefinitions.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields}
-import domain.models.applications.{Application, Capabilities, Capability, Environment, Permission, Role, State}
+import domain.models.applications.{ApplicationId, Application, Capabilities, Capability, Environment, Permission, Role, State}
 import domain.models.developers.DeveloperSession
 import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
 import play.api.mvc._
@@ -96,7 +96,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
     request.subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
   }
 
-  def whenTeamMemberOnApp(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>
       val composedActions = Action andThen applicationAction(applicationId, loggedIn)
       composedActions.async(fun)(request)
@@ -104,7 +104,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
 
   private def checkActionWithStateCheck(
       stateCheck: State => Boolean
-  )(capability: Capability, permissions: Permission)(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+  )(capability: Capability, permissions: Permission)(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       val composedActions = Action andThen
         applicationAction(applicationId, loggedIn) andThen
@@ -125,14 +125,14 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   def checkActionForTesting = checkActionWithStateCheck(_.isInTesting) _
 
   private object ManageSubscriptionsActions {
-    def subscriptionsComposedActions(applicationId: String, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour)(implicit request: UserRequest[AnyContent]) =
+    def subscriptionsComposedActions(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour)(implicit request: UserRequest[AnyContent]) =
       Action andThen
         applicationAction(applicationId, loggedIn) andThen
         capabilityFilter(Capabilities.EditSubscriptionFields) andThen
         fieldDefinitionsExistRefiner(noFieldsBehaviour)
   }
 
-  def subFieldsDefinitionsExistAction(applicationId: String, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)(
+  def subFieldsDefinitionsExistAction(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)(
       fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]
   ): Action[AnyContent] = {
     loggedInAction { implicit request: UserRequest[AnyContent] =>
@@ -142,7 +142,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
     }
   }
 
-  def subFieldsDefinitionsExistActionWithPageNumber(applicationId: String, pageNumber: Int)(
+  def subFieldsDefinitionsExistActionWithPageNumber(applicationId: ApplicationId, pageNumber: Int)(
       fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]
   ): Action[AnyContent] = {
     loggedInAction { implicit request =>
@@ -152,7 +152,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
     }
   }
 
-  def subFieldsDefinitionsExistActionByApi(applicationId: String, context: ApiContext, version: ApiVersion)(
+  def subFieldsDefinitionsExistActionByApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion)(
       fun: ApplicationWithSubscriptionFields[AnyContent] => Future[Result]
   ): Action[AnyContent] = {
     loggedInAction { implicit request =>

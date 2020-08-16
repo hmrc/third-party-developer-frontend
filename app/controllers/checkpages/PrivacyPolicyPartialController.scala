@@ -18,8 +18,7 @@ package controllers.checkpages
 
 import controllers.ApplicationController
 import controllers.checkpages.HasUrl._
-import domain._
-import domain.models.applications.{CheckInformation, Standard, UpdateApplicationRequest}
+import domain.models.applications.{ApplicationId, CheckInformation, Standard, UpdateApplicationRequest}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import views.html.checkpages.PrivacyPolicyView
@@ -31,20 +30,18 @@ trait PrivacyPolicyPartialController {
 
   val privacyPolicyView: PrivacyPolicyView
 
-  def privacyPolicyPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def privacyPolicyPage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
     Future.successful(app.access match {
       case std: Standard =>
-        val form = PrivacyPolicyForm(
-          hasUrl(std.privacyPolicyUrl, app.checkInformation.map(_.providedPrivacyPolicyURL)),
-          std.privacyPolicyUrl)
+        val form = PrivacyPolicyForm(hasUrl(std.privacyPolicyUrl, app.checkInformation.map(_.providedPrivacyPolicyURL)), std.privacyPolicyUrl)
         Ok(privacyPolicyView(app, PrivacyPolicyForm.form.fill(form), privacyPolicyActionRoute(app.id)))
       case _ => Ok(privacyPolicyView(app, PrivacyPolicyForm.form, privacyPolicyActionRoute(app.id)))
     })
   }
 
-  def privacyPolicyAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def privacyPolicyAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = PrivacyPolicyForm.form.bindFromRequest
     val app = request.application
 
@@ -55,7 +52,7 @@ trait PrivacyPolicyPartialController {
     def updateUrl(form: PrivacyPolicyForm) = {
       val access = app.access match {
         case s: Standard => s.copy(privacyPolicyUrl = form.privacyPolicyURL, overrides = Set.empty)
-        case other => other
+        case other       => other
       }
 
       applicationService.update(UpdateApplicationRequest(app.id, app.deployedTo, app.name, app.description, access))
@@ -71,7 +68,7 @@ trait PrivacyPolicyPartialController {
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  protected def landingPageRoute(appId: String): Call
-  protected def privacyPolicyActionRoute(appId: String): Call
+  protected def landingPageRoute(appId: ApplicationId): Call
+  protected def privacyPolicyActionRoute(appId: ApplicationId): Call
 
 }

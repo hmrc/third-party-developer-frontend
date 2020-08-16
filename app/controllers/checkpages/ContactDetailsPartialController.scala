@@ -17,8 +17,7 @@
 package controllers.checkpages
 
 import controllers.ApplicationController
-import domain._
-import domain.models.applications.{CheckInformation, ContactDetails}
+import domain.models.applications.{ApplicationId, CheckInformation, ContactDetails}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import views.html.checkpages.ContactDetailsView
@@ -30,7 +29,7 @@ trait ContactDetailsPartialController {
 
   val contactDetailsView: ContactDetailsView
 
-  def contactPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def contactPage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
     val contactForm = for {
@@ -47,7 +46,7 @@ trait ContactDetailsPartialController {
     })
   }
 
-  def contactAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def contactAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = ContactForm.form.bindFromRequest
     val app = request.application
 
@@ -56,17 +55,16 @@ trait ContactDetailsPartialController {
     }
 
     def withValidForm(form: ContactForm) = {
-      val information = app.checkInformation.getOrElse(CheckInformation())
+      val information = app.checkInformation
+        .getOrElse(CheckInformation())
         .copy(contactDetails = Some(ContactDetails(form.fullname, form.email, form.telephone)))
-      applicationService.updateCheckInformation(app, information) map { _ =>
-        Redirect(landingPageRoute(app.id))
-      }
+      applicationService.updateCheckInformation(app, information) map { _ => Redirect(landingPageRoute(app.id)) }
     }
 
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  protected def contactActionRoute(appId: String): Call
-  protected def landingPageRoute(appId: String): Call
+  protected def contactActionRoute(appId: ApplicationId): Call
+  protected def landingPageRoute(appId: ApplicationId): Call
 
 }

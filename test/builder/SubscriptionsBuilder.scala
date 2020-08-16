@@ -38,7 +38,7 @@ trait SubscriptionsBuilder {
     APISubscriptionStatus(name, s"serviceName-$name", contextName, version, subscribed = true, requiresTrust = false, fields = f, isTestSupport = false)
   }
 
-  def emptySubscriptionFieldsWrapper(applicationId: String, clientId: String, context: ApiContext, version: ApiVersion) = {
+  def emptySubscriptionFieldsWrapper(applicationId: ApplicationId, clientId: ClientId, context: ApiContext, version: ApiVersion) = {
     SubscriptionFieldsWrapper(applicationId, clientId, context, version, Seq.empty)
   }
 

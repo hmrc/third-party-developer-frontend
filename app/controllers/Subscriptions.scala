@@ -21,7 +21,7 @@ import connectors.ThirdPartyDeveloperConnector
 import domain._
 import domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
 import domain.models.views.SubscriptionRedirect._
-import domain.models.applications.{Application, CheckInformation, Environment, Role}
+import domain.models.applications.{ApplicationId, Application, CheckInformation, Environment, Role}
 import domain.models.developers.DeveloperSession
 import domain.models.views.SubscriptionRedirect
 import javax.inject.{Inject, Singleton}
@@ -59,13 +59,13 @@ class Subscriptions @Inject() (
     extends ApplicationController(mcc)
     with ApplicationHelper {
 
-  private def canManageLockedApiSubscriptionsAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
+  private def canManageLockedApiSubscriptionsAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     checkActionForAllStates(ManageLockedSubscriptions, AdministratorOnly)(applicationId)(fun)
 
-  private def canViewSubscriptionsInDevHubAction(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
+  private def canViewSubscriptionsInDevHubAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     checkActionForAllStates(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
 
-  def manageSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+  def manageSubscriptions(applicationId: ApplicationId): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
       request.user,
@@ -75,7 +75,7 @@ class Subscriptions @Inject() (
     )
   }
 
-  def addAppSubscriptions(applicationId: String): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
+  def addAppSubscriptions(applicationId: ApplicationId): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
       request.user,
@@ -97,15 +97,15 @@ class Subscriptions @Inject() (
     Future.successful(Ok(html))
   }
 
-  private def redirect(redirectTo: String, applicationId: String) = SubscriptionRedirect.withNameOption(redirectTo) match {
+  private def redirect(redirectTo: String, applicationId: ApplicationId) = SubscriptionRedirect.withNameOption(redirectTo) match {
     case Some(MANAGE_PAGE)            => Redirect(routes.Details.details(applicationId))
     case Some(APPLICATION_CHECK_PAGE) => Redirect(controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
     case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.manageSubscriptions(applicationId))
     case None                         => Redirect(routes.Details.details(applicationId))
   }
 
-  def changeApiSubscription(applicationId: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] = whenTeamMemberOnApp(applicationId) {
-    implicit request =>
+  def changeApiSubscription(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+    whenTeamMemberOnApp(applicationId) { implicit request =>
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
           def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
@@ -125,9 +125,9 @@ class Subscriptions @Inject() (
       def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = Future.successful(BadRequest(errorHandler.badRequestTemplate))
 
       ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
-  }
+    }
 
-  def changeLockedApiSubscription(applicationId: String, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
       applicationService
         .isSubscribedToApi(request.application, apiName, apiContext, apiVersion)
@@ -146,7 +146,7 @@ class Subscriptions @Inject() (
         )
     }
 
-  def changeLockedApiSubscriptionAction(applicationId: String, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
       def requestChangeSubscription(subscribed: Boolean) = {
         if (subscribed) {

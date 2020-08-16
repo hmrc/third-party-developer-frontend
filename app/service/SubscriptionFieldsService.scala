@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ClientId
 
 @Singleton
 class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
@@ -117,9 +118,9 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper)
 
 object SubscriptionFieldsService {
   trait SubscriptionFieldsConnector {
-    def fetchFieldValues(clientId: String, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]]
+    def fetchFieldValues(clientId: ClientId, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]]
 
-    def fetchFieldsValuesWithPrefetchedDefinitions(clientId: String, apiIdentifier: ApiIdentifier, definitionsCache: DefinitionsByApiVersion)(
+    def fetchFieldsValuesWithPrefetchedDefinitions(clientId: ClientId, apiIdentifier: ApiIdentifier, definitionsCache: DefinitionsByApiVersion)(
         implicit hc: HeaderCarrier
     ): Future[Seq[SubscriptionFieldValue]]
 
@@ -127,11 +128,11 @@ object SubscriptionFieldsService {
 
     def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
-    def saveFieldValues(clientId: String, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(
+    def saveFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(
         implicit hc: HeaderCarrier
     ): Future[ConnectorSaveSubscriptionFieldsResponse]
 
-    def deleteFieldValues(clientId: String, apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
+    def deleteFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
   }
 
   type DefinitionsByApiVersion = Map[ApiIdentifier, Seq[SubscriptionFieldDefinition]]

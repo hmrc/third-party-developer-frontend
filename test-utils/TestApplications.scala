@@ -30,8 +30,8 @@ trait TestApplications {
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
   def aSandboxApplication(
-      appId: String = randomUUID().toString,
-      clientId: String = randomString(28),
+      appId: ApplicationId = randomUUID().toString,
+      clientId: ClientId = ClientId(randomString(28)),
       adminEmail: String = "admin@example.com",
       developerEmail: String = "developer@example.com"
   ): Application = {
@@ -40,8 +40,8 @@ trait TestApplications {
   }
 
   def anApplication(
-      appId: String = randomUUID().toString,
-      clientId: String = randomString(28),
+      appId: ApplicationId = randomUUID().toString,
+      clientId: ClientId = ClientId(randomString(28)),
       environment: Environment = Environment.PRODUCTION,
       state: ApplicationState = ApplicationState.production("test", "test"),
       adminEmail: String = "admin@example.com",
@@ -92,7 +92,7 @@ trait TestApplications {
 
   def privilegedAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Privileged = Privileged(scopes)
 
-  def tokens(clientId: String = randomString(28), clientSecret: String = randomString(28), accessToken: String = randomString(28)): ApplicationToken = {
+  def tokens(clientId: ClientId = ClientId(randomString(28)), clientSecret: String = randomString(28), accessToken: String = randomString(28)): ApplicationToken = {
 
     ApplicationToken(clientId, Seq(aClientSecret()), accessToken)
   }

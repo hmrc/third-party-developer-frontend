@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
 import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields}
 import domain.models.subscriptions.ApiSubscriptionFields._
-import domain.models.applications.{Application, CheckInformation}
+import domain.models.applications.{ApplicationId, Application, CheckInformation}
 import domain.models.controllers.SaveSubsFieldsPageMode
 import model.EditManageSubscription._
 import model.NoSubscriptionFieldsRefinerBehaviour
@@ -80,7 +80,7 @@ class ManageSubscriptions @Inject() (
 
   import ManageSubscriptions._
 
-  def listApiSubscriptions(applicationId: String): Action[AnyContent] =
+  def listApiSubscriptions(applicationId: ApplicationId): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
@@ -91,7 +91,7 @@ class ManageSubscriptions @Inject() (
       successful(Ok(listApiSubscriptionsView(definitionsRequest.applicationRequest.application, details)))
     }
 
-  def editApiMetadataPage(applicationId: String, context: ApiContext, version: ApiVersion, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
+  def editApiMetadataPage(applicationId: ApplicationId, context: ApiContext, version: ApiVersion, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
     subFieldsDefinitionsExistActionByApi(applicationId, context, version) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
@@ -104,7 +104,7 @@ class ManageSubscriptions @Inject() (
       successful(Ok(editApiMetadataView(appRQ.application, viewModel, mode)))
     }
 
-  def saveSubscriptionFields(applicationId: String, apiContext: ApiContext, apiVersion: ApiVersion, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
+  def saveSubscriptionFields(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
     subFieldsDefinitionsExistActionByApi(applicationId, apiContext, apiVersion) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
@@ -152,7 +152,7 @@ class ManageSubscriptions @Inject() (
       })
   }
 
-  def subscriptionConfigurationStart(applicationId: String): Action[AnyContent] =
+  def subscriptionConfigurationStart(applicationId: ApplicationId): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId, NoSubscriptionFieldsRefinerBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId))) {
 
       definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
@@ -168,7 +168,7 @@ class ManageSubscriptions @Inject() (
         }
     }
 
-  def subscriptionConfigurationPage(applicationId: String, pageNumber: Int): Action[AnyContent] =
+  def subscriptionConfigurationPage(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] =
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
@@ -180,7 +180,7 @@ class ManageSubscriptions @Inject() (
       Future.successful(Ok(subscriptionConfigurationPageView(definitionsRequest.applicationRequest.application, pageNumber, viewModel)))
     }
 
-  def subscriptionConfigurationPagePost(applicationId: String, pageNumber: Int): Action[AnyContent] =
+  def subscriptionConfigurationPagePost(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] =
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { definitionsRequest: ApplicationWithSubscriptionFieldPage[AnyContent] =>
       implicit val applicationRequest: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
@@ -197,7 +197,7 @@ class ManageSubscriptions @Inject() (
       )
     }
 
-  def subscriptionConfigurationStepPage(applicationId: String, pageNumber: Int): Action[AnyContent] = {
+  def subscriptionConfigurationStepPage(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] = {
     def doEndOfJourneyRedirect(application: Application)(implicit hc: HeaderCarrier) = {
       if (application.deployedTo.isSandbox) {
         Future.successful(Redirect(routes.AddApplication.addApplicationSuccess(application.id)))

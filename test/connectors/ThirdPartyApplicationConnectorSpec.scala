@@ -128,7 +128,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   private val createApplicationRequestJsValue = Json.toJson(createApplicationRequest)
 
-  private def applicationResponse(appId: String, clientId: String, appName: String = "My Application") = new Application(
+  private def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: String = "My Application") = new Application(
     appId,
     clientId,
     appName,

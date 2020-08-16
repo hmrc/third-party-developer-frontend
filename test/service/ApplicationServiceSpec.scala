@@ -140,8 +140,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
     Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, Some("description"))
 
   def subStatusWithoutFieldValues(
-      appId: String,
-      clientId: String,
+      appId: ApplicationId,
+      clientId: ClientId,
       name: String,
       context: ApiContext,
       version: ApiVersion,
@@ -160,8 +160,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
     )
 
   def subStatus(
-      appId: String,
-      clientId: String,
+      appId: ApplicationId,
+      clientId: ClientId,
       name: String,
       context: String,
       version: ApiVersion,

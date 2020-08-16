@@ -20,7 +20,7 @@ import cats.data.{NonEmptyList, OptionT}
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.toDetails
 import domain.models.apidefinitions.APISubscriptionStatusWithSubscriptionFields
-import domain.models.applications.{Capability, Permission, State}
+import domain.models.applications.{ApplicationId, Capability, Permission, State}
 import domain.models.developers.DeveloperSession
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.mvc.Results._
@@ -41,7 +41,7 @@ trait ActionBuilders {
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-  def applicationAction(applicationId: String, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[MessagesRequest, ApplicationRequest] =
+  def applicationAction(applicationId: ApplicationId, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[MessagesRequest, ApplicationRequest] =
     new ActionRefiner[MessagesRequest, ApplicationRequest] {
       override protected def executionContext: ExecutionContext = ec
 

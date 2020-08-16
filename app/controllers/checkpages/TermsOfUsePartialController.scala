@@ -17,8 +17,7 @@
 package controllers.checkpages
 
 import controllers.{ApplicationController, TermsOfUseForm}
-import domain._
-import domain.models.applications.{CheckInformation, TermsOfUseAgreement}
+import domain.models.applications.{CheckInformation, TermsOfUseAgreement, ApplicationId}
 import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
@@ -41,7 +40,7 @@ trait TermsOfUsePartialController {
     )
   }
 
-  def termsOfUsePage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def termsOfUsePage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
     val checkInformation = app.checkInformation.getOrElse(CheckInformation())
     val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
@@ -49,7 +48,7 @@ trait TermsOfUsePartialController {
     Future.successful(Ok(createTermsOfUse(applicationViewModelFromApplicationRequest, TermsOfUseForm.form.fill(termsOfUseForm))))
   }
 
-  def termsOfUseAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def termsOfUseAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val version = appConfig.currentTermsOfUseVersion
     val app = request.application
 
@@ -64,8 +63,7 @@ trait TermsOfUsePartialController {
 
       val updatedInformation = if (information.termsOfUseAgreements.exists(terms => terms.version == version)) {
         information
-      }
-      else {
+      } else {
         information.copy(termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.user.email, DateTimeUtils.now, version))
       }
 
@@ -77,8 +75,8 @@ trait TermsOfUsePartialController {
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  protected def landingPageRoute(appId: String): Call
-  protected def termsOfUseActionRoute(appId: String): Call
+  protected def landingPageRoute(appId: ApplicationId): Call
+  protected def termsOfUseActionRoute(appId: ApplicationId): Call
   protected def submitButtonLabel: String
 
 }

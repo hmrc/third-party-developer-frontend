@@ -18,7 +18,7 @@ package controllers.checkpages
 
 import controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
 import domain.models
-import domain.models.applications.{Application, CheckInformation}
+import domain.models.applications.{ApplicationId, Application, CheckInformation}
 import domain.models.controllers.SubscriptionData
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
@@ -26,7 +26,7 @@ import views.html.checkpages.ApiSubscriptionsView
 
 import scala.concurrent.Future
 
-trait ApiSubscriptionsPartialController  {
+trait ApiSubscriptionsPartialController {
   self: ApplicationController with CanUseCheckActions =>
 
   val apiSubscriptionsViewTemplate: ApiSubscriptionsView
@@ -34,12 +34,12 @@ trait ApiSubscriptionsPartialController  {
   private def asSubscriptionData(applicationRequest: ApplicationRequest[AnyContent]) =
     models.controllers.SubscriptionData(applicationRequest.role, applicationRequest.application, APISubscriptions.groupSubscriptions(applicationRequest.subscriptions))
 
-  def apiSubscriptionsPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def apiSubscriptionsPage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
     Future.successful(Ok(apiSubscriptionsView(app, asSubscriptionData(request))))
   }
 
-  def apiSubscriptionsAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def apiSubscriptionsAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
     val subscriptionData = asSubscriptionData(request)
     val information = app.checkInformation.getOrElse(CheckInformation())
@@ -48,11 +48,10 @@ trait ApiSubscriptionsPartialController  {
     def hasNonExampleSubscription(subscriptionData: SubscriptionData) =
       subscriptionData.subscriptions.fold(false)(subs => subs.apis.exists(_.hasSubscriptions))
 
-    if( !hasNonExampleSubscription(subscriptionData) ) {
+    if (!hasNonExampleSubscription(subscriptionData)) {
       val form = DummySubscriptionsForm.form.bind(Map("hasNonExampleSubscription" -> "false"))
       Future.successful(BadRequest(apiSubscriptionsView(app, subscriptionData, Some(form))))
-    }
-    else {
+    } else {
       for {
         _ <- applicationService.updateCheckInformation(app, information.copy(apiSubscriptionsConfirmed = true))
       } yield Redirect(landingPageRoute(app.id))
@@ -60,20 +59,20 @@ trait ApiSubscriptionsPartialController  {
   }
 
   private def apiSubscriptionsView(
-    app: Application,
-    subscriptionData: SubscriptionData,
-    form: Option[Form[DummySubscriptionsForm]] = None
-    )(implicit request: ApplicationRequest[AnyContent]) = {
+      app: Application,
+      subscriptionData: SubscriptionData,
+      form: Option[Form[DummySubscriptionsForm]] = None
+  )(implicit request: ApplicationRequest[AnyContent]) = {
     apiSubscriptionsViewTemplate(
-        app,
-        subscriptionData.role,
-        subscriptionData.subscriptions,
-        app.id,
-        apiSubscriptionsActionRoute(app.id),
-        form
-      )
+      app,
+      subscriptionData.role,
+      subscriptionData.subscriptions,
+      app.id,
+      apiSubscriptionsActionRoute(app.id),
+      form
+    )
   }
 
-  protected def landingPageRoute(appId: String): Call
-  protected def apiSubscriptionsActionRoute(appId: String): Call
+  protected def landingPageRoute(appId: ApplicationId): Call
+  protected def apiSubscriptionsActionRoute(appId: ApplicationId): Call
 }

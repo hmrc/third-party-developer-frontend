@@ -92,7 +92,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
     def givenTheApplicationExistWithUserRole(
-        appId: String,
+        appId: ApplicationId,
         userRole: Role,
         state: ApplicationState = ApplicationState.production("test", "test"),
         additionalTeamMembers: Seq[Collaborator] = Seq()

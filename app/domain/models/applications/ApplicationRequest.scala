@@ -24,11 +24,13 @@ trait ApplicationRequest {
   protected def normalizeDescription(description: Option[String]): Option[String] = description.map(_.trim.take(250))
 }
 
-case class CreateApplicationRequest(name: String,
-                                    environment: Environment,
-                                    description: Option[String],
-                                    collaborators: Seq[Collaborator],
-                                    access: Access = Standard(Seq.empty, None, None, Set.empty))
+case class CreateApplicationRequest(
+    name: String,
+    environment: Environment,
+    description: Option[String],
+    collaborators: Seq[Collaborator],
+    access: Access = Standard(Seq.empty, None, None, Set.empty)
+)
 
 object CreateApplicationRequest extends ApplicationRequest {
   implicit val format = Json.format[CreateApplicationRequest]
@@ -41,11 +43,13 @@ object CreateApplicationRequest extends ApplicationRequest {
   )
 }
 
-case class UpdateApplicationRequest(id: String,
-                                    environment: Environment,
-                                    name: String,
-                                    description: Option[String] = None,
-                                    access: Access = Standard(Seq.empty, None, None, Set.empty))
+case class UpdateApplicationRequest(
+    id: ApplicationId,
+    environment: Environment,
+    name: String,
+    description: Option[String] = None,
+    access: Access = Standard(Seq.empty, None, None, Set.empty)
+)
 
 object UpdateApplicationRequest extends ApplicationRequest {
 
@@ -107,9 +111,8 @@ object UpdateApplicationRequest extends ApplicationRequest {
       normalizeDescription(application.description),
       access.copy(redirectUris = access.redirectUris.map {
         case form.originalRedirectUri => form.newRedirectUri
-        case s => s
+        case s                        => s
       })
     )
   }
 }
-

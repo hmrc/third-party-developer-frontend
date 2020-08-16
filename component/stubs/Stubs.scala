@@ -218,15 +218,15 @@ object AuditStub extends Matchers {
 
 object ApiSubscriptionFieldsStub {
 
-  def setUpDeleteSubscriptionFields(clientId: String, apiContext: ApiContext, apiVersion: ApiVersion) = {
+  def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
     stubFor(
       delete(urlEqualTo(fieldValuesUrl(clientId, apiContext, apiVersion)))
         .willReturn(aResponse().withStatus(NO_CONTENT))
     )
   }
 
-  private def fieldValuesUrl(clientId: String, apiContext: ApiContext, apiVersion: ApiVersion) = {
-    s"/field/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
+  private def fieldValuesUrl(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
+    s"/field/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
   }
 
   def noSubscriptionFields(apiContext: ApiContext, version: ApiVersion): Any = {

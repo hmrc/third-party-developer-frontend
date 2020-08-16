@@ -216,8 +216,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
     def givenApplicationExists(
-        appId: String = appId,
-        clientId: String = clientId,
+        appId: ApplicationId = appId,
+        clientId: ClientId = clientId,
         userRole: Role = ADMINISTRATOR,
         state: ApplicationState = testing,
         checkInformation: Option[CheckInformation] = None,

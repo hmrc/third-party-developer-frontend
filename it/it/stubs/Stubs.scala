@@ -36,7 +36,7 @@ import play.api.http.Status._
 
 object Stubs {
 
-  def setupRequest(path: String, status: Int, response: String) = {
+  def setupRequest(path: ClientId, status: Int, response: ClientId) = {
     Logger.info(s"Stubbing $path with $response")
     stubFor(
       get(urlEqualTo(path))
@@ -44,26 +44,26 @@ object Stubs {
     )
   }
 
-  def setupDeleteRequest(path: String, status: Int) =
+  def setupDeleteRequest(path: ClientId, status: Int) =
     stubFor(delete(urlEqualTo(path)).willReturn(aResponse().withStatus(status)))
 
-  def setupPostRequest(path: String, status: Int) =
+  def setupPostRequest(path: ClientId, status: Int) =
     stubFor(post(urlEqualTo(path)).willReturn(aResponse().withStatus(status)))
 
-  def setupPostRequest(path: String, status: Int, response: String) =
+  def setupPostRequest(path: ClientId, status: Int, response: ClientId) =
     stubFor(
       post(urlEqualTo(path))
         .willReturn(aResponse().withStatus(status).withBody(response))
     )
 
-  def setupPostContaining(path: String, data: String, status: Int): Unit =
+  def setupPostContaining(path: ClientId, data: ClientId, status: Int): Unit =
     stubFor(
       post(urlPathEqualTo(path))
         .withRequestBody(containing(data))
         .willReturn(aResponse().withStatus(status))
     )
 
-  def setupEncryptedPostRequest[T](path: String, data: T, status: Int, response: String)(
+  def setupEncryptedPostRequest[T](path: ClientId, data: T, status: Int, response: ClientId)(
       implicit writes: Writes[T],
       encryptedJson: EncryptedJson
   ) =
@@ -83,21 +83,21 @@ object DeveloperStub {
         .willReturn(aResponse().withStatus(status))
     )
 
-  def update(email: String, profile: UpdateProfileRequest, status: Int) =
+  def update(email: ClientId, profile: UpdateProfileRequest, status: Int) =
     stubFor(
       post(urlMatching(s"/developer/$email"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))
         .willReturn(aResponse().withStatus(status))
     )
 
-  def setupResend(email: String, status: Int) = {
+  def setupResend(email: ClientId, status: Int) = {
     stubFor(
       post(urlPathEqualTo(s"/$email/resend-verification"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def verifyResetPassword(email: String) = {
+  def verifyResetPassword(email: ClientId) = {
     verify(1, postRequestedFor(urlPathEqualTo(s"/$email/password-reset-request")))
   }
 }
@@ -109,35 +109,35 @@ object ApplicationStub {
     Stubs.setupPostRequest("/application/name/validate", OK, Json.toJson(validNameResult).toString)
   }
 
-  def setUpFetchApplication(id: String, status: Int, response: String = "") = {
+  def setUpFetchApplication(id: ClientId, status: Int, response: ClientId = "") = {
     stubFor(
       get(urlEqualTo(s"/application/$id"))
         .willReturn(aResponse().withStatus(status).withBody(response))
     )
   }
 
-  def setUpFetchEmptySubscriptions(id: String, status: Int) = {
+  def setUpFetchEmptySubscriptions(id: ClientId, status: Int) = {
     stubFor(
       get(urlEqualTo(s"/application/$id/subscription"))
         .willReturn(aResponse().withStatus(status).withBody("[]"))
     )
   }
 
-  def setUpFetchSubscriptions(id: String, status: Int, response: Seq[APISubscription]) = {
+  def setUpFetchSubscriptions(id: ClientId, status: Int, response: Seq[APISubscription]) = {
     stubFor(
       get(urlEqualTo(s"/application/$id/subscription"))
         .willReturn(aResponse().withStatus(status).withBody(Json.toJson(response).toString()))
     )
   }
 
-  def setUpDeleteSubscription(id: String, api: String, version: ApiVersion, status: Int) = {
+  def setUpDeleteSubscription(id: ClientId, api: ClientId, version: ApiVersion, status: Int) = {
     stubFor(
       delete(urlEqualTo(s"/application/$id/subscription?context=$api&version=${version.value}"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def setUpExecuteSubscription(id: String, api: String, version: ApiVersion, status: Int) = {
+  def setUpExecuteSubscription(id: ClientId, api: ClientId, version: ApiVersion, status: Int) = {
     stubFor(
       post(urlEqualTo(s"/application/$id/subscription"))
         .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(ApiContext(api), version)).toString()))
@@ -145,14 +145,14 @@ object ApplicationStub {
     )
   }
 
-  def setUpUpdateApproval(id: String) = {
+  def setUpUpdateApproval(id: ClientId) = {
     stubFor(
       post(urlEqualTo(s"/application/$id/check-information"))
         .willReturn(aResponse().withStatus(OK))
     )
   }
 
-  def configureUserApplications(email: String, applications: List[Application] = Nil, status: Int = OK) = {
+  def configureUserApplications(email: ClientId, applications: List[Application] = Nil, status: Int = OK) = {
     val encodedEmail = URLEncoder.encode(email, "UTF-8")
 
     def stubResponse(environment: Environment, applications: List[Application]) = {
@@ -174,7 +174,7 @@ object ApplicationStub {
     stubResponse(Environment.SANDBOX, sandboxApps)
   }
 
-  def configureApplicationCredentials(tokens: Map[String, ApplicationToken], status: Int = OK) = {
+  def configureApplicationCredentials(tokens: Map[ClientId, ApplicationToken], status: Int = OK) = {
     tokens.foreach { entry =>
       stubFor(
         get(urlEqualTo(s"/application/${entry._1}/credentials"))
@@ -190,23 +190,23 @@ object ApplicationStub {
 }
 
 object DeskproStub extends Matchers {
-  val deskproPath: String = "/deskpro/ticket"
-  val deskproFeedbackPath: String = "/deskpro/feedback"
+  val deskproPath: ClientId = "/deskpro/ticket"
+  val deskproFeedbackPath: ClientId = "/deskpro/feedback"
 
   def setupTicketCreation(status: Int = OK) = {
     Stubs.setupPostRequest(deskproPath, status)
   }
 
-  def verifyTicketCreationWithSubject(subject: String) = {
+  def verifyTicketCreationWithSubject(subject: ClientId) = {
     verify(1, postRequestedFor(urlPathEqualTo(deskproPath)).withRequestBody(containing(s""""subject":"$subject"""")))
   }
 }
 
 object AuditStub extends Matchers {
-  val auditPath: String = "/write/audit"
-  val mergedAuditPath: String = "/write/audit/merged"
+  val auditPath: ClientId = "/write/audit"
+  val mergedAuditPath: ClientId = "/write/audit/merged"
 
-  def setupAudit(status: Int = NO_CONTENT, data: Option[String] = None) = {
+  def setupAudit(status: Int = NO_CONTENT, data: Option[ClientId] = None) = {
     if (data.isDefined) {
       Stubs.setupPostContaining(auditPath, data.get, status)
       Stubs.setupPostContaining(mergedAuditPath, data.get, status)
@@ -233,15 +233,15 @@ object ThirdPartyDeveloperStub {
 
 object ApiSubscriptionFieldsStub {
 
-  def setUpDeleteSubscriptionFields(clientId: String, apiContext: ApiContext, apiVersion: ApiVersion) = {
+  def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
     stubFor(
       delete(urlEqualTo(fieldValuesUrl(clientId, apiContext, apiVersion)))
         .willReturn(aResponse().withStatus(NO_CONTENT))
     )
   }
 
-  private def fieldValuesUrl(clientId: String, apiContext: ApiContext, apiVersion: ApiVersion) = {
-    s"/field/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
+  private def fieldValuesUrl(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) = {
+    s"/field/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
   }
 
   def noSubscriptionFields(apiContext: ApiContext, version: ApiVersion): Any = {

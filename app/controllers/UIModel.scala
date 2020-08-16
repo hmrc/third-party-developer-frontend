@@ -26,11 +26,12 @@ import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ApplicationId
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions])
 
 case class ApplicationSummary(
-    id: String,
+    id: ApplicationId,
     name: String,
     environment: String,
     role: Role,

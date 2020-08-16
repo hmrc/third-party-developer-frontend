@@ -72,7 +72,7 @@ class CheckYourAnswers @Inject() (
     with TermsOfUsePartialController
     with CheckInformationFormHelper {
 
-  def answersPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def answersPage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
     Future.successful(
       Ok(
@@ -81,7 +81,7 @@ class CheckYourAnswers @Inject() (
     )
   }
 
-  def answersPageAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def answersPageAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val application = request.application
 
     (for {
@@ -105,20 +105,22 @@ class CheckYourAnswers @Inject() (
       }
   }
 
-  def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request => Future.successful(Ok(teamView(request.application, request.role, request.user))) }
+  def team(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+    Future.successful(Ok(teamView(request.application, request.role, request.user)))
+  }
 
-  def teamAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def teamAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
       _ <- applicationService.updateCheckInformation(request.application, information.copy(teamConfirmed = true))
     } yield Redirect(routes.CheckYourAnswers.answersPage(appId))
   }
 
-  def teamAddMember(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def teamAddMember(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
   }
 
-  def teamMemberRemoveConfirmation(appId: String, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def teamMemberRemoveConfirmation(appId: ApplicationId, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     successful(
       request.application
         .findCollaboratorByHash(teamMemberHash)
@@ -127,7 +129,7 @@ class CheckYourAnswers @Inject() (
     )
   }
 
-  def teamMemberRemoveAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def teamMemberRemoveAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
       applicationService
         .removeTeamMember(request.application, form.email, request.user.email)
@@ -141,19 +143,19 @@ class CheckYourAnswers @Inject() (
     RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  protected def landingPageRoute(appId: String): Call = routes.CheckYourAnswers.answersPage(appId)
+  protected def landingPageRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.answersPage(appId)
 
-  protected def nameActionRoute(appId: String): Call = routes.CheckYourAnswers.nameAction(appId)
+  protected def nameActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.nameAction(appId)
 
-  protected def contactActionRoute(appId: String): Call = routes.CheckYourAnswers.contactAction(appId)
+  protected def contactActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.contactAction(appId)
 
-  protected def apiSubscriptionsActionRoute(appId: String): Call = routes.CheckYourAnswers.apiSubscriptionsAction(appId)
+  protected def apiSubscriptionsActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.apiSubscriptionsAction(appId)
 
-  protected def privacyPolicyActionRoute(appId: String): Call = routes.CheckYourAnswers.privacyPolicyAction(appId)
+  protected def privacyPolicyActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.privacyPolicyAction(appId)
 
-  protected def termsAndConditionsActionRoute(appId: String): Call = routes.CheckYourAnswers.termsAndConditionsAction(appId)
+  protected def termsAndConditionsActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.termsAndConditionsAction(appId)
 
-  protected def termsOfUseActionRoute(appId: String): Call = routes.CheckYourAnswers.termsOfUseAction(appId)
+  protected def termsOfUseActionRoute(appId: ApplicationId): Call = routes.CheckYourAnswers.termsOfUseAction(appId)
 
   protected def submitButtonLabel = "Continue"
 }
@@ -167,7 +169,7 @@ case class CheckYourSubscriptionData(
 )
 
 case class CheckYourAnswersData(
-    appId: String,
+    appId: ApplicationId,
     softwareName: String,
     fullName: Option[String],
     email: Option[String],
