@@ -626,14 +626,6 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     title.get
   }
 
-  private def bodyOf(result: Future[Result]) = {
-    val bodyRegEx = """<body[^>]*>(.*)</body>""".r
-    println(contentAsString(result))
-    val body = bodyRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
-    body.isDefined shouldBe true
-    body.get
-  }
-
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
 }

@@ -20,7 +20,7 @@ import config.ErrorHandler
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import mocks.service._
-import play.api.mvc.AnyContentAsEmpty
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
@@ -33,6 +33,7 @@ import views.html._
 import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class AddApplicationSuccessSpec extends BaseControllerSpec
   with SubscriptionTestHelperSugar with WithCSRFAddToken {
@@ -106,14 +107,33 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
 
   "Add applications subordinate success page" should {
 
-    "return the page with the user is logged in" in new Setup {
+    "return the page with the user is logged in and the environment is Sandbox" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
       givenApplicationExists(subordinateApp)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
       status(result) shouldBe OK
+      titleOf(result) shouldBe "Application added to the sandbox - HMRC Developer Hub - GOV.UK"
       contentAsString(result) should include(loggedInUser.displayedName)
       contentAsString(result) should include("You can now use its credentials to test with sandbox APIs.")
+      contentAsString(result) should include("Read the guidance on")
+      contentAsString(result) should include("to find out which endpoints to use, creating a test user and types of test data.")
+      contentAsString(result) should not include "Sign in"
+    }
+
+    "return the page with the user is logged in and the environment is Development" in new Setup {
+      givenApplicationExists(subordinateApp)
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+
+      private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
+
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Application added to Development - HMRC Developer Hub - GOV.UK"
+      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include("You can now use its credentials to test with development APIs.")
       contentAsString(result) should include("Read the guidance on")
       contentAsString(result) should include("to find out which endpoints to use, creating a test user and types of test data.")
       contentAsString(result) should not include "Sign in"
@@ -136,4 +156,12 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
       redirectLocation(result) shouldBe Some("/developer/login")
     }
   }
+
+  private def titleOf(result: Future[Result]) = {
+    val titleRegEx = """<title[^>]*>(.*)</title>""".r
+    val title = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
+    title.isDefined shouldBe true
+    title.get
+  }
+
 }

@@ -22,7 +22,10 @@
 
 @(appName: String, id: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
-@pageHeading = @{"Application added to the sandbox"}
+@theSandbox = @{"the sandbox"}
+@subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}
+@subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
+@pageHeading = @{s"Application added to $subordinateWording"}
 
 @devMain(
     title = pageHeading,
@@ -40,7 +43,7 @@
 
     <h2 class="heading-medium">You added @appName</h2>
 
-    <p>You can now use its credentials to test with sandbox APIs.</p>
+    <p>You can now use its credentials to test with @subordinateEnvName APIs.</p>
 
     <p>Read the guidance on <a href="/api-documentation/docs/testing">testing in the sandbox</a>
         to find out which endpoints to use, creating a test user and types of test data.</p>
