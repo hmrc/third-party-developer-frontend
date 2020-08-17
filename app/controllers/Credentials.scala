@@ -16,8 +16,6 @@
 
 package controllers
 
-import java.util.UUID
-
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Credentials.serverTokenCutoffDate
@@ -36,7 +34,6 @@ import views.html.editapplication.DeleteClientSecretView
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
-import domain.models.applications.ClientId
 
 @Singleton
 class Credentials @Inject() (
@@ -93,8 +90,8 @@ class Credentials @Inject() (
       }
     }
 
-  def deleteClientSecret(applicationId: UUID, clientSecretId: String): Action[AnyContent] =
-    canChangeClientSecrets(ApplicationId(applicationId.toString)) { implicit request =>
+  def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String): Action[AnyContent] =
+    canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.fetchCredentials(request.application).map { tokens =>
         tokens.clientSecrets
           .find(_.id == clientSecretId)
@@ -102,11 +99,11 @@ class Credentials @Inject() (
       }
     }
 
-  def deleteClientSecretAction(applicationId: UUID, clientSecretId: String): Action[AnyContent] =
-    canChangeClientSecrets(ApplicationId(applicationId.toString)) { implicit request =>
+  def deleteClientSecretAction(applicationId: ApplicationId, clientSecretId: String): Action[AnyContent] =
+    canChangeClientSecrets(applicationId) { implicit request =>
       applicationService
         .deleteClientSecret(request.application, clientSecretId, request.user.email)
-        .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(ApplicationId(applicationId.toString))))
+        .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId)))
     }
 }
 

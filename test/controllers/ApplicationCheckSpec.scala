@@ -52,9 +52,9 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
 
-  val appId = ApplicationId("1234")
+  override val appId = ApplicationId("1234")
+
   val appName: String = "app"
-  val clientId = ClientId("clientIdzzz")
   val sessionId = "sessionId"
 
   val exampleContext = ApiContext("exampleContext")
@@ -73,7 +73,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersion("api-example-microservice"))
 
-  val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token") // TODO - this is wierd
+  val tokens: ApplicationToken = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
   val exampleApiSubscription: Some[APISubscriptions] = Some(
     APISubscriptions(
       "Example API",
@@ -403,7 +403,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
     }
 
     "successful submit action should take you to the check-your-answers page when no configurations confirmed because none required" in new Setup {
@@ -429,7 +429,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
     }
 
     "validation failure submit action" in new Setup {
@@ -1187,7 +1187,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
@@ -1253,7 +1253,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check/team")
 
       verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
@@ -1264,7 +1264,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
@@ -1278,7 +1278,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
     }
 
     "return unauthorised App details page with one Admin" in new Setup {

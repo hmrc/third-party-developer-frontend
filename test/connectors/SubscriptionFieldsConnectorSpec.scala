@@ -140,7 +140,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       Map(apiIdentifier -> Seq(subscriptionDefinition))
 
     val getUrl =
-      s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
+      s"$urlPrefix/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     "return subscription fields for an API" in new Setup {
       when(
@@ -361,7 +361,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   "fetchFieldValues" should {
     val definitionsUrl = s"/definition/context/${apiContext.value}/version/${apiVersion.value}"
     val valuesUrl =
-      s"/field/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
+      s"/field/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     val definitionsFromRestService = List(
       FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default)
@@ -449,7 +449,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       fieldsValues
     )
 
-    val putUrl = s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
+    val putUrl = s"$urlPrefix/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     "save the fields" in new Setup {
       val response = HttpResponse(OK)
@@ -540,7 +540,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
   "deleteFieldValues" should {
 
-    val url = s"$urlPrefix/application/$clientId/context/${apiContext.value}/version/${apiVersion.value}"
+    val url = s"$urlPrefix/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     "return success after delete call has returned 204 NO CONTENT" in new Setup {
       when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))

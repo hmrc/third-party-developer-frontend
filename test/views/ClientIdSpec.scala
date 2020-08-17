@@ -28,11 +28,12 @@ import views.helper.CommonViewSpec
 import views.html.ClientIdView
 
 import scala.collection.JavaConverters._
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
     val clientIdView = app.injector.instanceOf[ClientIdView]
-
 
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
       doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
@@ -44,8 +45,8 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken {
     val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val application = Application(
-      "Test Application ID",
-      "Test Application Client ID",
+      ApplicationId("Test Application ID"),
+      ClientId("Test Application Client ID"),
       "Test Application",
       DateTime.now(),
       DateTime.now(),

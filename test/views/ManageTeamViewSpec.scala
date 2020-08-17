@@ -29,6 +29,8 @@ import utils.WithCSRFAddToken
 import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
 

@@ -37,9 +37,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ManageApplicationsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  val appId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
-
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
@@ -63,7 +60,7 @@ class ManageApplicationsSpec extends BaseControllerSpec with SubscriptionTestHel
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 

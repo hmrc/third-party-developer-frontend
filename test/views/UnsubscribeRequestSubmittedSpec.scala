@@ -27,6 +27,8 @@ import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.UnsubscribeRequestSubmittedView
 import domain.models.apidefinitions.ApiVersion
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Unsubscribe request submitted page" should {

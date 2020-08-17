@@ -25,6 +25,8 @@ import utils.ViewHelpers.elementExistsByText
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeletePrincipalApplicationCompleteView
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken {
 

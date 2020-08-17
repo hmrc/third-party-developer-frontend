@@ -31,6 +31,8 @@ import views.helper.CommonViewSpec
 import views.html.ManageSubscriptionsView
 
 import scala.collection.JavaConverters._
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -45,8 +47,8 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
   }
 
   def buildApplication(applicationState: ApplicationState, environment: Environment): Application = Application(
-    "Test Application ID",
-    "Test Application Client ID",
+    ApplicationId("Test Application ID"),
+    ClientId("Test Application Client ID"),
     "Test Application",
     DateTime.now(),
     DateTime.now(),
@@ -76,7 +78,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
         EditApplicationForm.withData(productionApplicationTesting),
         ApplicationViewModel(application, false),
         Some(GroupedSubscriptions(Seq.empty, Seq.empty)),
-        "",
+        ApplicationId(""),
         request,
         developer,
         messagesProvider,

@@ -25,6 +25,8 @@ import utils.ViewHelpers.elementExistsByText
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeleteSubordinateApplicationConfirmView
+import domain.models.applications.ClientId
+import domain.models.applications.ApplicationId
 
 class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken {
 

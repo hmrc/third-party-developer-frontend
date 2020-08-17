@@ -53,8 +53,8 @@ import domain.models.applications.ClientId
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  val appId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
+  // val appId = ApplicationId("1234")
+  // val clientId = ClientId("clientId123")
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"

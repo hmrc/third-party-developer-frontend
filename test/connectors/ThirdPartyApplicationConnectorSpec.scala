@@ -171,7 +171,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "successfully update an application" in new Setup {
 
-      val url = baseUrl + s"/application/$applicationId"
+      val url = baseUrl + s"/application/${applicationId.value}"
       when(
         mockHttpClient
           .POST[JsValue, HttpResponse](eqTo(url), eqTo(updateApplicationRequestJsValue), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
@@ -221,7 +221,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   "fetch application by id" should {
 
-    val fetchUrl = s"/application/$applicationId"
+    val fetchUrl = s"/application/${applicationId.value}"
     val url = baseUrl + fetchUrl
     val appName = "app name"
 
@@ -276,8 +276,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "fetch credentials for application" should {
-    val tokens = ApplicationToken(applicationId, Seq(aClientSecret()), "pToken")
-    val url = baseUrl + s"/application/$applicationId/credentials"
+    val tokens = ApplicationToken(Seq(aClientSecret()), "pToken")
+    val url = baseUrl + s"/application/${applicationId.value}/credentials"
 
     "return credentials" in new Setup {
 
@@ -317,7 +317,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     val apiSubscription1 = createApiSubscription(ApiContext("api"), ApiVersion("1.0"), subscribed = true)
     val apiSubscription2 = createApiSubscription(ApiContext("api"), ApiVersion("2.0"), subscribed = false)
     val subscriptions = Seq(apiSubscription1, apiSubscription2)
-    val url = baseUrl + s"/application/$applicationId/subscription"
+    val url = baseUrl + s"/application/${applicationId.value}/subscription"
 
     "return the subscriptions when they are successfully retrieved" in new Setup {
 
@@ -365,7 +365,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   "subscribe to api" should {
     val apiIdentifier = ApiIdentifier(ApiContext("app1"), ApiVersion("2.0"))
-    val url = baseUrl + s"/application/$applicationId/subscription"
+    val url = baseUrl + s"/application/${applicationId.value}/subscription"
 
     "subscribe application to an api" in new Setup {
 
@@ -395,7 +395,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   "unsubscribe from api" should {
     val context = ApiContext("app1")
     val version = ApiVersion("2.0")
-    val url = baseUrl + s"/application/$applicationId/subscription?context=${context.value}&version=${version.value}"
+    val url = baseUrl + s"/application/${applicationId.value}/subscription?context=${context.value}&version=${version.value}"
 
     "unsubscribe application from an api" in new Setup {
 
@@ -447,7 +447,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     val applicationName = "applicationName"
     val email = "john.requestor@example.com"
     val upliftRequest = UpliftRequest(applicationName, email)
-    val url = baseUrl + s"/application/$applicationId/request-uplift"
+    val url = baseUrl + s"/application/${applicationId.value}/request-uplift"
 
     "return success response in case of a 204 NO CONTENT on backend " in new Setup {
 
@@ -487,7 +487,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   "updateApproval" should {
     val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email", "telephone")))
-    val url = s"$baseUrl/application/$applicationId/check-information"
+    val url = s"$baseUrl/application/${applicationId.value}/check-information"
 
     "return success response in case of a 204 on backend " in new Setup {
       when(
@@ -519,7 +519,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     val adminsToEmail = Set("bobby@example.com", "daisy@example.com")
     val addTeamMemberRequest =
       AddTeamMemberRequest(admin, Collaborator(teamMember, role), isRegistered = true, adminsToEmail)
-    val url = s"$baseUrl/application/$applicationId/collaborator"
+    val url = s"$baseUrl/application/${applicationId.value}/collaborator"
 
     "return success" in new Setup {
       val addTeamMemberResponse = AddTeamMemberResponse(true)
@@ -562,7 +562,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     val admin = "admin@example.com"
     val adminsToEmail = Seq("otheradmin@example.com", "anotheradmin@example.com")
     val queryParams = s"admin=${urlEncode(admin)}&adminsToEmail=${urlEncode(adminsToEmail.mkString(","))}"
-    val url = s"$baseUrl/application/$applicationId/collaborator/${urlEncode(email)}?$queryParams"
+    val url = s"$baseUrl/application/${applicationId.value}/collaborator/${urlEncode(email)}?$queryParams"
 
     "return success" in new Setup {
       when(
@@ -599,7 +599,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     val actorEmailAddress = "john.requestor@example.com"
     val clientSecretRequest = ClientSecretRequest(actorEmailAddress)
-    val url = s"$baseUrl/application/$applicationId/client-secret"
+    val url = s"$baseUrl/application/${applicationId.value}/client-secret"
 
     "generate the client secret" in new Setup {
       val newClientSecretId = UUID.randomUUID().toString
@@ -647,11 +647,11 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "deleteClientSecret" should {
-    val applicationId = UUID.randomUUID()
+    val applicationId = ApplicationId(UUID.randomUUID().toString())
     val clientSecretId = UUID.randomUUID().toString
     val actorEmailAddress = "john.requestor@example.com"
     val expectedDeleteClientSecretRequest = DeleteClientSecretRequest(actorEmailAddress)
-    val url = s"$baseUrl/application/${applicationId.toString}/client-secret/$clientSecretId"
+    val url = s"$baseUrl/application/${applicationId.value}/client-secret/$clientSecretId"
 
     "delete a client secret" in new Setup {
       when(
@@ -755,7 +755,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "deleteSubordinateApplication" should {
-    val url = s"$baseUrl/application/$applicationId/delete"
+    val url = s"$baseUrl/application/${applicationId.value}/delete"
 
     "successfully delete the application" in new Setup {
 

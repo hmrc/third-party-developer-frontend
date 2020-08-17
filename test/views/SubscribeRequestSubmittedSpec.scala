@@ -28,6 +28,8 @@ import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.SubscribeRequestSubmittedView
 import domain.models.apidefinitions.ApiVersion
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Subscribe request submitted page" should {

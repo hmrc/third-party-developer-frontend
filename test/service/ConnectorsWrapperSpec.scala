@@ -27,7 +27,9 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future.{successful,failed}
+import scala.concurrent.Future.{successful, failed}
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class ConnectorsWrapperSpec extends AsyncHmrcSpec {
 
@@ -44,12 +46,12 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
       mockAppConfig
     )
 
-    def theProductionConnectorWillReturnTheApplication(applicationId: String, application: Application) = {
+    def theProductionConnectorWillReturnTheApplication(applicationId: ApplicationId, application: Application) = {
       when(connectors.productionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(Some(application)))
       when(connectors.sandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(None))
     }
 
-    def theSandboxConnectorWillReturnTheApplication(applicationId: String, application: Application) = {
+    def theSandboxConnectorWillReturnTheApplication(applicationId: ApplicationId, application: Application) = {
       when(connectors.productionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(None))
       when(connectors.sandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(Some(application)))
     }
@@ -64,12 +66,12 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
     }
   }
 
-  val productionApplicationId = "Application ID"
-  val productionClientId = "hBnFo14C0y4SckYUbcoL2PbFA40a"
+  val productionApplicationId = ApplicationId("Application ID")
+  val productionClientId = ClientId("hBnFo14C0y4SckYUbcoL2PbFA40a")
   val productionApplication =
     Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("description"))
-  val sandboxApplicationId = "Application ID"
-  val sandboxClientId = "Client ID"
+  val sandboxApplicationId = ApplicationId("Application ID")
+  val sandboxClientId = ClientId("Client ID")
   val sandboxApplication = Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, Some("description"))
 
   "fetchByApplicationId" when {

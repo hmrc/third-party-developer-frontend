@@ -30,7 +30,7 @@ trait TestApplications {
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
   def aSandboxApplication(
-      appId: ApplicationId = randomUUID().toString,
+      appId: ApplicationId = ApplicationId(randomUUID().toString),
       clientId: ClientId = ClientId(randomString(28)),
       adminEmail: String = "admin@example.com",
       developerEmail: String = "developer@example.com"
@@ -40,7 +40,7 @@ trait TestApplications {
   }
 
   def anApplication(
-      appId: ApplicationId = randomUUID().toString,
+      appId: ApplicationId = ApplicationId(randomUUID().toString),
       clientId: ClientId = ClientId(randomString(28)),
       environment: Environment = Environment.PRODUCTION,
       state: ApplicationState = ApplicationState.production("test", "test"),
@@ -94,7 +94,7 @@ trait TestApplications {
 
   def tokens(clientId: ClientId = ClientId(randomString(28)), clientSecret: String = randomString(28), accessToken: String = randomString(28)): ApplicationToken = {
 
-    ApplicationToken(clientId, Seq(aClientSecret()), accessToken)
+    ApplicationToken(Seq(aClientSecret()), accessToken)
   }
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))

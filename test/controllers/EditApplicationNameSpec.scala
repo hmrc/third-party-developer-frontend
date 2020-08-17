@@ -38,9 +38,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  val appId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
-
   val developer: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
@@ -64,7 +61,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens: ApplicationToken = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]

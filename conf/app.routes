@@ -120,8 +120,8 @@ GET         /applications/:id/credentials                                       
 GET         /applications/:id/client-id                                                     controllers.Credentials.clientId(id: domain.models.applications.ApplicationId)
 GET         /applications/:id/client-secrets                                                controllers.Credentials.clientSecrets(id: domain.models.applications.ApplicationId)
 GET         /applications/:id/server-token                                                  controllers.Credentials.serverToken(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecret(id: java.util.UUID, clientSecretId: String)
-POST        /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecretAction(id: java.util.UUID, clientSecretId: String)
+GET         /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecret(id: domain.models.applications.ApplicationId, clientSecretId: String)
+POST        /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecretAction(id: domain.models.applications.ApplicationId, clientSecretId: String)
 POST        /applications/:id/client-secret-new                                             controllers.Credentials.addClientSecret(id: domain.models.applications.ApplicationId)
 
 GET         /applications/:id/request-check                                                 controllers.checkpages.ApplicationCheck.requestCheckPage(id: domain.models.applications.ApplicationId)

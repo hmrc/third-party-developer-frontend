@@ -31,6 +31,8 @@ import views.helper.CommonViewSpec
 import views.html.ServerTokenView
 
 import scala.collection.JavaConverters._
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
@@ -46,8 +48,8 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken {
     val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val application = Application(
-      "Test Application ID",
-      "Test Application Client ID",
+      ApplicationId("Test Application ID"),
+      ClientId("Test Application Client ID"),
       "Test Application",
       DateTime.now(),
       DateTime.now(),

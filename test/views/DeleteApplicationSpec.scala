@@ -26,6 +26,8 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeleteApplicationView
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -46,8 +48,8 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
-  val prodAppId = "prod123"
-  val sandboxAppId = "sand123"
+  val prodAppId = ApplicationId("prod123")
+  val sandboxAppId = ApplicationId("sand123")
   val prodApp: Application = application.copy(id = prodAppId)
   val sandboxApp: Application = application.copy(id = sandboxAppId, deployedTo = Environment.SANDBOX)
 

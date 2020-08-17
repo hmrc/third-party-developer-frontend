@@ -20,6 +20,8 @@ import utils.AsyncHmrcSpec
 import builder._
 import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class APISubscriptionStatusTest extends AsyncHmrcSpec with SubscriptionsBuilder {
 
@@ -31,7 +33,7 @@ class APISubscriptionStatusTest extends AsyncHmrcSpec with SubscriptionsBuilder 
       subscribed: Boolean = true,
       requiresTrust: Boolean = false
   ) = {
-    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version.version)
+    val emptyFields = emptySubscriptionFieldsWrapper(ApplicationId("myAppId"), ClientId("myClientId"), context, version.version)
 
     APISubscriptionStatus(name, service, context, version, subscribed, requiresTrust, emptyFields)
   }

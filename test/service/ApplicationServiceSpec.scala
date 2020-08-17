@@ -99,13 +99,13 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       mockAuditService
     )
 
-    def theProductionConnectorthenReturnTheApplication(applicationId: String, application: Application): Unit = {
+    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
       when(mockProductionApplicationConnector.fetchApplicationById(applicationId))
         .thenReturn(successful(Some(application)))
       when(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
     }
 
-    def theSandboxConnectorthenReturnTheApplication(applicationId: String, application: Application): Unit = {
+    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
       when(mockProductionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
       when(mockSandboxApplicationConnector.fetchApplicationById(applicationId))
         .thenReturn(successful(Some(application)))
@@ -114,7 +114,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
     def theSubscriptionFieldsServiceValuesthenReturn(
         fields: Seq[ApiSubscriptionFields.SubscriptionFieldValue]
     ): Unit = {
-      when(mockSubscriptionFieldsService.fetchFieldsValues(any[Application], *, *)(any[HeaderCarrier]))
+      when(mockSubscriptionFieldsService.fetchFieldsValues(any[Application], *, *[ApiIdentifier])(any[HeaderCarrier]))
         .thenReturn(successful(fields))
     }
 
@@ -130,12 +130,12 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   def api(name: String, context: String, requiresTrust: Option[Boolean], versions: VersionSubscription*): APISubscription =
     APISubscription(name, name, ApiContext(context), versions, requiresTrust)
 
-  val productionApplicationId = "Application ID"
-  val productionClientId = s"client-id-${randomUUID().toString}"
+  val productionApplicationId = ApplicationId("Application ID")
+  val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
   val productionApplication: Application =
     Application(productionApplicationId, productionClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("description"), Set())
-  val sandboxApplicationId = "Application ID"
-  val sandboxClientId = "Client ID"
+  val sandboxApplicationId = ApplicationId("Application ID")
+  val sandboxClientId = ClientId("Client ID")
   val sandboxApplication: Application =
     Application(sandboxApplicationId, sandboxClientId, "name", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, Some("description"))
 
@@ -183,9 +183,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
   "Fetch by teamMember email" should {
     val emailAddress = "user@example.com"
-    val app1 = Application("id1", "cl-id1", "zapplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION)
-    val app2 = Application("id2", "cl-id2", "application", DateTime.now, DateTime.now, None, Environment.SANDBOX)
-    val app3 = Application("id3", "cl-id3", "4pplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION)
+    val app1 = Application(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION)
+    val app2 = Application(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, DateTime.now, None, Environment.SANDBOX)
+    val app3 = Application(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION)
 
     val productionApps = Seq(app1, app3)
     val sandboxApps = Seq(app2)
@@ -488,7 +488,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
       when(mockProductionApplicationConnector.unsubscribeFromApi(productionApplicationId, context, version))
         .thenReturn(successful(ApplicationUpdateSuccessful))
-      when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionApplicationId, context, version))
+      when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionClientId, context, version))
         .thenReturn(successful(FieldsDeleteSuccessResult))
 
       await(applicationService.unsubscribeFromApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
@@ -496,14 +496,14 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   }
 
   "Update" should {
-    val applicationId = "applicationId"
-    val clientId = "clientId"
+    val applicationId = ApplicationId("applicationId")
+    val clientId = ClientId("clientId")
     val applicationName = "applicationName"
     val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, None)
 
     "truncate the description to 250 characters on update request" in new Setup {
       private val longDescription = "abcde" * 100
-      private val editApplicationForm = EditApplicationForm("applicationId", "name", Some(longDescription))
+      private val editApplicationForm = EditApplicationForm(applicationId, "name", Some(longDescription))
 
       UpdateApplicationRequest.from(editApplicationForm, application).description.get.length shouldBe 250
     }
@@ -552,15 +552,15 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   }
 
   "deleteClientSecret" should {
-    val applicationId = UUID.randomUUID()
+    val applicationId = ApplicationId(UUID.randomUUID().toString())
     val actorEmailAddress = "john.requestor@example.com"
     val secretToDelete = UUID.randomUUID().toString
 
     "delete a client secret" in new Setup {
 
-      val application = productionApplication.copy(id = applicationId.toString)
+      val application = productionApplication.copy(id = applicationId)
 
-      theProductionConnectorthenReturnTheApplication(applicationId.toString, application)
+      theProductionConnectorthenReturnTheApplication(applicationId, application)
 
       when(mockProductionApplicationConnector.deleteClientSecret(eqTo(applicationId), eqTo(secretToDelete), eqTo(actorEmailAddress))(any[HeaderCarrier]))
         .thenReturn(successful(ApplicationUpdateSuccessful))
@@ -570,7 +570,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   }
 
   "requestUplift" should {
-    val applicationId = "applicationId"
+    val applicationId = ApplicationId("applicationId")
     val applicationName = "applicationName"
 
     val user =
@@ -749,7 +749,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       when(mockDeveloperConnector.fetchByEmails(eqTo(Set("verified@example.com", "unverified@example.com")))(*))
         .thenReturn(successful(nonAdderAdmins))
       theProductionConnectorthenReturnTheApplication(productionApplicationId, application)
-      when(mockProductionApplicationConnector.addTeamMember(*, *)(*)).thenReturn(successful(response))
+      when(mockProductionApplicationConnector.addTeamMember(*[ApplicationId], *)(*)).thenReturn(successful(response))
 
       await(applicationService.addTeamMember(application, adderAdmin.emailAddress, teamMember)) shouldBe response
       verify(mockProductionApplicationConnector).addTeamMember(eqTo(productionApplicationId), eqTo(request.copy(adminsToEmail = Set("verified@example.com"))))(*)
@@ -829,7 +829,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       when(mockDeveloperConnector.fetchByEmails(eqTo(Set("verified@example.com", "unverified@example.com")))(*))
         .thenReturn(successful(nonRemoverAdmins))
       theProductionConnectorthenReturnTheApplication(productionApplicationId, application)
-      when(mockProductionApplicationConnector.removeTeamMember(*, *, *, *)(*)).thenReturn(successful(response))
+      when(mockProductionApplicationConnector.removeTeamMember(*[ApplicationId], *, *, *)(*)).thenReturn(successful(response))
 
       await(applicationService.removeTeamMember(application, teamMemberToRemove.emailAddress, removerAdmin.emailAddress)) shouldBe response
       verify(mockProductionApplicationConnector).removeTeamMember(
@@ -914,7 +914,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     "delete standard subordinate application when requested by an admin" in new Setup {
 
-      when(mockSandboxApplicationConnector.deleteApplication(*)(any[HeaderCarrier]))
+      when(mockSandboxApplicationConnector.deleteApplication(*[ApplicationId])(any[HeaderCarrier]))
         .thenReturn(successful(successful(())))
 
       await(applicationService.deleteSubordinateApplication(adminRequester, sandboxApp))
@@ -924,7 +924,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     "throw an exception when a subordinate application is requested to be deleted by a developer" in new Setup {
 
-      when(mockSandboxApplicationConnector.deleteApplication(*)(any[HeaderCarrier]))
+      when(mockSandboxApplicationConnector.deleteApplication(*[ApplicationId])(any[HeaderCarrier]))
         .thenReturn(failed(new ForbiddenException(expectedMessage)))
 
       private val exception = intercept[ForbiddenException](
@@ -935,7 +935,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     "throw an exception when a production application is requested to be deleted by a developer" in new Setup {
 
-      when(mockSandboxApplicationConnector.deleteApplication(*)(any[HeaderCarrier]))
+      when(mockSandboxApplicationConnector.deleteApplication(*[ApplicationId])(any[HeaderCarrier]))
         .thenReturn(failed(new ForbiddenException(expectedMessage)))
 
       private val exception = intercept[ForbiddenException](
@@ -946,7 +946,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     "throw an exception when a ROPC application is requested to be deleted by a developer" in new Setup {
 
-      when(mockSandboxApplicationConnector.deleteApplication(*)(any[HeaderCarrier]))
+      when(mockSandboxApplicationConnector.deleteApplication(*[ApplicationId])(any[HeaderCarrier]))
         .thenReturn(failed(new ForbiddenException(expectedMessage)))
 
       private val exception = intercept[ForbiddenException](
@@ -1072,9 +1072,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   "validate application name" should {
     "call the application connector validate method in sandbox" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId = randomUUID().toString
+      private val applicationId = ApplicationId(randomUUID().toString)
 
-      when(mockSandboxApplicationConnector.validateName(*, *)(any[HeaderCarrier]))
+      when(mockSandboxApplicationConnector.validateName(*, *[Option[ApplicationId]])(any[HeaderCarrier]))
         .thenReturn(successful(Valid))
 
       private val result =
@@ -1087,9 +1087,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     "call the application connector validate method in production" in new Setup {
       private val applicationName = "applicationName"
-      private val applicationId = randomUUID().toString
+      private val applicationId = ApplicationId(randomUUID().toString)
 
-      when(mockProductionApplicationConnector.validateName(*, *)(any[HeaderCarrier]))
+      when(mockProductionApplicationConnector.validateName(*, *[Option[ApplicationId]])(any[HeaderCarrier]))
         .thenReturn(successful(Valid))
 
       private val result =

@@ -16,8 +16,6 @@
 
 package service
 
-import java.util.UUID
-
 import config.ApplicationConfig
 import connectors._
 import domain._
@@ -173,7 +171,7 @@ class ApplicationService @Inject() (
     connectorWrapper
       .forEnvironment(application.deployedTo)
       .thirdPartyApplicationConnector
-      .deleteClientSecret(UUID.fromString(application.id.value), clientSecretId, actorEmailAddress)
+      .deleteClientSecret(application.id, clientSecretId, actorEmailAddress)
 
   def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
@@ -357,7 +355,7 @@ object ApplicationService {
     def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse]
     def updateApproval(id: ApplicationId, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)]
-    def deleteClientSecret(applicationId: UUID, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
     def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit]
   }

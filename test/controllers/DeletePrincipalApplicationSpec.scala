@@ -143,7 +143,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/details")
     }
   }
 

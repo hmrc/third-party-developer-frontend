@@ -54,9 +54,6 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)
 
-  val appId = ApplicationId("1234")
-  val clientId = ClientId("clientId123")
-
   val developer: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
   val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
@@ -96,7 +93,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
   val privilegedApplication: Application = application.copy(id = ApplicationId("456"), access = Privileged())
 
   val tokens: ApplicationToken =
-    ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
+    ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
   private val sessionParams = Seq(
     "csrfToken" -> fakeApplication().injector.instanceOf[TokenProvider].generateToken
@@ -345,11 +342,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
       "the page mode for saveSubscriptionFields action" when {
         "LeftHandNavigation" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/$appId/api-metadata")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId.value}/api-metadata")
         }
 
         "CheckYourAnswers" should {
-          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/$appId/check-your-answers#configurations")
+          saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.CheckYourAnswers, s"/developer/applications/${appId.value}/check-your-answers#configurations")
         }
 
         def saveSubscriptionFieldsTest(mode: SaveSubsFieldsPageMode, expectedRedirectUrl: String): Unit = {
@@ -664,7 +661,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         private val result = manageSubscriptionController.subscriptionConfigurationStepPage(appId, 2)(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/add/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id.value}/add/success")
       }
 
       "step page for the last page as a redirect for production" in new ManageSubscriptionsSetup {
@@ -680,7 +677,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         private val result = manageSubscriptionController.subscriptionConfigurationStepPage(productionApplication.id, 2)(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${productionApplication.id}/request-check")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${productionApplication.id.value}/request-check")
 
         verify(applicationServiceMock).updateCheckInformation(eqTo(productionApplication), eqTo(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))(
           any[HeaderCarrier]
@@ -721,7 +718,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         private val result = manageSubscriptionController.subscriptionConfigurationStart(appId)(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/add/success")
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/add/success")
       }
     }
 

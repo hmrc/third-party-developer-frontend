@@ -69,7 +69,7 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
     when(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
 
   def givenSubscribeToApiSucceeds() =
-    when(applicationServiceMock.subscribeToApi(*, *, *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+    when(applicationServiceMock.subscribeToApi(*, *[ApiContext], *[ApiVersion])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
 
   def ungivenSubscribeToApiSucceeds(app: Application, apiContext: ApiContext, apiVersion: ApiVersion) =
     when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
@@ -81,10 +81,10 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
     when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(false))
 
   def givenApplicationNameIsValid() =
-    when(applicationServiceMock.isApplicationNameValid(*, *, *)(any[HeaderCarrier])).thenReturn(successful(Valid))
+    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(any[HeaderCarrier])).thenReturn(successful(Valid))
 
   def givenApplicationNameIsInvalid(invalid: Invalid) =
-    when(applicationServiceMock.isApplicationNameValid(*, *, *)(any[HeaderCarrier])).thenReturn(successful(invalid))
+    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(any[HeaderCarrier])).thenReturn(successful(invalid))
 
   def givenApplicationUpdateSucceeds() =
     when(applicationServiceMock.update(any[UpdateApplicationRequest])(*)).thenReturn(successful(ApplicationUpdateSuccessful))

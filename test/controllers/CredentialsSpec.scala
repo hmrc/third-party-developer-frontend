@@ -49,8 +49,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   val loggedInUser = DeveloperSession(session)
 
   val applicationId = ApplicationId(UUID.randomUUID().toString())
-  val clientId = ClientId("clientId123")
-  val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret1"), aClientSecret("secret2")), "token")
+  val tokens = ApplicationToken(Seq(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
   trait ApplicationProvider {
     def createApplication(): Application
@@ -255,7 +254,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId}/client-secrets")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.value}/client-secrets")
       verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
 
@@ -348,7 +347,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   }
 
   "deleteClientSecretAction" should {
-    val applicationId: UUID = UUID.randomUUID()
+    val applicationId = ApplicationId(UUID.randomUUID().toString())
     val clientSecretId: String = UUID.randomUUID().toString
 
     "delete the selected client secret" in new Setup {
@@ -359,7 +358,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId}/client-secrets")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.value}/client-secrets")
     }
 
     "return 403 when a user with developer role tries do delete production secrets" in new Setup {

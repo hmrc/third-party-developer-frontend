@@ -53,9 +53,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
-  val appId = ApplicationId("1234")
   val appName: String = "app"
-  val clientId = ClientId("clientIdzzz")
   val sessionId = "sessionId"
   val apiVersion = ApiVersion("version")
 
@@ -84,7 +82,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
   val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, ApiContext("context"), apiVersion)
 
@@ -424,7 +422,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
@@ -488,7 +486,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers/team")
 
       verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
@@ -499,7 +497,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])

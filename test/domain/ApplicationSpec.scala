@@ -23,6 +23,8 @@ import domain.models.developers.Developer
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
 import helpers.string._
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class ApplicationSpec extends FunSpec with Matchers {
 
@@ -149,8 +151,8 @@ class ApplicationSpec extends FunSpec with Matchers {
     )
 
     val app = Application(
-      "id",
-      "clientId",
+      ApplicationId("id"),
+      ClientId("clientId"),
       "app name",
       DateTime.now(),
       DateTime.now(),

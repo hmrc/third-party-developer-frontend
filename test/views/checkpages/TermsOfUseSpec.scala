@@ -28,6 +28,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.checkpages.TermsOfUseView
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -36,8 +38,8 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
   "Terms of use view" must {
     val thirdPartyApplication =
       Application(
-        "APPLICATION_ID",
-        "CLIENT_ID",
+        ApplicationId("APPLICATION_ID"),
+        ClientId("CLIENT_ID"),
         "APPLICATION NAME",
         DateTimeUtils.now,
         DateTimeUtils.now,
@@ -58,7 +60,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
-        ApplicationViewModel(thirdPartyApplication,false),
+        ApplicationViewModel(thirdPartyApplication, false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
         submitButtonLabel = "A Label",
         submitAction = mock[Call],
@@ -66,7 +68,8 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
         request,
         developer,
         messagesProvider,
-        appConfig)
+        appConfig
+      )
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -88,13 +91,14 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
-        submitButtonLabel =  "A Label",
+        submitButtonLabel = "A Label",
         submitAction = mock[Call],
         landingPageRoute = mock[Call],
         request,
         developer,
         implicitly,
-        appConfigMock)
+        appConfigMock
+      )
       page.contentType should include("text/html")
 
       page.body.contains("Terms of use agreed by email@example.com") shouldBe true

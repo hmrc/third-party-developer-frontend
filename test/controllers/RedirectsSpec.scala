@@ -147,7 +147,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       status(result) shouldBe SEE_OTHER
       headers(result)
-      headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id}/redirect-uris"
+      headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
 
       verify(underTest.applicationService).update(argument.capture())(any[HeaderCarrier])
       argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(redirectUriToAdd) shouldBe true
@@ -190,7 +190,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
       val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
 
       status(result) shouldBe resultStatus
-      headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id}/redirect-uris"
+      headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
 
       verify(underTest.applicationService).update(argument.capture())(any[HeaderCarrier])
       argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(redirectUriToDelete) shouldBe false
@@ -204,7 +204,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       status(result) shouldBe resultStatus
 
-      headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id}/redirect-uris"
+      headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
     }
 
     def changeRedirectUriShouldRenderThePage(application: Application, resultStatus: Int, originalRedirectUri: String, newRedirectUri: String) = {
@@ -436,7 +436,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
       val argument: ArgumentCaptor[UpdateApplicationRequest] = ArgumentCaptor.forClass(classOf[UpdateApplicationRequest])
 
       status(result) shouldBe SEE_OTHER
-      headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id}/redirect-uris"
+      headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
 
       verify(underTest.applicationService).update(argument.capture())(any[HeaderCarrier])
       argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(originalRedirectUri) shouldBe false

@@ -17,7 +17,6 @@
 package stubs
 
 import java.net.URLEncoder
-import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
@@ -32,6 +31,8 @@ import play.api.libs.json.{Json, Writes}
 import play.api.http.Status._
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ClientId
+import domain.models.applications.ApplicationId
 
 object Stubs {
 
@@ -108,45 +109,45 @@ object ApplicationStub {
     Stubs.setupPostRequest("/application/name/validate", OK, Json.toJson(validNameResult).toString)
   }
 
-  def setUpFetchApplication(id: String, status: Int, response: String = "") = {
+  def setUpFetchApplication(id: ApplicationId, status: Int, response: String = "") = {
     stubFor(
-      get(urlEqualTo(s"/application/$id"))
+      get(urlEqualTo(s"/application/${id.value}"))
         .willReturn(aResponse().withStatus(status).withBody(response))
     )
   }
 
-  def setUpFetchEmptySubscriptions(id: String, status: Int) = {
+  def setUpFetchEmptySubscriptions(id: ApplicationId, status: Int) = {
     stubFor(
-      get(urlEqualTo(s"/application/$id/subscription"))
+      get(urlEqualTo(s"/application/${id.value}/subscription"))
         .willReturn(aResponse().withStatus(status).withBody("[]"))
     )
   }
 
-  def setUpFetchSubscriptions(id: String, status: Int, response: Seq[APISubscription]) = {
+  def setUpFetchSubscriptions(id: ApplicationId, status: Int, response: Seq[APISubscription]) = {
     stubFor(
-      get(urlEqualTo(s"/application/$id/subscription"))
+      get(urlEqualTo(s"/application/${id.value}/subscription"))
         .willReturn(aResponse().withStatus(status).withBody(Json.toJson(response).toString()))
     )
   }
 
-  def setUpDeleteSubscription(id: String, api: String, version: ApiVersion, status: Int) = {
+  def setUpDeleteSubscription(id: ApplicationId, api: String, version: ApiVersion, status: Int) = {
     stubFor(
-      delete(urlEqualTo(s"/application/$id/subscription?context=$api&version=${version.value}"))
+      delete(urlEqualTo(s"/application/${id.value}/subscription?context=$api&version=${version.value}"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def setUpExecuteSubscription(id: String, api: String, version: ApiVersion, status: Int) = {
+  def setUpExecuteSubscription(id: ApplicationId, api: String, version: ApiVersion, status: Int) = {
     stubFor(
-      post(urlEqualTo(s"/application/$id/subscription"))
+      post(urlEqualTo(s"/application/${id.value}/subscription"))
         .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(ApiContext(api), version)).toString()))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def setUpUpdateApproval(id: String) = {
+  def setUpUpdateApproval(id: ApplicationId) = {
     stubFor(
-      post(urlEqualTo(s"/application/$id/check-information"))
+      post(urlEqualTo(s"/application/${id.value}/check-information"))
         .willReturn(aResponse().withStatus(OK))
     )
   }

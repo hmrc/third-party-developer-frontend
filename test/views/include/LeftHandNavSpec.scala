@@ -27,6 +27,8 @@ import utils.ViewHelpers.elementExistsByText
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
+import domain.models.applications.ClientId
+import domain.models.applications.ApplicationId
 
 class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -35,7 +37,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
 
     val request = FakeRequest().withCSRFToken
 
-    val applicationId = "1234"
+    val applicationId = ApplicationId("1234")
     val clientId = ClientId("clientId123")
     val applicationName = "Test Application"
 

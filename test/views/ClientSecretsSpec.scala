@@ -32,6 +32,8 @@ import views.helper.CommonViewSpec
 import views.html.ClientSecretsView
 
 import scala.collection.JavaConverters._
+import domain.models.applications.ClientId
+import domain.models.applications.ApplicationId
 
 class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
@@ -59,8 +61,8 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken {
     val clientSecret5 = ClientSecret(randomUUID.toString, "", DateTimeUtils.now)
 
     val application = Application(
-      UUID.randomUUID().toString,
-      "Test Application Client ID",
+      ApplicationId(UUID.randomUUID().toString),
+      ClientId("Test Application Client ID"),
       "Test Application",
       DateTime.now(),
       DateTime.now(),
@@ -77,7 +79,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken {
       val emptyClientSecrets = Seq.empty
       val page = clientSecretsView.render(application, emptyClientSecrets, request, developer, messagesProvider, appConfig, Flash())
 
-      page.contentType should include ("text/html")
+      page.contentType should include("text/html")
 
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate a client secret") shouldBe true
@@ -127,7 +129,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken {
       val twoClientSecrets = Seq(clientSecret1, clientSecret2)
       val page = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig, Flash())
 
-      page.contentType should include ("text/html")
+      page.contentType should include("text/html")
 
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate another client secret") shouldBe true
@@ -138,7 +140,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken {
       val twoClientSecrets = Seq(clientSecret1, clientSecret2, clientSecret3, clientSecret4, clientSecret5)
       val page = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig, Flash())
 
-      page.contentType should include ("text/html")
+      page.contentType should include("text/html")
 
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate another client secret") shouldBe false

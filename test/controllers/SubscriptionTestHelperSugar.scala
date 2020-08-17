@@ -127,7 +127,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   val onlyApiExampleMicroserviceSubscribedTo: APISubscriptionStatus = {
     val context = ApiContext("example-api")
     val version = ApiVersionDefinition(versionOne, APIStatus.STABLE)
-    val emptyFields = emptySubscriptionFieldsWrapper((appId, clientId, context, version.version)
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.version)
 
     APISubscriptionStatus(
       name = "api-example-microservice",

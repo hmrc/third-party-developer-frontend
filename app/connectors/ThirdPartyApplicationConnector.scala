@@ -17,7 +17,6 @@
 package connectors
 
 import java.net.URLEncoder.encode
-import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
@@ -204,12 +203,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } recover recovery
   }
 
-  // TODO - so it's a UUID here !
-  def deleteClientSecret(applicationId: UUID, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
+  def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
       import ApplicationConnector.JsonFormatters._
 
-      http.POST(s"$serviceBaseUrl/application/${applicationId.toString}/client-secret/$clientSecretId.value}", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
+      http.POST(s"$serviceBaseUrl/application/${applicationId.value}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
         ApplicationUpdateSuccessful
       } recover recovery
     }
@@ -245,9 +243,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 }
 
 object ApplicationConnector {
-  def toDomain(addClientSecretResponse: AddClientSecretResponse): ApplicationToken =
-    ApplicationToken(addClientSecretResponse.clientId, addClientSecretResponse.clientSecrets.map(toDomain), addClientSecretResponse.accessToken)
-
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
     ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
 

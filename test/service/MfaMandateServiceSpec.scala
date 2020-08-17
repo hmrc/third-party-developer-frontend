@@ -24,6 +24,8 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class MfaMandateServiceSpec extends AsyncHmrcSpec {
 
@@ -41,11 +43,14 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
 
     val service = new MfaMandateService(mockAppConfig, mockApplicationService)
 
+    val applicationId = ApplicationId("myId")
+    val clientId = ClientId("myClientId")
+
     val applicationsWhereUserIsAdminInProduction = Future.successful(
       Seq(
         Application(
-          "myId",
-          "myClientId",
+          applicationId,
+          clientId,
           "myName",
           new DateTime(),
           new DateTime(),
@@ -59,8 +64,8 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
     val applicationsWhereUserIsDeveloperInProduction = Future.successful(
       Seq(
         Application(
-          "myId",
-          "myClientId",
+          applicationId,
+          clientId,
           "myName",
           new DateTime(),
           new DateTime(),
@@ -74,8 +79,8 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
     val applicationsWhereUserIsNotACollaboratorInProduction = Future.successful(
       Seq(
         Application(
-          "myId",
-          "myClientId",
+          applicationId,
+          clientId,
           "myName",
           new DateTime(),
           new DateTime(),
@@ -88,8 +93,8 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
     val applicationsWhereUserIsAdminInSandbox = Future.successful(
       Seq(
         Application(
-          "myId",
-          "myClientId",
+          applicationId,
+          clientId,
           "myName",
           new DateTime(),
           new DateTime(),

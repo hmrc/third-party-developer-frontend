@@ -25,6 +25,8 @@ import play.api.test.Helpers.{contentAsString, contentType}
 import play.twirl.api.Html
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with SharedMetricsClearDown {
 
@@ -34,7 +36,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Sha
     "render in the right order" in {
 
       val applicationName = "An Application Name"
-      val application = Application("appId123", "clientId123", applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION)
+      val application = Application(ApplicationId("appId123"), ClientId("clientId123"), applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION)
       val crumbs = Array(Crumb("Another Breadcrumb"), Crumb.application(application), Crumb.viewAllApplications, Crumb.home(appConfig))
 
       val page: Html = views.html.include.breadcrumbs.render(crumbs)

@@ -26,6 +26,7 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.AddApplicationNameView
+import domain.models.applications.ApplicationId
 
 class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 

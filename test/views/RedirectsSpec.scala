@@ -27,6 +27,8 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.RedirectsView
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken {
 

@@ -30,11 +30,13 @@ import utils.ViewHelpers.elementExistsByText
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ClientId
+import domain.models.applications.ApplicationId
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken {
   val request = FakeRequest().withCSRFToken
 
-  val applicationId = "1234"
+  val applicationId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
   val applicationName = "Test Application"
   val apiName = "Test API"
