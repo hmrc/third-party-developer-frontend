@@ -132,6 +132,11 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
     givenApplicationHasNoSubs(activeApplication)
 
+    val subsData = Seq(
+      exampleSubscriptionWithFields("api1", 1),
+      exampleSubscriptionWithFields("api2", 1)
+    )
+
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
@@ -182,6 +187,30 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
+    }
+
+    "return the subscriptions page for a developer on a standard app in the Sandbox environment" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+      fetchByApplicationIdReturns(appId, activeApplication)
+      givenApplicationHasSubs(activeApplication, subsData)
+
+      val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
+      contentAsString(result) should include("Subscribe to APIs so your application can access them in the sandbox")
+    }
+
+    "return the subscriptions page for a developer on a standard app in the Development environment" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      fetchByApplicationIdReturns(appId, activeApplication)
+      givenApplicationHasSubs(activeApplication, subsData)
+
+      val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
+      contentAsString(result) should include("Subscribe to APIs so your application can access them in Development")
     }
   }
 
@@ -595,6 +624,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     val title = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
     title.isDefined shouldBe true
     title.get
+  }
+
+  private def bodyOf(result: Future[Result]) = {
+    val bodyRegEx = """<body[^>]*>(.*)</body>""".r
+    println(contentAsString(result))
+    val body = bodyRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
+    body.isDefined shouldBe true
+    body.get
   }
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
