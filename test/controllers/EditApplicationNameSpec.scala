@@ -38,8 +38,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  val appId = "1234"
-  val clientId = "clientId123"
+  val appId = ApplicationId("1234")
+  val clientId = ClientId("clientId123")
 
   val developer: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"

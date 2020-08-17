@@ -53,9 +53,9 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
-  val appId = "1234"
+  val appId = ApplicationId("1234")
   val appName: String = "app"
-  val clientId = "clientIdzzz"
+  val clientId = ClientId("clientIdzzz")
   val sessionId = "sessionId"
   val apiVersion = ApiVersion("version")
 
@@ -86,7 +86,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
 
-  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", ApiContext("context"), apiVersion)
+  val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, ApiContext("context"), apiVersion)
 
   val exampleApiSubscription = Some(
     APISubscriptions(
@@ -179,7 +179,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     givenUpdateCheckInformationSucceeds(application)
 
     val context = ApiContext("apiContent")
-    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, apiVersion)
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, apiVersion)
 
     val subscriptions = Seq(
       APISubscriptions(

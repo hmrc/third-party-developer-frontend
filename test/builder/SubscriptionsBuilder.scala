@@ -21,6 +21,8 @@ import domain.models.applications.Application
 import domain.models.subscriptions.{AccessRequirements, APISubscription}
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 trait SubscriptionsBuilder {
 
@@ -33,7 +35,7 @@ trait SubscriptionsBuilder {
     val contextName = context.getOrElse(ApiContext(s"context-$name"))
     val version = ApiVersionDefinition(ApiVersion("version"), APIStatus.STABLE)
 
-    val f = fields.getOrElse(SubscriptionFieldsWrapper("fake-appId", "fake-clientId", contextName, version.version, Seq.empty))
+    val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId("fake-appId"), ClientId("fake-clientId"), contextName, version.version, Seq.empty))
 
     APISubscriptionStatus(name, s"serviceName-$name", contextName, version, subscribed = true, requiresTrust = false, fields = f, isTestSupport = false)
   }
@@ -46,7 +48,13 @@ trait SubscriptionsBuilder {
 
     val applicationId = application.id
 
-    SubscriptionFieldsWrapper(applicationId, s"clientId-$applicationId", ApiContext(s"context-$applicationId"), ApiVersion(s"version-$applicationId"), fields = fields)
+    SubscriptionFieldsWrapper(
+      applicationId,
+      ClientId(s"clientId-$applicationId"),
+      ApiContext(s"context-$applicationId"),
+      ApiVersion(s"version-$applicationId"),
+      fields = fields
+    )
   }
 
   def buildSubscriptionFieldValue(name: String, value: Option[String] = None, accessRequirements: AccessRequirements = AccessRequirements.Default): SubscriptionFieldValue = {

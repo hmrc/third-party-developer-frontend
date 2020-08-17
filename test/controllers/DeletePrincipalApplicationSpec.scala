@@ -56,8 +56,8 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       deleteSubordinateApplicationCompleteView
     )
 
-    val appId = "1234"
-    val clientId = "clientIdzzz"
+    val appId = ApplicationId("1234")
+    val clientId = ClientId("clientIdzzz")
     val appName: String = "Application Name"
 
     val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
@@ -65,20 +65,29 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInUser = DeveloperSession(session)
-    
+
     implicit val hc = HeaderCarrier()
 
-    val application = Application(appId, clientId, appName, DateTime.now.withTimeAtStartOfDay(), DateTime.now.withTimeAtStartOfDay(), None,
-      Environment.PRODUCTION, Some("Description 1"), Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    val application = Application(
+      appId,
+      clientId,
+      appName,
+      DateTime.now.withTimeAtStartOfDay(),
+      DateTime.now.withTimeAtStartOfDay(),
+      None,
+      Environment.PRODUCTION,
+      Some("Description 1"),
+      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
       state = ApplicationState.production(loggedInUser.email, ""),
-      access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+      access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    )
 
     fetchSessionByIdReturns(sessionId, session)
     fetchByApplicationIdReturns(application.id, application)
     when(underTest.applicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier])).thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest,implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 
   "delete application page" should {
@@ -168,7 +177,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       val result = addToken(underTest.deleteSubordinateApplicationConfirm(nonApprovedApplication.id))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
-    
+
     "deleteSubordinateApplicationAction action is called" in new UnapprovedApplicationSetup {
       val result = addToken(underTest.deleteSubordinateApplicationAction(nonApprovedApplication.id))(loggedInRequest)
       status(result) shouldBe NOT_FOUND

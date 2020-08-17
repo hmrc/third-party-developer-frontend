@@ -36,7 +36,7 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
 
   val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
   val applicationId = "1234"
-  val clientId = "clientId123"
+  val clientId = ClientId("clientId123")
   val applicationName = "Test Application"
   val apiName = "Test API"
   val apiContext = ApiContext("test")

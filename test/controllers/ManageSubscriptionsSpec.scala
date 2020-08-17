@@ -54,8 +54,8 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)
 
-  val appId = "1234"
-  val clientId = "clientId123"
+  val appId = ApplicationId("1234")
+  val clientId = ClientId("clientId123")
 
   val developer: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
@@ -91,9 +91,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
     )
   )
 
-  val productionApplication = application.copy(deployedTo = Environment.PRODUCTION, id = appId + "_Prod")
+  val productionApplication = application.copy(deployedTo = Environment.PRODUCTION, id = ApplicationId(appId + "_Prod"))
 
-  val privilegedApplication: Application = application.copy(id = "456", access = Privileged())
+  val privilegedApplication: Application = application.copy(id = ApplicationId("456"), access = Privileged())
 
   val tokens: ApplicationToken =
     ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")

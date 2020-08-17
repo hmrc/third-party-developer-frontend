@@ -36,6 +36,7 @@ import domain.models.apidefinitions.ApiIdentifier
 import domain.models.applications.Environment
 import domain.models.subscriptions.AccessRequirements
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ClientId
 
 class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   def fields(tpl: (String, String)*): Map[String, String] =
@@ -43,7 +44,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private val clientId = UUID.randomUUID().toString
+  private val clientId = ClientId(UUID.randomUUID().toString)
   private val apiContext = ApiContext("i-am-a-test")
   private val apiVersion = ApiVersion("1.0")
   private val apiIdentifier = ApiIdentifier(apiContext, apiVersion)

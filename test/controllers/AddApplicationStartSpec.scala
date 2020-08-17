@@ -32,11 +32,10 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AddApplicationStartSpec extends BaseControllerSpec
-  with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  val appId = "1234"
-  val clientId = "clientId123"
+  val appId = ApplicationId("1234")
+  val clientId = ClientId("clientId123")
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
@@ -49,9 +48,19 @@ class AddApplicationStartSpec extends BaseControllerSpec
 
   val collaborator: Collaborator = Collaborator(loggedInUser.email, Role.ADMINISTRATOR)
 
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-    Set(collaborator), state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+  val application = Application(
+    appId,
+    clientId,
+    "App name 1",
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    None,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    Set(collaborator),
+    state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
@@ -96,64 +105,64 @@ class AddApplicationStartSpec extends BaseControllerSpec
       .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
   }
 
-    "Add subordinate applications start page" should {
-      "return the add applications page with the user logged in" in new Setup {
-        private val result = underTest.addApplicationSubordinate()(loggedInRequest)
+  "Add subordinate applications start page" should {
+    "return the add applications page with the user logged in" in new Setup {
+      private val result = underTest.addApplicationSubordinate()(loggedInRequest)
 
-        status(result) shouldBe OK
-        contentAsString(result) should include("Add an application to the sandbox")
-        contentAsString(result) should include(loggedInUser.displayedName)
-        contentAsString(result) should include("Sign out")
-        contentAsString(result) should include("get its sandbox credentials")
-        contentAsString(result) should include("use its credentials for integration testing")
-        contentAsString(result) should include("In production, your application will need to comply with the expectations set out in our")
-        contentAsString(result) should include("Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:")
-        contentAsString(result) should not include "Sign in"
-      }
-
-      "return to the login page when the user is not logged in" in new Setup {
-        val request = FakeRequest()
-
-        private val result = underTest.addApplicationSubordinate()(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/login")
-      }
-
-      "redirect to the login screen when partly logged" in new Setup {
-        private val result = underTest.addApplicationSubordinate()(partLoggedInRequest)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/login")
-      }
+      status(result) shouldBe OK
+      contentAsString(result) should include("Add an application to the sandbox")
+      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include("Sign out")
+      contentAsString(result) should include("get its sandbox credentials")
+      contentAsString(result) should include("use its credentials for integration testing")
+      contentAsString(result) should include("In production, your application will need to comply with the expectations set out in our")
+      contentAsString(result) should include("Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:")
+      contentAsString(result) should not include "Sign in"
     }
 
-    "Add principal applications start page" should {
-      "return the add applications page with the user logged in" in new Setup {
-        private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+    "return to the login page when the user is not logged in" in new Setup {
+      val request = FakeRequest()
 
-        status(result) shouldBe OK
-        contentAsString(result) should include("Get production credentials")
-        contentAsString(result) should include(loggedInUser.displayedName)
-        contentAsString(result) should include("Sign out")
-        contentAsString(result) should include("Now that you've tested your software you can request production credentials to use live data.")
-        contentAsString(result) should not include "Sign in"
-      }
+      private val result = underTest.addApplicationSubordinate()(request)
 
-      "return to the login page when the user is not logged in" in new Setup {
-        val request = FakeRequest()
-
-        private val result = underTest.addApplicationPrincipal()(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/login")
-      }
-
-      "redirect to the login screen when partly logged" in new Setup {
-        private val result = underTest.addApplicationPrincipal()(partLoggedInRequest)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/login")
-      }
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
     }
+
+    "redirect to the login screen when partly logged" in new Setup {
+      private val result = underTest.addApplicationSubordinate()(partLoggedInRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+    }
+  }
+
+  "Add principal applications start page" should {
+    "return the add applications page with the user logged in" in new Setup {
+      private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("Get production credentials")
+      contentAsString(result) should include(loggedInUser.displayedName)
+      contentAsString(result) should include("Sign out")
+      contentAsString(result) should include("Now that you've tested your software you can request production credentials to use live data.")
+      contentAsString(result) should not include "Sign in"
+    }
+
+    "return to the login page when the user is not logged in" in new Setup {
+      val request = FakeRequest()
+
+      private val result = underTest.addApplicationPrincipal()(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+    }
+
+    "redirect to the login screen when partly logged" in new Setup {
+      private val result = underTest.addApplicationPrincipal()(partLoggedInRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+    }
+  }
 }

@@ -48,8 +48,8 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   val loggedInUser = DeveloperSession(session)
 
-  val applicationId = UUID.randomUUID()
-  val clientId = "clientId123"
+  val applicationId = ApplicationId(UUID.randomUUID().toString())
+  val clientId = ClientId("clientId123")
   val tokens = ApplicationToken("clientId", Seq(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
   trait ApplicationProvider {
@@ -59,7 +59,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   trait BasicApplicationProvider extends ApplicationProvider {
     def createApplication() =
       Application(
-        applicationId.toString,
+        applicationId,
         clientId,
         "App name 1",
         DateTimeUtils.now,
@@ -77,7 +77,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   }
 
   def createConfiguredApplication(
-      applicationId: UUID,
+      applicationId: ApplicationId,
       userRole: Role,
       state: ApplicationState = ApplicationState.production("", ""),
       access: Access = Standard(),
@@ -85,7 +85,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       createdOn: DateTime = DateTimeUtils.now
   ) =
     Application(
-      applicationId.toString,
+      applicationId,
       clientId,
       "app",
       createdOn,
@@ -138,7 +138,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "be displayed for an app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR)
 
-      val result = underTest.credentials(applicationId.toString)(loggedInRequest)
+      val result = underTest.credentials(applicationId)(loggedInRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Credentials")
@@ -148,7 +148,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "inform the user that only admins can access credentials when the user has the developer role and the app is in PROD" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result = underTest.credentials(applicationId.toString)(loggedInRequest)
+      val result = underTest.credentials(applicationId)(loggedInRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Credentials")
@@ -160,7 +160,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "be displayed for an app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR)
 
-      val result = underTest.clientId(applicationId.toString)(loggedInRequest)
+      val result = underTest.clientId(applicationId)(loggedInRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Client ID")
@@ -169,7 +169,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return 403 when the user has the developer role and the app is in PROD" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result = underTest.clientId(applicationId.toString)(loggedInRequest)
+      val result = underTest.clientId(applicationId)(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -177,7 +177,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return 400 when the application has not reached production state" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
 
-      val result = underTest.clientId(applicationId.toString)(loggedInRequest)
+      val result = underTest.clientId(applicationId)(loggedInRequest)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -187,7 +187,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "be displayed for an app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR)
 
-      val result = underTest.clientSecrets(applicationId.toString)(loggedInRequest.withCSRFToken)
+      val result = underTest.clientSecrets(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Client secrets")
@@ -196,7 +196,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return 403 when the user has the developer role and the app is in PROD" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result = underTest.clientSecrets(applicationId.toString)(loggedInRequest.withCSRFToken)
+      val result = underTest.clientSecrets(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -204,7 +204,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return 400 when the application has not reached production state" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
 
-      val result = underTest.clientSecrets(applicationId.toString)(loggedInRequest.withCSRFToken)
+      val result = underTest.clientSecrets(applicationId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -216,7 +216,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "be displayed for an app" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, createdOn = dateBeforeCutoff)
 
-      val result = underTest.serverToken(applicationId.toString)(loggedInRequest)
+      val result = underTest.serverToken(applicationId)(loggedInRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Server token")
@@ -225,7 +225,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return 404 for new apps" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, createdOn = DateTimeUtils.now)
 
-      val result = underTest.serverToken(applicationId.toString)(loggedInRequest)
+      val result = underTest.serverToken(applicationId)(loggedInRequest)
 
       status(result) shouldBe NOT_FOUND
     }
@@ -233,7 +233,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return 403 when the user has the developer role and the app is in PROD" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, DEVELOPER, environment = Environment.PRODUCTION, createdOn = dateBeforeCutoff)
 
-      val result = underTest.serverToken(applicationId.toString)(loggedInRequest)
+      val result = underTest.serverToken(applicationId)(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -241,23 +241,21 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return 400 when the application has not reached production state" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, createdOn = dateBeforeCutoff, state = pendingGatekeeperApproval(""))
 
-      val result = underTest.serverToken(applicationId.toString)(loggedInRequest)
+      val result = underTest.serverToken(applicationId)(loggedInRequest)
 
       status(result) shouldBe BAD_REQUEST
     }
   }
 
   "addClientSecret" should {
-    val applicationId = UUID.randomUUID()
-
     "add the client secret" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR)
       givenAddClientSecretReturns(application, loggedInUser.email)
 
-      val result = underTest.addClientSecret(applicationId.toString)(loggedInRequest)
+      val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.toString}/client-secrets")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId}/client-secrets")
       verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
 
@@ -265,7 +263,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, environment = Environment.PRODUCTION)
       givenAddClientSecretFailsWith(application, loggedInUser.email, new ClientSecretLimitExceeded)
 
-      val result = underTest.addClientSecret(applicationId.toString)(loggedInRequest)
+      val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe UNPROCESSABLE_ENTITY
     }
@@ -274,15 +272,15 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, environment = Environment.SANDBOX)
       givenAddClientSecretFailsWith(application, loggedInUser.email, new ClientSecretLimitExceeded)
 
-      val result = underTest.addClientSecret(applicationId.toString)(loggedInRequest)
+      val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe UNPROCESSABLE_ENTITY
     }
 
     "display the NotFound page when the application does not exist" in new Setup with BasicApplicationProvider {
-      fetchByApplicationIdReturnsNone(applicationId.toString)
+      fetchByApplicationIdReturnsNone(applicationId)
 
-      val result = (underTest.addClientSecret(applicationId.toString)(loggedInRequest))
+      val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
       status(result) shouldBe NOT_FOUND
     }
@@ -290,7 +288,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "display the error page when a user with developer role tries to add production secrets" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, DEVELOPER, environment = Environment.PRODUCTION)
 
-      val result = underTest.addClientSecret(applicationId.toString)(loggedInRequest)
+      val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
       verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
@@ -299,7 +297,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "display the error page when the application has not reached production state" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR, state = pendingGatekeeperApproval(""))
 
-      val result = (underTest.addClientSecret(applicationId.toString)(loggedInRequest))
+      val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
       verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
@@ -308,7 +306,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     "return to the login page when the user is not logged in" in new Setup {
       def createApplication() = createConfiguredApplication(applicationId, ADMINISTRATOR)
 
-      val result = underTest.addClientSecret(applicationId.toString)(loggedOutRequest)
+      val result = underTest.addClientSecret(applicationId)(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -361,7 +359,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.toString}/client-secrets")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId}/client-secrets")
     }
 
     "return 403 when a user with developer role tries do delete production secrets" in new Setup {

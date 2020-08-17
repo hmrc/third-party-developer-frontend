@@ -29,17 +29,18 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import scala.concurrent.Future.{failed, successful}
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ApplicationId
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationServiceMock = mock[ApplicationService]
 
-  def fetchByApplicationIdReturns(id: String, returns: Application): Unit =
+  def fetchByApplicationIdReturns(id: ApplicationId, returns: Application): Unit =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(Some(returns)))
 
   def fetchByApplicationIdReturns(application: Application): Unit =
     fetchByApplicationIdReturns(application.id, application)
 
-  def fetchByApplicationIdReturnsNone(id: String) =
+  def fetchByApplicationIdReturnsNone(id: ApplicationId) =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(None))
 
   def fetchByTeamMemberEmailReturns(apps: Seq[Application]) =

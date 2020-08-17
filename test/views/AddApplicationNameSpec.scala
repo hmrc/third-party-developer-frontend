@@ -32,7 +32,7 @@ class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val subordinateEnvironment = Environment.SANDBOX
-  val appId = "1234"
+  val appId = ApplicationId("1234")
   val principalEnvironment = Environment.PRODUCTION
 
   "Add application page in subordinate" should {

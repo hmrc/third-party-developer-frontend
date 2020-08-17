@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ClientId
 
 trait SubscriptionFieldsConnectorMock extends MockitoSugar with ArgumentMatchersSugar {
   val mockSubscriptionFieldsConnector = mock[AbstractSubscriptionFieldsConnector]

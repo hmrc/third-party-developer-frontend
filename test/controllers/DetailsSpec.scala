@@ -99,7 +99,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
           val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInRequest)
 
           status(result) shouldBe OK
-          
+
           val document = Jsoup.parse(contentAsString(result))
           elementExistsByText(document, "h1", "Credentials requested") shouldBe true
           elementExistsByText(document, "span", pendingVerificationApplication.name) shouldBe true
@@ -224,10 +224,9 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(underTest.applicationService).isApplicationNameValid(
-          eqTo("my invalid HMRC application name"),
-          eqTo(application.deployedTo),
-          eqTo(Some(application.id)))(any[HeaderCarrier])
+        verify(underTest.applicationService).isApplicationNameValid(eqTo("my invalid HMRC application name"), eqTo(application.deployedTo), eqTo(Some(application.id)))(
+          any[HeaderCarrier]
+        )
       }
     }
 
@@ -327,7 +326,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     val detailsView = app.injector.instanceOf[DetailsView]
     val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
 
-    val underTest = new Details (
+    val underTest = new Details(
       applicationServiceMock,
       mock[SessionService],
       mockErrorHandler,
@@ -426,12 +425,14 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     def changeDetailsShouldUpdateTheApplication(application: Application) = {
       givenApplicationExists(application)
 
-      await(application
-        .withName(newName)
-        .withDescription(newDescription)
-        .withTermsAndConditionsUrl(newTermsUrl)
-        .withPrivacyPolicyUrl(newPrivacyUrl)
-        .callChangeDetailsAction)
+      await(
+        application
+          .withName(newName)
+          .withDescription(newDescription)
+          .withTermsAndConditionsUrl(newTermsUrl)
+          .withPrivacyPolicyUrl(newPrivacyUrl)
+          .callChangeDetailsAction
+      )
 
       val updatedApplication = captureUpdatedApplication
       updatedApplication.name shouldBe newName
@@ -450,8 +451,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     implicit class ChangeDetailsAppAugment(val app: Application) {
       private val appAccess = app.access.asInstanceOf[Standard]
 
-      final def toForm = EditApplicationForm(app.id, app.name, app.description,
-        appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl)
+      final def toForm = EditApplicationForm(app.id, app.name, app.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl)
 
       final def callDetails: Future[Result] = underTest.details(app.id)(loggedInRequest)
 

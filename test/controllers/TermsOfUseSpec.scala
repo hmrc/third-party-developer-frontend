@@ -62,7 +62,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    val appId = "1234"
+    val appId = ApplicationId("1234")
 
     implicit val hc = HeaderCarrier()
 
@@ -74,7 +74,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     ) = {
       val application = Application(
         appId,
-        "clientId",
+        ClientId("clientId"),
         "appName",
         DateTimeUtils.now,
         DateTimeUtils.now,

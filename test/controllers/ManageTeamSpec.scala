@@ -48,11 +48,13 @@ import domain.models.connectors.AddTeamMemberResponse
 
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  val appId = "1234"
-  val clientId = "clientId123"
+  val appId = ApplicationId("1234")
+  val clientId = ClientId("clientId123")
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"

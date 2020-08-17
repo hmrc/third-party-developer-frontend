@@ -35,7 +35,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
   val request = FakeRequest().withCSRFToken
 
   val applicationId = "1234"
-  val clientId = "clientId123"
+  val clientId = ClientId("clientId123")
   val applicationName = "Test Application"
   val apiName = "Test API"
   val apiContext = ApiContext("test")

@@ -209,7 +209,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     metrics.record(api) {
       import ApplicationConnector.JsonFormatters._
 
-      http.POST(s"$serviceBaseUrl/application/${applicationId.toString}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
+      http.POST(s"$serviceBaseUrl/application/${applicationId.toString}/client-secret/$clientSecretId.value}", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
         ApplicationUpdateSuccessful
       } recover recovery
     }

@@ -35,8 +35,8 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
 
       val request = FakeRequest().withCSRFToken
 
-      val appId = "1234"
-      val clientId = "clientId123"
+      val appId = ApplicationId("1234")
+      val clientId = ClientId("clientId123")
       val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
       val application = Application(
         appId,

@@ -34,10 +34,10 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
 
       val request = FakeRequest().withCSRFToken
 
-      val appId = "1234"
+      val appId = ApplicationId("1234")
       val apiName = "Test API"
       val apiVersion = ApiVersion("1.0")
-      val clientId = "clientId123"
+      val clientId = ClientId("clientId123")
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
       val application = Application(
         appId,

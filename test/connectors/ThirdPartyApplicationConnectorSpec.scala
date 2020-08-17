@@ -67,10 +67,13 @@ import domain.models.connectors.AddTeamMemberResponse
 import domain.models.applications.ApplicationVerificationFailed
 import domain.models.applications.ApplicationVerificationSuccessful
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
-  private val applicationId = "applicationId"
+  private val applicationId = ApplicationId("applicationId")
+  private val clientId = ClientId("client-id")
   private val baseUrl = "https://example.com"
   private val environmentName = "ENVIRONMENT"
 
@@ -109,7 +112,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   private val upstream409Response = Upstream4xxResponse("", CONFLICT, CONFLICT)
 
   private val updateApplicationRequest = new UpdateApplicationRequest(
-    "My Id",
+    ApplicationId("My Id"),
     Environment.PRODUCTION,
     "My Application",
     Some("Description"),
@@ -151,13 +154,12 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   "create application" should {
 
     "successfully create an application" in new Setup {
-      val applicationId = "applicationId"
       val url = baseUrl + "/application"
 
       when(
         mockHttpClient
           .POST[JsValue, HttpResponse](eqTo(url), eqTo(createApplicationRequestJsValue), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(OK, Some(Json.toJson(applicationResponse(applicationId, "appName"))))))
+      ).thenReturn(Future.successful(HttpResponse(OK, Some(Json.toJson(applicationResponse(applicationId, ClientId("appName")))))))
 
       val result = await(connector.create(createApplicationRequest))
 
@@ -166,8 +168,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "update application" should {
-
-    val applicationId = "applicationId"
 
     "successfully update an application" in new Setup {
 
@@ -186,7 +186,10 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   "fetch by teamMember email" should {
     val email = "email@email.com"
     val url = baseUrl + "/developer/applications"
-    val applicationResponses = List(applicationResponse("app id 1", "client id 1", "app 1"), applicationResponse("app id 2", "client id 2", "app 2"))
+    val applicationResponses = List(
+      applicationResponse(ApplicationId("app id 1"), ClientId("client id 1"), "app 1"),
+      applicationResponse(ApplicationId("app id 2"), ClientId("client id 2"), "app 2")
+    )
 
     val response: Seq[String] = Seq("app 1", "app 2")
 
@@ -224,7 +227,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "return an application" in new Setup {
       when(mockHttpClient.GET[Application](eqTo(url))(*, *, *))
-        .thenReturn(Future.successful(applicationResponse(applicationId, "client-id", appName)))
+        .thenReturn(Future.successful(applicationResponse(applicationId, clientId, appName)))
 
       val result = await(connector.fetchApplicationById(applicationId))
 
@@ -247,7 +250,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       when(mockAppConfig.retryCount).thenReturn(1)
       when(mockHttpClient.GET[Application](eqTo(url))(*, *, *)).thenReturn(
         failed(new BadRequestException("")),
-        Future.successful(applicationResponse(applicationId, "client-id", appName))
+        Future.successful(applicationResponse(applicationId, clientId, appName))
       )
 
       val result = await(connector.fetchApplicationById(applicationId))
@@ -259,7 +262,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "when useProxy is enabled returns an application from proxy" in new Setup(proxyEnabled = true) {
       when(mockProxiedHttpClient.GET[Application](eqTo(url))(*, *, *))
-        .thenReturn(Future.successful(applicationResponse(applicationId, "client-id", appName)))
+        .thenReturn(Future.successful(applicationResponse(applicationId, clientId, appName)))
       when(connector.http).thenReturn(mockProxiedHttpClient)
 
       val result = await(connector.fetchApplicationById(applicationId))
@@ -273,7 +276,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "fetch credentials for application" should {
-    val tokens = ApplicationToken("pId", Seq(aClientSecret()), "pToken")
+    val tokens = ApplicationToken(applicationId, Seq(aClientSecret()), "pToken")
     val url = baseUrl + s"/application/$applicationId/credentials"
 
     "return credentials" in new Setup {
@@ -441,7 +444,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "requestUplift" should {
-    val applicationId = "applicationId"
     val applicationName = "applicationName"
     val email = "john.requestor@example.com"
     val upliftRequest = UpliftRequest(applicationName, email)
@@ -484,7 +486,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "updateApproval" should {
-    val applicationId = "applicationId"
     val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email", "telephone")))
     val url = s"$baseUrl/application/$applicationId/check-information"
 
@@ -511,7 +512,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "addTeamMember" should {
-    val applicationId = "applicationId"
+    val applicationId = ApplicationId("applicationId")
     val admin = "john.requestor@example.com"
     val teamMember = "john.teamMember@example.com"
     val role = Role.ADMINISTRATOR
@@ -557,7 +558,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   "removeTeamMember" should {
-    val applicationId = "applicationId"
     val email = "john.bloggs@example.com"
     val admin = "admin@example.com"
     val adminsToEmail = Seq("otheradmin@example.com", "anotheradmin@example.com")
@@ -597,7 +597,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     def tpaClientSecret(clientSecretId: String, clientSecretValue: Option[String] = None): TPAClientSecret =
       TPAClientSecret(clientSecretId, "secret-name", clientSecretValue, DateTimeUtils.now, None)
 
-    val applicationId = "applicationId"
     val actorEmailAddress = "john.requestor@example.com"
     val clientSecretRequest = ClientSecretRequest(actorEmailAddress)
     val url = s"$baseUrl/application/$applicationId/client-secret"
@@ -607,7 +606,11 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       val newClientSecretValue = UUID.randomUUID().toString
       val newClientSecret = tpaClientSecret(newClientSecretId, Some(newClientSecretValue))
       val response =
-        AddClientSecretResponse(UUID.randomUUID().toString, UUID.randomUUID().toString, List(tpaClientSecret("old-secret-1"), tpaClientSecret("old-secret-2"), newClientSecret))
+        AddClientSecretResponse(
+          ClientId(UUID.randomUUID().toString),
+          UUID.randomUUID().toString,
+          List(tpaClientSecret("old-secret-1"), tpaClientSecret("old-secret-2"), newClientSecret)
+        )
 
       when(
         mockHttpClient
@@ -677,9 +680,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     val url = s"$baseUrl/application/name/validate"
 
     "returns a valid response" in new Setup {
-
       val applicationName = "my valid application name"
-      val appId = randomUUID().toString
+      val appId = ApplicationId(randomUUID().toString)
 
       when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](*, *, *)(*, *, *, *))
         .thenReturn(Future.successful(ApplicationNameValidationResult(None)))
@@ -713,7 +715,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "when retry logic is enabled should retry on failure" in new Setup {
       val applicationName = "my valid application name"
-      val appId = randomUUID().toString
+      val appId = ApplicationId(randomUUID().toString)
 
       when(mockAppConfig.retryCount).thenReturn(1)
 

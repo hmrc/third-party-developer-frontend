@@ -32,14 +32,24 @@ import views.html.manageTeamViews.ManageTeamView
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appId = "1234"
-  val clientId = "clientId123"
+  val appId = ApplicationId("1234")
+  val clientId = ClientId("clientId123")
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val collaborator = utils.DeveloperSession("developer@example.com", "firstName2", "lastName2", loggedInState = LoggedInState.LOGGED_IN)
   val collaborators = Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR), Collaborator(collaborator.email, Role.DEVELOPER))
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-    collaborators, state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+  val application = Application(
+    appId,
+    clientId,
+    "App name 1",
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    None,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    collaborators,
+    state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
 
   "manageTeam view" should {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
@@ -47,15 +57,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
     def renderPage(role: Role, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
 
-      manageTeamView.render(
-        ApplicationViewModel(application, hasSubscriptionsFields = false),
-        role,
-        form,
-        request,
-        messagesProvider,
-        appConfig,
-        "nav-section",
-        loggedInUser)
+      manageTeamView.render(ApplicationViewModel(application, hasSubscriptionsFields = false), role, form, request, messagesProvider, appConfig, "nav-section", loggedInUser)
     }
 
     "show Add and Remove buttons for Admin" in {

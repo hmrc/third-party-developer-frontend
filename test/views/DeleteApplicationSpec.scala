@@ -30,17 +30,26 @@ import views.html.DeleteApplicationView
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
-  val appId = "1234"
-  val clientId = "clientId123"
+  val appId = ApplicationId("1234")
+  val clientId = ClientId("clientId123")
   val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+  val application = Application(
+    appId,
+    clientId,
+    "App name 1",
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    None,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
   val prodAppId = "prod123"
   val sandboxAppId = "sand123"
   val prodApp: Application = application.copy(id = prodAppId)
   val sandboxApp: Application = application.copy(id = sandboxAppId, deployedTo = Environment.SANDBOX)
-
 
   "delete application page" should {
     "show content and link to delete application for Administrator" when {
@@ -100,10 +109,8 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
             elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe false
             elementExistsByText(document, "p", "You cannot delete this application because you're not an administrator.") shouldBe true
             elementExistsByText(document, "p", "Ask one of these administrators to delete it:") shouldBe true
-            application.collaborators foreach { admin =>
-              elementExistsByText(document, "li", admin.emailAddress) shouldBe true
-            }
-        }
+            application.collaborators foreach { admin => elementExistsByText(document, "li", admin.emailAddress) shouldBe true }
+          }
       }
     }
   }

@@ -21,7 +21,7 @@ import java.util.UUID.randomUUID
 import builder._
 import controllers.checkpages.ApplicationCheck
 import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
-import domain.models.applications
+import domain.models.applications.ApplicationId
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.ApplicationUpliftSuccessful
@@ -52,7 +52,7 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
 
-  val appId = "1234"
+  val appId = ApplicationId("1234")
   val appName: String = "app"
   val clientId = ClientId("clientIdzzz")
   val sessionId = "sessionId"
@@ -71,9 +71,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
 
-  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "clientId", exampleContext, ApiVersion("api-example-microservice")) // TODO - this is wierd
+  val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersion("api-example-microservice"))
 
-  val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token") // TODO - this is wierd
   val exampleApiSubscription: Some[APISubscriptions] = Some(
     APISubscriptions(
       "Example API",
@@ -150,7 +150,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   def createPartiallyConfigurableApplication(
       appId: ApplicationId = appId,
-      clientId: clientId = clientId,
+      clientId: ClientId = clientId,
       userRole: Role = ADMINISTRATOR,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
@@ -392,7 +392,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+              Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
             )
           )
         )
@@ -418,7 +418,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+              Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
             )
           )
         )
