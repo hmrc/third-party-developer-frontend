@@ -25,14 +25,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 import domain.models.apidefinitions.ApiVersion
+import domain.models.applications.ApplicationId
 
 @Singleton
 class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, auditService: AuditService) {
 
   private def doRequest(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(
-      f: (String, String, String, String, String, String) => DeskproTicket
-  )(implicit hc: HeaderCarrier) = {
-    f(requester.displayedName, requester.email, application.name, application.id.value, apiName, apiVersion.value)
+      f: (String, String, String, ApplicationId, String, ApiVersion) => DeskproTicket
+  ) = {
+    f(requester.displayedName, requester.email, application.name, application.id, apiName, apiVersion)
   }
 
   def requestApiSubscription(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[TicketResult] = {

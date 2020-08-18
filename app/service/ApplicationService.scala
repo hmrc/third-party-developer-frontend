@@ -162,7 +162,6 @@ class ApplicationService @Inject() (
     } yield subscription
   }
 
-  // TODO - should this be (ApplicationId, String) ??
   def addClientSecret(application: Application, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[(String, String)] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.addClientSecrets(application.id, ClientSecretRequest(actorEmailAddress))
   }
@@ -194,7 +193,7 @@ class ApplicationService @Inject() (
     val appId = application.id
 
     if (environment.isSandbox || requesterRole.isAdministrator) {
-      val deskproTicket = DeskproTicket.createForPrincipalApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId.value)
+      val deskproTicket = DeskproTicket.createForPrincipalApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId)
 
       for {
         ticketResponse <- deskproConnector.createTicket(deskproTicket)

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// TODO remove duplication
-
 package it.stubs
 
 import java.net.URLEncoder

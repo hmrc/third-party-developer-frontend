@@ -35,10 +35,7 @@ case class Error(code: ErrorCode, message: String)
 object Error {
   implicit val formatError = Json.format[Error]
 
-  object LockedAccountError extends Error(ErrorCode.LOCKED_ACCOUNT, "Locked Account")
   object BadRequestError extends Error(ErrorCode.BAD_REQUEST, "Bad Request")
-  object InvalidPasswordError extends Error(ErrorCode.INVALID_PASSWORD, "Invalid password")
-  object PasswordRequiredError extends Error(ErrorCode.PASSWORD_REQUIRED, "Password is required")
 
   implicit val writeBRE = Json.writes[BadRequestError.type]
 }

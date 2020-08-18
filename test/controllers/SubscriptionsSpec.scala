@@ -44,17 +44,13 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 import scala.concurrent.Future
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ApplicationId
-// import domain.models.applications.ClientId
 
 class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
-  // val appId = ApplicationId("1234")
   val apiName = "api-1"
   val apiVersion = ApiVersion("1.0")
   val apiContext = ApiContext("Context")
   val displayStatus = "Status"
-  // val clientId = ClientId("clientId123")
 
   val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
   val sessionId = "sessionId"

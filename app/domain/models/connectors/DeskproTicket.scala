@@ -20,8 +20,7 @@ import controllers.{SupportEnquiryForm, routes}
 import domain.models.applications.{Environment, Role, ApplicationId}
 import play.api.libs.json.Json
 import play.api.mvc.Request
-
-// TODO - move this file to value classes.
+import domain.models.apidefinitions.ApiVersion
 
 case class DeskproTicket(
     name: String,
@@ -60,32 +59,32 @@ object DeskproTicket extends FieldTransformer {
       requestorName: String,
       requestorEmail: String,
       applicationName: String,
-      applicationId: String,
+      applicationId: ApplicationId,
       apiName: String,
-      apiVersion: String
+      apiVersion: ApiVersion
   ): DeskproTicket = {
     val message = s"""I '$requestorEmail' want my application '$applicationName'
-                  |identified by '$applicationId'
+                  |identified by '${applicationId.value}'
                   |to be subscribed to the API '$apiName'
-                  |with version '$apiVersion'""".stripMargin
+                  |with version '${apiVersion.value}'""".stripMargin
 
-    DeskproTicket(requestorName, requestorEmail, "Request to subscribe to an API", message, routes.Subscriptions.manageSubscriptions(ApplicationId(applicationId)).url)
+    DeskproTicket(requestorName, requestorEmail, "Request to subscribe to an API", message, routes.Subscriptions.manageSubscriptions(applicationId).url)
   }
 
   def createForApiUnsubscribe(
       requestorName: String,
       requestorEmail: String,
       applicationName: String,
-      applicationId: String,
+      applicationId: ApplicationId,
       apiName: String,
-      apiVersion: String
+      apiVersion: ApiVersion
   ): DeskproTicket = {
     val message = s""""I '$requestorEmail' want my application '$applicationName'
-                  |identified by '$applicationId'
+                  |identified by '${applicationId.value}'
                   |to be unsubscribed from the API '$apiName'
-                  |with version '$apiVersion'""".stripMargin
+                  |with version '${apiVersion.value}'""".stripMargin
 
-    DeskproTicket(requestorName, requestorEmail, "Request to unsubscribe from an API", message, routes.Subscriptions.manageSubscriptions(ApplicationId(applicationId)).url)
+    DeskproTicket(requestorName, requestorEmail, "Request to unsubscribe from an API", message, routes.Subscriptions.manageSubscriptions(applicationId).url)
   }
 
   def createForPrincipalApplicationDeletion(
@@ -94,7 +93,7 @@ object DeskproTicket extends FieldTransformer {
       role: Role,
       environment: Environment,
       applicationName: String,
-      applicationId: String
+      applicationId: ApplicationId
   ): DeskproTicket = {
 
     val actor = role match {
@@ -104,9 +103,9 @@ object DeskproTicket extends FieldTransformer {
 
     val message =
       s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
-         |and the application id is '$applicationId'. I want it to be deleted from the Developer Hub.""".stripMargin
+         |and the application id is '${applicationId.value}'. I want it to be deleted from the Developer Hub.""".stripMargin
 
-    DeskproTicket(name, requestedByEmail, "Request to delete an application", message, routes.DeleteApplication.deleteApplication(ApplicationId(applicationId), None).url)
+    DeskproTicket(name, requestedByEmail, "Request to delete an application", message, routes.DeleteApplication.deleteApplication(applicationId, None).url)
   }
 
   def createFromSupportEnquiry(supportEnquiry: SupportEnquiryForm, appTitle: String)(implicit request: Request[_]) = {
