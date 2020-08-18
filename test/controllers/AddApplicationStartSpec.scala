@@ -98,7 +98,10 @@ class AddApplicationStartSpec extends BaseControllerSpec
   }
 
     "Add subordinate applications start page" should {
-      "return the add applications page with the user logged in" in new Setup {
+      "return the add applications page with the user logged in when the environment is Production" in new Setup {
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+
         private val result = underTest.addApplicationSubordinate()(loggedInRequest)
 
         status(result) shouldBe OK
@@ -112,10 +115,9 @@ class AddApplicationStartSpec extends BaseControllerSpec
         contentAsString(result) should not include "Sign in"
       }
 
-      "return the add applications page with the user logged in and environmennt is QA/Dev" in new Setup {
+      "return the add applications page with the user logged in when the environmennt is QA/Dev" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-
         private val result = underTest.addApplicationSubordinate()(loggedInRequest)
 
         status(result) shouldBe OK
@@ -148,7 +150,9 @@ class AddApplicationStartSpec extends BaseControllerSpec
     }
 
     "Add principal applications start page" should {
-      "return the add applications page with the user logged in" in new Setup {
+      "return the add applications page with the user logged in when the environment is Production" in new Setup {
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
         private val result = underTest.addApplicationPrincipal()(loggedInRequest)
 
         status(result) shouldBe OK
@@ -156,6 +160,19 @@ class AddApplicationStartSpec extends BaseControllerSpec
         contentAsString(result) should include(loggedInUser.displayedName)
         contentAsString(result) should include("Sign out")
         contentAsString(result) should include("Now that you've tested your software you can request production credentials to use live data.")
+        contentAsString(result) should not include "Sign in"
+      }
+
+      "return the add applications page with the user logged in when the environment is QA" in new Setup {
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+        private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+
+        status(result) shouldBe OK
+        contentAsString(result) should include("Add an application to QA")
+        contentAsString(result) should include(loggedInUser.displayedName)
+        contentAsString(result) should include("Sign out")
+        contentAsString(result) should include("Now that you've tested your software you can request to add your application to QA.")
         contentAsString(result) should not include "Sign in"
       }
 

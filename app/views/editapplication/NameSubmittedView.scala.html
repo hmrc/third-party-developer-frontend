@@ -25,6 +25,9 @@
 @(applicationId: String, app: Application)(
         implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig)
 
+@nameOfEnv = @{appConfig.nameOfPrincipalEnvironment}
+@nameOfEnvLowerCase = @{appConfig.nameOfPrincipalEnvironment.toLowerCase()}
+@principalEnv = @{if(appConfig.nameOfPrincipalEnvironment == "Production") {nameOfEnvLowerCase} else nameOfEnv}
 @pageHeading = @{s"Request received"}
 
 @devMain(
@@ -55,12 +58,12 @@
             </p>
             <p>The checking process can take up to 10 working days.</p>
 
-            <h3 class="heading-medium">New production application</h3>
-            <p>By requesting credentials you've created a new production application called <span class="bold">@{app.name}</span>.<p/>
+            <h3 class="heading-medium">New @principalEnv application</h3>
+            <p>By requesting credentials you've created a new @principalEnv application called <span class="bold">@{app.name}</span>.<p/>
             <p>Once your credentials are issued, you can access them in your application. You'll be notified by email.</p>
             <br>
 
-            <a href="@routes.Details.details(app.id)" class="button">View new production application</a>
+            <a href="@routes.Details.details(app.id)" class="button">View new @principalEnv application</a>
         </div>
     </div>
 

@@ -22,9 +22,14 @@
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
-@pageHeading = @{"Get production credentials"}
+@getProductionCredentials = @{"Get production credentials"}
+@pageHeading = @{ if(appConfig.nameOfPrincipalEnvironment == "Production") {getProductionCredentials} else {s"Add an application to ${appConfig.nameOfPrincipalEnvironment}"}}
+@requestProductionCredentials = @{"production credentials to use live data"}
+@addApplicationToEnv = @{s"to add your application to ${appConfig.nameOfPrincipalEnvironment}"}
+@principalWording = @{ if(appConfig.nameOfPrincipalEnvironment == "Production") {requestProductionCredentials} else addApplicationToEnv}
 
-@devMain(
+
+    @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
@@ -39,7 +44,7 @@
         <h1 class="heading-xlarge">@pageHeading</h1>
     </header>
 
-    <p>Now that you've tested your software you can request production credentials to use live data.</p>
+    <p>Now that you've tested your software you can request @principalWording.</p>
     <div class="panel panel-border-wide">
         <p>To do that you must comply with our
             <a href="/api-documentation/docs/terms-of-use">terms of use</a>.
