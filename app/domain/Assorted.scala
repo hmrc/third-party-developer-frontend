@@ -16,71 +16,7 @@
 
 package domain
 
-import domain.models.applications.{Access, Application, Capability, CheckInformation, ClientSecret, Collaborator, ContactDetails, Environment, OverrideFlag, Permission, Role, Standard, State, TermsOfUseAgreement, TermsOfUseStatus}
-import domain.models.developers.DeveloperSession
-
-case class AddTeamMemberRequest(adminEmail: String, collaborator: Collaborator, isRegistered: Boolean, adminsToEmail: Set[String])
-
-object AddTeamMemberRequest {
-  import play.api.libs.json._
-  implicit val format = Json.format[AddTeamMemberRequest]
-}
-
-case class AddTeamMemberResponse(registeredUser: Boolean)
-
-object AddTeamMemberResponse {
-  import play.api.libs.json._
-  implicit val format = Json.format[AddTeamMemberResponse]
-}
-
-
-
-
-
-
-
-
-
-case class CheckInformationForm(apiSubscriptionsComplete: Boolean = false,
-                                apiSubscriptionConfigurationsComplete: Boolean = false,
-                                contactDetailsComplete: Boolean = false,
-                                teamConfirmedComplete: Boolean = false,
-                                confirmedNameComplete: Boolean = false,
-                                providedPrivacyPolicyURLComplete: Boolean = false,
-                                providedTermsAndConditionsURLComplete: Boolean = false,
-                                termsOfUseAgreementComplete: Boolean = false)
-
-
-
-
-
-object CheckInformationForm {
-  def fromCheckInformation(checkInformation: CheckInformation) = {
-    CheckInformationForm(
-      confirmedNameComplete = checkInformation.confirmedName,
-      apiSubscriptionsComplete = checkInformation.apiSubscriptionsConfirmed,
-      apiSubscriptionConfigurationsComplete = checkInformation.apiSubscriptionConfigurationsConfirmed,
-      contactDetailsComplete = checkInformation.contactDetails.isDefined,
-      providedPrivacyPolicyURLComplete = checkInformation.providedPrivacyPolicyURL,
-      providedTermsAndConditionsURLComplete = checkInformation.providedTermsAndConditionsURL,
-      teamConfirmedComplete = checkInformation.teamConfirmed,
-      termsOfUseAgreementComplete = checkInformation.termsOfUseAgreements.exists(terms => terms.version.nonEmpty)
-    )
-  }
-}
-
-
-
-
-
-
-
-case class ClientSecretResponse(clientSecret: String)
-
-object ClientSecretResponse {
-  import play.api.libs.json._
-  implicit val format = Json.format[ClientSecretResponse]
-}
+import domain.models.applications.ApplicationId
 
 class ApplicationAlreadyExists extends RuntimeException
 
@@ -96,29 +32,12 @@ class TeamMemberAlreadyExists extends RuntimeException("This user is already a t
 
 class ApplicationNeedsAdmin extends RuntimeException
 
-case class ApplicationCreatedResponse(id: String)
+case class ApplicationCreatedResponse(id: ApplicationId)
 
 sealed trait ApplicationUpdateSuccessful
 
 case object ApplicationUpdateSuccessful extends ApplicationUpdateSuccessful
 
-
 sealed trait ApplicationUpliftSuccessful
 
 case object ApplicationUpliftSuccessful extends ApplicationUpliftSuccessful
-
-sealed trait ApplicationVerificationSuccessful
-
-case object ApplicationVerificationSuccessful extends ApplicationVerificationSuccessful
-
-class ApplicationVerificationFailed(verificationCode: String) extends RuntimeException
-
-sealed trait VerifyPasswordSuccessful
-
-case object VerifyPasswordSuccessful extends VerifyPasswordSuccessful
-
-final case class DeleteApplicationRequest(requester: DeveloperSession)
-object DeleteApplicationRequest {
-  import play.api.libs.json._
-  implicit val format = Json.format[DeleteApplicationRequest]
-}

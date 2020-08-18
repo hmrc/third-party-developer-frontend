@@ -26,6 +26,7 @@ import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.play.http.metrics.API
+import domain.models.applications.ApplicationId
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration("Test.microservice.services.hmrc-deskpro.port" -> stubPort)
@@ -52,7 +53,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
   "DeskproConnector" when {
 
     "Creating a Deskpro ticket" should {
-      val ticket = DeskproTicket.createForUplift("Joe Bloggs", "joe.bloggs@example.com", "Test App", "appId")
+      val ticket = DeskproTicket.createForUplift("Joe Bloggs", "joe.bloggs@example.com", "Test App", ApplicationId("appId"))
       val ticketPath = "/deskpro/ticket"
       val expectedBody = Json.toJson(ticket).toString()
 

@@ -22,15 +22,14 @@ import domain.DeskproTicketCreationFailed
 import domain.models.connectors.TicketCreated
 import mocks.service._
 import org.mockito.ArgumentCaptor
-import play.api.mvc.{Request, Result}
+import play.api.mvc.Request
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK}
+import play.api.test.Helpers.{BAD_REQUEST, FORBIDDEN, OK, _}
 import service.DeskproService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
 import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}
-import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}

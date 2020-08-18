@@ -17,7 +17,7 @@
 package service
 
 import config.ApplicationConfig
-import domain.models.applications.{Application, Collaborator, Environment, Role}
+import domain.models.applications._
 import org.joda.time.{DateTime, Duration, Instant, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
@@ -41,11 +41,14 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
 
     val service = new MfaMandateService(mockAppConfig, mockApplicationService)
 
+    val applicationId = ApplicationId("myId")
+    val clientId = ClientId("myClientId")
+
     val applicationsWhereUserIsAdminInProduction = Future.successful(
       Seq(
         Application(
-          "myId",
-          "myClientId",
+          applicationId,
+          clientId,
           "myName",
           new DateTime(),
           new DateTime(),
@@ -59,8 +62,8 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
     val applicationsWhereUserIsDeveloperInProduction = Future.successful(
       Seq(
         Application(
-          "myId",
-          "myClientId",
+          applicationId,
+          clientId,
           "myName",
           new DateTime(),
           new DateTime(),
@@ -74,8 +77,8 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
     val applicationsWhereUserIsNotACollaboratorInProduction = Future.successful(
       Seq(
         Application(
-          "myId",
-          "myClientId",
+          applicationId,
+          clientId,
           "myName",
           new DateTime(),
           new DateTime(),
@@ -88,8 +91,8 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
     val applicationsWhereUserIsAdminInSandbox = Future.successful(
       Seq(
         Application(
-          "myId",
-          "myClientId",
+          applicationId,
+          clientId,
           "myName",
           new DateTime(),
           new DateTime(),

@@ -17,7 +17,8 @@
 package views
 
 import config.ApplicationConfig
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.apidefinitions.ApiVersion
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -34,26 +35,37 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
       val appConfig = mock[ApplicationConfig]
       val request = FakeRequest().withCSRFToken
 
-      val appId = "1234"
+      val appId = ApplicationId("1234")
       val apiName = "Test API"
-      val apiVersion = "1.0"
-      val clientId = "clientId123"
+      val apiVersion = ApiVersion("1.0")
+      val clientId = ClientId("clientId123")
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
-      val application = Application(appId, clientId, "Test Application", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Test Application Description"),
-        Set(Collaborator(developer.email, Role.ADMINISTRATOR)), state = ApplicationState.production(developer.email, ""),
-        access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+      val application = Application(
+        appId,
+        clientId,
+        "Test Application",
+        DateTimeUtils.now,
+        DateTimeUtils.now,
+        None,
+        Environment.PRODUCTION,
+        Some("Test Application Description"),
+        Set(Collaborator(developer.email, Role.ADMINISTRATOR)),
+        state = ApplicationState.production(developer.email, ""),
+        access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+      )
 
       val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
 
       val page = subscribeRequestSubmittedView.render(
-        ApplicationViewModel(application,hasSubscriptionsFields = false),
+        ApplicationViewModel(application, hasSubscriptionsFields = false),
         apiName,
         apiVersion,
         request,
         developer,
         messagesProvider,
         appConfig,
-        "subscriptions")
+        "subscriptions"
+      )
 
       page.contentType should include("text/html")
 

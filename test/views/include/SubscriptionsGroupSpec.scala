@@ -18,8 +18,8 @@ package views.include
 
 import builder.SubscriptionsBuilder
 import controllers.APISubscriptions
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.apidefinitions._
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import domain.models.views.SubscriptionRedirect
 import org.jsoup.Jsoup
@@ -34,16 +34,16 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
   implicit val request = FakeRequest().withCSRFToken
 
   val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
-  val applicationId = "1234"
-  val clientId = "clientId123"
+  val applicationId = ApplicationId("1234")
+  val clientId = ClientId("clientId123")
   val applicationName = "Test Application"
   val apiName = "Test API"
-  val apiContext = "test"
-  val apiVersion = "1.0"
+  val apiContext = ApiContext("test")
+  val apiVersion = ApiVersion("1.0")
 
   val emptyFields = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 
-  val subscriptionStatus = APISubscriptionStatus(apiName, apiName, apiContext, APIVersion(apiVersion, APIStatus.STABLE, None), false, false, fields = emptyFields)
+  val subscriptionStatus = APISubscriptionStatus(apiName, apiName, apiContext, ApiVersionDefinition(apiVersion, APIStatus.STABLE, None), false, false, fields = emptyFields)
 
   val apiSubscriptions = Seq(APISubscriptions(apiName, apiName, apiContext, Seq(subscriptionStatus)))
 
@@ -51,20 +51,35 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
 
   case class Page(role: Role, environment: Environment, state: ApplicationState) {
     lazy val body: Document = {
-      val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, None, environment, Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, role)), state = state,
-        access = Standard(redirectUris = Seq("https://red1.example.com", "https://red2.example.con"), termsAndConditionsUrl = Some("http://tnc-url.example.com")))
+      val application = Application(
+        applicationId,
+        clientId,
+        applicationName,
+        DateTimeUtils.now,
+        DateTimeUtils.now,
+        None,
+        environment,
+        Some("Description 1"),
+        Set(Collaborator(loggedInUser.email, role)),
+        state = state,
+        access = Standard(redirectUris = Seq("https://red1.example.com", "https://red2.example.con"), termsAndConditionsUrl = Some("http://tnc-url.example.com"))
+      )
 
-      Jsoup.parse(subscriptionsGroup.render(
-        role,
-        application,
-        apiSubscriptions,
-        group = "Example",
-        afterSubscriptionRedirectTo = SubscriptionRedirect.MANAGE_PAGE,
-        showSubscriptionFields = true,
-        messagesProvider,
-        appConfig,
-        request).body)
+      Jsoup.parse(
+        subscriptionsGroup
+          .render(
+            role,
+            application,
+            apiSubscriptions,
+            group = "Example",
+            afterSubscriptionRedirectTo = SubscriptionRedirect.MANAGE_PAGE,
+            showSubscriptionFields = true,
+            messagesProvider,
+            appConfig,
+            request
+          )
+          .body
+      )
     }
 
     lazy val toggle = body.getElementById("test-1_0-toggle")

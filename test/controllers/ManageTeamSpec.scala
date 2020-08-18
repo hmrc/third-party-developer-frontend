@@ -16,8 +16,13 @@
 
 package controllers
 
-import domain.models.applications.{ApplicationState, Role}
-import domain.models.developers.Session
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
+import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
+import domain.models.applications._
+import domain.models.connectors.AddTeamMemberResponse
+import domain.models.controllers.AddTeamMemberPageMode
 import helpers.string._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
@@ -27,32 +32,16 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.WithLoggedInSession._
 import utils.{TestApplications, WithCSRFAddToken}
+import utils.WithLoggedInSession._
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.models.developers.Developer
-import domain.models.developers.LoggedInState
-import domain.models.developers.DeveloperSession
-import domain.models.applications.Application
-import domain.models.applications.Collaborator
-import domain.AddTeamMemberResponse
-import domain.ApplicationUpdateSuccessful
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
-import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
-import domain.TeamMemberAlreadyExists
-import domain.ApplicationNotFound
-import domain.models.controllers.AddTeamMemberPageMode
-
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
-
-  val appId = "1234"
-  val clientId = "clientId123"
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
@@ -91,17 +80,19 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    def givenTheApplicationExistWithUserRole( appId: String,
-                                              userRole: Role,
-                                              state: ApplicationState = ApplicationState.production("test", "test"),
-                                              additionalTeamMembers: Seq[Collaborator] = Seq()) = {
-      
+    def givenTheApplicationExistWithUserRole(
+        appId: ApplicationId,
+        userRole: Role,
+        state: ApplicationState = ApplicationState.production("test", "test"),
+        additionalTeamMembers: Seq[Collaborator] = Seq()
+    ) = {
+
       val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(Collaborator(loggedInUser.email, userRole))
       val application = aStandardApplication.copy(collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = DateTime.parse("2018-04-06T09:00"))
 
-      fetchByApplicationIdReturns(appId,application)
-      fetchCredentialsReturns(application,tokens())
-      givenApplicationHasSubs(application,Seq.empty)
+      fetchByApplicationIdReturns(appId, application)
+      fetchCredentialsReturns(application, tokens())
+      givenApplicationHasSubs(application, Seq.empty)
 
       application
     }
@@ -166,8 +157,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-      verify(applicationServiceMock).addTeamMember(eqTo(application),
-        eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
     }
 
     "check if team member already exists on the application" in new Setup {
@@ -177,8 +167,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
-      verify(applicationServiceMock).addTeamMember(eqTo(application),
-        eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
 
     }
 
@@ -189,8 +178,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe NOT_FOUND
-      verify(applicationServiceMock).addTeamMember(eqTo(application),
-        eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
 
     }
 
@@ -198,11 +186,11 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
       when(applicationServiceMock.addTeamMember(eqTo(application), *, any[Collaborator])(any[HeaderCarrier]))
         .thenReturn(failed(new ApplicationNotFound))
-      val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString))
+      val result =
+        underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
-      verify(applicationServiceMock, never).addTeamMember(eqTo(application),
-        eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
+      verify(applicationServiceMock, never).addTeamMember(eqTo(application), eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
 
     }
 
@@ -282,8 +270,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-        verify(applicationServiceMock).removeTeamMember(eqTo(application),
-          eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+        verify(applicationServiceMock).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
       }
 
       "redirect to the team members page without removing a team member when the confirmation in 'No'" in new Setup {
@@ -293,8 +280,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-        verify(applicationServiceMock, never).removeTeamMember(eqTo(application),
-          eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
       }
 
       "return 400 Bad Request when no confirmation is given" in new Setup {
@@ -302,8 +288,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
 
         status(result) shouldBe BAD_REQUEST
-        verify(applicationServiceMock, never).removeTeamMember(eqTo(application),
-          eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
       }
 
       "show 400 Bad Request when no email is given" in new Setup {
@@ -311,8 +296,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> "Yes"))
 
         status(result) shouldBe BAD_REQUEST
-        verify(applicationServiceMock, never).removeTeamMember(eqTo(application),
-          eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
       }
     }
 
@@ -340,15 +324,15 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       }
     }
   }
-    
+
   "ManageTeam" when {
     "using an application pending approval" should {
 
       trait PendingApprovalReturnsBadRequest extends Setup {
         def executeAction: Future[Result]
-        
+
         val pageNumber = 1
-        
+
         val apiVersion = exampleSubscriptionWithFields("api1", 1)
         val subsData = Seq(
           apiVersion
@@ -356,9 +340,9 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
         val app = aStandardPendingApprovalApplication(developer.email)
 
-        fetchByApplicationIdReturns(app)          
+        fetchByApplicationIdReturns(app)
         givenApplicationHasSubs(app, subsData)
-        
+
         val result = executeAction
 
         status(result) shouldBe NOT_FOUND
@@ -384,13 +368,13 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
           addToken(underTest.addTeamMemberAction(app.id, AddTeamMemberPageMode.ApplicationCheck))(requestWithForm)
         }
       }
-      
+
       "return a bad request for removeTeamMember action" in new PendingApprovalReturnsBadRequest {
         def executeAction = {
           underTest.removeTeamMember(app.id, "fake-hash")(loggedInRequest)
         }
       }
-      
+
       "return a bad request for removeTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
         def executeAction = {
           underTest.removeTeamMemberAction(app.id)(loggedInRequest)

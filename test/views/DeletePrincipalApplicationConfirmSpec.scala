@@ -17,7 +17,7 @@
 package views
 
 import controllers.DeletePrincipalApplicationForm
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
@@ -34,17 +34,26 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
   "delete application confirm page" should {
 
     val request = FakeRequest().withCSRFToken
-    val appId = "1234"
-    val clientId = "clientId123"
+    val appId = ApplicationId("1234")
+    val clientId = ClientId("clientId123")
     val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
-    val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-      access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+    val application = Application(
+      appId,
+      clientId,
+      "App name 1",
+      DateTimeUtils.now,
+      DateTimeUtils.now,
+      None,
+      Environment.PRODUCTION,
+      Some("Description 1"),
+      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+      state = ApplicationState.production(loggedInUser.email, ""),
+      access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    )
 
     "render with no errors" in {
 
-      val page = deletePrincipalApplicationConfirmView.render(
-        application, DeletePrincipalApplicationForm.form, request, loggedInUser, messagesProvider, appConfig)
+      val page = deletePrincipalApplicationConfirmView.render(application, DeletePrincipalApplicationForm.form, request, loggedInUser, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

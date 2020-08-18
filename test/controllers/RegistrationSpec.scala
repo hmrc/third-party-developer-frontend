@@ -25,7 +25,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
-import views.html.{AccountVerifiedView, ConfirmationView, ExpiredVerificationLinkView, RegistrationView, ResendConfirmationView, SignInView}
+import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}

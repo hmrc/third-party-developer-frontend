@@ -35,11 +35,7 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ManageApplicationsSpec
-  extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
-
-  val appId = "1234"
-  val clientId = "clientId123"
+class ManageApplicationsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
@@ -50,11 +46,21 @@ class ManageApplicationsSpec
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val application = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+  val application = Application(
+    appId,
+    clientId,
+    "App name 1",
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    None,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
 
-  val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
@@ -90,11 +96,11 @@ class ManageApplicationsSpec
     fetchSessionByIdReturns(sessionId, session)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(addApplicationController,implicitly)(sessionId)
+      .withLoggedIn(addApplicationController, implicitly)(sessionId)
       .withSession(sessionParams: _*)
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(addApplicationController,implicitly)(partLoggedInSessionId)
+      .withLoggedIn(addApplicationController, implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
   }
 

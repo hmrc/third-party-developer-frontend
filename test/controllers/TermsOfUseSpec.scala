@@ -19,9 +19,9 @@ package controllers
 import domain.ApplicationUpdateSuccessful
 import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications
+import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.applications.Role.ADMINISTRATOR
-import domain.models.applications._
 import domain.models.developers.{Developer, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
@@ -62,7 +62,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    val appId = "1234"
+    val appId = ApplicationId("1234")
 
     implicit val hc = HeaderCarrier()
 
@@ -74,7 +74,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     ) = {
       val application = Application(
         appId,
-        "clientId",
+        ClientId("clientId"),
         "appName",
         DateTimeUtils.now,
         DateTimeUtils.now,

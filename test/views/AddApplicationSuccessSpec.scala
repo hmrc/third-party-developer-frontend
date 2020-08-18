@@ -16,7 +16,7 @@
 
 package views
 
-import domain.models.applications.Environment
+import domain.models.applications.{ApplicationId, Environment}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -35,11 +35,10 @@ class AddApplicationSuccessSpec extends CommonViewSpec with WithCSRFAddToken {
   "Add application success page" should {
 
     def testPage(applicationName: String, environment: Environment): Document = {
-      val applicationId = "application-id"
+      val applicationId = ApplicationId("application-id")
       val loggedIn = utils.DeveloperSession("", "", "", None, loggedInState = LoggedInState.LOGGED_IN)
       val request = FakeRequest().withCSRFToken
-      val page = addApplicationSuccess.render(
-        applicationName, applicationId, environment, request, loggedIn, messagesProvider, appConfig, navSection = "nav-section")
+      val page = addApplicationSuccess.render(applicationName, applicationId, environment, request, loggedIn, messagesProvider, appConfig, navSection = "nav-section")
       val document = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", s"You added $applicationName") shouldBe true
       document

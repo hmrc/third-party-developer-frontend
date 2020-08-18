@@ -16,18 +16,20 @@
 
 package domain.models.subscriptions
 
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.{ApplicationId, ClientId}
 import play.api.libs.json.{Format, Json}
 
 object ApiSubscriptionFields {
 
   case class SubscriptionFieldDefinition(
-                                          name: String,
-                                          description: String,
-                                          shortDescription: String,
-                                          hint: String,
-                                          `type`: String,
-                                          access: AccessRequirements
-                                        )
+      name: String,
+      description: String,
+      shortDescription: String,
+      hint: String,
+      `type`: String,
+      access: AccessRequirements
+  )
 
   case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: String)
 
@@ -38,12 +40,12 @@ object ApiSubscriptionFields {
   case object FieldsDeleteFailureResult extends FieldsDeleteResult
 
   case class SubscriptionFieldsWrapper(
-                                        applicationId: String,
-                                        clientId: String,
-                                        apiContext: String,
-                                        apiVersion: String,
-                                        fields: Seq[SubscriptionFieldValue]
-                                      )
+      applicationId: ApplicationId,
+      clientId: ClientId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      fields: Seq[SubscriptionFieldValue]
+  )
 
   type Fields = Map[String, String]
 
@@ -52,11 +54,11 @@ object ApiSubscriptionFields {
   }
 
   case class SubscriptionFieldsPutRequest(
-                                           clientId: String,
-                                           apiContext: String,
-                                           apiVersion: String,
-                                           fields: Map[String, String]
-                                         )
+      clientId: ClientId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      fields: Map[String, String]
+  )
 
   object SubscriptionFieldsPutRequest {
     implicit val format: Format[SubscriptionFieldsPutRequest] =

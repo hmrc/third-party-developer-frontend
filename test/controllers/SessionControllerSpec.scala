@@ -20,15 +20,13 @@ import java.util.UUID
 
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
-import domain.models.developers.Session
-import domain.models.developers.{Developer, LoggedInState}
+import domain.models.developers.{Developer, LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
-import play.api.test.Helpers.redirectLocation
+import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import utils.WithLoggedInSession._
-import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

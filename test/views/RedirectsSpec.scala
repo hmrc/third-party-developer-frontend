@@ -16,8 +16,8 @@
 
 package views
 
+import domain.models.applications._
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -30,8 +30,8 @@ import views.html.RedirectsView
 
 class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken {
 
-  val appId = "1234"
-  val clientId = "clientId123"
+  val appId = ApplicationId("1234")
+  val clientId = ClientId("clientId123")
   val loggedInUser = utils.DeveloperSession("developer@example.com", "John", "Doe", loggedInState = LoggedInState.LOGGED_IN)
   val loggedInDev = utils.DeveloperSession("developer2@example.com", "Billy", "Fontaine", loggedInState = LoggedInState.LOGGED_IN)
   val application = Application(
@@ -53,27 +53,19 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken {
 
     def renderPageWithRedirectUris(role: Role, numberOfRedirectUris: Int) = {
       val request = FakeRequest().withCSRFToken
-      val redirects = 1 to numberOfRedirectUris map(num => s"http://localhost:$num")
+      val redirects = 1 to numberOfRedirectUris map (num => s"http://localhost:$num")
       val standardAccess = Standard(redirectUris = redirects, termsAndConditionsUrl = None)
 
       val applicationWithRedirects = application.copy(access = standardAccess)
-      val user = if(role.isAdministrator) {
+      val user = if (role.isAdministrator) {
         loggedInUser
-      }
-      else {
+      } else {
         loggedInDev
       }
 
       val redirectsView = app.injector.instanceOf[RedirectsView]
 
-      redirectsView.render(
-        ApplicationViewModel(applicationWithRedirects,hasSubscriptionsFields = false),
-        redirects,
-        request,
-        user,
-        messagesProvider,
-        appConfig,
-        "redirects")
+      redirectsView.render(ApplicationViewModel(applicationWithRedirects, hasSubscriptionsFields = false), redirects, request, user, messagesProvider, appConfig, "redirects")
     }
 
     def renderPageForStandardApplicationAsAdminWithRedirectUris(numberOfRedirectUris: Int) = {

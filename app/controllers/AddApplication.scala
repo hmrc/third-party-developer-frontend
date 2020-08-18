@@ -18,8 +18,9 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys.appNameField
+import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.applications.{CreateApplicationRequest, Environment, Invalid, Valid}
+import domain.ApplicationCreatedResponse
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -27,26 +28,28 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service._
 import views.html._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 
 @Singleton
-class AddApplication @Inject()(val applicationService: ApplicationService,
-                               val sessionService: SessionService,
-                               val auditService: AuditService,
-                               val errorHandler: ErrorHandler,
-                               mcc: MessagesControllerComponents,
-                               val cookieSigner : CookieSigner,
-                               addApplicationSubordinateEmptyNestView: AddApplicationSubordinateEmptyNestView,
-                               manageApplicationsView: ManageApplicationsView,
-                               accessTokenSwitchView: AccessTokenSwitchView,
-                               usingPrivilegedApplicationCredentialsView: UsingPrivilegedApplicationCredentialsView,
-                               tenDaysWarningView: TenDaysWarningView,
-                               addApplicationStartSubordinateView: AddApplicationStartSubordinateView,
-                               addApplicationStartPrincipalView: AddApplicationStartPrincipalView,
-                               addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
-                               addApplicationNameView: AddApplicationNameView)
-                              (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends ApplicationController(mcc) {
+class AddApplication @Inject() (
+    val applicationService: ApplicationService,
+    val sessionService: SessionService,
+    val auditService: AuditService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    addApplicationSubordinateEmptyNestView: AddApplicationSubordinateEmptyNestView,
+    manageApplicationsView: ManageApplicationsView,
+    accessTokenSwitchView: AccessTokenSwitchView,
+    usingPrivilegedApplicationCredentialsView: UsingPrivilegedApplicationCredentialsView,
+    tenDaysWarningView: TenDaysWarningView,
+    addApplicationStartSubordinateView: AddApplicationStartSubordinateView,
+    addApplicationStartPrincipalView: AddApplicationStartPrincipalView,
+    addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
+    addApplicationNameView: AddApplicationNameView
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends ApplicationController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>
@@ -58,33 +61,23 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     }
   }
 
-  def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(accessTokenSwitchView()))
-  }
+  def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(accessTokenSwitchView())) }
 
-  def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(usingPrivilegedApplicationCredentialsView()))
-  }
+  def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(usingPrivilegedApplicationCredentialsView())) }
 
-  def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(tenDaysWarningView()))
-  }
+  def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(tenDaysWarningView())) }
 
-  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(addApplicationStartSubordinateView()))
-  }
+  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(addApplicationStartSubordinateView())) }
 
-  def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(addApplicationStartPrincipalView()))
-  }
+  def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(addApplicationStartPrincipalView())) }
 
-  def addApplicationSuccess(applicationId: String): Action[AnyContent] =
+  def addApplicationSuccess(applicationId: ApplicationId): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit appRequest =>
       import appRequest._
 
       successful(
         deployedTo match {
-          case SANDBOX => Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
+          case SANDBOX    => Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
           case PRODUCTION => NotFound(errorHandler.notFoundTemplate(request))
         }
       )
@@ -95,39 +88,35 @@ class AddApplication @Inject()(val applicationService: ApplicationService,
     successful(Ok(addApplicationNameView(form, environment)))
   }
 
-  def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction {
-    implicit request =>
+  def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
+    val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
 
-      val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest
+    def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
+      successful(Ok(addApplicationNameView(errors, environment)))
 
-      def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
-        successful(Ok(addApplicationNameView(errors, environment)))
+    def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
+      applicationService
+        .createForUser(CreateApplicationRequest.fromAddApplicationJourney(loggedIn, form, environment))
+    }
 
-      def addApplication(form: AddApplicationNameForm) = {
-        applicationService
-          .createForUser(CreateApplicationRequest.fromAddApplicationJourney(loggedIn, form, environment))
-      }
+    def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =
+      applicationService
+        .isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment, None)
+        .flatMap {
+          case Valid =>
+            addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
+              environment match {
+                case PRODUCTION => Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
+                case SANDBOX    => Redirect(routes.Subscriptions.addAppSubscriptions(applicationCreatedResponse.id))
+              }
+            )
 
-      def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =
-        applicationService.isApplicationNameValid(
-          formThatPassesSimpleValidation.applicationName,
-          environment,
-          None)
-          .flatMap {
-            case Valid =>
-              addApplication(formThatPassesSimpleValidation).map(
-                applicationCreatedResponse => environment match {
-                  case PRODUCTION => Redirect(controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
-                  case SANDBOX => Redirect(routes.Subscriptions.addAppSubscriptions(applicationCreatedResponse.id))
-                }
-              )
+          case invalid: Invalid =>
+            def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
-            case invalid: Invalid =>
-              def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+            successful(BadRequest(addApplicationNameView(invalidApplicationNameForm, environment)))
+        }
 
-              successful(BadRequest(addApplicationNameView(invalidApplicationNameForm, environment)))
-          }
-
-      requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)
+    requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)
   }
 }

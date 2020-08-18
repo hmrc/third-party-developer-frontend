@@ -25,7 +25,7 @@
 @import domain.models.developers.DeveloperSession
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
-@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: String, submitAction: Call, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+@(app: Application, role: Role, subscriptions: Option[GroupedSubscriptions], id: ApplicationId, submitAction: Call, errorForm: Option[Form[DummySubscriptionsForm]] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @import domain.models.applications.Role
     @pageHeading = @{ "Confirm which APIs you want to use" }

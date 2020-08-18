@@ -17,17 +17,15 @@
 package controllers
 
 import config.ErrorHandler
-import domain.models.developers.{LoggedInState, Session}
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.views.NavLink
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.models.developers.Developer
-import domain.models.developers.DeveloperSession
-import domain.models.views.NavLink
-import play.api.test.Helpers._
 
 class NavigationSpec extends BaseControllerSpec {
 

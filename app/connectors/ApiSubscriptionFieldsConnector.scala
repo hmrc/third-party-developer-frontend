@@ -22,24 +22,22 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.models.apidefinitions.APIIdentifier
-import domain.models.applications.Environment
-import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.applications.{ClientId, Environment}
 import domain.models.subscriptions.AccessRequirements
+import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
-import play.api.libs.json.{Format, JsSuccess, Json}
+import play.api.libs.json.{Format, Json, JsSuccess}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext)
-    extends SubscriptionFieldsConnector
-    with Retries {
+abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
   val environment: Environment
@@ -55,8 +53,8 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
 
   def fetchFieldsValuesWithPrefetchedDefinitions(
-      clientId: String,
-      apiIdentifier: APIIdentifier,
+      clientId: ClientId,
+      apiIdentifier: ApiIdentifier,
       definitionsCache: DefinitionsByApiVersion
   )(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]] = {
 
@@ -65,18 +63,18 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     internalFetchFieldValues(getDefinitions)(clientId, apiIdentifier)
   }
 
-  def fetchFieldValues(clientId: String, context: String, version: String)(
+  def fetchFieldValues(clientId: ClientId, context: ApiContext, version: ApiVersion)(
       implicit hc: HeaderCarrier
   ): Future[Seq[SubscriptionFieldValue]] = {
 
     def getDefinitions() = fetchFieldDefinitions(context, version)
 
-    internalFetchFieldValues(getDefinitions)(clientId, APIIdentifier(context, version))
+    internalFetchFieldValues(getDefinitions)(clientId, ApiIdentifier(context, version))
   }
 
   private def internalFetchFieldValues(
       getDefinitions: () => Future[Seq[SubscriptionFieldDefinition]]
-  )(clientId: String, apiIdentifier: APIIdentifier)(
+  )(clientId: ClientId, apiIdentifier: ApiIdentifier)(
       implicit hc: HeaderCarrier
   ): Future[Seq[SubscriptionFieldValue]] = {
 
@@ -104,7 +102,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     } yield joinFieldValuesToDefinitions(definitions, fieldValues)
   }
 
-  def fetchFieldDefinitions(apiContext: String, apiVersion: String)(
+  def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion)(
       implicit hc: HeaderCarrier
   ): Future[Seq[SubscriptionFieldDefinition]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
@@ -124,8 +122,9 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     } recover recovery(DefinitionsByApiVersion.empty)
   }
 
-  def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
-                     (implicit hc: HeaderCarrier): Future[ConnectorSaveSubscriptionFieldsResponse] = {
+  def saveFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(
+      implicit hc: HeaderCarrier
+  ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
 
     import CustomResponseHandlers.permissiveBadRequestResponseHandler
@@ -135,14 +134,14 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
         case BAD_REQUEST =>
           Json.parse(response.body).validate[Map[String, String]] match {
             case s: JsSuccess[Map[String, String]] => SaveSubscriptionFieldsFailureResponse(s.get)
-            case _ => SaveSubscriptionFieldsFailureResponse(Map.empty)
+            case _                                 => SaveSubscriptionFieldsFailureResponse(Map.empty)
           }
         case OK | CREATED => SaveSubscriptionFieldsSuccessResponse
       }
     }
   }
 
-  def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(
+  def deleteFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)(
       implicit hc: HeaderCarrier
   ): Future[FieldsDeleteResult] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
@@ -157,7 +156,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     }
   }
 
-  private def fetchApplicationApiValues(clientId: String, apiContext: String, apiVersion: String)(
+  private def fetchApplicationApiValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)(
       implicit hc: HeaderCarrier
   ): Future[Option[ApplicationApiFieldValues]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
@@ -168,11 +167,11 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
 
-  private def urlSubscriptionFieldValues(clientId: String, apiContext: String, apiVersion: String) =
-    s"$serviceBaseUrl/field/application/${urlEncode(clientId)}/context/${urlEncode(apiContext)}/version/${urlEncode(apiVersion)}"
+  private def urlSubscriptionFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion) =
+    s"$serviceBaseUrl/field/application/${urlEncode(clientId.value)}/context/${urlEncode(apiContext.value)}/version/${urlEncode(apiVersion.value)}"
 
-  private def urlSubscriptionFieldDefinition(apiContext: String, apiVersion: String) =
-    s"$serviceBaseUrl/definition/context/${urlEncode(apiContext)}/version/${urlEncode(apiVersion)}"
+  private def urlSubscriptionFieldDefinition(apiContext: ApiContext, apiVersion: ApiVersion) =
+    s"$serviceBaseUrl/definition/context/${urlEncode(apiContext.value)}/version/${urlEncode(apiVersion.value)}"
 
   private def recovery[T](value: T): PartialFunction[Throwable, T] = {
     case _: NotFoundException => value
@@ -193,14 +192,14 @@ object SubscriptionFieldsConnector {
 
   def toDomain(fs: AllApiFieldDefinitions): DefinitionsByApiVersion = {
     fs.apis
-      .map(fd => APIIdentifier(fd.apiContext, fd.apiVersion) -> fd.fieldDefinitions.map(toDomain))
+      .map(fd => ApiIdentifier(fd.apiContext, fd.apiVersion) -> fd.fieldDefinitions.map(toDomain))
       .toMap
   }
 
   private[connectors] case class ApplicationApiFieldValues(
-      clientId: String,
-      apiContext: String,
-      apiVersion: String,
+      clientId: ClientId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
       fieldsId: UUID,
       fields: Map[String, String]
   )
@@ -211,12 +210,12 @@ object SubscriptionFieldsConnector {
       shortDescription: String,
       hint: String,
       `type`: String,
-      access : AccessRequirements
+      access: AccessRequirements
   )
 
   private[connectors] case class ApiFieldDefinitions(
-      apiContext: String,
-      apiVersion: String,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
       fieldDefinitions: List[FieldDefinition]
   )
 

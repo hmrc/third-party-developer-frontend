@@ -20,7 +20,8 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import config.ApplicationConfig
-import domain.models.applications.Environment
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.{ClientId, Environment}
 import helpers.FutureTimeoutSupportImpl
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -37,9 +38,9 @@ class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndA
   private val bearer = "TestBearerToken"
 
   implicit val hc = HeaderCarrier()
-  val clientId: String = UUID.randomUUID().toString
-  val apiContext: String = "i-am-a-test"
-  val apiVersion: String = "1.0"
+  val clientId: ClientId = ClientId(UUID.randomUUID().toString)
+  val apiContext: ApiContext = ApiContext("i-am-a-test")
+  val apiVersion: ApiVersion = ApiVersion("1.0")
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
   private val testActorSystem = ActorSystem("test-actor-system")
 

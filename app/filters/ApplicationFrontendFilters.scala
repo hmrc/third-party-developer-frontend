@@ -16,8 +16,8 @@
 
 package filters
 
-import javax.inject.{Inject, Singleton}
 import com.kenshoo.play.metrics.MetricsFilter
+import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HttpFilters
 import play.api.mvc.EssentialFilter

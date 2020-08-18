@@ -16,21 +16,22 @@
 
 package domain
 
-import utils.AsyncHmrcSpec
 import builder._
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.models.apidefinitions._
+import domain.models.applications.{ApplicationId, ClientId}
+import utils.AsyncHmrcSpec
 
 class APISubscriptionStatusTest extends AsyncHmrcSpec with SubscriptionsBuilder {
 
   def aSubscription(
       name: String = "name",
       service: String = "service",
-      context: String = "context",
-      version: APIVersion = APIVersion("1.0", APIStatus.STABLE),
+      context: ApiContext = ApiContext("context"),
+      version: ApiVersionDefinition = ApiVersionDefinition(ApiVersion("1.0"), APIStatus.STABLE),
       subscribed: Boolean = true,
       requiresTrust: Boolean = false
   ) = {
-    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version.version)
+    val emptyFields = emptySubscriptionFieldsWrapper(ApplicationId("myAppId"), ClientId("myClientId"), context, version.version)
 
     APISubscriptionStatus(name, service, context, version, subscribed, requiresTrust, emptyFields)
   }
@@ -38,11 +39,11 @@ class APISubscriptionStatusTest extends AsyncHmrcSpec with SubscriptionsBuilder 
   "canUnsubscribe" should {
 
     "be true if user is an ADMINISTRATOR or DEVELOPER, and the API is not deprecated" in {
-      APIStatus.values.filterNot(_ == APIStatus.DEPRECATED) foreach { s => aSubscription(version = APIVersion("2.0", s)).canUnsubscribe shouldBe true }
+      APIStatus.values.filterNot(_ == APIStatus.DEPRECATED) foreach { s => aSubscription(version = ApiVersionDefinition(ApiVersion("2.0"), s)).canUnsubscribe shouldBe true }
     }
 
     "be false if the API version is deprecated" in {
-      aSubscription(version = APIVersion("2.0", APIStatus.DEPRECATED)).canUnsubscribe shouldBe false
+      aSubscription(version = ApiVersionDefinition(ApiVersion("2.0"), APIStatus.DEPRECATED)).canUnsubscribe shouldBe false
     }
   }
 }

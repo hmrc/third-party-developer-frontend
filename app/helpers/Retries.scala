@@ -25,8 +25,8 @@ import javax.inject.Inject
 import play.api.Logger
 import uk.gov.hmrc.http.BadRequestException
 
-import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 
 trait Retries {
 

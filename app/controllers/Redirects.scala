@@ -17,9 +17,9 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.models.applications.{ApplicationId, Standard, UpdateApplicationRequest}
 import domain.models.applications.Capabilities.SupportsRedirects
 import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-import domain.models.applications.{Standard, UpdateApplicationRequest}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -31,42 +31,38 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 
 @Singleton
-class Redirects @Inject()(val applicationService: ApplicationService,
-                          val sessionService: SessionService,
-                          val errorHandler: ErrorHandler,
-                          mcc: MessagesControllerComponents,
-                          val cookieSigner : CookieSigner,
-                          redirectsView: RedirectsView,
-                          addRedirectView: AddRedirectView,
-                          deleteRedirectConfirmationView: DeleteRedirectConfirmationView,
-                          changeRedirectView: ChangeRedirectView
-                         )
-                         (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc) {
+class Redirects @Inject() (
+    val applicationService: ApplicationService,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    redirectsView: RedirectsView,
+    addRedirectView: AddRedirectView,
+    deleteRedirectConfirmationView: DeleteRedirectConfirmationView,
+    changeRedirectView: ChangeRedirectView
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends ApplicationController(mcc) {
 
-
-  def canChangeRedirectInformationAction(applicationId: String)
-                                        (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  def canChangeRedirectInformationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsRedirects, SandboxOrAdmin)(applicationId)(fun)
 
-  def redirects(applicationId: String) = checkActionForApprovedApps(SupportsRedirects, TeamMembersOnly)(applicationId) { implicit request =>
+  def redirects(applicationId: ApplicationId) = checkActionForApprovedApps(SupportsRedirects, TeamMembersOnly)(applicationId) { implicit request =>
     val appAccess = request.application.access.asInstanceOf[Standard]
     successful(Ok(redirectsView(applicationViewModelFromApplicationRequest, appAccess.redirectUris)))
   }
 
-  def addRedirect(applicationId: String) = canChangeRedirectInformationAction(applicationId) { implicit request =>
+  def addRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     successful(Ok(addRedirectView(applicationViewModelFromApplicationRequest, AddRedirectForm.form)))
   }
 
-  def addRedirectAction(applicationId: String) = canChangeRedirectInformationAction(applicationId) { implicit request =>
+  def addRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     val application = request.application
 
     def handleValidForm(form: AddRedirectForm) = {
       if (application.hasRedirectUri(form.redirectUri)) {
-        successful(BadRequest(
-          addRedirectView(applicationViewModelFromApplicationRequest, AddRedirectForm.form.fill(form).withError("redirectUri", "redirect.uri.duplicate"))))
-      }
-      else {
+        successful(BadRequest(addRedirectView(applicationViewModelFromApplicationRequest, AddRedirectForm.form.fill(form).withError("redirectUri", "redirect.uri.duplicate"))))
+      } else {
         applicationService.update(UpdateApplicationRequest.from(application, form)).map(_ => Redirect(routes.Redirects.redirects(applicationId)))
       }
     }
@@ -78,7 +74,7 @@ class Redirects @Inject()(val applicationService: ApplicationService,
     AddRedirectForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def deleteRedirect(applicationId: String) = canChangeRedirectInformationAction(applicationId) { implicit request =>
+  def deleteRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     def handleValidForm(form: DeleteRedirectForm) = {
       successful(Ok(deleteRedirectConfirmationView(applicationViewModelFromApplicationRequest, DeleteRedirectConfirmationForm.form, form.redirectUri)))
     }
@@ -90,13 +86,15 @@ class Redirects @Inject()(val applicationService: ApplicationService,
     DeleteRedirectForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def deleteRedirectAction(applicationId: String) = canChangeRedirectInformationAction(applicationId) { implicit request =>
+  def deleteRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     val application = request.application
 
     def handleValidForm(form: DeleteRedirectConfirmationForm) = {
       form.deleteRedirectConfirm match {
-        case Some("Yes") => applicationService.update(UpdateApplicationRequest.from(application, form))
-          .map(_ => Redirect(routes.Redirects.redirects(application.id)))
+        case Some("Yes") =>
+          applicationService
+            .update(UpdateApplicationRequest.from(application, form))
+            .map(_ => Redirect(routes.Redirects.redirects(application.id)))
         case _ => successful(Redirect(routes.Redirects.redirects(application.id)))
       }
     }
@@ -108,11 +106,11 @@ class Redirects @Inject()(val applicationService: ApplicationService,
     DeleteRedirectConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def changeRedirect(applicationId: String) = canChangeRedirectInformationAction(applicationId) { implicit request =>
+  def changeRedirect(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     successful(Ok(changeRedirectView(applicationViewModelFromApplicationRequest, ChangeRedirectForm.form.bindFromRequest())))
   }
 
-  def changeRedirectAction(applicationId: String) = canChangeRedirectInformationAction(applicationId) { implicit request =>
+  def changeRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     def handleValidForm(form: ChangeRedirectForm) = {
       def updateUris() = {
         applicationService.update(UpdateApplicationRequest.from(request.application, form)).map(_ => Redirect(routes.Redirects.redirects(applicationId)))
@@ -121,9 +119,14 @@ class Redirects @Inject()(val applicationService: ApplicationService,
       if (form.originalRedirectUri == form.newRedirectUri) successful(Redirect(routes.Redirects.redirects(applicationId)))
       else {
         request.application.access match {
-          case app: Standard => if (app.redirectUris.contains(form.newRedirectUri)) handleInvalidForm(ChangeRedirectForm.form.fill(form)
-            .withError("newRedirectUri", "redirect.uri.duplicate"))
-          else updateUris()
+          case app: Standard =>
+            if (app.redirectUris.contains(form.newRedirectUri))
+              handleInvalidForm(
+                ChangeRedirectForm.form
+                  .fill(form)
+                  .withError("newRedirectUri", "redirect.uri.duplicate")
+              )
+            else updateUris()
           case _ => successful(Redirect(routes.Details.details(applicationId)))
         }
       }

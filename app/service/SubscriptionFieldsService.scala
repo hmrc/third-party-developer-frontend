@@ -17,9 +17,9 @@
 package service
 
 import cats.implicits._
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.applications.{Application, ClientId, Environment, Role}
 import domain.models.subscriptions.ApiSubscriptionFields._
-import domain.models.apidefinitions.APIIdentifier
-import domain.models.applications.{Application, Environment, Role}
 import domain.models.subscriptions.DevhubAccessLevel
 import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.DefinitionsByApiVersion
@@ -28,10 +28,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
+class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
 
-  def fetchFieldsValues(application: Application, fieldDefinitions: Seq[SubscriptionFieldDefinition], apiIdentifier: APIIdentifier)
-                       (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]] = {
+  def fetchFieldsValues(application: Application, fieldDefinitions: Seq[SubscriptionFieldDefinition], apiIdentifier: ApiIdentifier)(
+      implicit hc: HeaderCarrier
+  ): Future[Seq[SubscriptionFieldValue]] = {
     val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
 
     if (fieldDefinitions.isEmpty) {
@@ -41,13 +42,9 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     }
   }
 
-  def saveFieldValues(  role : Role,
-                        application : Application,
-                        apiContext: String,
-                        apiVersion : String,
-                        oldValues: Seq[SubscriptionFieldValue],
-                        newValues: Map[String, String])
-                        (implicit hc: HeaderCarrier) : Future[ServiceSaveSubscriptionFieldsResponse] = {
+  def saveFieldValues(role: Role, application: Application, apiContext: ApiContext, apiVersion: ApiVersion, oldValues: Seq[SubscriptionFieldValue], newValues: Map[String, String])(
+      implicit hc: HeaderCarrier
+  ): Future[ServiceSaveSubscriptionFieldsResponse] = {
     case object AccessDenied
 
     def isAllowedToAndCreateNewValue(oldValue: SubscriptionFieldValue, newValue: String) = {
@@ -64,14 +61,14 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
 
       connector.saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
     }
-    
+
     if (newValues.isEmpty) {
-        Future.successful(SaveSubscriptionFieldsSuccessResponse)
+      Future.successful(SaveSubscriptionFieldsSuccessResponse)
     } else {
       val eitherValuesToSave = oldValues.map(oldValue =>
         newValues.get(oldValue.definition.name) match {
           case Some(newFormValue) => isAllowedToAndCreateNewValue(oldValue, newFormValue)
-          case None => Right(oldValue)
+          case None               => Right(oldValue)
         }
       )
 
@@ -81,12 +78,10 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
       )
     }
   }
-  
-  def saveBlankFieldValues( application: Application,
-                            apiContext: String,
-                            apiVersion: String,
-                            values : Seq[SubscriptionFieldValue])
-                            (implicit hc: HeaderCarrier) : Future[ServiceSaveSubscriptionFieldsResponse] = {
+
+  def saveBlankFieldValues(application: Application, apiContext: ApiContext, apiVersion: ApiVersion, values: Seq[SubscriptionFieldValue])(
+      implicit hc: HeaderCarrier
+  ): Future[ServiceSaveSubscriptionFieldsResponse] = {
 
     def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionFieldDefinition]) = {
       fieldDefinitions
@@ -94,7 +89,7 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
         .toMap
     }
 
-    if(values.forall(_.value.isEmpty)){
+    if (values.forall(_.value.isEmpty)) {
       val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
 
       val emptyFieldValues = createEmptyFieldValues(values.map(_.definition))
@@ -108,10 +103,11 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
     connectorsWrapper
       .forEnvironment(environment)
-      .apiSubscriptionFieldsConnector.fetchAllFieldDefinitions()
+      .apiSubscriptionFieldsConnector
+      .fetchAllFieldDefinitions()
   }
 
-  def getFieldDefinitions(application: Application, apiIdentifier: APIIdentifier)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]] = {
+  def getFieldDefinitions(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]] = {
     val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
 
     connector.fetchFieldDefinitions(apiIdentifier.context, apiIdentifier.version)
@@ -120,27 +116,27 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
 
 object SubscriptionFieldsService {
   trait SubscriptionFieldsConnector {
-    def fetchFieldValues(clientId: String, context: String, version: String)
-                        (implicit hc: HeaderCarrier) : Future[Seq[SubscriptionFieldValue]]
+    def fetchFieldValues(clientId: ClientId, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]]
 
-    def fetchFieldsValuesWithPrefetchedDefinitions(clientId: String, apiIdentifier: APIIdentifier, definitionsCache: DefinitionsByApiVersion)
-                                                  (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]]
+    def fetchFieldsValuesWithPrefetchedDefinitions(clientId: ClientId, apiIdentifier: ApiIdentifier, definitionsCache: DefinitionsByApiVersion)(
+        implicit hc: HeaderCarrier
+    ): Future[Seq[SubscriptionFieldValue]]
 
     def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion]
 
-    def fetchFieldDefinitions(apiContext: String, apiVersion: String)
-                             (implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
+    def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
-    def saveFieldValues(clientId: String, apiContext: String, apiVersion: String, fields: Fields)
-                       (implicit hc: HeaderCarrier): Future[ConnectorSaveSubscriptionFieldsResponse]
+    def saveFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(
+        implicit hc: HeaderCarrier
+    ): Future[ConnectorSaveSubscriptionFieldsResponse]
 
-    def deleteFieldValues(clientId: String, apiContext: String, apiVersion: String)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
+    def deleteFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
   }
 
-  type DefinitionsByApiVersion = Map[APIIdentifier, Seq[SubscriptionFieldDefinition]]
+  type DefinitionsByApiVersion = Map[ApiIdentifier, Seq[SubscriptionFieldDefinition]]
 
   object DefinitionsByApiVersion {
-    val empty = Map.empty[APIIdentifier, Seq[SubscriptionFieldDefinition]]
+    val empty = Map.empty[ApiIdentifier, Seq[SubscriptionFieldDefinition]]
   }
 
   sealed trait AccessValidation

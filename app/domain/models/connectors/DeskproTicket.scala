@@ -16,26 +16,29 @@
 
 package domain.models.connectors
 
-import controllers.{SupportEnquiryForm, routes}
-import domain.models.applications.{Environment, Role}
+import controllers.{routes, SupportEnquiryForm}
+import domain.models.apidefinitions.ApiVersion
+import domain.models.applications.{ApplicationId, Environment, Role}
 import play.api.libs.json.Json
 import play.api.mvc.Request
 
-case class DeskproTicket(name: String,
-                         email: String,
-                         subject: String,
-                         message: String,
-                         referrer: String,
-                         userAgent: String = "",
-                         authId: String = "",
-                         areaOfTax: String = "",
-                         sessionId: String = "",
-                         javascriptEnabled: String = "")
+case class DeskproTicket(
+    name: String,
+    email: String,
+    subject: String,
+    message: String,
+    referrer: String,
+    userAgent: String = "",
+    authId: String = "",
+    areaOfTax: String = "",
+    sessionId: String = "",
+    javascriptEnabled: String = ""
+)
 
 object DeskproTicket extends FieldTransformer {
   implicit val format = Json.format[DeskproTicket]
 
-  def createForUplift(requestorName: String, requestorEmail: String, applicationName: String, applicationId: String): DeskproTicket = {
+  def createForUplift(requestorName: String, requestorEmail: String, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
     val message =
       s"""$requestorEmail submitted the following application for production use on the Developer Hub:
          |$applicationName
@@ -52,42 +55,57 @@ object DeskproTicket extends FieldTransformer {
     )
   }
 
-  def createForApiSubscribe(requestorName: String, requestorEmail: String,
-                            applicationName: String, applicationId: String,
-                            apiName: String, apiVersion: String): DeskproTicket = {
+  def createForApiSubscribe(
+      requestorName: String,
+      requestorEmail: String,
+      applicationName: String,
+      applicationId: ApplicationId,
+      apiName: String,
+      apiVersion: ApiVersion
+  ): DeskproTicket = {
     val message = s"""I '$requestorEmail' want my application '$applicationName'
-                  |identified by '$applicationId'
+                  |identified by '${applicationId.value}'
                   |to be subscribed to the API '$apiName'
-                  |with version '$apiVersion'""".stripMargin
+                  |with version '${apiVersion.value}'""".stripMargin
 
     DeskproTicket(requestorName, requestorEmail, "Request to subscribe to an API", message, routes.Subscriptions.manageSubscriptions(applicationId).url)
   }
 
-  def createForApiUnsubscribe(requestorName: String, requestorEmail: String,
-                              applicationName: String, applicationId: String,
-                              apiName: String, apiVersion: String): DeskproTicket = {
+  def createForApiUnsubscribe(
+      requestorName: String,
+      requestorEmail: String,
+      applicationName: String,
+      applicationId: ApplicationId,
+      apiName: String,
+      apiVersion: ApiVersion
+  ): DeskproTicket = {
     val message = s""""I '$requestorEmail' want my application '$applicationName'
-                  |identified by '$applicationId'
+                  |identified by '${applicationId.value}'
                   |to be unsubscribed from the API '$apiName'
-                  |with version '$apiVersion'""".stripMargin
+                  |with version '${apiVersion.value}'""".stripMargin
 
     DeskproTicket(requestorName, requestorEmail, "Request to unsubscribe from an API", message, routes.Subscriptions.manageSubscriptions(applicationId).url)
   }
 
-  def createForPrincipalApplicationDeletion(name: String, requestedByEmail: String, role: Role, environment: Environment,
-                                            applicationName: String, applicationId: String): DeskproTicket = {
+  def createForPrincipalApplicationDeletion(
+      name: String,
+      requestedByEmail: String,
+      role: Role,
+      environment: Environment,
+      applicationName: String,
+      applicationId: ApplicationId
+  ): DeskproTicket = {
 
     val actor = role match {
       case Role.ADMINISTRATOR => "an administrator"
-      case _ => "a developer"
+      case _                  => "a developer"
     }
 
     val message =
       s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
-         |and the application id is '$applicationId'. I want it to be deleted from the Developer Hub.""".stripMargin
+         |and the application id is '${applicationId.value}'. I want it to be deleted from the Developer Hub.""".stripMargin
 
-    DeskproTicket(name, requestedByEmail, "Request to delete an application",
-      message, routes.DeleteApplication.deleteApplication(applicationId, None).url)
+    DeskproTicket(name, requestedByEmail, "Request to delete an application", message, routes.DeleteApplication.deleteApplication(applicationId, None).url)
   }
 
   def createFromSupportEnquiry(supportEnquiry: SupportEnquiryForm, appTitle: String)(implicit request: Request[_]) = {
@@ -105,7 +123,8 @@ object DeskproTicket extends FieldTransformer {
       subject = s"$appTitle: Support Enquiry",
       message = message,
       referrer = routes.Support.submitSupportEnquiry().url,
-      userAgent = request.headers.get("User-Agent").getOrElse("n/a"))
+      userAgent = request.headers.get("User-Agent").getOrElse("n/a")
+    )
   }
 
   def deleteDeveloperAccount(name: String, email: String): DeskproTicket = {
@@ -120,7 +139,6 @@ object DeskproTicket extends FieldTransformer {
 
     DeskproTicket("", email, "Request for 2SV to be removed", message, routes.UserLoginAccount.confirm2SVHelp().url)
   }
-
 
 }
 

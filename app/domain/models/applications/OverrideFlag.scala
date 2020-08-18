@@ -20,7 +20,7 @@ package domain.models.applications
 case class OverrideFlag(overrideType: String)
 
 object OverrideFlag {
-  import play.api.libs.json.{Format, JsError, JsObject, JsString, JsSuccess, Json, Reads}
+  import play.api.libs.json._
 
   val reads = Reads[OverrideFlag] {
     case JsString(value) => JsSuccess(OverrideFlag(value))

@@ -16,7 +16,7 @@
 
 package views
 
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
@@ -43,8 +43,8 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken {
     val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val application = Application(
-      "Test Application ID",
-      "Test Application Client ID",
+      ApplicationId("Test Application ID"),
+      ClientId("Test Application Client ID"),
       "Test Application",
       DateTime.now(),
       DateTime.now(),

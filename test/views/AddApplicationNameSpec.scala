@@ -17,7 +17,7 @@
 package views
 
 import controllers.AddApplicationNameForm
-import domain.models.applications.Environment
+import domain.models.applications.{ApplicationId, Environment}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.data.Form
@@ -32,7 +32,7 @@ class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val subordinateEnvironment = Environment.SANDBOX
-  val appId = "1234"
+  val appId = ApplicationId("1234")
   val principalEnvironment = Environment.PRODUCTION
 
   "Add application page in subordinate" should {

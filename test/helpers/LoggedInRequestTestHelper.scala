@@ -16,14 +16,14 @@
 
 package helpers
 
-import mocks.service.SessionServiceMock
 import controllers.BaseControllerSpec
+import domain.models.developers.{Developer, LoggedInState, Session}
+import mocks.service.SessionServiceMock
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import play.filters.csrf.CSRF.TokenProvider
 import security.CookieEncoding
 import service.SessionService
-import domain.models.developers.{Developer, LoggedInState, Session}
-import play.filters.csrf.CSRF.TokenProvider
-import play.api.test.FakeRequest
-import play.api.mvc.AnyContentAsEmpty
 import utils.WithLoggedInSession._
 
 trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding {

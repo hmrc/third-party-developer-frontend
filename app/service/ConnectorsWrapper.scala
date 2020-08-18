@@ -19,7 +19,7 @@ package service
 import com.google.inject.name.Named
 import config.ApplicationConfig
 import connectors._
-import domain.models.applications.{Application, Environment}
+import domain.models.applications.{Application, ApplicationId, Environment}
 import domain.models.applications.Environment.PRODUCTION
 import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
@@ -28,20 +28,22 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ConnectorsWrapper @Inject()(val sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
-                                  val productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-                                  @Named("SANDBOX") val sandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector,
-                                  @Named("PRODUCTION") val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
-                                  applicationConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
+class ConnectorsWrapper @Inject() (
+    val sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
+    val productionApplicationConnector: ThirdPartyApplicationProductionConnector,
+    @Named("SANDBOX") val sandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+    @Named("PRODUCTION") val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+    applicationConfig: ApplicationConfig
+)(implicit val ec: ExecutionContext) {
 
   def forEnvironment(environment: Environment): Connectors = {
     environment match {
       case PRODUCTION => Connectors(productionApplicationConnector, productionSubscriptionFieldsConnector)
-      case _ => Connectors(sandboxApplicationConnector, sandboxSubscriptionFieldsConnector)
+      case _          => Connectors(sandboxApplicationConnector, sandboxSubscriptionFieldsConnector)
     }
   }
 
-  def fetchApplicationById(id: String)(implicit hc: HeaderCarrier): Future[Option[Application]] = {
+  def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] = {
     val productionApplicationFuture = productionApplicationConnector.fetchApplicationById(id)
     val sandboxApplicationFuture = sandboxApplicationConnector.fetchApplicationById(id) recover {
       case _ => None

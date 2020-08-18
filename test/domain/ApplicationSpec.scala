@@ -17,12 +17,12 @@
 package domain
 
 import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
-import domain.models.applications.{Access, Application, ApplicationState, Collaborator, Environment, Privileged, ROPC, Role, Standard}
+import domain.models.applications._
 import domain.models.applications.Permissions.SandboxOrAdmin
 import domain.models.developers.Developer
+import helpers.string._
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
-import helpers.string._
 
 class ApplicationSpec extends FunSpec with Matchers {
 
@@ -149,8 +149,8 @@ class ApplicationSpec extends FunSpec with Matchers {
     )
 
     val app = Application(
-      "id",
-      "clientId",
+      ApplicationId("id"),
+      ClientId("clientId"),
       "app name",
       DateTime.now(),
       DateTime.now(),

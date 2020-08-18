@@ -23,12 +23,6 @@ object PasswordReset {
   implicit val format = Json.format[PasswordReset]
 }
 
-case class PasswordCheckRequest(email: String, password: String)
-
-object PasswordCheckRequest {
-  implicit val format = Json.format[PasswordCheckRequest]
-}
-
 case class ChangePassword(email:String, oldPassword:String, newPassword:String)
 object ChangePassword {
   implicit val format = Json.format[ChangePassword]

@@ -19,8 +19,8 @@ package connectors
 import connectors.SubscriptionFieldsConnector.{AllApiFieldDefinitions, ApiFieldDefinitions, FieldDefinition}
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirement, DevhubAccessRequirements}
 import play.api.libs.functional.syntax._
-import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
+import play.api.libs.json.Json.JsValueWrapper
 
 trait FieldDefinitionFormatters extends AccessRequirementsFormatters{
 

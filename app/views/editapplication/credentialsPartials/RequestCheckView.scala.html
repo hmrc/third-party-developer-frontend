@@ -15,8 +15,9 @@
  *@
 
 @import config.ApplicationConfig
+@import domain.models.applications.ApplicationId
 
-@(applicationId:String)(implicit applicationConfig: ApplicationConfig)
+@(applicationId:ApplicationId)(implicit applicationConfig: ApplicationConfig)
 
 <p>You must submit your application for checking.
  We’ll take up to 10 working days to check your application and issue production credentials.

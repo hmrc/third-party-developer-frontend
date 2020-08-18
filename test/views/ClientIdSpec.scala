@@ -16,7 +16,7 @@
 
 package views
 
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
@@ -33,7 +33,6 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
     val clientIdView = app.injector.instanceOf[ClientIdView]
 
-
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
       doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
     }
@@ -44,8 +43,8 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken {
     val developer = utils.DeveloperSession("Test", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
 
     val application = Application(
-      "Test Application ID",
-      "Test Application Client ID",
+      ApplicationId("Test Application ID"),
+      ClientId("Test Application Client ID"),
       "Test Application",
       DateTime.now(),
       DateTime.now(),

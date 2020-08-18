@@ -18,8 +18,7 @@ package controllers
 
 import config.ErrorHandler
 import domain.models.connectors.TicketCreated
-import domain.models.developers.Session
-import domain.models.developers.{Developer, LoggedInState}
+import domain.models.developers.{Developer, LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor

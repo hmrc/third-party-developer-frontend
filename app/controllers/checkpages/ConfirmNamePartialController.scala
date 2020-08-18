@@ -18,8 +18,7 @@ package controllers.checkpages
 
 import controllers.ApplicationController
 import controllers.FormKeys.appNameField
-import domain._
-import domain.models.applications.{CheckInformation, Invalid, UpdateApplicationRequest, Valid}
+import domain.models.applications._
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call, Result}
 import views.html.checkpages.ConfirmNameView
@@ -31,13 +30,13 @@ trait ConfirmNamePartialController {
 
   val confirmNameView: ConfirmNameView
 
-  def namePage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def namePage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
     Future.successful(Ok(confirmNameView(app, NameForm.form.fill(NameForm(app.name)), nameActionRoute(appId))))
   }
 
-  def nameAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def nameAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = NameForm.form.bindFromRequest
     val app = request.application
 
@@ -54,7 +53,8 @@ trait ConfirmNamePartialController {
     }
 
     def withValidForm(form: NameForm): Future[Result] = {
-      applicationService.isApplicationNameValid(form.applicationName, app.deployedTo, Some(app.id))
+      applicationService
+        .isApplicationNameValid(form.applicationName, app.deployedTo, Some(app.id))
         .flatMap({
           case Valid =>
             val information = app.checkInformation.getOrElse(CheckInformation())
@@ -62,7 +62,7 @@ trait ConfirmNamePartialController {
               _ <- updateNameIfChanged(form)
               _ <- applicationService.updateCheckInformation(app, information.copy(confirmedName = true))
             } yield Redirect(landingPageRoute(app.id))
-          case invalid : Invalid =>
+          case invalid: Invalid =>
             def invalidNameCheckForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
 
             Future.successful(BadRequest(confirmNameView(request.application, invalidNameCheckForm, nameActionRoute(appId))))
@@ -72,7 +72,7 @@ trait ConfirmNamePartialController {
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  protected def nameActionRoute(appId: String): Call
-  protected def landingPageRoute(appId: String): Call
+  protected def nameActionRoute(appId: ApplicationId): Call
+  protected def landingPageRoute(appId: ApplicationId): Call
 
 }

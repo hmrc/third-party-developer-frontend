@@ -17,10 +17,10 @@
 package controllers.checkpages
 
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.FormKeys._
 import controllers._
-import domain._
-import domain.models.applications.CheckInformation
+import controllers.FormKeys._
+import domain.models.applications.{ApplicationId, CheckInformation}
+import domain.models.views.CheckInformationForm
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
@@ -28,35 +28,35 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.{ApplicationService, SessionService}
 import uk.gov.voa.play.form.ConditionalMappings._
-import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
-import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
+import views.html.checkpages._
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
+import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
 import views.html.editapplication.NameSubmittedView
 
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future.successful
 
 @Singleton
-class ApplicationCheck @Inject()(val applicationService: ApplicationService,
-                                 val sessionService: SessionService,
-                                 val errorHandler: ErrorHandler,
-                                 mcc: MessagesControllerComponents,
-                                 val cookieSigner : CookieSigner,
-                                 landingPageView: LandingPageView,
-                                 unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
-                                 nameSubmittedView: NameSubmittedView,
-                                 teamView: TeamView,
-                                 teamMemberAddView: TeamMemberAddView,
-                                 teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView,
-                                 val termsOfUseView: TermsOfUseView,
-                                 val confirmNameView: ConfirmNameView,
-                                 val contactDetailsView: ContactDetailsView,
-                                 val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
-                                 val privacyPolicyView: PrivacyPolicyView,
-                                 val termsAndConditionsView: TermsAndConditionsView
-                                 )
-                                (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc)
+class ApplicationCheck @Inject() (
+    val applicationService: ApplicationService,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    landingPageView: LandingPageView,
+    unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
+    nameSubmittedView: NameSubmittedView,
+    teamView: TeamView,
+    teamMemberAddView: TeamMemberAddView,
+    teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView,
+    val termsOfUseView: TermsOfUseView,
+    val confirmNameView: ConfirmNameView,
+    val contactDetailsView: ContactDetailsView,
+    val apiSubscriptionsViewTemplate: ApiSubscriptionsView,
+    val privacyPolicyView: PrivacyPolicyView,
+    val termsAndConditionsView: TermsAndConditionsView
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends ApplicationController(mcc)
     with ApplicationHelper
     with CanUseCheckActions
     with ConfirmNamePartialController
@@ -65,25 +65,24 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     with PrivacyPolicyPartialController
     with TermsAndConditionsPartialController
     with TermsOfUsePartialController
-    with CheckInformationFormHelper
-    {
+    with CheckInformationFormHelper {
 
-  def requestCheckPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def requestCheckPage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val form = createCheckFormForApplication(request)
-    Future.successful(Ok(landingPageView(applicationViewModelFromApplicationRequest(),form)))
+    Future.successful(Ok(landingPageView(applicationViewModelFromApplicationRequest(), form)))
   }
 
-  def unauthorisedAppDetails(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
+  def unauthorisedAppDetails(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     val application = request.application
 
-    if(request.role.isAdministrator) {
+    if (request.role.isAdministrator) {
       Future.successful(Redirect(routes.ApplicationCheck.requestCheckPage(appId)))
     } else {
       Future.successful(Ok(unauthorisedAppDetailsView(application.name, application.adminEmails)))
     }
   }
 
-  def requestCheckAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request: ApplicationRequest[AnyContent] =>
+  def requestCheckAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request: ApplicationRequest[AnyContent] =>
     def withFormErrors(form: Form[CheckInformationForm]): Future[Result] = {
       Future.successful(BadRequest(landingPageView(applicationViewModelFromApplicationRequest(), form)))
     }
@@ -97,54 +96,55 @@ class ApplicationCheck @Inject()(val applicationService: ApplicationService,
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  def credentialsRequested(appId: String): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
+  def credentialsRequested(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     Future.successful(Ok(nameSubmittedView(appId, request.application)))
   }
 
-  def team(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def team(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(teamView(request.application, request.role, request.user)))
   }
 
-  def teamAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-
+  def teamAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val information = request.application.checkInformation.getOrElse(CheckInformation())
     for {
       _ <- applicationService.updateCheckInformation(request.application, information.copy(teamConfirmed = true))
     } yield Redirect(routes.ApplicationCheck.requestCheckPage(appId))
   }
 
-  def teamAddMember(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def teamAddMember(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     Future.successful(Ok(teamMemberAddView(applicationViewModelFromApplicationRequest, AddTeamMemberForm.form, request.user)))
   }
 
-  def teamMemberRemoveConfirmation(appId: String, teamMemberHash:  String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    successful(request.application.findCollaboratorByHash(teamMemberHash)
-      .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.user, collaborator.emailAddress)))
-      .getOrElse(Redirect(routes.ApplicationCheck.team(appId))))
+  def teamMemberRemoveConfirmation(appId: ApplicationId, teamMemberHash: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+    successful(
+      request.application
+        .findCollaboratorByHash(teamMemberHash)
+        .map(collaborator => Ok(teamMemberRemoveConfirmationView(request.application, request.user, collaborator.emailAddress)))
+        .getOrElse(Redirect(routes.ApplicationCheck.team(appId)))
+    )
   }
 
-  def teamMemberRemoveAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def teamMemberRemoveAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+    def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm): Future[Result] = {
+      applicationService
+        .removeTeamMember(request.application, form.email, request.user.email)
+        .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
+    }
 
-    def handleValidForm(form: RemoveTeamMemberCheckPageConfirmationForm) : Future[Result] = {
-        applicationService
-          .removeTeamMember(request.application, form.email, request.user.email)
-          .map(_ => Redirect(routes.ApplicationCheck.team(appId)))
-      }
-
-    def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]) : Future[Result] = {
+    def handleInvalidForm(form: Form[RemoveTeamMemberCheckPageConfirmationForm]): Future[Result] = {
       successful(BadRequest)
     }
 
     RemoveTeamMemberCheckPageConfirmationForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  protected def landingPageRoute(appId: String): Call = routes.ApplicationCheck.requestCheckPage(appId)
-  protected def nameActionRoute(appId: String): Call = routes.ApplicationCheck.nameAction(appId)
-  protected def contactActionRoute(appId: String): Call = routes.ApplicationCheck.contactAction(appId)
-  protected def apiSubscriptionsActionRoute(appId: String): Call = routes.ApplicationCheck.apiSubscriptionsAction(appId)
-  protected def privacyPolicyActionRoute(appId: String): Call = routes.ApplicationCheck.privacyPolicyAction(appId)
-  protected def termsAndConditionsActionRoute(appId: String): Call = routes.ApplicationCheck.termsAndConditionsAction(appId)
-  protected def termsOfUseActionRoute(appId: String): Call = routes.ApplicationCheck.termsOfUseAction(appId)
+  protected def landingPageRoute(appId: ApplicationId): Call = routes.ApplicationCheck.requestCheckPage(appId)
+  protected def nameActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.nameAction(appId)
+  protected def contactActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.contactAction(appId)
+  protected def apiSubscriptionsActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.apiSubscriptionsAction(appId)
+  protected def privacyPolicyActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.privacyPolicyAction(appId)
+  protected def termsAndConditionsActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.termsAndConditionsAction(appId)
+  protected def termsOfUseActionRoute(appId: ApplicationId): Call = routes.ApplicationCheck.termsOfUseAction(appId)
   protected def submitButtonLabel = "Save and return"
 }
 
@@ -203,8 +203,6 @@ object DetailsForm {
     )(DetailsForm.apply)(DetailsForm.unapply)
   )
 }
-
-
 
 case class ContactForm(fullname: String, email: String, telephone: String)
 

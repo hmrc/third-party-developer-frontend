@@ -17,7 +17,7 @@
 package views.include
 
 import config.ApplicationConfig
-import domain.models.applications.{Application, Environment}
+import domain.models.applications.{Application, ApplicationId, ClientId, Environment}
 import model.Crumb
 import org.jsoup.Jsoup
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -34,7 +34,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Sha
     "render in the right order" in {
 
       val applicationName = "An Application Name"
-      val application = Application("appId123", "clientId123", applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION)
+      val application = Application(ApplicationId("appId123"), ClientId("clientId123"), applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION)
       val crumbs = Array(Crumb("Another Breadcrumb"), Crumb.application(application), Crumb.viewAllApplications, Crumb.home(appConfig))
 
       val page: Html = views.html.include.breadcrumbs.render(crumbs)

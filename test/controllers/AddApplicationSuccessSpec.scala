@@ -30,15 +30,10 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html._
-import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AddApplicationSuccessSpec extends BaseControllerSpec
-  with SubscriptionTestHelperSugar with WithCSRFAddToken {
-
-  val appId = "1234"
-  val clientId = "clientId123"
+class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
@@ -49,13 +44,33 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val principalApp = Application(appId, clientId, "App name 1", DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+  val principalApp = Application(
+    appId,
+    clientId,
+    "App name 1",
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    None,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
 
-  val subordinateApp = Application(appId, clientId, "App name 2", DateTimeUtils.now, DateTimeUtils.now, None, Environment.SANDBOX, Some("Description 2"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+  val subordinateApp = Application(
+    appId,
+    clientId,
+    "App name 2",
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    None,
+    Environment.SANDBOX,
+    Some("Description 2"),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
@@ -67,7 +82,6 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
     val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-
 
     val underTest = new AddApplication(
       applicationServiceMock,
@@ -100,7 +114,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec
       .withSession(sessionParams: _*)
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest,implicitly)(partLoggedInSessionId)
+      .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
   }
 
