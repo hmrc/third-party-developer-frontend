@@ -18,12 +18,12 @@ package utils
 
 import java.util.UUID.randomUUID
 
+import domain.models.apidefinitions.AccessType
 import domain.models.applications._
 import org.joda.time.DateTimeZone
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.util.Random
-import domain.models.apidefinitions.AccessType
 
 trait TestApplications {
 
