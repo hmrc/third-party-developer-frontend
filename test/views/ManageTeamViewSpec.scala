@@ -17,7 +17,7 @@
 package views
 
 import controllers.AddTeamMemberForm
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import helpers.string._
 import model.ApplicationViewModel
@@ -25,12 +25,10 @@ import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
 import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
+import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
 

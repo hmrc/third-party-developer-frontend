@@ -17,7 +17,7 @@
 package views.include
 
 import controllers.Credentials.serverTokenCutoffDate
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -27,8 +27,6 @@ import utils.ViewHelpers.elementExistsByText
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
-import domain.models.applications.ClientId
-import domain.models.applications.ApplicationId
 
 class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
 

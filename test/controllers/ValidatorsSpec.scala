@@ -19,8 +19,8 @@ package controllers
 import org.scalacheck.Gen
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.data.Forms._
 import play.api.data._
+import play.api.data.Forms._
 import play.api.data.validation.{Invalid, ValidationError, ValidationResult}
 import utils.AsyncHmrcSpec
 import utils.Generators._

@@ -20,12 +20,11 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.ApplicationCheck
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
-import domain.models.applications.ApplicationId
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.ApplicationUpliftSuccessful
-import domain.models.applications._
+import domain.models.apidefinitions._
+import domain.models.applications.{ApplicationId, _}
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -45,10 +44,7 @@ import views.html.editapplication.NameSubmittedView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import play.api.test.Helpers._
-
 import scala.concurrent.Future.successful
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
 

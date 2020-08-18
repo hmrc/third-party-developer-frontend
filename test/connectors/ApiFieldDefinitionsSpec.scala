@@ -17,11 +17,11 @@
 package connectors
 
 import connectors.SubscriptionFieldsConnector.{ApiFieldDefinitions, FieldDefinition}
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{Json, JsSuccess}
 import utils.AsyncHmrcSpec
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
 

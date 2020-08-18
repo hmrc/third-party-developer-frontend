@@ -19,8 +19,8 @@ package views
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
-import utils.WithCSRFAddToken
 import utils.ViewHelpers._
+import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.ProfileDeleteSubmittedView
 

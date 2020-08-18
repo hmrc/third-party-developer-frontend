@@ -17,15 +17,13 @@
 package service
 
 import config.ApplicationConfig
-import domain.models.applications.{Application, Collaborator, Environment, Role}
+import domain.models.applications._
 import org.joda.time.{DateTime, Duration, Instant, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class MfaMandateServiceSpec extends AsyncHmrcSpec {
 

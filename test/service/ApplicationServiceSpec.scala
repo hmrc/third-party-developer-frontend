@@ -23,22 +23,14 @@ import builder._
 import config.ApplicationConfig
 import connectors._
 import controllers.EditApplicationForm
-import domain.{
-  ApplicationAlreadyExists,
-  ApplicationNeedsAdmin,
-  ApplicationNotFound,
-  ApplicationUpdateSuccessful,
-  ApplicationUpliftSuccessful,
-  ClientSecretLimitExceeded,
-  TeamMemberAlreadyExists
-}
-import domain.models.apidefinitions.APIStatus._
-import domain.models.subscriptions.ApiSubscriptionFields._
+import domain._
 import domain.models.apidefinitions._
+import domain.models.apidefinitions.APIStatus._
 import domain.models.applications._
-import domain.models.connectors.{DeskproTicket, TicketCreated}
+import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketCreated}
 import domain.models.developers.{Developer, LoggedInState, User}
 import domain.models.subscriptions.{APISubscription, ApiSubscriptionFields}
+import domain.models.subscriptions.ApiSubscriptionFields._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import play.api.http.Status.OK
@@ -46,14 +38,11 @@ import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
-import utils.AsyncHmrcSpec
 import uk.gov.hmrc.time.DateTimeUtils
+import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.successful
-import scala.concurrent.Future.failed
-import domain.models.connectors.AddTeamMemberRequest
-import domain.models.connectors.AddTeamMemberResponse
+import scala.concurrent.Future.{failed, successful}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 

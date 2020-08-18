@@ -16,12 +16,10 @@
 
 package domain
 
-import utils.AsyncHmrcSpec
 import builder._
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
+import domain.models.apidefinitions._
+import domain.models.applications.{ApplicationId, ClientId}
+import utils.AsyncHmrcSpec
 
 class APISubscriptionStatusTest extends AsyncHmrcSpec with SubscriptionsBuilder {
 

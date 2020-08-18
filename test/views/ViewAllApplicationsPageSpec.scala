@@ -18,7 +18,7 @@ package views
 
 import controllers.ApplicationSummary
 import domain.models.apidefinitions.AccessType
-import domain.models.applications.{Role, State, TermsOfUseStatus}
+import domain.models.applications.{ApplicationId, Role, State, TermsOfUseStatus}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -28,7 +28,6 @@ import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsTe
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
-import domain.models.applications.ApplicationId
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {

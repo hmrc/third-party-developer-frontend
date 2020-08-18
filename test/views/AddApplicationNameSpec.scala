@@ -17,7 +17,7 @@
 package views
 
 import controllers.AddApplicationNameForm
-import domain.models.applications.Environment
+import domain.models.applications.{ApplicationId, Environment}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.data.Form
@@ -26,7 +26,6 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.AddApplicationNameView
-import domain.models.applications.ApplicationId
 
 class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
 

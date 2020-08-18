@@ -16,8 +16,8 @@
 
 package views
 
+import domain.models.applications._
 import domain.models.applications.Environment.PRODUCTION
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Privileged, ROPC, Role, Standard}
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -28,8 +28,6 @@ import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
 
 import scala.collection.JavaConverters._
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class LeftHandNavSpec extends CommonViewSpec {
 

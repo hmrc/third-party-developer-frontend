@@ -16,20 +16,18 @@
 
 package mocks.service
 
-import domain._
-import service.ApplicationService
-import uk.gov.hmrc.http.HeaderCarrier
 import java.util.UUID
 
-import domain.models.apidefinitions.APISubscriptionStatus
-import domain.models.applications.{Application, ApplicationToken, CheckInformation, Invalid, UpdateApplicationRequest, Valid}
+import domain._
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, ApiVersion}
+import domain.models.applications._
 import domain.models.developers.DeveloperSession
 import domain.models.subscriptions.APISubscription
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+import service.ApplicationService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future.{failed, successful}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ApplicationId
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationServiceMock = mock[ApplicationService]

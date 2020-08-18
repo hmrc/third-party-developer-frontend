@@ -17,13 +17,11 @@
 package controllers
 
 import domain.models.apidefinitions.AccessType
+import domain.models.applications._
 import domain.models.applications.Role.DEVELOPER
 import domain.models.applications.State.TESTING
-import domain.models.applications.{Application, Collaborator, Environment, TermsOfUseStatus}
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class ApplicationSummaryTest extends WordSpec with Matchers {
 

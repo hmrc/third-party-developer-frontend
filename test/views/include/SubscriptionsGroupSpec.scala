@@ -18,8 +18,8 @@ package views.include
 
 import builder.SubscriptionsBuilder
 import controllers.APISubscriptions
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.apidefinitions._
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import domain.models.views.SubscriptionRedirect
 import org.jsoup.Jsoup
@@ -29,9 +29,6 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.SubscriptionsGroup
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with SubscriptionsBuilder {
   implicit val request = FakeRequest().withCSRFToken

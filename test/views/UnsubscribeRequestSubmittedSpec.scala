@@ -16,7 +16,8 @@
 
 package views
 
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.apidefinitions.ApiVersion
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -26,9 +27,6 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.UnsubscribeRequestSubmittedView
-import domain.models.apidefinitions.ApiVersion
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Unsubscribe request submitted page" should {

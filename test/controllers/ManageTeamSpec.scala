@@ -16,8 +16,13 @@
 
 package controllers
 
-import domain.models.applications.{ApplicationState, Role}
-import domain.models.developers.Session
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
+import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
+import domain.models.applications._
+import domain.models.connectors.AddTeamMemberResponse
+import domain.models.controllers.AddTeamMemberPageMode
 import helpers.string._
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
@@ -27,29 +32,14 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.WithLoggedInSession._
 import utils.{TestApplications, WithCSRFAddToken}
+import utils.WithLoggedInSession._
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.models.developers.Developer
-import domain.models.developers.LoggedInState
-import domain.models.developers.DeveloperSession
-import domain.models.applications.Application
-import domain.models.applications.Collaborator
-import domain.ApplicationUpdateSuccessful
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
-import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
-import domain.TeamMemberAlreadyExists
-import domain.ApplicationNotFound
-import domain.models.controllers.AddTeamMemberPageMode
-import domain.models.connectors.AddTeamMemberResponse
-
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 

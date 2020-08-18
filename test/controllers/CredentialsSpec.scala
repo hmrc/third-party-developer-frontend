@@ -30,6 +30,7 @@ import org.joda.time.{DateTime, DateTimeZone}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,7 +38,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithLoggedInSession._
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
-import play.api.test.Helpers._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {

@@ -19,13 +19,14 @@ package controllers
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.ChangePassword
-import domain.models.developers.{Session, UpdateProfileRequest}
+import domain.models.developers.{Developer, LoggedInState, Session, UpdateProfileRequest}
+import domain.InvalidCredentials
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
-import play.api.test.Helpers._
 import org.mockito.ArgumentCaptor
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import service.AuditService
@@ -36,10 +37,6 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.developers.Developer
-import domain.models.developers.LoggedInState
-import domain.InvalidCredentials
-
 import scala.concurrent.Future.failed
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {

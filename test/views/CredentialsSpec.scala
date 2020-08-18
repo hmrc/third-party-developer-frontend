@@ -16,7 +16,7 @@
 
 package views
 
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
@@ -28,8 +28,6 @@ import views.helper.CommonViewSpec
 import views.html.CredentialsView
 
 import scala.collection.JavaConverters._
-import domain.models.applications.ClientId
-import domain.models.applications.ApplicationId
 
 class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {

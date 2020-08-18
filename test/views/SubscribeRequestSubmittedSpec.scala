@@ -17,7 +17,8 @@
 package views
 
 import config.ApplicationConfig
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.apidefinitions.ApiVersion
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -27,9 +28,6 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.SubscribeRequestSubmittedView
-import domain.models.apidefinitions.ApiVersion
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Subscribe request submitted page" should {

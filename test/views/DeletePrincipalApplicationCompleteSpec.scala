@@ -16,7 +16,7 @@
 
 package views
 
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
@@ -25,8 +25,6 @@ import utils.ViewHelpers.elementExistsByText
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeletePrincipalApplicationCompleteView
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken {
 

@@ -17,7 +17,7 @@
 package connectors
 
 import config.ApplicationConfig
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json.{Json, JsString, JsValue}
 import utils.AsyncHmrcSpec
 
 class PayloadEncryptionSpec extends AsyncHmrcSpec {

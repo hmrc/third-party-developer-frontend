@@ -19,7 +19,7 @@ package views
 import java.util.UUID
 import java.util.UUID.randomUUID
 
-import domain.models.applications.{Application, ApplicationState, ClientSecret, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
@@ -32,8 +32,6 @@ import views.helper.CommonViewSpec
 import views.html.ClientSecretsView
 
 import scala.collection.JavaConverters._
-import domain.models.applications.ClientId
-import domain.models.applications.ApplicationId
 
 class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {

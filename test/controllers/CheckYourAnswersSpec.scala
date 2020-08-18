@@ -20,12 +20,12 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, ApiVersionDefinition}
+import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
+import domain.models.apidefinitions._
 import domain.models.applications._
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.APISubscription
-import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -47,7 +47,6 @@ import views.html.checkpages.checkyouranswers.team.TeamView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder {
 

@@ -16,7 +16,7 @@
 
 package views
 
-import domain.models.applications.Environment
+import domain.models.applications.{ApplicationId, Environment}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -25,7 +25,6 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.AddApplicationSuccessView
-import domain.models.applications.ApplicationId
 
 class AddApplicationSuccessSpec extends CommonViewSpec with WithCSRFAddToken {
 

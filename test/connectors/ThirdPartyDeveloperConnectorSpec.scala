@@ -19,21 +19,21 @@ package connectors
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
+import domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}
 import domain.models.connectors._
 import domain.models.developers._
-import domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status
 import play.api.http.Status.NO_CONTENT
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json.{Json, JsString, JsValue}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.{successful, failed}
+import scala.concurrent.Future.{failed, successful}
 import scala.concurrent.Future
 
 class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {

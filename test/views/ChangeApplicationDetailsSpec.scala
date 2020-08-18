@@ -17,7 +17,7 @@
 package views
 
 import controllers.EditApplicationForm
-import domain.models.applications.{Application, ApplicationState, Environment, Standard, State}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -28,8 +28,6 @@ import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsTe
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.ChangeDetailsView
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken {
 

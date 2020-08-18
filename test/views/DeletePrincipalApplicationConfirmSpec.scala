@@ -17,7 +17,7 @@
 package views
 
 import controllers.DeletePrincipalApplicationForm
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
@@ -26,8 +26,6 @@ import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueC
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeletePrincipalApplicationConfirmView
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken {
 

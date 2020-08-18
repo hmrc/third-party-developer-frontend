@@ -18,11 +18,11 @@ package service
 
 import builder.SubscriptionsBuilder
 import connectors.ThirdPartyApplicationConnector
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.applications._
+import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import domain.models.subscriptions.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.applications.{Application, Environment, Role}
-import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import mocks.connector.SubscriptionFieldsConnectorMock
 import org.joda.time.DateTime
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,9 +30,6 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 

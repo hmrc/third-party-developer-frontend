@@ -19,9 +19,9 @@ package controllers
 import domain.ApplicationUpdateSuccessful
 import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications
+import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.applications.Role.ADMINISTRATOR
-import domain.models.applications._
 import domain.models.developers.{Developer, LoggedInState, Session}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime

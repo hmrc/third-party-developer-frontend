@@ -17,7 +17,7 @@
 package views
 
 import controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
-import domain.models.applications.{Application, ApplicationState, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.joda.time.DateTime
@@ -31,8 +31,6 @@ import views.helper.CommonViewSpec
 import views.html.ManageSubscriptionsView
 
 import scala.collection.JavaConverters._
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 

@@ -20,8 +20,12 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
+import builder.SubscriptionsBuilder
 import config.ApplicationConfig
 import connectors.SubscriptionFieldsConnector._
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.applications.{ClientId, Environment}
+import domain.models.subscriptions.AccessRequirements
 import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.FutureTimeoutSupportImpl
 import play.api.http.Status._
@@ -29,14 +33,9 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpResponse, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.AsyncHmrcSpec
+
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.{failed, successful}
-import scala.concurrent.{ExecutionContext, Future}
-import builder.SubscriptionsBuilder
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.applications.Environment
-import domain.models.subscriptions.AccessRequirements
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ClientId
 
 class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   def fields(tpl: (String, String)*): Map[String, String] =

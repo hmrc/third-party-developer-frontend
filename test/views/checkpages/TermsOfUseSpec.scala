@@ -18,7 +18,7 @@ package views.checkpages
 
 import config.ApplicationConfig
 import controllers.TermsOfUseForm
-import domain.models.applications.{Application, ApplicationState, CheckInformation, Collaborator, Environment, Role, Standard, State, TermsOfUseAgreement}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -28,8 +28,6 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.checkpages.TermsOfUseView
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
 

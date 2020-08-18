@@ -20,7 +20,8 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import config.ApplicationConfig
-import domain.models.applications.Environment
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications.{ClientId, Environment}
 import helpers.FutureTimeoutSupportImpl
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -30,8 +31,6 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ClientId
 
 class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite {
   private val baseUrl = "https://example.com"

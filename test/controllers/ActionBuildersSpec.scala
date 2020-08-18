@@ -17,6 +17,7 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import helpers.LoggedInRequestTestHelper
 import mocks.service.ApplicationServiceMock
 import play.api.http.Status.{NOT_FOUND, OK}
@@ -25,9 +26,8 @@ import play.api.mvc.{AnyContent, MessagesControllerComponents}
 import play.api.test.Helpers._
 import service.{ApplicationService, SessionService}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class TestController(
     val cookieSigner: CookieSigner,

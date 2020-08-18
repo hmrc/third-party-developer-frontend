@@ -30,7 +30,6 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html._
-import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

@@ -17,7 +17,7 @@
 package views
 
 import controllers.TermsOfUseForm
-import domain.models.applications.{Application, CheckInformation, Environment, TermsOfUseAgreement}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
@@ -28,8 +28,6 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.TermsOfUseView
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
   val termsOfUseView = app.injector.instanceOf[TermsOfUseView]

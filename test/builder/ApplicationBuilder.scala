@@ -16,13 +16,10 @@
 
 package builder
 
-import uk.gov.hmrc.time.DateTimeUtils
 import java.util.UUID.randomUUID
 
-import domain.models.applications.{ApplicationState, Collaborator, Environment, Role, Standard}
-import domain.models.applications.Application
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
+import domain.models.applications._
+import uk.gov.hmrc.time.DateTimeUtils
 
 trait ApplicationBuilder {
 

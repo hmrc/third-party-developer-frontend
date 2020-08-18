@@ -17,7 +17,7 @@
 package views.include
 
 import config.ApplicationConfig
-import domain.models.applications.{Application, Environment}
+import domain.models.applications.{Application, ApplicationId, ClientId, Environment}
 import model.Crumb
 import org.jsoup.Jsoup
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -25,8 +25,6 @@ import play.api.test.Helpers.{contentAsString, contentType}
 import play.twirl.api.Html
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with SharedMetricsClearDown {
 

@@ -19,7 +19,7 @@ package views
 import java.util.UUID.randomUUID
 
 import config.ApplicationConfig
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
@@ -31,8 +31,6 @@ import views.helper.CommonViewSpec
 import views.html.ServerTokenView
 
 import scala.collection.JavaConverters._
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
 
 class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {

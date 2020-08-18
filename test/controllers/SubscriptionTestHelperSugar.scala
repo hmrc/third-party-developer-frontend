@@ -16,15 +16,12 @@
 
 package controllers
 
-import domain.models.apidefinitions.APIStatus._
-import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
-import utils.AsyncHmrcSpec
 import builder._
-import domain.models.apidefinitions.{APIAccess, APIStatus, APISubscriptionStatus, ApiVersionDefinition}
-import domain.models.applications.Application
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ApplicationId
-import domain.models.applications.ClientId
+import domain.models.apidefinitions._
+import domain.models.apidefinitions.APIStatus._
+import domain.models.applications.{Application, ApplicationId, ClientId}
+import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
+import utils.AsyncHmrcSpec
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 

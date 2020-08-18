@@ -19,12 +19,14 @@ package controllers
 import java.util.UUID.randomUUID
 
 import config.ErrorHandler
-import domain.models.apidefinitions.APISubscriptionStatus
-import domain.models.applications.{CheckInformation, Privileged, Standard}
 import domain.models.controllers.SaveSubsFieldsPageMode
-import domain.models.developers.Session
-import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirements}
+import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.subscriptions.DevhubAccessRequirement._
+import domain.ApplicationNotFound
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, ApiVersion}
+import domain.models.applications.{CheckInformation, Privileged, Standard, _}
+import domain.models.developers.{Session, _}
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
@@ -34,22 +36,14 @@ import play.filters.csrf.CSRF.TokenProvider
 import service.{AuditService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
+import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
-
-import scala.concurrent.Future
-import domain.models.subscriptions.DevhubAccessRequirement._
-import utils.TestApplications
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
 import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import domain.ApplicationNotFound
-import domain.models.developers._
-import domain.models.applications._
-
+import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)
