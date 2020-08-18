@@ -49,7 +49,8 @@ trait ActionBuilders {
         import cats.implicits._
 
         (for {
-          application <- OptionT(applicationService.fetchByApplicationId(applicationId))
+          applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
+          application = applicationWithSubs.application
           subs <- OptionT.liftF(applicationService.apisWithSubscriptions(application))
           role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
         } yield {

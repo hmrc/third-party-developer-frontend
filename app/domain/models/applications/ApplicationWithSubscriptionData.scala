@@ -35,19 +35,7 @@ object FieldValue {
 }
 
 case class ApplicationWithSubscriptionData(
-    id: ApplicationId,
-    clientId: ClientId,
-    name: String,
-    createdOn: DateTime,
-    lastAccess: DateTime,
-    lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
-    deployedTo: Environment,
-    description: Option[String] = None,
-    collaborators: Set[Collaborator] = Set.empty,
-    access: Access = Standard(),
-    state: ApplicationState = ApplicationState.testing,
-    checkInformation: Option[CheckInformation] = None,
-    ipWhitelist: Set[String] = Set.empty,
+    application: Application,
     subscriptions: Set[ApiIdentifier] = Set.empty,
     subscriptionFieldValues: Map[ApiContext, Map[ApiVersion, Map[FieldName, FieldValue]]] = Map.empty
 )
