@@ -17,8 +17,8 @@
 package controllers.checkpages
 
 import config.{ApplicationConfig, ErrorHandler}
-import controllers.FormKeys._
 import controllers._
+import controllers.FormKeys._
 import domain.models.applications.{ApplicationId, CheckInformation}
 import domain.models.views.CheckInformationForm
 import javax.inject.{Inject, Singleton}
@@ -28,13 +28,13 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.{ApplicationService, SessionService}
 import uk.gov.voa.play.form.ConditionalMappings._
-import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
-import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
+import views.html.checkpages._
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
+import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
 import views.html.editapplication.NameSubmittedView
 
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future.successful
 
 @Singleton
 class ApplicationCheck @Inject() (

@@ -17,17 +17,15 @@
 package service
 
 import cats.implicits._
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.applications.{Application, ClientId, Environment, Role}
 import domain.models.subscriptions.ApiSubscriptionFields._
-import domain.models.apidefinitions.ApiIdentifier
-import domain.models.applications.{Application, Environment, Role}
 import domain.models.subscriptions.DevhubAccessLevel
 import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ClientId
 
 @Singleton
 class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {

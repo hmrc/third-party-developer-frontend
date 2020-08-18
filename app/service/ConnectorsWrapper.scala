@@ -19,7 +19,7 @@ package service
 import com.google.inject.name.Named
 import config.ApplicationConfig
 import connectors._
-import domain.models.applications.{ApplicationId, Application, Environment}
+import domain.models.applications.{Application, ApplicationId, Environment}
 import domain.models.applications.Environment.PRODUCTION
 import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector

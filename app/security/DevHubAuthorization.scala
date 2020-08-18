@@ -20,11 +20,11 @@ import java.security.MessageDigest
 
 import cats.implicits._
 import config.ApplicationConfig
-import controllers.{BaseController, MaybeUserRequest, UserRequest, routes}
+import controllers.{routes, BaseController, MaybeUserRequest, UserRequest}
 import domain.models.developers.{DeveloperSession, LoggedInState}
 import play.api.Logger
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, Cookie, DiscardingCookie, MessagesRequest, Request, RequestHeader, Result, Results}
+import play.api.mvc._
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendHeaderCarrierProvider

@@ -17,7 +17,7 @@
 package controllers.checkpages
 
 import controllers.{ApplicationController, TermsOfUseForm}
-import domain.models.applications.{CheckInformation, TermsOfUseAgreement, ApplicationId}
+import domain.models.applications.{ApplicationId, CheckInformation, TermsOfUseAgreement}
 import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}

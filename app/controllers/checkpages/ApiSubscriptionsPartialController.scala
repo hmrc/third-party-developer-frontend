@@ -18,7 +18,7 @@ package controllers.checkpages
 
 import controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
 import domain.models
-import domain.models.applications.{ApplicationId, Application, CheckInformation}
+import domain.models.applications.{Application, ApplicationId, CheckInformation}
 import domain.models.controllers.SubscriptionData
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}

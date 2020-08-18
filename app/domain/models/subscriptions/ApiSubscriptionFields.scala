@@ -16,9 +16,9 @@
 
 package domain.models.subscriptions
 
-import play.api.libs.json.{Format, Json}
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.{ClientId, ApplicationId}
+import domain.models.applications.{ApplicationId, ClientId}
+import play.api.libs.json.{Format, Json}
 
 object ApiSubscriptionFields {
 

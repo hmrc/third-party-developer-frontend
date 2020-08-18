@@ -19,18 +19,17 @@ package controllers
 import cats.data.{NonEmptyList, OptionT}
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.toDetails
-import domain.models.apidefinitions.APISubscriptionStatusWithSubscriptionFields
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
 import domain.models.applications.{ApplicationId, Capability, Permission, State}
 import domain.models.developers.DeveloperSession
 import model.NoSubscriptionFieldsRefinerBehaviour
-import play.api.mvc.Results._
 import play.api.mvc._
+import play.api.mvc.Results._
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 trait ActionBuilders {
 

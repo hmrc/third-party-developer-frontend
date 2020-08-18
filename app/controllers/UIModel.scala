@@ -17,16 +17,14 @@
 package controllers
 
 import controllers.APISubscriptions.subscriptionNumberLabel
+import domain.models.apidefinitions.{AccessType, ApiContext, APISubscriptionStatus, ApiVersion}
 import domain.models.apidefinitions.APIGroup._
-import domain.models.apidefinitions.{APISubscriptionStatus, AccessType}
-import domain.models.applications.{Application, Role, State, TermsOfUseStatus}
+import domain.models.applications._
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.ApplicationId
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions])
 

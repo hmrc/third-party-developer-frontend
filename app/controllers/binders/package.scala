@@ -16,12 +16,10 @@
 
 package controllers
 
-import domain.models.applications.Environment
-import domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
-import play.api.mvc.PathBindable
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import domain.models.applications.{ClientId, ApplicationId}
-import play.api.mvc.QueryStringBindable
+import domain.models.applications.{ApplicationId, ClientId, Environment}
+import domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
+import play.api.mvc.{PathBindable, QueryStringBindable}
 
 package object binders {
   implicit def clientIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientId] = new PathBindable[ClientId] {

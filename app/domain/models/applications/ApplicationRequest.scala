@@ -16,7 +16,7 @@
 
 package domain.models.applications
 
-import controllers.{AddApplicationNameForm, AddRedirectForm, ChangeRedirectForm, DeleteRedirectConfirmationForm, EditApplicationForm}
+import controllers._
 import domain.models.developers.DeveloperSession
 import play.api.libs.json.Json
 

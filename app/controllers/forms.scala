@@ -16,11 +16,9 @@
 
 package controllers
 
-import domain.models.applications.{Application, Standard, ApplicationId}
+import domain.models.applications.{Application, ApplicationId, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
-import cats.syntax.contravariant
-import cats.syntax.coflatMap
 
 trait ConfirmPassword {
   val password: String

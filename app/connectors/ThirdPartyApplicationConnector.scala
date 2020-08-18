@@ -22,11 +22,12 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import domain.models.apidefinitions.DefinitionFormats._
-import domain.models.apidefinitions.ApiIdentifier
 import domain.models.applications._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
-import domain.models.subscriptions.APISubscription
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
+import domain.models.subscriptions.APISubscription
+import domain._
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
@@ -42,15 +43,6 @@ import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
-import domain.ApplicationCreatedResponse
-import domain.ApplicationUpdateSuccessful
-import domain.TeamMemberAlreadyExists
-import domain.ApplicationNeedsAdmin
-import domain.ApplicationNotFound
-import domain.ApplicationUpliftSuccessful
-import domain.ApplicationAlreadyExists
-import domain.ClientSecretLimitExceeded
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 

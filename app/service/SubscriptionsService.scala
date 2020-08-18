@@ -17,15 +17,14 @@
 package service
 
 import connectors.DeskproConnector
-import domain.models.applications.Application
+import domain.models.apidefinitions.ApiVersion
+import domain.models.applications.{Application, ApplicationId}
 import domain.models.connectors.{DeskproTicket, TicketResult}
 import domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
-import domain.models.apidefinitions.ApiVersion
-import domain.models.applications.ApplicationId
 
 @Singleton
 class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, auditService: AuditService) {

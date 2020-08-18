@@ -17,29 +17,26 @@
 package controllers.checkpages
 
 import config.{ApplicationConfig, ErrorHandler}
+import controllers._
 import controllers.FormKeys.applicationNameAlreadyExistsKey
 import controllers.ManageSubscriptions.FieldValue
-import controllers._
 import domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
-import domain.models.apidefinitions._
-import domain.models.controllers._
-import domain.models.subscriptions._
+import domain.models.apidefinitions.{APISubscriptionStatus, _}
 import domain.models.applications._
-import domain.models.apidefinitions.APISubscriptionStatus
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import service.{ApplicationService, SessionService}
-import views.html.checkpages.{ApiSubscriptionsView, ConfirmNameView, ContactDetailsView, PrivacyPolicyView, TermsAndConditionsView, TermsOfUseView}
+import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
 
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future.successful
 
 @Singleton
 class CheckYourAnswers @Inject() (

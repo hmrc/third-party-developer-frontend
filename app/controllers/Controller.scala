@@ -19,8 +19,8 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
-import domain.models.apidefinitions.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields}
-import domain.models.applications.{ApplicationId, Application, Capabilities, Capability, Environment, Permission, Role, State}
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
+import domain.models.applications._
 import domain.models.developers.DeveloperSession
 import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
 import play.api.mvc._
@@ -30,7 +30,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 trait HeaderEnricher {
   def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]): HeaderCarrier =

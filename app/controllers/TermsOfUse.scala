@@ -17,9 +17,9 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.models.applications._
 import domain.models.applications.Capabilities.SupportsTermsOfUse
 import domain.models.applications.Permissions.SandboxOrAdmin
-import domain.models.applications.{ApplicationId, Application, CheckInformation, TermsOfUseAgreement, TermsOfUseStatus}
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form
@@ -27,7 +27,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service.{ApplicationService, SessionService}
 import uk.gov.hmrc.time.DateTimeUtils
-import views.html.{TermsOfUseView, partials}
+import views.html.{partials, TermsOfUseView}
 
 import scala.concurrent.{ExecutionContext, Future}
 

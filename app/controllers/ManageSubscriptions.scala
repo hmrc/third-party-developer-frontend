@@ -18,10 +18,10 @@ package controllers
 
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields}
-import domain.models.subscriptions.ApiSubscriptionFields._
-import domain.models.applications.{ApplicationId, Application, CheckInformation}
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
+import domain.models.applications.{Application, ApplicationId, CheckInformation}
 import domain.models.controllers.SaveSubsFieldsPageMode
+import domain.models.subscriptions.ApiSubscriptionFields._
 import model.EditManageSubscription._
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data.FormError
@@ -35,7 +35,6 @@ import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptions
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 object ManageSubscriptions {
 

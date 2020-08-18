@@ -18,7 +18,7 @@ package controllers.checkpages
 
 import controllers.ApplicationController
 import controllers.FormKeys.appNameField
-import domain.models.applications.{ApplicationId, CheckInformation, Invalid, UpdateApplicationRequest, Valid}
+import domain.models.applications._
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call, Result}
 import views.html.checkpages.ConfirmNameView

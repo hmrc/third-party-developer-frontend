@@ -22,9 +22,9 @@ import controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import domain.models.connectors.{DeskproTicket, Feedback, TicketId, TicketResult}
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.Request
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class DeskproService @Inject()(val deskproConnector: DeskproConnector, val appConfig: ApplicationConfig) {

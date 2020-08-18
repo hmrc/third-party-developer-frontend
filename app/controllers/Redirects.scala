@@ -17,9 +17,9 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.models.applications.{ApplicationId, Standard, UpdateApplicationRequest}
 import domain.models.applications.Capabilities.SupportsRedirects
 import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-import domain.models.applications.{ApplicationId, Standard, UpdateApplicationRequest}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner

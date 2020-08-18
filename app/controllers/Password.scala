@@ -26,8 +26,8 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import play.twirl.api.HtmlFormat
-import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import service.{AuditService, SessionService}
+import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import views.html._
 

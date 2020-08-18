@@ -18,8 +18,9 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys.appNameField
+import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.applications.{ApplicationId, CreateApplicationRequest, Environment, Invalid, Valid}
+import domain.ApplicationCreatedResponse
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -27,10 +28,8 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service._
 import views.html._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
-import domain.ApplicationCreatedResponse
-import scala.concurrent.Future
 
 @Singleton
 class AddApplication @Inject() (

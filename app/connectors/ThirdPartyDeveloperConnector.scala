@@ -20,8 +20,8 @@ import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
 import domain._
-import domain.models.connectors.{AccountSetupRequest, ChangePassword, LoginRequest, PasswordReset, TotpAuthenticationRequest, UpdateLoggedInStateRequest, UserAuthenticationResponse, VerifyMfaRequest}
-import domain.models.developers.{Developer, EmailAlreadyInUse, Registration, RegistrationDownstreamResponse, RegistrationSuccessful, Session, SessionInvalid, UpdateProfileRequest, User}
+import domain.models.connectors._
+import domain.models.developers._
 import javax.inject.{Inject, Singleton}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE

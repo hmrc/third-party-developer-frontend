@@ -17,12 +17,13 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 import service.{ApplicationService, SessionService}
 import views.html.ApplicationVerificationView
-import domain.models.applications.{ApplicationVerificationSuccessful, ApplicationVerificationFailed}
+
 import scala.concurrent.ExecutionContext
 
 @Singleton

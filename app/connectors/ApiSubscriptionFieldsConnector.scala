@@ -22,21 +22,20 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.models.apidefinitions.{ApiIdentifier, ApiContext, ApiVersion}
-import domain.models.applications.Environment
-import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.applications.{ClientId, Environment}
 import domain.models.subscriptions.AccessRequirements
+import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
-import play.api.libs.json.{Format, JsSuccess, Json}
+import play.api.libs.json.{Format, Json, JsSuccess}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.applications.ClientId
 
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries {
   protected val httpClient: HttpClient

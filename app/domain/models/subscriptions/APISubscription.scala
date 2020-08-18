@@ -16,8 +16,7 @@
 
 package domain.models.subscriptions
 
-import domain.models.apidefinitions.VersionSubscription
-import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.{ApiContext, VersionSubscription}
 
 case class APISubscription(
     name: String,

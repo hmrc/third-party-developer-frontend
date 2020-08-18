@@ -18,11 +18,11 @@ package domain.models.applications
 
 import domain.models.apidefinitions.AccessType.STANDARD
 import domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails}
-import domain.models.applications.Permissions.SandboxOrAdmin
-import domain.models.developers.Developer
 import domain.models.applications.Environment._
+import domain.models.applications.Permissions.SandboxOrAdmin
 import domain.models.applications.Role.ADMINISTRATOR
 import domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
+import domain.models.developers.Developer
 import helpers.string.Digest
 import org.joda.time.DateTime
 

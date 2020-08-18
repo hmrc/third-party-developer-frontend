@@ -20,9 +20,9 @@ import config.{ApplicationConfig, ErrorHandler}
 import controllers.FormKeys.appNameField
 import controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
 import domain._
+import domain.models.applications._
 import domain.models.applications.Capabilities.SupportsDetails
 import domain.models.applications.Permissions.SandboxOrAdmin
-import domain.models.applications.{ApplicationId, Application, CheckInformation, Invalid, Standard, State, UpdateApplicationRequest, Valid}
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
 import play.api.data.Form

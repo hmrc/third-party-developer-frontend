@@ -16,11 +16,10 @@
 
 package model
 
-import domain.models.apidefinitions.APISubscriptionStatusWithSubscriptionFields
-import domain.models.subscriptions.DevhubAccessLevel
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
 import domain.models.applications.Role
+import domain.models.subscriptions.DevhubAccessLevel
 import play.api.data.FormError
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 
 object EditManageSubscription {
 

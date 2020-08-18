@@ -17,18 +17,18 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.models.applications.ApplicationId
 import domain.models.applications.Capabilities.SupportsIpWhitelist
 import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import domain.models.applications.ApplicationId
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service._
 import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistView, ManageIpWhitelistView}
 
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future.successful
 
 @Singleton
 class IpWhitelist @Inject() (

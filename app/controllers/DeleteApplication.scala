@@ -17,8 +17,8 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.models.applications.Capabilities.SupportsDeletion
 import domain.models.applications.ApplicationId
+import domain.models.applications.Capabilities.SupportsDeletion
 import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form

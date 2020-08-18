@@ -17,12 +17,12 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.models.controllers.AddTeamMemberPageMode._
-import domain.models.applications.Capabilities.SupportsTeamMembers
-import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain._
 import domain.models.applications.{ApplicationId, Collaborator, Role}
+import domain.models.applications.Capabilities.SupportsTeamMembers
+import domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import domain.models.controllers.AddTeamMemberPageMode
+import domain.models.controllers.AddTeamMemberPageMode._
 import domain.models.developers.DeveloperSession
 import javax.inject.{Inject, Singleton}
 import model.ApplicationViewModel
@@ -34,8 +34,8 @@ import service._
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future.successful
 
 @Singleton
 class ManageTeam @Inject() (

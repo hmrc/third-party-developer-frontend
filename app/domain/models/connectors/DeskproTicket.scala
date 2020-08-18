@@ -16,11 +16,11 @@
 
 package domain.models.connectors
 
-import controllers.{SupportEnquiryForm, routes}
-import domain.models.applications.{Environment, Role, ApplicationId}
+import controllers.{routes, SupportEnquiryForm}
+import domain.models.apidefinitions.ApiVersion
+import domain.models.applications.{ApplicationId, Environment, Role}
 import play.api.libs.json.Json
 import play.api.mvc.Request
-import domain.models.apidefinitions.ApiVersion
 
 case class DeskproTicket(
     name: String,
