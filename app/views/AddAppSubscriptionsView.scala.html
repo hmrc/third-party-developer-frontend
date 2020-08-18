@@ -26,10 +26,10 @@
 @import domain.models.applications.State
 @import views.helper.EnvironmentNameService
 
-@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, environmentNameService: EnvironmentNameService)
+@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
 @(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, environment: Environment, subscriptions: Option[GroupedSubscriptions])(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig)
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
     application.deployedTo.isProduction && (

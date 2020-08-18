@@ -20,9 +20,9 @@
 @import model.Crumb
 @import views.helper.EnvironmentNameService
 
-@this(devMain: DevMain, environmentNameService: EnvironmentNameService)
+@this(devMain: DevMain)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
 
 @pageHeading = @{s"Add an application to ${environmentNameService.subordinateWording}"}
 

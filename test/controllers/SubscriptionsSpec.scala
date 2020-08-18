@@ -34,6 +34,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.helper.EnvironmentNameService
 import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
 import views.html.include.ChangeSubscriptionConfirmationView
 
@@ -103,6 +104,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
     val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
     val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
+    implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new Subscriptions(
       mock[ThirdPartyDeveloperConnector],
@@ -190,6 +192,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
       fetchByApplicationIdReturns(appId, activeApplication)
       givenApplicationHasSubs(activeApplication, subsData)
+      println(s"**** sandbox: ${environmentNameService.subordinateWording}")
 
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -203,10 +206,12 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       fetchByApplicationIdReturns(appId, activeApplication)
       givenApplicationHasSubs(activeApplication, subsData)
 
+      println(s"**** development: ${environmentNameService.subordinateWording}")
+
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include("Subscribe to APIs so your application can access them in Development")
+      contentAsString(result) should include("Subscribe to APIs so your application can access them in development")
     }
   }
 

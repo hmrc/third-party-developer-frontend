@@ -29,6 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.helper.EnvironmentNameService
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -83,6 +84,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+    implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
       applicationServiceMock,

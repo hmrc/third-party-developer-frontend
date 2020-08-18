@@ -26,6 +26,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service._
+import views.helper.EnvironmentNameService
 import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,7 +49,7 @@ class AddApplication @Inject() (
     addApplicationStartPrincipalView: AddApplicationStartPrincipalView,
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
     addApplicationNameView: AddApplicationNameView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>

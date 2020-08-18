@@ -22,9 +22,17 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class EnvironmentNameService @Inject()(appConfig: ApplicationConfig) {
 
-  val theSandbox = "the sandbox"
-  val subordinateEnvName = appConfig.nameOfSubordinateEnvironment.toLowerCase()
-  val subordinateWording = if(appConfig.subordinateIsSandbox) {theSandbox} else subordinateEnvName
+
+  def subordinateIsSandbox = appConfig.nameOfSubordinateEnvironment == "Sandbox"
+  def principalIsProduction = appConfig.nameOfPrincipalEnvironment == "Production"
+  def theSandbox = "the sandbox"
+  def subordinateEnvName = appConfig.nameOfSubordinateEnvironment.toLowerCase()
+  def subordinateWording =
+    {
+      println(s"****** EnvironmentNameService - [${appConfig.nameOfSubordinateEnvironment}]")
+      println(s"****** EnvironmentNameService - ${subordinateIsSandbox}")
+      if(subordinateIsSandbox) {theSandbox} else subordinateEnvName
+    }
 
 
 }

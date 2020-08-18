@@ -25,15 +25,16 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import views.helper.EnvironmentNameService
 
 class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
 
   override lazy val app: Application = fakeApplication()
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
-
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+
 
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 

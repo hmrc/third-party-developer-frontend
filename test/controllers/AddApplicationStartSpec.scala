@@ -30,7 +30,6 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
-import views.html.include.DevMain
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -68,12 +67,10 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
     val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
-    val devMain = app.injector.asInstanceOf[DevMain]
-    val environmentNameService = new EnvironmentNameService(appConfig)
-    val addApplicationStartSubordinateView2 =  new AddApplicationStartSubordinateView(devMain, environmentNameService: EnvironmentNameService)
     val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+    implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
       applicationServiceMock,
@@ -111,6 +108,10 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
       "return the add applications page with the user logged in when the environment is Production" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+
+        println(s"******1 ${appConfig.nameOfSubordinateEnvironment}")
+        println(s"******2 ${appConfig.subordinateIsSandbox}")
+        println(s"******3 ${environmentNameService.subordinateWording}")
 
         private val result = underTest.addApplicationSubordinate()(loggedInRequest)
 
