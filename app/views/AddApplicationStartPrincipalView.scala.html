@@ -22,11 +22,9 @@
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
-@getProductionCredentials = @{"Get production credentials"}
-@pageHeading = @{ if(appConfig.nameOfPrincipalEnvironment == "Production") {getProductionCredentials} else {s"Add an application to ${appConfig.nameOfPrincipalEnvironment}"}}
-@requestProductionCredentials = @{"production credentials to use live data"}
+@pageHeading = @{ if(appConfig.principalIsProduction) {"Get production credentials"} else {s"Add an application to ${appConfig.nameOfPrincipalEnvironment}"}}
 @addApplicationToEnv = @{s"to add your application to ${appConfig.nameOfPrincipalEnvironment}"}
-@principalWording = @{ if(appConfig.nameOfPrincipalEnvironment == "Production") {requestProductionCredentials} else addApplicationToEnv}
+@principalWording = @{ if(appConfig.principalIsProduction) {"production credentials to use live data"} else addApplicationToEnv}
 
 
     @devMain(

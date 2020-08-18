@@ -28,7 +28,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.helper.EnvironmentNameService
 import views.html._
+import views.html.include.DevMain
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -66,6 +68,9 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val tenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
     val addApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val devMain = app.injector.asInstanceOf[DevMain]
+    val environmentNameService = new EnvironmentNameService(appConfig)
+    val addApplicationStartSubordinateView2 =  new AddApplicationStartSubordinateView(devMain, environmentNameService: EnvironmentNameService)
     val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]

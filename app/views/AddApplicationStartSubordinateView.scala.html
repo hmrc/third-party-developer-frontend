@@ -18,17 +18,13 @@
 @import domain.models.applications.Environment
 @import include._
 @import model.Crumb
+@import views.helper.EnvironmentNameService
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, environmentNameService: EnvironmentNameService)
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
-@subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
-@theSandbox = @{"the sandbox"}
-@subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else subordinateEnvName}
-@pageHeading = @{s"Add an application to $subordinateWording"}
-
-
+@pageHeading = @{s"Add an application to ${environmentNameService.subordinateWording}"}
 
     @devMain(
     title = pageHeading,
@@ -45,12 +41,12 @@
         <h1 class="heading-xlarge">@pageHeading</h1>
     </header>
 
-    <p>Add your application to @subordinateWording so you can test it.</p>
+    <p>Add your application to @environmentNameService.subordinateWording so you can test it.</p>
 
-    <p>Once you add your application and subscribe it to the @subordinateEnvName APIs you want to integrate with you can:</p>
+    <p>Once you add your application and subscribe it to the @environmentNameService.subordinateEnvName APIs you want to integrate with you can:</p>
 
     <ul class="list list-bullet">
-        <li>get its @subordinateEnvName credentials</li>
+        <li>get its @environmentNameService.subordinateEnvName credentials</li>
         <li>use its credentials for integration testing</li>
     </ul>
 

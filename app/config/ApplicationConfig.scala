@@ -73,6 +73,9 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
     }
   }
 
+  lazy val subordinateIsSandbox = nameOfSubordinateEnvironment == "Sandbox"
+  lazy val principalIsProduction = nameOfPrincipalEnvironment == "Production"
+
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl = apiSubscriptionFieldsUrl("api-subscription-fields-production")
   val apiSubscriptionFieldsProductionBearerToken = getConfString("api-subscription-fields-production.bearer-token", "")

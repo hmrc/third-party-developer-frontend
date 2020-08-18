@@ -24,8 +24,9 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.State
+@import views.helper.EnvironmentNameService
 
-@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
+@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, environmentNameService: EnvironmentNameService)
 
 @(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, environment: Environment, subscriptions: Option[GroupedSubscriptions])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig)
@@ -38,9 +39,6 @@
 }
 
 @pageHeading = @{"Which APIs do you want to use?"}
-@theSandbox = @{"the sandbox"}
-@subordinateWording = @{ if(applicationConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {applicationConfig.nameOfSubordinateEnvironment}}
-
 
     @devMain(
     title = pageHeading,
@@ -58,7 +56,7 @@
 
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            <p>Subscribe to APIs so your application can access them in @subordinateWording. You can change them at any time.</p>
+            <p>Subscribe to APIs so your application can access them in @environmentNameService.subordinateWording. You can change them at any time.</p>
 
             <p>Once you subscribe, we'll send you email updates such as new API versions, new endpoints or version retirements.</p>
 
