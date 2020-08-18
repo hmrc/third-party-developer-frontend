@@ -55,7 +55,7 @@
 <p>Edit the configuration for these APIs you have subscribed to.</p>
 
   @for(api <- details) {
-    <h2>@{api.name} @{api.version} @{api.displayedStatus}</h2>
+    <h2>@{api.name} @{api.version.value} @{api.displayedStatus}</h2>
     <table>
       <thead>
         <tr>

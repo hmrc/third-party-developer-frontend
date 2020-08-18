@@ -35,7 +35,7 @@
     applicationConfig: config.ApplicationConfig
 )
 
-@pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion} ${viewModel.displayedStatus}" }
+@pageHeading = @{ s"${viewModel.apiName} ${viewModel.apiVersion.value} ${viewModel.displayedStatus}" }
 
 @devMain(
     title = pageHeading,
