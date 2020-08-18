@@ -16,22 +16,30 @@
 
 package controllers
 
-import domain.models.apidefinitions.APIStatus._
-import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
-import utils.AsyncHmrcSpec
 import builder._
-import domain.models.apidefinitions.{APIAccess, APIStatus, APISubscriptionStatus, APIVersion}
-import domain.models.applications.Application
+import domain.models.apidefinitions._
+import domain.models.apidefinitions.APIStatus._
+import domain.models.applications.{Application, ApplicationId, ClientId}
+import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
+import utils.AsyncHmrcSpec
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   self: AsyncHmrcSpec =>
 
+  val appId = ApplicationId("myAppId")
+  val clientId = ClientId("myClientId")
+  val employmentContext = ApiContext("individual-employment-context")
+  val taxContext = ApiContext("individual-tax-context")
+  val versionOne = ApiVersion("1.0")
+  val versionTwo = ApiVersion("2.0")
+  val versionThree = ApiVersion("3.0")
+
   def subscriptionStatus(
       apiName: String,
       serviceName: String,
-      context: String,
-      version: String,
+      context: ApiContext,
+      version: ApiVersion,
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
@@ -40,29 +48,36 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       fields: Option[SubscriptionFieldsWrapper] = None
   ) = {
 
-    val mappedFields = fields.getOrElse(emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version))
+    val mappedFields = fields.getOrElse(emptySubscriptionFieldsWrapper(appId, clientId, context, version))
 
-    APISubscriptionStatus(apiName, serviceName, context, APIVersion(version, status, access), subscribed, requiresTrust, isTestSupport = isTestSupport, fields = mappedFields)
+    APISubscriptionStatus(
+      apiName,
+      serviceName,
+      context,
+      ApiVersionDefinition(version, status, access),
+      subscribed,
+      requiresTrust,
+      isTestSupport = isTestSupport,
+      fields = mappedFields
+    )
   }
 
   val sampleSubscriptions: Seq[APISubscriptionStatus] = {
     Seq(
-      subscriptionStatus("Individual Employment", "individual-employment", "individual-employment-context", "1.0", STABLE, subscribed = true),
-      subscriptionStatus("Individual Employment", "individual-employment", "individual-employment-context", "2.0", BETA),
-      subscriptionStatus("Individual Tax", "individual-tax", "individual-tax-context", "1.0", STABLE),
-      subscriptionStatus("Individual Tax", "individual-tax", "individual-tax-context", "2.0", BETA)
+      subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = true),
+      subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA),
+      subscriptionStatus("Individual Tax", "individual-tax", taxContext, versionOne, STABLE),
+      subscriptionStatus("Individual Tax", "individual-tax", taxContext, versionTwo, BETA)
     )
   }
 
   def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {
     val sfv = buildSubscriptionFieldValue("the value")
 
-    val context = "individual-employment-context-2"
-    val version = "1.0"
-    val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, context, version, Seq(sfv))
+    val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, employmentContext, versionOne, Seq(sfv))
 
     Seq(
-      subscriptionStatus("Individual Employment 2", "individual-employment-2", context, version, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
+      subscriptionStatus("Individual Employment 2", "individual-employment-2", employmentContext, versionOne, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
     )
   }
 
@@ -70,7 +85,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       applicationSubscription: APISubscriptions,
       expectedApiHumanReadableAppName: String,
       expectedApiServiceName: String,
-      expectedVersions: Seq[APIVersion]
+      expectedVersions: Seq[ApiVersionDefinition]
   ) {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
     applicationSubscription.apiServiceName shouldBe expectedApiServiceName
@@ -98,18 +113,18 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     val fields = (1 to count).map(i => generateFieldValue(prefix, i))
 
     SubscriptionFieldsWrapper(
-      applicationId = WHO_CARES,
-      clientId = WHO_CARES,
-      apiContext = WHO_CARES,
-      apiVersion = WHO_CARES,
+      applicationId = ApplicationId(WHO_CARES),
+      clientId = ClientId(WHO_CARES),
+      apiContext = ApiContext(WHO_CARES),
+      apiVersion = ApiVersion(WHO_CARES),
       fields = fields
     )
   }
 
   val onlyApiExampleMicroserviceSubscribedTo: APISubscriptionStatus = {
-    val context = "example-api"
-    val version = APIVersion("1.0", APIStatus.STABLE)
-    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version.version)
+    val context = ApiContext("example-api")
+    val version = ApiVersionDefinition(versionOne, APIStatus.STABLE)
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.version)
 
     APISubscriptionStatus(
       name = "api-example-microservice",
@@ -124,9 +139,9 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   }
 
   def exampleSubscriptionWithoutFields(prefix: String): APISubscriptionStatus = {
-    val context = s"/$prefix-api"
-    val version = APIVersion("1.0", APIStatus.STABLE)
-    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version.version)
+    val context = ApiContext(s"/$prefix-api")
+    val version = ApiVersionDefinition(versionOne, APIStatus.STABLE)
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.version)
 
     val subscriptinFieldInxed = 1
     APISubscriptionStatus(

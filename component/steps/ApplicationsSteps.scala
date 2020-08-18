@@ -18,10 +18,8 @@ package steps
 
 import java.util.UUID.randomUUID
 
-import domain.models.apidefinitions.{APIAccess, APIAccessType, APIStatus, APIVersion, VersionSubscription}
 import domain.models.applications.Environment.PRODUCTION
 import domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, Environment, Privileged, ROPC, Role, Standard}
-import domain.models.subscriptions.APISubscription
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -34,6 +32,8 @@ import play.api.libs.json.Json
 import stubs._
 import stubs.ApplicationStub.configureUserApplications
 import uk.gov.hmrc.time.DateTimeUtils
+import domain.models.applications.ApplicationId
+import domain.models.applications.ClientId
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil
@@ -43,8 +43,8 @@ object AppWorld {
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar {
   implicit val webDriver = Env.driver
 
-  val applicationId = "applicationId"
-  val clientId = "clientId"
+  val applicationId = ApplicationId("applicationId")
+  val clientId = ClientId("clientId")
 
   private def defaultApp(name: String, environment: String) = Application(
     id = applicationId,
@@ -58,7 +58,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     collaborators = Set(Collaborator("john.smith@example.com", Role.ADMINISTRATOR))
   )
 
-  Given( """^application with name '(.*)' can be created$""") { (name: String) =>
+  Given("""^application with name '(.*)' can be created$""") { (name: String) =>
     ApplicationStub.setupApplicationNameValidation()
 
     val app = defaultApp(name, "PRODUCTION")
@@ -70,61 +70,65 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     configureUserApplications(app.collaborators.head.emailAddress, List(app))
   }
 
-  Then( """^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) =>
-    DeskproStub.verifyTicketCreationWithSubject(subject)
-  }
+  Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => DeskproStub.verifyTicketCreationWithSubject(subject) }
 
-  Then( """^there is a link to submit your application for checking with the text '(.*)'$""") { (linkText: String) =>
+  Then("""^there is a link to submit your application for checking with the text '(.*)'$""") { (linkText: String) =>
     val link = Env.driver.findElement(By.linkText(linkText))
     link.getAttribute("href") shouldBe s"${Env.host}/developer/applications/$applicationId/request-check"
   }
 
-  Given( """^I have no application assigned to my email '(.*)'$""") { (email: String) =>
+  Given("""^I have no application assigned to my email '(.*)'$""") { (email: String) =>
     ApplicationStub.configureUserApplications(email)
     ApplicationStub.configureUserApplications(email)
     AppWorld.userApplicationsOnBackend = Nil
   }
 
-  And( """^applications have the credentials:$""") { (data: DataTable) =>
+  And("""^applications have the credentials:$""") { (data: DataTable) =>
     val listOfCredentials = data.asScalaRawMaps[String, String].toList
-    val tuples = listOfCredentials.map { credentials =>
-      credentials("id") -> ApplicationToken(credentials("prodClientId"), splitToSecrets(credentials("prodClientSecrets")), credentials("prodAccessToken"))
-    }
+    val tuples = listOfCredentials.map { credentials => credentials("id") -> ApplicationToken(splitToSecrets(credentials("prodClientSecrets")), credentials("prodAccessToken")) }
     AppWorld.tokens = tuples.toMap
     ApplicationStub.configureApplicationCredentials(AppWorld.tokens)
   }
 
   def splitToSecrets(input: String): Seq[ClientSecret] = input.split(",").map(_.trim).map(s => ClientSecret(randomUUID.toString, s, DateTimeUtils.now))
 
-  Given( """^I have the following applications assigned to my email '(.*)':$""") { (email: String, data: DataTable) =>
+  Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: String, data: DataTable) =>
     val applications = data.asScalaRawMaps[String, String].toList
 
     val verificationCode = "aVerificationCode"
 
     AppWorld.userApplicationsOnBackend = applications map { app: Map[String, String] =>
       val applicationState = app.getOrElse("state", "TESTING") match {
-        case "TESTING" => ApplicationState.testing
-        case "PRODUCTION" => ApplicationState.production(email, verificationCode)
-        case "PENDING_GATEKEEPER_APPROVAL" => ApplicationState.pendingGatekeeperApproval(email)
+        case "TESTING"                        => ApplicationState.testing
+        case "PRODUCTION"                     => ApplicationState.production(email, verificationCode)
+        case "PENDING_GATEKEEPER_APPROVAL"    => ApplicationState.pendingGatekeeperApproval(email)
         case "PENDING_REQUESTER_VERIFICATION" => ApplicationState.pendingRequesterVerification(email, verificationCode)
-        case unknownState: String => fail(s"Unknown state '$unknownState'")
+        case unknownState: String             => fail(s"Unknown state '$unknownState'")
       }
       val access = app.getOrElse("accessType", "STANDARD") match {
-        case "STANDARD" => Standard(redirectUris = app.getOrElse("redirectUris", "").split(",").toSeq.map(_.trim).filter(_.nonEmpty))
+        case "STANDARD"   => Standard(redirectUris = app.getOrElse("redirectUris", "").split(",").toSeq.map(_.trim).filter(_.nonEmpty))
         case "PRIVILEGED" => Privileged()
-        case "ROPC" => ROPC()
+        case "ROPC"       => ROPC()
       }
 
       val environment = app.getOrElse("environment", "PRODUCTION") match {
         case "PRODUCTION" => Environment.PRODUCTION
-        case "SANDBOX" => Environment.SANDBOX
+        case "SANDBOX"    => Environment.SANDBOX
       }
 
-      Application(app("id"), app.getOrElse("clientId", s"autogenerated-${randomUUID().toString}"), app("name"),
-        DateTimeUtils.now, DateTimeUtils.now, None, environment, app.get("description"),
+      Application(
+        ApplicationId(app.getOrElse("id", s"autogenerated-${randomUUID().toString}")),
+        ClientId(app.getOrElse("clientId", s"autogenerated-${randomUUID().toString}")),
+        app("name"),
+        DateTimeUtils.now,
+        DateTimeUtils.now,
+        None,
+        environment,
+        app.get("description"),
         Set(Collaborator(email, Role.withName(app.getOrElse("role", "ADMINISTRATOR")))),
         access,
-        state = applicationState)
+        state = applicationState
+      )
     }
     // configure get all apps for user email
     configureStubsForApplications(email, AppWorld.userApplicationsOnBackend)
@@ -134,46 +138,34 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     ApplicationStub.configureUserApplications(email, applications)
     for (app <- applications) {
       // configure to be able to fetch apps and Subscriptions
-      ApplicationStub.setUpFetchApplication(app.id,OK, Json.toJson(app).toString())
+      ApplicationStub.setUpFetchApplication(app.id, OK, Json.toJson(app).toString())
       ApplicationStub.setUpFetchEmptySubscriptions(app.id, OK)
     }
   }
 
-  When( """^I see a link to request account deletion$""") { () =>
-    webDriver.findElements(By.cssSelector("[id=account-deletion]")).size() shouldBe 1
-  }
+  When("""^I see a link to request account deletion$""") { () => webDriver.findElements(By.cssSelector("[id=account-deletion]")).size() shouldBe 1 }
 
-  When("""^I click on the request account deletion link$""") { () =>
-    webDriver.findElement(By.cssSelector("[id=account-deletion]")).click()
-  }
+  When("""^I click on the request account deletion link$""") { () => webDriver.findElement(By.cssSelector("[id=account-deletion]")).click() }
 
   When("""^I click on the account deletion confirmation submit button$""") { () =>
     DeskproStub.setupTicketCreation()
     webDriver.findElement(By.cssSelector("[id=submit]")).click()
   }
 
-  When("""^I select the confirmation option with id '(.*)'$""") { (id: String ) =>
-    webDriver.findElement(By.cssSelector(s"[id=$id]")).click()
+  When("""^I select the confirmation option with id '(.*)'$""") { (id: String) => webDriver.findElement(By.cssSelector(s"[id=$id]")).click() }
+
+  When("""^I am on the unsubcribe request submitted page for application with id '(.*)' and api with name '(.*)', context '(.*)' and version '(.*)'$""") {
+    (id: String, apiName: String, apiContext: String, apiVersion: String) =>
+      webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=MANAGE_PAGE"
   }
 
-  When("""^I am on the unsubcribe request submitted page for application with id '(.*)' and api with name '(.*)', context '(.*)' and version '(.*)'$""") { (id: String, apiName: String, apiContext: String, apiVersion: String) =>
-    webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=MANAGE_PAGE"
-  }
-
-  When( """^I am on the subscriptions page for application with id '(.*)'$""") { (id: String) =>
+  When("""^I am on the subscriptions page for application with id '(.*)'$""") { (id: String) =>
     webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/subscriptions"
   }
 
-  When( """^I navigate to the Subscription page for application with id '(.*)'$""") { id: String =>
+  When("""^I navigate to the Subscription page for application with id '(.*)'$""") { id: String =>
     go(SubscriptionLink(id))
     on(SubscriptionPage(id))
   }
 
-  private def aVersionSubscription(version: String, apiStatus: APIStatus, subscribed: Boolean, access: APIAccessType) = {
-    VersionSubscription(APIVersion(version, apiStatus, Some(APIAccess(access))), subscribed)
-  }
-
-  private def aApiSubscription(context: String, versions: Seq[VersionSubscription], requiresTrust: Option[Boolean] = None) = {
-    APISubscription(context, s"service-$context", context, versions, requiresTrust)
-  }
 }

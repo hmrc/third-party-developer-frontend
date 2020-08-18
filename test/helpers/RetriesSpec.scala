@@ -25,9 +25,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.BadRequestException
 import utils.AsyncHmrcSpec
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.failed
 import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 class RetriesSpec extends AsyncHmrcSpec {

@@ -20,6 +20,8 @@ import java.net.URI
 
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
+import domain.models.connectors.UpdateLoggedInStateRequest
+import domain.models.developers.{Developer, LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.scalatest.Assertion
@@ -30,7 +32,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import qr.{OtpAuthUri, QRCode}
-import service.{MFAResponse, MFAService, MfaMandateService}
+import service.{MfaMandateService, MFAResponse, MFAService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
@@ -39,11 +41,6 @@ import views.html.protectaccount._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.developers.Developer
-import domain.models.developers.LoggedInState
-import domain.models.developers.Session
-import domain.models.connectors.UpdateLoggedInStateRequest
-
 import scala.concurrent.Future.successful
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {

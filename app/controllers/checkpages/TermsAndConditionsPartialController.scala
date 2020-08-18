@@ -18,8 +18,7 @@ package controllers.checkpages
 
 import controllers.ApplicationController
 import controllers.checkpages.HasUrl._
-import domain._
-import domain.models.applications.{CheckInformation, Standard, UpdateApplicationRequest}
+import domain.models.applications.{ApplicationId, CheckInformation, Standard, UpdateApplicationRequest}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import views.html.checkpages.TermsAndConditionsView
@@ -31,20 +30,18 @@ trait TermsAndConditionsPartialController {
 
   val termsAndConditionsView: TermsAndConditionsView
 
-  def termsAndConditionsPage(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def termsAndConditionsPage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
 
     Future.successful(app.access match {
       case std: Standard =>
-        val form = TermsAndConditionsForm(
-          hasUrl(std.termsAndConditionsUrl, app.checkInformation.map(_.providedTermsAndConditionsURL)),
-          std.termsAndConditionsUrl)
+        val form = TermsAndConditionsForm(hasUrl(std.termsAndConditionsUrl, app.checkInformation.map(_.providedTermsAndConditionsURL)), std.termsAndConditionsUrl)
         Ok(termsAndConditionsView(app, TermsAndConditionsForm.form.fill(form), termsAndConditionsActionRoute(app.id)))
       case _ => Ok(termsAndConditionsView(app, TermsAndConditionsForm.form, termsAndConditionsActionRoute(app.id)))
     })
   }
 
-  def termsAndConditionsAction(appId: String): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
+  def termsAndConditionsAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val requestForm = TermsAndConditionsForm.form.bindFromRequest
     val app = request.application
 
@@ -55,7 +52,7 @@ trait TermsAndConditionsPartialController {
     def updateUrl(form: TermsAndConditionsForm) = {
       val access = app.access match {
         case s: Standard => s.copy(termsAndConditionsUrl = form.termsAndConditionsURL, overrides = Set.empty)
-        case other => other
+        case other       => other
       }
 
       applicationService.update(UpdateApplicationRequest(app.id, app.deployedTo, app.name, app.description, access))
@@ -72,7 +69,7 @@ trait TermsAndConditionsPartialController {
     requestForm.fold(withFormErrors, withValidForm)
   }
 
-  protected def landingPageRoute(appId: String): Call
-  protected def termsAndConditionsActionRoute(appId: String): Call
+  protected def landingPageRoute(appId: ApplicationId): Call
+  protected def termsAndConditionsActionRoute(appId: ApplicationId): Call
 
 }

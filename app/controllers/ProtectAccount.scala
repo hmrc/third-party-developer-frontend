@@ -27,12 +27,12 @@ import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import qr.{OtpAuthUri, QRCode}
-import service.{MFAService, MfaMandateService, SessionService}
+import service.{MfaMandateService, MFAService, SessionService}
 import views.html.{Add2SVView, UserDidNotAdd2SVView}
 import views.html.protectaccount._
 
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future.successful
 
 @Singleton
 class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,

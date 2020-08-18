@@ -18,7 +18,7 @@ package views.checkpages
 
 import config.ApplicationConfig
 import controllers.TermsOfUseForm
-import domain.models.applications.{Application, ApplicationState, CheckInformation, Collaborator, Environment, Role, Standard, State, TermsOfUseAgreement}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -36,8 +36,8 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
   "Terms of use view" must {
     val thirdPartyApplication =
       Application(
-        "APPLICATION_ID",
-        "CLIENT_ID",
+        ApplicationId("APPLICATION_ID"),
+        ClientId("CLIENT_ID"),
         "APPLICATION NAME",
         DateTimeUtils.now,
         DateTimeUtils.now,
@@ -58,7 +58,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
-        ApplicationViewModel(thirdPartyApplication,false),
+        ApplicationViewModel(thirdPartyApplication, false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
         submitButtonLabel = "A Label",
         submitAction = mock[Call],
@@ -66,7 +66,8 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
         request,
         developer,
         messagesProvider,
-        appConfig)
+        appConfig
+      )
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -88,13 +89,14 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
       val page = termsOfUse.render(
         ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
-        submitButtonLabel =  "A Label",
+        submitButtonLabel = "A Label",
         submitAction = mock[Call],
         landingPageRoute = mock[Call],
         request,
         developer,
         implicitly,
-        appConfigMock)
+        appConfigMock
+      )
       page.contentType should include("text/html")
 
       page.body.contains("Terms of use agreed by email@example.com") shouldBe true

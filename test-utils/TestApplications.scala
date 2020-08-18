@@ -18,40 +18,40 @@ package utils
 
 import java.util.UUID.randomUUID
 
-import domain.models.applications.{Access, Application, ApplicationState, ApplicationToken, CheckInformation, ClientSecret, Collaborator, Environment, Privileged, ROPC, Role, Standard, State}
+import domain.models.apidefinitions.AccessType
+import domain.models.applications._
 import org.joda.time.DateTimeZone
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.util.Random
-import domain.models.apidefinitions.AccessType
 
 trait TestApplications {
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
-  def aSandboxApplication(appId: String = randomUUID().toString,
-                          clientId: String = randomString(28),
-                          adminEmail: String = "admin@example.com",
-                          developerEmail: String = "developer@example.com"): Application = {
+  def aSandboxApplication(
+      appId: ApplicationId = ApplicationId(randomUUID().toString),
+      clientId: ClientId = ClientId(randomString(28)),
+      adminEmail: String = "admin@example.com",
+      developerEmail: String = "developer@example.com"
+  ): Application = {
 
-    anApplication(appId,
-      clientId,
-      environment = Environment.SANDBOX,
-      state = ApplicationState(State.PRODUCTION, None),
-      adminEmail = adminEmail,
-      developerEmail = developerEmail)
+    anApplication(appId, clientId, environment = Environment.SANDBOX, state = ApplicationState(State.PRODUCTION, None), adminEmail = adminEmail, developerEmail = developerEmail)
   }
 
-  def anApplication(appId: String = randomUUID().toString,
-                    clientId: String = randomString(28),
-                    environment: Environment = Environment.PRODUCTION,
-                    state: ApplicationState = ApplicationState.production("test", "test"),
-                    adminEmail: String = "admin@example.com",
-                    developerEmail: String = "developer@example.com",
-                    access: Access = standardAccess(),
-                    ipWhitelist: Set[String] = Set.empty): Application = {
+  def anApplication(
+      appId: ApplicationId = ApplicationId(randomUUID().toString),
+      clientId: ClientId = ClientId(randomString(28)),
+      environment: Environment = Environment.PRODUCTION,
+      state: ApplicationState = ApplicationState.production("test", "test"),
+      adminEmail: String = "admin@example.com",
+      developerEmail: String = "developer@example.com",
+      access: Access = standardAccess(),
+      ipWhitelist: Set[String] = Set.empty
+  ): Application = {
 
-    Application(id = appId,
+    Application(
+      id = appId,
       clientId = clientId,
       name = "App name 1",
       createdOn = DateTimeUtils.now,
@@ -61,22 +61,25 @@ trait TestApplications {
       collaborators = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER)),
       state = state,
       access = access,
-      ipWhitelist = ipWhitelist)
+      ipWhitelist = ipWhitelist
+    )
   }
 
   val aStandardApplication: Application = anApplication()
 
   def aStandardApprovedApplication: Application = aStandardApplication
 
-  def aStandardNonApprovedApplication(adminEmail: String = "admin@example.com"): Application = 
+  def aStandardNonApprovedApplication(adminEmail: String = "admin@example.com"): Application =
     anApplication(adminEmail = adminEmail).withState(ApplicationState.testing)
 
-  def aStandardPendingApprovalApplication(adminEmail: String = "admin@example.com"): Application = 
+  def aStandardPendingApprovalApplication(adminEmail: String = "admin@example.com"): Application =
     anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test", "test"))
 
-  def standardAccess(redirectUris: Seq[String] = Seq("https://redirect1", "https://redirect2"),
-                     termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),
-                     privacyPolicyUrl: Option[String] = Some("http://example.com/privacy")): Standard = {
+  def standardAccess(
+      redirectUris: Seq[String] = Seq("https://redirect1", "https://redirect2"),
+      termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),
+      privacyPolicyUrl: Option[String] = Some("http://example.com/privacy")
+  ): Standard = {
 
     Standard(redirectUris, termsAndConditionsUrl, privacyPolicyUrl)
   }
@@ -89,16 +92,14 @@ trait TestApplications {
 
   def privilegedAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Privileged = Privileged(scopes)
 
-  def tokens(clientId: String = randomString(28),
-             clientSecret: String = randomString(28),
-             accessToken: String = randomString(28)): ApplicationToken = {
+  def tokens(clientId: ClientId = ClientId(randomString(28)), clientSecret: String = randomString(28), accessToken: String = randomString(28)): ApplicationToken = {
 
-    ApplicationToken(clientId, Seq(aClientSecret()), accessToken)
+    ApplicationToken(Seq(aClientSecret()), accessToken)
   }
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
-   implicit class AppAugment(val app: Application) {
+  implicit class AppAugment(val app: Application) {
     final def withName(name: String): Application = app.copy(name = name)
 
     final def withDescription(description: Option[String]): Application = app.copy(description = description)

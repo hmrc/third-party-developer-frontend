@@ -18,8 +18,8 @@ package controllers
 
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector
-import domain.models.connectors.{ChangePassword, PasswordReset}
 import domain.{InvalidResetCode, UnverifiedAccount}
+import domain.models.connectors.{ChangePassword, PasswordReset}
 import mocks.service.SessionServiceMock
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -28,7 +28,7 @@ import play.twirl.api.HtmlFormat
 import service.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
-import views.html.{CheckEmailView, ForgotPasswordView, ResetErrorView, ResetInvalidView, ResetView, SignInView}
+import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

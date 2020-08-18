@@ -17,12 +17,12 @@
 @import config.ApplicationConfig
 @import include._
 @import model.Crumb
-@import domain.models.applications.Application
+@import domain.models.applications.{ApplicationId, Application}
 @import domain.models.developers.DeveloperSession
 
 @this(devMain: DevMain)
 
-@(applicationId: String, app: Application)(
+@(applicationId: ApplicationId, app: Application)(
         implicit request: Request[_], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig)
 
 @nameOfEnv = @{appConfig.nameOfPrincipalEnvironment}

@@ -20,12 +20,11 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.ApplicationCheck
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
-import domain.models.applications
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.ApplicationUpliftSuccessful
-import domain.models.applications._
+import domain.models.apidefinitions._
+import domain.models.applications.{ApplicationId, _}
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -45,16 +44,17 @@ import views.html.editapplication.NameSubmittedView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import play.api.test.Helpers._
-
 import scala.concurrent.Future.successful
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
 
-  val appId = "1234"
+  override val appId = ApplicationId("1234")
+
   val appName: String = "app"
-  val clientId = "clientIdzzz"
   val sessionId = "sessionId"
+
+  val exampleContext = ApiContext("exampleContext")
+  val version = ApiVersion("version")
 
   val developerDto: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session: Session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
@@ -67,20 +67,20 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val production: ApplicationState = ApplicationState.production("thirdpartydeveloper@example.com", "ABCD")
   val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com")
 
-  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "clientId", "exampleContext", "api-example-microservice")
+  val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersion("api-example-microservice"))
 
-  val tokens: ApplicationToken = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens: ApplicationToken = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
   val exampleApiSubscription: Some[APISubscriptions] = Some(
     APISubscriptions(
       "Example API",
       "api-example-microservice",
-      "exampleContext",
+      exampleContext,
       Seq(
         APISubscriptionStatus(
           "API1",
           "api-example-microservice",
-          "exampleContext",
-          APIVersion("version", APIStatus.STABLE),
+          exampleContext,
+          ApiVersionDefinition(version, APIStatus.STABLE),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
@@ -122,8 +122,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   def createFullyConfigurableApplication(
       collaborators: Set[Collaborator],
-      appId: String = appId,
-      clientId: String = clientId,
+      appId: ApplicationId = appId,
+      clientId: ClientId = clientId,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
       access: Access = Standard()
@@ -145,8 +145,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   }
 
   def createPartiallyConfigurableApplication(
-      appId: String = appId,
-      clientId: String = clientId,
+      appId: ApplicationId = appId,
+      clientId: ClientId = clientId,
       userRole: Role = ADMINISTRATOR,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
@@ -422,11 +422,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")
+              Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
             )
           )
         )
-      )
 
       when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
         .thenReturn(successful(ApplicationUpliftSuccessful))
@@ -434,7 +433,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
     }
 
     "successful submit action should take you to the check-your-answers page when no configurations confirmed because none required" in new Setup {
@@ -449,11 +448,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              Seq(applications.TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0")
+              Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
             )
           )
         )
-      )
 
       when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
         .thenReturn(successful(ApplicationUpliftSuccessful))
@@ -461,7 +459,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
     }
 
     "validation failure submit action" in new Setup {
@@ -1219,7 +1217,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
@@ -1285,7 +1283,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check/team")
 
       verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
@@ -1296,7 +1294,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
@@ -1310,7 +1308,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val result = addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/request-check")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
     }
 
     "return unauthorised App details page with one Admin" in new Setup {

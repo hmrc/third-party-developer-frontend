@@ -21,9 +21,9 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
+import com.google.zxing.{BarcodeFormat, EncodeHintType}
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import com.google.zxing.{BarcodeFormat, EncodeHintType}
 import javax.imageio.ImageIO
 
 import scala.collection.JavaConverters._

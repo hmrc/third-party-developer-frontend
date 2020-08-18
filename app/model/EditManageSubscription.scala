@@ -16,55 +16,45 @@
 
 package model
 
-import domain.models.apidefinitions.APISubscriptionStatusWithSubscriptionFields
-import domain.models.subscriptions.DevhubAccessLevel
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
 import domain.models.applications.Role
+import domain.models.subscriptions.DevhubAccessLevel
 import play.api.data.FormError
 
 object EditManageSubscription {
 
   case class EditApiConfigurationViewModel(
       apiName: String,
-      apiVersion: String,
-      apiContext: String,
+      apiVersion: ApiVersion,
+      apiContext: ApiContext,
       displayedStatus: String,
       fields: Seq[SubscriptionFieldViewModel],
-      errors: Seq[FormError])
-  
-  case class SubscriptionFieldViewModel(
-    name: String,
-    description: String,
-    hint: String,
-    canWrite: Boolean,
-    value: String,
-    errors: Seq[FormError])
+      errors: Seq[FormError]
+  )
+
+  case class SubscriptionFieldViewModel(name: String, description: String, hint: String, canWrite: Boolean, value: String, errors: Seq[FormError])
 
   object EditApiConfigurationViewModel {
     def toViewModel(
-        apiSubscription : APISubscriptionStatusWithSubscriptionFields,
+        apiSubscription: APISubscriptionStatusWithSubscriptionFields,
         role: Role,
         formErrors: Seq[FormError],
-        postedFormValues: Map[String, String]): EditApiConfigurationViewModel = {
-          
-    val fieldsViewModel = apiSubscription.fields.fields
+        postedFormValues: Map[String, String]
+    ): EditApiConfigurationViewModel = {
+
+      val fieldsViewModel = apiSubscription.fields.fields
         .map(field => {
           val accessLevel = DevhubAccessLevel.fromRole(role)
           val canWrite = field.definition.access.devhub.satisfiesWrite(accessLevel)
           val fieldErrors = formErrors.filter(e => e.key == field.definition.name)
 
-          val newValue = if (canWrite){
+          val newValue = if (canWrite) {
             postedFormValues.get(field.definition.name).getOrElse(field.value)
-          } else { 
+          } else {
             field.value
           }
-          
-          SubscriptionFieldViewModel(
-            field.definition.name,
-            field.definition.description,
-            field.definition.hint,
-            canWrite,
-            newValue,
-            fieldErrors)
+
+          SubscriptionFieldViewModel(field.definition.name, field.definition.description, field.definition.hint, canWrite, newValue, fieldErrors)
         })
 
       EditApiConfigurationViewModel(

@@ -17,9 +17,10 @@
 package connectors
 
 import connectors.SubscriptionFieldsConnector.{ApiFieldDefinitions, FieldDefinition}
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{Json, JsSuccess}
 import utils.AsyncHmrcSpec
 
 class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
@@ -41,7 +42,11 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
        |}""".stripMargin
 
   private val basicFieldDefinition: ApiFieldDefinitions = {
-    ApiFieldDefinitions("my-context", "1.0", List(FieldDefinition("field-name", "my-description", "my-shortDescription", "my-hint", "STRING", AccessRequirements.Default)))
+    ApiFieldDefinitions(
+      ApiContext("my-context"),
+      ApiVersion("1.0"),
+      List(FieldDefinition("field-name", "my-description", "my-shortDescription", "my-hint", "STRING", AccessRequirements.Default))
+    )
   }
 
   private def fieldDefinitionWithAccessJson =
@@ -74,8 +79,8 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
     "for field definition with access" in {
       val apiFieldDefinitionsWithAccess: ApiFieldDefinitions = {
         ApiFieldDefinitions(
-          "my-context",
-          "1.0",
+          ApiContext("my-context"),
+          ApiVersion("1.0"),
           List(
             FieldDefinition(
               name = "field-name",

@@ -17,7 +17,7 @@
 package domain
 
 import domain.models.applications.OverrideFlag
-import play.api.libs.json.{JsError, JsString, Json}
+import play.api.libs.json.{JsError, Json, JsString}
 import utils.AsyncHmrcSpec
 
 class OverrideFlagSpec extends AsyncHmrcSpec {

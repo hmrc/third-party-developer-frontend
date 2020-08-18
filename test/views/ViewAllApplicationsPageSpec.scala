@@ -18,7 +18,7 @@ package views
 
 import controllers.ApplicationSummary
 import domain.models.apidefinitions.AccessType
-import domain.models.applications.{Role, State, TermsOfUseStatus}
+import domain.models.applications.{ApplicationId, Role, State, TermsOfUseStatus}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -31,13 +31,15 @@ import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
-  def isGreenAddProductionApplicationButtonVisible(document: Document) : Boolean ={
+  def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
     val href = controllers.routes.AddApplication.addApplicationPrincipal().url
 
     val greenButtons = document.select(s"a[href=$href][class=button]")
 
     !greenButtons.isEmpty
   }
+
+  val applicationId = ApplicationId("1111")
 
   trait Setup {
     when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
@@ -63,8 +65,20 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, false, appCreatedOn, AccessType.STANDARD))
+      val appSummaries = Seq(
+        ApplicationSummary(
+          applicationId,
+          appName,
+          appEnvironment,
+          appUserRole,
+          TermsOfUseStatus.NOT_APPLICABLE,
+          State.TESTING,
+          appLastAccess,
+          false,
+          appCreatedOn,
+          AccessType.STANDARD
+        )
+      )
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
@@ -115,8 +129,20 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, false, appCreatedOn, AccessType.STANDARD))
+      val appSummaries = Seq(
+        ApplicationSummary(
+          applicationId,
+          appName,
+          appEnvironment,
+          appUserRole,
+          TermsOfUseStatus.NOT_APPLICABLE,
+          State.TESTING,
+          appLastAccess,
+          false,
+          appCreatedOn,
+          AccessType.STANDARD
+        )
+      )
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
@@ -139,8 +165,20 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.PRODUCTION, appLastAccess, false, appCreatedOn, AccessType.PRIVILEGED))
+      val appSummaries = Seq(
+        ApplicationSummary(
+          applicationId,
+          appName,
+          appEnvironment,
+          appUserRole,
+          TermsOfUseStatus.NOT_APPLICABLE,
+          State.PRODUCTION,
+          appLastAccess,
+          false,
+          appCreatedOn,
+          AccessType.PRIVILEGED
+        )
+      )
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
@@ -161,8 +199,20 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, false, appCreatedOn, AccessType.STANDARD))
+      val appSummaries = Seq(
+        ApplicationSummary(
+          applicationId,
+          appName,
+          appEnvironment,
+          appUserRole,
+          TermsOfUseStatus.NOT_APPLICABLE,
+          State.TESTING,
+          appLastAccess,
+          false,
+          appCreatedOn,
+          AccessType.STANDARD
+        )
+      )
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 

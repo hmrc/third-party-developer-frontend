@@ -16,8 +16,8 @@
 
 package views
 
+import domain.models.applications._
 import domain.models.applications.Environment.PRODUCTION
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Privileged, ROPC, Role, Standard}
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -34,11 +34,13 @@ class LeftHandNavSpec extends CommonViewSpec {
   val leftHandNavView = app.injector.instanceOf[LeftHandNav]
 
   trait Setup {
+    val applicationId = ApplicationId("std-app-id")
+    val clientId = ClientId("std-client-id")
     implicit val request = FakeRequest()
     implicit val loggedIn = utils.DeveloperSession("user@example.com", "Test", "Test", None, loggedInState = LoggedInState.LOGGED_IN)
-    val standardApplication = Application("std-app-id", "std-client-id", "name", now, now, None, PRODUCTION, access = Standard())
-    val privilegedApplication = Application("std-app-id", "std-client-id", "name", now, now, None, PRODUCTION, access = Privileged())
-    val ropcApplication = Application("std-app-id", "std-client-id", "name", now, now, None, PRODUCTION, access = ROPC())
+    val standardApplication = Application(applicationId, clientId, "name", now, now, None, PRODUCTION, access = Standard())
+    val privilegedApplication = Application(applicationId, clientId, "name", now, now, None, PRODUCTION, access = Privileged())
+    val ropcApplication = Application(applicationId, clientId, "name", now, now, None, PRODUCTION, access = ROPC())
 
     def elementExistsById(doc: Document, id: String) = doc.select(s"#$id").asScala.nonEmpty
   }
@@ -79,9 +81,7 @@ class LeftHandNavSpec extends CommonViewSpec {
     }
 
     "include links to client ID and client secrets if the user is an admin and the app has reached production state" in new Setup {
-      val application = standardApplication.copy(
-        collaborators = Set(Collaborator(loggedIn.email, Role.ADMINISTRATOR)),
-        state = ApplicationState.production("", ""))
+      val application = standardApplication.copy(collaborators = Set(Collaborator(loggedIn.email, Role.ADMINISTRATOR)), state = ApplicationState.production("", ""))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false)), Some("")).body)
 
@@ -90,10 +90,8 @@ class LeftHandNavSpec extends CommonViewSpec {
     }
 
     "include links to client ID and client secrets if the user is not an admin but the app is in sandbox" in new Setup {
-      val application = standardApplication.copy(
-        deployedTo = Environment.SANDBOX,
-        collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER)),
-        state = ApplicationState.production("", ""))
+      val application =
+        standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER)), state = ApplicationState.production("", ""))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false)), Some("")).body)
 

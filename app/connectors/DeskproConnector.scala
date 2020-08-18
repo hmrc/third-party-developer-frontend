@@ -18,7 +18,7 @@ package connectors
 
 import config.ApplicationConfig
 import domain._
-import domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId, TicketResult}
+import domain.models.connectors._
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}

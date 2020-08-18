@@ -17,7 +17,7 @@
 package views
 
 import controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
-import domain.models.applications.{Application, ApplicationState, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.joda.time.DateTime
@@ -45,8 +45,8 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
   }
 
   def buildApplication(applicationState: ApplicationState, environment: Environment): Application = Application(
-    "Test Application ID",
-    "Test Application Client ID",
+    ApplicationId("Test Application ID"),
+    ClientId("Test Application Client ID"),
     "Test Application",
     DateTime.now(),
     DateTime.now(),
@@ -76,7 +76,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
         EditApplicationForm.withData(productionApplicationTesting),
         ApplicationViewModel(application, false),
         Some(GroupedSubscriptions(Seq.empty, Seq.empty)),
-        "",
+        ApplicationId(""),
         request,
         developer,
         messagesProvider,

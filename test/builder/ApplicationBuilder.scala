@@ -16,18 +16,17 @@
 
 package builder
 
-import uk.gov.hmrc.time.DateTimeUtils
 import java.util.UUID.randomUUID
 
-import domain.models.applications.{ApplicationState, Collaborator, Environment, Role, Standard}
-import domain.models.applications.Application
+import domain.models.applications._
+import uk.gov.hmrc.time.DateTimeUtils
 
 trait ApplicationBuilder {
 
-  def buildApplication(appOwnerEmail : String) : Application = {
+  def buildApplication(appOwnerEmail: String): Application = {
 
-    val appId = "appid-" + randomUUID.toString
-    val clientId =  "clientid-" + randomUUID.toString
+    val appId = ApplicationId("appid-" + randomUUID.toString)
+    val clientId = ClientId("clientid-" + randomUUID.toString)
 
     Application(
       appId,
@@ -43,10 +42,11 @@ trait ApplicationBuilder {
       access = Standard(
         redirectUris = Seq("https://red1", "https://red2"),
         termsAndConditionsUrl = Some("http://tnc-url.com")
-      ))
+      )
+    )
   }
 
-  def buildCollaborators(emails : Seq[String]) : Set[Collaborator] = {
+  def buildCollaborators(emails: Seq[String]): Set[Collaborator] = {
     emails.map(email => Collaborator(email, Role.ADMINISTRATOR)).toSet
- }
+  }
 }

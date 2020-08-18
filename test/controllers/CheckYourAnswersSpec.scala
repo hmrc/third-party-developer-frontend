@@ -20,12 +20,12 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
-import domain.models.apidefinitions.{APIStatus, APISubscriptionStatus, APIVersion}
+import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
+import domain.models.apidefinitions._
 import domain.models.applications._
+import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.APISubscription
-import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -52,10 +52,9 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
-  val appId = "1234"
   val appName: String = "app"
-  val clientId = "clientIdzzz"
   val sessionId = "sessionId"
+  val apiVersion = ApiVersion("version")
 
   val developerDto = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
@@ -82,21 +81,21 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  val tokens = ApplicationToken("clientId", Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
-  val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", "context", "version")
+  val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, ApiContext("context"), apiVersion)
 
   val exampleApiSubscription = Some(
     APISubscriptions(
       "Example API",
       "api-example-microservice",
-      "exampleContext",
+      ApiContext("exampleContext"),
       Seq(
         APISubscriptionStatus(
           "API1",
           "api-example-microservice",
-          "exampleContext",
-          APIVersion("version", APIStatus.STABLE),
+          ApiContext("exampleContext"),
+          ApiVersionDefinition(apiVersion, APIStatus.STABLE),
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
@@ -109,15 +108,15 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     Seq.empty,
     Seq(
       APISubscriptions(
-        "API1",
         "ServiceName",
         "apiContent",
+        ApiContext("context"),
         Seq(
           APISubscriptionStatus(
             "API1",
             "subscriptionServiceName",
-            "context",
-            APIVersion("version", APIStatus.STABLE),
+            ApiContext("context"),
+            ApiVersionDefinition(apiVersion, APIStatus.STABLE),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
@@ -176,9 +175,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     givenUpdateCheckInformationSucceeds(application)
 
-    val context = "apiContent"
-    val version = "version"
-    val emptyFields = emptySubscriptionFieldsWrapper("myAppId", "myClientId", context, version)
+    val context = ApiContext("apiContent")
+    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, apiVersion)
 
     val subscriptions = Seq(
       APISubscriptions(
@@ -190,7 +188,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
             "API1",
             "subscriptionServiceName",
             context,
-            APIVersion(version, APIStatus.STABLE),
+            ApiVersionDefinition(apiVersion, APIStatus.STABLE),
             subscribed = true,
             requiresTrust = false,
             fields = emptyFields
@@ -215,8 +213,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
     def givenApplicationExists(
-        appId: String = appId,
-        clientId: String = clientId,
+        appId: ApplicationId = appId,
+        clientId: ClientId = clientId,
         userRole: Role = ADMINISTRATOR,
         state: ApplicationState = testing,
         checkInformation: Option[CheckInformation] = None,
@@ -281,10 +279,9 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     val expectedCheckInformation: CheckInformation = application.checkInformation.getOrElse(CheckInformation()).copy(confirmedName = false)
 
     when(underTest.applicationService.requestUplift(eqTo(appId), eqTo(application.name), eqTo(loggedInUser))(any[HeaderCarrier]))
-      .thenAnswer( (i: InvocationOnMock) => {
-          failed(new ApplicationAlreadyExists)
-        }
-      )
+      .thenAnswer((i: InvocationOnMock) => {
+        failed(new ApplicationAlreadyExists)
+      })
     givenUpdateCheckInformationSucceeds(application, expectedCheckInformation)
 
     private val result = addToken(underTest.answersPageAction(appId))(requestWithFormBody)
@@ -441,7 +438,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
@@ -505,7 +502,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers/team")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers/team")
 
       verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
     }
@@ -516,7 +513,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/applications/$appId/check-your-answers")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/check-your-answers")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
       verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])

@@ -20,8 +20,8 @@ import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
 import domain._
-import domain.models.connectors.{AccountSetupRequest, ChangePassword, LoginRequest, PasswordCheckRequest, PasswordReset, TotpAuthenticationRequest, UpdateLoggedInStateRequest, UserAuthenticationResponse, VerifyMfaRequest}
-import domain.models.developers.{Developer, EmailAlreadyInUse, Registration, RegistrationDownstreamResponse, RegistrationSuccessful, Session, SessionInvalid, UpdateProfileRequest, User}
+import domain.models.connectors._
+import domain.models.developers._
 import javax.inject.{Inject, Singleton}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
@@ -136,18 +136,6 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       .recover {
         // treat session not found as successfully destroyed
         case _: NotFoundException => NO_CONTENT
-      }
-  }
-
-  def checkPassword(checkRequest: PasswordCheckRequest)(implicit hc: HeaderCarrier): Future[VerifyPasswordSuccessful] = metrics.record(api) {
-    encryptedJson.secretRequestJson(
-      Json.toJson(checkRequest),
-      http.POST(s"$serviceBaseUrl/check-password", _, Seq(CONTENT_TYPE -> JSON)))
-      .map(_ => VerifyPasswordSuccessful)
-      .recover {
-        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
       }
   }
 

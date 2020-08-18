@@ -23,6 +23,7 @@
 @import domain.models.views.Link
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
+@import domain.models.applications.ApplicationId
 
 @this(devMain: DevMain)
 
@@ -49,7 +50,7 @@
  </p>
 
  @{
-  def createRemoveLink(appId: String, emailAddress: String) = {
+  def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
    controllers.checkpages.routes.ApplicationCheck.teamMemberRemoveConfirmation(appId, emailAddress.toSha256)
   }
   teamList(app, role, loggedIn, controllers.checkpages.routes.ApplicationCheck.teamAddMember(app.id), Link, createRemoveLink)

@@ -15,12 +15,13 @@
  *@
 
 @import domain.models.developers.DeveloperSession
+@import domain.models.applications.ApplicationId
 @import include._
 @import model.Crumb
 
 @this(devMain: DevMain)
 
-@(appName: String, id: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
+@(appName: String, id: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
 @theSandbox = @{"the sandbox"}
 @subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}

@@ -21,8 +21,7 @@ import javax.inject.Inject
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.filters.frontend.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class WhitelistedCall(uri: String, method: String)
 

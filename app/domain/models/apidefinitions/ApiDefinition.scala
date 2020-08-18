@@ -22,19 +22,17 @@ import play.api.libs.json.Json
 
 import scala.util.Try
 
-
-
 object APIDefinition {
   private val nonNumericOrPeriodRegex = "[^\\d^.]*"
   private val fallback = Array(1, 0, 0)
 
-  private def versionSorter(v1: APIVersion, v2: APIVersion) = {
-    val v1Parts = Try(v1.version.replaceAll(nonNumericOrPeriodRegex, "").split("\\.").map(_.toInt)).getOrElse(fallback)
-    val v2Parts = Try(v2.version.replaceAll(nonNumericOrPeriodRegex, "").split("\\.").map(_.toInt)).getOrElse(fallback)
+  private def versionSorter(v1: ApiVersionDefinition, v2: ApiVersionDefinition) = {
+    val v1Parts = Try(v1.version.value.replaceAll(nonNumericOrPeriodRegex, "").split("\\.").map(_.toInt)).getOrElse(fallback)
+    val v2Parts = Try(v2.version.value.replaceAll(nonNumericOrPeriodRegex, "").split("\\.").map(_.toInt)).getOrElse(fallback)
     val pairs = v1Parts.zip(v2Parts)
 
     val firstUnequalPair = pairs.find { case (one, two) => one != two }
-    firstUnequalPair.fold(v1.version.length > v2.version.length) { case (a, b) => a > b }
+    firstUnequalPair.fold(v1.version.value.length > v2.version.value.length) { case (a, b) => a > b }
   }
 
   def descendingVersion(v1: VersionSubscription, v2: VersionSubscription) = {
@@ -42,9 +40,9 @@ object APIDefinition {
   }
 }
 
-case class VersionSubscription(version: APIVersion, subscribed: Boolean)
+case class VersionSubscription(version: ApiVersionDefinition, subscribed: Boolean)
 
-case class APIVersion(version: String, status: APIStatus, access: Option[APIAccess] = None) {
+case class ApiVersionDefinition(version: ApiVersion, status: APIStatus, access: Option[APIAccess] = None) {
   val displayedStatus = {
     status match {
       case APIStatus.ALPHA      => "Alpha"
@@ -60,41 +58,55 @@ case class APIVersion(version: String, status: APIStatus, access: Option[APIAcce
 
 case class APIAccess(`type`: APIAccessType)
 
-case class APIIdentifier(context: String, version: String)
+case class ApiContext(value: String) extends AnyVal
+
+object ApiContext {
+
+  implicit val formatApiContext = Json.valueFormat[ApiContext]
+
+  implicit val ordering: Ordering[ApiContext] = new Ordering[ApiContext] {
+    override def compare(x: ApiContext, y: ApiContext): Int = x.value.compareTo(y.value)
+  }
+}
+
+case class ApiVersion(value: String) extends AnyVal
+
+object ApiVersion {
+
+  implicit val formatApiVersion = Json.valueFormat[ApiVersion]
+
+  implicit val ordering: Ordering[ApiVersion] = new Ordering[ApiVersion] {
+    override def compare(x: ApiVersion, y: ApiVersion): Int = x.value.compareTo(y.value)
+  }
+}
+
+case class ApiIdentifier(context: ApiContext, version: ApiVersion)
 
 case class APISubscriptionStatus(
     name: String,
     serviceName: String,
-    context: String,
-    apiVersion: APIVersion,
+    context: ApiContext,
+    apiVersion: ApiVersionDefinition,
     subscribed: Boolean,
     requiresTrust: Boolean,
     fields: SubscriptionFieldsWrapper,
-    isTestSupport: Boolean = false) {
+    isTestSupport: Boolean = false
+) {
   def canUnsubscribe: Boolean = {
     apiVersion.status != APIStatus.DEPRECATED
   }
 }
 
-case class APISubscriptionStatusWithSubscriptionFields(
-  name: String,
-  context: String,
-  apiVersion: APIVersion,
-  fields: SubscriptionFieldsWrapper)
+case class APISubscriptionStatusWithSubscriptionFields(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, fields: SubscriptionFieldsWrapper)
 
 object APISubscriptionStatusWithSubscriptionFields {
-  def apply(fields : Seq[APISubscriptionStatus]) : Seq[APISubscriptionStatusWithSubscriptionFields] = {
+  def apply(fields: Seq[APISubscriptionStatus]): Seq[APISubscriptionStatusWithSubscriptionFields] = {
 
-    def toAPISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatus : APISubscriptionStatus)
-    : Option[APISubscriptionStatusWithSubscriptionFields] = {
-      if (apiSubscriptionStatus.fields.fields.isEmpty){
+    def toAPISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatus: APISubscriptionStatus): Option[APISubscriptionStatusWithSubscriptionFields] = {
+      if (apiSubscriptionStatus.fields.fields.isEmpty) {
         None
       } else {
-        Some(APISubscriptionStatusWithSubscriptionFields(
-          apiSubscriptionStatus.name,
-          apiSubscriptionStatus.context,
-          apiSubscriptionStatus.apiVersion,
-          apiSubscriptionStatus.fields))
+        Some(APISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatus.name, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion, apiSubscriptionStatus.fields))
       }
     }
 
@@ -104,8 +116,8 @@ object APISubscriptionStatusWithSubscriptionFields {
 
 object DefinitionFormats {
   implicit val formatAPIAccess = Json.format[APIAccess]
-  implicit val formatAPIVersion = Json.format[APIVersion]
+  implicit val formatApiVersionDefinition = Json.format[ApiVersionDefinition]
   implicit val formatVersionSubscription = Json.format[VersionSubscription]
   implicit val formatAPISubscription = Json.format[APISubscription]
-  implicit val formatAPIIdentifier = Json.format[APIIdentifier]
+  implicit val formatAPIIdentifier = Json.format[ApiIdentifier]
 }

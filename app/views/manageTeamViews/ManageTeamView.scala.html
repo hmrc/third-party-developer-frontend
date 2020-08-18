@@ -22,7 +22,7 @@
 @import include.teamMembers._
 @import model.ApplicationViewModel
 @import views.html.include.DevMain
-@import domain.models.applications.Role
+@import domain.models.applications.{ApplicationId, Role}
 @import domain.models.developers.DeveloperSession
 
 
@@ -64,7 +64,7 @@
 
 
     @{
-        def createRemoveLink(appId: String, emailAddress: String) = {
+        def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
             controllers.routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
         }
 

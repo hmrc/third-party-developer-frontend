@@ -25,13 +25,13 @@ import uk.gov.hmrc.crypto.json.{JsonDecryptor, JsonEncryptor}
 import scala.concurrent.Future
 
 @Singleton
-class PayloadEncryption @Inject()(localCrypto: LocalCrypto) {
+class PayloadEncryption @Inject() (localCrypto: LocalCrypto) {
 
   implicit val crypto = localCrypto
 
   def encrypt[T](payload: T)(implicit writes: Writes[T]): JsValue = {
     val encryptor = new JsonEncryptor[T]()(crypto, writes)
-    Json.toJson(encryptor.writes(Protected(payload)))
+    encryptor.writes(Protected(payload))
   }
 
   def decrypt[T](payload: JsValue)(implicit reads: Reads[T]): T = {
@@ -42,7 +42,7 @@ class PayloadEncryption @Inject()(localCrypto: LocalCrypto) {
   }
 }
 
-class LocalCrypto @Inject()(applicationConfig: ApplicationConfig) extends CompositeSymmetricCrypto {
+class LocalCrypto @Inject() (applicationConfig: ApplicationConfig) extends CompositeSymmetricCrypto {
   override protected val currentCrypto: Encrypter with Decrypter = new AesCrypto {
     override protected val encryptionKey: String = applicationConfig.jsonEncryptionKey
   }
@@ -55,7 +55,7 @@ object SecretRequest {
   implicit val format = Json.format[SecretRequest]
 }
 
-class EncryptedJson @Inject()(payloadEncryption: PayloadEncryption) {
+class EncryptedJson @Inject() (payloadEncryption: PayloadEncryption) {
   def secretRequestJson[R](payload: JsValue, block: JsValue => Future[R]) = {
     block(toSecretRequestJson(payload))
   }

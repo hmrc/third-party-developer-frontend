@@ -26,8 +26,7 @@ import play.api.Application
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
-import utils.AsyncHmrcSpec
-import utils.SharedMetricsClearDown
+import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
 trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers {
   val mcc = app.injector.instanceOf[MessagesControllerComponents]

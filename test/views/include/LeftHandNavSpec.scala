@@ -17,7 +17,7 @@
 package views.include
 
 import controllers.Credentials.serverTokenCutoffDate
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -36,20 +36,28 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
 
     val request = FakeRequest().withCSRFToken
 
-    val applicationId = "1234"
-    val clientId = "clientId123"
+    val applicationId = ApplicationId("1234")
+    val clientId = ClientId("clientId123")
     val applicationName = "Test Application"
 
     val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
-    val application = Application(applicationId, clientId, applicationName,
-      DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
+    val application = Application(
+      applicationId,
+      clientId,
+      applicationName,
+      DateTimeUtils.now,
+      DateTimeUtils.now,
+      None,
+      Environment.PRODUCTION,
+      Some("Description 1"),
       Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
       state = ApplicationState.production(loggedInUser.email, ""),
-      access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
+      access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    )
 
-    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application,hasSubscriptionsFields = true)
-    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application,hasSubscriptionsFields = false)
+    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true)
+    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false)
   }
 
   "Left Hand Nav" when {

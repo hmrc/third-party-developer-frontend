@@ -16,12 +16,11 @@
 
 package controllers
 
-import java.util.UUID
-
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import controllers.Credentials.serverTokenCutoffDate
 import domain._
+import domain.models.applications.ApplicationId
 import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
@@ -37,80 +36,75 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 
 @Singleton
-class Credentials @Inject()(val applicationService: ApplicationService,
-                            val developerConnector: ThirdPartyDeveloperConnector,
-                            val auditService: AuditService,
-                            val sessionService: SessionService,
-                            val errorHandler: ErrorHandler,
-                            mcc: MessagesControllerComponents,
-                            val cookieSigner : CookieSigner,
-                            credentialsView: CredentialsView,
-                            clientIdView: ClientIdView,
-                            clientSecretsView: ClientSecretsView,
-                            serverTokenView: ServerTokenView,
-                            deleteClientSecretView: DeleteClientSecretView)
-                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-  extends ApplicationController(mcc) {
+class Credentials @Inject() (
+    val applicationService: ApplicationService,
+    val developerConnector: ThirdPartyDeveloperConnector,
+    val auditService: AuditService,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    credentialsView: CredentialsView,
+    clientIdView: ClientIdView,
+    clientSecretsView: ClientSecretsView,
+    serverTokenView: ServerTokenView,
+    deleteClientSecretView: DeleteClientSecretView
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+    extends ApplicationController(mcc) {
 
-  private def canViewClientCredentialsPage(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def canViewClientCredentialsPage(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(ViewCredentials, TeamMembersOnly)(applicationId)(fun)
 
-  private def canChangeClientSecrets(applicationId: String)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def canChangeClientSecrets(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(ChangeClientSecret, SandboxOrAdmin)(applicationId)(fun)
 
-  def credentials(applicationId: String): Action[AnyContent] =
-    canViewClientCredentialsPage(applicationId) { implicit request =>
-      successful(Ok(credentialsView(request.application)))
-  }
+  def credentials(applicationId: ApplicationId): Action[AnyContent] =
+    canViewClientCredentialsPage(applicationId) { implicit request => successful(Ok(credentialsView(request.application))) }
 
-  def clientId(applicationId: String): Action[AnyContent] =
+  def clientId(applicationId: ApplicationId): Action[AnyContent] =
+    canChangeClientSecrets(applicationId) { implicit request => successful(Ok(clientIdView(request.application))) }
+
+  def clientSecrets(applicationId: ApplicationId): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      successful(Ok(clientIdView(request.application)))
-  }
+      applicationService.fetchCredentials(request.application).map { tokens => Ok(clientSecretsView(request.application, tokens.clientSecrets)) }
+    }
 
-  def clientSecrets(applicationId: String): Action[AnyContent] =
-    canChangeClientSecrets(applicationId) { implicit request =>
-      applicationService.fetchCredentials(request.application).map { tokens =>
-        Ok(clientSecretsView(request.application, tokens.clientSecrets))
-      }
-  }
-
-  def serverToken(applicationId: String): Action[AnyContent] =
+  def serverToken(applicationId: ApplicationId): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       if (request.application.createdOn.isBefore(serverTokenCutoffDate)) {
-        applicationService.fetchCredentials(request.application).map { tokens =>
-          Ok(serverTokenView(request.application, tokens.accessToken))
-        }
+        applicationService.fetchCredentials(request.application).map { tokens => Ok(serverTokenView(request.application, tokens.accessToken)) }
       } else {
         successful(NotFound(errorHandler.notFoundTemplate))
       }
     }
 
-  def addClientSecret(applicationId: String): Action[AnyContent] = 
+  def addClientSecret(applicationId: ApplicationId): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.addClientSecret(request.application, request.user.email).map { response =>
         Redirect(controllers.routes.Credentials.clientSecrets(applicationId))
           .flashing("newSecretId" -> response._1, "newSecret" -> response._2)
       } recover {
-          case _: ApplicationNotFound => NotFound(errorHandler.notFoundTemplate)
-          case _: ForbiddenException => Forbidden(errorHandler.badRequestTemplate)
-          case _: ClientSecretLimitExceeded => UnprocessableEntity(errorHandler.badRequestTemplate)
+        case _: ApplicationNotFound       => NotFound(errorHandler.notFoundTemplate)
+        case _: ForbiddenException        => Forbidden(errorHandler.badRequestTemplate)
+        case _: ClientSecretLimitExceeded => UnprocessableEntity(errorHandler.badRequestTemplate)
       }
     }
 
-  def deleteClientSecret(applicationId: UUID, clientSecretId: String): Action[AnyContent] = 
-    canChangeClientSecrets(applicationId.toString) { implicit request =>
+  def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String): Action[AnyContent] =
+    canChangeClientSecrets(applicationId) { implicit request =>
       applicationService.fetchCredentials(request.application).map { tokens =>
-        tokens.clientSecrets.find(_.id == clientSecretId)
+        tokens.clientSecrets
+          .find(_.id == clientSecretId)
           .fold(NotFound(errorHandler.notFoundTemplate))(secret => Ok(deleteClientSecretView(request.application, secret)))
       }
     }
 
-  def deleteClientSecretAction(applicationId: UUID, clientSecretId: String): Action[AnyContent] =
-    canChangeClientSecrets(applicationId.toString) { implicit request =>
-      applicationService.deleteClientSecret(request.application, clientSecretId, request.user.email)
-        .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId.toString)))
-  }
+  def deleteClientSecretAction(applicationId: ApplicationId, clientSecretId: String): Action[AnyContent] =
+    canChangeClientSecrets(applicationId) { implicit request =>
+      applicationService
+        .deleteClientSecret(request.application, clientSecretId, request.user.email)
+        .map(_ => Redirect(controllers.routes.Credentials.clientSecrets(applicationId)))
+    }
 }
 
 object Credentials {

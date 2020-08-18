@@ -17,7 +17,7 @@
 package views
 
 import controllers.TermsOfUseForm
-import domain.models.applications.{Application, CheckInformation, Environment, TermsOfUseAgreement}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.joda.time.format.DateTimeFormat
@@ -46,8 +46,8 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
     implicit val loggedIn = utils.DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection = "details"
 
-    val id = "id"
-    val clientId = "clientId"
+    val id = ApplicationId("id")
+    val clientId = ClientId("clientId")
     val appName = "an application"
     val createdOn = DateTimeUtils.now
     val lastAccess = DateTimeUtils.now
@@ -61,11 +61,11 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
         val version = "1.0"
         val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(emailAddress, timeStamp, version)))
         val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(termsOfUseView(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
+        val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false), TermsOfUseForm.form))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {
-        page.title should startWith ("Terms of use")
+        page.title should startWith("Terms of use")
         page.header.text shouldBe "Terms of use"
       }
 
@@ -73,7 +73,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
         page.alert.text shouldBe s"Terms of use accepted on $expectedTimeStamp by $emailAddress."
       }
 
-      "render the terms of use" in new Setup  {
+      "render the terms of use" in new Setup {
         page.termsOfUse should not be null
       }
 
@@ -86,11 +86,11 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
         val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
-        val page: Page = Page(termsOfUseView(ApplicationViewModel(application,hasSubscriptionsFields = false), TermsOfUseForm.form))
+        val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false), TermsOfUseForm.form))
       }
 
       "set the title and header to 'Terms of use'" in new Setup {
-        page.title should startWith ("Agree to our terms of use")
+        page.title should startWith("Agree to our terms of use")
         page.header.text shouldBe "Agree to our terms of use"
       }
 

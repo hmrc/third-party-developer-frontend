@@ -16,9 +16,7 @@
 
 package domain.models.applications
 
-case class ApplicationToken(clientId: String,
-                            clientSecrets: Seq[ClientSecret],
-                            accessToken: String)
+case class ApplicationToken(clientSecrets: Seq[ClientSecret], accessToken: String)
 
 object ApplicationToken {
   import play.api.libs.json.Json

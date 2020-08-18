@@ -16,7 +16,7 @@
 
 package controllers
 
-import domain.models.applications.{Application, Standard}
+import domain.models.applications.{Application, ApplicationId, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
 
@@ -155,8 +155,7 @@ object ForgotPasswordForm {
 
 }
 
-case class ChangePasswordForm(currentPassword: String, password: String, confirmPassword: String)
-    extends ConfirmPassword
+case class ChangePasswordForm(currentPassword: String, password: String, confirmPassword: String) extends ConfirmPassword
 
 object ChangePasswordForm {
 
@@ -236,7 +235,7 @@ object AddApplicationNameForm {
 }
 
 case class EditApplicationForm(
-    applicationId: String,
+    applicationId: ApplicationId,
     applicationName: String,
     description: Option[String] = None,
     privacyPolicyUrl: Option[String] = None,
@@ -247,7 +246,7 @@ object EditApplicationForm {
 
   val form: Form[EditApplicationForm] = Form(
     mapping(
-      "applicationId" -> nonEmptyText,
+      "applicationId" -> nonEmptyText.transform[ApplicationId](ApplicationId(_), id => id.value),
       "applicationName" -> applicationNameValidator,
       "description" -> optional(text),
       "privacyPolicyUrl" -> optional(privacyPolicyUrlValidator),

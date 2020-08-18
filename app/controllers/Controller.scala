@@ -19,8 +19,8 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
-import domain.models.apidefinitions.{APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields}
-import domain.models.applications.{Application, Capabilities, Capability, Environment, Permission, Role, State}
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
+import domain.models.applications._
 import domain.models.developers.DeveloperSession
 import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
 import play.api.mvc._
@@ -32,43 +32,46 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HeaderEnricher {
-  def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]) : HeaderCarrier =
+  def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]): HeaderCarrier =
     user match {
       case Some(dev) => enrichHeaders(hc, dev)
-      case _ => hc
+      case _         => hc
     }
 
-  def enrichHeaders(hc: HeaderCarrier, user: DeveloperSession) : HeaderCarrier =
-     hc.withExtraHeaders("X-email-address" -> user.email, "X-name" -> user.displayedNameEncoded)
+  def enrichHeaders(hc: HeaderCarrier, user: DeveloperSession): HeaderCarrier =
+    hc.withExtraHeaders("X-email-address" -> user.email, "X-name" -> user.displayedNameEncoded)
 
   implicit class RequestWithAjaxSupport(h: Headers) {
     def isAjaxRequest: Boolean = h.get("X-Requested-With").contains("XMLHttpRequest")
   }
 }
 
-case class UserRequest[A](developerSession: DeveloperSession, request: MessagesRequest[A])
-  extends MessagesRequest[A](request, request.messagesApi)
+case class UserRequest[A](developerSession: DeveloperSession, request: MessagesRequest[A]) extends MessagesRequest[A](request, request.messagesApi)
 
-case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: MessagesRequest[A])
-  extends MessagesRequest[A](request, request.messagesApi)
+case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], request: MessagesRequest[A]) extends MessagesRequest[A](request, request.messagesApi)
 
-case class ApplicationRequest[A](application: Application, deployedTo: Environment, subscriptions: Seq[APISubscriptionStatus], role: Role, user: DeveloperSession, request: MessagesRequest[A])
-  extends MessagesRequest[A](request, request.messagesApi)
+case class ApplicationRequest[A](
+    application: Application,
+    deployedTo: Environment,
+    subscriptions: Seq[APISubscriptionStatus],
+    role: Role,
+    user: DeveloperSession,
+    request: MessagesRequest[A]
+) extends MessagesRequest[A](request, request.messagesApi)
 
-case class ApplicationWithFieldDefinitionsRequest[A]( fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields],
-                                                      applicationRequest: ApplicationRequest[A])
-  extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
+case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields], applicationRequest: ApplicationRequest[A])
+    extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
-case class ApplicationWithSubscriptionFieldPage[A]( pageIndex: Int,
-                                                    totalPages: Int,
-                                                    apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
-                                                    apiDetails: ApiDetails,
-                                                    applicationRequest: ApplicationRequest[A])
-  extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
+case class ApplicationWithSubscriptionFieldPage[A](
+    pageIndex: Int,
+    totalPages: Int,
+    apiSubscriptionStatus: APISubscriptionStatusWithSubscriptionFields,
+    apiDetails: ApiDetails,
+    applicationRequest: ApplicationRequest[A]
+) extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
-  case class ApplicationWithSubscriptionFields[A](  apiSubscription: APISubscriptionStatusWithSubscriptionFields,
-                                                    applicationRequest: ApplicationRequest[A])
-  extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
+case class ApplicationWithSubscriptionFields[A](apiSubscription: APISubscriptionStatusWithSubscriptionFields, applicationRequest: ApplicationRequest[A])
+    extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
 abstract class BaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher {
   val errorHandler: ErrorHandler
@@ -81,35 +84,33 @@ abstract class BaseController(mcc: MessagesControllerComponents) extends Fronten
 
 abstract class LoggedInController(mcc: MessagesControllerComponents) extends BaseController(mcc)
 
-abstract class ApplicationController(mcc: MessagesControllerComponents)
-  extends LoggedInController(mcc) with ActionBuilders {
+abstract class ApplicationController(mcc: MessagesControllerComponents) extends LoggedInController(mcc) with ActionBuilders {
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
     ApplicationViewModel(request.application, hasSubscriptionFields(request))
 
-  def hasSubscriptionFields(request: ApplicationRequest[_]) : Boolean = {
+  def hasSubscriptionFields(request: ApplicationRequest[_]): Boolean = {
     request.subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
   }
 
-  def whenTeamMemberOnApp(applicationId: String)
-                         (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>
       val composedActions = Action andThen applicationAction(applicationId, loggedIn)
       composedActions.async(fun)(request)
     }
 
-  private def checkActionWithStateCheck(stateCheck: State => Boolean)(capability: Capability, permissions: Permission)
-                                                            (applicationId: String)
-                                                            (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+  private def checkActionWithStateCheck(
+      stateCheck: State => Boolean
+  )(capability: Capability, permissions: Permission)(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       val composedActions = Action andThen
-                            applicationAction(applicationId, loggedIn) andThen
-                            capabilityFilter(capability) andThen
-                            permissionFilter(permissions) andThen
-                            approvalFilter(stateCheck)
-        
+        applicationAction(applicationId, loggedIn) andThen
+        capabilityFilter(capability) andThen
+        permissionFilter(permissions) andThen
+        approvalFilter(stateCheck)
+
       composedActions.async(fun)(request)
     }
   }
@@ -117,23 +118,22 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
   def checkActionForAllStates = checkActionWithStateCheck(stateCheck = _ => true) _
 
   def checkActionForApprovedApps = checkActionWithStateCheck(_.isApproved) _
-  
+
   def checkActionForApprovedOrTestingApps = checkActionWithStateCheck(state => state.isApproved || state.isInTesting) _
 
   def checkActionForTesting = checkActionWithStateCheck(_.isInTesting) _
 
   private object ManageSubscriptionsActions {
-    def subscriptionsComposedActions(applicationId: String, noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour)
-                      (implicit request: UserRequest[AnyContent]) =
+    def subscriptionsComposedActions(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour)(implicit request: UserRequest[AnyContent]) =
       Action andThen
         applicationAction(applicationId, loggedIn) andThen
         capabilityFilter(Capabilities.EditSubscriptionFields) andThen
         fieldDefinitionsExistRefiner(noFieldsBehaviour)
   }
 
-  def subFieldsDefinitionsExistAction(applicationId: String,
-                                      noFieldsBehaviour : NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)
-                                    (fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+  def subFieldsDefinitionsExistAction(applicationId: ApplicationId, noFieldsBehaviour: NoSubscriptionFieldsRefinerBehaviour = NoSubscriptionFieldsRefinerBehaviour.BadRequest)(
+      fun: ApplicationWithFieldDefinitionsRequest[AnyContent] => Future[Result]
+  ): Action[AnyContent] = {
     loggedInAction { implicit request: UserRequest[AnyContent] =>
       ManageSubscriptionsActions
         .subscriptionsComposedActions(applicationId, noFieldsBehaviour)
@@ -141,8 +141,9 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
     }
   }
 
-  def subFieldsDefinitionsExistActionWithPageNumber(applicationId: String, pageNumber: Int)
-                                                   (fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]): Action[AnyContent] = {
+  def subFieldsDefinitionsExistActionWithPageNumber(applicationId: ApplicationId, pageNumber: Int)(
+      fun: ApplicationWithSubscriptionFieldPage[AnyContent] => Future[Result]
+  ): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
         .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldPageRefiner(pageNumber))
@@ -150,8 +151,9 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
     }
   }
 
-  def subFieldsDefinitionsExistActionByApi(applicationId: String, context: String, version: String)
-                                                   (fun: ApplicationWithSubscriptionFields[AnyContent] => Future[Result]): Action[AnyContent] = {
+  def subFieldsDefinitionsExistActionByApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion)(
+      fun: ApplicationWithSubscriptionFields[AnyContent] => Future[Result]
+  ): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
         .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldsRefiner(context, version))
@@ -160,19 +162,14 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
   }
 }
 
-abstract class LoggedOutController(mcc: MessagesControllerComponents)
-  extends BaseController(mcc) with ExtendedDevHubAuthorization {
+abstract class LoggedOutController(mcc: MessagesControllerComponents) extends BaseController(mcc) with ExtendedDevHubAuthorization {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier = {
     val carrier = super.hc
     request match {
-      case x: MaybeUserRequest[_] =>
-        implicit val req: MaybeUserRequest[_] = x
-        enrichHeaders(carrier, x.developerSession)
-      case x: UserRequest[_] =>
-        implicit val req: UserRequest[_] = x
-        enrichHeaders(carrier, x.developerSession)
-      case _ => carrier
+      case x: MaybeUserRequest[_] => enrichHeaders(carrier, x.developerSession)
+      case x: UserRequest[_]      => enrichHeaders(carrier, x.developerSession)
+      case _                      => carrier
     }
   }
 }

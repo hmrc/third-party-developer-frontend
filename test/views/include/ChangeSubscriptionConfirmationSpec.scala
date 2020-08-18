@@ -17,7 +17,8 @@
 package views.include
 
 import controllers.ChangeSubscriptionConfirmationForm
-import domain.models.applications.{Application, ApplicationState, Collaborator, Environment, Role, Standard}
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications._
 import domain.models.developers.LoggedInState
 import domain.models.views.SubscriptionRedirect
 import model.ApplicationViewModel
@@ -25,33 +26,42 @@ import org.jsoup.Jsoup
 import play.api.data.Form
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
 import utils.ViewHelpers.elementExistsByText
+import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken {
   val request = FakeRequest().withCSRFToken
 
-  val applicationId = "1234"
-  val clientId = "clientId123"
+  val applicationId = ApplicationId("1234")
+  val clientId = ClientId("clientId123")
   val applicationName = "Test Application"
   val apiName = "Test API"
-  val apiContext = "test"
-  val apiVersion = "1.0"
+  val apiContext = ApiContext("test")
+  val apiVersion = ApiVersion("1.0")
 
   val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
-  val application = Application(applicationId, clientId, applicationName, DateTimeUtils.now, DateTimeUtils.now, None, Environment.PRODUCTION, Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)), state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com")))
-
+  val application = Application(
+    applicationId,
+    clientId,
+    applicationName,
+    DateTimeUtils.now,
+    DateTimeUtils.now,
+    None,
+    Environment.PRODUCTION,
+    Some("Description 1"),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    state = ApplicationState.production(loggedInUser.email, ""),
+    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  )
 
   def renderPage(form: Form[ChangeSubscriptionConfirmationForm], subscribed: Boolean) = {
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
 
     changeSubscriptionConfirmationView.render(
-      ApplicationViewModel(application,hasSubscriptionsFields = false),
+      ApplicationViewModel(application, hasSubscriptionsFields = false),
       form,
       apiName,
       apiContext,

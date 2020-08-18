@@ -20,8 +20,12 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
+import builder.SubscriptionsBuilder
 import config.ApplicationConfig
 import connectors.SubscriptionFieldsConnector._
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.applications.{ClientId, Environment}
+import domain.models.subscriptions.AccessRequirements
 import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.FutureTimeoutSupportImpl
 import play.api.http.Status._
@@ -29,12 +33,9 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpResponse, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.AsyncHmrcSpec
+
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.{failed, successful}
-import scala.concurrent.{ExecutionContext, Future}
-import builder.SubscriptionsBuilder
-import domain.models.apidefinitions.APIIdentifier
-import domain.models.applications.Environment
-import domain.models.subscriptions.AccessRequirements
 
 class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   def fields(tpl: (String, String)*): Map[String, String] =
@@ -42,10 +43,10 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private val clientId = UUID.randomUUID().toString
-  private val apiContext = "i-am-a-test"
-  private val apiVersion = "1.0"
-  private val apiIdentifier = APIIdentifier(apiContext, apiVersion)
+  private val clientId = ClientId(UUID.randomUUID().toString)
+  private val apiContext = ApiContext("i-am-a-test")
+  private val apiVersion = ApiVersion("1.0")
+  private val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   private val fieldsId = UUID.randomUUID()
   private val urlPrefix = "/field"
   private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
@@ -138,7 +139,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       Map(apiIdentifier -> Seq(subscriptionDefinition))
 
     val getUrl =
-      s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
+      s"$urlPrefix/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     "return subscription fields for an API" in new Setup {
       when(
@@ -298,7 +299,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   }
 
   "fetchFieldDefinitions" should {
-    val url = s"/definition/context/$apiContext/version/$apiVersion"
+    val url = s"/definition/context/${apiContext.value}/version/${apiVersion.value}"
 
     val definitionsFromRestService = List(
       FieldDefinition("field1", "desc1", "sdesc2", "hint1", "some type", AccessRequirements.Default)
@@ -357,9 +358,9 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   }
 
   "fetchFieldValues" should {
-    val definitionsUrl = s"/definition/context/$apiContext/version/$apiVersion"
+    val definitionsUrl = s"/definition/context/${apiContext.value}/version/${apiVersion.value}"
     val valuesUrl =
-      s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
+      s"/field/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     val definitionsFromRestService = List(
       FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default)
@@ -447,7 +448,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       fieldsValues
     )
 
-    val putUrl = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
+    val putUrl = s"$urlPrefix/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     "save the fields" in new Setup {
       val response = HttpResponse(OK)
@@ -537,12 +538,11 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   }
 
   "deleteFieldValues" should {
-    import scala.concurrent.ExecutionContext.Implicits.global
 
-    val url = s"$urlPrefix/application/$clientId/context/$apiContext/version/$apiVersion"
+    val url = s"$urlPrefix/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     "return success after delete call has returned 204 NO CONTENT" in new Setup {
-      when(mockHttpClient.DELETE(url))
+      when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(successful(HttpResponse(NO_CONTENT)))
 
       private val result = await(
@@ -554,7 +554,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     }
 
     "return failure if api-subscription-fields returns unexpected status" in new Setup {
-      when(mockHttpClient.DELETE(url))
+      when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(successful(HttpResponse(ACCEPTED)))
 
       private val result = await(
@@ -567,7 +567,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
     "return failure when api-subscription-fields returns a 500" in new Setup {
 
-      when(mockHttpClient.DELETE(url))
+      when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(failed(upstream500Response))
 
       private val result = await(
@@ -579,7 +579,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     }
 
     "return success when api-subscription-fields returns a 404" in new Setup {
-      when(mockHttpClient.DELETE(url))
+      when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
         .thenReturn(failed(new NotFoundException("")))
 
       private val result = await(

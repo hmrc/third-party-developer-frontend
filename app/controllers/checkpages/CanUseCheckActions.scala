@@ -17,6 +17,7 @@
 package controllers.checkpages
 
 import controllers.{ApplicationController, ApplicationRequest}
+import domain.models.applications.ApplicationId
 import domain.models.applications.Capabilities.SupportsAppChecks
 import domain.models.applications.Permissions.AdministratorOnly
 import play.api.mvc.{Action, AnyContent, Result}
@@ -26,8 +27,6 @@ import scala.concurrent.Future
 trait CanUseCheckActions {
   self: ApplicationController =>
 
-  private[controllers] def canUseChecksAction(applicationId: String)
-                                (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private[controllers] def canUseChecksAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForTesting(SupportsAppChecks, AdministratorOnly)(applicationId)(fun)
 }
-

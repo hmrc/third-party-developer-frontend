@@ -16,12 +16,13 @@
 
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
+@import domain.models.apidefinitions.{ApiContext, ApiVersion}
 @import model.{ApplicationViewModel, Crumb}
 @import include._
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
-@(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: String, version: String, subscribed: Boolean, redirectTo: String)(
+@(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: ApiContext, version: ApiVersion, subscribed: Boolean, redirectTo: String)(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messagesProvider: MessagesProvider,
@@ -65,9 +66,9 @@
         <fieldset class="inline @if(form.errors("confirm").nonEmpty) {form-group-error}">
           <div class="form-group">
                 @if(subscribed) {
-                    <h2 class="heading-large">Are you sure you want to request to unsubscribe from @name @version?</h2>
+                    <h2 class="heading-large">Are you sure you want to request to unsubscribe from @name @version.value?</h2>
                 } else {
-                    <h2 class="heading-large">Are you sure you want to request to subscribe to @name @version?</h2>
+                    <h2 class="heading-large">Are you sure you want to request to subscribe to @name @version.value?</h2>
                 }
                 <fieldset id="confirm" class="inline">
                     @helper.CSRF.formField
