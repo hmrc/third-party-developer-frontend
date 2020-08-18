@@ -19,7 +19,6 @@ package views.helper
 import java.util.Locale
 
 import config.ApplicationConfig
-import org.mockito.Mockito.when
 import org.scalatest.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application

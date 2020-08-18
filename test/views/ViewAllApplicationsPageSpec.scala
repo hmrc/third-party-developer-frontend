@@ -22,7 +22,6 @@ import domain.models.applications.{ApplicationId, Role, State, TermsOfUseStatus}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
@@ -104,7 +103,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(ApplicationSummary("1111", appName, appEnvironment, appUserRole,
+      val appSummaries = Seq(ApplicationSummary(ApplicationId("1111"), appName, appEnvironment, appUserRole,
         TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, false, appCreatedOn, AccessType.STANDARD))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
