@@ -34,6 +34,7 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{successful, failed}
+import scala.concurrent.Future
 
 class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
 
@@ -45,11 +46,11 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     val encryptedJson = new EncryptedJson(mockPayloadEncryption)
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     val mockMetrics = new NoopConnectorMetrics()
-    val encryptedString = JsString("someEncryptedStringOfData")
+    val encryptedString: JsString = JsString("someEncryptedStringOfData")
     val encryptedBody: JsValue = Json.toJson(SecretRequest(encryptedString.as[String]))
 
     when(mockAppConfig.thirdPartyDeveloperUrl).thenReturn("http://THIRD_PARTY_DEVELOPER:9000")
-    when(mockPayloadEncryption.encrypt(any[String])(*)).thenReturn(encryptedString)
+    when(mockPayloadEncryption.encrypt(*)(*)).thenReturn(encryptedString)
 
     val connector = new ThirdPartyDeveloperConnector(mockHttp, encryptedJson, mockAppConfig, mockMetrics)
 
@@ -66,24 +67,23 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     "successfully register a developer" in new Setup {
       val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
 
-      when(mockHttp.POST(endpoint("developer"), encryptedBody, Seq("Content-Type" -> "application/json"))).thenReturn(successful(HttpResponse(Status.CREATED)))
+      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
+        .thenReturn(successful(HttpResponse(Status.CREATED)))
 
       await(connector.register(registrationToTest)) shouldBe RegistrationSuccessful
 
-      verify(mockPayloadEncryption).encrypt(Json.toJson(registrationToTest))
-      verify(mockHttp).POST(endpoint("developer"), encryptedBody, Seq("Content-Type" -> "application/json"))
+      verify(mockPayloadEncryption).encrypt(eqTo(Json.toJson(registrationToTest)))(*)
     }
 
     "fail to register a developer when the email address is already in use" in new Setup {
       val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
 
-      when(mockHttp.POST(endpoint("developer"), encryptedBody, Seq("Content-Type" -> "application/json")))
+      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
         .thenReturn(failed(Upstream4xxResponse("409 exception", Status.CONFLICT, Status.CONFLICT)))
 
       await(connector.register(registrationToTest)) shouldBe EmailAlreadyInUse
 
-      verify(mockPayloadEncryption).encrypt(Json.toJson(registrationToTest))
-      verify(mockHttp).POST(endpoint("developer"), encryptedBody, Seq("Content-Type" -> "application/json"))
+      verify(mockPayloadEncryption).encrypt(eqTo(Json.toJson(registrationToTest)))(*)
     }
 
     "successfully verify a developer" in new Setup {
@@ -101,18 +101,17 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     val email = "john.smith@example.com"
 
     "successfully create an unregistered user" in new Setup {
-      when(mockHttp.POST(endpoint("unregistered-developer"), encryptedBody, Seq("Content-Type" -> "application/json")))
+      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("unregistered-developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
         .thenReturn(successful(HttpResponse(Status.OK)))
 
       val result = await(connector.createUnregisteredUser(email))
 
       result shouldBe Status.OK
-      verify(mockPayloadEncryption).encrypt(Json.toJson(UnregisteredUserCreationRequest(email)))
-      verify(mockHttp).POST(endpoint("unregistered-developer"), encryptedBody, Seq("Content-Type" -> "application/json"))
+      verify(mockPayloadEncryption).encrypt(eqTo(Json.toJson(UnregisteredUserCreationRequest(email))))(*)
     }
 
     "propagate error when the request fails" in new Setup {
-      when(mockHttp.POST(endpoint("unregistered-developer"), encryptedBody, Seq("Content-Type" -> "application/json")))
+      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("unregistered-developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
         .thenReturn(failed(Upstream5xxResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
 
       intercept[Upstream5xxResponse] {
@@ -225,13 +224,12 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     "successfully reset password" in new Setup {
       val passwordReset = PasswordReset("user@example.com", "newPassword")
 
-      when(mockHttp.POST(endpoint("reset-password"), encryptedBody, Seq("Content-Type" -> "application/json")))
+      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("reset-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
         .thenReturn(successful(HttpResponse(Status.OK)))
 
       await(connector.reset(passwordReset))
 
-      verify(mockPayloadEncryption).encrypt(Json.toJson(passwordReset))
-      verify(mockHttp).POST(endpoint("reset-password"), encryptedBody, Seq("Content-Type" -> "application/json"))
+      verify(mockPayloadEncryption).encrypt(eqTo(Json.toJson(passwordReset)))(*)
     }
   }
 
@@ -273,30 +271,30 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     val changePasswordRequest = ChangePassword("email@example.com", "oldPassword123", "newPassword321")
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {
-      when(mockHttp.POST(endpoint("change-password"), encryptedBody, Seq("Content-Type" -> "application/json")))
+      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("change-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
         .thenReturn(failed(Upstream4xxResponse("Unauthorised error", Status.UNAUTHORIZED, Status.UNAUTHORIZED)))
 
       await(connector.changePassword(changePasswordRequest).failed) shouldBe a[InvalidCredentials]
 
-      verify(mockPayloadEncryption).encrypt(Json.toJson(changePasswordRequest))
+      verify(mockPayloadEncryption).encrypt(eqTo(Json.toJson(changePasswordRequest)))(*)
     }
 
     "throw Unverified Account if the response is Forbidden" in new Setup {
-      when(mockHttp.POST(endpoint("change-password"), encryptedBody, Seq("Content-Type" -> "application/json")))
+      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("change-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
         .thenReturn(failed(Upstream4xxResponse("Forbidden error", Status.FORBIDDEN, Status.FORBIDDEN)))
 
       await(connector.changePassword(changePasswordRequest).failed) shouldBe a[UnverifiedAccount]
 
-      verify(mockPayloadEncryption).encrypt(Json.toJson(changePasswordRequest))
+      verify(mockPayloadEncryption).encrypt(eqTo(Json.toJson(changePasswordRequest)))(*)
     }
 
     "throw Locked Account if the response is Locked" in new Setup {
-      when(mockHttp.POST(endpoint("change-password"), encryptedBody, Seq("Content-Type" -> "application/json")))
+      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("change-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
         .thenReturn(failed(Upstream4xxResponse("Locked error", Status.LOCKED, Status.LOCKED)))
 
       await(connector.changePassword(changePasswordRequest).failed) shouldBe a[LockedAccount]
 
-      verify(mockPayloadEncryption).encrypt(Json.toJson(changePasswordRequest))
+      verify(mockPayloadEncryption).encrypt(eqTo(Json.toJson(changePasswordRequest)))(*)
     }
   }
 
@@ -312,9 +310,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
       await(connector.createMfaSecret(email)) shouldBe expectedSecret
 
       verify(mockHttp).POSTEmpty(eqTo(endpoint(s"developer/$email/mfa")), *)(*, *, *)
-
     }
-
   }
 
   "verify MFA" should {

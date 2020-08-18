@@ -23,7 +23,7 @@ class InvalidEmail extends RuntimeException("Invalid email")
 class LockedAccount extends RuntimeException("Account is locked")
 class UnverifiedAccount extends RuntimeException("Account is unverified")
 class InvalidResetCode extends RuntimeException("Invalid reset code")
-class DeskproTicketCreationFailed(reason:String) extends RuntimeException(s"Failed to create deskpro ticket: $reason") {
+class DeskproTicketCreationFailed(reason: String) extends RuntimeException(s"Failed to create deskpro ticket: $reason") {
   lazy val displayMessage =
     """Sorry, we're experiencing technical difficulties.
       |Your name has not been submitted. Please try again later.
@@ -33,12 +33,12 @@ class DeskproTicketCreationFailed(reason:String) extends RuntimeException(s"Fail
 case class Error(code: ErrorCode, message: String)
 
 object Error {
-  implicit val format2 = Json.format[Error]
+  implicit val formatError = Json.format[Error]
+
+  object LockedAccountError extends Error(ErrorCode.LOCKED_ACCOUNT, "Locked Account")
+  object BadRequestError extends Error(ErrorCode.BAD_REQUEST, "Bad Request")
+  object InvalidPasswordError extends Error(ErrorCode.INVALID_PASSWORD, "Invalid password")
+  object PasswordRequiredError extends Error(ErrorCode.PASSWORD_REQUIRED, "Password is required")
+
+  implicit val writeBRE = Json.writes[BadRequestError.type]
 }
-
-object LockedAccountError extends Error(ErrorCode.LOCKED_ACCOUNT, "Locked Account")
-object BadRequestError extends Error(ErrorCode.BAD_REQUEST, "Bad Request")
-object InvalidPasswordError extends Error(ErrorCode.INVALID_PASSWORD, "Invalid password")
-object PasswordRequiredError extends Error(ErrorCode.PASSWORD_REQUIRED, "Password is required")
-
-

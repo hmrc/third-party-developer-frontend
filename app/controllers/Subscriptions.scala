@@ -117,6 +117,7 @@ class Subscriptions @Inject() (
 
       def handleValidForm(form: ChangeSubscriptionForm) =
         if (request.application.hasLockedSubscriptions) {
+          import domain.Error._
           Future.successful(BadRequest(Json.toJson(BadRequestError)))
         } else {
           updateSubscription(form).map(_ => redirect(redirectTo, applicationId))

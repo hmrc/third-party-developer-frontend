@@ -18,23 +18,37 @@ package domain.models.applications
 
 import org.joda.time.DateTime
 
+import domain.models.apidefinitions.{ApiContext, ApiVersion, ApiIdentifier}
+
 case class FieldName(value: String) extends AnyVal
 
-case class FieldValue(value: String) extends AnyVal
+object FieldName {
+  import play.api.libs.json.{Json, JsSuccess, KeyReads, KeyWrites}
+  implicit val formatFieldName = Json.valueFormat[FieldName]
+  implicit val keyReadsFieldName: KeyReads[FieldName] = key => JsSuccess(FieldName(key))
+  implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
+}
 
-// case class ApplicationWithSubscriptionData(
-//     id: ApplicationId,
-//     clientId: ClientId,
-//     name: String,
-//     createdOn: DateTime,
-//     lastAccess: DateTime,
-//     lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
-//     deployedTo: Environment,
-//     description: Option[String] = None,
-//     collaborators: Set[Collaborator] = Set.empty,
-//     access: Access = Standard(),
-//     state: ApplicationState = ApplicationState.testing,
-//     checkInformation: Option[CheckInformation] = None,
-//     ipWhitelist: Set[String] = Set.empty,
-//     subscriptions: Set[ApiIdentifier] = Set.empty,
-//     subscriptionFieldValues: Map[ApiContext, Map[ApiVersion, Map[FieldName, FieldValue]]] = Map.empty)
+case class FieldValue(value: String) extends AnyVal
+object FieldValue {
+  import play.api.libs.json.Json
+  val formatFieldValue = Json.valueFormat[FieldValue]
+}
+
+case class ApplicationWithSubscriptionData(
+    id: ApplicationId,
+    clientId: ClientId,
+    name: String,
+    createdOn: DateTime,
+    lastAccess: DateTime,
+    lastAccessTokenUsage: Option[DateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
+    deployedTo: Environment,
+    description: Option[String] = None,
+    collaborators: Set[Collaborator] = Set.empty,
+    access: Access = Standard(),
+    state: ApplicationState = ApplicationState.testing,
+    checkInformation: Option[CheckInformation] = None,
+    ipWhitelist: Set[String] = Set.empty,
+    subscriptions: Set[ApiIdentifier] = Set.empty,
+    subscriptionFieldValues: Map[ApiContext, Map[ApiVersion, Map[FieldName, FieldValue]]] = Map.empty
+)

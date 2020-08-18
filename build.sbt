@@ -43,8 +43,8 @@ lazy val compile = Seq(
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.google.zxing" % "core" % "3.2.1",
   "org.typelevel" %% "cats-core" % "2.0.0",
-  "com.typesafe.play" %% "play-json" % "2.7.4",
-  "com.typesafe.play" %% "play-json-joda" % "2.7.4"
+  "com.typesafe.play" %% "play-json" % "2.8.1",
+  "com.typesafe.play" %% "play-json-joda" % "2.8.1"
 )
 
 lazy val test = Seq(
