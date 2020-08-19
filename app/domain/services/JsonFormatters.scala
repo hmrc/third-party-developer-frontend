@@ -16,7 +16,10 @@
 
 package domain.services
 
-trait JsonFormatters {
+import domain.models.subscriptions.Fields
+
+trait JsonFormatters extends Fields.JsonFormatters
+{
   import play.api.libs.json._
   import play.api.libs.json.JodaReads._
   import play.api.libs.json.JodaWrites._
@@ -61,17 +64,11 @@ trait JsonFormatters {
     .and[ROPC](AccessType.ROPC.toString)
     .format
 
-  implicit val formatFieldName = Json.valueFormat[FieldName]
-  implicit val formatFieldvalue = Json.valueFormat[FieldValue]
-
   implicit val keyReadsApiContext: KeyReads[ApiContext] = key => JsSuccess(ApiContext(key))
   implicit val keyWritesApiContext: KeyWrites[ApiContext] = _.value
 
   implicit val keyReadsApiVersion: KeyReads[ApiVersion] = key => JsSuccess(ApiVersion(key))
   implicit val keyWritesApiVersion: KeyWrites[ApiVersion] = _.value
-
-  implicit val keyReadsFieldName: KeyReads[FieldName] = key => JsSuccess(FieldName(key))
-  implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
 
   implicit val formatApiIdentifier = Json.format[ApiIdentifier]
 

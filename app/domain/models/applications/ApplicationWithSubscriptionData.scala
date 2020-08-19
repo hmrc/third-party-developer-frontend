@@ -17,24 +17,10 @@
 package domain.models.applications
 
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-
-case class FieldName(value: String) extends AnyVal
-
-object FieldName {
-  import play.api.libs.json.{Json, JsSuccess, KeyReads, KeyWrites}
-  implicit val formatFieldName = Json.valueFormat[FieldName]
-  implicit val keyReadsFieldName: KeyReads[FieldName] = key => JsSuccess(FieldName(key))
-  implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
-}
-
-case class FieldValue(value: String) extends AnyVal
-object FieldValue {
-  import play.api.libs.json.Json
-  val formatFieldValue = Json.valueFormat[FieldValue]
-}
+import domain.models.subscriptions.Fields
 
 case class ApplicationWithSubscriptionData(
     application: Application,
     subscriptions: Set[ApiIdentifier] = Set.empty,
-    subscriptionFieldValues: Map[ApiContext, Map[ApiVersion, Map[FieldName, FieldValue]]] = Map.empty
+    subscriptionFieldValues: Map[ApiContext, Map[ApiVersion, Fields.Alias]] = Map.empty
 )

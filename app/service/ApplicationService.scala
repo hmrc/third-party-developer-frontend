@@ -42,7 +42,6 @@ class ApplicationService @Inject() (
     connectorWrapper: ConnectorsWrapper,
     subscriptionFieldsService: SubscriptionFieldsService,
     deskproConnector: DeskproConnector,
-    applicationConfig: ApplicationConfig,
     developerConnector: ThirdPartyDeveloperConnector,
     sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
     productionApplicationConnector: ThirdPartyApplicationProductionConnector,

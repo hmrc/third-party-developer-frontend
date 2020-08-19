@@ -18,12 +18,19 @@ package domain.models.subscriptions
 
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications.{ApplicationId, ClientId}
-import play.api.libs.json.{Format, Json}
 
 object ApiSubscriptionFields {
 
+  trait JsonFormatters extends Fields.JsonFormatters {
+    import play.api.libs.json._
+
+    implicit val format: Format[SubscriptionFieldsPutRequest] = Json.format[SubscriptionFieldsPutRequest]
+  }
+
+  object JsonFormatters extends JsonFormatters
+
   case class SubscriptionFieldDefinition(
-      name: String,
+      name: FieldName,
       description: String,
       shortDescription: String,
       hint: String,
@@ -31,7 +38,7 @@ object ApiSubscriptionFields {
       access: AccessRequirements
   )
 
-  case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: String)
+  case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: FieldValue)
 
   sealed trait FieldsDeleteResult
 
@@ -47,23 +54,12 @@ object ApiSubscriptionFields {
       fields: Seq[SubscriptionFieldValue]
   )
 
-  type Fields = Map[String, String]
-
-  object Fields {
-    val empty = Map.empty[String, String]
-  }
-
   case class SubscriptionFieldsPutRequest(
       clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
-      fields: Map[String, String]
+      fields: Fields.Alias
   )
-
-  object SubscriptionFieldsPutRequest {
-    implicit val format: Format[SubscriptionFieldsPutRequest] =
-      Json.format[SubscriptionFieldsPutRequest]
-  }
 
   sealed trait ServiceSaveSubscriptionFieldsResponse
 
