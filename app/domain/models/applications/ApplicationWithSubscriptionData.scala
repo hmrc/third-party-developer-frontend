@@ -17,7 +17,6 @@
 package domain.models.applications
 
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import org.joda.time.DateTime
 
 case class FieldName(value: String) extends AnyVal
 
