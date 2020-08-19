@@ -33,10 +33,16 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationServiceMock = mock[ApplicationService]
 
   def fetchByApplicationIdReturns(id: ApplicationId, returns: Application): Unit =
+    fetchByApplicationIdReturns(id, ApplicationWithSubscriptionData(returns, Set.empty, Map.empty))
+
+  def fetchByApplicationIdReturns(returns: Application): Unit =
+    fetchByApplicationIdReturns(returns.id, ApplicationWithSubscriptionData(returns, Set.empty, Map.empty))
+
+  def fetchByApplicationIdReturns(id: ApplicationId, returns: ApplicationWithSubscriptionData): Unit =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(Some(returns)))
 
-  def fetchByApplicationIdReturns(application: Application): Unit =
-    fetchByApplicationIdReturns(application.id, application)
+  def fetchByApplicationIdReturns(appData: ApplicationWithSubscriptionData): Unit =
+    fetchByApplicationIdReturns(appData.application.id, appData)
 
   def fetchByApplicationIdReturnsNone(id: ApplicationId) =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(None))
@@ -124,13 +130,15 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
       .thenReturn(successful(ApplicationUpdateSuccessful))
   }
 
-  def givenApplicationExists(application: Application): Unit = {
+  def givenApplicationExists(application: Application): Unit = givenApplicationExists(ApplicationWithSubscriptionData(application, Set.empty, Map.empty))
+
+  def givenApplicationExists(appData: ApplicationWithSubscriptionData): Unit = {
     import utils.TestApplications.tokens
 
-    fetchByApplicationIdReturns(application.id, application)
+    fetchByApplicationIdReturns(appData.application.id, appData)
 
-    when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens()))
+    when(applicationServiceMock.fetchCredentials(eqTo(appData.application))(*)).thenReturn(successful(tokens()))
 
-    givenApplicationHasNoSubs(application)
+    givenApplicationHasNoSubs(appData.application)
   }
 }

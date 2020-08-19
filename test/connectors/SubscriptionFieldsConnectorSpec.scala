@@ -25,7 +25,7 @@ import config.ApplicationConfig
 import connectors.SubscriptionFieldsConnector._
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.{ClientId, Environment}
-import domain.models.subscriptions.AccessRequirements
+import domain.models.subscriptions.{AccessRequirements, FieldName, FieldValue, Fields}
 import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.FutureTimeoutSupportImpl
 import play.api.http.Status._
@@ -38,8 +38,11 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.{failed, successful}
 
 class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
-  def fields(tpl: (String, String)*): Map[String, String] =
-    Map[String, String](tpl: _*)
+  def fields(tpl: (FieldName, FieldValue)*): Fields.Alias =
+    Map(tpl: _*)
+
+  // TODO Remove asap
+  def rawFields(tpl: (String, String)*): Fields.Alias = tpl.toSeq.map(t => (FieldName(t._1), FieldValue(t._2))).toMap
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -179,7 +182,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
         subscriptionFieldsConnector
           .fetchFieldsValuesWithPrefetchedDefinitions(clientId, apiIdentifier, prefetchedDefinitions)
       )
-      result shouldBe Seq(subscriptionFieldValue.copy(value = ""))
+      result shouldBe Seq(subscriptionFieldValue.copy(value = FieldValue.empty))
     }
 
     "send the x-api-header key when retrieving subscription fields for an API" in new ProxiedSetup {
@@ -225,8 +228,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     "return all field definitions" in new Setup {
 
       val definitions = List(
-        FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default),
-        FieldDefinition("field2", "desc2", "sdesc2", "hint2", "some other type", AccessRequirements.Default)
+        FieldDefinition(FieldName("field1"), "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default),
+        FieldDefinition(FieldName("field2"), "desc2", "sdesc2", "hint2", "some other type", AccessRequirements.Default)
       )
 
       private val validResponse =
@@ -273,8 +276,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     "when retry logic is enabled should retry on failure" in new Setup {
 
       val definitions = List(
-        FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default),
-        FieldDefinition("field2", "desc2", "sdesc2", "hint2", "some other type", AccessRequirements.Default)
+        FieldDefinition(FieldName("field1"), "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default),
+        FieldDefinition(FieldName("field2"), "desc2", "sdesc2", "hint2", "some other type", AccessRequirements.Default)
       )
 
       private val validResponse =
@@ -302,11 +305,11 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     val url = s"/definition/context/${apiContext.value}/version/${apiVersion.value}"
 
     val definitionsFromRestService = List(
-      FieldDefinition("field1", "desc1", "sdesc2", "hint1", "some type", AccessRequirements.Default)
+      FieldDefinition(FieldName("field1"), "desc1", "sdesc2", "hint1", "some type", AccessRequirements.Default)
     )
 
     val expectedDefinitions =
-      List(SubscriptionFieldDefinition("field1", "desc1", "sdesc2", "hint1", "some type", AccessRequirements.Default))
+      List(SubscriptionFieldDefinition(FieldName("field1"), "desc1", "sdesc2", "hint1", "some type", AccessRequirements.Default))
 
     val validResponse =
       ApiFieldDefinitions(apiContext, apiVersion, definitionsFromRestService)
@@ -363,7 +366,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       s"/field/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     val definitionsFromRestService = List(
-      FieldDefinition("field1", "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default)
+      FieldDefinition(FieldName("field1"), "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default)
     )
 
     val validDefinitionsResponse: ApiFieldDefinitions =
@@ -373,9 +376,9 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       val expectedDefinitions =
         definitionsFromRestService.map(d => SubscriptionFieldDefinition(d.name, d.description, d.shortDescription, d.hint, d.`type`, AccessRequirements.Default))
       val expectedFieldValues =
-        expectedDefinitions.map(definition => SubscriptionFieldValue(definition, "my-value"))
+        expectedDefinitions.map(definition => SubscriptionFieldValue(definition, FieldValue("my-value")))
 
-      val fieldsValues: Map[String, String] =
+      val fieldsValues: Fields.Alias =
         fields(expectedFieldValues.map(v => v.definition.name -> v.value): _*)
 
       val validValuesResponse: ApplicationApiFieldValues =
@@ -440,7 +443,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   }
 
   "saveFieldValues" should {
-    val fieldsValues = fields("field001" -> "value001", "field002" -> "value002")
+    val fieldsValues = rawFields("field001" -> "value001", "field002" -> "value002")
     val subFieldsPutRequest = SubscriptionFieldsPutRequest(
       clientId,
       apiContext,

@@ -20,7 +20,7 @@ import builder.SubscriptionsBuilder
 import connectors.ThirdPartyApplicationConnector
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications._
-import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
+import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldValue, Fields}
 import domain.models.subscriptions.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import mocks.connector.SubscriptionFieldsConnectorMock
@@ -127,15 +127,15 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       val definition1 = buildSubscriptionFieldValue("field1", accessRequirements = access).definition
       val definition2 = buildSubscriptionFieldValue("field2", accessRequirements = access).definition
 
-      val value2 = SubscriptionFieldValue(definition2, "oldValue2")
+      val value2 = SubscriptionFieldValue(definition2, FieldValue("oldValue2"))
 
       val oldValues = Seq(
-        SubscriptionFieldValue(definition1, "oldValue1"),
-        SubscriptionFieldValue(definition2, "oldValue2")
+        SubscriptionFieldValue(definition1, FieldValue("oldValue1")),
+        SubscriptionFieldValue(definition2, FieldValue("oldValue2"))
       )
 
-      val newValue1 = "newValue"
-      val newValuesMap = Map(definition1.name -> newValue1)
+      val newValue1 = FieldValue("newValue")
+      val newValuesMap: Fields.Alias = Map(definition1.name -> newValue1)
 
       when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
@@ -144,7 +144,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
       result shouldBe SaveSubscriptionFieldsSuccessResponse
 
-      val newFields1 = Map(
+      val newFields1: Fields.Alias = Map(
         definition1.name -> newValue1,
         definition2.name -> value2.value
       )
@@ -161,9 +161,9 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
       val definition = buildSubscriptionFieldValue("field-denied", accessRequirements = access).definition
 
-      val oldValues = Seq(SubscriptionFieldValue(definition, "oldValue"))
+      val oldValues = Seq(SubscriptionFieldValue(definition, FieldValue("oldValue")))
 
-      val newValues = Map(definition.name -> "newValue")
+      val newValues = Map(definition.name -> FieldValue("newValue"))
 
       val result = await(underTest.saveFieldValues(developerRole, application, apiContext, apiVersion, oldValues, newValues))
 
@@ -176,7 +176,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
   "saveBlankFieldValues" should {
     "save when old values are empty" in new Setup {
-      val emptyOldValue = SubscriptionFieldValue(buildSubscriptionFieldValue("field-name").definition, "")
+      val emptyOldValue = SubscriptionFieldValue(buildSubscriptionFieldValue("field-name").definition, FieldValue.empty)
 
       when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
@@ -185,7 +185,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       result shouldBe SaveSubscriptionFieldsSuccessResponse
 
       val expectedSavedFields = Map(
-        emptyOldValue.definition.name -> ""
+        emptyOldValue.definition.name -> FieldValue.empty
       )
 
       verify(mockSubscriptionFieldsConnector)
