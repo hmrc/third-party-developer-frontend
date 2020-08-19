@@ -28,6 +28,7 @@ import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsTe
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
+import views.helper.EnvironmentNameService
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
@@ -43,8 +44,9 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   trait Setup {
     when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
     when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-
   }
+  
+  val environmentNameService = new EnvironmentNameService(appConfig)
 
   "view all applications page" should {
 
@@ -232,7 +234,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
 
-      addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section")
+      addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
 
     "show the empty nest page when there are no applications when environment is Prod/Sandbox" in new Setup {

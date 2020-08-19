@@ -18,14 +18,13 @@
 @import include._
 @import model.Crumb
 @import domain.models.developers.DeveloperSession
+@import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-account")
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-account", environmentNameService: EnvironmentNameService)
 
-@theSandbox = @{"the sandbox"}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
-@subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else subordinateEnvName}
 
 @devMain(
     title = "View all applications",
@@ -38,7 +37,7 @@
     developerSession = Some(loggedIn)
 ) {
 
-    <h1 class="heading-xlarge">Add an application to @subordinateWording</h1>
+    <h1 class="heading-xlarge">Add an application to @environmentNameService.subordinateWording</h1>
     <p>To start using our RESTful APIs with your application, you'll need to:</p>
     <ol class="list list-number">
         <li>
