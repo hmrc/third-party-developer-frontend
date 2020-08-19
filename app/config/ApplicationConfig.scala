@@ -63,6 +63,7 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   lazy val retryCount = getConfigDefaulted("retryCount", 0)
   lazy val retryDelayMilliseconds = getConfigDefaulted("retryDelayMilliseconds", 500)
 
+  // TODO: Don't use directly in views - go via EnvironmentNameService
   lazy val nameOfPrincipalEnvironment: String = getConfigDefaulted("features.nameOfPrincipalEnvironment", "Production")
   lazy val nameOfSubordinateEnvironment: String = getConfigDefaulted("features.nameOfSubordinateEnvironment", "Sandbox")
 

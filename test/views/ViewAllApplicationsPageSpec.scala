@@ -55,7 +55,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
-      manageApplicationsView.render(appSummaries, request, loggedIn, messagesProvider, appConfig, "nav-section")
+      manageApplicationsView.render(appSummaries, request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
 
     "show the applications page if there is more than 0 sandbox applications and environment is Prod/Sandbox" in new Setup {
@@ -117,7 +117,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
-      elementExistsByText(document, "p", "After testing in Development, you can apply for QA credentials.") shouldBe true
+      println(document)
+      elementExistsByText(document, "p", "After testing in development, you can apply for qa credentials.") shouldBe true
 
       isGreenAddProductionApplicationButtonVisible(document) shouldBe true
     }
