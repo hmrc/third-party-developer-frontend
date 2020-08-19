@@ -19,7 +19,7 @@ package controllers.checkpages
 import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import controllers.FormKeys.applicationNameAlreadyExistsKey
-import controllers.ManageSubscriptions.FieldValue
+import controllers.ManageSubscriptions.Field
 import domain.{ApplicationAlreadyExists, DeskproTicketCreationFailed}
 import domain.models.apidefinitions.{APISubscriptionStatus, _}
 import domain.models.applications._
@@ -162,7 +162,7 @@ case class CheckYourSubscriptionData(
     apiContext: ApiContext,
     apiVersion: ApiVersion,
     displayedStatus: String,
-    fields: Seq[FieldValue]
+    fields: Seq[Field]
 )
 
 case class CheckYourAnswersData(

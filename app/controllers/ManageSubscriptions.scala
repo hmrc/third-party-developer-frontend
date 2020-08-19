@@ -38,14 +38,14 @@ import scala.concurrent.Future.successful
 
 object ManageSubscriptions {
 
-  case class FieldValue(name: String, value: String)
+  case class Field(name: String, value: String)
 
-  case class ApiDetails(name: String, context: ApiContext, version: ApiVersion, displayedStatus: String, subsValues: Seq[FieldValue])
+  case class ApiDetails(name: String, context: ApiContext, version: ApiVersion, displayedStatus: String, subsValues: Seq[Field])
 
-  def toFieldValue(sfv: SubscriptionFieldValue): FieldValue = {
+  def toFieldValue(sfv: SubscriptionFieldValue): Field = {
     def default(in: String, default: String) = if (in.isEmpty) default else in
 
-    FieldValue(sfv.definition.shortDescription, default(sfv.value, "None"))
+    Field(sfv.definition.shortDescription, default(sfv.value, "None"))
   }
 
   def toDetails(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
