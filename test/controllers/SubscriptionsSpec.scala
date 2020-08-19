@@ -192,7 +192,6 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
       fetchByApplicationIdReturns(appId, activeApplication)
       givenApplicationHasSubs(activeApplication, subsData)
-      println(s"**** sandbox: ${environmentNameService.subordinateWording}")
 
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -205,8 +204,6 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
       fetchByApplicationIdReturns(appId, activeApplication)
       givenApplicationHasSubs(activeApplication, subsData)
-
-      println(s"**** development: ${environmentNameService.subordinateWording}")
 
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK

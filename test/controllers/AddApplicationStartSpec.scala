@@ -109,10 +109,6 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
-        println(s"******1 ${appConfig.nameOfSubordinateEnvironment}")
-        println(s"******2 ${appConfig.subordinateIsSandbox}")
-        println(s"******3 ${environmentNameService.subordinateWording}")
-
         private val result = underTest.addApplicationSubordinate()(loggedInRequest)
 
       status(result) shouldBe OK

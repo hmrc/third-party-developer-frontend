@@ -92,7 +92,6 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
     "working with an application with api subscriptions" should {
       "render correctly" in new Setup {
         val page = leftHandNavView.render(Some(applicationViewModelWithApiSubscriptions), Some("details"), request, loggedInUser, appConfig)
-        println(page)
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
@@ -121,7 +120,6 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
     "on the View all applications page" should {
       "render correct wording for default environment config" in new Setup {
         val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
-        println(page)
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
@@ -133,7 +131,6 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
         val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
-        println(page)
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
@@ -145,7 +142,6 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Staging")
 
         val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
-        println(page)
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
@@ -157,7 +153,6 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Integration")
 
         val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
-        println(page)
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
