@@ -34,6 +34,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.helper.EnvironmentNameService
 import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
 import views.html.include.ChangeSubscriptionConfirmationView
 
@@ -103,6 +104,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
     val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
     val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
+    implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new Subscriptions(
       mock[ThirdPartyDeveloperConnector],
@@ -127,6 +129,11 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     givenApplicationUpdateSucceeds()
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
     givenApplicationHasNoSubs(activeApplication)
+
+    val subsData = Seq(
+      exampleSubscriptionWithFields("api1", 1),
+      exampleSubscriptionWithFields("api2", 1)
+    )
 
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
@@ -178,6 +185,30 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
+    }
+
+    "return the subscriptions page for a developer on a standard app in the Sandbox environment" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+      fetchByApplicationIdReturns(appId, activeApplication)
+      givenApplicationHasSubs(activeApplication, subsData)
+
+      val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
+      contentAsString(result) should include("Subscribe to APIs so your application can access them in the sandbox")
+    }
+
+    "return the subscriptions page for a developer on a standard app in the Development environment" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      fetchByApplicationIdReturns(appId, activeApplication)
+      givenApplicationHasSubs(activeApplication, subsData)
+
+      val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
+      contentAsString(result) should include("Subscribe to APIs so your application can access them in development")
     }
   }
 

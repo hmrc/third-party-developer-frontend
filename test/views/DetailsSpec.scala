@@ -38,6 +38,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
   case class Page(doc: Appendable) {
     lazy val body: Document = Jsoup.parse(doc.body)
+    lazy val environmentName: Element = body.getElementById("environmentName")
     lazy val warning: Element = body.getElementById("termsOfUseWarning")
     lazy val termsOfUse: Element = body.getElementById("termsOfUse")
     lazy val agreementDetails: Element = termsOfUse.getElementById("termsOfUseAagreementDetails")
@@ -48,6 +49,46 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     implicit val loggedIn: DeveloperSession = utils.DeveloperSession("developer@example.com", "Joe", "Bloggs", loggedInState = LoggedInState.LOGGED_IN)
     implicit val navSection: String = "details"
+
+    "rendering Environment " when {
+      "managing a principal application" should {
+        val deployedTo = Environment.PRODUCTION
+        val application = anApplication(environment = deployedTo)
+          .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+
+        "Show Production when environment is Production" in {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+          page.environmentName.text shouldBe "Production"
+        }
+        "Show QA when environment is QA" in {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+          page.environmentName.text shouldBe "QA"
+        }
+      }
+
+      "managing a subordinate application" should {
+        val deployedTo = Environment.SANDBOX
+        val application = anApplication(environment = deployedTo)
+          .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+
+        "Show Sandbox when environment is Sandbox" in {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+          page.environmentName.text shouldBe "Sandbox"
+        }
+        "Show Development when environment is Development" in {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false)))
+          page.environmentName.text shouldBe "Development"
+        }
+      }
+    }
 
     "showing Terms of Use details" when {
       "managing a sandbox application" should {

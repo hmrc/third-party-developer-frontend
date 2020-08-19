@@ -24,11 +24,12 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.State
+@import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
 @(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, environment: Environment, subscriptions: Option[GroupedSubscriptions])(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig)
+        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
     application.deployedTo.isProduction && (
@@ -39,7 +40,7 @@
 
 @pageHeading = @{"Which APIs do you want to use?"}
 
-@devMain(
+    @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
@@ -55,7 +56,7 @@
 
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            <p>Subscribe to APIs so your application can access them in the sandbox. You can change them at any time.</p>
+            <p>Subscribe to APIs so your application can access them in @environmentNameService.subordinateWording. You can change them at any time.</p>
 
             <p>Once you subscribe, we'll send you email updates such as new API versions, new endpoints or version retirements.</p>
 

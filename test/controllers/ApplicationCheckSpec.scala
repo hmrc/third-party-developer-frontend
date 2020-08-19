@@ -229,7 +229,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   }
 
   "check request submitted" should {
-    "return credentials requested page" in new Setup {
+    "return credentials requested page when environment is Production" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
       def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = underTest.credentialsRequested(appId)(loggedInRequest)
@@ -244,6 +246,23 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       body should include("The checking process can take up to 10 working days.")
       body should include("By requesting credentials you've created a new production application")
     }
+    "return credentials requested page when environment is QA" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      def createApplication() = createPartiallyConfigurableApplication()
+
+      private val result = underTest.credentialsRequested(appId)(loggedInRequest)
+
+      status(result) shouldBe OK
+      private val body = contentAsString(result)
+
+      body should include("Request received")
+      body should include("We've sent you a confirmation email")
+      body should include("What happens next?")
+      body should include("We may ask for a demonstration of your software.")
+      body should include("The checking process can take up to 10 working days.")
+      body should include("By requesting credentials you've created a new QA application")
+    }
     "return forbidden when not logged in" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication()
       private val result = underTest.credentialsRequested(appId)(loggedOutRequest)
@@ -254,8 +273,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   }
 
   "landing page" should {
-    "return landing page" in new Setup {
-
+    "return landing page when environment is Production" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
       def createApplication() = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
@@ -264,6 +284,20 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       private val body = contentAsString(result)
 
       body should include("Get production credentials")
+      body should include("Save and come back later")
+    }
+
+    "return landing page when environment is QA" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      def createApplication() = createPartiallyConfigurableApplication()
+
+      private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
+
+      status(result) shouldBe OK
+      private val body = contentAsString(result)
+
+      body should include(s"Add $appName to QA")
       body should include("Save and come back later")
     }
 

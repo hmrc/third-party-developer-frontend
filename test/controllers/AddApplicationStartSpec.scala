@@ -28,6 +28,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
+import views.helper.EnvironmentNameService
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -69,6 +70,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
     val addApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
     val addApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+    implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
       applicationServiceMock,
@@ -102,9 +104,12 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
       .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
   }
 
-  "Add subordinate applications start page" should {
-    "return the add applications page with the user logged in" in new Setup {
-      private val result = underTest.addApplicationSubordinate()(loggedInRequest)
+    "Add subordinate applications start page" should {
+      "return the add applications page with the user logged in when the environment is Production" in new Setup {
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+
+        private val result = underTest.addApplicationSubordinate()(loggedInRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to the sandbox")
@@ -117,8 +122,25 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
       contentAsString(result) should not include "Sign in"
     }
 
-    "return to the login page when the user is not logged in" in new Setup {
-      val request = FakeRequest()
+      "return the add applications page with the user logged in when the environmennt is QA/Dev" in new Setup {
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+        private val result = underTest.addApplicationSubordinate()(loggedInRequest)
+
+        status(result) shouldBe OK
+        contentAsString(result) should include("Add an application to development")
+        contentAsString(result) should include(loggedInUser.displayedName)
+        contentAsString(result) should include("Sign out")
+        contentAsString(result) should include("get its development credentials")
+        contentAsString(result) should include("use its credentials for integration testing")
+        contentAsString(result) should include("In production, your application will need to comply with the expectations set out in our")
+        contentAsString(result) should include("Once you add your application and subscribe it to the development APIs you want to integrate with you can:")
+        contentAsString(result) should not include "Sign in"
+      }
+
+
+      "return to the login page when the user is not logged in" in new Setup {
+        val request = FakeRequest()
 
       private val result = underTest.addApplicationSubordinate()(request)
 
@@ -134,17 +156,32 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
     }
   }
 
-  "Add principal applications start page" should {
-    "return the add applications page with the user logged in" in new Setup {
-      private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+    "Add principal applications start page" should {
+      "return the add applications page with the user logged in when the environment is Production" in new Setup {
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+        private val result = underTest.addApplicationPrincipal()(loggedInRequest)
 
-      status(result) shouldBe OK
-      contentAsString(result) should include("Get production credentials")
-      contentAsString(result) should include(loggedInUser.displayedName)
-      contentAsString(result) should include("Sign out")
-      contentAsString(result) should include("Now that you've tested your software you can request production credentials to use live data.")
-      contentAsString(result) should not include "Sign in"
-    }
+        status(result) shouldBe OK
+        contentAsString(result) should include("Get production credentials")
+        contentAsString(result) should include(loggedInUser.displayedName)
+        contentAsString(result) should include("Sign out")
+        contentAsString(result) should include("Now that you've tested your software you can request production credentials to use live data.")
+        contentAsString(result) should not include "Sign in"
+      }
+
+      "return the add applications page with the user logged in when the environment is QA" in new Setup {
+        when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+        private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+
+        status(result) shouldBe OK
+        contentAsString(result) should include("Add an application to QA")
+        contentAsString(result) should include(loggedInUser.displayedName)
+        contentAsString(result) should include("Sign out")
+        contentAsString(result) should include("Now that you've tested your software you can request to add your application to QA.")
+        contentAsString(result) should not include "Sign in"
+      }
 
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()

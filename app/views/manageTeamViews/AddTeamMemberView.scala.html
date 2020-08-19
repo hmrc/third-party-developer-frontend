@@ -43,7 +43,7 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))(request, loggedIn)),
+    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))(request, loggedIn, applicationConfig)),
     developerSession = Some(loggedIn)
 ) {
 

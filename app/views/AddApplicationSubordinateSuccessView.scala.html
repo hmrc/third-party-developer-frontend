@@ -18,12 +18,14 @@
 @import domain.models.applications.ApplicationId
 @import include._
 @import model.Crumb
+@import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain)
 
-@(appName: String, id: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
+@(appName: String, id: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
 
-@pageHeading = @{"Application added to the sandbox"}
+@subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
+@pageHeading = @{s"Application added to ${environmentNameService.subordinateWording}"}
 
 @devMain(
     title = pageHeading,
@@ -41,7 +43,7 @@
 
     <h2 class="heading-medium">You added @appName</h2>
 
-    <p>You can now use its credentials to test with sandbox APIs.</p>
+    <p>You can now use its credentials to test with @subordinateEnvName APIs.</p>
 
     <p>Read the guidance on <a href="/api-documentation/docs/testing">testing in the sandbox</a>
         to find out which endpoints to use, creating a test user and types of test data.</p>

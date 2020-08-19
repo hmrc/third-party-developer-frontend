@@ -33,6 +33,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.Html
 import service._
 import uk.gov.hmrc.http.HeaderCarrier
+import views.helper.EnvironmentNameService
 import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
 import views.html.include.ChangeSubscriptionConfirmationView
 
@@ -54,7 +55,7 @@ class Subscriptions @Inject() (
     changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
     unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
     subscribeRequestSubmittedView: SubscribeRequestSubmittedView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
     extends ApplicationController(mcc)
     with ApplicationHelper {
 

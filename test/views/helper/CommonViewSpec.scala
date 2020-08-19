@@ -33,6 +33,9 @@ trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedM
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
+  when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+  when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(("metrics.jvm", false))

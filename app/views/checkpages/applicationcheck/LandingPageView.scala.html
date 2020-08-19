@@ -25,8 +25,9 @@
 @(applicationView: ApplicationViewModel, form: Form[CheckInformationForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @app = @{ applicationView.application }
-
-@pageHeading = @{ s"Get production credentials for ${app.name}" }
+@getProductionCredentials = @{s"Get production credentials for ${app.name}"}
+@addApplicationToEnv = @{s"Add ${app.name} to ${applicationConfig.nameOfPrincipalEnvironment}"}
+@pageHeading = @{if(applicationConfig.nameOfPrincipalEnvironment == "Production") {getProductionCredentials} else addApplicationToEnv}
 
 @devMain(
     title = pageHeading,

@@ -17,7 +17,12 @@
 @import controllers.checkpages.{CheckYourAnswersData, DummyCheckYourAnswersForm}
 @import domain.models.controllers.SaveSubsFieldsPageMode
 
-@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], messages: Messages)
+@import config.ApplicationConfig
+@(data: CheckYourAnswersData, form: Form[DummyCheckYourAnswersForm], editable: Boolean)(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
+
+@requestProductionCredentials = @{s"production credentials"}
+@addApplicationToEnv = @{s"to add your application to ${applicationConfig.nameOfPrincipalEnvironment}"}
+@principalWording = @{if(applicationConfig.nameOfPrincipalEnvironment == "Production") {requestProductionCredentials} else addApplicationToEnv}
 
 @helper.form(action = controllers.checkpages.routes.CheckYourAnswers.answersPageAction(data.appId), 'class -> "form") {
   @helper.CSRF.formField
@@ -191,7 +196,7 @@
       </div>
       @if(editable) {
         <div class="form-group">
-            <h2>Now request production credentials</h2>
+            <h2>Now request @principalWording </h2>
             <p>By submitting your request you are confirming that, to the best your knowledge, the details you are providing are correct.</p>
             <button id="submit" class="button" type="submit">Accept and send</button>
             <a href="@routes.AddApplication.manageApps" id="cancel" class="secondary-button">Save and come back later</a>

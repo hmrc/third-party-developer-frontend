@@ -18,14 +18,15 @@
 @import domain.models.applications.Environment
 @import include._
 @import model.Crumb
+@import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
 
-@pageHeading = @{"Add an application to the sandbox"}
+@pageHeading = @{s"Add an application to ${environmentNameService.subordinateWording}"}
 
-@devMain(
+    @devMain(
     title = pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
@@ -40,12 +41,12 @@
         <h1 class="heading-xlarge">@pageHeading</h1>
     </header>
 
-    <p>Add your application to the sandbox so you can test it.</p>
+    <p>Add your application to @environmentNameService.subordinateWording so you can test it.</p>
 
-    <p>Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:</p>
+    <p>Once you add your application and subscribe it to the @environmentNameService.subordinateEnvName APIs you want to integrate with you can:</p>
 
     <ul class="list list-bullet">
-        <li>get its sandbox credentials</li>
+        <li>get its @environmentNameService.subordinateEnvName credentials</li>
         <li>use its credentials for integration testing</li>
     </ul>
 

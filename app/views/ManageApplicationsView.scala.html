@@ -21,10 +21,11 @@
 @import uk.gov.hmrc.auth.core.Admin
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.ApplicationId
+@import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
-@(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications")
+@(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
 
 @devMain(
     title = "View all applications",
@@ -56,10 +57,10 @@
         @applicationList(applications)
         @if(noProductionApplications(applications)) {
             </br>
-            <p>After testing in the sandbox, you can apply for production credentials.</p>
+            <p>After testing in @environmentNameService.subordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
 
             <div>
-               <a class="button" href="@routes.AddApplication.addApplicationPrincipal">Get production credentials</a>
+               <a class="button" href="@routes.AddApplication.addApplicationPrincipal">Get @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials</a>
             </div>
         }
         @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
@@ -71,12 +72,12 @@
 
 @applicationList(applications: Seq[controllers.ApplicationSummary]) = {
     @defining(applications.partition(_.environment == "Production")) { case (productionApps, sandboxApps) =>
-        @applicationTable(productionApps)
-        @applicationTable(sandboxApps)
+        @applicationTable(productionApps, appConfig.nameOfPrincipalEnvironment)
+        @applicationTable(sandboxApps, appConfig.nameOfSubordinateEnvironment)
     }
 }
 
-@applicationTable(applications: Seq[controllers.ApplicationSummary]) = {
+@applicationTable(applications: Seq[controllers.ApplicationSummary], environmentName: String) = {
     @if(applications.nonEmpty) {
         <table>
             <caption class="visually-hidden">Applications</caption>
@@ -86,9 +87,7 @@
                 <col width="30%"/>
             </colgroup>
             <thead>
-                <th>@{
-                    applications.head.environment
-                } applications</th>
+                <th>@environmentName applications</th>
                 <th>Your role</th>
                 <th>Last API call</th>
             </thead>

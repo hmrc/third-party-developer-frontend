@@ -314,8 +314,9 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   }
 
   "check your answers page" should {
-    "return check your answers page" in new Setup {
-
+    "return check your answers page when environment is Production" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
       givenApplicationExists()
 
       private val result = addToken(underTest.answersPage(appId))(loggedInRequest)
@@ -325,6 +326,22 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       body should include("Check your answers before requesting credentials")
       body should include("About your application")
+      body should include("Now request production credentials")
+    }
+
+    "return check your answers page when environment is QA" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      givenApplicationExists()
+
+      private val result = addToken(underTest.answersPage(appId))(loggedInRequest)
+
+      status(result) shouldBe OK
+      private val body = contentAsString(result)
+
+      body should include("Check your answers before requesting credentials")
+      body should include("About your application")
+      body should include("Now request to add your application to QA")
     }
 
     "return forbidden when accessed without being an admin" in new Setup {

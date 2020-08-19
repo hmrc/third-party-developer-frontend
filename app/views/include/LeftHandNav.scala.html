@@ -20,7 +20,12 @@
 
 @this()
 
-@(application: Option[ApplicationViewModel] = None, navSection: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession)
+@(application: Option[ApplicationViewModel] = None, navSection: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: config.ApplicationConfig)
+
+@theSandbox = @{"the sandbox"}
+@subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}
+@getProductionCredentials = @{"Get production credentials"}
+@principalWording = @{ if(appConfig.nameOfPrincipalEnvironment == "Production") {getProductionCredentials} else {s"Add an application to ${appConfig.nameOfPrincipalEnvironment}"}}
 
     @(application, navSection) match {
         case (Some(applicationView), Some(section)) => {
@@ -92,8 +97,8 @@
                 <span class="heading-small" id="nav2">Manage applications</span>
                 <ul>
                     <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.AddApplication.manageApps">View all applications</a></li>
-                    <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationSubordinate">Add an application to the sandbox</a></li>
-                    <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationPrincipal">Get production credentials</a></li>
+                    <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationSubordinate">Add an application to @subordinateWording</a></li>
+                    <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationPrincipal">@principalWording</a></li>
                 </ul>
                 <br>
             </div>

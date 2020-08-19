@@ -63,6 +63,9 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   lazy val retryCount = getConfigDefaulted("retryCount", 0)
   lazy val retryDelayMilliseconds = getConfigDefaulted("retryDelayMilliseconds", 500)
 
+  lazy val nameOfPrincipalEnvironment: String = getConfigDefaulted("features.nameOfPrincipalEnvironment", "Production")
+  lazy val nameOfSubordinateEnvironment: String = getConfigDefaulted("features.nameOfSubordinateEnvironment", "Sandbox")
+
   lazy val dateOfAdminMfaMandate: Option[LocalDate] = {
     config.getOptional[String]("dateOfAdminMfaMandate") match {
       case Some(s) => MfaMandateService.parseLocalDate(s)
