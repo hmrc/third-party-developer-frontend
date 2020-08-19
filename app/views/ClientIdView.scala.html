@@ -25,6 +25,8 @@
 @(app: Application)(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
+@clientId = @{app.clientId.value}
+
 @devMain(
     title = "Client ID",
     userFullName = loggedIn.loggedInName,
@@ -40,12 +42,12 @@
     <h1 class="heading-xlarge">Client ID</h1>
 
     <p>
-        <span class="font-medium">@{app.clientId}</span>
+        <span class="font-medium">@clientId</span>
         <br>
         <a href="#"
         class="copy-to-clip"
         title="Copies client ID into the system clipboard."
-        data-clip-text="@{app.clientId}"
+        data-clip-text="@clientId"
         aria-live="polite"
         aria-label="Copy client ID to clipboard">
             Copy
