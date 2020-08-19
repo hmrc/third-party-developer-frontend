@@ -117,7 +117,6 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
-      println(document)
       elementExistsByText(document, "p", "After testing in development, you can apply for qa credentials.") shouldBe true
 
       isGreenAddProductionApplicationButtonVisible(document) shouldBe true

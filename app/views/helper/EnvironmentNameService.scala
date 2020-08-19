@@ -21,14 +21,12 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class EnvironmentNameService @Inject()(appConfig: ApplicationConfig) {
-  // TODO: Rename these values.
-  // TOTO: Should these be lazy values?
   
   def subordinateIsSandbox = appConfig.nameOfSubordinateEnvironment == "Sandbox"
   
   def principalIsProduction = appConfig.nameOfPrincipalEnvironment == "Production"
   
-  def theSandbox = "the sandbox"
+  private def theSandbox = "the sandbox"
 
   def subordinateEnvName = appConfig.nameOfSubordinateEnvironment.toLowerCase()
 
