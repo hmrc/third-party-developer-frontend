@@ -147,7 +147,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
       status(result) shouldBe OK
-      titleOf(result) shouldBe "Application added to Development - HMRC Developer Hub - GOV.UK"
+      titleOf(result) shouldBe "Application added to development - HMRC Developer Hub - GOV.UK"
       contentAsString(result) should include(loggedInUser.displayedName)
       contentAsString(result) should include("You can now use its credentials to test with development APIs.")
       contentAsString(result) should include("Read the guidance on")

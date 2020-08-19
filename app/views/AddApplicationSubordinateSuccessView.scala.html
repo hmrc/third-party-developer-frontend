@@ -18,15 +18,14 @@
 @import domain.models.applications.ApplicationId
 @import include._
 @import model.Crumb
+@import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain)
 
-@(appName: String, id: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
+@(appName: String, id: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
 
-@theSandbox = @{"the sandbox"}
-@subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
-@pageHeading = @{s"Application added to $subordinateWording"}
+@pageHeading = @{s"Application added to ${environmentNameService.subordinateWording}"}
 
 @devMain(
     title = pageHeading,
