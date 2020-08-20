@@ -127,6 +127,8 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
 
+    import CustomResponseHandlers.permissiveBadRequestResponseHandler
+
     http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)).map { response =>
       response.status match {
         case BAD_REQUEST =>
