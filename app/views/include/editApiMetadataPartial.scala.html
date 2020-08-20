@@ -35,28 +35,31 @@
   @helper.CSRF.formField
 
   @for((field, idx) <- viewModel.fields.zipWithIndex) {
-    <div class="form-group @if(field.errors.nonEmpty){form-group-error}">
+    @defining(field.name.value) { fieldName =>
+    @defining(field.value.value) { fieldValue =>
+        <div class="form-group @if(field.errors.nonEmpty){form-group-error}">
 
-      @fieldError(field.errors, field.name)
+          @fieldError(field.errors, fieldName)
 
-      <label class="form-label" for="@{field.name}">
-        @{field.description}
-      </label>
-      <span class="form-hint">@{field.hint}</span>
+          <label class="form-label" for="@fieldName">
+            @{field.description}
+          </label>
+          <span class="form-hint">@{field.hint}</span>
 
-      @if(field.canWrite){
-        <input type="text"
-          name="@{field.name}"
-          value="@{field.value}"
-          class="form-input input--medium @if(field.errors.nonEmpty){form-control-error}"
-          id="@{field.name}" />
-      } else {
-        <input type="text"
-          value="@{field.value}"
-          class="form-input input--medium"
-          id="@{field.name}" disabled/>
-      }
-    </div>
+          @if(field.canWrite){
+            <input type="text"
+              name="@{fieldName}"
+              value="@{fieldValue}"
+              class="form-input input--medium @if(field.errors.nonEmpty){form-control-error}"
+              id="@{fieldName}" />
+          } else {
+            <input type="text"
+              value="@{fieldValue}"
+              class="form-input input--medium"
+              id="@{fieldName}" disabled/>
+          }
+        </div>
+    }}
   }
 
  <div class="form-group">

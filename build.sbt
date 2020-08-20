@@ -66,7 +66,9 @@ lazy val test = Seq(
 
 lazy val overrideDependencies = Seq(
   "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % testScope,
-  "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % testScope
+  "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % seleniumVersion % testScope,
+  "com.typesafe.play" %% "play-json" % "2.8.1",
+  "com.typesafe.play" %% "play-json-joda" % "2.8.1"
 )
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)

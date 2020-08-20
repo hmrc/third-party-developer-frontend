@@ -17,22 +17,22 @@
 package connectors
 
 import connectors.SubscriptionFieldsConnector.{AllApiFieldDefinitions, ApiFieldDefinitions, FieldDefinition}
-import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirement, DevhubAccessRequirements}
+import domain.models.subscriptions._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.json.Json.JsValueWrapper
 
-trait FieldDefinitionFormatters extends AccessRequirementsFormatters{
+trait FieldDefinitionFormatters extends AccessRequirementsFormatters with Fields.JsonFormatters {
 
   implicit val FieldDefinitionReads: Reads[FieldDefinition] = (
-  (JsPath \ "name").read[String] and
-  (JsPath \ "description").read[String] and
-  ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
-  ((JsPath \ "hint").read[String] or Reads.pure("")) and
-  // TODO: Use enums from api-subs-fields
-  //  (JsPath \ "type").read[FieldDefinitionType] and
-  (JsPath \ "type").read[String] and
-  ((JsPath \ "access").read[AccessRequirements] or Reads.pure(AccessRequirements.Default))
+    (JsPath \ "name").read[FieldName] and
+      (JsPath \ "description").read[String] and
+      ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
+      ((JsPath \ "hint").read[String] or Reads.pure("")) and
+      // TODO: Use enums from api-subs-fields
+      //  (JsPath \ "type").read[FieldDefinitionType] and
+      (JsPath \ "type").read[String] and
+      ((JsPath \ "access").read[AccessRequirements] or Reads.pure(AccessRequirements.Default))
   )(FieldDefinition.apply _)
 
   implicit val FieldDefinitionListReads = Json.reads[ApiFieldDefinitions]
@@ -45,28 +45,29 @@ trait AccessRequirementsFormatters {
   import domain.models.subscriptions.DevhubAccessRequirement._
 
   def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
-    if(value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
+    if (value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
 
   implicit val DevhubAccessRequirementFormat: Format[DevhubAccessRequirement] = new Format[DevhubAccessRequirement] {
 
-    override def writes(o: DevhubAccessRequirement): JsValue = JsString(o match {
-      case AdminOnly => "adminOnly"
-      case Anyone => "anyone"
-      case NoOne => "noOne"
-    })
+    override def writes(o: DevhubAccessRequirement): JsValue =
+      JsString(o match {
+        case AdminOnly => "adminOnly"
+        case Anyone    => "anyone"
+        case NoOne     => "noOne"
+      })
 
     override def reads(json: JsValue): JsResult[DevhubAccessRequirement] = json match {
       case JsString("adminOnly") => JsSuccess(AdminOnly)
-      case JsString("anyone") => JsSuccess(Anyone)
-      case JsString("noOne") => JsSuccess(NoOne)
-      case _ => JsError("Not a recognized DevhubAccessRequirement")
+      case JsString("anyone")    => JsSuccess(Anyone)
+      case JsString("noOne")     => JsSuccess(NoOne)
+      case _                     => JsError("Not a recognized DevhubAccessRequirement")
     }
   }
 
   implicit val DevhubAccessRequirementsReads: Reads[DevhubAccessRequirements] = (
     ((JsPath \ "read").read[DevhubAccessRequirement] or Reads.pure(DevhubAccessRequirement.Default)) and
       ((JsPath \ "write").read[DevhubAccessRequirement] or Reads.pure(DevhubAccessRequirement.Default))
-    )(DevhubAccessRequirements.apply _)
+  )(DevhubAccessRequirements.apply _)
 
   implicit val DevhubAccessRequirementsWrites: OWrites[DevhubAccessRequirements] = new OWrites[DevhubAccessRequirements] {
     def writes(requirements: DevhubAccessRequirements) = {
@@ -75,7 +76,7 @@ trait AccessRequirementsFormatters {
           ignoreDefaultField(requirements.read, DevhubAccessRequirement.Default, "read") ::
             ignoreDefaultField(requirements.write, DevhubAccessRequirement.Default, "write") ::
             List.empty[Option[(String, JsValueWrapper)]]
-          ).filterNot(_.isEmpty).map(_.get): _*
+        ).filterNot(_.isEmpty).map(_.get): _*
       )
     }
   }

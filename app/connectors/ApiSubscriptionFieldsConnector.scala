@@ -24,13 +24,13 @@ import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.{ClientId, Environment}
-import domain.models.subscriptions.AccessRequirements
+import domain.models.subscriptions.{AccessRequirements, ApiSubscriptionFields, FieldName, FieldValue, Fields}
 import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
-import play.api.libs.json.{Format, Json, JsSuccess}
+import play.api.libs.json.{JsSuccess, Json}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -80,9 +80,9 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
     def joinFieldValuesToDefinitions(
         defs: Seq[SubscriptionFieldDefinition],
-        fieldValues: Fields
+        fieldValues: Fields.Alias
     ): Seq[SubscriptionFieldValue] = {
-      defs.map(field => SubscriptionFieldValue(field, fieldValues.getOrElse(field.name, "")))
+      defs.map(field => SubscriptionFieldValue(field, fieldValues.getOrElse(field.name, FieldValue.empty)))
     }
 
     def ifDefinitionsGetValues(
@@ -122,12 +122,10 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     } recover recovery(DefinitionsByApiVersion.empty)
   }
 
-  def saveFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(
+  def saveFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields.Alias)(
       implicit hc: HeaderCarrier
   ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-
-    import CustomResponseHandlers.permissiveBadRequestResponseHandler
 
     http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)).map { response =>
       response.status match {
@@ -201,11 +199,11 @@ object SubscriptionFieldsConnector {
       apiContext: ApiContext,
       apiVersion: ApiVersion,
       fieldsId: UUID,
-      fields: Map[String, String]
+      fields: Map[FieldName, FieldValue]
   )
 
   private[connectors] case class FieldDefinition(
-      name: String,
+      name: FieldName,
       description: String,
       shortDescription: String,
       hint: String,
@@ -221,8 +219,10 @@ object SubscriptionFieldsConnector {
 
   private[connectors] case class AllApiFieldDefinitions(apis: Seq[ApiFieldDefinitions])
 
-  object JsonFormatters extends FieldDefinitionFormatters {
-    implicit val format: Format[ApplicationApiFieldValues] = Json.format[ApplicationApiFieldValues]
+  object JsonFormatters extends FieldDefinitionFormatters with ApiSubscriptionFields.JsonFormatters {
+    import play.api.libs.json._
+    implicit val reads: Reads[ApplicationApiFieldValues] = Json.reads[ApplicationApiFieldValues]
+    implicit val writes: OWrites[ApplicationApiFieldValues] = Json.writes[ApplicationApiFieldValues]
   }
 }
 

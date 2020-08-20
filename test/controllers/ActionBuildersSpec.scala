@@ -43,19 +43,20 @@ class ActionBuildersSpec extends BaseControllerSpec with ApplicationServiceMock 
   trait Setup {
     val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
-    val application = buildApplication(developer.email)
+    val applicationWithSubscriptionData = buildApplicationWithSubscriptionData(developer.email)
     val subscriptionWithoutSubFields = buildAPISubscriptionStatus("api name")
-    val subscriptionWithSubFields = buildAPISubscriptionStatus("api name", fields = Some(buildSubscriptionFieldsWrapper(application, Seq(buildSubscriptionFieldValue("field1")))))
+    val subscriptionWithSubFields =
+      buildAPISubscriptionStatus("api name", fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionData.application, Seq(buildSubscriptionFieldValue("field1")))))
 
     val underTest = new TestController(cookieSigner, mcc, sessionServiceMock, errorHandler, applicationServiceMock)
 
-    fetchByApplicationIdReturns(application)
+    fetchByApplicationIdReturns(applicationWithSubscriptionData)
 
     def runTestAction(context: ApiContext, version: ApiVersion, expectedStatus: Int) = {
       val testResultBody = "was called"
 
-      val result = underTest.subFieldsDefinitionsExistActionByApi(application.id, context, version) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
-        Future.successful(underTest.Ok(testResultBody))
+      val result = underTest.subFieldsDefinitionsExistActionByApi(applicationWithSubscriptionData.application.id, context, version) {
+        definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] => Future.successful(underTest.Ok(testResultBody))
       }(loggedInRequest)
       status(result) shouldBe expectedStatus
       if (expectedStatus == OK) {
@@ -68,25 +69,25 @@ class ActionBuildersSpec extends BaseControllerSpec with ApplicationServiceMock 
 
   "subFieldsDefinitionsExistActionByApi" should {
     "Found one" in new Setup {
-      givenApplicationHasSubs(application, Seq(subscriptionWithSubFields))
+      givenApplicationHasSubs(applicationWithSubscriptionData.application, Seq(subscriptionWithSubFields))
 
       runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, OK)
     }
 
     "Wrong context" in new Setup {
-      givenApplicationHasSubs(application, Seq(subscriptionWithSubFields))
+      givenApplicationHasSubs(applicationWithSubscriptionData.application, Seq(subscriptionWithSubFields))
 
       runTestAction(ApiContext("wrong-context"), subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
     }
 
     "Wrong version" in new Setup {
-      givenApplicationHasSubs(application, Seq(subscriptionWithSubFields))
+      givenApplicationHasSubs(applicationWithSubscriptionData.application, Seq(subscriptionWithSubFields))
 
       runTestAction(subscriptionWithSubFields.context, ApiVersion("wrong-version"), NOT_FOUND)
     }
 
     "Subscription with no fields" in new Setup {
-      givenApplicationHasSubs(application, Seq(subscriptionWithoutSubFields))
+      givenApplicationHasSubs(applicationWithSubscriptionData.application, Seq(subscriptionWithoutSubFields))
 
       runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
     }

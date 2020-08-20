@@ -18,8 +18,8 @@ package builder
 
 import domain.models.apidefinitions._
 import domain.models.applications.{Application, ApplicationId, ClientId}
-import domain.models.subscriptions.{AccessRequirements, APISubscription}
-import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
+import domain.models.subscriptions.{APISubscription, AccessRequirements, FieldName, FieldValue}
+import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 
 trait SubscriptionsBuilder {
 
@@ -56,8 +56,8 @@ trait SubscriptionsBuilder {
 
   def buildSubscriptionFieldValue(name: String, value: Option[String] = None, accessRequirements: AccessRequirements = AccessRequirements.Default): SubscriptionFieldValue = {
 
-    val definitnion = SubscriptionFieldDefinition(name, s"description-$name", s"hint-$name", "STRING", s"shortDescription-$name", accessRequirements)
+    val definitnion = SubscriptionFieldDefinition(FieldName(name), s"description-$name", s"hint-$name", "STRING", s"shortDescription-$name", accessRequirements)
 
-    SubscriptionFieldValue(definitnion, value.getOrElse(s"value-$name"))
+    SubscriptionFieldValue(definitnion, FieldValue(value.getOrElse(s"value-$name")))
   }
 }

@@ -18,10 +18,11 @@ package controllers
 
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
+import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, ApiContext, ApiVersion}
 import domain.models.applications.{Application, ApplicationId, CheckInformation}
 import domain.models.controllers.SaveSubsFieldsPageMode
 import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.subscriptions.{FieldName, FieldValue}
 import model.EditManageSubscription._
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data.FormError
@@ -45,7 +46,7 @@ object ManageSubscriptions {
   def toFieldValue(sfv: SubscriptionFieldValue): Field = {
     def default(in: String, default: String) = if (in.isEmpty) default else in
 
-    Field(sfv.definition.shortDescription, default(sfv.value, "None"))
+    Field(sfv.definition.shortDescription, default(sfv.value.value, "None"))
   }
 
   def toDetails(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
@@ -132,7 +133,7 @@ class ManageSubscriptions @Inject() (
       validationFailureView: EditApiConfigurationViewModel => Html
   )(implicit hc: HeaderCarrier, applicationRequest: ApplicationRequest[AnyContent]): Future[Result] = {
 
-    val postedValuesAsMap = applicationRequest.body.asFormUrlEncoded.get.map(v => (v._1, v._2.head))
+    val postedValuesAsMap = applicationRequest.body.asFormUrlEncoded.get.map(v => (FieldName(v._1), FieldValue(v._2.head)))
 
     val subscriptionFieldValues = apiSubscription.fields.fields
     val role = applicationRequest.role

@@ -22,6 +22,7 @@ import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import play.api.libs.json.{Json, JsSuccess}
 import utils.AsyncHmrcSpec
+import domain.models.subscriptions.FieldName
 
 class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
 
@@ -45,7 +46,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
     ApiFieldDefinitions(
       ApiContext("my-context"),
       ApiVersion("1.0"),
-      List(FieldDefinition("field-name", "my-description", "my-shortDescription", "my-hint", "STRING", AccessRequirements.Default))
+      List(FieldDefinition(FieldName("field-name"), "my-description", "my-shortDescription", "my-hint", "STRING", AccessRequirements.Default))
     )
   }
 
@@ -83,7 +84,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
           ApiVersion("1.0"),
           List(
             FieldDefinition(
-              name = "field-name",
+              name = FieldName("field-name"),
               description = "my-description",
               shortDescription = "my-shortDescription",
               hint = "my-hint",

@@ -23,6 +23,7 @@ import connectors.{ConnectorMetrics, ConnectorMetricsImpl, ProductionSubscriptio
 import helpers.FutureTimeoutSupportImpl
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
+import connectors.ApmConnector
 
 class ConfigurationModule extends AbstractModule {
   override def configure(): Unit = {
@@ -37,5 +38,8 @@ class ConfigurationModule extends AbstractModule {
     bind(classOf[SubscriptionFieldsConnector])
       .annotatedWith(Names.named("PRODUCTION"))
       .to(classOf[ProductionSubscriptionFieldsConnector])
+
+    bind(classOf[ApmConnector.Config])
+      .toProvider(classOf[LiveApmConnectorConfigProvider])
   }
 }

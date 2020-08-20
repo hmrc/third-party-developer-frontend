@@ -120,10 +120,11 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     )
 
     val application = createApplication()
+    val applicationWithSubscriptionData = ApplicationWithSubscriptionData(application)
 
     implicit val hc = HeaderCarrier()
 
-    fetchByApplicationIdReturns(application.id, application)
+    fetchByApplicationIdReturns(application.id, applicationWithSubscriptionData)
     givenApplicationHasNoSubs(application)
     fetchCredentialsReturns(application, tokens)
     fetchSessionByIdReturns(sessionId, session)

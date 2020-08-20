@@ -29,7 +29,7 @@ import domain.models.apidefinitions.APIStatus._
 import domain.models.applications._
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketCreated}
 import domain.models.developers.{Developer, LoggedInState, User}
-import domain.models.subscriptions.{APISubscription, ApiSubscriptionFields}
+import domain.models.subscriptions.{APISubscription, ApiSubscriptionFields, FieldValue}
 import domain.models.subscriptions.ApiSubscriptionFields._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
@@ -76,12 +76,13 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
     val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
+    val mockApmConnector: ApmConnector = mock[ApmConnector]
 
     val applicationService = new ApplicationService(
+      mockApmConnector,
       connectorsWrapper,
       mockSubscriptionFieldsService,
       mockDeskproConnector,
-      mockAppConfig,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
       mockProductionApplicationConnector,
@@ -209,20 +210,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       intercept[Upstream5xxResponse] {
         await(applicationService.fetchByTeamMemberEmail(emailAddress))
       }
-    }
-  }
-
-  "Fetch by ID" should {
-    "return the application fetched from the production connector when it exists there" in new Setup {
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      private val result = await(applicationService.fetchByApplicationId(productionApplicationId))
-      result shouldBe Some(productionApplication)
-    }
-
-    "return the application fetched from the sandbox connector when it exists there" in new Setup {
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      private val result = await(applicationService.fetchByApplicationId(sandboxApplicationId))
-      result shouldBe Some(sandboxApplication)
     }
   }
 
@@ -411,7 +398,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
         private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
-        private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, ""))
+        private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, FieldValue.empty))
 
         theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
@@ -442,7 +429,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
         private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
 
-        private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, ""))
+        private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, FieldValue.empty))
 
         theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 

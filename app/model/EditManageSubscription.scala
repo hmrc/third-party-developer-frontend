@@ -16,8 +16,9 @@
 
 package model
 
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
+import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, ApiContext, ApiVersion}
 import domain.models.applications.Role
+import domain.models.subscriptions.{FieldName, FieldValue}
 import domain.models.subscriptions.DevhubAccessLevel
 import play.api.data.FormError
 
@@ -32,24 +33,24 @@ object EditManageSubscription {
       errors: Seq[FormError]
   )
 
-  case class SubscriptionFieldViewModel(name: String, description: String, hint: String, canWrite: Boolean, value: String, errors: Seq[FormError])
+  case class SubscriptionFieldViewModel(name: FieldName, description: String, hint: String, canWrite: Boolean, value: FieldValue, errors: Seq[FormError])
 
   object EditApiConfigurationViewModel {
     def toViewModel(
         apiSubscription: APISubscriptionStatusWithSubscriptionFields,
         role: Role,
         formErrors: Seq[FormError],
-        postedFormValues: Map[String, String]
+        postedFormValues: Map[FieldName, FieldValue]
     ): EditApiConfigurationViewModel = {
 
       val fieldsViewModel = apiSubscription.fields.fields
         .map(field => {
           val accessLevel = DevhubAccessLevel.fromRole(role)
           val canWrite = field.definition.access.devhub.satisfiesWrite(accessLevel)
-          val fieldErrors = formErrors.filter(e => e.key == field.definition.name)
+          val fieldErrors = formErrors.filter(e => e.key == field.definition.name.value)
 
           val newValue = if (canWrite) {
-            postedFormValues.get(field.definition.name).getOrElse(field.value)
+            postedFormValues.getOrElse(field.definition.name,field.value)
           } else {
             field.value
           }

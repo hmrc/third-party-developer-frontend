@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package domain.models.applications
+package config
 
-import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import domain.models.subscriptions.Fields
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import connectors.ApmConnector
+import com.google.inject.{Provider, Inject, Singleton}
 
-case class ApplicationWithSubscriptionData(
-    application: Application,
-    subscriptions: Set[ApiIdentifier] = Set.empty,
-    subscriptionFieldValues: Map[ApiContext, Map[ApiVersion, Fields.Alias]] = Map.empty
-)
+@Singleton
+class LiveApmConnectorConfigProvider @Inject() (config: ServicesConfig) extends Provider[ApmConnector.Config] {
+
+  override def get(): ApmConnector.Config =
+    ApmConnector.Config(
+      serviceBaseUrl = config.baseUrl("api-platform-microservice")
+    )
+}

@@ -20,7 +20,7 @@ import cats.implicits._
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.{Application, ClientId, Environment, Role}
 import domain.models.subscriptions.ApiSubscriptionFields._
-import domain.models.subscriptions.DevhubAccessLevel
+import domain.models.subscriptions.{DevhubAccessLevel, FieldValue, Fields}
 import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.HeaderCarrier
@@ -42,12 +42,12 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper)
     }
   }
 
-  def saveFieldValues(role: Role, application: Application, apiContext: ApiContext, apiVersion: ApiVersion, oldValues: Seq[SubscriptionFieldValue], newValues: Map[String, String])(
+  def saveFieldValues(role: Role, application: Application, apiContext: ApiContext, apiVersion: ApiVersion, oldValues: Seq[SubscriptionFieldValue], newValues: Fields.Alias)(
       implicit hc: HeaderCarrier
   ): Future[ServiceSaveSubscriptionFieldsResponse] = {
     case object AccessDenied
 
-    def isAllowedToAndCreateNewValue(oldValue: SubscriptionFieldValue, newValue: String) = {
+    def isAllowedToAndCreateNewValue(oldValue: SubscriptionFieldValue, newValue: FieldValue) = {
       if (oldValue.definition.access.devhub.satisfiesWrite(DevhubAccessLevel.fromRole(role))) {
         Right(oldValue.copy(value = newValue))
       } else {
@@ -83,9 +83,9 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper)
       implicit hc: HeaderCarrier
   ): Future[ServiceSaveSubscriptionFieldsResponse] = {
 
-    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionFieldDefinition]) = {
+    def createEmptyFieldValues(fieldDefinitions: Seq[SubscriptionFieldDefinition]): Fields.Alias = {
       fieldDefinitions
-        .map(d => d.name -> "")
+        .map(d => d.name -> FieldValue.empty)
         .toMap
     }
 
@@ -126,7 +126,7 @@ object SubscriptionFieldsService {
 
     def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
-    def saveFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(
+    def saveFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields.Alias)(
         implicit hc: HeaderCarrier
     ): Future[ConnectorSaveSubscriptionFieldsResponse]
 

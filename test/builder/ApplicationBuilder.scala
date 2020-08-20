@@ -49,4 +49,10 @@ trait ApplicationBuilder {
   def buildCollaborators(emails: Seq[String]): Set[Collaborator] = {
     emails.map(email => Collaborator(email, Role.ADMINISTRATOR)).toSet
   }
+
+  def buildApplicationWithSubscriptionData(appOwnerEmail: String): ApplicationWithSubscriptionData = {
+    val application = buildApplication(appOwnerEmail)
+
+    ApplicationWithSubscriptionData(application)
+  }
 }

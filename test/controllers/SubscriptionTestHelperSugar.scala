@@ -22,6 +22,7 @@ import domain.models.apidefinitions.APIStatus._
 import domain.models.applications.{Application, ApplicationId, ClientId}
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
 import utils.AsyncHmrcSpec
+import domain.models.subscriptions.FieldValue
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
@@ -104,7 +105,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   def generateFieldValue(prefix: String, index: Int): SubscriptionFieldValue =
     SubscriptionFieldValue(
       definition = generateField(prefix, index),
-      value = generateValueName(prefix, index)
+      value = FieldValue(generateValueName(prefix, index))
     )
 
   val WHO_CARES = "who cares"

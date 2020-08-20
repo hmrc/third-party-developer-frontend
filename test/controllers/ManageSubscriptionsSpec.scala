@@ -44,6 +44,8 @@ import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptions
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
+import domain.models.subscriptions.FieldValue
+import domain.models.subscriptions.FieldName
 
 class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)
@@ -135,9 +137,9 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       .withLoggedIn(manageSubscriptionController, implicitly)(partLoggedInSessionId)
       .withSession(sessionParams: _*)
 
-    def editFormPostRequest(fieldName: String, fieldValue: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
+    def editFormPostRequest(fieldName: FieldName, fieldValue: FieldValue): FakeRequest[AnyContentAsFormUrlEncoded] = {
       loggedInRequest
-        .withFormUrlEncodedBody(fieldName -> fieldValue)
+        .withFormUrlEncodedBody(fieldName.value -> fieldValue.value)
     }
 
     def assertCommonEditFormFields(result: Future[Result], apiSubscriptionStatus: APISubscriptionStatus): Unit = {
@@ -354,7 +356,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(any[HeaderCarrier]))
               .thenReturn(successful(SaveSubscriptionFieldsSuccessResponse))
 
-            private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, newSubscriptionValue)
+            private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
 
             private val result =
               addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.version, mode))(
@@ -364,7 +366,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(expectedRedirectUrl)
 
-            val expectedFields = Map(subSubscriptionValue.definition.name -> newSubscriptionValue)
+            val expectedFields = Map(subSubscriptionValue.definition.name -> FieldValue(newSubscriptionValue))
 
             verify(mockSubscriptionFieldsService)
               .saveFieldValues(
@@ -391,7 +393,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             val newSubscriptionValue = "new value"
 
             private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
-              writableSubSubscriptionValue.definition.name -> newSubscriptionValue
+              writableSubSubscriptionValue.definition.name.value -> newSubscriptionValue
             )
 
             private val result =
@@ -402,7 +404,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(expectedRedirectUrl)
 
-            val expectedFields = Map(writableSubSubscriptionValue.definition.name -> newSubscriptionValue)
+            val expectedFields = Map(writableSubSubscriptionValue.definition.name -> FieldValue(newSubscriptionValue))
 
             verify(mockSubscriptionFieldsService)
               .saveFieldValues(
@@ -433,7 +435,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             val newSubscriptionValue = "illegal new value"
 
             private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
-              readonlySubSubscriptionValue.definition.name -> newSubscriptionValue
+              readonlySubSubscriptionValue.definition.name.value -> newSubscriptionValue
             )
 
             private val result =
@@ -456,7 +458,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
             private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
 
-            private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, newSubscriptionValue)
+            private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
 
             private val result =
               addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.version, mode))(
@@ -482,7 +484,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
             private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
 
-            private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, newSubscriptionValue)
+            private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
 
             private val result =
               addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.version, mode))(
@@ -531,7 +533,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
           private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
 
-          private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, newSubscriptionValue)
+          private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
 
           private val result = addToken(manageSubscriptionController.subscriptionConfigurationPagePost(appId, pageNumber))(loggedInWithFormValues)
 
@@ -556,7 +558,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
           private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
 
-          private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, newSubscriptionValue)
+          private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
 
           private val result = addToken(manageSubscriptionController.subscriptionConfigurationPagePost(appId, pageNumber))(loggedInWithFormValues)
 

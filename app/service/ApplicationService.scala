@@ -38,10 +38,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ApplicationService @Inject() (
+    apmConnector: ApmConnector,
     connectorWrapper: ConnectorsWrapper,
     subscriptionFieldsService: SubscriptionFieldsService,
     deskproConnector: DeskproConnector,
-    applicationConfig: ApplicationConfig,
     developerConnector: ThirdPartyDeveloperConnector,
     sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
     productionApplicationConnector: ThirdPartyApplicationProductionConnector,
@@ -54,8 +54,8 @@ class ApplicationService @Inject() (
   def update(updateApplicationRequest: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper.forEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
 
-  def fetchByApplicationId(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] = {
-    connectorWrapper.fetchApplicationById(id)
+  def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] = {
+    apmConnector.fetchApplicationById(applicationId)
   }
 
   def fetchCredentials(application: Application)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
