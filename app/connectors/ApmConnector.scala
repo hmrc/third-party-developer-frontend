@@ -36,7 +36,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(imp
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
     http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.value}")
 
-  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier) = {
+  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
     import domain.services.FieldsJsonFormatters._
     import domain.services.ApplicationJsonFormatters._
     
