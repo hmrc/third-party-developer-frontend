@@ -34,10 +34,11 @@ import play.api.libs.json.{JsSuccess, Json}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import domain.services._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries {
+abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries with SubscriptionFieldsConnector.JsonFormatters {
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
   val environment: Environment
@@ -47,7 +48,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   val apiKey: String
 
   import SubscriptionFieldsConnector._
-  import SubscriptionFieldsConnector.JsonFormatters._
 
   def http: HttpClient =
     if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
@@ -221,7 +221,8 @@ object SubscriptionFieldsConnector {
 
   private[connectors] case class AllApiFieldDefinitions(apis: Seq[ApiFieldDefinitions])
 
-  object JsonFormatters extends FieldDefinitionFormatters with ApiSubscriptionFields.JsonFormatters {
+  trait JsonFormatters extends FieldDefinitionJsonFormatters with FieldsJsonFormatters with ApplicationJsonFormatters {
+
     import play.api.libs.json._
     implicit val reads: Reads[ApplicationApiFieldValues] = Json.reads[ApplicationApiFieldValues]
     implicit val writes: OWrites[ApplicationApiFieldValues] = Json.writes[ApplicationApiFieldValues]

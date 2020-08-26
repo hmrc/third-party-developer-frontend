@@ -21,14 +21,6 @@ import domain.models.applications.{ApplicationId, ClientId}
 
 object ApiSubscriptionFields {
 
-  trait JsonFormatters extends Fields.JsonFormatters {
-    import play.api.libs.json._
-
-    implicit val format: Format[SubscriptionFieldsPutRequest] = Json.format[SubscriptionFieldsPutRequest]
-  }
-
-  object JsonFormatters extends JsonFormatters
-
   case class SubscriptionFieldDefinition(
       name: FieldName,
       description: String,
@@ -70,5 +62,4 @@ object ApiSubscriptionFields {
   case class SaveSubscriptionFieldsFailureResponse(fieldErrors: Map[String, String]) extends ConnectorSaveSubscriptionFieldsResponse
 
   case object SaveSubscriptionFieldsAccessDeniedResponse extends ServiceSaveSubscriptionFieldsResponse
-
 }

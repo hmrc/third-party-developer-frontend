@@ -20,11 +20,12 @@ import connectors.SubscriptionFieldsConnector.{AllApiFieldDefinitions, ApiFieldD
 import domain.models.subscriptions._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import play.api.libs.json.Json.JsValueWrapper
 
-trait FieldDefinitionFormatters extends AccessRequirementsFormatters with Fields.JsonFormatters {
+trait FieldDefinitionJsonFormatters {
+  import domain.services.AccessRequirementsJsonFormatters._
+  import domain.services.ApplicationJsonFormatters._
 
-  implicit val FieldDefinitionReads: Reads[FieldDefinition] = (
+  implicit val readsFieldDefinition: Reads[FieldDefinition] = (
     (JsPath \ "name").read[FieldName] and
       (JsPath \ "description").read[String] and
       ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
@@ -35,53 +36,9 @@ trait FieldDefinitionFormatters extends AccessRequirementsFormatters with Fields
       ((JsPath \ "access").read[AccessRequirements] or Reads.pure(AccessRequirements.Default))
   )(FieldDefinition.apply _)
 
-  implicit val FieldDefinitionListReads = Json.reads[ApiFieldDefinitions]
+  implicit val readsApiFieldDefinitions: Reads[ApiFieldDefinitions] = Json.reads[ApiFieldDefinitions]
 
-  implicit val formatAllApiFieldDefinitionsResponse =
-    Json.reads[AllApiFieldDefinitions]
+  implicit val formatAllApiFieldDefinitionsResponse: Reads[AllApiFieldDefinitions] = Json.reads[AllApiFieldDefinitions]
 }
 
-trait AccessRequirementsFormatters {
-  import domain.models.subscriptions.DevhubAccessRequirement._
-
-  def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
-    if (value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
-
-  implicit val DevhubAccessRequirementFormat: Format[DevhubAccessRequirement] = new Format[DevhubAccessRequirement] {
-
-    override def writes(o: DevhubAccessRequirement): JsValue =
-      JsString(o match {
-        case AdminOnly => "adminOnly"
-        case Anyone    => "anyone"
-        case NoOne     => "noOne"
-      })
-
-    override def reads(json: JsValue): JsResult[DevhubAccessRequirement] = json match {
-      case JsString("adminOnly") => JsSuccess(AdminOnly)
-      case JsString("anyone")    => JsSuccess(Anyone)
-      case JsString("noOne")     => JsSuccess(NoOne)
-      case _                     => JsError("Not a recognized DevhubAccessRequirement")
-    }
-  }
-
-  implicit val DevhubAccessRequirementsReads: Reads[DevhubAccessRequirements] = (
-    ((JsPath \ "read").read[DevhubAccessRequirement] or Reads.pure(DevhubAccessRequirement.Default)) and
-      ((JsPath \ "write").read[DevhubAccessRequirement] or Reads.pure(DevhubAccessRequirement.Default))
-  )(DevhubAccessRequirements.apply _)
-
-  implicit val DevhubAccessRequirementsWrites: OWrites[DevhubAccessRequirements] = new OWrites[DevhubAccessRequirements] {
-    def writes(requirements: DevhubAccessRequirements) = {
-      Json.obj(
-        (
-          ignoreDefaultField(requirements.read, DevhubAccessRequirement.Default, "read") ::
-            ignoreDefaultField(requirements.write, DevhubAccessRequirement.Default, "write") ::
-            List.empty[Option[(String, JsValueWrapper)]]
-        ).filterNot(_.isEmpty).map(_.get): _*
-      )
-    }
-  }
-
-  implicit val AccessRequirementsReads: Reads[AccessRequirements] = Json.reads[AccessRequirements]
-
-  implicit val AccessRequirementsWrites: Writes[AccessRequirements] = Json.writes[AccessRequirements]
-}
+object FieldDefinitionJsonFormatters extends FieldDefinitionJsonFormatters

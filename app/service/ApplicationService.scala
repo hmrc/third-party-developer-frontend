@@ -35,6 +35,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.subscriptions.FieldName
 
 @Singleton
 class ApplicationService @Inject() (
@@ -93,7 +94,7 @@ class ApplicationService @Inject() (
     val thirdPartyAppConnector = connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
     for {
-      fieldDefinitions: DefinitionsByApiVersion <- subscriptionFieldsService.getAllFieldDefinitions(application.deployedTo)
+      fieldDefinitions: Map[ApiContext, Map[ApiVersion, Map[FieldName, FieldDefinition]]] <- apmConnector.getAllFieldDefinitions(application.deployedTo)
       subscriptions: Seq[APISubscription] <- thirdPartyAppConnector.fetchSubscriptions(application.id)
       apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions(_, fieldDefinitions)))
     } yield apiVersions
