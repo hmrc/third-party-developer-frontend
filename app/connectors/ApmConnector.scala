@@ -25,13 +25,13 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 import domain.models.applications.Environment
 import domain.models.apidefinitions.{ApiContext,ApiVersion}
-import domain.models.subscriptions.FieldName
+import domain.models.subscriptions.{FieldName, ApiData}
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
-import play.api.libs.json.Reads
+import domain.services._
 
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(implicit ec: ExecutionContext) {
-  import domain.services.ApplicationJsonFormatters._
+  import ApmConnectorJsonFormatters._
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
     http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.value}")
@@ -39,16 +39,12 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(imp
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier) = {
     import domain.services.FieldsJsonFormatters._
     import domain.services.ApplicationJsonFormatters._
-
-    // implicit val keyReadsFieldName: KeyReads[FieldName] = key => JsSuccess(FieldName(key))
-
-    implicitly[Reads[Map[FieldName,String]]]
-    implicitly[Reads[Map[ApiContext,String]]]
-    implicitly[Reads[Map[ApiVersion,String]]]
-    implicitly[Reads[Map[ApiContext, Map[ApiVersion, Map[FieldName, String]]]]]
-    implicitly[Reads[SubscriptionFieldDefinition]]
     
     http.GET[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]](s"${config.serviceBaseUrl}/subscription-fields?environment=$environment")
+  }
+
+  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
+    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions?applicationId=${applicationId.value}")
   }
     
 }
@@ -57,4 +53,11 @@ object ApmConnector {
   case class Config(
       val serviceBaseUrl: String
   )
+}
+
+private[connectors] object ApmConnectorJsonFormatters extends ApplicationJsonFormatters with ApiDefinitionsJsonFormatters {
+  import play.api.libs.json._
+  import domain.models.subscriptions._
+  implicit val readsVersionData: Reads[VersionData] = Json.reads[VersionData]
+  implicit val readsApiData: Reads[ApiData] = Json.reads[ApiData]
 }

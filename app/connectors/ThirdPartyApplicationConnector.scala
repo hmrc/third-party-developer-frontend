@@ -21,7 +21,6 @@ import java.net.URLEncoder.encode
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.models.apidefinitions.DefinitionFormats._
 import domain.models.applications._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
@@ -43,10 +42,12 @@ import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
+import domain.services._
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
-  import ApplicationConnector._
+  import ApplicationConnectorDomain._
+  import ApplicationConnectorJsonFormatters._
 
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
@@ -183,7 +184,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
-    import ApplicationConnector.JsonFormatters._
 
     http.POST[ClientSecretRequest, AddClientSecretResponse](s"$serviceBaseUrl/application/${id.value}/client-secret", clientSecretRequest) map { response =>
       // API-4275: Once actual secret is only returned by TPA for new ones, will be able to find based on 'secret' field being defined
@@ -197,7 +197,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      import ApplicationConnector.JsonFormatters._
 
       http.POST(s"$serviceBaseUrl/application/${applicationId.value}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
         ApplicationUpdateSuccessful
@@ -234,15 +233,15 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 }
 
-object ApplicationConnector {
+private[connectors] object ApplicationConnectorDomain {
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
     ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
 
-  private[connectors] case class AddClientSecretResponse(clientId: ClientId, accessToken: String, clientSecrets: List[TPAClientSecret])
-  private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
-  private[connectors] case class DeleteClientSecretRequest(actorEmailAddress: String)
+  case class AddClientSecretResponse(clientId: ClientId, accessToken: String, clientSecrets: List[TPAClientSecret])
+  case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
+  case class DeleteClientSecretRequest(actorEmailAddress: String)
 
-  object JsonFormatters {
+private[connectors] object ApplicationConnectorJsonFormatters extends SubscriptionsJsonFormatters with ApiDefinitionsJsonFormatters {
     import play.api.libs.json.JodaReads._
     import play.api.libs.json.JodaWrites._
 

@@ -75,10 +75,10 @@ trait ApplicationJsonFormatters
   implicit val keyReadsApiVersion: KeyReads[ApiVersion] = key => JsSuccess(ApiVersion(key))
   implicit val keyWritesApiVersion: KeyWrites[ApiVersion] = _.value
 
-  implicit val formatApiIdentifier = Json.format[ApiIdentifier]
 
   implicit val formatApplication = Json.format[Application]
 
+  import ApiDefinitionsJsonFormatters.formatApiIdentifier
   implicit val format = Json.format[ApplicationWithSubscriptionData]
 }
 

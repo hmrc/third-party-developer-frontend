@@ -16,7 +16,7 @@
 
 package domain.models.apidefinitions
 
-import domain.models.subscriptions.APISubscription
+import domain.models.subscriptions.VersionSubscription
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldsWrapper
 import play.api.libs.json.Json
 
@@ -40,7 +40,6 @@ object APIDefinition {
   }
 }
 
-case class VersionSubscription(version: ApiVersionDefinition, subscribed: Boolean)
 
 case class ApiVersionDefinition(version: ApiVersion, status: APIStatus, access: Option[APIAccess] = None) {
   val displayedStatus = {
@@ -114,10 +113,3 @@ object APISubscriptionStatusWithSubscriptionFields {
   }
 }
 
-object DefinitionFormats {
-  implicit val formatAPIAccess = Json.format[APIAccess]
-  implicit val formatApiVersionDefinition = Json.format[ApiVersionDefinition]
-  implicit val formatVersionSubscription = Json.format[VersionSubscription]
-  implicit val formatAPISubscription = Json.format[APISubscription]
-  implicit val formatAPIIdentifier = Json.format[ApiIdentifier]
-}

@@ -25,7 +25,7 @@ import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketResult}
 import domain.models.developers.DeveloperSession
-import domain.models.subscriptions.APISubscription
+import domain.models.subscriptions._
 import domain.models.subscriptions.ApiSubscriptionFields._
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
@@ -62,6 +62,14 @@ class ApplicationService @Inject() (
   def fetchCredentials(application: Application)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
 
+  def xyz(application: ApplicationWithSubscriptionData)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
+    for {
+      subscribableApis <- apmConnector.fetchAllPossibleSubscriptions(application.application.id)
+    } yield ???
+
+    ???
+  }
+
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
     def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription, fieldDefinitions: DefinitionsByApiVersion): Future[APISubscriptionStatus] = {
@@ -94,7 +102,7 @@ class ApplicationService @Inject() (
     val thirdPartyAppConnector = connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
     for {
-      fieldDefinitions: Map[ApiContext, Map[ApiVersion, Map[FieldName, FieldDefinition]]] <- apmConnector.getAllFieldDefinitions(application.deployedTo)
+      fieldDefinitions: DefinitionsByApiVersion <- subscriptionFieldsService.getAllFieldDefinitions(application.deployedTo)
       subscriptions: Seq[APISubscription] <- thirdPartyAppConnector.fetchSubscriptions(application.id)
       apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions(_, fieldDefinitions)))
     } yield apiVersions
