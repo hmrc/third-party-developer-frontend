@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package domain.services
+package connectors
 
-import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldsPutRequest
-import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
+import domain.services.{ApiDefinitionsJsonFormatters, ApplicationsJsonFormatters}
 
-trait FieldsJsonFormatters {
-  import ApplicationJsonFormatters._
-  import AccessRequirementsJsonFormatters._
+private[connectors] object ApmConnectorJsonFormatters extends ApplicationsJsonFormatters with ApiDefinitionsJsonFormatters {
 
+  import domain.models.subscriptions._
   import play.api.libs.json._
 
-  implicit val readsSubscriptionFieldDefinition: Reads[SubscriptionFieldDefinition] = Json.reads[SubscriptionFieldDefinition]
-  implicit val formatSubscriptionFieldsPutRequest: Format[SubscriptionFieldsPutRequest] = Json.format[SubscriptionFieldsPutRequest]
+  implicit val readsVersionData: Reads[VersionData] = Json.reads[VersionData]
+  implicit val readsApiData: Reads[ApiData] = Json.reads[ApiData]
 }
-
-object FieldsJsonFormatters extends FieldsJsonFormatters

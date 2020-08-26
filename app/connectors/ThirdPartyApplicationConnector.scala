@@ -29,12 +29,11 @@ import domain._
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
-import org.joda.time.DateTime
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status.NO_CONTENT
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.Json
 import service.ApplicationService.ApplicationConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -42,12 +41,11 @@ import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
-import domain.services._
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
   import ApplicationConnectorDomain._
-  import ApplicationConnectorJsonFormatters._
+  import ThirdPartyApplicationConnectorJsonFormatters._
 
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
@@ -234,21 +232,17 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 }
 
 private[connectors] object ApplicationConnectorDomain {
+  import domain.models.applications.{ClientId, ClientSecret}
+  import org.joda.time.DateTime
+
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
     ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
 
   case class AddClientSecretResponse(clientId: ClientId, accessToken: String, clientSecrets: List[TPAClientSecret])
+
   case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
+
   case class DeleteClientSecretRequest(actorEmailAddress: String)
-
-private[connectors] object ApplicationConnectorJsonFormatters extends SubscriptionsJsonFormatters with ApiDefinitionsJsonFormatters {
-    import play.api.libs.json.JodaReads._
-    import play.api.libs.json.JodaWrites._
-
-    implicit val formatTPAClientSecret: Format[TPAClientSecret] = Json.format[TPAClientSecret]
-    implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]
-    implicit val formatDeleteClientSecretRequest: Format[DeleteClientSecretRequest] = Json.format[DeleteClientSecretRequest]
-  }
 }
 
 @Singleton

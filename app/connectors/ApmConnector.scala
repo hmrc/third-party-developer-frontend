@@ -18,16 +18,13 @@ package connectors
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import domain.models.applications.ApplicationId
 import scala.concurrent.ExecutionContext
-import domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
-import domain.models.applications.Environment
+import domain.models.applications._
 import domain.models.apidefinitions.{ApiContext,ApiVersion}
 import domain.models.subscriptions.{FieldName, ApiData}
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
-import domain.services._
 
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(implicit ec: ExecutionContext) {
@@ -37,27 +34,19 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(imp
     http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.value}")
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
-    import domain.services.FieldsJsonFormatters._
-    import domain.services.ApplicationJsonFormatters._
-    
+    import domain.services.SubscriptionsJsonFormatters._
+    import domain.services.ApplicationsJsonFormatters._
+
     http.GET[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]](s"${config.serviceBaseUrl}/subscription-fields?environment=$environment")
   }
 
   def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
     http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions?applicationId=${applicationId.value}")
   }
-    
 }
 
 object ApmConnector {
   case class Config(
       val serviceBaseUrl: String
   )
-}
-
-private[connectors] object ApmConnectorJsonFormatters extends ApplicationJsonFormatters with ApiDefinitionsJsonFormatters {
-  import play.api.libs.json._
-  import domain.models.subscriptions._
-  implicit val readsVersionData: Reads[VersionData] = Json.reads[VersionData]
-  implicit val readsApiData: Reads[ApiData] = Json.reads[ApiData]
 }

@@ -18,7 +18,7 @@ package domain.services
 
 import domain.models.subscriptions.{FieldValue, FieldName}
 
-trait ApplicationJsonFormatters
+trait ApplicationsJsonFormatters
 {
   import play.api.libs.json._
   import play.api.libs.json.JodaReads._
@@ -82,4 +82,4 @@ trait ApplicationJsonFormatters
   implicit val format = Json.format[ApplicationWithSubscriptionData]
 }
 
-object ApplicationJsonFormatters extends ApplicationJsonFormatters
+object ApplicationsJsonFormatters extends ApplicationsJsonFormatters

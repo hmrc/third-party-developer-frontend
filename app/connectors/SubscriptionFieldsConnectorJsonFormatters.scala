@@ -16,14 +16,19 @@
 
 package connectors
 
-import connectors.SubscriptionFieldsConnector.{AllApiFieldDefinitions, ApiFieldDefinitions, FieldDefinition}
-import domain.models.subscriptions._
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import domain.services.ApplicationsJsonFormatters
+import domain.services.AccessRequirementsJsonFormatters
+import domain.models.subscriptions.{AccessRequirements,FieldName}
+import domain.services.SubscriptionsJsonFormatters
 
-trait FieldDefinitionJsonFormatters {
-  import domain.services.AccessRequirementsJsonFormatters._
-  import domain.services.ApplicationJsonFormatters._
+object SubscriptionFieldsConnectorJsonFormatters
+    extends ApplicationsJsonFormatters
+    with SubscriptionsJsonFormatters
+    with AccessRequirementsJsonFormatters {
+
+  import SubscriptionFieldsConnectorDomain._
+  import play.api.libs.json._
+  import play.api.libs.functional.syntax._
 
   implicit val readsFieldDefinition: Reads[FieldDefinition] = (
     (JsPath \ "name").read[FieldName] and
@@ -36,9 +41,11 @@ trait FieldDefinitionJsonFormatters {
       ((JsPath \ "access").read[AccessRequirements] or Reads.pure(AccessRequirements.Default))
   )(FieldDefinition.apply _)
 
+  implicit val formatSubscriptionFieldsPutRequest: Format[SubscriptionFieldsPutRequest] = Json.format[SubscriptionFieldsPutRequest]
+
   implicit val readsApiFieldDefinitions: Reads[ApiFieldDefinitions] = Json.reads[ApiFieldDefinitions]
+
+  implicit val readsApplicationApiFieldValues: Reads[ApplicationApiFieldValues] = Json.reads[ApplicationApiFieldValues]
 
   implicit val formatAllApiFieldDefinitionsResponse: Reads[AllApiFieldDefinitions] = Json.reads[AllApiFieldDefinitions]
 }
-
-object FieldDefinitionJsonFormatters extends FieldDefinitionJsonFormatters

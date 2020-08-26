@@ -46,12 +46,6 @@ object ApiSubscriptionFields {
       fields: Seq[SubscriptionFieldValue]
   )
 
-  case class SubscriptionFieldsPutRequest(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersion: ApiVersion,
-      fields: Fields.Alias
-  )
 
   sealed trait ServiceSaveSubscriptionFieldsResponse
 
