@@ -21,12 +21,13 @@ import java.net.URLEncoder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import domain.models.apidefinitions.DefinitionFormats._
 import domain.models.apidefinitions.{ApiIdentifier, ApiContext, ApiVersion}
 import domain.models.applications.{Application, ApplicationToken, Environment}
 import domain.models.connectors.UserAuthenticationResponse
 import domain.models.developers.{Registration, Session, UpdateProfileRequest}
 import domain.models.subscriptions.APISubscription
+import domain.services.ApiDefinitionsJsonFormatters._
+import domain.services.SubscriptionsJsonFormatters._
 import org.scalatest.Matchers
 import play.api.Logger
 import play.api.libs.json.{Json, Writes}

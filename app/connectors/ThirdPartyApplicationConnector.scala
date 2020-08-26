@@ -44,7 +44,7 @@ import scala.util.Success
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
-  import ApplicationConnectorDomain._
+  import ThirdPartyApplicationConnectorDomain._
   import ThirdPartyApplicationConnectorJsonFormatters._
 
   protected val httpClient: HttpClient
@@ -231,7 +231,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 }
 
-private[connectors] object ApplicationConnectorDomain {
+private[connectors] object ThirdPartyApplicationConnectorDomain {
   import domain.models.applications.{ClientId, ClientSecret}
   import org.joda.time.DateTime
 

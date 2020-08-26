@@ -22,7 +22,7 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import builder.SubscriptionsBuilder
 import config.ApplicationConfig
-import connectors.SubscriptionFieldsConnector._
+import connectors.SubscriptionFieldsConnectorDomain._
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.{ClientId, Environment}
 import domain.models.subscriptions.{AccessRequirements, FieldName, FieldValue, Fields}

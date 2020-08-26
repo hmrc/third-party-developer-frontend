@@ -22,7 +22,7 @@ import java.util.UUID.randomUUID
 
 import akka.actor.ActorSystem
 import config.ApplicationConfig
-import connectors.ApplicationConnector.{AddClientSecretResponse, DeleteClientSecretRequest, TPAClientSecret}
+import connectors.ThirdPartyApplicationConnectorDomain._
 import domain._
 import domain.models.apidefinitions._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
@@ -45,6 +45,8 @@ import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
+import domain.models.subscriptions.VersionSubscription
+import domain.models.subscriptions.VersionSubscription
 
 class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 

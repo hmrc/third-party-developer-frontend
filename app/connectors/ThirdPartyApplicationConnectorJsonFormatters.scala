@@ -16,7 +16,7 @@
 
 package connectors
 
-import connectors.ApplicationConnectorDomain.{AddClientSecretResponse, DeleteClientSecretRequest, TPAClientSecret}
+import connectors.ThirdPartyApplicationConnectorDomain.{AddClientSecretResponse, DeleteClientSecretRequest, TPAClientSecret}
 import domain.services.{ApiDefinitionsJsonFormatters, SubscriptionsJsonFormatters}
 import play.api.libs.json.{Format, Json}
 
