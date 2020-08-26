@@ -30,11 +30,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
+import service.SubscriptionFieldsService
 
 trait ActionBuilders {
 
   val errorHandler: ErrorHandler
   val applicationService: ApplicationService
+  val subscriptionFieldsService: SubscriptionFieldsService
+
   implicit val appConfig: ApplicationConfig
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
@@ -51,7 +54,9 @@ trait ActionBuilders {
         (for {
           applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
           application = applicationWithSubs.application
-          subs <- OptionT.liftF(applicationService.apisWithSubscriptions(application))
+          fieldDefinitions <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(application.deployedTo))
+          subscriptionData <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
+          subs = applicationService.xyz(applicationWithSubs, fieldDefinitions, subscriptionData)
           role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
         } yield {
           ApplicationRequest(application, application.deployedTo, subs, role, developerSession, request)

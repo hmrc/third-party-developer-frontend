@@ -64,8 +64,9 @@ object ManageSubscriptions {
 class ManageSubscriptions @Inject() (
     val sessionService: SessionService,
     val auditService: AuditService,
-    val applicationService: ApplicationService,
     val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService,
+    val subscriptionFieldsService: SubscriptionFieldsService,
     mcc: MessagesControllerComponents,
     val subFieldsService: SubscriptionFieldsService,
     val cookieSigner: CookieSigner,

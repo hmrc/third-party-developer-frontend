@@ -28,7 +28,7 @@ import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import service.{ApplicationService, SessionService}
+import service.{ApplicationService, SessionService, SubscriptionFieldsService}
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
@@ -40,10 +40,11 @@ import scala.concurrent.Future.successful
 
 @Singleton
 class CheckYourAnswers @Inject() (
+    val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
+    val subscriptionFieldsService: SubscriptionFieldsService,
     val applicationCheck: ApplicationCheck,
     val sessionService: SessionService,
-    val errorHandler: ErrorHandler,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     checkYourAnswersView: CheckYourAnswersView,

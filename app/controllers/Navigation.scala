@@ -22,15 +22,16 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{ApplicationService, SessionService}
+import service.{ApplicationService, SessionService, SubscriptionFieldsService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Navigation @Inject()(val sessionService: SessionService,
-                           val applicationService: ApplicationService,
-                           mcc: MessagesControllerComponents,
                            val errorHandler: ErrorHandler,
+                           val applicationService: ApplicationService,
+                           val subscriptionFieldsService: SubscriptionFieldsService,
+                           mcc: MessagesControllerComponents,
                            val cookieSigner : CookieSigner)
                           (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends ApplicationController(mcc) {

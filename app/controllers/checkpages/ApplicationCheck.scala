@@ -26,7 +26,7 @@ import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import service.{ApplicationService, SessionService}
+import service.{ApplicationService, SessionService, SubscriptionFieldsService}
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
@@ -38,9 +38,10 @@ import scala.concurrent.Future.successful
 
 @Singleton
 class ApplicationCheck @Inject() (
-    val applicationService: ApplicationService,
-    val sessionService: SessionService,
     val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService,
+    val subscriptionFieldsService: SubscriptionFieldsService,
+    val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     landingPageView: LandingPageView,

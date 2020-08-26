@@ -66,9 +66,9 @@ class ApplicationService @Inject() (
   type FieldMap[V] = ApiMap[Map[FieldName,V]]
 
   def xyz(
-    application: ApplicationWithSubscriptionData, 
-    subscriptionFieldDefinitions: Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]])
-    (implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
+    application: ApplicationWithSubscriptionData,
+    subscriptionFieldDefinitions: Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]],
+    summaryApiDefinitions: Map[ApiContext,ApiData] ): Seq[APISubscriptionStatus] = {
 
     def handleContext(context: ApiContext, cdata: ApiData): Seq[APISubscriptionStatus] = {
       def handleVersion(version: ApiVersion, vdata: VersionData): APISubscriptionStatus = {
@@ -80,7 +80,7 @@ class ApplicationService @Inject() (
             case (n,d) => (SubscriptionFieldValue(d, fieldNameToValue.getOrElse(n, FieldValue.empty)))
           }
         }
-        
+
         APISubscriptionStatus(
           name = cdata.name,
           serviceName = cdata.serviceName,
@@ -103,14 +103,14 @@ class ApplicationService @Inject() (
         )
       }
 
-      cdata.versions.map{ 
+      cdata.versions.map{
         case (k,v) => handleVersion(k,v)
       }.toList
     }
 
-    apmConnector.fetchAllPossibleSubscriptions(application.application.id).map(_.flatMap {
+    summaryApiDefinitions.toList.flatMap {
       case (k,v) => handleContext(k,v)
-    }.toList)
+    }
   }
 
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {

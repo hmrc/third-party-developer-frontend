@@ -24,7 +24,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import service.{ApplicationService, SessionService}
+import service.{ApplicationService, SessionService, SubscriptionFieldsService}
 import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmationView, RedirectsView}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,9 +32,10 @@ import scala.concurrent.Future.successful
 
 @Singleton
 class Redirects @Inject() (
-    val applicationService: ApplicationService,
-    val sessionService: SessionService,
     val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService,
+    val subscriptionFieldsService: SubscriptionFieldsService,
+    val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     redirectsView: RedirectsView,

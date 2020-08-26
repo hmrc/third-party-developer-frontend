@@ -48,8 +48,9 @@ trait Auditing {
 @Singleton
 class UserLoginAccount @Inject()(val auditService: AuditService,
                                  val errorHandler: ErrorHandler,
-                                 val sessionService: SessionService,
                                  val applicationService: ApplicationService,
+                                 val subscriptionFieldsService: SubscriptionFieldsService,
+                                 val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
                                  val mfaMandateService: MfaMandateService,
                                  val cookieSigner : CookieSigner,

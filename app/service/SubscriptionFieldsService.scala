@@ -26,9 +26,13 @@ import service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.applications.ApplicationId
+import domain.models.subscriptions.ApiData
+import connectors.ApmConnector
+import domain.models.subscriptions.FieldName
 
 @Singleton
-class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper)(implicit val ec: ExecutionContext) {
+class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {
 
   def fetchFieldsValues(application: Application, fieldDefinitions: Seq[SubscriptionFieldDefinition], apiIdentifier: ApiIdentifier)(
       implicit hc: HeaderCarrier
@@ -98,6 +102,14 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper)
     } else {
       Future.successful(SaveSubscriptionFieldsSuccessResponse)
     }
+  }
+
+  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
+    apmConnector.fetchAllPossibleSubscriptions(applicationId)
+  }
+
+  def fetchAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
+    apmConnector.getAllFieldDefinitions(environment)
   }
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
