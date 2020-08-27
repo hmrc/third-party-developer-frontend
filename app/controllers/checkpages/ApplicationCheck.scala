@@ -35,12 +35,13 @@ import views.html.editapplication.NameSubmittedView
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import service.ApplicationActionService
 
 @Singleton
 class ApplicationCheck @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
-    val subscriptionFieldsService: SubscriptionFieldsService,
+    val applicationActionService: ApplicationActionService,
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,

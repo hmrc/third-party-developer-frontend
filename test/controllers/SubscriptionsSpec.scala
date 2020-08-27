@@ -23,7 +23,7 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications._
 import domain.models.connectors.TicketResult
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTimeZone
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
@@ -98,7 +98,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
   val tokens: ApplicationToken = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val manageSubscriptionsView = app.injector.instanceOf[ManageSubscriptionsView]
     val addAppSubscriptionsView = app.injector.instanceOf[AddAppSubscriptionsView]
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
@@ -109,11 +109,11 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     val underTest = new Subscriptions(
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
-      mock[SubscriptionFieldsService],
-      mock[SubscriptionsService],
-      applicationServiceMock,
-      sessionServiceMock,
       mockErrorHandler,
+      applicationServiceMock,
+      mock[SubscriptionsService],
+      applicationActionServiceMock,
+      sessionServiceMock,
       mcc,
       cookieSigner,
       manageSubscriptionsView,

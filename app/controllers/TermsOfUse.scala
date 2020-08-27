@@ -25,7 +25,7 @@ import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import service.{ApplicationService, SessionService, SubscriptionFieldsService}
+import service.{ApplicationService, SessionService, ApplicationActionService}
 import uk.gov.hmrc.time.DateTimeUtils
 import views.html.{TermsOfUseView, partials}
 
@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TermsOfUse @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
-    val subscriptionFieldsService: SubscriptionFieldsService,
+    val applicationActionService: ApplicationActionService,
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,

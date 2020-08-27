@@ -36,7 +36,7 @@ import scala.concurrent.Future.successful
 class AddApplication @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
-    val subscriptionFieldsService: SubscriptionFieldsService,
+    val applicationActionService: ApplicationActionService,
     val sessionService: SessionService,
     val auditService: AuditService,
     mcc: MessagesControllerComponents,

@@ -65,53 +65,6 @@ class ApplicationService @Inject() (
   type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName,V]]
 
-  def xyz(
-    application: ApplicationWithSubscriptionData,
-    subscriptionFieldDefinitions: Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]],
-    summaryApiDefinitions: Map[ApiContext,ApiData] ): Seq[APISubscriptionStatus] = {
-
-    def handleContext(context: ApiContext, cdata: ApiData): Seq[APISubscriptionStatus] = {
-      def handleVersion(version: ApiVersion, vdata: VersionData): APISubscriptionStatus = {
-        def zipDefintionsAndValues(): Seq[SubscriptionFieldValue] = {
-          val fieldNameToDefn = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
-          val fieldNameToValue = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
-
-          fieldNameToDefn.toList.map {
-            case (n,d) => (SubscriptionFieldValue(d, fieldNameToValue.getOrElse(n, FieldValue.empty)))
-          }
-        }
-
-        APISubscriptionStatus(
-          name = cdata.name,
-          serviceName = cdata.serviceName,
-          context,
-          apiVersion = ApiVersionDefinition(
-            version,
-            status = vdata.status,
-            access = Some(vdata.access)
-          ),
-          subscribed = application.subscriptions.contains(ApiIdentifier(context,version)),
-          requiresTrust = false, // Because these are filtered out
-          fields = SubscriptionFieldsWrapper(
-            applicationId = application.application.id,
-            clientId = application.application.clientId,
-            apiContext = context,
-            apiVersion = version,
-            fields = zipDefintionsAndValues()
-          ),
-          isTestSupport = cdata.isTestSupport
-        )
-      }
-
-      cdata.versions.map{
-        case (k,v) => handleVersion(k,v)
-      }.toList
-    }
-
-    summaryApiDefinitions.toList.flatMap {
-      case (k,v) => handleContext(k,v)
-    }
-  }
 
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 

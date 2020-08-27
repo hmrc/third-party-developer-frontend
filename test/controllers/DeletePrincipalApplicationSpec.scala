@@ -36,7 +36,7 @@ import scala.concurrent.Future.successful
 
 class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken with TestApplications with ErrorHandlerMock {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
     val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
     val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
     val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
@@ -44,9 +44,10 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     val deleteSubordinateApplicationCompleteView = app.injector.instanceOf[DeleteSubordinateApplicationCompleteView]
 
     val underTest = new DeleteApplication(
-      applicationServiceMock,
-      sessionServiceMock,
       mockErrorHandler,
+      applicationServiceMock,
+      applicationActionServiceMock,
+      sessionServiceMock,
       mcc,
       cookieSigner,
       deleteApplicationView,
@@ -82,8 +83,8 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
+    givenApplicationAction(application, loggedInUser)
     fetchSessionByIdReturns(sessionId, session)
-    fetchByApplicationIdReturns(application.id, application)
     when(underTest.applicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier])).thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
@@ -151,7 +152,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     trait UnapprovedApplicationSetup extends Setup {
       val nonApprovedApplication = aStandardNonApprovedApplication(loggedInUser.email)
 
-      fetchByApplicationIdReturns(nonApprovedApplication)
+      givenApplicationAction(nonApprovedApplication, loggedInUser)
       when(underTest.applicationService.apisWithSubscriptions(*)(any[HeaderCarrier])).thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
       when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(any[HeaderCarrier]))

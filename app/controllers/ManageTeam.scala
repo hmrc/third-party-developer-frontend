@@ -43,7 +43,7 @@ class ManageTeam @Inject() (
     val auditService: AuditService,
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
-    val subscriptionFieldsService: SubscriptionFieldsService,
+    val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     manageTeamView: ManageTeamView,

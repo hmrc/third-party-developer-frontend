@@ -39,7 +39,7 @@ import scala.concurrent.Future.successful
 class Credentials @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
-    val subscriptionFieldsService: SubscriptionFieldsService,
+    val applicationActionService: ApplicationActionService,
     val developerConnector: ThirdPartyDeveloperConnector,
     val auditService: AuditService,
     val sessionService: SessionService,

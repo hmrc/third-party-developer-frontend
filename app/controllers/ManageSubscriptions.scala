@@ -29,7 +29,7 @@ import play.api.data.FormError
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import play.twirl.api.Html
-import service.{ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
+import service.{ApplicationService, AuditService, SessionService, ApplicationActionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
 import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
@@ -66,7 +66,7 @@ class ManageSubscriptions @Inject() (
     val auditService: AuditService,
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
-    val subscriptionFieldsService: SubscriptionFieldsService,
+    val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
     val subFieldsService: SubscriptionFieldsService,
     val cookieSigner: CookieSigner,

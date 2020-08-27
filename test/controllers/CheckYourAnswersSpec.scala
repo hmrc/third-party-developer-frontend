@@ -130,7 +130,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
   val groupedSubsSubscribedToNothing = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = None)
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
     val checkYourAnswersView = app.injector.instanceOf[CheckYourAnswersView]
     val landingPageView = app.injector.instanceOf[LandingPageView]
     val teamView = app.injector.instanceOf[TeamView]
@@ -144,10 +144,11 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     val contactDetailsView = app.injector.instanceOf[ContactDetailsView]
 
     val underTest = new CheckYourAnswers(
+      mockErrorHandler,
       applicationServiceMock,
+      applicationActionServiceMock,
       mock[ApplicationCheck],
       sessionServiceMock,
-      mockErrorHandler,
       mcc,
       cookieSigner,
       checkYourAnswersView,
@@ -240,9 +241,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
         checkInformation = checkInformation
       )
 
-      fetchByApplicationIdReturns(application.id, application)
+      givenApplicationAction(application, loggedInUser)
       fetchCredentialsReturns(application, tokens)
-      givenApplicationHasNoSubs(application)
       givenUpdateCheckInformationSucceeds(application)
 
       application

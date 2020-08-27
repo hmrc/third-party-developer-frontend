@@ -43,10 +43,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class Subscriptions @Inject() (
     val developerConnector: ThirdPartyDeveloperConnector,
     val auditService: AuditService,
-    val subscriptionsService: SubscriptionsService,
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
-    val subscriptionFieldsService: SubscriptionFieldsService,
+    val subscriptionsService: SubscriptionsService,
+    val applicationActionService: ApplicationActionService,
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,

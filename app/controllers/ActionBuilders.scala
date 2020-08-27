@@ -25,18 +25,16 @@ import domain.models.developers.DeveloperSession
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.mvc._
 import play.api.mvc.Results._
-import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
-import service.SubscriptionFieldsService
+import service.ApplicationActionService
 
 trait ActionBuilders {
 
   val errorHandler: ErrorHandler
-  val applicationService: ApplicationService
-  val subscriptionFieldsService: SubscriptionFieldsService
+  val applicationActionService: ApplicationActionService
 
   implicit val appConfig: ApplicationConfig
 
@@ -51,16 +49,8 @@ trait ActionBuilders {
         implicit val implicitRequest: MessagesRequest[A] = request
         import cats.implicits._
 
-        (for {
-          applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
-          application = applicationWithSubs.application
-          fieldDefinitions <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(application.deployedTo))
-          subscriptionData <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
-          subs = applicationService.xyz(applicationWithSubs, fieldDefinitions, subscriptionData)
-          role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
-        } yield {
-          ApplicationRequest(application, application.deployedTo, subs, role, developerSession, request)
-        }).toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession)))).value
+        applicationActionService.process(applicationId, developerSession)
+        .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession)))).value
       }
     }
 
