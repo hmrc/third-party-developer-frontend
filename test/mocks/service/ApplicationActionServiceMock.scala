@@ -40,7 +40,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
     when(applicationActionServiceMock.process[A](eqTo(applicationId), *)(*,*))
     .thenReturn(OptionT.none[Future, ApplicationRequest[A]])
 
-  def givenApplicationAction[A](application: Application,developerSession: DeveloperSession): Unit =
+  def givenApplicationAction[A](application: Application, developerSession: DeveloperSession): Unit =
    givenApplicationAction[A](ApplicationWithSubscriptionData(application, Set.empty, Map.empty), developerSession)
 
   def givenApplicationAction[A](appData: ApplicationWithSubscriptionData, developerSession: DeveloperSession, subscriptions: Seq[APISubscriptionStatus] = Seq.empty): Unit = {
