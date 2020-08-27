@@ -128,7 +128,6 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     fetchSessionByIdReturns(sessionId, session)
     givenApplicationUpdateSucceeds()
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
-    givenApplicationHasNoSubs(activeApplication)
 
     val subsData = Seq(
       exampleSubscriptionWithFields("api1", 1),
@@ -349,7 +348,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationHasNoSubs(app)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
         ungivenSubscribeToApiSucceeds(app, apiContext, apiVersion)
         givenUpdateCheckInformationSucceeds(app)
 
