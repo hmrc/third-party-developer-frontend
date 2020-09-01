@@ -16,22 +16,19 @@
 
 package mocks.service
 
-import org.mockito.MockitoSugar
-import org.mockito.ArgumentMatchersSugar
-import service.ApplicationActionService
-import domain.models.applications.Application
-import domain.models.applications.ApplicationWithSubscriptionData
-import scala.concurrent.Future.{successful,failed}
-import controllers.ApplicationRequest
-import domain.models.developers.DeveloperSession
-import play.api.mvc.MessagesRequest
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.http.HeaderCarrier
-import domain.models.applications.ApplicationId
 import cats.data.OptionT
 import cats.implicits._
+import controllers.ApplicationRequest
 import domain.models.apidefinitions.APISubscriptionStatus
+import domain.models.applications.{Application, ApplicationId, ApplicationWithSubscriptionData}
+import domain.models.developers.DeveloperSession
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+import play.api.mvc.MessagesRequest
+import service.ApplicationActionService
+import uk.gov.hmrc.http.HeaderCarrier
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationActionServiceMock = mock[ApplicationActionService]
