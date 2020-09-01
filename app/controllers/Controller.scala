@@ -58,7 +58,11 @@ case class ApplicationRequest[A](
     role: Role,
     user: DeveloperSession,
     request: MessagesRequest[A]
-) extends MessagesRequest[A](request, request.messagesApi)
+) extends MessagesRequest[A](request, request.messagesApi) {
+  def hasSubscriptionFields: Boolean = {
+    subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
+  }
+}
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields], applicationRequest: ApplicationRequest[A])
     extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
@@ -91,11 +95,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
-    ApplicationViewModel(request.application, hasSubscriptionFields(request))
-
-  def hasSubscriptionFields(request: ApplicationRequest[_]): Boolean = {
-    request.subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
-  }
+    ApplicationViewModel(request.application, request.hasSubscriptionFields)
 
   def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>

@@ -37,7 +37,7 @@ class ApplicationActionService @Inject()(
   subscriptionFieldsService: SubscriptionFieldsService
 )(implicit ec: ExecutionContext)  {
 
-  def process[A](applicationId: ApplicationId, developerSession: DeveloperSession)(implicit request: MessagesRequest[A], hc: HeaderCarrier): OptionT[Future,ApplicationRequest[A]] = {
+  def process[A](applicationId: ApplicationId, developerSession: DeveloperSession)(implicit request: MessagesRequest[A], hc: HeaderCarrier): OptionT[Future, ApplicationRequest[A]] = {
     import cats.implicits._
 
     for {
@@ -45,14 +45,14 @@ class ApplicationActionService @Inject()(
         application = applicationWithSubs.application
         fieldDefinitions <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(application.deployedTo))
         subscriptionData <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
-        subs = xyz(applicationWithSubs, fieldDefinitions, subscriptionData)
+        subs = toApiSubscriptionStatusSeq(applicationWithSubs, fieldDefinitions, subscriptionData)
         role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
       } yield {
         ApplicationRequest(application, application.deployedTo, subs, role, developerSession, request)
       }
   }
 
-  def xyz(
+  def toApiSubscriptionStatusSeq(
     application: ApplicationWithSubscriptionData,
     subscriptionFieldDefinitions: Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]],
     summaryApiDefinitions: Map[ApiContext,ApiData] ): Seq[APISubscriptionStatus] = {
@@ -60,11 +60,11 @@ class ApplicationActionService @Inject()(
     def handleContext(context: ApiContext, cdata: ApiData): Seq[APISubscriptionStatus] = {
       def handleVersion(version: ApiVersion, vdata: VersionData): APISubscriptionStatus = {
         def zipDefinitionsAndValues(): Seq[SubscriptionFieldValue] = {
-          val fieldNameToDefn = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
+          val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
           val fieldNameToValue = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
 
-          fieldNameToDefn.toList.map {
-            case (n,d) => (SubscriptionFieldValue(d, fieldNameToValue.getOrElse(n, FieldValue.empty)))
+          fieldNameToDefinition.toList.map {
+            case (n,d) => SubscriptionFieldValue(d, fieldNameToValue.getOrElse(n, FieldValue.empty))
           }
         }
 

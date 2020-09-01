@@ -64,6 +64,7 @@ class ApplicationService @Inject() (
   type FieldMap[V] = ApiMap[Map[FieldName,V]]
 
 
+  // TODO - Candidate for removal as no longer used
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
     def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription, fieldDefinitions: DefinitionsByApiVersion): Future[APISubscriptionStatus] = {

@@ -98,7 +98,7 @@ class CheckYourAnswers @Inject() (
 
           val requestForm = validateCheckFormForApplication(request)
 
-          val applicationViewModel = ApplicationViewModel(application.copy(checkInformation = Some(information)), hasSubscriptionFields(request))
+          val applicationViewModel = ApplicationViewModel(application.copy(checkInformation = Some(information)), request.hasSubscriptionFields)
           Conflict(landingPageView(applicationViewModel, requestForm.withError("confirmedName", applicationNameAlreadyExistsKey)))
       }
   }

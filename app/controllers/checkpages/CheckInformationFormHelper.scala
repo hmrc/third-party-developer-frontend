@@ -28,7 +28,7 @@ trait CheckInformationFormHelper {
   def createCheckFormForApplication(request: ApplicationRequest[_]): Form[CheckInformationForm] = {
     val application = request.application
 
-    if (hasSubscriptionFields(request)) {
+    if (request.hasSubscriptionFields) {
       formWithSubscriptionConfiguration.fill(
         CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
       )
@@ -42,7 +42,7 @@ trait CheckInformationFormHelper {
   def validateCheckFormForApplication(request: ApplicationRequest[_]): Form[CheckInformationForm] = {
     val application = request.application
 
-    if (hasSubscriptionFields(request)) {
+    if (request.hasSubscriptionFields) {
       formWithSubscriptionConfiguration.fillAndValidate(
         CheckInformationForm.fromCheckInformation(application.checkInformation.getOrElse(CheckInformation()))
       )
