@@ -16,7 +16,6 @@
 
 package service
 
-import config.ApplicationConfig
 import connectors._
 import domain._
 import domain.models.apidefinitions._
@@ -25,8 +24,8 @@ import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketResult}
 import domain.models.developers.DeveloperSession
-import domain.models.subscriptions._
 import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.subscriptions.{FieldName, _}
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.DefinitionsByApiVersion
@@ -35,7 +34,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.subscriptions.FieldName
 
 @Singleton
 class ApplicationService @Inject() (

@@ -40,7 +40,7 @@ class ApplicationActionService @Inject()(
   def process[A](applicationId: ApplicationId, developerSession: DeveloperSession)(implicit request: MessagesRequest[A], hc: HeaderCarrier): OptionT[Future,ApplicationRequest[A]] = {
     import cats.implicits._
 
-    (for {
+    for {
         applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
         application = applicationWithSubs.application
         fieldDefinitions <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(application.deployedTo))
@@ -50,7 +50,6 @@ class ApplicationActionService @Inject()(
       } yield {
         ApplicationRequest(application, application.deployedTo, subs, role, developerSession, request)
       }
-    )
   }
 
   def xyz(
@@ -60,7 +59,7 @@ class ApplicationActionService @Inject()(
 
     def handleContext(context: ApiContext, cdata: ApiData): Seq[APISubscriptionStatus] = {
       def handleVersion(version: ApiVersion, vdata: VersionData): APISubscriptionStatus = {
-        def zipDefintionsAndValues(): Seq[SubscriptionFieldValue] = {
+        def zipDefinitionsAndValues(): Seq[SubscriptionFieldValue] = {
           val fieldNameToDefn = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
           val fieldNameToValue = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
 
@@ -85,7 +84,7 @@ class ApplicationActionService @Inject()(
             clientId = application.application.clientId,
             apiContext = context,
             apiVersion = version,
-            fields = zipDefintionsAndValues()
+            fields = zipDefinitionsAndValues()
           ),
           isTestSupport = cdata.isTestSupport
         )
