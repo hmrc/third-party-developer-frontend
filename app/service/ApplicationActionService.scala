@@ -21,7 +21,6 @@ import domain.models.applications.ApplicationId
 import domain.models.developers.DeveloperSession
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
-
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -54,8 +53,8 @@ class ApplicationActionService @Inject()(
 
   def toApiSubscriptionStatusSeq(
     application: ApplicationWithSubscriptionData,
-    subscriptionFieldDefinitions: Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]],
-    summaryApiDefinitions: Map[ApiContext,ApiData] ): Seq[APISubscriptionStatus] = {
+    subscriptionFieldDefinitions: Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]],
+    summaryApiDefinitions: Map[ApiContext, ApiData] ): Seq[APISubscriptionStatus] = {
 
     def handleContext(context: ApiContext, cdata: ApiData): Seq[APISubscriptionStatus] = {
       def handleVersion(version: ApiVersion, vdata: VersionData): APISubscriptionStatus = {
@@ -90,7 +89,9 @@ class ApplicationActionService @Inject()(
         )
       }
 
-      cdata.versions.map{
+      val orderDescending: Ordering[ApiVersion] = (x: ApiVersion, y: ApiVersion) => y.value.compareTo(x.value)
+
+      cdata.versions.toSeq.sortBy(_._1)(orderDescending).map {
         case (k,v) => handleVersion(k,v)
       }.toList
     }
