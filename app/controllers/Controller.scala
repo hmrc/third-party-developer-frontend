@@ -89,7 +89,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
-    ApplicationViewModel(request.application, hasSubscriptionFields(request))
+    ApplicationViewModel(request.application, hasSubscriptionFields(request), hasPpnsFields(request))
 
   def hasSubscriptionFields(request: ApplicationRequest[_]): Boolean = {
     request.subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
@@ -158,6 +158,16 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
       (ManageSubscriptionsActions
         .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldsRefiner(context, version))
         .async(fun)(request)
+    }
+  }
+
+  def subscribedToApiWithPpnsFieldAction(applicationId: ApplicationId)
+                                        (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      val composedActions = Action andThen
+        applicationAction(applicationId, loggedIn) andThen
+        subscribedToApiWithPpnsFieldFilter
+      composedActions.async(fun)(request)
     }
   }
 }

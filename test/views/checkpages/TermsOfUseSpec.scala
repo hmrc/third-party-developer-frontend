@@ -58,7 +58,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
-        ApplicationViewModel(thirdPartyApplication, false),
+        ApplicationViewModel(thirdPartyApplication, false, false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
         submitButtonLabel = "A Label",
         submitAction = mock[Call],
@@ -87,7 +87,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
 
       val page = termsOfUse.render(
-        ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false),
+        ApplicationViewModel(thirdPartyApplication.copy(checkInformation = Some(checkInformation)), false, false),
         form = TermsOfUseForm.form.fill(termsOfUseForm),
         submitButtonLabel = "A Label",
         submitAction = mock[Call],

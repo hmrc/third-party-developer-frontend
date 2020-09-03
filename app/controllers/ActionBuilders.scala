@@ -131,6 +131,26 @@ trait ActionBuilders {
       }
     }
 
+  def subscribedToApiWithPpnsFieldFilter(
+    implicit ec: ExecutionContext
+  ): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+    override protected def executionContext: ExecutionContext = ec
+
+    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
+      implicit val implicitRequest: ApplicationRequest[A] = request
+
+      if (hasPpnsFields(request)) {
+        Future.successful(None)
+      } else {
+        Future.successful(Some(NotFound(errorHandler.notFoundTemplate)))
+      }
+    }
+  }
+
+  def hasPpnsFields(request: ApplicationRequest[_]): Boolean = {
+    request.subscriptions.exists(s => s.subscribed && s.fields.fields.exists(field => field.definition.`type` == "PPNSField"))
+  }
+
   private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
     if (cond) {
       None

@@ -55,8 +55,8 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
-    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true)
-    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false)
+    val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
+    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
   }
 
   "Left Hand Nav" when {
@@ -79,7 +79,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
       }
 
       "display server token link for old apps" in new Setup {
-        val oldAppWithoutSubsFields = ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false)
+        val oldAppWithoutSubsFields = ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
         val page = leftHandNavView.render(Some(oldAppWithoutSubsFields), Some("details"), request, loggedInUser, appConfig)
 
         page.contentType should include("text/html")
@@ -107,7 +107,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
       }
 
       "display server token link for old apps" in new Setup {
-        val oldAppWithSubsFields = ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true)
+        val oldAppWithSubsFields = ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
         val page = leftHandNavView.render(Some(oldAppWithSubsFields), Some("details"), request, loggedInUser, appConfig)
 
         page.contentType should include("text/html")

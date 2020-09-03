@@ -45,7 +45,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec with WithCSRFAddToken 
         EditApplicationForm(application.id, application.name, application.description, application.privacyPolicyUrl, application.termsAndConditionsUrl)
       )
 
-      changeDetails.render(form, ApplicationViewModel(application, hasSubscriptionsFields = false), request, loggedIn, messagesProvider, appConfig, "nav-section")
+      changeDetails.render(form, ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), request, loggedIn, messagesProvider, appConfig, "nav-section")
     }
 
     def formGroupWithLabelIsPrepopulated(doc: Document, labelText: String, inputValue: String) = {
