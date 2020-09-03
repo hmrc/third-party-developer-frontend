@@ -22,7 +22,7 @@ import domain.models.applications.ApplicationId
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{ApplicationService, PushPullNotificationsService, SessionService}
+import service.{ApplicationActionService, ApplicationService, PushPullNotificationsService, SessionService}
 import views.html.ppns.PushSecretsView
 
 import scala.concurrent.ExecutionContext
@@ -33,6 +33,7 @@ class PushPullNotifications @Inject() (
                                         override val applicationService: ApplicationService,
                                         override val errorHandler: ErrorHandler,
                                         override val cookieSigner: CookieSigner,
+                                        override val applicationActionService: ApplicationActionService,
                                         mcc: MessagesControllerComponents,
                                         pushSecretsView: PushSecretsView,
                                         pushPullNotificationsService: PushPullNotificationsService,

@@ -54,7 +54,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
 
         "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
           val application: Application = anApplication(developerEmail = loggedInUser.email)
-          givenApplicationExists(application)
+          givenApplicationAction(application, loggedInUser)
 
           val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
 
@@ -74,7 +74,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
 
         "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
           val application: Application = anApplication(developerEmail = loggedInUser.email)
-          givenApplicationExists(application)
+          givenApplicationAction(application, loggedInUser)
 
           val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
 
@@ -85,7 +85,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
       "not a team member on an application" should {
         "return not found" in new Setup {
           val application: Application = aStandardApplication
-          givenApplicationExists(application)
+          givenApplicationAction(application, loggedInUser)
 
           val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
 
@@ -96,7 +96,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
       "not logged in" should {
         "redirect to login" in new Setup {
           val application: Application = aStandardApplication
-          givenApplicationExists(application)
+          givenApplicationAction(application, loggedInUser)
 
           val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedOutRequest)
 
@@ -106,7 +106,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
     }
   }
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
     private val pushSecretsView = app.injector.instanceOf[PushSecretsView]
     private val pushPullNotificationsServiceMock = mock[PushPullNotificationsService]
 
@@ -115,6 +115,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
       applicationServiceMock,
       mockErrorHandler,
       cookieSigner,
+      applicationActionServiceMock,
       mcc,
       pushSecretsView,
       pushPullNotificationsServiceMock
@@ -141,13 +142,12 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     def showPushSecretsShouldRenderThePage(application: Application) = {
-      givenApplicationExists(application)
-
       val subscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("ppns", 1)
       val newFields: Seq[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
         .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = "PPNSField")))
-      val newSubscriptionStatus: APISubscriptionStatus = subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields))
-      givenApplicationHasSubs(application, Seq(newSubscriptionStatus))
+      val subsData = Seq(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
+
+      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
       val expectedSecrets = Seq("some secret")
       when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application.clientId))(any[HeaderCarrier])).thenReturn(successful(expectedSecrets))
