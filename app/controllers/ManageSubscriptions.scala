@@ -130,9 +130,9 @@ class ManageSubscriptions @Inject() (
 
   // TODO: Use value class for FieldNameParam
   def editApiMetadataFieldPage(
-      applicationId: domain.models.applications.ApplicationId,
-      apiContext: domain.models.apidefinitions.ApiContext,
-      apiVersion: domain.models.apidefinitions.ApiVersion,
+      applicationId: ApplicationId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
       fieldNameParam: String) : Action[AnyContent] =
 
     subFieldsDefinitionsExistActionByApi(applicationId, apiContext, apiVersion) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
@@ -142,11 +142,12 @@ class ManageSubscriptions @Inject() (
 
       def notFound = NotFound(errorHandler.notFoundTemplate)
 
+      // TODO : Move this to an action refiner?
       successful(definitionsRequest.apiSubscription.fields.fields
         .find(field => field.definition.name == fieldName)
         .fold(notFound)((field : SubscriptionFieldValue) => {
 
-          // TODO : Check can write or 403.
+          // TODO : Check can write or return forbidden (403) (possibly in above refiner?)
 
           val subscriptionViewModel = SubscriptionFieldViewModel(
             field.definition.name,
