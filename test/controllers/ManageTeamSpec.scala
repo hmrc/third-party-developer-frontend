@@ -95,7 +95,6 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
       givenApplicationAction(application, developerSession)
       fetchCredentialsReturns(application, tokens())
-      // givenApplicationHasSubs(application, Seq.empty)
 
       application
     }
@@ -345,7 +344,6 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
         givenApplicationAction(app, loggedInUser)
 
-        // fetchByApplicationIdReturns(app)
         givenApplicationHasSubs(app, subsData)
 
         val result = executeAction
