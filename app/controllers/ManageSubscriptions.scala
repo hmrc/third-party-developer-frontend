@@ -37,6 +37,7 @@ import views.html.managesubscriptions._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import domain.models.subscriptions.DevhubAccessLevel
 
 object ManageSubscriptions {
 
@@ -142,31 +143,38 @@ class ManageSubscriptions @Inject() (
 
       def notFound = NotFound(errorHandler.notFoundTemplate)
 
-      // TODO : Move this to an action refiner?
+      // TODO : Move forbidden / not_found logic to new refiner
+
       successful(definitionsRequest.apiSubscription.fields.fields
         .find(field => field.definition.name == fieldName)
         .fold(notFound)((field : SubscriptionFieldValue) => {
 
-          // TODO : Check can write or return forbidden (403) (possibly in above refiner?)
 
-          val subscriptionViewModel = SubscriptionFieldViewModel(
-            field.definition.name,
-            field.definition.description,
-            field.definition.hint,
-            canWrite = true,
-            field.value,
-            Seq.empty
-          )
+          val accessLevel = DevhubAccessLevel.fromRole(definitionsRequest.applicationRequest.role)
+          val canWrite = field.definition.access.devhub.satisfiesWrite(accessLevel)
 
-          val viewModel = EditApiConfigurationFieldViewModel(
-            definitionsRequest.apiSubscription.name,
-            definitionsRequest.apiSubscription.apiVersion.version,
-            definitionsRequest.apiSubscription.context,
-            definitionsRequest.apiSubscription.apiVersion.displayedStatus,
-            subscriptionViewModel
-          )
+          if (canWrite){
+            val subscriptionViewModel = SubscriptionFieldViewModel(
+              field.definition.name,
+              field.definition.description,
+              field.definition.hint,
+              canWrite = true,
+              field.value,
+              Seq.empty
+            )
+
+            val viewModel = EditApiConfigurationFieldViewModel(
+              definitionsRequest.apiSubscription.name,
+              definitionsRequest.apiSubscription.apiVersion.version,
+              definitionsRequest.apiSubscription.context,
+              definitionsRequest.apiSubscription.apiVersion.displayedStatus,
+              subscriptionViewModel
+            )
 
           Ok(editApiMetadataFieldView(definitionsRequest.applicationRequest.application, viewModel))
+          } else {
+            Forbidden(errorHandler.badRequestTemplate)
+          }
         }))
   }
 
