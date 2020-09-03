@@ -332,7 +332,31 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
       "the edit single subscription field page is called it" should {
         "render the page" in new ManageSubscriptionsSetup {
-          // TODO
+          val whoCanWrite = NoOne
+          val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
+
+          val fieldName = "my-field-name"
+          val field = buildSubscriptionFieldValue(fieldName, Some("old-value"), accessDenied)
+          val wrapper = buildSubscriptionFieldsWrapper(application, Seq(field))
+
+          val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
+          val subsData = Seq(apiSubscriptionStatus)
+
+          givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
+
+          private val result =
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName))(
+              loggedInRequest
+            )
+
+          status(result) shouldBe OK
+
+          contentAsString(result) should include(apiSubscriptionStatus.name)
+          contentAsString(result) should include(apiSubscriptionStatus.apiVersion.version.value)
+
+          contentAsString(result) should include(field.definition.description)
+          contentAsString(result) should include(field.definition.hint)
+          contentAsString(result) should include(field.value.value)
         }
       }
 
