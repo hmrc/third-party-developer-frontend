@@ -80,11 +80,11 @@ trait SubscriptionsJsonFormatters {
   implicit val readsSubscriptionFieldDefinition: Reads[SubscriptionFieldDefinition] = (
     (JsPath \ "name").read[FieldName] and
       (JsPath \ "description").read[String] and
+      ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
       ((JsPath \ "hint").read[String] or Reads.pure("")) and
       (JsPath \ "type").read[String] and
       // TODO: Use enums from api-subs-fields
       //  (JsPath \ "type").read[FieldDefinitionType] and
-      ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
       ((JsPath \ "access").read[AccessRequirements] or Reads.pure(AccessRequirements.Default))
   )(SubscriptionFieldDefinition.apply _)
 
