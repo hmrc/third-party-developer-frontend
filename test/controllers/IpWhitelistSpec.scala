@@ -33,8 +33,9 @@ import views.html.ipwhitelist.{ChangeIpWhitelistSuccessView, ChangeIpWhitelistVi
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
+import domain.models.developers.DeveloperSession
 
-class IpWhitelistSpec extends BaseControllerSpec with TestApplications with WithCSRFAddToken {
+class IpWhitelistSpec extends BaseControllerSpec with ApplicationActionServiceMock with TestApplications with WithCSRFAddToken {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val mockDeskproService = mock[DeskproService]
@@ -44,9 +45,10 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
 
     val underTest = new IpWhitelist(
       mockDeskproService,
-      applicationServiceMock,
-      sessionServiceMock,
       mockErrorHandler,
+      applicationServiceMock,
+      applicationActionServiceMock,
+      sessionServiceMock,
       mcc,
       cookieSigner,
       manageIpWhitelistView,
@@ -59,9 +61,11 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
 
     val admin: Developer = Developer("admin@example.com", "Joe", "Bloggs")
     val developer: Developer = Developer("developer@example.com", "John", "Doe")
-    def givenTheUserIsLoggedInAs(user: Developer) = {
+
+    def givenTheUserIsLoggedInAs(user: Developer): DeveloperSession = {
       val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
       fetchSessionByIdReturns(sessionId, session)
+      DeveloperSession(session)
     }
 
     implicit val hc = HeaderCarrier()
@@ -74,8 +78,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
 
   "manageIpWhitelist" should {
     "return the manage IP whitelist page for admins" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
 
       val result = underTest.manageIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest)
 
@@ -86,8 +90,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "return bad request when the application does not have whitelisted IPs" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithoutIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithoutIpWhitelist, developerSession)
 
       val result = underTest.manageIpWhitelist(anApplicationWithoutIpWhitelist.id)(loggedInRequest)
 
@@ -95,8 +99,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "return the manage IP whitelist page for developers" in new Setup {
-      givenTheUserIsLoggedInAs(developer)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(developer)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
 
       val result = underTest.manageIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest)
 
@@ -109,8 +113,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
 
   "changeIpWhitelist" should {
     "return the change IP whitelist page for admins" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
 
       val result = underTest.changeIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken)
 
@@ -121,8 +125,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "return bad request when the application does not have whitelisted IPs" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithoutIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithoutIpWhitelist, developerSession)
 
       val result = underTest.changeIpWhitelist(anApplicationWithoutIpWhitelist.id)(loggedInRequest.withCSRFToken)
 
@@ -130,8 +134,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "return forbidden for developers" in new Setup {
-      givenTheUserIsLoggedInAs(developer)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(developer)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
 
       val result = underTest.changeIpWhitelist(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken)
 
@@ -141,8 +145,9 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
 
   "changeIpWhitelistAction" should {
     "send deskpro ticket for admins" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
+
       when(mockDeskproService.submitSupportEnquiry(supportEnquiryFormCaptor.capture())(any[Request[AnyRef]], any[HeaderCarrier])).thenReturn(successful(TicketCreated))
       val expectedComments = "add 1.1.2.0/24 to the whitelist"
 
@@ -159,8 +164,9 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "propagate exception from deskpro" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
+
       when(mockDeskproService.submitSupportEnquiry(any[SupportEnquiryForm])(any[Request[AnyRef]], any[HeaderCarrier]))
         .thenReturn(failed(new DeskproTicketCreationFailed("unexpected error")))
 
@@ -173,8 +179,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "return bad request when the application does not have whitelisted IPs" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithoutIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithoutIpWhitelist, developerSession)
 
       val result = underTest.changeIpWhitelistAction(anApplicationWithoutIpWhitelist.id)(loggedInRequest.withCSRFToken
         .withFormUrlEncodedBody("description" -> "add 1.1.2.0/24 to the whitelist"))
@@ -183,8 +189,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "return forbidden for developers" in new Setup {
-      givenTheUserIsLoggedInAs(developer)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(developer)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
 
       val result = underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
         .withFormUrlEncodedBody("description" -> "add 1.1.2.0/24 to the whitelist"))
@@ -193,8 +199,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "return bad request when the change description is missing" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
 
       val result = underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken)
 
@@ -202,8 +208,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "return bad request when the change description is empty" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
 
       val result = underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
         .withFormUrlEncodedBody("description" -> ""))
@@ -212,8 +218,8 @@ class IpWhitelistSpec extends BaseControllerSpec with TestApplications with With
     }
 
     "return bad request when the change description is too long" in new Setup {
-      givenTheUserIsLoggedInAs(admin)
-      givenApplicationExists(anApplicationWithIpWhitelist)
+      val developerSession = givenTheUserIsLoggedInAs(admin)
+      givenApplicationAction(anApplicationWithIpWhitelist, developerSession)
 
       val result = underTest.changeIpWhitelistAction(anApplicationWithIpWhitelist.id)(loggedInRequest.withCSRFToken
         .withFormUrlEncodedBody("description" -> "a" * 3001))

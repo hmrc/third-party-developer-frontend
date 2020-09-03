@@ -19,7 +19,7 @@ package controllers
 import config.ErrorHandler
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
@@ -60,7 +60,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -73,10 +73,11 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
+      mock[ErrorHandler],
       applicationServiceMock,
+      applicationActionServiceMock,
       sessionServiceMock,
       mock[AuditService],
-      mock[ErrorHandler],
       mcc,
       cookieSigner,
       addApplicationSubordinateEmptyNestView,

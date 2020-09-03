@@ -17,7 +17,7 @@
 package service
 
 import builder.SubscriptionsBuilder
-import connectors.ThirdPartyApplicationConnector
+import connectors.{ApmConnector, ThirdPartyApplicationConnector}
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications._
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldValue, Fields}
@@ -50,8 +50,9 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
     val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
+    val mockApmConnector: ApmConnector = mock[ApmConnector]
 
-    val underTest = new SubscriptionFieldsService(mockConnectorsWrapper)
+    val underTest = new SubscriptionFieldsService(mockConnectorsWrapper, mockApmConnector)
 
     when(mockConnectorsWrapper.forEnvironment(application.deployedTo))
       .thenReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector))

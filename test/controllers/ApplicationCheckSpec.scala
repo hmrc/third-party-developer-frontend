@@ -164,7 +164,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     createFullyConfigurableApplication(collaborators, appId, clientId, state, checkInformation, access)
   }
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationProvider {
+  trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider {
     val landingPageView = app.injector.instanceOf[LandingPageView]
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val nameSubmittedView = app.injector.instanceOf[NameSubmittedView]
@@ -181,9 +181,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     val applicationCheck = app.injector.instanceOf[ApplicationCheck]
 
     val underTest = new ApplicationCheck(
-      applicationServiceMock,
-      sessionServiceMock,
       mockErrorHandler,
+      applicationServiceMock,
+      applicationActionServiceMock,
+      sessionServiceMock,
       mcc,
       cookieSigner,
       landingPageView,
@@ -208,8 +209,6 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     givenApplicationUpdateSucceeds()
 
-    fetchByApplicationIdReturns(appId, application)
-
     fetchCredentialsReturns(application, tokens)
 
     givenRemoveTeamMemberSucceeds(loggedInUser)
@@ -218,14 +217,23 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     givenApplicationNameIsValid()
 
-    givenApplicationHasNoSubs(application)
-
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
     val loggedInRequestWithFormBody = loggedInRequest.withFormUrlEncodedBody()
 
     def idAttributeOnCheckedInput(result: Future[Result]): String = Jsoup.parse(contentAsString(result)).select("input[checked]").attr("id")
+
+  }
+
+  trait Setup extends BaseSetup {
+    givenApplicationAction(application, loggedInUser)
+  }
+
+  trait SetupWithSubs extends BaseSetup {
+    def setupApplicationWithSubs(a: Application, s: Seq[APISubscriptionStatus]): Unit = {
+      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(s), asFields((s))), loggedInUser, s)
+    }
   }
 
   "check request submitted" should {
@@ -394,10 +402,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       body should include(stepCompleteIndication("agree-terms-status"))
     }
 
-    "show api subscription configuration step as complete when it has been done" in new Setup {
+    "show api subscription configuration step as complete when it has been done" in new SetupWithSubs {
       def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))
 
-      givenApplicationHasSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
+      setupApplicationWithSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -512,10 +520,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   }
 
   "api subscriptions review" should {
-    "return page" in new Setup {
+    "return page" in new SetupWithSubs {
       def createApplication() = createPartiallyConfigurableApplication()
       val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
-      givenApplicationHasSubs(application, subsData)
+      setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsPage(application.id))(loggedInRequest)
 
@@ -524,10 +532,10 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       contentAsString(result) should include(generateName("api1"))
     }
 
-    "success action" in new Setup {
+    "success action" in new SetupWithSubs {
       def createApplication() = createPartiallyConfigurableApplication()
       val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
-      givenApplicationHasSubs(application, subsData)
+      setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -583,8 +591,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       status(result) shouldBe BAD_REQUEST
     }
 
-    "return 404 NOT FOUND when only API-EXAMPLE-MICROSERVICE API is subscribed to" in new Setup with BasicApplicationProvider {
-      givenApplicationHasSubs(application, Seq(onlyApiExampleMicroserviceSubscribedTo))
+    "return 404 NOT FOUND when only API-EXAMPLE-MICROSERVICE API is subscribed to" in new SetupWithSubs with BasicApplicationProvider {
+      setupApplicationWithSubs(application, Seq(onlyApiExampleMicroserviceSubscribedTo))
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 

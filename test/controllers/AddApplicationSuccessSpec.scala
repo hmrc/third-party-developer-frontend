@@ -74,7 +74,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -87,10 +87,11 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
+      mock[ErrorHandler],
       applicationServiceMock,
+      applicationActionServiceMock,
       sessionServiceMock,
       mock[AuditService],
-      mock[ErrorHandler],
       mcc,
       cookieSigner,
       addApplicationSubordinateEmptyNestView,
@@ -126,7 +127,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     "return the page with the user is logged in and the environment is Sandbox" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-      givenApplicationExists(subordinateApp)
+      givenApplicationAction(subordinateApp, loggedInUser)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
@@ -140,9 +141,9 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     }
 
     "return the page with the user is logged in and the environment is Development" in new Setup {
-      givenApplicationExists(subordinateApp)
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      givenApplicationAction(subordinateApp, loggedInUser)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
@@ -179,5 +180,4 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     title.isDefined shouldBe true
     title.get
   }
-
 }

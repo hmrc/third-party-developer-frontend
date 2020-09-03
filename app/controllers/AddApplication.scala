@@ -34,10 +34,11 @@ import scala.concurrent.Future.successful
 
 @Singleton
 class AddApplication @Inject() (
+    val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
+    val applicationActionService: ApplicationActionService,
     val sessionService: SessionService,
     val auditService: AuditService,
-    val errorHandler: ErrorHandler,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     addApplicationSubordinateEmptyNestView: AddApplicationSubordinateEmptyNestView,

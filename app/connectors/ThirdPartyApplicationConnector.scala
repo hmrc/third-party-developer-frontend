@@ -21,7 +21,6 @@ import java.net.URLEncoder.encode
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.models.apidefinitions.DefinitionFormats._
 import domain.models.applications._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
@@ -30,12 +29,11 @@ import domain._
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
-import org.joda.time.DateTime
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status.NO_CONTENT
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.Json
 import service.ApplicationService.ApplicationConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -46,7 +44,8 @@ import scala.util.Success
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
-  import ApplicationConnector._
+  import ThirdPartyApplicationConnectorDomain._
+  import ThirdPartyApplicationConnectorJsonFormatters._
 
   protected val httpClient: HttpClient
   protected val proxiedHttpClient: ProxiedHttpClient
@@ -183,7 +182,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
-    import ApplicationConnector.JsonFormatters._
 
     http.POST[ClientSecretRequest, AddClientSecretResponse](s"$serviceBaseUrl/application/${id.value}/client-secret", clientSecretRequest) map { response =>
       // API-4275: Once actual secret is only returned by TPA for new ones, will be able to find based on 'secret' field being defined
@@ -197,7 +195,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      import ApplicationConnector.JsonFormatters._
 
       http.POST(s"$serviceBaseUrl/application/${applicationId.value}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
         ApplicationUpdateSuccessful
@@ -234,22 +231,18 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 }
 
-object ApplicationConnector {
+private[connectors] object ThirdPartyApplicationConnectorDomain {
+  import domain.models.applications.{ClientId, ClientSecret}
+  import org.joda.time.DateTime
+
   def toDomain(tpaClientSecret: TPAClientSecret): ClientSecret =
     ClientSecret(tpaClientSecret.id, tpaClientSecret.name, tpaClientSecret.createdOn, tpaClientSecret.lastAccess)
 
-  private[connectors] case class AddClientSecretResponse(clientId: ClientId, accessToken: String, clientSecrets: List[TPAClientSecret])
-  private[connectors] case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
-  private[connectors] case class DeleteClientSecretRequest(actorEmailAddress: String)
+  case class AddClientSecretResponse(clientId: ClientId, accessToken: String, clientSecrets: List[TPAClientSecret])
 
-  object JsonFormatters {
-    import play.api.libs.json.JodaReads._
-    import play.api.libs.json.JodaWrites._
+  case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
 
-    implicit val formatTPAClientSecret: Format[TPAClientSecret] = Json.format[TPAClientSecret]
-    implicit val formatAddClientSecretResponse: Format[AddClientSecretResponse] = Json.format[AddClientSecretResponse]
-    implicit val formatDeleteClientSecretRequest: Format[DeleteClientSecretRequest] = Json.format[DeleteClientSecretRequest]
-  }
+  case class DeleteClientSecretRequest(actorEmailAddress: String)
 }
 
 @Singleton

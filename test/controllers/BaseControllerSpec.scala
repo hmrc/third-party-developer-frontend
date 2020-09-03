@@ -25,7 +25,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
-import views.helper.EnvironmentNameService
 
 class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
 

@@ -25,17 +25,18 @@ import model.ApplicationViewModel
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import service.{ApplicationService, SessionService}
+import service.{ApplicationService, SessionService, ApplicationActionService}
 import uk.gov.hmrc.time.DateTimeUtils
-import views.html.{partials, TermsOfUseView}
+import views.html.{TermsOfUseView, partials}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TermsOfUse @Inject() (
     val errorHandler: ErrorHandler,
-    val sessionService: SessionService,
     val applicationService: ApplicationService,
+    val applicationActionService: ApplicationActionService,
+    val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     termsOfUseView: TermsOfUseView

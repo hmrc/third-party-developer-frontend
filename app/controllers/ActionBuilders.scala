@@ -25,16 +25,17 @@ import domain.models.developers.DeveloperSession
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.mvc._
 import play.api.mvc.Results._
-import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
+import service.ApplicationActionService
 
 trait ActionBuilders {
 
   val errorHandler: ErrorHandler
-  val applicationService: ApplicationService
+  val applicationActionService: ApplicationActionService
+
   implicit val appConfig: ApplicationConfig
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
@@ -48,14 +49,8 @@ trait ActionBuilders {
         implicit val implicitRequest: MessagesRequest[A] = request
         import cats.implicits._
 
-        (for {
-          applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
-          application = applicationWithSubs.application
-          subs <- OptionT.liftF(applicationService.apisWithSubscriptions(application))
-          role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
-        } yield {
-          ApplicationRequest(application, application.deployedTo, subs, role, developerSession, request)
-        }).toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession)))).value
+        applicationActionService.process(applicationId, developerSession)
+        .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, developerSession)))).value
       }
     }
 

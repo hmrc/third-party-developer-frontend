@@ -23,6 +23,7 @@ import domain.models.applications.{Application, ApplicationId, ClientId}
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldsWrapper, SubscriptionFieldValue}
 import utils.AsyncHmrcSpec
 import domain.models.subscriptions.FieldValue
+import domain.models.subscriptions.FieldName
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
@@ -159,4 +160,36 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
 
   def exampleSubscriptionWithFields(prefix: String, count: Int): APISubscriptionStatus =
     exampleSubscriptionWithoutFields(prefix).copy(fields = generateWrapper(prefix, count))
+
+
+  def asSubscriptions(in: Seq[APISubscriptionStatus]): Set[ApiIdentifier] = {
+    in.filter(_.subscribed).map(ass => {
+      ApiIdentifier(ass.context, ass.apiVersion.version)
+    })
+    .toSet
+  }
+
+  def asFields(in: SubscriptionFieldsWrapper): Map[FieldName, FieldValue] = {
+    in.fields.map(sfv => sfv.definition.name -> sfv.value).toMap
+  }
+
+  def asFields(subscriptions: Seq[APISubscriptionStatus]): Map[ApiContext, Map[ApiVersion, Map[FieldName, FieldValue]]] = {
+    import cats._
+    import cats.implicits._
+    type MapType = Map[ApiVersion, Map[FieldName, FieldValue]]
+
+    // Shortcut combining as we know there will never be records for the same version for the same context
+    implicit def monoidVersions: Monoid[MapType] =
+      new Monoid[MapType] {
+
+        override def combine(x: MapType, y: MapType): MapType = x ++ y
+
+        override def empty: MapType = Map.empty
+      }
+
+    Monoid.combineAll(
+      subscriptions.filter(_.subscribed).toList.map(s => Map(s.context -> Map(s.apiVersion.version -> asFields(s.fields))))
+    )
+  }
+
 }

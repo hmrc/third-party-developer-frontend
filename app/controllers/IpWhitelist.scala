@@ -33,9 +33,10 @@ import scala.concurrent.Future.successful
 @Singleton
 class IpWhitelist @Inject() (
     deskproService: DeskproService,
-    val applicationService: ApplicationService,
-    val sessionService: SessionService,
     val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService,
+    val applicationActionService: ApplicationActionService,
+    val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     manageIpWhitelistView: ManageIpWhitelistView,

@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
+import service.ApplicationService
 
 trait HeaderEnricher {
   def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]): HeaderCarrier =
@@ -57,7 +58,11 @@ case class ApplicationRequest[A](
     role: Role,
     user: DeveloperSession,
     request: MessagesRequest[A]
-) extends MessagesRequest[A](request, request.messagesApi)
+) extends MessagesRequest[A](request, request.messagesApi) {
+  def hasSubscriptionFields: Boolean = {
+    subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
+  }
+}
 
 case class ApplicationWithFieldDefinitionsRequest[A](fieldDefinitions: NonEmptyList[APISubscriptionStatusWithSubscriptionFields], applicationRequest: ApplicationRequest[A])
     extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
@@ -85,15 +90,12 @@ abstract class BaseController(mcc: MessagesControllerComponents) extends Fronten
 abstract class LoggedInController(mcc: MessagesControllerComponents) extends BaseController(mcc)
 
 abstract class ApplicationController(mcc: MessagesControllerComponents) extends LoggedInController(mcc) with ActionBuilders {
+  val applicationService: ApplicationService
 
   implicit def userFromRequest(implicit request: ApplicationRequest[_]): DeveloperSession = request.user
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
-    ApplicationViewModel(request.application, hasSubscriptionFields(request), hasPpnsFields(request))
-
-  def hasSubscriptionFields(request: ApplicationRequest[_]): Boolean = {
-    request.subscriptions.exists(s => s.subscribed && s.fields.fields.nonEmpty)
-  }
+    ApplicationViewModel(request.application, request.hasSubscriptionFields, hasPpnsFields(request))
 
   def whenTeamMemberOnApp(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     loggedInAction { implicit request =>

@@ -43,6 +43,7 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
+import domain.models.subscriptions.VersionSubscription
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 

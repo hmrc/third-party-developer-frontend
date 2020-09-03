@@ -26,6 +26,8 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.HttpResponse
+import scala.util.control.NonFatal
 
 @Singleton
 class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext) {
@@ -34,8 +36,8 @@ class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, me
   val api = API("deskpro")
 
   def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
-    http.POST(requestUrl("/deskpro/ticket"), deskproTicket) map (_ => TicketCreated) recover {
-      case e: Exception =>
+    http.POST[DeskproTicket,HttpResponse](requestUrl("/deskpro/ticket"), deskproTicket) map (_ => TicketCreated) recover {
+      case NonFatal(e) =>
         Logger.error(s"Deskpro ticket creation failed for: $deskproTicket", e)
         throw new DeskproTicketCreationFailed(e.getMessage)
     }

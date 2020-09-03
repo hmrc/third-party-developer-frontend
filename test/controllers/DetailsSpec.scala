@@ -69,7 +69,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         "return a redirect when using an application in testing state" in new Setup {
           val testingApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.testing)
 
-          givenApplicationExists(testingApplication)
+          givenApplicationAction(testingApplication, loggedInUser)
 
           val result = testingApplication.callDetails
 
@@ -80,7 +80,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         "return the credentials requested page on an application pending approval" in new Setup {
           val pendingApprovalApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingGatekeeperApproval("dont-care"))
 
-          givenApplicationExists(pendingApprovalApplication)
+          givenApplicationAction(pendingApprovalApplication, loggedInUser)
 
           val result = addToken(underTest.details(pendingApprovalApplication.id))(loggedInRequest)
 
@@ -94,7 +94,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         "return the credentials requested page on an application pending verification" in new Setup {
           val pendingVerificationApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care"))
 
-          givenApplicationExists(pendingVerificationApplication)
+          givenApplicationAction(pendingVerificationApplication, loggedInUser)
 
           val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInRequest)
 
@@ -109,7 +109,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "not a team member on an application" should {
         "return not found" in new Setup {
           val application = aStandardApplication
-          givenApplicationExists(application)
+          givenApplicationAction(application, loggedInUser)
 
           val result = application.callDetails
 
@@ -120,7 +120,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "not logged in" should {
         "redirect to login" in new Setup {
           val application = aStandardApplication
-          givenApplicationExists(application)
+          givenApplicationAction(application, loggedInUser)
 
           val result = application.callDetailsNotLoggedIn
 
@@ -150,7 +150,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return forbidden for a developer on a standard production app" in new Setup {
         val application = anApplication(developerEmail = loggedInUser.email)
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.callChangeDetails
 
@@ -159,7 +159,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return not found when not a teamMember on the app" in new Setup {
         val application = aStandardApprovedApplication
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.callChangeDetails
 
@@ -168,7 +168,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "redirect to login when not logged in" in new Setup {
         val application = aStandardApprovedApplication
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.callDetailsNotLoggedIn
 
@@ -177,7 +177,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return not found for an ROPC application" in new Setup {
         val application = anROPCApplication()
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = underTest.details(application.id)(loggedInRequest)
 
@@ -186,7 +186,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return not found for a privileged application" in new Setup {
         val application = aPrivilegedApplication()
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = underTest.details(application.id)(loggedInRequest)
 
@@ -197,7 +197,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "changeDetailsAction validation" should {
       "not pass when application is updated with empty name" in new Setup {
         val application = anApplication(adminEmail = loggedInUser.email)
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.withName("").callChangeDetailsAction
 
@@ -206,7 +206,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "not pass when application is updated with invalid name" in new Setup {
         val application = anApplication(adminEmail = loggedInUser.email)
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.withName("a").callChangeDetailsAction
 
@@ -218,7 +218,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
           .thenReturn(Future.successful(Invalid.invalidName))
 
         val application = anApplication(adminEmail = loggedInUser.email)
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
 
@@ -234,7 +234,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return not found" in new Setup {
         val application = aStandardNonApprovedApplication()
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.callChangeDetails
 
@@ -243,7 +243,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "return not found when not a teamMember on the app" in new Setup {
         val application = aStandardApprovedApplication
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.withDescription(newDescription).callChangeDetailsAction
 
@@ -252,7 +252,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "redirect to login when not logged in" in new Setup {
         val application = aStandardApprovedApplication
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.withDescription(newDescription).callChangeDetailsActionNotLoggedIn
 
@@ -271,7 +271,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "return forbidden for a developer" in new Setup {
         val application = anApplication(developerEmail = loggedInUser.email)
 
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         val result = application.withDescription(newDescription).callChangeDetailsAction
 
@@ -281,7 +281,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       "keep original application name when administrator does an update" in new Setup {
         val application = anApplication(adminEmail = loggedInUser.email)
 
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         application.withName(newName).callChangeDetailsAction
 
@@ -310,7 +310,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       "update the app but not the check information" in new Setup {
         val application = aSandboxApplication(adminEmail = loggedInUser.email)
-        givenApplicationExists(application)
+        givenApplicationAction(application, loggedInUser)
 
         await(application.withName(newName).callChangeDetailsAction)
 
@@ -320,16 +320,17 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
   }
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
     val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
 
     val underTest = new Details(
-      applicationServiceMock,
-      mock[SessionService],
       mockErrorHandler,
+      applicationServiceMock,
+      applicationActionServiceMock,
+      mock[SessionService],
       mcc,
       cookieSigner,
       unauthorisedAppDetailsView,
@@ -379,7 +380,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true) = {
-      givenApplicationExists(application)
+      givenApplicationAction(application, loggedInUser)
 
       val result = application.callDetails
 
@@ -394,7 +395,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     def changeDetailsShouldRenderThePage(application: Application) = {
-      givenApplicationExists(application)
+      givenApplicationAction(application, loggedInUser)
 
       val result = application.callChangeDetails
 
@@ -414,7 +415,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     def changeDetailsShouldRedirectOnSuccess(application: Application) = {
-      givenApplicationExists(application)
+      givenApplicationAction(application, loggedInUser)
 
       val result = application.withDescription(newDescription).callChangeDetailsAction
 
@@ -423,7 +424,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     def changeDetailsShouldUpdateTheApplication(application: Application) = {
-      givenApplicationExists(application)
+      givenApplicationAction(application, loggedInUser)
 
       await(
         application

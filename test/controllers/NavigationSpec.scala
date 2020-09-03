@@ -19,7 +19,7 @@ package controllers
 import config.ErrorHandler
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.views.NavLink
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -36,12 +36,13 @@ class NavigationSpec extends BaseControllerSpec {
 
   var userPassword = "Password1!"
 
-  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock {
+  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val underTest = new Navigation(
       sessionServiceMock,
-      applicationServiceMock,
-      mcc,
       mock[ErrorHandler],
+      applicationServiceMock,
+      applicationActionServiceMock,
+      mcc,
       cookieSigner
     )
 

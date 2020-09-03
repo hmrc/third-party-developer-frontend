@@ -24,7 +24,7 @@ import domain.models.applications._
 import domain.models.connectors.AddTeamMemberResponse
 import domain.models.controllers.AddTeamMemberPageMode
 import helpers.string._
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -49,7 +49,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
   val loggedInUser = DeveloperSession(session)
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with TestApplications {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TestApplications {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
     val addTeamMemberView = app.injector.instanceOf[AddTeamMemberView]
     val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
@@ -58,8 +58,9 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     val underTest = new ManageTeam(
       sessionServiceMock,
       mock[AuditService],
-      applicationServiceMock,
       mockErrorHandler,
+      applicationServiceMock,
+      applicationActionServiceMock,
       mcc,
       cookieSigner,
       manageTeamView,
@@ -87,12 +88,13 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         additionalTeamMembers: Seq[Collaborator] = Seq()
     ) = {
 
-      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(Collaborator(loggedInUser.email, userRole))
-      val application = aStandardApplication.copy(collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = DateTime.parse("2018-04-06T09:00"))
+      val developerSession = DeveloperSession(session)
 
-      fetchByApplicationIdReturns(appId, application)
+      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(Collaborator(developerSession.email, userRole))
+      val application = aStandardApplication.copy(id = appId, collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = DateTime.parse("2018-04-06T09:00"))
+
+      givenApplicationAction(application, developerSession)
       fetchCredentialsReturns(application, tokens())
-      givenApplicationHasSubs(application, Seq.empty)
 
       application
     }
@@ -340,7 +342,8 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
         val app = aStandardPendingApprovalApplication(developer.email)
 
-        fetchByApplicationIdReturns(app)
+        givenApplicationAction(app, loggedInUser)
+
         givenApplicationHasSubs(app, subsData)
 
         val result = executeAction

@@ -37,9 +37,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Details @Inject() (
-    val applicationService: ApplicationService,
-    val sessionService: SessionService,
     val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService,
+    val applicationActionService: ApplicationActionService,
+    val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
