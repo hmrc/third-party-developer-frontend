@@ -16,80 +16,89 @@
 
 package controllers
 
-import config.{ApplicationConfig, ErrorHandler}
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
-import helpers.LoggedInRequestTestHelper
-import mocks.service.ApplicationServiceMock
-import play.api.http.Status.{NOT_FOUND, OK}
-import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents}
-import play.api.test.Helpers._
-import service.{ApplicationService, SessionService}
+ import config.{ApplicationConfig, ErrorHandler}
+ import domain.models.apidefinitions.{ApiContext, ApiVersion}
+ import domain.models.developers.DeveloperSession
+ import helpers.LoggedInRequestTestHelper
+ import mocks.service._
+ import play.api.http.Status.{NOT_FOUND, OK}
+ import play.api.libs.crypto.CookieSigner
+ import play.api.mvc.{AnyContent, MessagesControllerComponents}
+ import play.api.test.Helpers._
+ import service.{ApplicationActionService, ApplicationService, SessionService}
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+ import scala.concurrent.{ExecutionContext, Future}
+ import scala.concurrent.ExecutionContext.Implicits.global
 
-class TestController(
-    val cookieSigner: CookieSigner,
-    val mcc: MessagesControllerComponents,
-    val sessionService: SessionService,
-    val errorHandler: ErrorHandler,
-    val applicationService: ApplicationService
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
-    extends ApplicationController(mcc) {}
+ class TestController(
+     val cookieSigner: CookieSigner,
+     val mcc: MessagesControllerComponents,
+     val sessionService: SessionService,
+     val errorHandler: ErrorHandler,
+     val applicationService: ApplicationService,
+     val applicationActionService: ApplicationActionService
+ )(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
+     extends ApplicationController(mcc) {}
 
-class ActionBuildersSpec extends BaseControllerSpec with ApplicationServiceMock with builder.ApplicationBuilder with builder.SubscriptionsBuilder with LoggedInRequestTestHelper {
+ class ActionBuildersSpec extends BaseControllerSpec
+   with ApplicationServiceMock
+   with ApplicationActionServiceMock
+   with builder.ApplicationBuilder
+   with builder.SubscriptionsBuilder
+   with LoggedInRequestTestHelper {
 
-  trait Setup {
-    val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
+   trait Setup {
+     val loggedInUser = DeveloperSession(session)
 
-    val applicationWithSubscriptionData = buildApplicationWithSubscriptionData(developer.email)
-    val subscriptionWithoutSubFields = buildAPISubscriptionStatus("api name")
-    val subscriptionWithSubFields =
-      buildAPISubscriptionStatus("api name", fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionData.application, Seq(buildSubscriptionFieldValue("field1")))))
+     val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
-    val underTest = new TestController(cookieSigner, mcc, sessionServiceMock, errorHandler, applicationServiceMock)
+     val applicationWithSubscriptionData = buildApplicationWithSubscriptionData(developer.email)
+     val subscriptionWithoutSubFields = buildAPISubscriptionStatus("api name")
+     val subscriptionWithSubFields =
+       buildAPISubscriptionStatus("api name", fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionData.application, Seq(buildSubscriptionFieldValue("field1")))))
 
-    fetchByApplicationIdReturns(applicationWithSubscriptionData)
+     val underTest = new TestController(cookieSigner, mcc, sessionServiceMock, errorHandler, applicationServiceMock, applicationActionServiceMock)
 
-    def runTestAction(context: ApiContext, version: ApiVersion, expectedStatus: Int) = {
-      val testResultBody = "was called"
+     fetchByApplicationIdReturns(applicationWithSubscriptionData)
 
-      val result = underTest.subFieldsDefinitionsExistActionByApi(applicationWithSubscriptionData.application.id, context, version) {
-        definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] => Future.successful(underTest.Ok(testResultBody))
-      }(loggedInRequest)
-      status(result) shouldBe expectedStatus
-      if (expectedStatus == OK) {
-        contentAsString(result) shouldBe testResultBody
-      } else {
-        contentAsString(result) should not be testResultBody
-      }
-    }
-  }
+     def runTestAction(context: ApiContext, version: ApiVersion, expectedStatus: Int) = {
+       val testResultBody = "was called"
 
-  "subFieldsDefinitionsExistActionByApi" should {
-    "Found one" in new Setup {
-      givenApplicationHasSubs(applicationWithSubscriptionData.application, Seq(subscriptionWithSubFields))
+       val result = underTest.subFieldsDefinitionsExistActionByApi(applicationWithSubscriptionData.application.id, context, version) {
+         definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] => Future.successful(underTest.Ok(testResultBody))
+       }(loggedInRequest)
+       status(result) shouldBe expectedStatus
+       if (expectedStatus == OK) {
+         contentAsString(result) shouldBe testResultBody
+       } else {
+         contentAsString(result) should not be testResultBody
+       }
+     }
+   }
 
-      runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, OK)
-    }
+   "subFieldsDefinitionsExistActionByApi" should {
+     "Found one" in new Setup {
+       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, Seq(subscriptionWithSubFields))
 
-    "Wrong context" in new Setup {
-      givenApplicationHasSubs(applicationWithSubscriptionData.application, Seq(subscriptionWithSubFields))
+       runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, OK)
+     }
 
-      runTestAction(ApiContext("wrong-context"), subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
-    }
+     "Wrong context" in new Setup {
+       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, Seq(subscriptionWithSubFields))
 
-    "Wrong version" in new Setup {
-      givenApplicationHasSubs(applicationWithSubscriptionData.application, Seq(subscriptionWithSubFields))
+       runTestAction(ApiContext("wrong-context"), subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
+     }
 
-      runTestAction(subscriptionWithSubFields.context, ApiVersion("wrong-version"), NOT_FOUND)
-    }
+     "Wrong version" in new Setup {
+       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, Seq(subscriptionWithSubFields))
 
-    "Subscription with no fields" in new Setup {
-      givenApplicationHasSubs(applicationWithSubscriptionData.application, Seq(subscriptionWithoutSubFields))
+       runTestAction(subscriptionWithSubFields.context, ApiVersion("wrong-version"), NOT_FOUND)
+     }
 
-      runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
-    }
-  }
-}
+     "Subscription with no fields" in new Setup {
+       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, Seq(subscriptionWithoutSubFields))
+
+       runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
+     }
+   }
+ }

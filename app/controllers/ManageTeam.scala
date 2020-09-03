@@ -41,8 +41,9 @@ import scala.concurrent.Future.successful
 class ManageTeam @Inject() (
     val sessionService: SessionService,
     val auditService: AuditService,
-    val applicationService: ApplicationService,
     val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService,
+    val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     manageTeamView: ManageTeamView,

@@ -16,9 +16,9 @@
 
 package domain.services
 
-import domain.models.subscriptions.Fields
+import domain.models.subscriptions.{FieldValue, FieldName}
 
-trait JsonFormatters extends Fields.JsonFormatters
+trait ApplicationsJsonFormatters
 {
   import play.api.libs.json._
   import play.api.libs.json.JodaReads._
@@ -27,6 +27,11 @@ trait JsonFormatters extends Fields.JsonFormatters
   import uk.gov.hmrc.play.json.Union
   import domain.models.applications._
   import domain.models.apidefinitions._
+
+  implicit val formatFieldValue = Json.valueFormat[FieldValue]
+  implicit val formatFieldName = Json.valueFormat[FieldName]
+  implicit val keyReadsFieldName: KeyReads[FieldName] = key => JsSuccess(FieldName(key))
+  implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
 
   val readsOverrideFlag = Reads[OverrideFlag] {
     case JsString(value) => JsSuccess(OverrideFlag(value))
@@ -70,11 +75,11 @@ trait JsonFormatters extends Fields.JsonFormatters
   implicit val keyReadsApiVersion: KeyReads[ApiVersion] = key => JsSuccess(ApiVersion(key))
   implicit val keyWritesApiVersion: KeyWrites[ApiVersion] = _.value
 
-  implicit val formatApiIdentifier = Json.format[ApiIdentifier]
 
   implicit val formatApplication = Json.format[Application]
 
+  import ApiDefinitionsJsonFormatters.formatApiIdentifier
   implicit val format = Json.format[ApplicationWithSubscriptionData]
 }
 
-object JsonFormatters extends JsonFormatters
+object ApplicationsJsonFormatters extends ApplicationsJsonFormatters

@@ -16,13 +16,14 @@
 
 package connectors
 
-import connectors.SubscriptionFieldsConnector.{ApiFieldDefinitions, FieldDefinition}
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import play.api.libs.json.{Json, JsSuccess}
 import utils.AsyncHmrcSpec
 import domain.models.subscriptions.FieldName
+import connectors.SubscriptionFieldsConnectorDomain.ApiFieldDefinitions
+import connectors.SubscriptionFieldsConnectorDomain.FieldDefinition
 
 class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
 
@@ -72,7 +73,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
       |}""".stripMargin
 
   "from json" should {
-    import SubscriptionFieldsConnector.JsonFormatters._
+    import SubscriptionFieldsConnectorJsonFormatters._
     "for basic field definition" in {
       Json.fromJson[ApiFieldDefinitions](Json.parse(basicFieldDefinitionJson)) shouldBe JsSuccess(basicFieldDefinition)
     }

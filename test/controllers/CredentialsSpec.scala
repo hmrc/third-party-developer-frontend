@@ -25,7 +25,7 @@ import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.ClientSecretLimitExceeded
 import domain.models.applications._
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import mocks.service._
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.CSRFTokenHelper._
@@ -97,7 +97,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       access = access
     )
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationProvider {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider {
     val credentialsView = app.injector.instanceOf[CredentialsView]
     val clientIdView = app.injector.instanceOf[ClientIdView]
     val clientSecretsView = app.injector.instanceOf[ClientSecretsView]
@@ -105,11 +105,12 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     val deleteClientSecretView = app.injector.instanceOf[DeleteClientSecretView]
 
     val underTest = new Credentials(
+      mockErrorHandler,
       applicationServiceMock,
+      applicationActionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
       sessionServiceMock,
-      mockErrorHandler,
       mcc,
       cookieSigner,
       credentialsView,
@@ -124,8 +125,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
     implicit val hc = HeaderCarrier()
 
-    fetchByApplicationIdReturns(application.id, applicationWithSubscriptionData)
-    givenApplicationHasNoSubs(application)
+    givenApplicationAction(applicationWithSubscriptionData, loggedInUser)
     fetchCredentialsReturns(application, tokens)
     fetchSessionByIdReturns(sessionId, session)
     givenApplicationUpdateSucceeds()
@@ -279,7 +279,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     }
 
     "display the NotFound page when the application does not exist" in new Setup with BasicApplicationProvider {
-      fetchByApplicationIdReturnsNone(applicationId)
+      givenApplicationActionReturnsNotFound(applicationId)
 
       val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 

@@ -77,8 +77,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     val underTest = new UserLoginAccount(
       mock[AuditService],
       mock[ErrorHandler],
-      sessionServiceMock,
       mock[ApplicationService],
+      mock[SubscriptionFieldsService],
+      sessionServiceMock,
       mcc,
       mfaMandateService,
       cookieSigner,

@@ -16,7 +16,6 @@
 
 package service
 
-import config.ApplicationConfig
 import connectors._
 import domain._
 import domain.models.apidefinitions._
@@ -25,8 +24,8 @@ import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketResult}
 import domain.models.developers.DeveloperSession
-import domain.models.subscriptions.APISubscription
 import domain.models.subscriptions.ApiSubscriptionFields._
+import domain.models.subscriptions.{FieldName, _}
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.DefinitionsByApiVersion
@@ -61,6 +60,11 @@ class ApplicationService @Inject() (
   def fetchCredentials(application: Application)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
 
+  type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
+  type FieldMap[V] = ApiMap[Map[FieldName,V]]
+
+
+  // TODO - Candidate for removal as no longer used
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
     def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription, fieldDefinitions: DefinitionsByApiVersion): Future[APISubscriptionStatus] = {

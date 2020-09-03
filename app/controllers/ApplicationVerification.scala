@@ -36,7 +36,7 @@ class ApplicationVerification @Inject()(service: ApplicationService,
                                        (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedOutController(mcc) {
 
   def verifyUplift(code: String) = Action.async { implicit request =>
-    service.verify(code) map { 
+    service.verify(code) map {
       case ApplicationVerificationSuccessful => Ok(applicationVerificationView(success = true))
       case ApplicationVerificationFailed     => Ok(applicationVerificationView(success = false))
     }

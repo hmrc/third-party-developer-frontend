@@ -23,7 +23,7 @@ import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.applications.Role.ADMINISTRATOR
 import domain.models.developers.{Developer, LoggedInState, Session}
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.ArgumentCaptor
@@ -39,16 +39,18 @@ import views.html.TermsOfUseView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import domain.models.developers.DeveloperSession
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
     val underTest = new TermsOfUse(
       mockErrorHandler,
-      sessionServiceMock,
       applicationServiceMock,
+      applicationActionServiceMock,
+      sessionServiceMock,
       mcc,
       cookieSigner,
       termsOfUseView
@@ -58,6 +60,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     val sessionId = "sessionId"
     val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val developerSession = DeveloperSession(session)
 
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
@@ -86,7 +89,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
         checkInformation = checkInformation
       )
 
-      fetchByApplicationIdReturns(application.id, application)
+      givenApplicationAction(application, developerSession)
 
       when(underTest.applicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
         .thenReturn(successful(Seq.empty[APISubscriptionStatus]))

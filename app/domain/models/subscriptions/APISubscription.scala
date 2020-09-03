@@ -16,7 +16,9 @@
 
 package domain.models.subscriptions
 
-import domain.models.apidefinitions.{ApiContext, VersionSubscription}
+import domain.models.apidefinitions.{ApiContext, ApiVersion, APIStatus, APIAccess, ApiVersionDefinition}
+
+case class VersionSubscription(version: ApiVersionDefinition, subscribed: Boolean)
 
 case class APISubscription(
     name: String,
@@ -26,3 +28,11 @@ case class APISubscription(
     requiresTrust: Option[Boolean],
     isTestSupport: Boolean = false
 )
+
+case class VersionData(status: APIStatus, access: APIAccess)
+
+case class ApiData(
+    serviceName: String,
+    name: String,
+    isTestSupport: Boolean,
+    versions: Map[ApiVersion, VersionData])

@@ -18,7 +18,7 @@ package controllers
 
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
 import play.api.mvc.Result
@@ -48,16 +48,17 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val redirectsView = app.injector.instanceOf[RedirectsView]
     val addRedirectView = app.injector.instanceOf[AddRedirectView]
     val deleteRedirectConfirmationView = app.injector.instanceOf[DeleteRedirectConfirmationView]
     val changeRedirectView = app.injector.instanceOf[ChangeRedirectView]
 
     val underTest = new Redirects(
-      applicationServiceMock,
-      sessionServiceMock,
       mockErrorHandler,
+      applicationServiceMock,
+      applicationActionServiceMock,
+      sessionServiceMock,
       mcc,
       cookieSigner,
       redirectsView,
@@ -75,7 +76,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
     fetchSessionByIdReturns(sessionId, session)
 
     override def givenApplicationExists(application: Application): Unit = {
-      super.givenApplicationExists(application)
+      givenApplicationAction(application, loggedInDeveloper)
       givenApplicationUpdateSucceeds()
     }
 

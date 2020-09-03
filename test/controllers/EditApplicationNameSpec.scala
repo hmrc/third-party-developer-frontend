@@ -21,7 +21,7 @@ import java.util.UUID.randomUUID
 import config.ErrorHandler
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import mocks.service._
 import org.joda.time.DateTimeZone
 import org.mockito.Mockito
 import play.api.mvc.AnyContentAsEmpty
@@ -37,7 +37,7 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionServiceMock with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val developer: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
@@ -77,10 +77,11 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
+      mock[ErrorHandler],
       applicationServiceMock,
+      applicationActionServiceMock,
       sessionServiceMock,
       mock[AuditService],
-      mock[ErrorHandler],
       mcc,
       cookieSigner,
       addApplicationSubordinateEmptyNestView,
@@ -102,8 +103,6 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
 
     givenApplicationUpdateSucceeds()
 
-    fetchByApplicationIdReturns(application.id, application)
-
     givenApplicationNameIsValid()
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
@@ -117,6 +116,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
   "NameApplicationPage in subordinate" should {
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
+      givenApplicationAction(application, loggedInUser)
 
       fetchByTeamMemberEmailReturns(loggedInUser.email, List(application))
 
@@ -131,7 +131,6 @@ class EditApplicationNameSpec extends BaseControllerSpec with SubscriptionTestHe
     }
 
     "return to the login page when the user is not logged in" in new Setup {
-
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
       private val result = underTest.addApplicationName(Environment.SANDBOX)(request)

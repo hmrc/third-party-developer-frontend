@@ -16,25 +16,37 @@
 
 package connectors
 
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.models.applications._
+import domain.models.subscriptions.{ApiData, FieldName}
+import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import domain.models.applications.ApplicationId
-import scala.concurrent.ExecutionContext
-import domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.Future
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(implicit ec: ExecutionContext) {
-  import domain.services.JsonFormatters._
+  import ApmConnectorJsonFormatters._
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
     http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.value}")
 
+  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
+    import domain.services.ApplicationsJsonFormatters._
+    import domain.services.SubscriptionsJsonFormatters._
+
+    http.GET[Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]](s"${config.serviceBaseUrl}/subscription-fields?environment=$environment")
+  }
+
+  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
+    http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions?applicationId=${applicationId.value}")
+  }
 }
 
 object ApmConnector {
   case class Config(
-      val serviceBaseUrl: String
+      serviceBaseUrl: String
   )
 }

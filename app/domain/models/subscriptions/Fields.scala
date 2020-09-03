@@ -35,25 +35,10 @@ object FieldValue {
   val formatFieldValue = Json.valueFormat[FieldValue]
 }
 
-
 trait Fields {
-
   val empty = Map.empty[FieldName, FieldValue]
-
-  trait JsonFormatters {
-
-    import play.api.libs.json._
-
-    implicit val formatFieldValue = Json.valueFormat[FieldValue]
-    implicit val formatFieldName = Json.valueFormat[FieldName]
-    implicit val keyReadsFieldName: KeyReads[FieldName] = key => JsSuccess(FieldName(key))
-    implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
-  }
-
-  object JsonFormatters extends JsonFormatters
 }
 
 object Fields extends Fields {
-
-  type Alias = Map[FieldName, FieldValue]
+  type Alias = Map[FieldName,FieldValue]
 }

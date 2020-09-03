@@ -37,11 +37,12 @@ import scala.concurrent.Future.successful
 
 @Singleton
 class Credentials @Inject() (
+    val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
+    val applicationActionService: ApplicationActionService,
     val developerConnector: ThirdPartyDeveloperConnector,
     val auditService: AuditService,
     val sessionService: SessionService,
-    val errorHandler: ErrorHandler,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     credentialsView: CredentialsView,

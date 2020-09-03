@@ -27,10 +27,7 @@ object DevhubAccessRequirement {
   case object Anyone extends DevhubAccessRequirement
 }
 
-// TODO: This is a 2.11 workaround for private case class constructors.
-// When upgrading to 212 remove sealed abstract decorators.
-// https://stackoverflow.com/questions/38097490/scala-case-class-private-constructor-isnt-private
-sealed abstract case class DevhubAccessRequirements private (
+case class DevhubAccessRequirements private (
                                               val read: DevhubAccessRequirement,
                                               val write: DevhubAccessRequirement) {
   def satisfiesRead(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(read) // ReadWrite will be at least as strict.

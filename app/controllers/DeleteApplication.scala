@@ -31,9 +31,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DeleteApplication @Inject() (
-    val applicationService: ApplicationService,
-    val sessionService: SessionService,
     val errorHandler: ErrorHandler,
+    val applicationService: ApplicationService,
+    val applicationActionService: ApplicationActionService,
+    val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     deleteApplicationView: DeleteApplicationView,

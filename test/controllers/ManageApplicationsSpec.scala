@@ -21,7 +21,7 @@ import java.util.UUID.randomUUID
 import config.ErrorHandler
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import mocks.service.{ApplicationServiceMock, SessionServiceMock}
+import mocks.service._
 import org.joda.time.DateTimeZone
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -36,7 +36,7 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ManageApplicationsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class ManageApplicationsSpec extends BaseControllerSpec with ApplicationActionServiceMock with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
   val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
   val sessionId = "sessionId"
@@ -78,10 +78,11 @@ class ManageApplicationsSpec extends BaseControllerSpec with SubscriptionTestHel
     implicit val environmentNameService = new EnvironmentNameService(appConfig)
 
     val addApplicationController = new AddApplication(
+      mock[ErrorHandler],
       applicationServiceMock,
+      applicationActionServiceMock,
       sessionServiceMock,
       mock[AuditService],
-      mock[ErrorHandler],
       mcc,
       cookieSigner,
       addApplicationSubordinateEmptyNestView,

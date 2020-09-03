@@ -24,7 +24,6 @@ import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.{ClientId, Environment}
-import domain.models.subscriptions.{AccessRequirements, ApiSubscriptionFields, FieldName, FieldValue, Fields}
 import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
@@ -36,6 +35,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.subscriptions._
+import SubscriptionFieldsConnectorDomain._
 
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries {
   protected val httpClient: HttpClient
@@ -46,8 +47,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   val bearerToken: String
   val apiKey: String
 
-  import SubscriptionFieldsConnector._
-  import SubscriptionFieldsConnector.JsonFormatters._
+  import SubscriptionFieldsConnectorJsonFormatters._
 
   def http: HttpClient =
     if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
@@ -178,7 +178,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   }
 }
 
-object SubscriptionFieldsConnector {
+private[connectors] object SubscriptionFieldsConnectorDomain {
   def toDomain(f: FieldDefinition): SubscriptionFieldDefinition = {
     SubscriptionFieldDefinition(
       name = f.name,
@@ -196,7 +196,7 @@ object SubscriptionFieldsConnector {
       .toMap
   }
 
-  private[connectors] case class ApplicationApiFieldValues(
+  case class ApplicationApiFieldValues(
       clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
@@ -204,7 +204,7 @@ object SubscriptionFieldsConnector {
       fields: Map[FieldName, FieldValue]
   )
 
-  private[connectors] case class FieldDefinition(
+  case class FieldDefinition(
       name: FieldName,
       description: String,
       shortDescription: String,
@@ -213,20 +213,23 @@ object SubscriptionFieldsConnector {
       access: AccessRequirements
   )
 
-  private[connectors] case class ApiFieldDefinitions(
+  case class ApiFieldDefinitions(
       apiContext: ApiContext,
       apiVersion: ApiVersion,
       fieldDefinitions: List[FieldDefinition]
   )
 
-  private[connectors] case class AllApiFieldDefinitions(apis: Seq[ApiFieldDefinitions])
+  case class AllApiFieldDefinitions(apis: Seq[ApiFieldDefinitions])
 
-  object JsonFormatters extends FieldDefinitionFormatters with ApiSubscriptionFields.JsonFormatters {
-    import play.api.libs.json._
-    implicit val reads: Reads[ApplicationApiFieldValues] = Json.reads[ApplicationApiFieldValues]
-    implicit val writes: OWrites[ApplicationApiFieldValues] = Json.writes[ApplicationApiFieldValues]
-  }
+  case class SubscriptionFieldsPutRequest(
+    clientId: ClientId,
+    apiContext: ApiContext,
+    apiVersion: ApiVersion,
+    fields: Fields.Alias
+)
+
 }
+
 
 @Singleton
 class SandboxSubscriptionFieldsConnector @Inject() (
