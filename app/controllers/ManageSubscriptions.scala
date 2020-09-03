@@ -135,47 +135,32 @@ class ManageSubscriptions @Inject() (
       apiContext: ApiContext,
       apiVersion: ApiVersion,
       fieldNameParam: String) : Action[AnyContent] =
-
-    subFieldsDefinitionsExistActionByApi(applicationId, apiContext, apiVersion) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
-      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+    singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
 
       val fieldName = FieldName(fieldNameParam)
 
-      def notFound = NotFound(errorHandler.notFoundTemplate)
+      val fieldValue = definitionRequest.subscriptionWithSubscriptionField.subscriptionFieldValue
+      val definition = fieldValue.definition
+      
+      val subscriptionViewModel = SubscriptionFieldViewModel(
+        definition.name,
+        definition.description,
+        definition.hint,
+        canWrite = true,
+        fieldValue.value,
+        Seq.empty
+      )
 
-      // TODO : Move forbidden / not_found logic to new refiner
+      val viewModel = EditApiConfigurationFieldViewModel(
+        definitionRequest.subscriptionWithSubscriptionField.name,
+        definitionRequest.subscriptionWithSubscriptionField.apiVersion.version,
+        definitionRequest.subscriptionWithSubscriptionField.context,
+        definitionRequest.subscriptionWithSubscriptionField.apiVersion.displayedStatus,
+        subscriptionViewModel
+      )
 
-      successful(definitionsRequest.apiSubscription.fields.fields
-        .find(field => field.definition.name == fieldName)
-        .fold(notFound)((field : SubscriptionFieldValue) => {
-
-
-          val accessLevel = DevhubAccessLevel.fromRole(definitionsRequest.applicationRequest.role)
-          val canWrite = field.definition.access.devhub.satisfiesWrite(accessLevel)
-
-          if (canWrite){
-            val subscriptionViewModel = SubscriptionFieldViewModel(
-              field.definition.name,
-              field.definition.description,
-              field.definition.hint,
-              canWrite = true,
-              field.value,
-              Seq.empty
-            )
-
-            val viewModel = EditApiConfigurationFieldViewModel(
-              definitionsRequest.apiSubscription.name,
-              definitionsRequest.apiSubscription.apiVersion.version,
-              definitionsRequest.apiSubscription.context,
-              definitionsRequest.apiSubscription.apiVersion.displayedStatus,
-              subscriptionViewModel
-            )
-
-          Ok(editApiMetadataFieldView(definitionsRequest.applicationRequest.application, viewModel))
-          } else {
-            Forbidden(errorHandler.badRequestTemplate)
-          }
-        }))
+      successful(Ok(editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel)))
   }
 
   private def subscriptionConfigurationSave(
