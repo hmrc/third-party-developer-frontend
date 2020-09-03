@@ -35,6 +35,8 @@ object SubscriptionFieldsConnectorJsonFormatters
       (JsPath \ "description").read[String] and
       ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
       ((JsPath \ "hint").read[String] or Reads.pure("")) and
+      // TODO: Below TODO to be deleted when SubscriptionFieldsConnector is no longer used
+      //  as calls to api-subs-fields will in the future go through APM
       // TODO: Use enums from api-subs-fields
       //  (JsPath \ "type").read[FieldDefinitionType] and
       (JsPath \ "type").read[String] and
