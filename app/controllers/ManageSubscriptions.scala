@@ -27,12 +27,13 @@ import model.EditManageSubscription._
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data.FormError
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.Results.NotFound
 import play.api.mvc._
 import play.twirl.api.Html
 import service.{ApplicationService, AuditService, SessionService, ApplicationActionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
-import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
+import views.html.managesubscriptions._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
@@ -72,6 +73,7 @@ class ManageSubscriptions @Inject() (
     val cookieSigner: CookieSigner,
     listApiSubscriptionsView: ListApiSubscriptionsView,
     editApiMetadataView: EditApiMetadataView,
+    editApiMetadataFieldView: EditApiMetadataFieldView,
     subscriptionConfigurationStartView: SubscriptionConfigurationStartView,
     subscriptionConfigurationPageView: SubscriptionConfigurationPageView,
     subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView
@@ -125,6 +127,47 @@ class ManageSubscriptions @Inject() (
         }
       )
     }
+
+  // TODO: Use value class for FieldNameParam
+  def editApiMetadataFieldPage(
+      applicationId: domain.models.applications.ApplicationId,
+      apiContext: domain.models.apidefinitions.ApiContext,
+      apiVersion: domain.models.apidefinitions.ApiVersion,
+      fieldNameParam: String) : Action[AnyContent] =
+
+    subFieldsDefinitionsExistActionByApi(applicationId, apiContext, apiVersion) { definitionsRequest: ApplicationWithSubscriptionFields[AnyContent] =>
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
+
+      val fieldName = FieldName(fieldNameParam)
+
+      def notFound = NotFound(errorHandler.notFoundTemplate)
+
+      successful(definitionsRequest.apiSubscription.fields.fields
+        .find(field => field.definition.name == fieldName)
+        .fold(notFound)((field : SubscriptionFieldValue) => {
+
+          // TODO : Check can write or 403.
+
+          val subscriptionViewModel = SubscriptionFieldViewModel(
+            field.definition.name,
+            field.definition.description,
+            field.definition.hint,
+            canWrite = true,
+            field.value,
+            Seq.empty
+          )
+
+          val viewModel = EditApiConfigurationFieldViewModel(
+            definitionsRequest.apiSubscription.name,
+            definitionsRequest.apiSubscription.apiVersion.version,
+            definitionsRequest.apiSubscription.context,
+            definitionsRequest.apiSubscription.apiVersion.displayedStatus,
+            subscriptionViewModel
+          )
+
+          Ok(editApiMetadataFieldView(definitionsRequest.applicationRequest.application, viewModel))
+        }))
+  }
 
   private def subscriptionConfigurationSave(
       apiContext: ApiContext,

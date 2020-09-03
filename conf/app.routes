@@ -174,6 +174,7 @@ GET         /applications/:id/check-your-answers                                
 POST        /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPageAction(id: domain.models.applications.ApplicationId)
 
 GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/api-metadata/:context/:version/fields/:fieldName              controllers.ManageSubscriptions.editApiMetadataFieldPage(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, fieldName: String)
 GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.editApiMetadataPage(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
 POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.saveSubscriptionFields(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
 

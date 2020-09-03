@@ -33,7 +33,20 @@ object EditManageSubscription {
       errors: Seq[FormError]
   )
 
-  case class SubscriptionFieldViewModel(name: FieldName, description: String, hint: String, canWrite: Boolean, value: FieldValue, errors: Seq[FormError])
+  case class EditApiConfigurationFieldViewModel(
+      apiName: String,
+      apiVersion: ApiVersion,
+      apiContext: ApiContext,
+      displayedStatus: String,
+      field: SubscriptionFieldViewModel)
+
+  case class SubscriptionFieldViewModel(
+      name: FieldName,
+      description: String,
+      hint: String,
+      canWrite: Boolean,
+      value: FieldValue,
+      errors: Seq[FormError])
 
   object EditApiConfigurationViewModel {
     def toViewModel(
