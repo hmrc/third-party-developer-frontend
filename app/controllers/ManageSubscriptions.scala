@@ -163,6 +163,26 @@ class ManageSubscriptions @Inject() (
       successful(Ok(editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel)))
   }
 
+   def saveApiMetadataFieldPage(
+      applicationId: ApplicationId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      fieldNameParam: String) : Action[AnyContent] =
+    singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
+
+      val fieldName = FieldName(fieldNameParam)
+
+      val fieldValue = definitionRequest.subscriptionWithSubscriptionField.subscriptionFieldValue
+      val definition = fieldValue.definition
+
+      //
+      // TODO: Validate and do the save!
+      // TODO: Test me
+
+      successful(Redirect(controllers.routes.ManageSubscriptions.listApiSubscriptions(applicationId)))
+  }
+
   private def subscriptionConfigurationSave(
       apiContext: ApiContext,
       apiVersion: ApiVersion,
