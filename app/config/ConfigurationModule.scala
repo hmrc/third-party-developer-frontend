@@ -17,19 +17,21 @@
 package config
 
 import akka.pattern.FutureTimeoutSupport
-import com.google.inject.AbstractModule
 import com.google.inject.name.Names
-import connectors.{ConnectorMetrics, ConnectorMetricsImpl, ProductionSubscriptionFieldsConnector, SandboxSubscriptionFieldsConnector}
+import com.google.inject.{AbstractModule, Provider}
+import connectors._
 import helpers.FutureTimeoutSupportImpl
+import javax.inject.{Inject, Singleton}
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
-import connectors.ApmConnector
 
 class ConfigurationModule extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
     bind(classOf[SessionTimeoutFilter]).to(classOf[SessionTimeoutFilterWithWhitelist])
     bind(classOf[FutureTimeoutSupport]).to(classOf[FutureTimeoutSupportImpl])
+    bind(classOf[PushPullNotificationsConnector.Config]).toProvider(classOf[PushPullNotificationsApiConnectorConfigProvider])
 
     bind(classOf[SubscriptionFieldsConnector])
       .annotatedWith(Names.named("SANDBOX"))
@@ -41,5 +43,18 @@ class ConfigurationModule extends AbstractModule {
 
     bind(classOf[ApmConnector.Config])
       .toProvider(classOf[LiveApmConnectorConfigProvider])
+  }
+}
+
+@Singleton
+class PushPullNotificationsApiConnectorConfigProvider @Inject()(config: ServicesConfig) extends Provider[PushPullNotificationsConnector.Config] {
+
+  override def get(): PushPullNotificationsConnector.Config = {
+    val authConfigKey = "push-pull-notifications-api.authorizationKey"
+    val authorizationKey: String = config.getConfString(authConfigKey, throw new RuntimeException(s"Could not find config key '$authConfigKey'"))
+    PushPullNotificationsConnector.Config(
+      serviceBaseUrl = config.baseUrl("push-pull-notifications-api"),
+      authorizationKey
+    )
   }
 }

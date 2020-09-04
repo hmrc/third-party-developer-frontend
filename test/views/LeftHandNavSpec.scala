@@ -48,7 +48,7 @@ class LeftHandNavSpec extends CommonViewSpec {
   "Left Hand Nav" should {
 
     "include links to manage API subscriptions, credentials and team members for an app with standard access" in new Setup {
-      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(standardApplication, hasSubscriptionsFields = false)), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(standardApplication, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-subscriptions") shouldBe true
       elementExistsById(document, "nav-manage-credentials") shouldBe true
@@ -59,7 +59,7 @@ class LeftHandNavSpec extends CommonViewSpec {
     }
 
     "include links to manage team members but not API subscriptions for an app with privileged access" in new Setup {
-      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(privilegedApplication, hasSubscriptionsFields = false)), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(privilegedApplication, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-subscriptions") shouldBe false
       elementExistsById(document, "nav-manage-credentials") shouldBe true
@@ -70,7 +70,7 @@ class LeftHandNavSpec extends CommonViewSpec {
     }
 
     "include links to manage team members but not API subscriptions for an app with ROPC access" in new Setup {
-      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(ropcApplication, hasSubscriptionsFields = false)), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(ropcApplication, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-subscriptions") shouldBe false
       elementExistsById(document, "nav-manage-credentials") shouldBe true
@@ -83,7 +83,7 @@ class LeftHandNavSpec extends CommonViewSpec {
     "include links to client ID and client secrets if the user is an admin and the app has reached production state" in new Setup {
       val application = standardApplication.copy(collaborators = Set(Collaborator(loggedIn.email, Role.ADMINISTRATOR)), state = ApplicationState.production("", ""))
 
-      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false)), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-client-id") shouldBe true
       elementExistsById(document, "nav-manage-client-secrets") shouldBe true
@@ -93,10 +93,22 @@ class LeftHandNavSpec extends CommonViewSpec {
       val application =
         standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER)), state = ApplicationState.production("", ""))
 
-      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false)), Some("")).body)
+      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
       elementExistsById(document, "nav-manage-client-id") shouldBe true
       elementExistsById(document, "nav-manage-client-secrets") shouldBe true
+    }
+
+    "include link to push secrets when the application has PPNS fields" in new Setup {
+      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(standardApplication, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
+
+      elementExistsById(document, "nav-manage-push-secrets") shouldBe true
+    }
+
+    "not include link to push secrets when the application does not have PPNS fields" in new Setup {
+      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(standardApplication, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
+
+      elementExistsById(document, "nav-manage-push-secrets") shouldBe false
     }
   }
 }

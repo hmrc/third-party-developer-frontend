@@ -57,7 +57,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
     def renderPage(role: Role, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
 
-      manageTeamView.render(ApplicationViewModel(application, hasSubscriptionsFields = false), role, form, request, messagesProvider, appConfig, "nav-section", loggedInUser)
+      manageTeamView.render(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), role, form, request, messagesProvider, appConfig, "nav-section", loggedInUser)
     }
 
     "show Add and Remove buttons for Admin" in {
