@@ -36,7 +36,7 @@ class PushPullNotifications @Inject() (
                                         override val applicationActionService: ApplicationActionService,
                                         mcc: MessagesControllerComponents,
                                         pushSecretsView: PushSecretsView,
-                                        pushPullNotificationsService: PushPullNotificationsService,
+                                        pushPullNotificationsService: PushPullNotificationsService
                                       )(implicit override val ec: ExecutionContext, override val appConfig: ApplicationConfig)
   extends ApplicationController(mcc) {
 
