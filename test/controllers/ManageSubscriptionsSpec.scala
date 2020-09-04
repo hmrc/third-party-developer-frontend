@@ -330,6 +330,12 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         }
       }
 
+      "the edit single subscription field page is called it" should {
+        "render the page" in new ManageSubscriptionsSetup {
+          // TODO
+        }
+      }
+
       "the page mode for saveSubscriptionFields action" when {
         "LeftHandNavigation" should {
           saveSubscriptionFieldsTest(SaveSubsFieldsPageMode.LeftHandNavigation, s"/developer/applications/${appId.value}/api-metadata")
