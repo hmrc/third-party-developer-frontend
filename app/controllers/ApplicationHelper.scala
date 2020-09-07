@@ -23,5 +23,4 @@ import service.ApplicationService
 trait ApplicationHelper {
   val applicationService: ApplicationService
 
-  def roleForApplication(application: Application, email: String): Role = application.role(email).getOrElse(throw new ApplicationNotFound)
 }
