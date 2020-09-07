@@ -98,11 +98,11 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
       }
     }
 
-    def doConnectorSave(valuesToSave: Seq[SubscriptionFieldValue]) = {
+    def doConnectorSave(valueToSave: SubscriptionFieldValue) = {
       val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
-      val fieldsToSave = valuesToSave.map(v => (v.definition.name -> v.value)).toMap
+      val fieldToSave = Map(valueToSave.definition.name -> valueToSave.value)
 
-      connector.saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
+      connector.saveFieldValues(application.clientId, apiContext, apiVersion, fieldToSave)
     }
 
     if (newValues.isEmpty) {
@@ -115,9 +115,9 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
           case None               => Right(oldValue)
         }
 
-      eitherValuesToSave.toList.fold(
+      eitherValuesToSave.fold[Future[ServiceSaveSubscriptionFieldsResponse]](
         accessDenied => Future.successful(SaveSubscriptionFieldsAccessDeniedResponse),
-        values => doConnectorSave(values)
+        value => doConnectorSave(value)
       )
     }
   }

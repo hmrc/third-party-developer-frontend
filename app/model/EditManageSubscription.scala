@@ -80,8 +80,10 @@ object EditManageSubscription {
         formErrors
       )
     }
-    //This is duplicated to make it work
-    def toViewModel2(
+  }
+
+  object EditApiConfigurationFieldViewModel {
+    def toViewModel(
         apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
         role: Role,
         formErrors: Seq[FormError],
@@ -108,7 +110,6 @@ object EditManageSubscription {
          newValue,
          fieldErrors)
 
-       //Use Adams class instead - > EditApiConfigurationFieldViewModel
       EditApiConfigurationFieldViewModel(
         apiSubscription.name,
         apiSubscription.apiVersion.version,

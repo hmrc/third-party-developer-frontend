@@ -20,13 +20,15 @@
 @import views.html.include.DevMain
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
+@import domain.models.controllers.SaveSubsFieldsPageMode
 @import views.helper.IdFormatter
 
 @this(devMain: DevMain)
 
 @(
   app: Application,
-  viewModel: EditApiConfigurationFieldViewModel
+  viewModel: EditApiConfigurationFieldViewModel,
+  mode: SaveSubsFieldsPageMode
 )(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
@@ -55,7 +57,7 @@
 
 
   @helper.form(
-    action = routes.ManageSubscriptions.saveApiMetadataFieldPage(app.id, viewModel.apiContext, viewModel.apiVersion, viewModel.field.name.value),
+    action = routes.ManageSubscriptions.saveApiMetadataFieldPage(app.id, viewModel.apiContext, viewModel.apiVersion, viewModel.field.name.value, mode),
     'class -> "fields-subscription") {
 
     @helper.CSRF.formField

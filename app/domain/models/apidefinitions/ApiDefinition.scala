@@ -99,7 +99,7 @@ case class APISubscriptionStatus(
 
 case class APISubscriptionStatusWithSubscriptionFields(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, fields: SubscriptionFieldsWrapper)
 
-case class APISubscriptionStatusWithWritableSubscriptionField(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, subscriptionFieldValue: SubscriptionFieldValue)
+case class APISubscriptionStatusWithWritableSubscriptionField(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, subscriptionFieldValue: SubscriptionFieldValue, oldValues: SubscriptionFieldsWrapper)
 
 object APISubscriptionStatusWithSubscriptionFields {
   def apply(fields: Seq[APISubscriptionStatus]): Seq[APISubscriptionStatusWithSubscriptionFields] = {

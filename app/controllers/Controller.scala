@@ -78,7 +78,9 @@ case class ApplicationWithSubscriptionFieldPage[A](
 case class ApplicationWithSubscriptionFields[A](apiSubscription: APISubscriptionStatusWithSubscriptionFields, applicationRequest: ApplicationRequest[A])
     extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
-case class ApplicationWithWritableSubscriptionField[A](subscriptionWithSubscriptionField: APISubscriptionStatusWithWritableSubscriptionField, applicationRequest: ApplicationRequest[A])
+case class ApplicationWithWritableSubscriptionField[A](
+  subscriptionWithSubscriptionField: APISubscriptionStatusWithWritableSubscriptionField,
+  applicationRequest: ApplicationRequest[A])
   extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
 abstract class BaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher {
@@ -171,7 +173,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
   ): Action[AnyContent] = {
     loggedInAction { implicit request =>
       (ManageSubscriptionsActions
-        .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) 
+        .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest)
           andThen subscriptionFieldsRefiner(context, version)
           andThen writeableSubscriptionFieldRefiner(fieldName)
       ).async(fun)(request)

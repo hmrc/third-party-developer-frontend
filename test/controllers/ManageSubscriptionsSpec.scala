@@ -345,7 +345,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
           private val result =
-            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName))(
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName, SaveSubsFieldsPageMode.LeftHandNavigation))(
               loggedInRequest
             )
 
@@ -358,7 +358,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
           contentAsString(result) should include(field.definition.hint)
           contentAsString(result) should include(field.value.value)
         }
-        
+
         "404 for invalid field name" in new ManageSubscriptionsSetup {
           val whoCanWrite = Anyone
           val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
@@ -372,7 +372,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
           private val result =
-            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), "invalid-field-name"))(
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), "invalid-field-name", SaveSubsFieldsPageMode.CheckYourAnswers))(
               loggedInRequest
             )
 
@@ -393,7 +393,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
           private val result =
-            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName))(
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName, SaveSubsFieldsPageMode.CheckYourAnswers))(
               loggedInRequest
             )
 

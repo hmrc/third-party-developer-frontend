@@ -151,7 +151,8 @@ trait ActionBuilders {
                   input.apiSubscription.name,
                   input.apiSubscription.context,
                   input.apiSubscription.apiVersion,
-                  subscriptionFieldValue), input.applicationRequest))
+                  subscriptionFieldValue,
+                  input.apiSubscription.fields), input.applicationRequest))
               } else {
                 Left(Forbidden(errorHandler.badRequestTemplate))
               }

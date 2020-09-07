@@ -27,7 +27,6 @@ import model.EditManageSubscription._
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data.FormError
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.Results.NotFound
 import play.api.mvc._
 import play.twirl.api.Html
 import service.{ApplicationService, AuditService, SessionService, ApplicationActionService, SubscriptionFieldsService}
@@ -37,7 +36,6 @@ import views.html.managesubscriptions._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
-import domain.models.subscriptions.DevhubAccessLevel
 
 object ManageSubscriptions {
 
@@ -134,7 +132,8 @@ class ManageSubscriptions @Inject() (
       applicationId: ApplicationId,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
-      fieldNameParam: String) : Action[AnyContent] =
+      fieldNameParam: String,
+      mode: SaveSubsFieldsPageMode) : Action[AnyContent] =    // TODO - make this FieldName type
     singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
 
@@ -142,7 +141,7 @@ class ManageSubscriptions @Inject() (
 
       val fieldValue = definitionRequest.subscriptionWithSubscriptionField.subscriptionFieldValue
       val definition = fieldValue.definition
-      
+
       val subscriptionViewModel = SubscriptionFieldViewModel(
         definition.name,
         definition.description,
@@ -160,27 +159,19 @@ class ManageSubscriptions @Inject() (
         subscriptionViewModel
       )
 
-      successful(Ok(editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel)))
+      successful(Ok(editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel, mode)))
   }
 
    def saveApiMetadataFieldPage(
       applicationId: ApplicationId,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
-      fieldNameParam: String) : Action[AnyContent] =
-<<<<<<< HEAD
-      //Do We need a mode param? Above it needs it for the redirect
-=======
->>>>>>> 00a4369336c184824bca39bb11a5da47db86506d
-    singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
+      fieldNameParam: String,    // TODO - make this FieldName type
+      mode: SaveSubsFieldsPageMode) : Action[AnyContent] =
+
+      singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
 
-      val fieldName = FieldName(fieldNameParam)
-
-      val fieldValue = definitionRequest.subscriptionWithSubscriptionField.subscriptionFieldValue
-      val definition = fieldValue.definition
-
-<<<<<<< HEAD
       import SaveSubsFieldsPageMode._
       val successRedirectUrl = mode match {
         case LeftHandNavigation => routes.ManageSubscriptions.listApiSubscriptions(applicationId)
@@ -190,17 +181,13 @@ class ManageSubscriptions @Inject() (
       subscriptionConfigurationSave2(
         apiContext,
         apiVersion,
-        //Change this to use the new subscirptionWithSubscriptionField within the new class
         definitionRequest.subscriptionWithSubscriptionField,
         successRedirectUrl,
         viewModel => {
-        //Change this to be definitionRequest  
-          editApiMetadataView(definitionRequest.applicationRequest.application, viewModel, mode)
+          editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel, mode)
         }
       )
 
-=======
->>>>>>> 00a4369336c184824bca39bb11a5da47db86506d
       //
       // TODO: Validate and do the save!
       // TODO: Test me
@@ -247,20 +234,17 @@ class ManageSubscriptions @Inject() (
     //Only one field value??
     val postedValuesAsMap = applicationRequest.body.asFormUrlEncoded.get.map(v => (FieldName(v._1), FieldValue(v._2.head)))
 
-    //Change this to use subscriptionFieldValue
-    val subscriptionFieldValues = apiSubscription.subscriptionFieldValue
     val role = applicationRequest.role
     val application = applicationRequest.application
 
     subFieldsService
-    //rename saveFieldValues2 method
-      .saveFieldValues2(role, application, apiContext, apiVersion, subscriptionFieldValues, postedValuesAsMap)
+      .saveFieldValues(role, application, apiContext, apiVersion, apiSubscription.oldValues.fields, postedValuesAsMap)
       .map({
         case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect)
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val formErrors = fieldErrors.map(error => FormError(error._1, Seq(error._2))).toSeq
           //duplicate viewModel2 and rename
-          val viewModel = EditApiConfigurationViewModel.toViewModel2(apiSubscription, role, formErrors, postedValuesAsMap)
+          val viewModel = EditApiConfigurationFieldViewModel.toViewModel(apiSubscription, role, formErrors, postedValuesAsMap)
 
           BadRequest(validationFailureView(viewModel))
         case SaveSubscriptionFieldsAccessDeniedResponse => Forbidden(errorHandler.badRequestTemplate)
