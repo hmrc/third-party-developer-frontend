@@ -168,7 +168,10 @@ class ManageSubscriptions @Inject() (
       apiContext: ApiContext,
       apiVersion: ApiVersion,
       fieldNameParam: String) : Action[AnyContent] =
+<<<<<<< HEAD
       //Do We need a mode param? Above it needs it for the redirect
+=======
+>>>>>>> 00a4369336c184824bca39bb11a5da47db86506d
     singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
 
@@ -177,6 +180,7 @@ class ManageSubscriptions @Inject() (
       val fieldValue = definitionRequest.subscriptionWithSubscriptionField.subscriptionFieldValue
       val definition = fieldValue.definition
 
+<<<<<<< HEAD
       import SaveSubsFieldsPageMode._
       val successRedirectUrl = mode match {
         case LeftHandNavigation => routes.ManageSubscriptions.listApiSubscriptions(applicationId)
@@ -195,6 +199,8 @@ class ManageSubscriptions @Inject() (
         }
       )
 
+=======
+>>>>>>> 00a4369336c184824bca39bb11a5da47db86506d
       //
       // TODO: Validate and do the save!
       // TODO: Test me
