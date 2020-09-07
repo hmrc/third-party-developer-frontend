@@ -88,8 +88,7 @@ object EditManageSubscription {
         role: Role,
         formErrors: Seq[FormError],
         postedFormValues: Map[FieldName, FieldValue]
-    ): EditApiConfigurationFieldViewModel = { //change return type
-      // apiSubscription.subscriptionFieldValue Extract this?? Make shorter??
+    ): EditApiConfigurationFieldViewModel = {
       val fieldsViewModel = apiSubscription.subscriptionFieldValue.value
       val accessLevel = DevhubAccessLevel.fromRole(role)
       val canWrite = apiSubscription.subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
@@ -101,7 +100,6 @@ object EditManageSubscription {
         fieldsViewModel
       }
 
-      //remove map and make as val
       val subscriptionFieldViewModel =
         SubscriptionFieldViewModel(apiSubscription.subscriptionFieldValue.definition.name,
          apiSubscription.subscriptionFieldValue.definition.description,

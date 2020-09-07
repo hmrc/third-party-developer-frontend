@@ -83,45 +83,6 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     }
   }
 
-  //Fields duplicated to see if it compiles
-  //change oldValues -> oldValue: SubscriptionFieldValue
-   def saveFieldValues2(role: Role, application: Application, apiContext: ApiContext, apiVersion: ApiVersion, oldValue: SubscriptionFieldValue, newValues: Fields.Alias)(
-      implicit hc: HeaderCarrier
-  ): Future[ServiceSaveSubscriptionFieldsResponse] = {
-    case object AccessDenied
-
-    def isAllowedToAndCreateNewValue(oldValue: SubscriptionFieldValue, newValue: FieldValue) = {
-      if (oldValue.definition.access.devhub.satisfiesWrite(DevhubAccessLevel.fromRole(role))) {
-        Right(oldValue.copy(value = newValue))
-      } else {
-        Left(AccessDenied)
-      }
-    }
-
-    def doConnectorSave(valueToSave: SubscriptionFieldValue) = {
-      val connector = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
-      val fieldToSave = Map(valueToSave.definition.name -> valueToSave.value)
-
-      connector.saveFieldValues(application.clientId, apiContext, apiVersion, fieldToSave)
-    }
-
-    if (newValues.isEmpty) {
-      Future.successful(SaveSubscriptionFieldsSuccessResponse)
-    } else {
-      //this is no longer a sequence no need to map
-      val eitherValuesToSave =
-        newValues.get(oldValue.definition.name) match {
-          case Some(newFormValue) => isAllowedToAndCreateNewValue(oldValue, newFormValue)
-          case None               => Right(oldValue)
-        }
-
-      eitherValuesToSave.fold[Future[ServiceSaveSubscriptionFieldsResponse]](
-        accessDenied => Future.successful(SaveSubscriptionFieldsAccessDeniedResponse),
-        value => doConnectorSave(value)
-      )
-    }
-  }
-
   def saveBlankFieldValues(application: Application, apiContext: ApiContext, apiVersion: ApiVersion, values: Seq[SubscriptionFieldValue])(
       implicit hc: HeaderCarrier
   ): Future[ServiceSaveSubscriptionFieldsResponse] = {

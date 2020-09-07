@@ -166,7 +166,7 @@ class ManageSubscriptions @Inject() (
       applicationId: ApplicationId,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
-      fieldNameParam: String,    // TODO - make this FieldName type
+      fieldNameParam: String,
       mode: SaveSubsFieldsPageMode) : Action[AnyContent] =
 
       singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
@@ -178,7 +178,7 @@ class ManageSubscriptions @Inject() (
         case CheckYourAnswers   => checkpages.routes.CheckYourAnswers.answersPage(applicationId).withFragment("configurations")
       }
 
-      subscriptionConfigurationSave2(
+      subscriptionConfigurationFieldSave(
         apiContext,
         apiVersion,
         definitionRequest.subscriptionWithSubscriptionField,
@@ -187,9 +187,6 @@ class ManageSubscriptions @Inject() (
           editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel, mode)
         }
       )
-
-      //
-      // TODO: Validate and do the save!
       // TODO: Test me
 
       successful(Redirect(controllers.routes.ManageSubscriptions.listApiSubscriptions(applicationId)))
@@ -222,16 +219,14 @@ class ManageSubscriptions @Inject() (
       })
   }
 
-    private def subscriptionConfigurationSave2(
+    private def subscriptionConfigurationFieldSave(
       apiContext: ApiContext,
       apiVersion: ApiVersion,
-      //Change this apiSubscription param to our class
       apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
       successRedirect: Call,
       validationFailureView: EditApiConfigurationFieldViewModel => Html
   )(implicit hc: HeaderCarrier, applicationRequest: ApplicationRequest[AnyContent]): Future[Result] = {
-
-    //Only one field value??
+    
     val postedValuesAsMap = applicationRequest.body.asFormUrlEncoded.get.map(v => (FieldName(v._1), FieldValue(v._2.head)))
 
     val role = applicationRequest.role
@@ -243,7 +238,6 @@ class ManageSubscriptions @Inject() (
         case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect)
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val formErrors = fieldErrors.map(error => FormError(error._1, Seq(error._2))).toSeq
-          //duplicate viewModel2 and rename
           val viewModel = EditApiConfigurationFieldViewModel.toViewModel(apiSubscription, role, formErrors, postedValuesAsMap)
 
           BadRequest(validationFailureView(viewModel))
