@@ -71,7 +71,9 @@
           <tr>
             <td>@{field.name}</td>
             <td>@{field.value}</td>
-            <td></td>
+            <td>
+              <a href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, fieldName, LeftHandNavigation)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-@{fieldName.value}-submit">Edit</a>
+            </td>
           </tr>
         }
       </tbody>
