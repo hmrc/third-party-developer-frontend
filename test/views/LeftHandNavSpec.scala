@@ -99,16 +99,29 @@ class LeftHandNavSpec extends CommonViewSpec {
       elementExistsById(document, "nav-manage-client-secrets") shouldBe true
     }
 
-    "include link to push secrets when the application has PPNS fields" in new Setup {
-      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(standardApplication, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
+    "include link to push secrets when the application has PPNS fields and the user is an admin or the application is sandbox" in new Setup {
+      val prodAppAsAdmin = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(Collaborator(loggedIn.email, Role.ADMINISTRATOR)))
+      val sandboxAppAsDev = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER)))
 
-      elementExistsById(document, "nav-manage-push-secrets") shouldBe true
+      val prodAppAsAdminDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
+      val sandboxAppAsDevDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(sandboxAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
+
+      elementExistsById(prodAppAsAdminDocument, "nav-manage-push-secrets") shouldBe true
+      elementExistsById(sandboxAppAsDevDocument, "nav-manage-push-secrets") shouldBe true
     }
 
-    "not include link to push secrets when the application does not have PPNS fields" in new Setup {
-      val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(standardApplication, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
+    "not include link to push secrets when the application does not have PPNS fields, or it does, but the user is only a developer for a production app" in new Setup {
+      val prodAppAsAdmin = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(Collaborator(loggedIn.email, Role.ADMINISTRATOR)))
+      val sandboxAppAsDev = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER)))
+      val prodAppAsDev = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER)))
 
-      elementExistsById(document, "nav-manage-push-secrets") shouldBe false
+      val prodAppAsAdminDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
+      val sandboxAppAsDevDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(sandboxAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
+      val prodAppAsDevDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
+
+      elementExistsById(prodAppAsAdminDocument, "nav-manage-push-secrets") shouldBe false
+      elementExistsById(sandboxAppAsDevDocument, "nav-manage-push-secrets") shouldBe false
+      elementExistsById(prodAppAsDevDocument, "nav-manage-push-secrets") shouldBe false
     }
   }
 }

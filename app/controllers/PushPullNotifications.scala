@@ -19,6 +19,8 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import domain.models.applications.ApplicationId
+import domain.models.applications.Capabilities.ViewPushSecret
+import domain.models.applications.Permissions.SandboxOrAdmin
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -40,10 +42,11 @@ class PushPullNotifications @Inject() (
                                       )(implicit override val ec: ExecutionContext, override val appConfig: ApplicationConfig)
   extends ApplicationController(mcc) {
 
-  def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
-    pushPullNotificationsService.fetchPushSecrets(request.application.clientId) map { pushSecrets =>
-      NonEmptyList.fromList(pushSecrets.toList)
-        .fold(NotFound(errorHandler.notFoundTemplate))(nonEmptySecrets => Ok(pushSecretsView(request.application, nonEmptySecrets)))
+  def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId, ViewPushSecret, SandboxOrAdmin) {
+    implicit request: ApplicationRequest[AnyContent] =>
+      pushPullNotificationsService.fetchPushSecrets(request.application.clientId) map { pushSecrets =>
+        NonEmptyList.fromList(pushSecrets.toList)
+          .fold(NotFound(errorHandler.notFoundTemplate))(nonEmptySecrets => Ok(pushSecretsView(request.application, nonEmptySecrets)))
     }
   }
 }

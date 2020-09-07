@@ -72,4 +72,8 @@ object Capabilities {
   case object SupportsIpWhitelist extends Capability {
     def hasCapability(app: Application): Boolean = app.ipWhitelist.nonEmpty
   }
+
+  case object ViewPushSecret extends Capability {
+    def hasCapability(app: Application) = true
+  }
 }
