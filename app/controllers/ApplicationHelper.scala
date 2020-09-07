@@ -22,5 +22,4 @@ import service.ApplicationService
 
 trait ApplicationHelper {
   val applicationService: ApplicationService
-
 }
