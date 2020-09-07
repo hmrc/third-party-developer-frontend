@@ -16,7 +16,7 @@
 
 package model
 
-import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, ApiContext, ApiVersion}
+import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
 import domain.models.applications.Role
 import domain.models.subscriptions.{FieldName, FieldValue}
 import domain.models.subscriptions.DevhubAccessLevel
@@ -78,6 +78,43 @@ object EditManageSubscription {
         apiSubscription.apiVersion.displayedStatus,
         fieldsViewModel,
         formErrors
+      )
+    }
+    //This is duplicated to make it work
+    def toViewModel2(
+        apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
+        role: Role,
+        formErrors: Seq[FormError],
+        postedFormValues: Map[FieldName, FieldValue]
+    ): EditApiConfigurationFieldViewModel = { //change return type
+      // apiSubscription.subscriptionFieldValue Extract this?? Make shorter??
+      val fieldsViewModel = apiSubscription.subscriptionFieldValue.value
+      val accessLevel = DevhubAccessLevel.fromRole(role)
+      val canWrite = apiSubscription.subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
+      val fieldErrors = formErrors.filter(e => e.key == apiSubscription.subscriptionFieldValue.definition.name.value)
+
+      val newValue = if (canWrite) {
+      postedFormValues.getOrElse(apiSubscription.subscriptionFieldValue.definition.name,fieldsViewModel)
+      } else {
+        fieldsViewModel
+      }
+
+      //remove map and make as val
+      val subscriptionFieldViewModel =
+        SubscriptionFieldViewModel(apiSubscription.subscriptionFieldValue.definition.name,
+         apiSubscription.subscriptionFieldValue.definition.description,
+         apiSubscription.subscriptionFieldValue.definition.hint,
+         canWrite,
+         newValue,
+         fieldErrors)
+
+       //Use Adams class instead - > EditApiConfigurationFieldViewModel
+      EditApiConfigurationFieldViewModel(
+        apiSubscription.name,
+        apiSubscription.apiVersion.version,
+        apiSubscription.context,
+        apiSubscription.apiVersion.displayedStatus,
+        subscriptionFieldViewModel
       )
     }
   }

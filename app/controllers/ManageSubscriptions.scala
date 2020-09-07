@@ -18,7 +18,7 @@ package controllers
 
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, ApiContext, ApiVersion}
+import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
 import domain.models.applications.{Application, ApplicationId, CheckInformation}
 import domain.models.controllers.SaveSubsFieldsPageMode
 import domain.models.subscriptions.ApiSubscriptionFields._
@@ -168,6 +168,7 @@ class ManageSubscriptions @Inject() (
       apiContext: ApiContext,
       apiVersion: ApiVersion,
       fieldNameParam: String) : Action[AnyContent] =
+      //Do We need a mode param? Above it needs it for the redirect
     singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
 
@@ -175,6 +176,24 @@ class ManageSubscriptions @Inject() (
 
       val fieldValue = definitionRequest.subscriptionWithSubscriptionField.subscriptionFieldValue
       val definition = fieldValue.definition
+
+      import SaveSubsFieldsPageMode._
+      val successRedirectUrl = mode match {
+        case LeftHandNavigation => routes.ManageSubscriptions.listApiSubscriptions(applicationId)
+        case CheckYourAnswers   => checkpages.routes.CheckYourAnswers.answersPage(applicationId).withFragment("configurations")
+      }
+
+      subscriptionConfigurationSave2(
+        apiContext,
+        apiVersion,
+        //Change this to use the new subscirptionWithSubscriptionField within the new class
+        definitionRequest.subscriptionWithSubscriptionField,
+        successRedirectUrl,
+        viewModel => {
+        //Change this to be definitionRequest  
+          editApiMetadataView(definitionRequest.applicationRequest.application, viewModel, mode)
+        }
+      )
 
       //
       // TODO: Validate and do the save!
@@ -204,6 +223,38 @@ class ManageSubscriptions @Inject() (
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val formErrors = fieldErrors.map(error => FormError(error._1, Seq(error._2))).toSeq
           val viewModel = EditApiConfigurationViewModel.toViewModel(apiSubscription, role, formErrors, postedValuesAsMap)
+
+          BadRequest(validationFailureView(viewModel))
+        case SaveSubscriptionFieldsAccessDeniedResponse => Forbidden(errorHandler.badRequestTemplate)
+      })
+  }
+
+    private def subscriptionConfigurationSave2(
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      //Change this apiSubscription param to our class
+      apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
+      successRedirect: Call,
+      validationFailureView: EditApiConfigurationFieldViewModel => Html
+  )(implicit hc: HeaderCarrier, applicationRequest: ApplicationRequest[AnyContent]): Future[Result] = {
+
+    //Only one field value??
+    val postedValuesAsMap = applicationRequest.body.asFormUrlEncoded.get.map(v => (FieldName(v._1), FieldValue(v._2.head)))
+
+    //Change this to use subscriptionFieldValue
+    val subscriptionFieldValues = apiSubscription.subscriptionFieldValue
+    val role = applicationRequest.role
+    val application = applicationRequest.application
+
+    subFieldsService
+    //rename saveFieldValues2 method
+      .saveFieldValues2(role, application, apiContext, apiVersion, subscriptionFieldValues, postedValuesAsMap)
+      .map({
+        case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect)
+        case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
+          val formErrors = fieldErrors.map(error => FormError(error._1, Seq(error._2))).toSeq
+          //duplicate viewModel2 and rename
+          val viewModel = EditApiConfigurationViewModel.toViewModel2(apiSubscription, role, formErrors, postedValuesAsMap)
 
           BadRequest(validationFailureView(viewModel))
         case SaveSubscriptionFieldsAccessDeniedResponse => Forbidden(errorHandler.badRequestTemplate)
