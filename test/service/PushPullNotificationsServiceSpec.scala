@@ -18,11 +18,15 @@ package service
 
 import java.util.UUID
 
-import connectors.PushPullNotificationsConnector
-import domain.models.applications.ClientId
+import connectors.ThirdPartyApplicationConnector
+import domain.models.applications.Environment.PRODUCTION
+import domain.models.applications.{Application, ApplicationId, ClientId}
 import org.scalatest.Matchers
 import play.api.http.Status.INTERNAL_SERVER_ERROR
+import service.PushPullNotificationsService.PushPullNotificationsConnector
+import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,9 +37,20 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with Matchers {
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val clientId: ClientId = ClientId(UUID.randomUUID.toString)
+    val anApplication: Application = Application(
+      ApplicationId("appId"),
+      clientId,
+      "App name 1",
+      DateTimeUtils.now,
+      DateTimeUtils.now,
+      deployedTo = PRODUCTION
+    )
     val pushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
+    val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
+    when(mockConnectorsWrapper.forEnvironment(*))
+      .thenReturn(Connectors(mock[ThirdPartyApplicationConnector], mock[SubscriptionFieldsConnector], pushPullNotificationsConnector))
 
-    val underTest = new PushPullNotificationsService(pushPullNotificationsConnector)
+    val underTest = new PushPullNotificationsService(mockConnectorsWrapper)
   }
 
   "fetchPushSecrets" should {
@@ -43,7 +58,7 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with Matchers {
       val expectedPushSecrets = Seq("123", "abc")
       when(pushPullNotificationsConnector.fetchPushSecrets(clientId)).thenReturn(successful(expectedPushSecrets))
 
-      val result: Seq[String] = await(underTest.fetchPushSecrets(clientId))
+      val result: Seq[String] = await(underTest.fetchPushSecrets(anApplication))
 
       result shouldBe expectedPushSecrets
     }
@@ -53,7 +68,7 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with Matchers {
       when(pushPullNotificationsConnector.fetchPushSecrets(clientId))
         .thenReturn(failed(Upstream5xxResponse(expectedErrorMessage, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      val exception: Upstream5xxResponse = intercept[Upstream5xxResponse](await(underTest.fetchPushSecrets(clientId)))
+      val exception: Upstream5xxResponse = intercept[Upstream5xxResponse](await(underTest.fetchPushSecrets(anApplication)))
 
       exception.getMessage shouldBe expectedErrorMessage
     }

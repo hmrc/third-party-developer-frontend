@@ -33,10 +33,8 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   val betaFeedbackUnauthenticatedUrl = "/contact/beta-feedback-unauthenticated"
   val thirdPartyDeveloperUrl = baseUrl("third-party-developer")
   val thirdPartyApplicationProductionUrl = thirdPartyApplicationUrl("third-party-application-production")
-  val thirdPartyApplicationProductionBearerToken = getConfString("third-party-application-production.bearer-token", "")
   val thirdPartyApplicationProductionUseProxy = useProxy("third-party-application-production")
   val thirdPartyApplicationSandboxUrl = thirdPartyApplicationUrl("third-party-application-sandbox")
-  val thirdPartyApplicationSandboxBearerToken = getConfString("third-party-application-sandbox.bearer-token", "")
   val thirdPartyApplicationSandboxUseProxy = useProxy("third-party-application-sandbox")
   val thirdPartyApplicationProductionApiKey = getConfString("third-party-application-production.api-key", "")
   val thirdPartyApplicationSandboxApiKey = getConfString("third-party-application-sandbox.api-key", "")
@@ -75,13 +73,21 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
 
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl = apiSubscriptionFieldsUrl("api-subscription-fields-production")
-  val apiSubscriptionFieldsProductionBearerToken = getConfString("api-subscription-fields-production.bearer-token", "")
   val apiSubscriptionFieldsProductionApiKey = getConfString("api-subscription-fields-production.api-key", "")
   val apiSubscriptionFieldsProductionUseProxy = useProxy("api-subscription-fields-production")
   val apiSubscriptionFieldsSandboxUrl = apiSubscriptionFieldsUrl("api-subscription-fields-sandbox")
-  val apiSubscriptionFieldsSandboxBearerToken = getConfString("api-subscription-fields-sandbox.bearer-token", "")
   val apiSubscriptionFieldsSandboxUseProxy = useProxy("api-subscription-fields-sandbox")
   val apiSubscriptionFieldsSandboxApiKey = getConfString("api-subscription-fields-sandbox.api-key", "")
+
+  // PPNS
+  val ppnsProductionUrl = apiSubscriptionFieldsUrl("push-pull-notifications-api-production")
+  val ppnsProductionApiKey = getConfString("push-pull-notifications-api-production.api-key", "")
+  val ppnsProductionUseProxy = useProxy("push-pull-notifications-api-production")
+  val ppnsProductionAuthorizationKey = getConfString("push-pull-notifications-api-production.authorizationKey", "")
+  val ppnsSandboxUrl = apiSubscriptionFieldsUrl("push-pull-notifications-api-sandbox")
+  val ppnsSandboxUseProxy = useProxy("push-pull-notifications-api-sandbox")
+  val ppnsSandboxApiKey = getConfString("push-pull-notifications-api-sandbox.api-key", "")
+  val ppnsSandboxAuthorizationKey = getConfString("push-pull-notifications-api-sandbox.authorizationKey", "")
 
   private def buildUrl(key: String) = {
     (getConfigDefaulted(s"$env.$key.protocol", ""), getConfigDefaulted(s"$env.$key.host", "")) match {

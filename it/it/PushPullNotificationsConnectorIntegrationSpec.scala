@@ -19,7 +19,7 @@ package it
 import java.util.UUID.randomUUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.{ConnectorMetrics, NoopConnectorMetrics, PushPullNotificationsConnector}
+import connectors.{ConnectorMetrics, NoopConnectorMetrics, ProductionPushPullNotificationsConnector}
 import domain.models.applications.ClientId
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HeaderNames.AUTHORIZATION
@@ -33,8 +33,8 @@ import uk.gov.hmrc.play.http.metrics.API
 class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val authorizationKey = randomUUID.toString
   private val stubConfig = Configuration(
-    "Test.microservice.services.push-pull-notifications-api.port" -> stubPort,
-    "Test.microservice.services.push-pull-notifications-api.authorizationKey" -> authorizationKey
+    "Test.microservice.services.push-pull-notifications-api-production.port" -> stubPort,
+    "Test.microservice.services.push-pull-notifications-api-production.authorizationKey" -> authorizationKey
   )
 
   override def fakeApplication(): Application =
@@ -47,7 +47,7 @@ class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegra
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val connector: PushPullNotificationsConnector = app.injector.instanceOf[PushPullNotificationsConnector]
+    val connector: ProductionPushPullNotificationsConnector = app.injector.instanceOf[ProductionPushPullNotificationsConnector]
   }
 
   "api" should {

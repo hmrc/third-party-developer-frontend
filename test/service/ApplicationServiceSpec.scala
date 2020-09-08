@@ -44,6 +44,7 @@ import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.VersionSubscription
+import service.PushPullNotificationsService.PushPullNotificationsConnector
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
@@ -62,6 +63,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
     val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
+    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
@@ -72,6 +74,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       mockProductionApplicationConnector,
       mockSandboxSubscriptionFieldsConnector,
       mockProductionSubscriptionFieldsConnector,
+      mockPushPullNotificationsConnector,
+      mockPushPullNotificationsConnector,
       mockAppConfig
     )
 

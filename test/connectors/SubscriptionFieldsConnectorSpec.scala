@@ -82,7 +82,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   trait ProxiedSetup extends Setup {
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    when(mockProxiedHttpClient.withHeaders(*, *))
+    when(mockProxiedHttpClient.withHeaders(*))
       .thenReturn(mockProxiedHttpClient)
 
     override val subscriptionFieldsConnector =
@@ -197,7 +197,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
           .fetchFieldsValuesWithPrefetchedDefinitions(clientId, apiIdentifier, prefetchedDefinitions)
       )
 
-      verify(mockProxiedHttpClient).withHeaders(*, eqTo(apiKey))
+      verify(mockProxiedHttpClient).withHeaders(eqTo(apiKey))
     }
 
     "when retry logic is enabled should retry on failure" in new Setup {

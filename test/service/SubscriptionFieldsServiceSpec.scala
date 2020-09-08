@@ -20,11 +20,12 @@ import builder.SubscriptionsBuilder
 import connectors.{ApmConnector, ThirdPartyApplicationConnector}
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications._
-import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldValue, Fields}
 import domain.models.subscriptions.ApiSubscriptionFields.{SaveSubscriptionFieldsAccessDeniedResponse, SaveSubscriptionFieldsSuccessResponse, SubscriptionFieldValue}
 import domain.models.subscriptions.DevhubAccessRequirement.NoOne
+import domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldValue, Fields}
 import mocks.connector.SubscriptionFieldsConnectorMock
 import org.joda.time.DateTime
+import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
 
@@ -50,12 +51,13 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
     val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
+    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
     val mockApmConnector: ApmConnector = mock[ApmConnector]
 
     val underTest = new SubscriptionFieldsService(mockConnectorsWrapper, mockApmConnector)
 
     when(mockConnectorsWrapper.forEnvironment(application.deployedTo))
-      .thenReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector))
+      .thenReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector, mockPushPullNotificationsConnector))
 
     when(
       mockThirdPartyApplicationConnector

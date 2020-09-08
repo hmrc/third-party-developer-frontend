@@ -22,7 +22,6 @@ import play.api.Configuration
 import play.api.http.HeaderNames.ACCEPT
 import play.api.libs.ws.{WSClient, WSProxyServer, WSRequest}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.bootstrap.config.RunMode
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -37,13 +36,11 @@ class ProxiedHttpClient @Inject()(config: Configuration,
                                   runMode: RunMode)
   extends DefaultHttpClient(config, httpAuditing, wsClient, actorSystem) with WSProxy {
 
-  val authorization: Option[Authorization] = None
   val apiKeyHeader: Option[(String, String)] = None
   private val env = runMode.env
 
-  def withHeaders(bearerToken: String, apiKey: String = ""): ProxiedHttpClient = {
+  def withHeaders(apiKey: String = ""): ProxiedHttpClient = {
     new ProxiedHttpClient(config, httpAuditing, wsClient, environment, actorSystem, runMode) {
-      override val authorization = Some(Authorization(s"Bearer $bearerToken"))
       override val apiKeyHeader: Option[(String, String)] = if ("" == apiKey) None else Some("x-api-key" -> apiKey)
     }
   }
@@ -56,7 +53,7 @@ class ProxiedHttpClient @Inject()(config: Configuration,
       if (apiKeyHeader.isDefined) extraHeaders :+ apiKeyHeader.get
       else extraHeaders
 
-    val hcWithBearerAndAccept = hc.copy(authorization = authorization, extraHeaders = extraHeadersWithMaybeApiKeyHeader)
+    val hcWithBearerAndAccept = hc.copy(extraHeaders = extraHeadersWithMaybeApiKeyHeader)
 
     super.buildRequest(url)(hcWithBearerAndAccept)
   }

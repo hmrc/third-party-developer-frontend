@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import connectors._
 import domain.models.applications.{Application, ApplicationId, ClientId, Environment}
 import play.api.http.Status
+import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.time.DateTimeUtils
@@ -41,6 +42,8 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
       mock[ThirdPartyApplicationProductionConnector],
       mock[SubscriptionFieldsConnector],
       mock[SubscriptionFieldsConnector],
+      mock[PushPullNotificationsConnector],
+      mock[PushPullNotificationsConnector],
       mockAppConfig
     )
 

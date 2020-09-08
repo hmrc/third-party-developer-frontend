@@ -44,13 +44,12 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   val environment: Environment
   val serviceBaseUrl: String
   val useProxy: Boolean
-  val bearerToken: String
   val apiKey: String
 
   import SubscriptionFieldsConnectorJsonFormatters._
 
   def http: HttpClient =
-    if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
+    if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
 
   def fetchFieldsValuesWithPrefetchedDefinitions(
       clientId: ClientId,
@@ -244,7 +243,6 @@ class SandboxSubscriptionFieldsConnector @Inject() (
   val environment: Environment = Environment.SANDBOX
   val serviceBaseUrl: String = appConfig.apiSubscriptionFieldsSandboxUrl
   val useProxy: Boolean = appConfig.apiSubscriptionFieldsSandboxUseProxy
-  val bearerToken: String = appConfig.apiSubscriptionFieldsSandboxBearerToken
   val apiKey: String = appConfig.apiSubscriptionFieldsSandboxApiKey
 }
 
@@ -261,6 +259,5 @@ class ProductionSubscriptionFieldsConnector @Inject() (
   val environment: Environment = Environment.PRODUCTION
   val serviceBaseUrl: String = appConfig.apiSubscriptionFieldsProductionUrl
   val useProxy: Boolean = appConfig.apiSubscriptionFieldsProductionUseProxy
-  val bearerToken: String = appConfig.apiSubscriptionFieldsProductionBearerToken
   val apiKey: String = appConfig.apiSubscriptionFieldsProductionApiKey
 }

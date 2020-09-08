@@ -17,13 +17,12 @@
 package config
 
 import akka.pattern.FutureTimeoutSupport
-import com.google.inject.name.Names
-import com.google.inject.{AbstractModule, Provider}
+import com.google.inject.AbstractModule
+import com.google.inject.name.Names.named
 import connectors._
 import helpers.FutureTimeoutSupportImpl
-import javax.inject.{Inject, Singleton}
+import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.filters.frontend.SessionTimeoutFilter
 
 class ConfigurationModule extends AbstractModule {
@@ -31,30 +30,22 @@ class ConfigurationModule extends AbstractModule {
     bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
     bind(classOf[SessionTimeoutFilter]).to(classOf[SessionTimeoutFilterWithWhitelist])
     bind(classOf[FutureTimeoutSupport]).to(classOf[FutureTimeoutSupportImpl])
-    bind(classOf[PushPullNotificationsConnector.Config]).toProvider(classOf[PushPullNotificationsApiConnectorConfigProvider])
 
     bind(classOf[SubscriptionFieldsConnector])
-      .annotatedWith(Names.named("SANDBOX"))
+      .annotatedWith(named("SANDBOX"))
       .to(classOf[SandboxSubscriptionFieldsConnector])
-
     bind(classOf[SubscriptionFieldsConnector])
-      .annotatedWith(Names.named("PRODUCTION"))
+      .annotatedWith(named("PRODUCTION"))
       .to(classOf[ProductionSubscriptionFieldsConnector])
+
+    bind(classOf[PushPullNotificationsConnector])
+      .annotatedWith(named("PPNS-SANDBOX"))
+      .to(classOf[SandboxPushPullNotificationsConnector])
+    bind(classOf[PushPullNotificationsConnector])
+      .annotatedWith(named("PPNS-PRODUCTION"))
+      .to(classOf[ProductionPushPullNotificationsConnector])
 
     bind(classOf[ApmConnector.Config])
       .toProvider(classOf[LiveApmConnectorConfigProvider])
-  }
-}
-
-@Singleton
-class PushPullNotificationsApiConnectorConfigProvider @Inject()(config: ServicesConfig) extends Provider[PushPullNotificationsConnector.Config] {
-
-  override def get(): PushPullNotificationsConnector.Config = {
-    val authConfigKey = "push-pull-notifications-api.authorizationKey"
-    val authorizationKey: String = config.getConfString(authConfigKey, throw new RuntimeException(s"Could not find config key '$authConfigKey'"))
-    PushPullNotificationsConnector.Config(
-      serviceBaseUrl = config.baseUrl("push-pull-notifications-api"),
-      authorizationKey
-    )
   }
 }

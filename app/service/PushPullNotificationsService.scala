@@ -16,18 +16,25 @@
 
 package service
 
-import connectors.PushPullNotificationsConnector
-import domain.models.applications.ClientId
+import domain.models.applications.{Application, ClientId}
 import javax.inject.{Inject, Singleton}
+import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PushPullNotificationsService @Inject()(pushPullNotificationsConnector: PushPullNotificationsConnector)
+class PushPullNotificationsService @Inject()(connectorsWrapper: ConnectorsWrapper)
                                             (implicit ec: ExecutionContext) {
 
-  def fetchPushSecrets(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
-    pushPullNotificationsConnector.fetchPushSecrets(clientId)
+  def fetchPushSecrets(application: Application)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
+    val connector: PushPullNotificationsConnector = connectorsWrapper.forEnvironment(application.deployedTo).pushPullNotificationsConnector
+    connector.fetchPushSecrets(application.clientId)
+  }
+}
+
+object PushPullNotificationsService {
+  trait PushPullNotificationsConnector {
+    def fetchPushSecrets(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Seq[String]]
   }
 }

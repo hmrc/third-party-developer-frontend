@@ -32,7 +32,7 @@ import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite {
+class PushPullNotificationsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite {
   private val baseUrl = "https://example.com"
   private val environmentName = "ENVIRONMENT"
 
@@ -53,7 +53,7 @@ class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndA
     when(mockEnvironment.toString).thenReturn(environmentName)
     when(mockProxiedHttpClient.withHeaders(*)).thenReturn(mockProxiedHttpClient)
 
-    val connector: AbstractSubscriptionFieldsConnector = new AbstractSubscriptionFieldsConnector {
+    val connector: AbstractPushPullNotificationsConnector = new AbstractPushPullNotificationsConnector {
       val httpClient = mockHttpClient
       val proxiedHttpClient = mockProxiedHttpClient
       val serviceBaseUrl = baseUrl
@@ -63,6 +63,7 @@ class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndA
       val actorSystem = testActorSystem
       val futureTimeout = futureTimeoutSupport
       val appConfig = mockAppConfig
+      val authorizationKey = "random auth key"
       implicit val ec: ExecutionContext = global
     }
   }

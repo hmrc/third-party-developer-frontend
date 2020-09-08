@@ -44,7 +44,7 @@ class PushPullNotifications @Inject() (
 
   def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId, ViewPushSecret, SandboxOrAdmin) {
     implicit request: ApplicationRequest[AnyContent] =>
-      pushPullNotificationsService.fetchPushSecrets(request.application.clientId) map { pushSecrets =>
+      pushPullNotificationsService.fetchPushSecrets(request.application) map { pushSecrets =>
         NonEmptyList.fromList(pushSecrets.toList)
           .fold(NotFound(errorHandler.notFoundTemplate))(nonEmptySecrets => Ok(pushSecretsView(request.application, nonEmptySecrets)))
     }
