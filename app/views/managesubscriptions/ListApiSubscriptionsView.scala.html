@@ -29,7 +29,8 @@
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messages: Messages,
-    applicationConfig: config.ApplicationConfig)
+    applicationConfig: config.ApplicationConfig
+    )
 
 @pageHeading = @{ "Subscription configuration" }
 
@@ -71,7 +72,9 @@
             <td>@{field.shortDescription}</td>
             <td>@{field.value}</td>
             <td>
-              <a href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, field.name, LeftHandNavigation)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-@{field.name}-submit">Edit</a>
+              @if(field.canWrite) {
+                <a href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, field.name, LeftHandNavigation)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-@{field.name}-submit">Edit</a>
+              }
             </td>
           </tr>
         }

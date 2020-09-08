@@ -34,6 +34,7 @@ import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.subscriptions.DevhubAccessLevel
 
 @Singleton
 class Details @Inject() (
@@ -54,7 +55,9 @@ class Details @Inject() (
     checkActionForApprovedApps(SupportsDetails, SandboxOrAdmin)(applicationId)(fun)
 
   def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
+    val accessLevel = DevhubAccessLevel.fromRole(request.role)
+
+    val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
 
     Future.successful(request.application.state.name match {
       case State.TESTING if request.role.isAdministrator =>

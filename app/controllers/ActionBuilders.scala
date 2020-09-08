@@ -90,7 +90,9 @@ trait ActionBuilders {
       def refine[A](input: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldPage[A]]] = {
         implicit val implicitRequest: Request[A] = input.applicationRequest.request
 
-        val details = input.fieldDefinitions.map(toDetails).toList
+        val accessLevel = DevhubAccessLevel.fromRole(input.applicationRequest.role)
+
+        val details = input.fieldDefinitions.map(toDetails(accessLevel)).toList
 
         Future.successful(
           if (pageNumber >= 1 && pageNumber <= details.size) {

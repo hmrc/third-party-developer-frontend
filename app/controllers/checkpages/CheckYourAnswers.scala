@@ -37,6 +37,7 @@ import views.html.checkpages.checkyouranswers.team.TeamView
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import domain.models.subscriptions.DevhubAccessLevel
 
 @Singleton
 class CheckYourAnswers @Inject() (
@@ -71,7 +72,9 @@ class CheckYourAnswers @Inject() (
     with CheckInformationFormHelper {
 
   def answersPage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
-    val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
+    val accessLevel = DevhubAccessLevel.fromRole(request.role)
+
+    val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
     Future.successful(
       Ok(
         checkYourAnswersView(checkYourAnswersData, CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy")))
@@ -81,13 +84,14 @@ class CheckYourAnswers @Inject() (
 
   def answersPageAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val application = request.application
+    val accessLevel = DevhubAccessLevel.fromRole(request.role)
 
     (for {
       _ <- applicationService.requestUplift(appId, application.name, request.user)
     } yield Redirect(routes.ApplicationCheck.credentialsRequested(appId)))
       .recover {
         case e: DeskproTicketCreationFailed =>
-          val checkYourAnswersData = CheckYourAnswersData(request.application, request.subscriptions)
+          val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
           val requestForm = CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
           InternalServerError(checkYourAnswersView(checkYourAnswersData, requestForm.withError("submitError", e.displayMessage)))
       }
@@ -180,16 +184,16 @@ case class CheckYourAnswersData(
 )
 
 object CheckYourAnswersData {
-  def apply(application: Application, subs: Seq[APISubscriptionStatus]): CheckYourAnswersData = {
+  def apply(accessLevel: DevhubAccessLevel, application: Application, subs: Seq[APISubscriptionStatus]): CheckYourAnswersData = {
     val contactDetails: Option[ContactDetails] = application.checkInformation.flatMap(_.contactDetails)
 
-    def asCheckYourSubscriptionData(in: APISubscriptionStatus): CheckYourSubscriptionData = {
+    def asCheckYourSubscriptionData(accessLevel: DevhubAccessLevel)(in: APISubscriptionStatus): CheckYourSubscriptionData = {
       CheckYourSubscriptionData(
         name = in.name,
         apiContext = in.context,
         apiVersion = in.apiVersion.version,
         displayedStatus = in.apiVersion.displayedStatus,
-        fields = in.fields.fields.map(ManageSubscriptions.toFieldValue)
+        fields = in.fields.fields.map(ManageSubscriptions.toFieldValue(accessLevel))
       )
     }
 
@@ -203,7 +207,7 @@ object CheckYourAnswersData {
       privacyPolicyUrl = application.privacyPolicyUrl,
       termsAndConditionsUrl = application.termsAndConditionsUrl,
       acceptedTermsOfUse = application.checkInformation.fold(false)(_.termsOfUseAgreements.nonEmpty),
-      subscriptions = subs.filter(_.subscribed).map(asCheckYourSubscriptionData)
+      subscriptions = subs.filter(_.subscribed).map(asCheckYourSubscriptionData(accessLevel))
     )
   }
 }

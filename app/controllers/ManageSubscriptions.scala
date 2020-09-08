@@ -36,26 +36,29 @@ import views.html.managesubscriptions._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import domain.models.subscriptions.DevhubAccessLevel
 
 object ManageSubscriptions {
 
-  case class Field(name: String, shortDescription: String, value: String)
+  case class Field(name: String, shortDescription: String, value: String, canWrite: Boolean)
 
   case class ApiDetails(name: String, context: ApiContext, version: ApiVersion, displayedStatus: String, subsValues: Seq[Field])
 
-  def toFieldValue(sfv: SubscriptionFieldValue): Field = {
+  def toFieldValue(accessLevel: DevhubAccessLevel)(sfv: SubscriptionFieldValue): Field = {
     def default(in: String, default: String) = if (in.isEmpty) default else in
 
-    Field(sfv.definition.name.value, sfv.definition.shortDescription, default(sfv.value.value, "None"))
+    val canWrite = sfv.definition.access.devhub.satisfiesWrite(accessLevel)
+
+    Field(sfv.definition.name.value, sfv.definition.shortDescription, default(sfv.value.value, "None"), canWrite)
   }
 
-  def toDetails(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
+  def toDetails(accessLevel: DevhubAccessLevel)(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
     ApiDetails(
       name = in.name,
       context = in.context,
       version = in.apiVersion.version,
       displayedStatus = in.apiVersion.displayedStatus,
-      subsValues = in.fields.fields.map(toFieldValue)
+      subsValues = in.fields.fields.map(toFieldValue(accessLevel))
     )
   }
 }
@@ -86,8 +89,10 @@ class ManageSubscriptions @Inject() (
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
+      val accessLevel = DevhubAccessLevel.fromRole(appRQ.role)
+
       val details = definitionsRequest.fieldDefinitions
-        .map(toDetails)
+        .map(toDetails(accessLevel))
         .toList
 
       successful(Ok(listApiSubscriptionsView(definitionsRequest.applicationRequest.application, details)))
@@ -232,8 +237,10 @@ class ManageSubscriptions @Inject() (
 
           implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
+          val accessLevel = DevhubAccessLevel.fromRole(appRQ.role)
+
           val details = definitionsRequest.fieldDefinitions
-            .map(toDetails)
+            .map(toDetails(accessLevel))
             .toList
 
           Future.successful(Ok(subscriptionConfigurationStartView(definitionsRequest.applicationRequest.application, details)))
