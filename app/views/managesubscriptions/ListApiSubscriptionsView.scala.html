@@ -62,17 +62,16 @@
         <th class="col-35">Name</th>
         <th class="col-60">Configuration</th>
         <td>
-            <a href="@{routes.ManageSubscriptions.editApiMetadataPage(app.id, api.context, api.version, LeftHandNavigation)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-submit">Edit</a>
         </td>
         </tr>
       </thead>
       <tbody>
         @for(field <- api.subsValues.toList) {
           <tr>
-            <td>@{field.name}</td>
+            <td>@{field.shortDescription}</td>
             <td>@{field.value}</td>
             <td>
-              <a href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, fieldName, LeftHandNavigation)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-@{fieldName.value}-submit">Edit</a>
+              <a href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, field.name, LeftHandNavigation)}" class="numeric" id="@{IdFormatter.identifier(api.context, api.version)}-@{field.name}-submit">Edit</a>
             </td>
           </tr>
         }

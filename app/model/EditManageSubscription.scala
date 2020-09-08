@@ -38,7 +38,9 @@ object EditManageSubscription {
       apiVersion: ApiVersion,
       apiContext: ApiContext,
       displayedStatus: String,
-      field: SubscriptionFieldViewModel)
+      field: SubscriptionFieldViewModel,
+      errors: Seq[FormError]
+  )
 
   case class SubscriptionFieldViewModel(
       name: FieldName,
@@ -93,15 +95,17 @@ object EditManageSubscription {
       val accessLevel = DevhubAccessLevel.fromRole(role)
       val canWrite = apiSubscription.subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
       val fieldErrors = formErrors.filter(e => e.key == apiSubscription.subscriptionFieldValue.definition.name.value)
+      println(s">>>>>${fieldErrors}")
 
       val newValue = if (canWrite) {
-      postedFormValues.getOrElse(apiSubscription.subscriptionFieldValue.definition.name,fieldsViewModel)
+        postedFormValues.getOrElse(apiSubscription.subscriptionFieldValue.definition.name,fieldsViewModel)
       } else {
         fieldsViewModel
       }
 
       val subscriptionFieldViewModel =
-        SubscriptionFieldViewModel(apiSubscription.subscriptionFieldValue.definition.name,
+        SubscriptionFieldViewModel(
+          apiSubscription.subscriptionFieldValue.definition.name,
          apiSubscription.subscriptionFieldValue.definition.description,
          apiSubscription.subscriptionFieldValue.definition.hint,
          canWrite,
@@ -113,7 +117,8 @@ object EditManageSubscription {
         apiSubscription.apiVersion.version,
         apiSubscription.context,
         apiSubscription.apiVersion.displayedStatus,
-        subscriptionFieldViewModel
+        subscriptionFieldViewModel,
+        formErrors
       )
     }
   }
