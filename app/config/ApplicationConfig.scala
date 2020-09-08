@@ -80,11 +80,11 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   val apiSubscriptionFieldsSandboxApiKey = getConfString("api-subscription-fields-sandbox.api-key", "")
 
   // PPNS
-  val ppnsProductionUrl = apiSubscriptionFieldsUrl("push-pull-notifications-api-production")
+  val ppnsProductionUrl = pushPullNotificationsApiUrl("push-pull-notifications-api-production")
   val ppnsProductionApiKey = getConfString("push-pull-notifications-api-production.api-key", "")
   val ppnsProductionUseProxy = useProxy("push-pull-notifications-api-production")
   val ppnsProductionAuthorizationKey = getConfString("push-pull-notifications-api-production.authorizationKey", "")
-  val ppnsSandboxUrl = apiSubscriptionFieldsUrl("push-pull-notifications-api-sandbox")
+  val ppnsSandboxUrl = pushPullNotificationsApiUrl("push-pull-notifications-api-sandbox")
   val ppnsSandboxUseProxy = useProxy("push-pull-notifications-api-sandbox")
   val ppnsSandboxApiKey = getConfString("push-pull-notifications-api-sandbox.api-key", "")
   val ppnsSandboxAuthorizationKey = getConfString("push-pull-notifications-api-sandbox.authorizationKey", "")
@@ -105,6 +105,8 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
   private def apiSubscriptionFieldsUrl = serviceUrl("api-subscription-fields")(_)
 
   private def thirdPartyApplicationUrl = serviceUrl("third-party-application")(_)
+
+  private def pushPullNotificationsApiUrl = serviceUrl("push-pull-notifications-api")(_)
 
   private def useProxy(serviceName: String) = getConfBool(s"$serviceName.use-proxy", false)
 }
