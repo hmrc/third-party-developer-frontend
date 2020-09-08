@@ -95,7 +95,6 @@ object EditManageSubscription {
       val accessLevel = DevhubAccessLevel.fromRole(role)
       val canWrite = apiSubscription.subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
       val fieldErrors = formErrors.filter(e => e.key == apiSubscription.subscriptionFieldValue.definition.name.value)
-      println(s">>>>>${fieldErrors}")
 
       val newValue = if (canWrite) {
         postedFormValues.getOrElse(apiSubscription.subscriptionFieldValue.definition.name,fieldsViewModel)

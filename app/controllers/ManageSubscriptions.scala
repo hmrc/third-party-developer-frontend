@@ -190,7 +190,6 @@ class ManageSubscriptions @Inject() (
       .map({
         case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect)
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
-        println(s"****${fieldErrors}")
           val formErrors = fieldErrors.map(error => FormError(error._1, Seq(error._2))).toSeq
           val viewModel = EditApiConfigurationViewModel.toViewModel(apiSubscription, role, formErrors, postedValuesAsMap)
 
@@ -217,7 +216,6 @@ class ManageSubscriptions @Inject() (
       .map({
         case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect)
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
-        println(s"******${fieldErrors}")
           val formErrors = fieldErrors.map(error => FormError(error._1, Seq(error._2))).toSeq
           val viewModel = EditApiConfigurationFieldViewModel.toViewModel(apiSubscription, role, formErrors, postedValuesAsMap)
 
