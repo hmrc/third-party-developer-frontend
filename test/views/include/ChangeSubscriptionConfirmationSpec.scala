@@ -61,7 +61,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
 
     changeSubscriptionConfirmationView.render(
-      ApplicationViewModel(application, hasSubscriptionsFields = false),
+      ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
       form,
       apiName,
       apiContext,

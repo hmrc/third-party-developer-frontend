@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package model
+package service
 
-import domain.models.applications.Application
+import connectors.PushPullNotificationsConnector
+import domain.models.applications.ClientId
+import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.http.HeaderCarrier
 
-case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean)
+import scala.concurrent.{ExecutionContext, Future}
+
+@Singleton
+class PushPullNotificationsService @Inject()(pushPullNotificationsConnector: PushPullNotificationsConnector)
+                                            (implicit ec: ExecutionContext) {
+
+  def fetchPushSecrets(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
+    pushPullNotificationsConnector.fetchPushSecrets(clientId)
+  }
+}
