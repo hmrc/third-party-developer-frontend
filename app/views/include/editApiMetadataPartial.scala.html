@@ -35,31 +35,27 @@
   @helper.CSRF.formField
 
   @for((field, idx) <- viewModel.fields.zipWithIndex) {
-    @defining(field.name.value) { fieldName =>
-    @defining(field.value.value) { fieldValue =>
-        <div class="form-group @if(field.errors.nonEmpty){form-group-error}">
+    @if(field.canWrite) {
 
-          @fieldError(field.errors, fieldName)
+      @defining(field.name.value) { fieldName =>
+      @defining(field.value.value) { fieldValue =>
+          <div class="form-group @if(field.errors.nonEmpty){form-group-error}">
 
-          <label class="form-label" for="@fieldName">
-            @{field.description}
-          </label>
-          <span class="form-hint">@{field.hint}</span>
+            @fieldError(field.errors, fieldName)
 
-          @if(field.canWrite){
+            <label class="form-label" for="@fieldName">
+              @{field.description}
+            </label>
+            <span class="form-hint">@{field.hint}</span>
+
             <input type="text"
               name="@{fieldName}"
               value="@{fieldValue}"
               class="form-input input--medium @if(field.errors.nonEmpty){form-control-error}"
               id="@{fieldName}" />
-          } else {
-            <input type="text"
-              value="@{fieldValue}"
-              class="form-input input--medium"
-              id="@{fieldName}" disabled/>
-          }
-        </div>
-    }}
+          </div>
+      }}
+    }
   }
 
  <div class="form-group">

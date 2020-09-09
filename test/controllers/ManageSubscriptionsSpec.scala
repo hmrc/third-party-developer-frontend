@@ -151,11 +151,13 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       val fields = apiSubscriptionStatus.fields.fields.toList
 
       for (field <- fields) {
-        contentAsString(result) should include(field.definition.description)
-        contentAsString(result) should include(field.definition.hint)
+        if (field.definition.access.devhub.satisfiesWrite(DevhubAccessLevel.Admininstator)) {
+          contentAsString(result) should include(field.definition.description)
+          contentAsString(result) should include(field.definition.hint)
+        } else {
+          contentAsString(result) should not include(field.definition.description)
+          contentAsString(result) should not include(field.definition.hint)
 
-        if (!field.definition.access.devhub.satisfiesWrite(DevhubAccessLevel.Admininstator)) {
-          contentAsString(result) should include("disabled")
         }
       }
     }
