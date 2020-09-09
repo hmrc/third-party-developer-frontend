@@ -43,9 +43,13 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
   Helpers.running(fakeApplication()) {
     "showPushSecrets" when {
       "logged in as a Developer on an application" should {
-        "return the push secret for a production app" in new Setup {
+        "return 403 for a prod app" in new Setup {
           val application: Application = anApplication(developerEmail = loggedInUser.email)
-          showPushSecretsShouldRenderThePage(application)
+          givenApplicationAction(application, loggedInUser)
+
+          val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
+
+          status(result) shouldBe FORBIDDEN
         }
 
         "return the push secret for a sandbox app" in new Setup {
@@ -53,7 +57,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
         }
 
         "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-          val application: Application = anApplication(developerEmail = loggedInUser.email)
+          val application: Application = aSandboxApplication(developerEmail = loggedInUser.email)
           givenApplicationAction(application, loggedInUser)
 
           val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
@@ -64,8 +68,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
 
       "logged in as an Administrator on an application" should {
         "return the push secret for a production app" in new Setup {
-          val application: Application = anApplication(adminEmail = loggedInUser.email)
-          showPushSecretsShouldRenderThePage(application)
+          showPushSecretsShouldRenderThePage(anApplication(adminEmail = loggedInUser.email))
         }
 
         "return the push secret for a sandbox app" in new Setup {
@@ -73,7 +76,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
         }
 
         "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-          val application: Application = anApplication(developerEmail = loggedInUser.email)
+          val application: Application = anApplication(adminEmail = loggedInUser.email)
           givenApplicationAction(application, loggedInUser)
 
           val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
@@ -150,7 +153,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
       givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
       val expectedSecrets = Seq("some secret")
-      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application.clientId))(any[HeaderCarrier])).thenReturn(successful(expectedSecrets))
+      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(any[HeaderCarrier])).thenReturn(successful(expectedSecrets))
 
       val result = underTest.showPushSecrets(application.id)(loggedInRequest)
 

@@ -180,11 +180,13 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
     }
   }
 
-  def subscribedToApiWithPpnsFieldAction(applicationId: ApplicationId)
+  def subscribedToApiWithPpnsFieldAction(applicationId: ApplicationId, capability: Capability, permissions: Permission)
                                         (fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] = {
     loggedInAction { implicit request =>
       val composedActions = Action andThen
         applicationAction(applicationId, loggedIn) andThen
+        capabilityFilter(capability) andThen
+        permissionFilter(permissions) andThen
         subscribedToApiWithPpnsFieldFilter
       composedActions.async(fun)(request)
     }

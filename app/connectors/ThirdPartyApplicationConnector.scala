@@ -53,11 +53,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   val environment: Environment
   val serviceBaseUrl: String
   val useProxy: Boolean
-  val bearerToken: String
   val apiKey: String
   def isEnabled: Boolean
 
-  def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
+  def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
 
   val api = API("third-party-application")
 
@@ -259,7 +258,6 @@ class ThirdPartyApplicationSandboxConnector @Inject() (
   val environment = Environment.SANDBOX
   val serviceBaseUrl = appConfig.thirdPartyApplicationSandboxUrl
   val useProxy = appConfig.thirdPartyApplicationSandboxUseProxy
-  val bearerToken = appConfig.thirdPartyApplicationSandboxBearerToken
   val apiKey = appConfig.thirdPartyApplicationSandboxApiKey
 
   override val isEnabled = appConfig.hasSandbox;
@@ -279,7 +277,6 @@ class ThirdPartyApplicationProductionConnector @Inject() (
   val environment = Environment.PRODUCTION
   val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
   val useProxy = appConfig.thirdPartyApplicationProductionUseProxy
-  val bearerToken = appConfig.thirdPartyApplicationProductionBearerToken
   val apiKey = appConfig.thirdPartyApplicationProductionApiKey
 
   override val isEnabled = true

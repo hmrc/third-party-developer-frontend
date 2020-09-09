@@ -19,9 +19,10 @@ package service
 import com.google.inject.name.Named
 import config.ApplicationConfig
 import connectors._
-import domain.models.applications.{Application, ApplicationId, Environment}
 import domain.models.applications.Environment.PRODUCTION
+import domain.models.applications.{Application, ApplicationId, Environment}
 import javax.inject.{Inject, Singleton}
+import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -33,13 +34,15 @@ class ConnectorsWrapper @Inject() (
     val productionApplicationConnector: ThirdPartyApplicationProductionConnector,
     @Named("SANDBOX") val sandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector,
     @Named("PRODUCTION") val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+    @Named("PPNS-SANDBOX") val sandboxPushPullNotificationsConnector: PushPullNotificationsConnector,
+    @Named("PPNS-PRODUCTION") val productionPushPullNotificationsConnector: PushPullNotificationsConnector,
     applicationConfig: ApplicationConfig
 )(implicit val ec: ExecutionContext) {
 
   def forEnvironment(environment: Environment): Connectors = {
     environment match {
-      case PRODUCTION => Connectors(productionApplicationConnector, productionSubscriptionFieldsConnector)
-      case _          => Connectors(sandboxApplicationConnector, sandboxSubscriptionFieldsConnector)
+      case PRODUCTION => Connectors(productionApplicationConnector, productionSubscriptionFieldsConnector, productionPushPullNotificationsConnector)
+      case _          => Connectors(sandboxApplicationConnector, sandboxSubscriptionFieldsConnector, sandboxPushPullNotificationsConnector)
     }
   }
 
@@ -58,4 +61,6 @@ class ConnectorsWrapper @Inject() (
   }
 }
 
-case class Connectors(thirdPartyApplicationConnector: ThirdPartyApplicationConnector, apiSubscriptionFieldsConnector: SubscriptionFieldsConnector)
+case class Connectors(thirdPartyApplicationConnector: ThirdPartyApplicationConnector,
+                      apiSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+                      pushPullNotificationsConnector: PushPullNotificationsConnector)

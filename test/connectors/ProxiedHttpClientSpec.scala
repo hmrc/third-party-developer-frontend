@@ -19,10 +19,9 @@ package connectors
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import play.api.{Configuration, Environment, Mode}
 import play.api.libs.ws.{WSClient, WSRequest}
+import play.api.{Configuration, Environment, Mode}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.bootstrap.config.RunMode
 import utils.AsyncHmrcSpec
@@ -34,7 +33,6 @@ class ProxiedHttpClientSpec extends AsyncHmrcSpec {
 
   trait Setup {
     val apiKey: String = UUID.randomUUID().toString
-    val bearerToken: String = UUID.randomUUID().toString
     val url = "http://example.com"
     val mockConfig: Configuration = mock[Configuration]
     val mockHttpAuditing: HttpAuditing = mock[HttpAuditing]
@@ -55,22 +53,21 @@ class ProxiedHttpClientSpec extends AsyncHmrcSpec {
 
     "creates a ProxiedHttpClient with passed in headers" in new Setup {
 
-      private val result = underTest.withHeaders(bearerToken, apiKey)
+      private val result = underTest.withHeaders(apiKey)
 
-      result.authorization shouldBe Some(Authorization(s"Bearer $bearerToken"))
       result.apiKeyHeader shouldBe Some("x-api-key" -> apiKey)
     }
 
     "when apiKey is empty String, apiKey header is None" in new Setup {
 
-      private val result = underTest.withHeaders(bearerToken, "")
+      private val result = underTest.withHeaders("")
 
       result.apiKeyHeader shouldBe None
     }
 
     "when apiKey isn't provided, apiKey header is None" in new Setup {
 
-      private val result = underTest.withHeaders(bearerToken)
+      private val result = underTest.withHeaders()
 
       result.apiKeyHeader shouldBe None
     }

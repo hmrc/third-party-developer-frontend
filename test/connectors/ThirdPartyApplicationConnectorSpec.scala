@@ -65,7 +65,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     private val futureTimeoutSupport = new FutureTimeoutSupportImpl
     private val actorSystemTest = ActorSystem("test-actor-system")
     val apiKeyTest = "5bb51bca-8f97-4f2b-aee4-81a4a70a42d3"
-    val bearer = "TestBearerToken"
 
     val connector = new ThirdPartyApplicationConnector(mockAppConfig, mockMetrics) {
       val ec = global
@@ -73,7 +72,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       val proxiedHttpClient = mockProxiedHttpClient
       val serviceBaseUrl = baseUrl
       val useProxy = proxyEnabled
-      val bearerToken = "TestBearerToken"
       val environment = mockEnvironment
       val apiKey = apiKeyTest
       val appConfig = mockAppConfig
@@ -245,7 +243,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
       val result = await(connector.fetchApplicationById(applicationId))
 
-      verify(mockProxiedHttpClient).withHeaders(bearer, apiKeyTest)
+      verify(mockProxiedHttpClient).withHeaders(apiKeyTest)
 
       result shouldBe defined
       result.get.id shouldBe applicationId
@@ -727,7 +725,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
           .thenReturn(mockProxiedHttpClient)
 
         connector.http shouldBe mockProxiedHttpClient
-        verify(mockProxiedHttpClient).withHeaders(bearer, apiKeyTest)
+        verify(mockProxiedHttpClient).withHeaders(apiKeyTest)
       }
     }
   }

@@ -17,7 +17,7 @@
 package domain.models.applications
 
 import domain.models.apidefinitions.AccessType.STANDARD
-import domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails}
+import domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import domain.models.applications.Environment._
 import domain.models.applications.Permissions.SandboxOrAdmin
 import domain.models.applications.Role.ADMINISTRATOR
@@ -115,6 +115,10 @@ case class Application(
       case (PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
       case _                                                             => false
     }
+  }
+
+  def canViewPushSecret(developer: Developer): Boolean = {
+    allows(ViewPushSecret, developer, SandboxOrAdmin)
   }
 
   private val maximumNumberOfRedirectUris = 5
