@@ -1,191 +1,193 @@
 # microservice specific routes
 
-GET         /registration                                                                   controllers.Registration.registration
-POST        /registration                                                                   controllers.Registration.register
-GET         /confirmation                                                                   controllers.Registration.confirmation
+GET         /registration                                                                                controllers.Registration.registration
+POST        /registration                                                                                controllers.Registration.register
+GET         /confirmation                                                                                controllers.Registration.confirmation
 
-GET         /verification                                                                   controllers.Registration.verify(code: String)
-GET         /resend-verification                                                            controllers.Registration.resendVerification
-GET         /resend-confirmation                                                            controllers.Registration.resendConfirmation
+GET         /verification                                                                                controllers.Registration.verify(code: String)
+GET         /resend-verification                                                                         controllers.Registration.resendVerification
+GET         /resend-confirmation                                                                         controllers.Registration.resendConfirmation
 
-GET         /login                                                                          controllers.UserLoginAccount.login
-GET         /login/2sv-recommendation                                                       controllers.ProtectAccount.get2svRecommendationPage
-POST        /login                                                                          controllers.UserLoginAccount.authenticate
-GET         /login/2SV-help                                                                 controllers.UserLoginAccount.get2SVHelpConfirmationPage
-POST        /login/2SV-help                                                                 controllers.UserLoginAccount.confirm2SVHelp
-GET         /login/2SV-help/complete                                                        controllers.UserLoginAccount.get2SVHelpCompletionPage
-GET         /login-totp                                                                     controllers.UserLoginAccount.enterTotp
-POST        /login-totp                                                                     controllers.UserLoginAccount.authenticateTotp
-GET         /login/2SV-not-set                                                              controllers.ProtectAccount.get2SVNotSetPage
+GET         /login                                                                                       controllers.UserLoginAccount.login
+GET         /login/2sv-recommendation                                                                    controllers.ProtectAccount.get2svRecommendationPage
+POST        /login                                                                                       controllers.UserLoginAccount.authenticate
+GET         /login/2SV-help                                                                              controllers.UserLoginAccount.get2SVHelpConfirmationPage
+POST        /login/2SV-help                                                                              controllers.UserLoginAccount.confirm2SVHelp
+GET         /login/2SV-help/complete                                                                     controllers.UserLoginAccount.get2SVHelpCompletionPage
+GET         /login-totp                                                                                  controllers.UserLoginAccount.enterTotp
+POST        /login-totp                                                                                  controllers.UserLoginAccount.authenticateTotp
+GET         /login/2SV-not-set                                                                           controllers.ProtectAccount.get2SVNotSetPage
 
-GET         /logout                                                                         controllers.UserLogoutAccount.logout
+GET         /logout                                                                                      controllers.UserLogoutAccount.logout
 
-GET         /logout/survey                                                                  controllers.UserLogoutAccount.logoutSurvey
-POST        /logout/survey                                                                  controllers.UserLogoutAccount.logoutSurveyAction
+GET         /logout/survey                                                                               controllers.UserLogoutAccount.logoutSurvey
+POST        /logout/survey                                                                               controllers.UserLogoutAccount.logoutSurveyAction
 
-GET         /support                                                                        controllers.Support.raiseSupportEnquiry
-POST        /support                                                                        controllers.Support.submitSupportEnquiry
-GET         /support/submitted                                                              controllers.Support.thankyou
+GET         /support                                                                                     controllers.Support.raiseSupportEnquiry
+POST        /support                                                                                     controllers.Support.submitSupportEnquiry
+GET         /support/submitted                                                                           controllers.Support.thankyou
 
-GET         /locked                                                                         controllers.UserLoginAccount.accountLocked
+GET         /locked                                                                                      controllers.UserLoginAccount.accountLocked
 
-GET         /profile                                                                        controllers.Profile.showProfile
-GET         /profile/change                                                                 controllers.Profile.changeProfile
-POST        /profile                                                                        controllers.Profile.updateProfile
+GET         /profile                                                                                     controllers.Profile.showProfile
+GET         /profile/change                                                                              controllers.Profile.changeProfile
+POST        /profile                                                                                     controllers.Profile.updateProfile
 
-GET         /profile/protect-account                                                        controllers.ProtectAccount.getProtectAccount
-GET         /profile/protect-account/setup                                                  controllers.ProtectAccount.getQrCode
-GET         /profile/protect-account/access-code                                            controllers.ProtectAccount.getAccessCodePage
-GET         /profile/protect-account/complete                                               controllers.ProtectAccount.getProtectAccountCompletedPage
-POST        /profile/protect-account/enable                                                 controllers.ProtectAccount.protectAccount
-GET         /profile/protect-account/confirm-removal                                        controllers.ProtectAccount.get2SVRemovalConfirmationPage
-POST        /profile/protect-account/confirm-removal                                        controllers.ProtectAccount.confirm2SVRemoval
-GET         /profile/protect-account/remove                                                 controllers.ProtectAccount.get2SVRemovalAccessCodePage
-POST        /profile/protect-account/remove                                                 controllers.ProtectAccount.remove2SV
-GET         /profile/protect-account/remove/complete                                        controllers.ProtectAccount.get2SVRemovalCompletePage
+GET         /profile/protect-account                                                                     controllers.ProtectAccount.getProtectAccount
+GET         /profile/protect-account/setup                                                               controllers.ProtectAccount.getQrCode
+GET         /profile/protect-account/access-code                                                         controllers.ProtectAccount.getAccessCodePage
+GET         /profile/protect-account/complete                                                            controllers.ProtectAccount.getProtectAccountCompletedPage
+POST        /profile/protect-account/enable                                                              controllers.ProtectAccount.protectAccount
+GET         /profile/protect-account/confirm-removal                                                     controllers.ProtectAccount.get2SVRemovalConfirmationPage
+POST        /profile/protect-account/confirm-removal                                                     controllers.ProtectAccount.confirm2SVRemoval
+GET         /profile/protect-account/remove                                                              controllers.ProtectAccount.get2SVRemovalAccessCodePage
+POST        /profile/protect-account/remove                                                              controllers.ProtectAccount.remove2SV
+GET         /profile/protect-account/remove/complete                                                     controllers.ProtectAccount.get2SVRemovalCompletePage
 
 
-GET         /profile/password                                                               controllers.Profile.showPasswordPage
-POST        /profile/password                                                               controllers.Profile.updatePassword
+GET         /profile/password                                                                            controllers.Profile.showPasswordPage
+POST        /profile/password                                                                            controllers.Profile.updatePassword
 
-GET         /profile/delete                                                                 controllers.Profile.requestDeletion
-POST        /profile/delete                                                                 controllers.Profile.deleteAccount
+GET         /profile/delete                                                                              controllers.Profile.requestDeletion
+POST        /profile/delete                                                                              controllers.Profile.deleteAccount
 
-GET         /forgot-password                                                                controllers.Password.showForgotPassword
-POST        /forgot-password                                                                controllers.Password.requestReset
+GET         /forgot-password                                                                             controllers.Password.showForgotPassword
+POST        /forgot-password                                                                             controllers.Password.requestReset
 
-#TODO - Delete this first reset-password route when we have released the new version of TPD - APSR-1144
-GET         /:email/reset-password                                                          controllers.Password.validateReset(email: String, code: String)
-GET         /reset-password-link                                                            controllers.Password.validateReset(email: String, code: String)
+#TODO - Delete this first reset-password route when we have released the new version of TPD              - APSR-1144
+GET         /:email/reset-password                                                                       controllers.Password.validateReset(email: String, code: String)
+GET         /reset-password-link                                                                         controllers.Password.validateReset(email: String, code: String)
 
-GET         /reset-password                                                                 controllers.Password.resetPasswordChange
-POST        /reset-password                                                                 controllers.Password.resetPassword
-GET         /reset-password/error                                                           controllers.Password.resetPasswordError
+GET         /reset-password                                                                              controllers.Password.resetPasswordChange
+POST        /reset-password                                                                              controllers.Password.resetPassword
+GET         /reset-password/error                                                                        controllers.Password.resetPasswordError
 
-GET         /applications                                                                   controllers.AddApplication.manageApps
+GET         /applications                                                                                controllers.AddApplication.manageApps
 
-GET         /applications/using-privileged-application-credentials                          controllers.AddApplication.usingPrivilegedApplicationCredentialsPage()
-GET         /applications/access-token                                                      controllers.AddApplication.accessTokenSwitchPage()
+GET         /applications/using-privileged-application-credentials                                       controllers.AddApplication.usingPrivilegedApplicationCredentialsPage()
+GET         /applications/access-token                                                                   controllers.AddApplication.accessTokenSwitchPage()
 
-GET         /applications/add/production/10-days                                            controllers.AddApplication.tenDaysWarning
+GET         /applications/add/production/10-days                                                         controllers.AddApplication.tenDaysWarning
 
-GET         /applications/add/sandbox                                                       controllers.AddApplication.addApplicationSubordinate
-GET         /applications/add/production                                                    controllers.AddApplication.addApplicationPrincipal
+GET         /applications/add/sandbox                                                                    controllers.AddApplication.addApplicationSubordinate
+GET         /applications/add/production                                                                 controllers.AddApplication.addApplicationPrincipal
 
-GET         /applications/add/:environment/name                                             controllers.AddApplication.addApplicationName(environment: domain.models.applications.Environment)
-POST        /applications/add/:environment/name                                             controllers.AddApplication.editApplicationNameAction(environment: domain.models.applications.Environment)
+GET         /applications/add/:environment/name                                                          controllers.AddApplication.addApplicationName(environment: domain.models.applications.Environment)
+POST        /applications/add/:environment/name                                                          controllers.AddApplication.editApplicationNameAction(environment: domain.models.applications.Environment)
 
-GET         /applications/:id/add/success                                                   controllers.AddApplication.addApplicationSuccess(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/add/success                                                                controllers.AddApplication.addApplicationSuccess(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/team-members                                                  controllers.ManageTeam.manageTeam(id: domain.models.applications.ApplicationId, error: Option[String])
-GET         /applications/:id/team-members/add                                              controllers.ManageTeam.addTeamMember(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/team-members/add/:addTeamMemberPageMode                       controllers.ManageTeam.addTeamMemberAction(id: domain.models.applications.ApplicationId, addTeamMemberPageMode: domain.models.controllers.AddTeamMemberPageMode)
-GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation              controllers.ManageTeam.removeTeamMember(id: domain.models.applications.ApplicationId, teamMemberHash: String)
-POST        /applications/:id/team-members/remove                                           controllers.ManageTeam.removeTeamMemberAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/team-members                                                               controllers.ManageTeam.manageTeam(id: domain.models.applications.ApplicationId, error: Option[String])
+GET         /applications/:id/team-members/add                                                           controllers.ManageTeam.addTeamMember(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/team-members/add/:addTeamMemberPageMode                                    controllers.ManageTeam.addTeamMemberAction(id: domain.models.applications.ApplicationId, addTeamMemberPageMode: domain.models.controllers.AddTeamMemberPageMode)
+GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation                           controllers.ManageTeam.removeTeamMember(id: domain.models.applications.ApplicationId, teamMemberHash: String)
+POST        /applications/:id/team-members/remove                                                        controllers.ManageTeam.removeTeamMemberAction(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/details                                                       controllers.Details.details(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/details                                                                    controllers.Details.details(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/details/change                                                controllers.Details.changeDetails(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/details/change                                                controllers.Details.changeDetailsAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/details/change                                                             controllers.Details.changeDetails(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/details/change                                                             controllers.Details.changeDetailsAction(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/details/terms-of-use                                          controllers.TermsOfUse.termsOfUse(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/details/terms-of-use                                          controllers.TermsOfUse.agreeTermsOfUse(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/details/terms-of-use                                                       controllers.TermsOfUse.termsOfUse(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/details/terms-of-use                                                       controllers.TermsOfUse.agreeTermsOfUse(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/redirect-uris                                                 controllers.Redirects.redirects(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/redirect-uris/add                                             controllers.Redirects.addRedirect(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/redirect-uris/add                                             controllers.Redirects.addRedirectAction(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/redirect-uris/delete-confirmation                             controllers.Redirects.deleteRedirect(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/redirect-uris/delete                                          controllers.Redirects.deleteRedirectAction(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/redirect-uris/change                                          controllers.Redirects.changeRedirect(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/redirect-uris/change-confirmation                             controllers.Redirects.changeRedirectAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/redirect-uris                                                              controllers.Redirects.redirects(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/redirect-uris/add                                                          controllers.Redirects.addRedirect(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/redirect-uris/add                                                          controllers.Redirects.addRedirectAction(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/redirect-uris/delete-confirmation                                          controllers.Redirects.deleteRedirect(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/redirect-uris/delete                                                       controllers.Redirects.deleteRedirectAction(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/redirect-uris/change                                                       controllers.Redirects.changeRedirect(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/redirect-uris/change-confirmation                                          controllers.Redirects.changeRedirectAction(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/delete                                                        controllers.DeleteApplication.deleteApplication(id: domain.models.applications.ApplicationId, error: Option[String])
-GET         /applications/:id/delete-principal-confirm                                      controllers.DeleteApplication.deletePrincipalApplicationConfirm(id: domain.models.applications.ApplicationId, error: Option[String])
-POST        /applications/:id/delete-principal                                              controllers.DeleteApplication.deletePrincipalApplicationAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/delete-subordinate-confirm                                    controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/delete-subordinate                                            controllers.DeleteApplication.deleteSubordinateApplicationAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/delete                                                                     controllers.DeleteApplication.deleteApplication(id: domain.models.applications.ApplicationId, error: Option[String])
+GET         /applications/:id/delete-principal-confirm                                                   controllers.DeleteApplication.deletePrincipalApplicationConfirm(id: domain.models.applications.ApplicationId, error: Option[String])
+POST        /applications/:id/delete-principal                                                           controllers.DeleteApplication.deletePrincipalApplicationAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/delete-subordinate-confirm                                                 controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/delete-subordinate                                                         controllers.DeleteApplication.deleteSubordinateApplicationAction(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/ip-whitelist                                                  controllers.IpWhitelist.manageIpWhitelist(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/ip-whitelist/change                                           controllers.IpWhitelist.changeIpWhitelist(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/ip-whitelist/change                                           controllers.IpWhitelist.changeIpWhitelistAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-whitelist                                                               controllers.IpWhitelist.manageIpWhitelist(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-whitelist/change                                                        controllers.IpWhitelist.changeIpWhitelist(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/ip-whitelist/change                                                        controllers.IpWhitelist.changeIpWhitelistAction(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/subscriptions                                                 controllers.Subscriptions.manageSubscriptions(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/subscriptions                                                              controllers.Subscriptions.manageSubscriptions(id: domain.models.applications.ApplicationId)
 
-POST        /applications/:id/change-subscription                                           controllers.Subscriptions.changeApiSubscription(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, redirectTo: String)
+POST        /applications/:id/change-subscription                                                        controllers.Subscriptions.changeApiSubscription(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, redirectTo: String)
 
-GET         /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscription(id: domain.models.applications.ApplicationId, name: String, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, redirectTo: String)
-POST        /applications/:id/change-locked-subscription                                    controllers.Subscriptions.changeLockedApiSubscriptionAction(id: domain.models.applications.ApplicationId, name: String, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, redirectTo: String)
+GET         /applications/:id/change-locked-subscription                                                 controllers.Subscriptions.changeLockedApiSubscription(id: domain.models.applications.ApplicationId, name: String, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, redirectTo: String)
+POST        /applications/:id/change-locked-subscription                                                 controllers.Subscriptions.changeLockedApiSubscriptionAction(id: domain.models.applications.ApplicationId, name: String, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, redirectTo: String)
 
-GET         /applications/:id/credentials                                                   controllers.Credentials.credentials(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/client-id                                                     controllers.Credentials.clientId(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/client-secrets                                                controllers.Credentials.clientSecrets(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/server-token                                                  controllers.Credentials.serverToken(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecret(id: domain.models.applications.ApplicationId, clientSecretId: String)
-POST        /applications/:id/client-secret/:clientSecretId/delete                          controllers.Credentials.deleteClientSecretAction(id: domain.models.applications.ApplicationId, clientSecretId: String)
-POST        /applications/:id/client-secret-new                                             controllers.Credentials.addClientSecret(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/credentials                                                                controllers.Credentials.credentials(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/client-id                                                                  controllers.Credentials.clientId(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/client-secrets                                                             controllers.Credentials.clientSecrets(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/server-token                                                               controllers.Credentials.serverToken(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/client-secret/:clientSecretId/delete                                       controllers.Credentials.deleteClientSecret(id: domain.models.applications.ApplicationId, clientSecretId: String)
+POST        /applications/:id/client-secret/:clientSecretId/delete                                       controllers.Credentials.deleteClientSecretAction(id: domain.models.applications.ApplicationId, clientSecretId: String)
+POST        /applications/:id/client-secret-new                                                          controllers.Credentials.addClientSecret(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/request-check                                                 controllers.checkpages.ApplicationCheck.requestCheckPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/request-check                                                 controllers.checkpages.ApplicationCheck.requestCheckAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/submitted                                       controllers.checkpages.ApplicationCheck.credentialsRequested(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/appDetails                                      controllers.checkpages.ApplicationCheck.unauthorisedAppDetails(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check                                                              controllers.checkpages.ApplicationCheck.requestCheckPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/request-check                                                              controllers.checkpages.ApplicationCheck.requestCheckAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/submitted                                                    controllers.checkpages.ApplicationCheck.credentialsRequested(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/appDetails                                                   controllers.checkpages.ApplicationCheck.unauthorisedAppDetails(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/request-check/name                                            controllers.checkpages.ApplicationCheck.namePage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/request-check/name                                            controllers.checkpages.ApplicationCheck.nameAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/contact                                         controllers.checkpages.ApplicationCheck.contactPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/request-check/contact                                         controllers.checkpages.ApplicationCheck.contactAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/subscriptions                                   controllers.checkpages.ApplicationCheck.apiSubscriptionsPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/request-check/subscriptions                                   controllers.checkpages.ApplicationCheck.apiSubscriptionsAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/privacy-policy                                  controllers.checkpages.ApplicationCheck.privacyPolicyPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/request-check/privacy-policy                                  controllers.checkpages.ApplicationCheck.privacyPolicyAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/terms-and-conditions                            controllers.checkpages.ApplicationCheck.termsAndConditionsPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/request-check/terms-and-conditions                            controllers.checkpages.ApplicationCheck.termsAndConditionsAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/terms-of-use                                    controllers.checkpages.ApplicationCheck.termsOfUsePage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/request-check/terms-of-use                                    controllers.checkpages.ApplicationCheck.termsOfUseAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/team                                            controllers.checkpages.ApplicationCheck.team(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/request-check/team                                            controllers.checkpages.ApplicationCheck.teamAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/team/add                                        controllers.checkpages.ApplicationCheck.teamAddMember(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/request-check/team/remove-confirmation/:teamMemberHash        controllers.checkpages.ApplicationCheck.teamMemberRemoveConfirmation(id: domain.models.applications.ApplicationId, teamMemberHash: String)
-POST        /applications/:id/request-check/team/remove                                     controllers.checkpages.ApplicationCheck.teamMemberRemoveAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/name                                                         controllers.checkpages.ApplicationCheck.namePage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/request-check/name                                                         controllers.checkpages.ApplicationCheck.nameAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/contact                                                      controllers.checkpages.ApplicationCheck.contactPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/request-check/contact                                                      controllers.checkpages.ApplicationCheck.contactAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/subscriptions                                                controllers.checkpages.ApplicationCheck.apiSubscriptionsPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/request-check/subscriptions                                                controllers.checkpages.ApplicationCheck.apiSubscriptionsAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/privacy-policy                                               controllers.checkpages.ApplicationCheck.privacyPolicyPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/request-check/privacy-policy                                               controllers.checkpages.ApplicationCheck.privacyPolicyAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/terms-and-conditions                                         controllers.checkpages.ApplicationCheck.termsAndConditionsPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/request-check/terms-and-conditions                                         controllers.checkpages.ApplicationCheck.termsAndConditionsAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/terms-of-use                                                 controllers.checkpages.ApplicationCheck.termsOfUsePage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/request-check/terms-of-use                                                 controllers.checkpages.ApplicationCheck.termsOfUseAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/team                                                         controllers.checkpages.ApplicationCheck.team(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/request-check/team                                                         controllers.checkpages.ApplicationCheck.teamAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/team/add                                                     controllers.checkpages.ApplicationCheck.teamAddMember(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/request-check/team/remove-confirmation/:teamMemberHash                     controllers.checkpages.ApplicationCheck.teamMemberRemoveConfirmation(id: domain.models.applications.ApplicationId, teamMemberHash: String)
+POST        /applications/:id/request-check/team/remove                                                  controllers.checkpages.ApplicationCheck.teamMemberRemoveAction(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/add/subscription-configuration-start                          controllers.ManageSubscriptions.subscriptionConfigurationStart(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPage(id: domain.models.applications.ApplicationId, pageNumber: Int)
-POST        /applications/:id/add/subscription-configuration/:pageNumber                    controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: domain.models.applications.ApplicationId,pageNumber: Int)
-GET         /applications/:id/add/subscription-configuration-step/:pageNumber               controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: domain.models.applications.ApplicationId, pageNumber: Int)
+GET         /applications/:id/add/subscription-configuration-start                                       controllers.ManageSubscriptions.subscriptionConfigurationStart(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/add/subscription-configuration/:pageNumber                                 controllers.ManageSubscriptions.subscriptionConfigurationPage(id: domain.models.applications.ApplicationId, pageNumber: Int)
+POST        /applications/:id/add/subscription-configuration/:pageNumber                                 controllers.ManageSubscriptions.subscriptionConfigurationPagePost(id: domain.models.applications.ApplicationId,pageNumber: Int)
+GET         /applications/:id/add/subscription-configuration-step/:pageNumber                            controllers.ManageSubscriptions.subscriptionConfigurationStepPage(id: domain.models.applications.ApplicationId, pageNumber: Int)
 
-GET         /applications/:id/check-your-answers/name                                       controllers.checkpages.CheckYourAnswers.namePage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/check-your-answers/name                                       controllers.checkpages.CheckYourAnswers.nameAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/check-your-answers/contact                                    controllers.checkpages.CheckYourAnswers.contactPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/check-your-answers/contact                                    controllers.checkpages.CheckYourAnswers.contactAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/check-your-answers/subscriptions                              controllers.checkpages.CheckYourAnswers.apiSubscriptionsPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/check-your-answers/subscriptions                              controllers.checkpages.CheckYourAnswers.apiSubscriptionsAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/check-your-answers/privacy-policy                             controllers.checkpages.CheckYourAnswers.privacyPolicyPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/check-your-answers/privacy-policy                             controllers.checkpages.CheckYourAnswers.privacyPolicyAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/check-your-answers/terms-and-conditions                       controllers.checkpages.CheckYourAnswers.termsAndConditionsPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/check-your-answers/terms-and-conditions                       controllers.checkpages.CheckYourAnswers.termsAndConditionsAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/check-your-answers/terms-of-use                               controllers.checkpages.CheckYourAnswers.termsOfUsePage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/check-your-answers/terms-of-use                               controllers.checkpages.CheckYourAnswers.termsOfUseAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/check-your-answers/team                                       controllers.checkpages.CheckYourAnswers.team(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/check-your-answers/team                                       controllers.checkpages.CheckYourAnswers.teamAction(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/check-your-answers/team/add                                   controllers.checkpages.CheckYourAnswers.teamAddMember(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/check-your-answers/team/remove-confirmation/:teamMemberHash   controllers.checkpages.CheckYourAnswers.teamMemberRemoveConfirmation(id: domain.models.applications.ApplicationId, teamMemberHash: String)
-POST        /applications/:id/check-your-answers/team/remove                                controllers.checkpages.CheckYourAnswers.teamMemberRemoveAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers/name                                                    controllers.checkpages.CheckYourAnswers.namePage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/check-your-answers/name                                                    controllers.checkpages.CheckYourAnswers.nameAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers/contact                                                 controllers.checkpages.CheckYourAnswers.contactPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/check-your-answers/contact                                                 controllers.checkpages.CheckYourAnswers.contactAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers/subscriptions                                           controllers.checkpages.CheckYourAnswers.apiSubscriptionsPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/check-your-answers/subscriptions                                           controllers.checkpages.CheckYourAnswers.apiSubscriptionsAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers/privacy-policy                                          controllers.checkpages.CheckYourAnswers.privacyPolicyPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/check-your-answers/privacy-policy                                          controllers.checkpages.CheckYourAnswers.privacyPolicyAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers/terms-and-conditions                                    controllers.checkpages.CheckYourAnswers.termsAndConditionsPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/check-your-answers/terms-and-conditions                                    controllers.checkpages.CheckYourAnswers.termsAndConditionsAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers/terms-of-use                                            controllers.checkpages.CheckYourAnswers.termsOfUsePage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/check-your-answers/terms-of-use                                            controllers.checkpages.CheckYourAnswers.termsOfUseAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers/team                                                    controllers.checkpages.CheckYourAnswers.team(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/check-your-answers/team                                                    controllers.checkpages.CheckYourAnswers.teamAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers/team/add                                                controllers.checkpages.CheckYourAnswers.teamAddMember(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers/team/remove-confirmation/:teamMemberHash                controllers.checkpages.CheckYourAnswers.teamMemberRemoveConfirmation(id: domain.models.applications.ApplicationId, teamMemberHash: String)
+POST        /applications/:id/check-your-answers/team/remove                                             controllers.checkpages.CheckYourAnswers.teamMemberRemoveAction(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPage(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/check-your-answers                                            controllers.checkpages.CheckYourAnswers.answersPageAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/check-your-answers                                                         controllers.checkpages.CheckYourAnswers.answersPage(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/check-your-answers                                                         controllers.checkpages.CheckYourAnswers.answersPageAction(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/api-metadata                                                  controllers.ManageSubscriptions.listApiSubscriptions(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.editApiMetadataPage(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
-POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode        controllers.ManageSubscriptions.saveSubscriptionFields(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
+GET         /applications/:id/api-metadata                                                               controllers.ManageSubscriptions.listApiSubscriptions(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode                     controllers.ManageSubscriptions.editApiMetadataPage(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
+POST        /applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode                     controllers.ManageSubscriptions.saveSubscriptionFields(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
+GET         /applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode   controllers.ManageSubscriptions.editApiMetadataFieldPage(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, fieldName: String, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
+POST        /applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode   controllers.ManageSubscriptions.saveApiMetadataFieldPage(id: domain.models.applications.ApplicationId, context: domain.models.apidefinitions.ApiContext, version: domain.models.apidefinitions.ApiVersion, fieldName: String, saveSubsFieldsPageMode: domain.models.controllers.SaveSubsFieldsPageMode)
 
-GET         /applications/:id/push-secrets                                                  controllers.PushPullNotifications.showPushSecrets(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/push-secrets                                                               controllers.PushPullNotifications.showPushSecrets(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/add/subscriptions                                             controllers.Subscriptions.addAppSubscriptions(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/add/subscriptions                                                          controllers.Subscriptions.addAppSubscriptions(id: domain.models.applications.ApplicationId)
 
-GET         /application-verification                                                       controllers.ApplicationVerification.verifyUplift(code: String)
-GET         /user-navlinks                                                                  controllers.Navigation.navLinks
+GET         /application-verification                                                                    controllers.ApplicationVerification.verifyUplift(code: String)
+GET         /user-navlinks                                                                               controllers.Navigation.navLinks
 
-GET         /partials/terms-of-use                                                          controllers.TermsOfUse.termsOfUsePartial
+GET         /partials/terms-of-use                                                                       controllers.TermsOfUse.termsOfUsePartial
 
-GET         /assets/*file                                                                   @controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                                                                                @controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /keep-alive                                                                     controllers.SessionController.keepAlive()
+GET         /keep-alive                                                                                  controllers.SessionController.keepAlive()

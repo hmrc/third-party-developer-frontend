@@ -19,7 +19,7 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.ApiDetails
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiVersion}
 import domain.models.applications._
 import domain.models.developers.DeveloperSession
 import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
@@ -77,6 +77,11 @@ case class ApplicationWithSubscriptionFieldPage[A](
 
 case class ApplicationWithSubscriptionFields[A](apiSubscription: APISubscriptionStatusWithSubscriptionFields, applicationRequest: ApplicationRequest[A])
     extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
+
+case class ApplicationWithWritableSubscriptionField[A](
+  subscriptionWithSubscriptionField: APISubscriptionStatusWithWritableSubscriptionField,
+  applicationRequest: ApplicationRequest[A])
+  extends MessagesRequest[A](applicationRequest, applicationRequest.messagesApi)
 
 abstract class BaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher {
   val errorHandler: ErrorHandler
@@ -160,6 +165,18 @@ abstract class ApplicationController(mcc: MessagesControllerComponents) extends 
       (ManageSubscriptionsActions
         .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest) andThen subscriptionFieldsRefiner(context, version))
         .async(fun)(request)
+    }
+  }
+
+  def singleSubFieldsWritableDefinitionActionByApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion, fieldName: String)(
+      fun: ApplicationWithWritableSubscriptionField[AnyContent] => Future[Result]
+  ): Action[AnyContent] = {
+    loggedInAction { implicit request =>
+      (ManageSubscriptionsActions
+        .subscriptionsComposedActions(applicationId, NoSubscriptionFieldsRefinerBehaviour.BadRequest)
+          andThen subscriptionFieldsRefiner(context, version)
+          andThen writeableSubscriptionFieldRefiner(fieldName)
+      ).async(fun)(request)
     }
   }
 
