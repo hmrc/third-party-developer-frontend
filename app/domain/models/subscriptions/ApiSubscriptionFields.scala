@@ -46,7 +46,6 @@ object ApiSubscriptionFields {
       fields: Seq[SubscriptionFieldValue]
   )
 
-
   sealed trait ServiceSaveSubscriptionFieldsResponse
 
   sealed trait ConnectorSaveSubscriptionFieldsResponse extends ServiceSaveSubscriptionFieldsResponse

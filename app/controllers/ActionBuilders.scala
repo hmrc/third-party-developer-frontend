@@ -19,7 +19,7 @@ package controllers
 import cats.data.{NonEmptyList, OptionT}
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.toDetails
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields, ApiVersion}
+import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields,APISubscriptionStatusWithWritableSubscriptionField, ApiVersion}
 import domain.models.applications.{ApplicationId, Capability, Permission, State}
 import domain.models.developers.DeveloperSession
 import model.NoSubscriptionFieldsRefinerBehaviour
@@ -30,6 +30,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 import service.ApplicationActionService
+import domain.models.subscriptions.DevhubAccessLevel
 
 trait ActionBuilders {
 
@@ -89,7 +90,9 @@ trait ActionBuilders {
       def refine[A](input: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldPage[A]]] = {
         implicit val implicitRequest: Request[A] = input.applicationRequest.request
 
-        val details = input.fieldDefinitions.map(toDetails).toList
+        val accessLevel = DevhubAccessLevel.fromRole(input.applicationRequest.role)
+
+        val details = input.fieldDefinitions.map(toDetails(accessLevel)).toList
 
         Future.successful(
           if (pageNumber >= 1 && pageNumber <= details.size) {
@@ -121,6 +124,42 @@ trait ActionBuilders {
             case Nil               => Left(NotFound(errorHandler.notFoundTemplate))
             case apiDetails :: Nil => Right(ApplicationWithSubscriptionFields(apiDetails, input.applicationRequest))
             case _                 => throw new RuntimeException(s"Too many APIs match for; context: ${context.value} version: ${version.value}")
+          }
+        })
+      }
+    }
+
+  def writeableSubscriptionFieldRefiner(fieldName: String)(
+      implicit ec: ExecutionContext
+  ): ActionRefiner[ApplicationWithSubscriptionFields, ApplicationWithWritableSubscriptionField] =
+    new ActionRefiner[ApplicationWithSubscriptionFields, ApplicationWithWritableSubscriptionField] {
+      override protected def executionContext: ExecutionContext = ec
+
+      def refine[A](input: ApplicationWithSubscriptionFields[A]): Future[Either[Result, ApplicationWithWritableSubscriptionField[A]]] = {
+        implicit val implicitRequest: Request[A] = input.applicationRequest.request
+
+        Future.successful({
+          val subscriptionFieldValues = input.apiSubscription.fields.fields
+            .filter(d => d.definition.name.value == fieldName)
+
+          subscriptionFieldValues match {
+            case Nil => Left(NotFound(errorHandler.notFoundTemplate))
+            case subscriptionFieldValue :: Nil => {
+              val accessLevel = DevhubAccessLevel.fromRole(input.applicationRequest.role)
+              val canWrite = subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
+
+              if (canWrite){
+                Right(ApplicationWithWritableSubscriptionField(APISubscriptionStatusWithWritableSubscriptionField(
+                  input.apiSubscription.name,
+                  input.apiSubscription.context,
+                  input.apiSubscription.apiVersion,
+                  subscriptionFieldValue,
+                  input.apiSubscription.fields), input.applicationRequest))
+              } else {
+                Left(Forbidden(errorHandler.badRequestTemplate))
+              }
+            }
+            case _ => throw new RuntimeException(s"Too many APIs match for; fieldName: ${fieldName}")
           }
         })
       }

@@ -24,7 +24,7 @@ import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, Devhu
 import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.subscriptions.DevhubAccessRequirement._
 import domain.ApplicationNotFound
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, ApiVersion}
+import domain.models.apidefinitions.{APISubscriptionStatus, ApiContext, ApiVersion}
 import domain.models.applications.{CheckInformation, Privileged, Standard, _}
 import domain.models.developers.{Session, _}
 import mocks.service._
@@ -39,7 +39,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
-import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
+import views.html.managesubscriptions.{EditApiMetadataFieldView, EditApiMetadataView, ListApiSubscriptionsView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -102,9 +102,11 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
     val listApiSubscriptionsView = app.injector.instanceOf[ListApiSubscriptionsView]
     val editApiMetadataView = app.injector.instanceOf[EditApiMetadataView]
+    val editApiMetadataFieldView =app.injector.instanceOf[EditApiMetadataFieldView]
     val subscriptionConfigurationStartView = app.injector.instanceOf[SubscriptionConfigurationStartView]
     val subscriptionConfigurationPageView = app.injector.instanceOf[SubscriptionConfigurationPageView]
     val subscriptionConfigurationStepPageView = app.injector.instanceOf[SubscriptionConfigurationStepPageView]
+
 
     val manageSubscriptionController = new ManageSubscriptions(
       sessionServiceMock,
@@ -117,6 +119,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       cookieSigner,
       listApiSubscriptionsView,
       editApiMetadataView,
+      editApiMetadataFieldView,
       subscriptionConfigurationStartView,
       subscriptionConfigurationPageView,
       subscriptionConfigurationStepPageView
@@ -324,6 +327,77 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
           contentAsString(result) should include(application.name)
           contentAsString(result) should include("Sandbox")
+        }
+      }
+
+      "the edit single subscription field page is called it" should {
+        "render the page" in new ManageSubscriptionsSetup {
+          val whoCanWrite = Anyone
+          val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
+
+          val fieldName = "my-field-name"
+          val field = buildSubscriptionFieldValue(fieldName, Some("old-value"), accessDenied)
+          val wrapper = buildSubscriptionFieldsWrapper(application, Seq(field))
+
+          val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
+          val subsData = Seq(apiSubscriptionStatus)
+
+          givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
+
+          private val result =
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName, SaveSubsFieldsPageMode.LeftHandNavigation))(
+              loggedInRequest
+            )
+
+          status(result) shouldBe OK
+
+          contentAsString(result) should include(apiSubscriptionStatus.name)
+          contentAsString(result) should include(apiSubscriptionStatus.apiVersion.version.value)
+
+          contentAsString(result) should include(field.definition.description)
+          contentAsString(result) should include(field.definition.hint)
+          contentAsString(result) should include(field.value.value)
+        }
+
+        "404 for invalid field name" in new ManageSubscriptionsSetup {
+          val whoCanWrite = Anyone
+          val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
+
+          val field = buildSubscriptionFieldValue("fieldName", Some("value"), accessDenied)
+          val wrapper = buildSubscriptionFieldsWrapper(application, Seq(field))
+
+          val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
+          val subsData = Seq(apiSubscriptionStatus)
+
+          givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
+
+          private val result =
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), "invalid-field-name", SaveSubsFieldsPageMode.CheckYourAnswers))(
+              loggedInRequest
+            )
+
+          status(result) shouldBe NOT_FOUND
+        }
+
+        "403/404 for read only field" in new ManageSubscriptionsSetup{
+          val whoCanWrite = NoOne
+          val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
+
+          val fieldName = "my-field-name"
+          val field = buildSubscriptionFieldValue(fieldName, Some("old-value"), accessDenied)
+          val wrapper = buildSubscriptionFieldsWrapper(application, Seq(field))
+
+          val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
+          val subsData = Seq(apiSubscriptionStatus)
+
+          givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
+
+          private val result =
+            addToken(manageSubscriptionController.editApiMetadataFieldPage(appId, ApiContext("/api1-api"), ApiVersion("1.0"), fieldName, SaveSubsFieldsPageMode.CheckYourAnswers))(
+              loggedInRequest
+            )
+
+          status(result) shouldBe FORBIDDEN
         }
       }
 

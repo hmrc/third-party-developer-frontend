@@ -18,7 +18,7 @@ package controllers
 
 import com.google.inject.{Inject, Singleton}
 import config.{ApplicationConfig, ErrorHandler}
-import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, ApiContext, ApiVersion}
+import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
 import domain.models.applications.{Application, ApplicationId, CheckInformation}
 import domain.models.controllers.SaveSubsFieldsPageMode
 import domain.models.subscriptions.ApiSubscriptionFields._
@@ -32,30 +32,33 @@ import play.twirl.api.Html
 import service.{ApplicationService, AuditService, SessionService, ApplicationActionService, SubscriptionFieldsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
-import views.html.managesubscriptions.{EditApiMetadataView, ListApiSubscriptionsView}
+import views.html.managesubscriptions._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import domain.models.subscriptions.DevhubAccessLevel
 
 object ManageSubscriptions {
 
-  case class Field(name: String, value: String)
+  case class Field(name: String, shortDescription: String, value: String, canWrite: Boolean)
 
   case class ApiDetails(name: String, context: ApiContext, version: ApiVersion, displayedStatus: String, subsValues: Seq[Field])
 
-  def toFieldValue(sfv: SubscriptionFieldValue): Field = {
+  def toFieldValue(accessLevel: DevhubAccessLevel)(sfv: SubscriptionFieldValue): Field = {
     def default(in: String, default: String) = if (in.isEmpty) default else in
 
-    Field(sfv.definition.shortDescription, default(sfv.value.value, "None"))
+    val canWrite = sfv.definition.access.devhub.satisfiesWrite(accessLevel)
+
+    Field(sfv.definition.name.value, sfv.definition.shortDescription, default(sfv.value.value, "None"), canWrite)
   }
 
-  def toDetails(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
+  def toDetails(accessLevel: DevhubAccessLevel)(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
     ApiDetails(
       name = in.name,
       context = in.context,
       version = in.apiVersion.version,
       displayedStatus = in.apiVersion.displayedStatus,
-      subsValues = in.fields.fields.map(toFieldValue)
+      subsValues = in.fields.fields.map(toFieldValue(accessLevel))
     )
   }
 }
@@ -72,6 +75,7 @@ class ManageSubscriptions @Inject() (
     val cookieSigner: CookieSigner,
     listApiSubscriptionsView: ListApiSubscriptionsView,
     editApiMetadataView: EditApiMetadataView,
+    editApiMetadataFieldView: EditApiMetadataFieldView,
     subscriptionConfigurationStartView: SubscriptionConfigurationStartView,
     subscriptionConfigurationPageView: SubscriptionConfigurationPageView,
     subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView
@@ -85,8 +89,10 @@ class ManageSubscriptions @Inject() (
     subFieldsDefinitionsExistAction(applicationId) { definitionsRequest: ApplicationWithFieldDefinitionsRequest[AnyContent] =>
       implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
+      val accessLevel = DevhubAccessLevel.fromRole(appRQ.role)
+
       val details = definitionsRequest.fieldDefinitions
-        .map(toDetails)
+        .map(toDetails(accessLevel))
         .toList
 
       successful(Ok(listApiSubscriptionsView(definitionsRequest.applicationRequest.application, details)))
@@ -126,6 +132,50 @@ class ManageSubscriptions @Inject() (
       )
     }
 
+  // TODO: Use value class for FieldNameParam
+  def editApiMetadataFieldPage(
+      applicationId: ApplicationId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      fieldNameParam: String,
+      mode: SaveSubsFieldsPageMode) : Action[AnyContent] =    // TODO - make this FieldName type
+    singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
+
+      val fieldName = FieldName(fieldNameParam)
+      val fieldValue = definitionRequest.subscriptionWithSubscriptionField.subscriptionFieldValue.value
+      val viewModel = EditApiConfigurationFieldViewModel.toViewModel(definitionRequest.subscriptionWithSubscriptionField, appRQ.role, Seq(), Map(fieldName -> fieldValue))
+
+      successful(Ok(editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel, mode)))
+  }
+
+   def saveApiMetadataFieldPage(
+      applicationId: ApplicationId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      fieldNameParam: String,
+      mode: SaveSubsFieldsPageMode) : Action[AnyContent] =
+
+      singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) { definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
+      implicit val appRQ: ApplicationRequest[AnyContent] = definitionRequest.applicationRequest
+
+      import SaveSubsFieldsPageMode._
+      val successRedirectUrl = mode match {
+        case LeftHandNavigation => routes.ManageSubscriptions.listApiSubscriptions(applicationId)
+        case CheckYourAnswers   => checkpages.routes.CheckYourAnswers.answersPage(applicationId).withFragment("configurations")
+      }
+
+      subscriptionConfigurationFieldSave(
+        apiContext,
+        apiVersion,
+        definitionRequest.subscriptionWithSubscriptionField,
+        successRedirectUrl,
+        viewModel => {
+          editApiMetadataFieldView(definitionRequest.applicationRequest.application, viewModel, mode)
+        }
+      )
+  }
+
   private def subscriptionConfigurationSave(
       apiContext: ApiContext,
       apiVersion: ApiVersion,
@@ -153,6 +203,32 @@ class ManageSubscriptions @Inject() (
       })
   }
 
+    private def subscriptionConfigurationFieldSave(
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
+      successRedirect: Call,
+      validationFailureView: EditApiConfigurationFieldViewModel => Html
+  )(implicit hc: HeaderCarrier, applicationRequest: ApplicationRequest[AnyContent]): Future[Result] = {
+
+    val postedValuesAsMap = applicationRequest.body.asFormUrlEncoded.get.map(v => (FieldName(v._1), FieldValue(v._2.head)))
+
+    val role = applicationRequest.role
+    val application = applicationRequest.application
+
+    subFieldsService
+      .saveFieldValues(role, application, apiContext, apiVersion, apiSubscription.oldValues.fields, postedValuesAsMap)
+      .map({
+        case SaveSubscriptionFieldsSuccessResponse => Redirect(successRedirect)
+        case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
+          val formErrors = fieldErrors.map(error => FormError(error._1, Seq(error._2))).toSeq
+          val viewModel = EditApiConfigurationFieldViewModel.toViewModel(apiSubscription, role, formErrors, postedValuesAsMap)
+
+          BadRequest(validationFailureView(viewModel))
+        case SaveSubscriptionFieldsAccessDeniedResponse => Forbidden(errorHandler.badRequestTemplate)
+      })
+  }
+
   def subscriptionConfigurationStart(applicationId: ApplicationId): Action[AnyContent] =
     subFieldsDefinitionsExistAction(applicationId, NoSubscriptionFieldsRefinerBehaviour.Redirect(routes.AddApplication.addApplicationSuccess(applicationId))) {
 
@@ -161,8 +237,10 @@ class ManageSubscriptions @Inject() (
 
           implicit val appRQ: ApplicationRequest[AnyContent] = definitionsRequest.applicationRequest
 
+          val accessLevel = DevhubAccessLevel.fromRole(appRQ.role)
+
           val details = definitionsRequest.fieldDefinitions
-            .map(toDetails)
+            .map(toDetails(accessLevel))
             .toList
 
           Future.successful(Ok(subscriptionConfigurationStartView(definitionsRequest.applicationRequest.application, details)))

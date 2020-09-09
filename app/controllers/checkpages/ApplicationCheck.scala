@@ -26,7 +26,7 @@ import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import service.{ApplicationService, SessionService, SubscriptionFieldsService}
+import service.{ApplicationService, SessionService}
 import uk.gov.voa.play.form.ConditionalMappings._
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}

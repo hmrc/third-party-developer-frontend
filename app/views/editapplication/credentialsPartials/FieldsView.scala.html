@@ -21,7 +21,6 @@
 @import domain.models.applications.ClientSecret
 @import domain.models.applications.Application
 @import domain.models.developers.Developer
-@import domain.models.applications.ApplicationId
 
 @(app: Application, developer: Developer, clientSecrets: Seq[ClientSecret])(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash)

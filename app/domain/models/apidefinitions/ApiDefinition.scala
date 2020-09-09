@@ -21,6 +21,7 @@ import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldsWrapp
 import play.api.libs.json.Json
 
 import scala.util.Try
+import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 
 object APIDefinition {
   private val nonNumericOrPeriodRegex = "[^\\d^.]*"
@@ -97,6 +98,8 @@ case class APISubscriptionStatus(
 }
 
 case class APISubscriptionStatusWithSubscriptionFields(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, fields: SubscriptionFieldsWrapper)
+
+case class APISubscriptionStatusWithWritableSubscriptionField(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, subscriptionFieldValue: SubscriptionFieldValue, oldValues: SubscriptionFieldsWrapper)
 
 object APISubscriptionStatusWithSubscriptionFields {
   def apply(fields: Seq[APISubscriptionStatus]): Seq[APISubscriptionStatusWithSubscriptionFields] = {
