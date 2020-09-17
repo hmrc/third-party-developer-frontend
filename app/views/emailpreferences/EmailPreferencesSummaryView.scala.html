@@ -19,8 +19,10 @@
 @import include._
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
-
+@import model.APICategory
+@import model.TaxRegimeInterests
 @this(devMain: DevMain)
+
 
 @()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -54,11 +56,12 @@
                     <th></th>
                 </tr>
                 @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests) {
+
                     <tr>
-                        <td class="col-30 bold-small">@taxRegimeInterest.regime</td>
+                        <td class="col-30 bold-small">@APICategory.withName(taxRegimeInterest.regime).displayName</td>
                         <td>
                             @if(taxRegimeInterest.services.isEmpty) {
-                                All @taxRegimeInterest.regime APIs
+                                All @APICategory.withName(taxRegimeInterest.regime).displayName APIs
                             } else {
                                 @for(selectedAPI <- taxRegimeInterest.services) {
                                     @selectedAPI
