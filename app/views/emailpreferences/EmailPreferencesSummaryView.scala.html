@@ -15,7 +15,7 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.DeveloperSession
+@import domain.models.developers.DeveloperSession
 @import include._
 @import model.Crumb
 @import uk.gov.hmrc.urls.Link
@@ -50,22 +50,29 @@
             <tbody>
                 <tr>
                     <th strong class="col-30 bold-small">Category</th>
-                    <td>None</td>
-                    <td>
-                        <div align="right">
-                            <a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the type of APIs you're interested in</span></a>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
                     <th strong class="col-30 bold-small">APIs</th>
-                    <td>None</td>
-                    <td>
-                        <div align="right">
-                            <a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a>
-                        </div>
-                    </td>
+                    <th></th>
                 </tr>
+                @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests) {
+                    <tr>
+                        <td class="col-30 bold-small">@taxRegimeInterest.regime</td>
+                        <td>
+                            @if(taxRegimeInterest.services.isEmpty) {
+                                All @taxRegimeInterest.regime APIs
+                            } else {
+                                @for(selectedAPI <- taxRegimeInterest.services) {
+                                    @selectedAPI
+                                    <br />
+                                }
+                            }
+                        </td>
+                        <td>
+                            <div align="right">
+                                <a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a>
+                            </div>
+                        </td>
+                    </tr>
+                }
                 <tr>
                     <th strong class="bold-small">Topics</th>
                     <td>
