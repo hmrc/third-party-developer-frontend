@@ -27,7 +27,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import io.cucumber.scala.{EN, ScalaDsl, Scenario}
 import org.apache.commons.io.FileUtils
 import org.openqa.selenium.{Dimension, OutputType, TakesScreenshot, WebDriver}
-import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.chrome.{ChromeOptions, ChromeDriver}
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxProfile}
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 import org.scalatest.Matchers
@@ -86,7 +86,12 @@ trait Env extends ScalaDsl with EN with Matchers with BrowserStackCaps {
   }
 
   def createChromeDriver(): WebDriver = {
-    val driver = new ChromeDriver()
+    val options = new ChromeOptions()
+    options.addArguments("--headless")
+    options.addArguments("--proxy-server='direct://'")
+    options.addArguments("--proxy-bypass-list=*")
+
+    val driver = new ChromeDriver(options)
     driver.manage().window().setSize(windowSize)
     driver
   }
