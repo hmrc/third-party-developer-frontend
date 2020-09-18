@@ -121,7 +121,8 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                    |    "developer": {
                    |      "email":"$userEmail",
                    |      "firstName":"John",
-                   |      "lastName": "Doe"
+                   |      "lastName": "Doe",
+                   |      "emailPreferences": { "interests" : [], "topics": [] }
                    |    }
                    |  }
                    |}""".stripMargin)
