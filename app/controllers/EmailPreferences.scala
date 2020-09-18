@@ -20,20 +20,23 @@ import config.{ApplicationConfig, ErrorHandler}
 import javax.inject.Inject
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.SessionService
+import service.{APIService, SessionService}
 import views.html.emailpreferences._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
                                  val errorHandler: ErrorHandler,
                                  val cookieSigner : CookieSigner,
+                                 apiService: APIService,
                                  emailPreferencesSummaryView: EmailPreferencesSummaryView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
   def emailPreferencesSummaryPage: Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(emailPreferencesSummaryView(Seq.empty)))
+    for {
+      apiCategoryDetails <- apiService.fetchAllAPICategoryDetails()
+    } yield Ok(emailPreferencesSummaryView(apiCategoryDetails))
   }
 
 }
