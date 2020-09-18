@@ -19,6 +19,7 @@ package views
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.views.NoBackButton
 import play.twirl.api.{Html, HtmlFormat}
+import play.api.test.FakeRequest
 import views.helper.CommonViewSpec
 import views.html.include.Main
 
@@ -29,6 +30,7 @@ class MainTemplateSpec extends CommonViewSpec {
     val developer = Developer("email", "firstName", "lastName")
     val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
     implicit val developerSession = DeveloperSession(session)
+    implicit val request = FakeRequest()
 
     "Application title meta data set by configuration" in {
       when(appConfig.title).thenReturn("Application Title")
@@ -49,7 +51,8 @@ class MainTemplateSpec extends CommonViewSpec {
         developerSession = Some(developerSession),
         mainContent = HtmlFormat.empty,
         messagesProvider = messagesProvider,
-        applicationConfig = appConfig)
+        applicationConfig = appConfig, 
+        request = request)
 
       view.body should include("data-title=\"Application Title")
     }

@@ -45,7 +45,7 @@
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
     developerSession: Option[DeveloperSession]
-)(mainContent: Html = HtmlFormat.empty)(implicit messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig)
+)(mainContent: Html = HtmlFormat.empty)(implicit messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig, request: play.api.mvc.Request[Any])
 
 @headScripts = {
 <script src='@routes.Assets.versioned("javascripts/googleTagManager.js")'></script>
@@ -110,6 +110,7 @@
     <li><a href="/api-documentation/docs/help/privacy" target="_blank" rel="noopener noreferrer" data-sso="false" data-journey-click="footer:Click:Privacy policy">@Messages("footer.links.privacy_policy.text")</a></li>
     <li><a href='/api-documentation/docs/help/terms-and-conditions' target="_blank" rel="noopener noreferrer" data-sso="false" data-journey-click="footer:Click:Terms and conditions">@Messages("footer.links.terms_and_conditions.text")</a></li>
     <li><a href='@Messages("footer.links.help_page.url")' target="_blank" rel="noopener noreferrer" data-sso="false" data-journey-click="footer:Click:Help">@Messages("footer.links.help_page.text")</a></li>
+    <li><a href='@{applicationConfig.platformFrontendHost}/accessibility-statement/hmrc-developer-hub?referrerUrl=@{helper.urlEncode(request.uri)}' rel="noopener noreferrer" data-sso="false" data-journey-click="footer:Click:AccessibilityStatement">Accessibility statement</a></li>
 </ul>
 }
 
