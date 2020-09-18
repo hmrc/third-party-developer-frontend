@@ -19,6 +19,7 @@ package utils
 import java.util.UUID
 
 import domain.models.developers.{Developer, LoggedInState}
+import model.EmailPreferences
 
 object DeveloperSession {
 
@@ -27,7 +28,8 @@ object DeveloperSession {
             lastName: String,
             organisation: Option[String] = None,
             mfaEnabled: Option[Boolean] = None,
-            loggedInState: LoggedInState): domain.models.developers.DeveloperSession = {
+            loggedInState: LoggedInState,
+            emailPreferences: EmailPreferences = EmailPreferences.noPreferences): domain.models.developers.DeveloperSession = {
 
     val sessionId: String = UUID.randomUUID().toString
 
@@ -38,6 +40,7 @@ object DeveloperSession {
         firstName,
         lastName,
         organisation,
-        mfaEnabled))
+        mfaEnabled,
+        emailPreferences))
   }
 }
