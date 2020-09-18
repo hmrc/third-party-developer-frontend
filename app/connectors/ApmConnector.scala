@@ -21,6 +21,7 @@ import domain.models.applications._
 import domain.models.subscriptions.{ApiData, FieldName}
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import javax.inject.{Inject, Singleton}
+import model.APICategoryDetails
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -33,7 +34,8 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(imp
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
     http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.value}")
 
-  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
+  def getAllFieldDefinitions(environment: Environment)
+                            (implicit hc: HeaderCarrier): Future[Map[ApiContext,Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]]] = {
     import domain.services.ApplicationsJsonFormatters._
     import domain.services.SubscriptionsJsonFormatters._
 
@@ -43,6 +45,9 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(imp
   def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Map[ApiContext, ApiData]] = {
     http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions?applicationId=${applicationId.value}")
   }
+
+  def fetchAllAPICategories()(implicit  hc: HeaderCarrier): Future[Seq[APICategoryDetails]] =
+    http.GET[Seq[APICategoryDetails]](s"${config.serviceBaseUrl}/api-categories")
 }
 
 object ApmConnector {

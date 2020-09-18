@@ -17,16 +17,15 @@
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
 @import include._
-@import model.Crumb
+@import model.{APICategoryDetails, Crumb}
 @import uk.gov.hmrc.urls.Link
-@import model.APICategory
-@import model.TaxRegimeInterests
+
 @this(devMain: DevMain)
 
-
-@()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(apiCategoryDetails: Seq[APICategoryDetails])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{ "Email preferences" }
+@taxRegimeDisplayName(taxRegime: String) = @{ apiCategoryDetails.find(_.category == taxRegime).fold("Unknown")(_.name)}
 
 @devMain(
     title = pageHeading,
@@ -58,10 +57,10 @@
                 @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests) {
 
                     <tr>
-                        <td class="col-30 bold-small">@APICategory.withName(taxRegimeInterest.regime).displayName</td>
+                        <td class="col-30 bold-small">@taxRegimeDisplayName(taxRegimeInterest.regime)</td>
                         <td>
                             @if(taxRegimeInterest.services.isEmpty) {
-                                All @APICategory.withName(taxRegimeInterest.regime).displayName APIs
+                                All @taxRegimeDisplayName(taxRegimeInterest.regime) APIs
                             } else {
                                 @for(selectedAPI <- taxRegimeInterest.services) {
                                     @selectedAPI
