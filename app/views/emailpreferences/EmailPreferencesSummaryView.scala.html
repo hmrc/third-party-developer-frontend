@@ -47,9 +47,9 @@
         <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
 
         @if(userHasEmailPreferences) {
-            <p>You can change your preferences at any time.</p>
+            <p id="firstLine">You can change your preferences at any time.</p>
         } else {
-            <p>You have selected no email preferences.</p>
+            <p id="firstLine">You have selected no email preferences.</p>
         }
 
 
@@ -86,7 +86,7 @@
                                 </td>
                                 <td id="chglnk-col-@taxRegimeInterest._2">
                                     <div align="right">
-                                        <a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a>
+                                        <a id="change-@taxRegimeInterest._2-link" href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a>
                                     </div>
                                 </td>
                             </tr>
@@ -100,7 +100,7 @@
                             }
                             </td>
                             <td>
-                                <div align="right"><a href="@routes.EmailPreferences.emailPreferencesSummaryPage">
+                                <div align="right"><a id="changeTopicsLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage">
                                     Change<span class="visually-hidden">
                                     Change the type of emails you want to receive</span></a>
                                 </div>
@@ -109,7 +109,7 @@
                     </tbody>
             </table>
         } else {
-            <p><a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Set up email preferences</a></p>
+            <p><a id="setupEmailPreferencesLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage">Set up email preferences</a></p>
         }
         <br />
 
