@@ -24,89 +24,103 @@
 
 @(apiCategoryDetails: Seq[APICategoryDetails])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
-@pageHeading = @{ "Email preferences" }
-@taxRegimeDisplayName(taxRegime: String) = @{ apiCategoryDetails.find(_.category == taxRegime).fold("Unknown")(_.name)}
-@userHasEmailPreferences = @{ loggedIn.developer.emailPreferences.interests.nonEmpty || loggedIn.developer.emailPreferences.topics.nonEmpty }
-
-@devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(Crumb(pageHeading), Crumb.manageProfile, Crumb.home),
-    developerSession = Some(loggedIn)
-) {
-
-    <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
-
-    @if(userHasEmailPreferences) {
-        <p>You can change your preferences at any time.</p>
-    } else {
-        <p>You have selected no email preferences.</p>
+    @pageHeading = @{
+        "Email preferences"
     }
-    
 
-    <p>Having a Developer Hub account means you will receive mandatory emails about:</p>
+    @taxRegimeDisplayName(taxRegime: String) = @{
+        apiCategoryDetails.find(_.category == taxRegime).fold("Unknown")(_.name)
+    }
 
-    <ul id="info" class="list list-bullet">
-        <li>important notices and service updates</li>
-        <li>changes to any applications you have</li>
-        <li>making your application accessible</li>
-    </ul>
+    @userHasEmailPreferences = @{
+        loggedIn.developer.emailPreferences.interests.nonEmpty || loggedIn.developer.emailPreferences.topics.nonEmpty
+    }
 
-    @if(userHasEmailPreferences) {
-        <table>
-            <caption class="heading-medium">Email preferences<caption>
-                <tbody>
-                    <tr>
-                        <th strong class="col-30 bold-small">Category</th>
-                        <th strong class="col-30 bold-small">APIs</th>
-                        <th></th>
-                    </tr>
-                    @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests) {
 
+    @devMain(
+        title = pageHeading,
+        userFullName = loggedIn.loggedInName,
+        breadcrumbs = Seq(Crumb(pageHeading), Crumb.manageProfile, Crumb.home),
+        developerSession = Some(loggedIn)
+    ) {
+
+        <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
+
+        @if(userHasEmailPreferences) {
+            <p>You can change your preferences at any time.</p>
+        } else {
+            <p>You have selected no email preferences.</p>
+        }
+
+
+        <p>Having a Developer Hub account means you will receive mandatory emails about:</p>
+
+        <ul id="info" class="list list-bullet">
+            <li>important notices and service updates</li>
+            <li>changes to any applications you have</li>
+            <li>making your application accessible</li>
+        </ul>
+
+        @if(userHasEmailPreferences) {
+            <table>
+                <caption class="heading-medium">Email preferences<caption>
+                    <tbody>
                         <tr>
-                            <td class="col-30 bold-small">@taxRegimeDisplayName(taxRegimeInterest.regime)</td>
-                            <td>
-                                @if(taxRegimeInterest.services.isEmpty) {
-                                    All @taxRegimeDisplayName(taxRegimeInterest.regime) APIs
-                                } else {
-                                    @for(selectedAPI <- taxRegimeInterest.services) {
-                                        @selectedAPI
-                                        <br />
-                                    }
-                                }
-                            </td>
-                            <td>
-                                <div align="right">
-                                    <a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a>
-                                </div>
-                            </td>
+                            <th strong class="col-30 bold-small">Category</th>
+                            <th strong class="col-30 bold-small">APIs</th>
+                            <th></th>
                         </tr>
-                    }
-                    <tr>
-                        <th strong class="bold-small">Topics</th>
-                        <td>
+                        @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.zipWithIndex) {
+
+                            <tr>
+                                <td id="regime-col-@taxRegimeInterest._2" class="col-30 bold-small">@taxRegimeDisplayName(taxRegimeInterest._1.regime)</td>
+                                <td id="apis-col-@taxRegimeInterest._2">
+                                    @if(taxRegimeInterest._1.services.isEmpty) {
+                                        All @taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
+                                    } else {
+                                        @for(selectedAPI <- taxRegimeInterest._1.services) {
+                                            @selectedAPI
+                                            <br />
+                                        }
+                                    }
+                                </td>
+                                <td id="chglnk-col-@taxRegimeInterest._2">
+                                    <div align="right">
+                                        <a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <th strong class="bold-small">Topics</th>
+                            <td>
                             @for(topicName <- loggedIn.developer.emailPreferences.topics.map(_.displayName).toList.sorted) {
                                 @topicName
                                 <br />
                             }
-                        </td>
-                        <td>
-                            <div align="right"><a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the type of emails you want to receive</span></a>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-        </table>
-    } else {
-        <p><a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Set up email preferences</a></p>
+                            </td>
+                            <td>
+                                <div align="right"><a href="@routes.EmailPreferences.emailPreferencesSummaryPage">
+                                    Change<span class="visually-hidden">
+                                    Change the type of emails you want to receive</span></a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+            </table>
+        } else {
+            <p><a href="@routes.EmailPreferences.emailPreferencesSummaryPage">Set up email preferences</a></p>
+        }
+        <br />
+
+        <p>Check the @{
+            Link.toExternalPage(url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
+        }.</p>
+
+        @if(userHasEmailPreferences) {
+            <p><a id="unsubscribeLnk" href="@routes.EmailPreferences.emailPreferencesSummaryPage">
+                Unsubscribe from Developer Hub emails</a></p>
+        }
+
+        <p><a id="viewAllApplicationsLink" href="@routes.AddApplication.manageApps()">View all applications</a></p>
     }
-    <br />
-
-    <p>Check the @{Link.toExternalPage(url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml}.</p>
-
-    @if(userHasEmailPreferences) {
-        <p><a id="unsubscribeLnk" href="@routes.EmailPreferences.emailPreferencesSummaryPage">Unsubscribe from Developer Hub emails</a></p>
-    }
-
-    <p><a id="viewAllApplicationsLink" href="@routes.AddApplication.manageApps()">View all applications</a></p>
-}
