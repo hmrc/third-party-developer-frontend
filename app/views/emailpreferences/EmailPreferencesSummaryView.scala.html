@@ -91,9 +91,9 @@
                                 </td>
                             </tr>
                         }
-                        <tr>
-                            <th strong class="bold-small">Topics</th>
-                            <td>
+                        <tr >
+                            <th id="topicsHeading" strong class="bold-small">Topics</th>
+                            <td id="selectedTopicsCell">
                             @for(topicName <- loggedIn.developer.emailPreferences.topics.map(_.displayName).toList.sorted) {
                                 @topicName
                                 <br />
@@ -114,11 +114,11 @@
         <br />
 
         <p>Check the @{
-            Link.toExternalPage(url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
+            Link.toExternalPage(id = Some("statusPageLink"), url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
         }.</p>
 
         @if(userHasEmailPreferences) {
-            <p><a id="unsubscribeLnk" href="@routes.EmailPreferences.emailPreferencesSummaryPage">
+            <p><a id="unsubscribeLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage">
                 Unsubscribe from Developer Hub emails</a></p>
         }
 
