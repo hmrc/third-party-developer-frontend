@@ -24,6 +24,7 @@ import javax.inject.{Inject, Singleton}
 import model.APICategoryDetails
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import domain.models.connectors.ExtendedAPIDefinition
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -48,6 +49,9 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(imp
 
   def fetchAllAPICategories()(implicit  hc: HeaderCarrier): Future[Seq[APICategoryDetails]] =
     http.GET[Seq[APICategoryDetails]](s"${config.serviceBaseUrl}/api-categories")
+
+  def fetchAPIDefinition(serviceName: String)(implicit hc: HeaderCarrier): Future[ExtendedAPIDefinition] =
+    http.GET[ExtendedAPIDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
 }
 
 object ApmConnector {

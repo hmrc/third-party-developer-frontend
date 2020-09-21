@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package it
+package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors._
-import domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
 import domain.models.developers.{Developer, LoggedInState, Session, SessionInvalid}
+import domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind

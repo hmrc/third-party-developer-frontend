@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package it
+package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.{ConnectorMetrics, DeskproConnector, NoopConnectorMetrics}
+import domain.models.applications.ApplicationId
 import domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.bind
@@ -26,7 +26,6 @@ import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.play.http.metrics.API
-import domain.models.applications.ApplicationId
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration("Test.microservice.services.hmrc-deskpro.port" -> stubPort)

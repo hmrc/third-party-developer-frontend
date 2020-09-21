@@ -53,4 +53,6 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
       result should contain only (category1, category2)
     }
   }
+
+  
 }
