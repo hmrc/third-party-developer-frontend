@@ -7,7 +7,7 @@ import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
 
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -44,6 +44,34 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
          val result: ExtendedAPIDefinition = await(underTest.fetchAPIDefinition("api1"))
          result.serviceName shouldBe serviceName
          result.name shouldBe name
+      }
+
+    "fail on Upstream5xxResponse when the call return a 500" in new Setup {
+
+      stubFor(
+        get(urlEqualTo("/combined-api-definitions/api1"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+
+      intercept[Upstream5xxResponse] {
+        await(underTest.fetchAPIDefinition("api1"))
+      }
+    }
+
+      "throw notfound when the api is not found" in new Setup {
+        stubFor(
+          post(urlEqualTo("/combined-api-definitions/unknownapi"))
+            .willReturn(
+              aResponse()
+                .withStatus(NOT_FOUND)
+                .withHeader("Content-Type", "application/json")
+            )
+        )
+
+        intercept[NotFoundException](await(underTest.fetchAPIDefinition("unknownapi")))
       }
   }
 }
