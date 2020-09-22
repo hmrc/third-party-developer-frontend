@@ -22,8 +22,11 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{APIService, SessionService}
 import views.html.emailpreferences._
+import domain.models.connectors.ExtendedAPIDefinition
+import model.{APICategoryDetails, APICategory}
+import views.emailpreferences.EmailPreferencesSummaryViewData
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
@@ -34,9 +37,29 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
   def emailPreferencesSummaryPage: Action[AnyContent] = loggedInAction { implicit request =>
+    val emailPreferences = request.developerSession.developer.emailPreferences
+    // val userServices: Set[String] = emailPreferences.interests.map(_.services).reduce(_ ++ _)
     for {
       apiCategoryDetails <- apiService.fetchAllAPICategoryDetails()
-    } yield Ok(emailPreferencesSummaryView(apiCategoryDetails))
+      //apis <- apiService.fetchAPIDetails(userServices)
+      // get list of apis from email prefs
+      // for each call apm to get extended service names etc
+      // pass this list to view
+      // Map(serviceName:String, displayName:String) 
+    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, Seq.empty, apiCategoryDetails)))
+  }
+
+  def toDataObject(emailPreferences: model.EmailPreferences, filteredAPIs: Seq[ExtendedAPIDefinition], categories: Seq[APICategoryDetails]): EmailPreferencesSummaryViewData = {
+    val displayCategories = createCategoryMap(categories, emailPreferences.interests.map(_.regime))
+    val apiDisplayNames = filteredAPIs.map(a => (a.serviceName, a.name)).toMap
+    EmailPreferencesSummaryViewData(displayCategories, apiDisplayNames)
+  }
+
+  def createCategoryMap(apisCategories: Seq[APICategoryDetails], usersCategories: Seq[String]): Map[String, String] = {
+    apisCategories
+    .filter(category => usersCategories.contains(category.category))
+    .map(c => (c.category, c.name))
+    .toMap
   }
 
 }

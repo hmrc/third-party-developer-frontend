@@ -34,6 +34,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
   trait Setup {
     val apiCategoryDetails: Seq[APICategoryDetails] =
       Seq(APICategoryDetails("VAT", "VAT"), APICategoryDetails("INCOME_TAX_MTD", "Income Tax (Making Tax Digital)"))
+    val apiCategoryDetailsMap = Map("VAT" -> "VAT", "INCOME_TAX_MTD" -> "Income Tax (Making Tax Digital)")
 
     val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set.empty), TaxRegimeInterests("INCOME_TAX_MTD", Set("income-tax-mtd-api-2", "income-tax-mtd-api-1"))), Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY))
     val developerSession = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN, emailPreferences = emailPreferences)
@@ -98,14 +99,14 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
 
   "Email Preferences Summary view page" should {
     "render results table when email preferences have been selected" in new Setup {
-      val page = emailPreferencesSummaryView.render(apiCategoryDetails, messagesProvider.messages, developerSession, request, appConfig)
+      val page = emailPreferencesSummaryView.render(EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty), messagesProvider.messages, developerSession, request, appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document)
       checkEmailPreferencesTable(document, developerSession.developer.emailPreferences, apiCategoryDetails)
     }
 
     "display 'no email preferences selected' page for users that have not yet selected any" in new Setup {
-        val page = emailPreferencesSummaryView.render(apiCategoryDetails, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+        val page = emailPreferencesSummaryView.render(EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty), messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
         val document = Jsoup.parse(page.body)
         validateStaticElements(document)
         checkNoEmailPreferencesPageElements(document)

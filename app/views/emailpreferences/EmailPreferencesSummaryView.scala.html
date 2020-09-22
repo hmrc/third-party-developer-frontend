@@ -19,17 +19,14 @@
 @import include._
 @import model.{APICategoryDetails, Crumb}
 @import uk.gov.hmrc.urls.Link
+@import views.emailpreferences.EmailPreferencesSummaryViewData
 
 @this(devMain: DevMain)
 
-@(apiCategoryDetails: Seq[APICategoryDetails])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(viewData: EmailPreferencesSummaryViewData)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
         "Email preferences"
-    }
-
-    @taxRegimeDisplayName(taxRegime: String) = @{
-        apiCategoryDetails.find(_.category == taxRegime).fold("Unknown")(_.name)
     }
 
     @userHasEmailPreferences = @{
@@ -73,10 +70,10 @@
                         @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.zipWithIndex) {
 
                             <tr>
-                                <td id="regime-col-@taxRegimeInterest._2" class="col-30 bold-small">@taxRegimeDisplayName(taxRegimeInterest._1.regime)</td>
+                                <td id="regime-col-@taxRegimeInterest._2" class="col-30 bold-small">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</td>
                                 <td id="apis-col-@taxRegimeInterest._2">
                                     @if(taxRegimeInterest._1.services.isEmpty) {
-                                        All @taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
+                                        All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
                                     } else {
                                         @for(selectedAPI <- taxRegimeInterest._1.services) {
                                             @selectedAPI

@@ -25,10 +25,13 @@ import utils.WithLoggedInSession._
 import play.api.mvc.AnyContentAsEmpty
 import play.filters.csrf.CSRF.TokenProvider
 import play.api.test.Helpers._
+import views.emailpreferences.EmailPreferencesSummaryViewData
+import model.EmailPreferences
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import model.APICategoryDetails
 import mocks.service.SessionServiceMock
+import model.TaxRegimeInterests
 
 class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
   
@@ -40,7 +43,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
         val controllerUnderTest = new EmailPreferences(sessionServiceMock, mcc, mockErrorHandler, cookieSigner, mockAPIService, mockEmailPreferencesSummaryView)
     
-        val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
+        val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set.empty)), Set.empty)
+        val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe", emailPreferences = emailPreferences)
         val sessionId = "sessionId"
         val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
         val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
@@ -50,20 +54,20 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
     }
 
     "emailPreferencesSummaryPage" should {
-        val mockCategory1 = mock[APICategoryDetails]
-        val mockCategory2 = mock[APICategoryDetails]
-
-        "return emailPreferencesSummaryView page for logged in user" in new Setup {
-            fetchSessionByIdReturns(sessionId, session)
-
+        val mockCategory1 = APICategoryDetails("CATEGORY_1", "Category 1")
+        val mockCategory2 = APICategoryDetails("CATEGORY_2", "Category 2")
+        val apiCategoryDetails: Seq[APICategoryDetails] = Seq(mockCategory1, mockCategory2)
         
-            val apiCategoryDetails: Seq[APICategoryDetails] = Seq(mockCategory1, mockCategory2)
+        "return emailPreferencesSummaryView page for logged in user" in new Setup {
+            val expectedCategoryMap = Map("CATEGORY_1" -> "Category 1")
+            fetchSessionByIdReturns(sessionId, session)
+        
             when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
 
             val result = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest)
 
             status(result) shouldBe OK
-            verify(mockEmailPreferencesSummaryView).apply(eqTo(apiCategoryDetails))(*,*,*,*)
+            verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(expectedCategoryMap, Map.empty)))(*,*,*,*)
         }
 
         "redirect to login screen for non-logged in user" in new Setup {
