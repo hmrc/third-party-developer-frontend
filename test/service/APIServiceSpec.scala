@@ -18,8 +18,9 @@ package service
 
 import utils.AsyncHmrcSpec
 import connectors.ApmConnector
-import scala.concurrent.Future
+import domain.models.connectors.ExtendedAPIDefinition
 
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.http.HeaderCarrier
 import model.APICategoryDetails
@@ -46,6 +47,27 @@ class APIServiceSpec extends AsyncHmrcSpec {
             result should contain only (category1, category2)
 
             verify(mockAPMConnector).fetchAllAPICategories()(*)
+        }
+    }
+
+    "fetchAPIDetails" should {
+        val apiServiceName1 = "service-1"
+        val apiServiceName2 = "service-2"
+
+        val apiDetails1 = mock[ExtendedAPIDefinition]
+        val apiDetails2 = mock[ExtendedAPIDefinition]
+
+        "return details of APIs by serviceName" in new Setup {
+            when(mockAPMConnector.fetchAPIDefinition(eqTo(apiServiceName1))(*)).thenReturn(Future.successful(apiDetails1))
+            when(mockAPMConnector.fetchAPIDefinition(eqTo(apiServiceName2))(*)).thenReturn(Future.successful(apiDetails2))
+
+            val result = await(serviceUnderTest.fetchAPIDetails(Set(apiServiceName1, apiServiceName2)))
+
+            result.size should be (2)
+            result should contain only (apiDetails1, apiDetails2)
+
+            verify(mockAPMConnector).fetchAPIDefinition(eqTo(apiServiceName1))(*)
+            verify(mockAPMConnector).fetchAPIDefinition(eqTo(apiServiceName2))(*)
         }
     }
 }

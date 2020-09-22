@@ -17,7 +17,9 @@
 package service
 
 import connectors.ApmConnector
+import domain.models.connectors.ExtendedAPIDefinition
 import javax.inject.{Inject, Singleton}
+
 import scala.concurrent.{ExecutionContext, Future}
 import model.APICategoryDetails
 import uk.gov.hmrc.http.HeaderCarrier
@@ -26,4 +28,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 class APIService @Inject()(apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {
   
     def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[Seq[APICategoryDetails]] = apmConnector.fetchAllAPICategories()
+
+    def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[Seq[ExtendedAPIDefinition]] =
+        Future.sequence(
+            apiServiceNames
+              .map(apmConnector.fetchAPIDefinition(_))
+              .toSeq)
 }

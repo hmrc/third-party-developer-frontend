@@ -17,21 +17,21 @@
 package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
+import domain.models.connectors.ExtendedAPIDefinition
 import javax.inject.Inject
+import model.APICategoryDetails
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{APIService, SessionService}
-import views.html.emailpreferences._
-import domain.models.connectors.ExtendedAPIDefinition
-import model.{APICategoryDetails, APICategory}
 import views.emailpreferences.EmailPreferencesSummaryViewData
+import views.html.emailpreferences._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
                                  val errorHandler: ErrorHandler,
-                                 val cookieSigner : CookieSigner,
+                                 val cookieSigner: CookieSigner,
                                  apiService: APIService,
                                  emailPreferencesSummaryView: EmailPreferencesSummaryView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
@@ -49,17 +49,18 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, Seq.empty, apiCategoryDetails)))
   }
 
-  def toDataObject(emailPreferences: model.EmailPreferences, filteredAPIs: Seq[ExtendedAPIDefinition], categories: Seq[APICategoryDetails]): EmailPreferencesSummaryViewData = {
-    val displayCategories = createCategoryMap(categories, emailPreferences.interests.map(_.regime))
-    val apiDisplayNames = filteredAPIs.map(a => (a.serviceName, a.name)).toMap
-    EmailPreferencesSummaryViewData(displayCategories, apiDisplayNames)
-  }
+  def toDataObject(emailPreferences: model.EmailPreferences,
+                   filteredAPIs: Seq[ExtendedAPIDefinition],
+                   categories: Seq[APICategoryDetails]): EmailPreferencesSummaryViewData =
+    EmailPreferencesSummaryViewData(
+      createCategoryMap(categories, emailPreferences.interests.map(_.regime)),
+      filteredAPIs.map(a => (a.serviceName, a.name)).toMap)
 
   def createCategoryMap(apisCategories: Seq[APICategoryDetails], usersCategories: Seq[String]): Map[String, String] = {
     apisCategories
-    .filter(category => usersCategories.contains(category.category))
-    .map(c => (c.category, c.name))
-    .toMap
+      .filter(category => usersCategories.contains(category.category))
+      .map(c => (c.category, c.name))
+      .toMap
   }
 
 }
