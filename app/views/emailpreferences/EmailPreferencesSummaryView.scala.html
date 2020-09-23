@@ -67,7 +67,7 @@
                             <th strong class="col-30 bold-small">APIs</th>
                             <th></th>
                         </tr>
-                        @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.zipWithIndex) {
+                        @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
 
                             <tr>
                                 <td id="regime-col-@taxRegimeInterest._2" class="col-30 bold-small">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</td>
@@ -75,7 +75,7 @@
                                     @if(taxRegimeInterest._1.services.isEmpty) {
                                         All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
                                     } else {
-                                        @for(selectedAPI <- taxRegimeInterest._1.services) {
+                                        @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
                                             @viewData.apiDisplayName(selectedAPI)
                                             <br />
                                         }

@@ -71,7 +71,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     tableHeaders.get(0).text() shouldBe "Category"
     tableHeaders.get(1).text() shouldBe "APIs"
 
-    for (interest <- emailPreferences.interests.zipWithIndex) {
+    for (interest <- emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
       val textRegimeDisplayNameVal = taxRegimeDisplayName(apiCategoryDetails, interest._1.regime)
       document.getElementById(s"regime-col-${interest._2}").text() shouldBe textRegimeDisplayNameVal
       val services = interest._1.services

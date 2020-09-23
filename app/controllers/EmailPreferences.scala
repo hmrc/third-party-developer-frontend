@@ -43,11 +43,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     for {
       apiCategoryDetails <- apiService.fetchAllAPICategoryDetails()
       apiNames <- apiService.fetchAPIDetails(userServices)
-      //apis <- apiService.fetchAPIDetails(userServices)
-      // get list of apis from email prefs
-      // for each call apm to get extended service names etc
-      // pass this list to view
-      // Map(serviceName:String, displayName:String) 
     } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails)))
   }
 
