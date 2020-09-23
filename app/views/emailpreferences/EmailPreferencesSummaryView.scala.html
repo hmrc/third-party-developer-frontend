@@ -76,7 +76,7 @@
                                         All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
                                     } else {
                                         @for(selectedAPI <- taxRegimeInterest._1.services) {
-                                            @selectedAPI
+                                            @viewData.apiDisplayName(selectedAPI)
                                             <br />
                                         }
                                     }

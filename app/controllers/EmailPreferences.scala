@@ -38,15 +38,17 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def emailPreferencesSummaryPage: Action[AnyContent] = loggedInAction { implicit request =>
     val emailPreferences = request.developerSession.developer.emailPreferences
-    // val userServices: Set[String] = emailPreferences.interests.map(_.services).reduce(_ ++ _)
+    val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
+
     for {
       apiCategoryDetails <- apiService.fetchAllAPICategoryDetails()
+      apiNames <- apiService.fetchAPIDetails(userServices)
       //apis <- apiService.fetchAPIDetails(userServices)
       // get list of apis from email prefs
       // for each call apm to get extended service names etc
       // pass this list to view
       // Map(serviceName:String, displayName:String) 
-    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, Seq.empty, apiCategoryDetails)))
+    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails)))
   }
 
   def toDataObject(emailPreferences: model.EmailPreferences,

@@ -36,7 +36,10 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       Seq(APICategoryDetails("VAT", "VAT"), APICategoryDetails("INCOME_TAX_MTD", "Income Tax (Making Tax Digital)"))
     val apiCategoryDetailsMap = Map("VAT" -> "VAT", "INCOME_TAX_MTD" -> "Income Tax (Making Tax Digital)")
 
-    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set.empty), TaxRegimeInterests("INCOME_TAX_MTD", Set("income-tax-mtd-api-2", "income-tax-mtd-api-1"))), Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY))
+    val api1 =  "income-tax-mtd-api-1"
+    val api2  = "income-tax-mtd-api-2"
+    val extendedServiceDetails = Map(api1 -> "API1", api2 -> "API2")
+    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set.empty), TaxRegimeInterests("INCOME_TAX_MTD", Set(api1, api2))), Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY))
     val developerSession = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN, emailPreferences = emailPreferences)
     val developerSessionWithoutEmailPreferences = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
@@ -46,7 +49,6 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
 
 
   def validateStaticElements(document: Document) = {
-    println(document)
 
     document.getElementById("pageHeading").text() shouldNot be("Email Preferences")
     val elements = document.select("ul#info > li")
@@ -64,7 +66,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     document.getElementById(id).attr("href") shouldBe linkVal
   }
 
-  def checkEmailPreferencesTable(document: Document, emailPreferences: EmailPreferences, apiCategoryDetails: Seq[APICategoryDetails]): Unit = {
+  def checkEmailPreferencesTable(document: Document, emailPreferences: EmailPreferences, apiCategoryDetails: Seq[APICategoryDetails], extendedServiceDetails: Map[String, String]): Unit = {
     val tableHeaders = document.getElementsByTag("th")
     tableHeaders.get(0).text() shouldBe "Category"
     tableHeaders.get(1).text() shouldBe "APIs"
@@ -73,7 +75,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       val textRegimeDisplayNameVal = taxRegimeDisplayName(apiCategoryDetails, interest._1.regime)
       document.getElementById(s"regime-col-${interest._2}").text() shouldBe textRegimeDisplayNameVal
       val services = interest._1.services
-      val apisColText = if (services.isEmpty) s"All $textRegimeDisplayNameVal APIs" else services.mkString(" ")
+      val apisColText = if (services.isEmpty) s"All $textRegimeDisplayNameVal APIs" else services.map(extendedServiceDetails.get(_).getOrElse("")).mkString(" ")
       document.getElementById(s"apis-col-${interest._2}").text() shouldBe apisColText
       checkLink(document, s"change-${interest._2}-link", "Change", "/developer/profile/email-preferences")
     }
@@ -99,10 +101,11 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
 
   "Email Preferences Summary view page" should {
     "render results table when email preferences have been selected" in new Setup {
-      val page = emailPreferencesSummaryView.render(EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty), messagesProvider.messages, developerSession, request, appConfig)
+
+      val page = emailPreferencesSummaryView.render(EmailPreferencesSummaryViewData(apiCategoryDetailsMap, extendedServiceDetails), messagesProvider.messages, developerSession, request, appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document)
-      checkEmailPreferencesTable(document, developerSession.developer.emailPreferences, apiCategoryDetails)
+      checkEmailPreferencesTable(document, developerSession.developer.emailPreferences, apiCategoryDetails, extendedServiceDetails)
     }
 
     "display 'no email preferences selected' page for users that have not yet selected any" in new Setup {

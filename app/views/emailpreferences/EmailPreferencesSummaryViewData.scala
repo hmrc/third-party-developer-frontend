@@ -17,6 +17,6 @@
 package views.emailpreferences
 
 final case class EmailPreferencesSummaryViewData(taxRegimeDisplayNames: Map[String, String], apiDisplayNames: Map[String, String]) {
-    def taxRegimeDisplayName(taxRegime: String): String = taxRegimeDisplayNames.getOrElse(taxRegime, "Unknown Tax Regime")
-    def apiDisplayName(serviceName: String): String = apiDisplayNames.getOrElse(serviceName, "Unknown API")
+    def taxRegimeDisplayName(taxRegime: String): String = taxRegimeDisplayNames.getOrElse(taxRegime, taxRegime)
+    def apiDisplayName(serviceName: String): String = apiDisplayNames.getOrElse(serviceName, serviceName)
 }
