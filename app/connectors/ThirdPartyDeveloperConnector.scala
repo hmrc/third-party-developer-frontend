@@ -32,6 +32,7 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
@@ -229,6 +230,17 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
         case _: NotFoundException => throw new InvalidEmail
       }
   }
+
+
+  def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
+      http.DELETE(s"$serviceBaseUrl/developer/$emailAddress/email-preferences")
+      .map(_.status == NO_CONTENT)
+      .recover {
+        case _: NotFoundException => throw new InvalidEmail
+      }
+  }
+
+
 }
 
 object ThirdPartyDeveloperConnector {

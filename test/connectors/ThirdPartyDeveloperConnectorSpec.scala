@@ -19,13 +19,13 @@ package connectors
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
-import domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}
+import domain.{InvalidCredentials, LockedAccount, UnverifiedAccount, InvalidEmail}
 import domain.models.connectors._
 import domain.models.developers._
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status
-import play.api.http.Status.NO_CONTENT
+import play.api.http.Status.{NOT_FOUND, NO_CONTENT}
 import play.api.libs.json.{Json, JsString, JsValue}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -359,6 +359,28 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
       private val result = await(connector.enableMfa(email))
 
       result shouldBe NO_CONTENT
+    }
+  }
+
+
+  "removeEmailPreferences" should {
+    "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
+        val email = "john.smith@example.com"
+         when(mockHttp.DELETE(endpoint(s"developer/$email/email-preferences"))).thenReturn(successful(HttpResponse(NO_CONTENT)))
+         private val result = await(connector.removeEmailPreferences(email))
+
+        result shouldBe true
+     
+    }
+
+    "throw InvalidEmail exception if email address not found in TPD" in new Setup {
+      val email = "john.smith@example.com"
+         when(mockHttp.DELETE(endpoint(s"developer/$email/email-preferences"))).thenReturn(failed(new NotFoundException("")))
+
+         intercept[InvalidEmail] {
+          await(connector.removeEmailPreferences(email))
+         }
+        
     }
   }
 }
