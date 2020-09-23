@@ -22,18 +22,20 @@ import javax.inject.Inject
 import model.APICategoryDetails
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{APIService, SessionService}
+import service.{APIService, EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
                                  val errorHandler: ErrorHandler,
                                  val cookieSigner: CookieSigner,
+                                 emailPreferencesService: EmailPreferencesService,
                                  apiService: APIService,
-                                 emailPreferencesSummaryView: EmailPreferencesSummaryView)
+                                 emailPreferencesSummaryView: EmailPreferencesSummaryView,
+                                 emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
   def emailPreferencesSummaryPage: Action[AnyContent] = loggedInAction { implicit request =>
@@ -44,6 +46,18 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       apiCategoryDetails <- apiService.fetchAllAPICategoryDetails()
       apiNames <- apiService.fetchAPIDetails(userServices)
     } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails)))
+  }
+
+  def unsubscribeAllPage: Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(emailPreferencesUnsubscribeAllView()))
+  }
+
+  def unsubscribeAllAction: Action[AnyContent] = loggedInAction { implicit request =>
+    val emailAddress = request.developerSession.developer.email
+    emailPreferencesService.removeEmailPreferences(emailAddress).map {
+      case true => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
+      case false => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
+    }
   }
 
   def toDataObject(emailPreferences: model.EmailPreferences,

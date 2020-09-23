@@ -34,6 +34,8 @@ GET         /profile/change                                                     
 POST        /profile                                                                                     controllers.Profile.updateProfile
 
 GET         /profile/email-preferences                                                      controllers.EmailPreferences.emailPreferencesSummaryPage
+GET         /profile/email-preferences/unsubscribe                                          controllers.EmailPreferences.unsubscribeAllPage
+POST        /profile/email-preferences/unsubscribe                                          controllers.EmailPreferences.unsubscribeAllAction
 
 GET         /profile/protect-account                                                        controllers.ProtectAccount.getProtectAccount
 GET         /profile/protect-account/setup                                                  controllers.ProtectAccount.getQrCode

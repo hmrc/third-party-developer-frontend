@@ -17,7 +17,7 @@
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
 @import include._
-@import model.{APICategoryDetails, Crumb}
+@import model.Crumb
 @import uk.gov.hmrc.urls.Link
 @import views.emailpreferences.EmailPreferencesSummaryViewData
 
@@ -115,7 +115,7 @@
         }.</p>
 
         @if(userHasEmailPreferences) {
-            <p><a id="unsubscribeLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage">
+            <p><a id="unsubscribeLink" href="@routes.EmailPreferences.unsubscribeAllPage">
                 Unsubscribe from Developer Hub emails</a></p>
         }
 
