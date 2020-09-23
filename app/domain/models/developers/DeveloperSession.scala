@@ -19,6 +19,7 @@ package domain.models.developers
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+import model.EmailPreferences
 import play.api.libs.json.{Format, Json}
 
 case class DeveloperSession(session: Session) {
@@ -57,7 +58,8 @@ case class Developer(
     firstName: String,
     lastName: String,
     organisation: Option[String] = None,
-    mfaEnabled: Option[Boolean] = None
+    mfaEnabled: Option[Boolean] = None,
+    emailPreferences: EmailPreferences = EmailPreferences.noPreferences
 )
 
 object Developer {

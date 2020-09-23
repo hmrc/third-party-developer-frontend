@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package it
+package connectors
 
 import java.util.UUID.randomUUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.{ConnectorMetrics, NoopConnectorMetrics, ProductionPushPullNotificationsConnector}
 import domain.models.applications.ClientId
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HeaderNames.AUTHORIZATION

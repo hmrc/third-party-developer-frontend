@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package it
+package connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import connectors.{ConnectorMetrics, NoopConnectorMetrics}
 import controllers.routes
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -121,7 +120,8 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                    |    "developer": {
                    |      "email":"$userEmail",
                    |      "firstName":"John",
-                   |      "lastName": "Doe"
+                   |      "lastName": "Doe",
+                   |      "emailPreferences": { "interests" : [], "topics": [] }
                    |    }
                    |  }
                    |}""".stripMargin)
