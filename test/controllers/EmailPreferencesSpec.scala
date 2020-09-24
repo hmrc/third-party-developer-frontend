@@ -18,8 +18,8 @@ package controllers
 
 import domain.models.apidefinitions.ApiContext
 import domain.models.connectors.ExtendedAPIDefinition
-import service.APIService
-import views.html.emailpreferences.EmailPreferencesSummaryView
+import service.{APIService, EmailPreferencesService}
+import views.html.emailpreferences.{EmailPreferencesSummaryView, EmailPreferencesUnsubscribeAllView}
 
 import scala.concurrent.Future
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
@@ -39,12 +39,23 @@ import model.TaxRegimeInterests
 class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
   
     trait Setup {
+        val mockEmailPreferencesService = mock[EmailPreferencesService]
         val mockAPIService = mock[APIService]
 
         val mockEmailPreferencesSummaryView = mock[EmailPreferencesSummaryView]
+        val mockEmailPreferencesUnsubscribeAllView = mock[EmailPreferencesUnsubscribeAllView]
         when(mockEmailPreferencesSummaryView.apply(*)(*,*,*,*)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
-        val controllerUnderTest = new EmailPreferences(sessionServiceMock, mcc, mockErrorHandler, cookieSigner, mockAPIService, mockEmailPreferencesSummaryView)
+        val controllerUnderTest =
+            new EmailPreferences(
+                sessionServiceMock,
+                mcc,
+                mockErrorHandler,
+                cookieSigner,
+                mockEmailPreferencesService,
+                mockAPIService,
+                mockEmailPreferencesSummaryView,
+                mockEmailPreferencesUnsubscribeAllView)
     
         val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
         val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe", emailPreferences = emailPreferences)
@@ -53,7 +64,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
         val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
         private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
-        val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
+        val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] =
+            FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
     }
 
     "emailPreferencesSummaryPage" should {

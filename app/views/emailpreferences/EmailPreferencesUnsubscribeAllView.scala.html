@@ -36,9 +36,9 @@
 
     <h1 id="pageHeading" class="heading-xlarge">Are you sure you want to unsubscribe from Developer Hub emails?</h1>
 
-    @helper.form(action = routes.EmailPreferences.unsubscribeAllAction(), 'class -> "form") {
+    @helper.form(action = routes.EmailPreferences.unsubscribeAllAction(), 'class -> "form", 'id -> "unsubscribeForm") {
         @helper.CSRF.formField
         <button id="submit" class="button" type="submit">Unsubscribe</button>
-        <a href="@routes.EmailPreferences.emailPreferencesSummaryPage()" class="secondary-button">Cancel</a>
+        <a id="cancelLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage()" class="secondary-button">Cancel</a>
     }
 }
