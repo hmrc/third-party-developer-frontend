@@ -59,9 +59,11 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
                 mockEmailPreferencesUnsubscribeAllView)
     
         val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
-        val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe", emailPreferences = emailPreferences)
+        val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
+        val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
         val sessionId = "sessionId"
-        val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+        val session: Session = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
+        val sessionNoEMailPrefences: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
         val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
         private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
@@ -92,6 +94,19 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
             status(result) shouldBe OK
 
             verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(expectedCategoryMap, expectedAPIDisplayNames)))(*,*,*,*)
+        }
+
+        "return emailPreferencesSummaryView page and set the view data correcly when the flash data value `unsubcribed` is true" in new Setup {
+            fetchSessionByIdReturns(sessionId, sessionNoEMailPrefences)
+
+            when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
+            when(mockAPIService.fetchAPIDetails(eqTo(Set.empty))(*)).thenReturn(Future.successful(Seq.empty))
+
+            val result = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest.withFlash("unsubscribed" -> "true"))
+
+            status(result) shouldBe OK
+
+            verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(Map.empty, Map.empty, true)))(*,*,*,*)
         }
 
         "redirect to login screen for non-logged in user" in new Setup {
