@@ -38,14 +38,19 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
-  def emailPreferencesSummaryPage: Action[AnyContent] = loggedInAction { implicit request =>
+  def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>
+    val unsubscribed: Boolean = request.flash.get("unsubscribed") match {
+      case Some("true") => true
+      case _ => false
+    }
+    
     val emailPreferences = request.developerSession.developer.emailPreferences
     val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
 
     for {
       apiCategoryDetails <- apiService.fetchAllAPICategoryDetails()
       apiNames <- apiService.fetchAPIDetails(userServices)
-    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails)))
+    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails, unsubscribed)))
   }
 
   def unsubscribeAllPage: Action[AnyContent] = loggedInAction { implicit request =>
@@ -53,19 +58,19 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def unsubscribeAllAction: Action[AnyContent] = loggedInAction { implicit request =>
-    val emailAddress = request.developerSession.developer.email
-    emailPreferencesService.removeEmailPreferences(emailAddress).map {
-      case true => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
+    emailPreferencesService.removeEmailPreferences(request.developerSession.developer.email).map {
+      case true => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
       case false => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
     }
   }
 
   def toDataObject(emailPreferences: model.EmailPreferences,
                    filteredAPIs: Seq[ExtendedAPIDefinition],
-                   categories: Seq[APICategoryDetails]): EmailPreferencesSummaryViewData =
+                   categories: Seq[APICategoryDetails], 
+                   unsubscribed: Boolean): EmailPreferencesSummaryViewData =
     EmailPreferencesSummaryViewData(
       createCategoryMap(categories, emailPreferences.interests.map(_.regime)),
-      filteredAPIs.map(a => (a.serviceName, a.name)).toMap)
+      filteredAPIs.map(a => (a.serviceName, a.name)).toMap, unsubscribed)
 
   def createCategoryMap(apisCategories: Seq[APICategoryDetails], usersCategories: Seq[String]): Map[String, String] = {
     apisCategories
