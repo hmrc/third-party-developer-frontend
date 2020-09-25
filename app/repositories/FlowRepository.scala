@@ -52,17 +52,21 @@ class FlowRepository @Inject()(mongo: ReactiveMongoComponent)(implicit val mat: 
     )
   )
 
-  def save[A <: Flow](flow: A)(implicit ct: ClassTag[A], reads: Reads[A], writes: OWrites[A]): Future[A] = {
-    val updateStatement: JsObject = Json.toJson(flow).as[JsObject] ++ Json.obj("lastUpdated" -> DateTime.now(UTC))
-    val updateStatementAlt: JsObject = Json.toJson(flow).as[JsObject] ++ Json.obj("$currentDate" -> Json.obj("lastUpdated" -> true))
-//    for {
-//      something <- findAndUpdate(Json.obj("sessionId" -> flow.sessionId, "flowType" -> classTag[A].runtimeClass.getSimpleName), updateStatement, upsert = true, fetchNewObject = true)
-//      _ <- updateLastUpdated(flow.sessionId)
-//    } something.result[A].head
+  def saveFlow[A <: Flow](flow: A)(implicit ct: ClassTag[A], reads: Reads[A], writes: OWrites[A]): Future[A] = {
+    val updateStatement: JsObject = flowToJson(flow).as[JsObject] ++ Json.obj("lastUpdated" -> DateTime.now(UTC))
+    // val updateStatementAlt: JsObject = Json.toJson(flow).as[JsObject] ++ Json.obj("$$currentDate" -> Json.obj("lastUpdated" -> true))
+  //  for {
+  //    something <- findAndUpdate(Json.obj("sessionId" -> flow.sessionId, "flowType" -> classTag[A].runtimeClass.getSimpleName), flowToJson(flow).as[JsObject], upsert = true, fetchNewObject = true)
+  //    _ <- updateLastUpdated(flow.sessionId)
+  //  } yield something.result[A].head
 
     findAndUpdate(Json.obj("sessionId" -> flow.sessionId, "flowType" -> classTag[A].runtimeClass.getSimpleName),
       updateStatement, upsert = true, fetchNewObject = true)
       .map(_.result[A].head)
+  }
+
+  private def flowToJson(flow: Flow) = {
+    Json.toJson(flow)
   }
 
   def deleteBySessionId[A <: Flow](sessionId: String)(implicit ct: ClassTag[A], reads: Reads[A], writes: OWrites[A]): Future[Boolean] = {

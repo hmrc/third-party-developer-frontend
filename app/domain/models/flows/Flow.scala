@@ -16,6 +16,8 @@
 
 package domain.models.flows
 
+import model.EmailTopic
+
 sealed trait Flow {
   val sessionId: String
 }
@@ -25,3 +27,6 @@ sealed trait Flow {
  */
 case class IpAllowlistFlow(override val sessionId: String,
                            allowlist: Set[String]) extends Flow
+
+case class EmailPreferencesFlow(override val sessionId: String,
+                           selectedTopics: Set[EmailTopic]) extends Flow
