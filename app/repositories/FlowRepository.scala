@@ -52,19 +52,14 @@ class FlowRepository @Inject()(mongo: ReactiveMongoComponent)(implicit val mat: 
     )
   )
 
-  def saveFlow[A <: Flow](flow: A)(implicit ct: ClassTag[A], reads: Reads[A], writes: OWrites[A]): Future[A] = {
-    val updateStatement: JsObject = flowToJson(flow).as[JsObject] ++ Json.obj("lastUpdated" -> DateTime.now(UTC))
-    // val updateStatementAlt: JsObject = Json.toJson(flow).as[JsObject] ++ Json.obj("$$currentDate" -> Json.obj("lastUpdated" -> true))
-  //  for {
-  //    something <- findAndUpdate(Json.obj("sessionId" -> flow.sessionId, "flowType" -> classTag[A].runtimeClass.getSimpleName), flowToJson(flow).as[JsObject], upsert = true, fetchNewObject = true)
-  //    _ <- updateLastUpdated(flow.sessionId)
-  //  } yield something.result[A].head
-
-    findAndUpdate(Json.obj("sessionId" -> flow.sessionId, "flowType" -> classTag[A].runtimeClass.getSimpleName),
-      updateStatement, upsert = true, fetchNewObject = true)
-      .map(_.result[A].head)
+  def saveFlow[A <: Flow](flow: A)(implicit ct: ClassTag[A], reads: Reads[A]): Future[A] = {
+   for {
+     something <- findAndUpdate(Json.obj("sessionId" -> flow.sessionId, "flowType" -> classTag[A].runtimeClass.getSimpleName), flowToJson(flow).as[JsObject], upsert = true, fetchNewObject = true)
+     _ <- updateLastUpdated(flow.sessionId)
+   } yield something.result[A].head
   }
 
+  // this function is used to force Json Writes to be of type Flow rather than A
   private def flowToJson(flow: Flow) = {
     Json.toJson(flow)
   }
