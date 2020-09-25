@@ -33,15 +33,15 @@
         breadcrumbs = Seq(Crumb.emailPreferences, Crumb.home),
         developerSession = Some(loggedIn)
     ) {
- 
-    <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
-     
-    <p>Manage your email preferences and choose the types of emails you want to receive from us.</p>
-    @EmailPrefsBulletInfoView()
-    
-    <form method="GET" action="@routes.EmailPreferences.emailPreferencesSummaryPage()">
-        <button id="submit" class="button" type="submit">Continue</button>
-        <!-- <a href="@routes.AddApplication.manageApps" id="continue" class="button">Continue</a> -->
-    </form>
 
-}
+        <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
+
+        <p id="firstSentence">
+            Manage your email preferences and choose the types of emails you want to receive from us.</p>
+        @EmailPrefsBulletInfoView()
+
+        <form id="emailPreferencesStartForm" method="GET" action="@routes.EmailPreferences.emailPreferencesSummaryPage()">
+            <button id="submit" class="button" type="submit">Continue</button>
+        </form>
+
+    }

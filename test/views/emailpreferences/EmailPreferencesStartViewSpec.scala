@@ -36,7 +36,9 @@ class EmailPreferencesStartViewSpec extends CommonViewSpec with WithCSRFAddToken
   }
 
   def checkLink(document: Document, id: String, linkText: String, linkVal: String) = {
-    withClue(s"Link text not as expected: for element: $id"){document.getElementById(id).text().startsWith(linkText) shouldBe true}
+    withClue(s"Link text not as expected: for element: $id") {
+      document.getElementById(id).text().startsWith(linkText) shouldBe true
+    }
     document.getElementById(id).attr("href") shouldBe linkVal
   }
 
@@ -45,13 +47,22 @@ class EmailPreferencesStartViewSpec extends CommonViewSpec with WithCSRFAddToken
       val page = emailPreferencesStartView.render(messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       val document = Jsoup.parse(page.body)
 
-    document.getElementById("pageHeading").text() shouldNot be("Email Preferences")
-    val elements = document.select("ul#info > li")
-    elements.get(0).text() shouldBe "important notices and service updates"
-    elements.get(1).text() shouldBe "changes to any applications you have"
-    elements.get(2).text() shouldBe "making your application accessible"
-      // check for continue button
-      // And `Manage your email preferences and choose the types of emails you want to receive from us` line
+      document.getElementById("pageHeading").text() should be("Email preferences")
+      document.getElementById("firstSentence").text() should be("Manage your email preferences and choose the types of emails you want to receive from us.")
+
+      val elements = document.select("ul#info > li")
+      elements.get(0).text() shouldBe "important notices and service updates"
+      elements.get(1).text() shouldBe "changes to any applications you have"
+      elements.get(2).text() shouldBe "making your application accessible"
+
+      // Check form is configured correctly
+      val form = document.getElementById("emailPreferencesStartForm")
+      form.attr("method") should be ("GET")
+      // TODO: Confirm the action attribute of the form once next page is in place
+//      form.attr("action") should be ("/developer/profile/email-preferences/...")
+
+      // Check submit button is correct
+      document.getElementById("submit").text should be ("Continue")
     }
 
   }
