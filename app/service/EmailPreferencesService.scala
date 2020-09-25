@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-package views.emailpreferences
+package service
 
-final case class EmailPreferencesSummaryViewData(taxRegimeDisplayNames: Map[String, String], apiDisplayNames: Map[String, String], unsubscribed: Boolean = false) {
-    def taxRegimeDisplayName(taxRegime: String): String = taxRegimeDisplayNames.getOrElse(taxRegime, taxRegime)
-    def apiDisplayName(serviceName: String): String = apiDisplayNames.getOrElse(serviceName, serviceName)
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+import connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.http.HeaderCarrier
+
+@Singleton
+class EmailPreferencesService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector)(implicit val ec: ExecutionContext) {
+
+    def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+        thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
+    }
 }

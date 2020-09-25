@@ -17,7 +17,7 @@
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
 @import include._
-@import model.{APICategoryDetails, Crumb}
+@import model.Crumb
 @import uk.gov.hmrc.urls.Link
 @import views.emailpreferences.EmailPreferencesSummaryViewData
 
@@ -37,17 +37,28 @@
     @devMain(
         title = pageHeading,
         userFullName = loggedIn.loggedInName,
-        breadcrumbs = Seq(Crumb(pageHeading), Crumb.manageProfile, Crumb.home),
+        breadcrumbs = Seq(Crumb.emailPreferences, Crumb.home),
         developerSession = Some(loggedIn)
     ) {
 
-        <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
+       
 
-        @if(userHasEmailPreferences) {
-            <p id="firstLine">You can change your preferences at any time.</p>
-        } else {
-            <p id="firstLine">You have selected no email preferences.</p>
+        @if(viewData.unsubscribed) {
+            <div class="govuk-box-highlight">
+                <h1 class="heading-xlarge">You are unsubscribed</h1>
+                <h2 class="heading-medium">You can change your email preferences at any time</h2>
+            </div>
+        }else{
+            <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
+
+            @if(userHasEmailPreferences) {
+                <p id="firstLine">You can change your preferences at any time.</p>
+            } else {
+                <p id="firstLine">You have selected no email preferences.</p>
+            }
         }
+
+     
 
 
         <p>Having a Developer Hub account means you will receive mandatory emails about:</p>
@@ -115,7 +126,7 @@
         }.</p>
 
         @if(userHasEmailPreferences) {
-            <p><a id="unsubscribeLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage">
+            <p><a id="unsubscribeLink" href="@routes.EmailPreferences.unsubscribeAllPage">
                 Unsubscribe from Developer Hub emails</a></p>
         }
 

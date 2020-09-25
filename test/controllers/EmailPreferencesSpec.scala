@@ -18,8 +18,8 @@ package controllers
 
 import domain.models.apidefinitions.ApiContext
 import domain.models.connectors.ExtendedAPIDefinition
-import service.APIService
-import views.html.emailpreferences.EmailPreferencesSummaryView
+import service.{APIService, EmailPreferencesService}
+import views.html.emailpreferences.{EmailPreferencesSummaryView, EmailPreferencesUnsubscribeAllView}
 
 import scala.concurrent.Future
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
@@ -39,21 +39,36 @@ import model.TaxRegimeInterests
 class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
   
     trait Setup {
+        val mockEmailPreferencesService = mock[EmailPreferencesService]
         val mockAPIService = mock[APIService]
 
         val mockEmailPreferencesSummaryView = mock[EmailPreferencesSummaryView]
+        val mockEmailPreferencesUnsubscribeAllView = mock[EmailPreferencesUnsubscribeAllView]
         when(mockEmailPreferencesSummaryView.apply(*)(*,*,*,*)).thenReturn(play.twirl.api.HtmlFormat.empty)
-
-        val controllerUnderTest = new EmailPreferences(sessionServiceMock, mcc, mockErrorHandler, cookieSigner, mockAPIService, mockEmailPreferencesSummaryView)
+        when(mockEmailPreferencesUnsubscribeAllView.apply()(*,*,*,*)).thenReturn(play.twirl.api.HtmlFormat.empty)
+        
+        val controllerUnderTest =
+            new EmailPreferences(
+                sessionServiceMock,
+                mcc,
+                mockErrorHandler,
+                cookieSigner,
+                mockEmailPreferencesService,
+                mockAPIService,
+                mockEmailPreferencesSummaryView,
+                mockEmailPreferencesUnsubscribeAllView)
     
         val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
-        val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe", emailPreferences = emailPreferences)
+        val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
+        val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
         val sessionId = "sessionId"
-        val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+        val session: Session = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
+        val sessionNoEMailPrefences: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
         val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
         private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
-        val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
+        val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] =
+            FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
     }
 
     "emailPreferencesSummaryPage" should {
@@ -81,6 +96,19 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
             verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(expectedCategoryMap, expectedAPIDisplayNames)))(*,*,*,*)
         }
 
+        "return emailPreferencesSummaryView page and set the view data correcly when the flash data value `unsubcribed` is true" in new Setup {
+            fetchSessionByIdReturns(sessionId, sessionNoEMailPrefences)
+
+            when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
+            when(mockAPIService.fetchAPIDetails(eqTo(Set.empty))(*)).thenReturn(Future.successful(Seq.empty))
+
+            val result = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest.withFlash("unsubscribed" -> "true"))
+
+            status(result) shouldBe OK
+
+            verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(Map.empty, Map.empty, true)))(*,*,*,*)
+        }
+
         "redirect to login screen for non-logged in user" in new Setup {
             fetchSessionByIdReturnsNone(sessionId)
 
@@ -93,4 +121,60 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
             verifyZeroInteractions(mockEmailPreferencesSummaryView)
         }
     }
+
+     "emailPreferencesUnsubcribeAllPage" should {
+
+         "return emailPreferencesUnsubcribeAllPage page for logged in user" in new Setup {
+            fetchSessionByIdReturns(sessionId, session)
+
+        
+            val result = controllerUnderTest.unsubscribeAllPage()(loggedInRequest)
+             status(result) shouldBe OK
+            
+            verifyZeroInteractions(mockAPIService)
+            verifyZeroInteractions(mockEmailPreferencesSummaryView)
+             verify(mockEmailPreferencesUnsubscribeAllView).apply()(*,*,*,*)
+         }
+
+
+        "redirect to login screen for non-logged in user" in new Setup {
+            fetchSessionByIdReturnsNone(sessionId)
+
+            val result = controllerUnderTest.unsubscribeAllPage()(FakeRequest())
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+
+            verifyZeroInteractions(mockAPIService)
+            verifyZeroInteractions(mockEmailPreferencesUnsubscribeAllView)
+        }
+
+     }
+
+      "emailPreferencesUnsubcribeAllAction" should {
+
+        "call unsubcribe all emailpreferences service and redirect to the summary page with session value set"  in new Setup {
+             fetchSessionByIdReturns(sessionId, session)
+
+            when(mockEmailPreferencesService.removeEmailPreferences(*)(*)).thenReturn(Future.successful(true))
+            val result = controllerUnderTest.unsubscribeAllAction()(loggedInRequest)
+            status(result) shouldBe SEE_OTHER
+            
+            redirectLocation(result) shouldBe Some(controllers.routes.EmailPreferences.emailPreferencesSummaryPage().url)
+            flash(result).get("unsubscribed") shouldBe Some("true")
+        }
+
+          "redirect to login screen for non-logged in user" in new Setup {
+            fetchSessionByIdReturnsNone(sessionId)
+
+             val result = controllerUnderTest.unsubscribeAllAction()(FakeRequest())
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+
+            verifyZeroInteractions(mockAPIService)
+            verifyZeroInteractions(mockEmailPreferencesService)
+        }
+
+      }
 }

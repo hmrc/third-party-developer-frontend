@@ -39,9 +39,16 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     val api1 =  "income-tax-mtd-api-1"
     val api2  = "income-tax-mtd-api-2"
     val extendedServiceDetails = Map(api1 -> "API1", api2 -> "API2")
-    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set.empty), TaxRegimeInterests("INCOME_TAX_MTD", Set(api1, api2))), Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY))
-    val developerSession = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN, emailPreferences = emailPreferences)
-    val developerSessionWithoutEmailPreferences = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+    val emailPreferences =
+      EmailPreferences(
+        List(TaxRegimeInterests("VAT", Set.empty), TaxRegimeInterests("INCOME_TAX_MTD", Set(api1, api2))),
+        Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY))
+
+    val developerSession =
+      utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN, emailPreferences = emailPreferences)
+
+    val developerSessionWithoutEmailPreferences =
+      utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val emailPreferencesSummaryView = app.injector.instanceOf[EmailPreferencesSummaryView]
@@ -56,9 +63,11 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     elements.get(1).text() shouldBe "changes to any applications you have"
     elements.get(2).text() shouldBe "making your application accessible"
     checkLink(document, "viewAllApplicationsLink", "View all applications", "/developer/applications")
-    checkLink(document, "statusPageLink", "service availability page for information about live incidents", "https://api-platform-status.production.tax.service.gov.uk/")
-    
-
+    checkLink(
+      document,
+      "statusPageLink",
+      "service availability page for information about live incidents",
+      "https://api-platform-status.production.tax.service.gov.uk/")
   }
 
   def checkLink(document: Document, id: String, linkText: String, linkVal: String) = {
@@ -66,7 +75,10 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     document.getElementById(id).attr("href") shouldBe linkVal
   }
 
-  def checkEmailPreferencesTable(document: Document, emailPreferences: EmailPreferences, apiCategoryDetails: Seq[APICategoryDetails], extendedServiceDetails: Map[String, String]): Unit = {
+  def checkEmailPreferencesTable(document: Document,
+                                 emailPreferences: EmailPreferences,
+                                 apiCategoryDetails: Seq[APICategoryDetails],
+                                 extendedServiceDetails: Map[String, String]): Unit = {
     val tableHeaders = document.getElementsByTag("th")
     tableHeaders.get(0).text() shouldBe "Category"
     tableHeaders.get(1).text() shouldBe "APIs"
@@ -75,7 +87,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       val textRegimeDisplayNameVal = taxRegimeDisplayName(apiCategoryDetails, interest._1.regime)
       document.getElementById(s"regime-col-${interest._2}").text() shouldBe textRegimeDisplayNameVal
       val services = interest._1.services
-      val apisColText = if (services.isEmpty) s"All $textRegimeDisplayNameVal APIs" else services.map(extendedServiceDetails.get(_).getOrElse("")).mkString(" ")
+      val apisColText = if (services.isEmpty) s"All $textRegimeDisplayNameVal APIs" else services.map(extendedServiceDetails.getOrElse(_, "")).mkString(" ")
       document.getElementById(s"apis-col-${interest._2}").text() shouldBe apisColText
       checkLink(document, s"change-${interest._2}-link", "Change", "/developer/profile/email-preferences")
     }
@@ -86,6 +98,8 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     val selectedTopicsCell = document.getElementById("selectedTopicsCell")
     selectedTopicsCell.text shouldBe emailPreferences.topics.map(_.displayName).toList.sorted.mkString(" ")
     checkLink(document, "changeTopicsLink", "Change", "/developer/profile/email-preferences")
+
+    checkLink(document, "unsubscribeLink", "Unsubscribe from Developer Hub emails", "/developer/profile/email-preferences/unsubscribe")
   }
 
   def taxRegimeDisplayName(apiCategoryDetails: Seq[APICategoryDetails], taxRegime: String): String = {
@@ -98,18 +112,26 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     document.select("a#unsubscribeLink").isEmpty shouldBe true
   }
 
-
   "Email Preferences Summary view page" should {
     "render results table when email preferences have been selected" in new Setup {
 
-      val page = emailPreferencesSummaryView.render(EmailPreferencesSummaryViewData(apiCategoryDetailsMap, extendedServiceDetails), messagesProvider.messages, developerSession, request, appConfig)
+      val page =
+        emailPreferencesSummaryView.render(
+          EmailPreferencesSummaryViewData(apiCategoryDetailsMap, extendedServiceDetails), messagesProvider.messages, developerSession, request, appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document)
       checkEmailPreferencesTable(document, developerSession.developer.emailPreferences, apiCategoryDetails, extendedServiceDetails)
     }
 
     "display 'no email preferences selected' page for users that have not yet selected any" in new Setup {
-        val page = emailPreferencesSummaryView.render(EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty), messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+        val page =
+          emailPreferencesSummaryView.render(
+            EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty),
+            messagesProvider.messages,
+            developerSessionWithoutEmailPreferences,
+            request,
+            appConfig)
+
         val document = Jsoup.parse(page.body)
         validateStaticElements(document)
         checkNoEmailPreferencesPageElements(document)

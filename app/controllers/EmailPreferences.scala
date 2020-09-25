@@ -22,36 +22,55 @@ import javax.inject.Inject
 import model.APICategoryDetails
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{APIService, SessionService}
+import service.{APIService, EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
                                  val errorHandler: ErrorHandler,
                                  val cookieSigner: CookieSigner,
+                                 emailPreferencesService: EmailPreferencesService,
                                  apiService: APIService,
-                                 emailPreferencesSummaryView: EmailPreferencesSummaryView)
+                                 emailPreferencesSummaryView: EmailPreferencesSummaryView,
+                                 emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
-  def emailPreferencesSummaryPage: Action[AnyContent] = loggedInAction { implicit request =>
+  def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>
+    val unsubscribed: Boolean = request.flash.get("unsubscribed") match {
+      case Some("true") => true
+      case _ => false
+    }
+    
     val emailPreferences = request.developerSession.developer.emailPreferences
     val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
 
     for {
       apiCategoryDetails <- apiService.fetchAllAPICategoryDetails()
       apiNames <- apiService.fetchAPIDetails(userServices)
-    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails)))
+    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails, unsubscribed)))
+  }
+
+  def unsubscribeAllPage: Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(emailPreferencesUnsubscribeAllView()))
+  }
+
+  def unsubscribeAllAction: Action[AnyContent] = loggedInAction { implicit request =>
+    emailPreferencesService.removeEmailPreferences(request.developerSession.developer.email).map {
+      case true => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
+      case false => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
+    }
   }
 
   def toDataObject(emailPreferences: model.EmailPreferences,
                    filteredAPIs: Seq[ExtendedAPIDefinition],
-                   categories: Seq[APICategoryDetails]): EmailPreferencesSummaryViewData =
+                   categories: Seq[APICategoryDetails], 
+                   unsubscribed: Boolean): EmailPreferencesSummaryViewData =
     EmailPreferencesSummaryViewData(
       createCategoryMap(categories, emailPreferences.interests.map(_.regime)),
-      filteredAPIs.map(a => (a.serviceName, a.name)).toMap)
+      filteredAPIs.map(a => (a.serviceName, a.name)).toMap, unsubscribed)
 
   def createCategoryMap(apisCategories: Seq[APICategoryDetails], usersCategories: Seq[String]): Map[String, String] = {
     apisCategories

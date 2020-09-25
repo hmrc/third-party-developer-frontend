@@ -43,4 +43,6 @@ object Crumb {
     Crumb("Subscription configuration", s"${routes.ManageSubscriptions.listApiSubscriptions(application.id)}", Some("data-breadcrumb-app-metadata"))
 
   def manageProfile = Crumb("Manage profile", s"${routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
+
+  def emailPreferences = Crumb("Email preferences", s"${routes.EmailPreferences.emailPreferencesSummaryPage()}", Some("data-breadcrumb-email-preferences"))
 }
