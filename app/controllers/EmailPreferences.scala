@@ -23,7 +23,7 @@ import model.APICategoryDetails
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{APIService, EmailPreferencesService, SessionService}
-import views.emailpreferences.EmailPreferencesSummaryViewData
+import views.emailpreferences.{EmailPreferencesSummaryViewData}
 import views.html.emailpreferences._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,8 +35,14 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  emailPreferencesService: EmailPreferencesService,
                                  apiService: APIService,
                                  emailPreferencesSummaryView: EmailPreferencesSummaryView,
-                                 emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView)
+                                 emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView,
+                                 emailPreferencesStartView: EmailPreferencesStartView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
+
+       
+  def start: Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(emailPreferencesStartView()))
+  }
 
   def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>
     val unsubscribed: Boolean = request.flash.get("unsubscribed") match {
@@ -45,12 +51,17 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     }
     
     val emailPreferences = request.developerSession.developer.emailPreferences
-    val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
-
+   if(emailPreferences.equals(model.EmailPreferences.noPreferences) && !unsubscribed){
+      Future.successful(Redirect(controllers.routes.EmailPreferences.start()))
+   } else{
+       val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
     for {
       apiCategoryDetails <- apiService.fetchAllAPICategoryDetails()
       apiNames <- apiService.fetchAPIDetails(userServices)
     } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails, unsubscribed)))
+    
+   }
+   
   }
 
   def unsubscribeAllPage: Action[AnyContent] = loggedInAction { implicit request =>

@@ -19,7 +19,7 @@ package controllers
 import domain.models.apidefinitions.ApiContext
 import domain.models.connectors.ExtendedAPIDefinition
 import service.{APIService, EmailPreferencesService}
-import views.html.emailpreferences.{EmailPreferencesSummaryView, EmailPreferencesUnsubscribeAllView}
+import views.html.emailpreferences._
 
 import scala.concurrent.Future
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
@@ -44,9 +44,12 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
         val mockEmailPreferencesSummaryView = mock[EmailPreferencesSummaryView]
         val mockEmailPreferencesUnsubscribeAllView = mock[EmailPreferencesUnsubscribeAllView]
+           val mockEmailPreferencesStartView = mock[EmailPreferencesStartView]
         when(mockEmailPreferencesSummaryView.apply(*)(*,*,*,*)).thenReturn(play.twirl.api.HtmlFormat.empty)
         when(mockEmailPreferencesUnsubscribeAllView.apply()(*,*,*,*)).thenReturn(play.twirl.api.HtmlFormat.empty)
+        when(mockEmailPreferencesStartView.apply()(*,*,*,*)).thenReturn(play.twirl.api.HtmlFormat.empty)
         
+      
         val controllerUnderTest =
             new EmailPreferences(
                 sessionServiceMock,
@@ -56,7 +59,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
                 mockEmailPreferencesService,
                 mockAPIService,
                 mockEmailPreferencesSummaryView,
-                mockEmailPreferencesUnsubscribeAllView)
+                mockEmailPreferencesUnsubscribeAllView,
+                mockEmailPreferencesStartView)
     
         val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
         val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
