@@ -39,7 +39,8 @@ POST        /profile/email-preferences/unsubscribe                              
 GET         /profile/email-preferences/start                                                controllers.EmailPreferences.flowStartPage
 GET         /profile/email-preferences/categories                                           controllers.EmailPreferences.flowSelectCategoriesPage
 POST        /profile/email-preferences/categories                                           controllers.EmailPreferences.flowSelectCategoriesAction
-
+GET         /profile/email-preferences/topics                                               controllers.EmailPreferences.flowSelectTopicsPage
+POST        /profile/email-preferences/topics                                               controllers.EmailPreferences.flowSelectTopicsAction
 
 GET         /profile/protect-account                                                        controllers.ProtectAccount.getProtectAccount
 GET         /profile/protect-account/setup                                                  controllers.ProtectAccount.getQrCode

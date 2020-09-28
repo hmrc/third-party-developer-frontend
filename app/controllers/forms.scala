@@ -427,6 +427,8 @@ object TaxRegimeEmailPreferencesForm {
   /* API-4407: Bit of a workaround here - should be using the mapping approach above to parse the form submission, but it doesn't seem to handle the repeating
    * taxRegime field. mapping("taxRegime" -> list(text)) does not seem to return a List of Strings, so TaxRegimeEmailPreferencesForm is not created correctly
    * (always empty list). */
-  def bindFromRequest()(implicit request: Request[AnyContent]): TaxRegimeEmailPreferencesForm =
-    TaxRegimeEmailPreferencesForm(request.body.asFormUrlEncoded.get("taxRegime").toList)
+  def bindFromRequest()(implicit request: Request[AnyContent]): TaxRegimeEmailPreferencesForm = {
+    val formValues: Option[List[String]] = request.body.asFormUrlEncoded.flatMap(_.get("taxRegime").map(_.toList))
+    TaxRegimeEmailPreferencesForm(formValues.getOrElse(List.empty))
+  }
 }

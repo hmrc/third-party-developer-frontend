@@ -45,10 +45,12 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
     val mockEmailPreferencesUnsubscribeAllView = mock[EmailPreferencesUnsubscribeAllView]
     val mockEmailPreferencesStartView = mock[FlowStartView]
     val mockEmailPreferencesSelectCategoriesView = mock[FlowSelectCategoriesView]
+    val mockEmailPreferencesFlowSelectTopicView = mock[FlowSelectTopicsView]
     when(mockEmailPreferencesSummaryView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesUnsubscribeAllView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesStartView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectCategoriesView.apply(*, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockEmailPreferencesFlowSelectTopicView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
     val controllerUnderTest =
       new EmailPreferences(
@@ -61,7 +63,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
         mockEmailPreferencesSummaryView,
         mockEmailPreferencesUnsubscribeAllView,
         mockEmailPreferencesStartView,
-        mockEmailPreferencesSelectCategoriesView)
+        mockEmailPreferencesSelectCategoriesView,
+        mockEmailPreferencesFlowSelectTopicView)
 
     val emailPreferences = model.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
     val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
@@ -246,4 +249,29 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
     }
 
   }
+
+   "flowSelectTopicsPage" should {
+
+    "render the page correctly when the user is logged in" in new Setup {
+          fetchSessionByIdReturns(sessionId, session)
+
+         val result = controllerUnderTest.flowSelectTopicsPage()(loggedInRequest)
+
+        status(result) shouldBe OK
+
+        verify(mockEmailPreferencesFlowSelectTopicView).apply()(*, *, *, *)
+    }
+
+     "redirect to login screen for non-logged in user" in new Setup {
+      fetchSessionByIdReturnsNone(sessionId)
+
+        val result = controllerUnderTest.flowSelectTopicsPage()(FakeRequest())
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+
+      verifyZeroInteractions(mockEmailPreferencesFlowSelectTopicView)
+    }
+
+   }
 }

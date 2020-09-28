@@ -38,7 +38,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  emailPreferencesSummaryView: EmailPreferencesSummaryView,
                                  emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView,
                                  flowStartView: FlowStartView,
-                                flowSelectCategoriesView: FlowSelectCategoriesView)
+                                flowSelectCategoriesView: FlowSelectCategoriesView,
+                                flowSelectTopicsview: FlowSelectTopicsView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
 
@@ -72,6 +73,17 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     // val selectedTaxRegimes: Set[APICategory] = requestForm.selectedTaxRegimes.map(APICategory.withName).toSet
     //extract selected categories and display as text OK(categoriesselected.mkString(" _ "))
   
+  }
+
+  def flowSelectTopicsPage:  Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(flowSelectTopicsview()))
+  }
+
+  def flowSelectTopicsAction: Action[AnyContent] = loggedInAction { implicit request =>
+    // val requestForm: TaxRegimeEmailPreferencesForm = TaxRegimeEmailPreferencesForm.bindFromRequest
+
+    // Persist Email Preferences changes to TPD
+    Future.successful(Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()))
   }
 
   def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>

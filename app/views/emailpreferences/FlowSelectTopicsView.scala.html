@@ -1,0 +1,106 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.models.developers.DeveloperSession
+@import include._
+@import model.Crumb
+@import domain.models.views.BackButtonWithJavaScript
+
+@this(devMain: DevMain)
+
+@()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+
+    @pageHeading = @{
+        "Email preferences"
+    }
+
+    @devMain(
+        title = pageHeading,
+        userFullName = loggedIn.loggedInName,
+        back = BackButtonWithJavaScript,
+        developerSession = Some(loggedIn)
+    ) {
+
+        <div>
+            <legend>
+                <h1 class="govuk-fieldset-heading">Which topics do you want to receive information about?</h1>
+            </legend>
+            <p class="form-hint">
+                We’ll only send you information about the APIs you are interested in.
+            </p>
+    
+            <p>Select all that apply.</p>
+        </div>
+    
+        <div class="form-group">
+            <form method="post" class="js-form" autocomplete="off" novalidate="novalidate" id="registration-form">
+                <div class="form">
+                    <div class="multiple-choice">
+                        <input id="business" type="checkbox" name="topic" value="BUSINESS_AND_POLICY">
+                        <label for="business">Business and policy
+                            <span class="form-hint">
+                                <p>Policy compliance, legislative changes and business guidance support</p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="multiple-choice">
+                        <input id="technical" type="checkbox" name="topic" value="TECHNICAL">
+                        <label for="technical">Technical
+                            <span class="form-hint">
+                                <p>Specifications, service guides, bug fixes and known errors</p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="multiple-choice">
+                        <input id="releases" type="checkbox" name="topic" value="RELEASE_SCHEDULES">
+                        <label for="releases">Release schedules
+                            <span class="form-hint">
+                                <p>Notifications about planned releases and outages</p>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+    
+        <div>
+            <p>Check the <a href="https://api-platform-status.production.tax.service.gov.uk/?_ga=2.73741073.2032328959.1590496078-921174029.1559546962#">service availability page for information about live incidents</a>.</p>
+    
+            <h2 class="heading-medium">Get involved in user research and events</h2>
+        </div>
+    
+        <div class="form-group">
+            <form method="post" class="js-form" autocomplete="off" novalidate="novalidate" id="registration-form">
+                <div class="form">
+                    <div class="multiple-choice">
+                        <input id="invites" type="checkbox" name="topic" value="EVENT_INVITES">
+                        <label for="invites">Event invites
+                            <span class="form-hint">
+                                <p>Get invites to knowledge share events and user research opportunities</p>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+    
+        <div class="form-group">
+            <a href="@routes.EmailPreferences.emailPreferencesSummaryPage()" class="button">Continue</a>
+        </div>
+
+        <a href="@routes.EmailPreferences.emailPreferencesSummaryPage()"> I'm not interested in any of these topics</a>
+    }
