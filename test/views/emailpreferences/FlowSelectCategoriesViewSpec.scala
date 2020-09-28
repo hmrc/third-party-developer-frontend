@@ -46,35 +46,32 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
   }
 
   def validateCheckboxItemsAgainstCategories(document: Document, categories: List[APICategoryDetails]) = {
-        categories.foreach( category => {
-          val checkbox = document.getElementById(category.category)
-          checkbox.attr("name") shouldBe "taxRegime"
-          checkbox.`val`() shouldBe category.category
+    categories.foreach(category => {
+      val checkbox = document.getElementById(category.category)
+      checkbox.attr("name") shouldBe "taxRegime"
+      checkbox.`val`() shouldBe category.category
 
-          document.select(s"label[for=${category.category}]").text shouldBe category.name
+      document.select(s"label[for=${category.category}]").text shouldBe category.name
 
-          withClue("Expected number of checkboxes differs from number of categories sent to view"){
-            document.select("input[type=checkbox]").size shouldBe categories.size
-          }
-
-        
-      })
-
+      withClue("Expected number of checkboxes differs from number of categories sent to view") {
+        document.select("input[type=checkbox]").size shouldBe categories.size
+      }
+    })
   }
 
   def validateStaticElements(document: Document, categories: List[APICategoryDetails]) {
 
-      document.getElementById("pageHeading").text() should be("Which API categories are you interested in?")
-      // Check form is configured correctly
-      val form = document.getElementById("emailPreferencesCategoriesForm")
-      form.attr("method") should be ("POST")
-      form.attr("action") should be ("/developer/profile/email-preferences/categories")
+    document.getElementById("pageHeading").text() should be("Which API categories are you interested in?")
+    // Check form is configured correctly
+    val form = document.getElementById("emailPreferencesCategoriesForm")
+    form.attr("method") should be("POST")
+    form.attr("action") should be("/developer/profile/email-preferences/categories")
 
-      // check checkboxes are displayed
-      validateCheckboxItemsAgainstCategories(document, categories)
-    
-      // Check submit button is correct
-      document.getElementById("selectCategories").text should be ("Continue")
+    // check checkboxes are displayed
+    validateCheckboxItemsAgainstCategories(document, categories)
+
+    // Check submit button is correct
+    document.getElementById("selectCategories").text should be("Continue")
   }
 
   "Email Preferences Select Categories view page" should {
@@ -88,12 +85,12 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
     }
 
-     "render the api categories selection Page with boxes selected when user selected categories passed to the view" in new Setup {
+    "render the api categories selection Page with boxes selected when user selected categories passed to the view" in new Setup {
       val page = flowSelectCategoriesView.render(categoriesFromAPM, usersCategories, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
 
-      val selectedBoxes =  document.select("input[type=checkbox][checked]").asScala.toList
+      val selectedBoxes = document.select("input[type=checkbox][checked]").asScala.toList
 
       // do we need to check here which items were selected and compare against user selected list?
       selectedBoxes.map(_.attr("value")) should contain allElementsOf usersCategories

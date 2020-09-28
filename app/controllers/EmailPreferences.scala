@@ -38,8 +38,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  emailPreferencesSummaryView: EmailPreferencesSummaryView,
                                  emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView,
                                  flowStartView: FlowStartView,
-                                flowSelectCategoriesView: FlowSelectCategoriesView,
-                                flowSelectTopicsview: FlowSelectTopicsView)
+                                 flowSelectCategoriesView: FlowSelectCategoriesView,
+                                 flowSelectTopicsview: FlowSelectTopicsView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
 
@@ -50,7 +50,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def flowSelectCategoriesPage: Action[AnyContent] = loggedInAction { implicit request =>
     // cant update cache here as we might have existing cached items?
-    for{
+    for {
       categories <- fetchCategoriesVisibleToUser()
       userCategories = fetchUsersCategories()
     } yield Ok(flowSelectCategoriesView(categories, userCategories))
@@ -61,8 +61,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   private def fetchUsersCategories()(implicit request: UserRequest[AnyContent]): Set[String] = {
-      //try and get values from cache if empty create new cache item based on 
-      // users existing email preferences
+    //try and get values from cache if empty create new cache item based on
+    // users existing email preferences
     request.developerSession.developer.emailPreferences.interests.map(_.regime).toSet
   }
 
@@ -72,11 +72,11 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
     // val selectedTaxRegimes: Set[APICategory] = requestForm.selectedTaxRegimes.map(APICategory.withName).toSet
     //extract selected categories and display as text OK(categoriesselected.mkString(" _ "))
-  
+
   }
 
-  def flowSelectTopicsPage:  Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(flowSelectTopicsview()))
+  def flowSelectTopicsPage: Action[AnyContent] = loggedInAction { implicit request =>
+    Future.successful(Ok(flowSelectTopicsview(Set.empty)))
   }
 
   def flowSelectTopicsAction: Action[AnyContent] = loggedInAction { implicit request =>

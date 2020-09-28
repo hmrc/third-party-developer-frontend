@@ -50,7 +50,7 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
     when(mockEmailPreferencesUnsubscribeAllView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesStartView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectCategoriesView.apply(*, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
-    when(mockEmailPreferencesFlowSelectTopicView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockEmailPreferencesFlowSelectTopicView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
     val controllerUnderTest =
       new EmailPreferences(
@@ -225,22 +225,22 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
     val apiCategories = List(APICategoryDetails("api1", "API 1"))
 
     "render the page correctly when the user is logged in" in new Setup {
-          fetchSessionByIdReturns(sessionId, session)
+      fetchSessionByIdReturns(sessionId, session)
 
-          val expectedSelectedCategories = session.developer.emailPreferences.interests.map(_.regime).toSet
-          when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategories))
-          
-         val result = controllerUnderTest.flowSelectCategoriesPage()(loggedInRequest)
+      val expectedSelectedCategories = session.developer.emailPreferences.interests.map(_.regime).toSet
+      when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategories))
 
-        status(result) shouldBe OK
+      val result = controllerUnderTest.flowSelectCategoriesPage()(loggedInRequest)
 
-        verify(mockEmailPreferencesSelectCategoriesView).apply(eqTo(apiCategories), eqTo(expectedSelectedCategories))(*, *, *, *)
+      status(result) shouldBe OK
+
+      verify(mockEmailPreferencesSelectCategoriesView).apply(eqTo(apiCategories), eqTo(expectedSelectedCategories))(*, *, *, *)
     }
 
-     "redirect to login screen for non-logged in user" in new Setup {
+    "redirect to login screen for non-logged in user" in new Setup {
       fetchSessionByIdReturnsNone(sessionId)
 
-        val result = controllerUnderTest.flowSelectCategoriesPage()(FakeRequest())
+      val result = controllerUnderTest.flowSelectCategoriesPage()(FakeRequest())
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
@@ -250,22 +250,23 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
   }
 
-   "flowSelectTopicsPage" should {
+  "flowSelectTopicsPage" should {
 
     "render the page correctly when the user is logged in" in new Setup {
-          fetchSessionByIdReturns(sessionId, session)
+      fetchSessionByIdReturns(sessionId, session)
+      val expectedSelectedTopics = session.developer.emailPreferences.topics.map(_.value).toSet
 
-         val result = controllerUnderTest.flowSelectTopicsPage()(loggedInRequest)
+      val result = controllerUnderTest.flowSelectTopicsPage()(loggedInRequest)
 
-        status(result) shouldBe OK
+      status(result) shouldBe OK
 
-        verify(mockEmailPreferencesFlowSelectTopicView).apply()(*, *, *, *)
+      verify(mockEmailPreferencesFlowSelectTopicView).apply(eqTo(expectedSelectedTopics))(*, *, *, *)
     }
 
-     "redirect to login screen for non-logged in user" in new Setup {
+    "redirect to login screen for non-logged in user" in new Setup {
       fetchSessionByIdReturnsNone(sessionId)
 
-        val result = controllerUnderTest.flowSelectTopicsPage()(FakeRequest())
+      val result = controllerUnderTest.flowSelectTopicsPage()(FakeRequest())
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
@@ -273,5 +274,5 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
       verifyZeroInteractions(mockEmailPreferencesFlowSelectTopicView)
     }
 
-   }
+  }
 }
