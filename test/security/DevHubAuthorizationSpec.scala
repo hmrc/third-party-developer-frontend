@@ -59,6 +59,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
     val requestWithNoRealSession = FakeRequest().withCookies(underTest.createCookie(sessionId))
 
     when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(developerSession.map(ds => ds.session)))
+    when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
   }
 
   val loggedInDeveloperSession = DeveloperSessionBuilder("Email", "firstName", "lastName", loggedInState = LoggedInState.LOGGED_IN)
@@ -71,6 +72,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
           val result = loggedInAction()(request)
 
           status(result) shouldBe OK
+          verify(underTest.sessionService).updateUserFlowSessions(loggedInDeveloperSession.session.sessionId)
         }
       }
 
@@ -79,6 +81,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
           val result = atLeastPartLoggedInAction()(request)
 
           status(result) shouldBe OK
+          verify(underTest.sessionService).updateUserFlowSessions(loggedInDeveloperSession.session.sessionId)
         }
       }
     }
@@ -90,6 +93,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
 
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+          verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
         }
       }
 
@@ -98,6 +102,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
           val result = atLeastPartLoggedInAction()(request)
 
           status(result) shouldBe OK
+          verify(underTest.sessionService).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
         }
       }
     }
@@ -108,6 +113,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+        verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
       }
 
       "they have a cookie but it is invalid" in new Setup(None) {
@@ -115,6 +121,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+        verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
       }
 
       "they have a valid cookie but it does not exist in the session service" in new Setup(None) {
@@ -124,6 +131,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
         val result = atLeastPartLoggedInAction()(requestWithNoRealSession)
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
+        verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
       }
     }
   }

@@ -21,9 +21,6 @@ import reactivemongo.api.indexes.IndexType.Ascending
 
 object IndexHelper {
 
-  def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String], isUnique: Boolean = false, isBackground: Boolean = true): Index =
-    Index(key = List(indexFieldKey -> Ascending), name = indexName, unique = isUnique, background = isBackground)
-
   def createAscendingIndex(indexName: Option[String], isUnique: Boolean, isBackground: Boolean, indexFieldsKey: String*): Index =
     Index(key = indexFieldsKey.map { _ -> Ascending }, name = indexName, unique = isUnique, background = isBackground)
 

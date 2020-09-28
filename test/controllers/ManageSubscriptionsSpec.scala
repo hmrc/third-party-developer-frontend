@@ -126,6 +126,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
     )
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     fetchByTeamMemberEmailReturns(List(application))
 

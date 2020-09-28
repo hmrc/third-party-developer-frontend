@@ -74,6 +74,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     override def givenApplicationExists(application: Application): Unit = {
       givenApplicationAction(application, loggedInDeveloper)

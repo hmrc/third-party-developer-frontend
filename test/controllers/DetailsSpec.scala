@@ -358,6 +358,8 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
       .thenReturn(successful(Some(session)))
 
+    when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
+
     when(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 

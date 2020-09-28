@@ -128,6 +128,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     givenApplicationAction(applicationWithSubscriptionData, loggedInUser)
     fetchCredentialsReturns(application, tokens)
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
     givenApplicationUpdateSucceeds()
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)

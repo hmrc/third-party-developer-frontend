@@ -206,6 +206,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     givenApplicationUpdateSucceeds()
 

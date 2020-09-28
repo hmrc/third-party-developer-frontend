@@ -35,6 +35,7 @@ trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding {
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
    
     private val sessionParams = Seq(
       "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken

@@ -34,4 +34,7 @@ trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
 
   def fetchSessionByIdReturnsNone(sessionId: String) =
     fetchSessionById(sessionId, None)
+
+  def updateUserFlowSessionsReturnsSuccessfully(sessionId: String) =
+    when(sessionServiceMock.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
 }

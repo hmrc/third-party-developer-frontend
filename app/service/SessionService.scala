@@ -20,13 +20,15 @@ import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
 import domain.models.developers.{Session, SessionInvalid}
 import javax.inject.{Inject, Singleton}
+import repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-                               val mfaMandateService: MfaMandateService)(implicit val ec: ExecutionContext) {
+                               val mfaMandateService: MfaMandateService,
+                               val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
   def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = {
     for {
       mfaMandatedForUser <- mfaMandateService.isMfaMandatedForUser(emailAddress)
@@ -47,4 +49,8 @@ class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
 
   def destroy(sessionId: String)(implicit hc: HeaderCarrier): Future[Int] =
     thirdPartyDeveloperConnector.deleteSession(sessionId)
+
+  def updateUserFlowSessions(sessionId: String): Future[Unit] = {
+    flowRepository.updateLastUpdated(sessionId)
+  }
 }

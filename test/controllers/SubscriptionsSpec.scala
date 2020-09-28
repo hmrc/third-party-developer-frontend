@@ -126,6 +126,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
     givenApplicationUpdateSucceeds()
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
 

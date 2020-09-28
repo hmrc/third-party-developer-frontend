@@ -94,6 +94,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
     val hc = HeaderCarrier()
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 

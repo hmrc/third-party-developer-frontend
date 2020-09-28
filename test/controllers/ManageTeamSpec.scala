@@ -72,6 +72,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     implicit val hc = HeaderCarrier()
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
     when(applicationServiceMock.addTeamMember(any[Application], any[String], any[Collaborator])(any[HeaderCarrier]))
       .thenReturn(successful(AddTeamMemberResponse(registeredUser = true)))
     when(applicationServiceMock.removeTeamMember(any[Application], any[String], eqTo(loggedInUser.email))(any[HeaderCarrier]))

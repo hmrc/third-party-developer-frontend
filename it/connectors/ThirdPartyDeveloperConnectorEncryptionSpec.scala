@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
     "Test.microservice.services.third-party-developer.port" -> stubPort,
-    "json.encryption.key" -> "abcdefghijklmnopqrstuv=="
+    "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
   override def fakeApplication(): Application =
@@ -61,7 +61,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
         1,
         postRequestedFor(urlMatching("/developer"))
           .withRequestBody(
-            equalTo("""{"data":"Zw/sYw13nx6BrF3uAK8Qssm3sNZrI5pcJIVgTd8CdGY/o0GzlHwXqUVXKmx7QQ1avPtuPt45IYrVojwrPSGL9A13AqF0PAL6obBTOpqpGFzrgSkMl6uIAcdsBeop+gby"}""")
+            equalTo("""{"data":"yLR5YLduz4B2c79v3eSrnUuk71jBNoOOytn5CgYL/JbxxGVgD/JJVZAwF5fm/z3LTxtUsa9G6WSLb9F5Sh4YNTQuTO4Cm+8EtimKAMofV6BnHESgQTR9x1Ebgznq7UM9"}""")
           )
       )
     }
@@ -81,7 +81,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       verify(
         1,
         postRequestedFor(urlMatching("/unregistered-developer"))
-          .withRequestBody(equalTo("""{"data":"k7hutBek3t8KfWDBIKTCQxRDepB7R40FnmKK2Adpzfg="}"""))
+          .withRequestBody(equalTo("""{"data":"SnD4DUOHcofAQ4I47oLWPJphsTSdnsNimDZYxGLBsNk="}"""))
       )
     }
   }
@@ -100,7 +100,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       verify(
         1,
         postRequestedFor(urlMatching("/reset-password"))
-          .withRequestBody(equalTo("""{"data":"k7hutBek3t8KfWDBIKTCQ0l+TimQW7kD9CjSsGHSaAQbeQeXeipY+TaP5PL7E7Td64EpDJeriAHHbAXqKfoG8g=="}"""))
+          .withRequestBody(equalTo("""{"data":"SnD4DUOHcofAQ4I47oLWPD9WBDX+EpFdLI9sgOgrmALZCFOLGD3vQHyTdsIGleFrZxxEoEE0fcdRG4M56u1DPQ=="}"""))
       )
     }
   }
@@ -120,7 +120,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
         1,
         postRequestedFor(urlMatching("/change-password"))
           .withRequestBody(
-            equalTo("""{"data":"k7hutBek3t8KfWDBIKTCQ55JG4p9+fMdvQ0VkN8bpmd90WmD+EXjWAYekKvTLLYUNsoQzP0MXHS23JgkFZItsxfqZsCc76lJQmpWm/p0te4+5+KbrSWmSBVuTBFkPkrD"}""")
+            equalTo("""{"data":"SnD4DUOHcofAQ4I47oLWPEvRoYcX4MI3Pvf7Hi00UW3Mvua6Mn/CtJHdVVBMe+PY2iC59W2ezrtf2CctLsjw6bzljfc14VQVDSO1+Zq0IHc2wY/GEYT92qzvXri8Yycg"}""")
           )
       )
     }

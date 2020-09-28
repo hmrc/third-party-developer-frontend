@@ -52,6 +52,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout 
       val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val loggedInRequest = FakeRequest()
         .withLoggedIn(sessionController,implicitly)(session.sessionId)
