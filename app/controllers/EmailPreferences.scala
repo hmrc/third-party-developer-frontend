@@ -36,12 +36,19 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  apiService: APIService,
                                  emailPreferencesSummaryView: EmailPreferencesSummaryView,
                                  emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView,
-                                 emailPreferencesStartView: EmailPreferencesStartView)
+                                 emailPreferencesStartView: EmailPreferencesStartView,
+                                emailPreferencesFlowSelectCategoriesView: EmailPreferencesFlowSelectCategoriesView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
 
   def flowStartPage: Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(emailPreferencesStartView()))
+  }
+
+  def flowSelectCategoriesPage: Action[AnyContent] = loggedInAction { implicit request =>
+    for{
+      categories <- apiService.fetchAllAPICategoryDetails().map(_.toList.sortBy(_.name))
+    } yield Ok(emailPreferencesFlowSelectCategoriesView(categories))
   }
 
   def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>
