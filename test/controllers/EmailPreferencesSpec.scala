@@ -217,4 +217,33 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
       verifyZeroInteractions(mockEmailPreferencesStartView)
     }
   }
+
+  "flowSelectCategoriesPage" should {
+    val apiCategories = List(APICategoryDetails("api1", "API 1"))
+
+    "render the page correctly when the user is logged in" in new Setup {
+          fetchSessionByIdReturns(sessionId, session)
+
+          val expectedSelectedCategories = session.developer.emailPreferences.interests.map(_.regime).toSet
+          when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategories))
+          
+         val result = controllerUnderTest.flowSelectCategoriesPage()(loggedInRequest)
+
+        status(result) shouldBe OK
+
+        verify(mockEmailPreferencesSelectCategoriesView).apply(eqTo(apiCategories), eqTo(expectedSelectedCategories))(*, *, *, *)
+    }
+
+     "redirect to login screen for non-logged in user" in new Setup {
+      fetchSessionByIdReturnsNone(sessionId)
+
+        val result = controllerUnderTest.flowSelectCategoriesPage()(FakeRequest())
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+
+      verifyZeroInteractions(mockEmailPreferencesSelectCategoriesView)
+    }
+
+  }
 }
