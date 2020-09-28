@@ -10,7 +10,4 @@ trait BaseRepositoryIntegrationSpec
     with DefaultAwaitTimeout
     with FutureAwaits
     with BeforeAndAfterAll
-    with BeforeAndAfterEach {
- 
-
-}
+    with BeforeAndAfterEach
