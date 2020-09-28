@@ -91,6 +91,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, loggedInState))
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     def protectAccountRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {
       FakeRequest()

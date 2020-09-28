@@ -19,6 +19,7 @@ package service
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
 import domain.models.developers.{Developer, LoggedInState, Session, SessionInvalid}
+import repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
 
@@ -30,7 +31,7 @@ class SessionServiceSpec extends AsyncHmrcSpec {
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], mock[MfaMandateService])
+    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], mock[MfaMandateService], mock[FlowRepository])
 
     val email = "thirdpartydeveloper@example.com"
     val encodedEmail = "thirdpartydeveloper%40example.com"
@@ -113,6 +114,22 @@ class SessionServiceSpec extends AsyncHmrcSpec {
 
       intercept[RuntimeException](await(underTest.fetch(sessionId)))
 
+    }
+  }
+
+  "updateUserFlowSessions" should {
+    "update flow using the flow repository" in new Setup {
+      when(underTest.flowRepository.updateLastUpdated(sessionId)).thenReturn(successful(()))
+
+      await(underTest.updateUserFlowSessions(sessionId))
+
+      verify(underTest.flowRepository).updateLastUpdated(sessionId)
+    }
+
+    "propagate the exception when the repository fails" in new Setup {
+      when(underTest.flowRepository.updateLastUpdated(sessionId)).thenThrow(new RuntimeException)
+
+      intercept[RuntimeException](await(underTest.updateUserFlowSessions(sessionId)))
     }
   }
 }

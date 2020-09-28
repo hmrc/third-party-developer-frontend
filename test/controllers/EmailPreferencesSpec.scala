@@ -83,6 +83,7 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
         "return emailPreferencesSummaryView page for logged in user" in new Setup {
             val expectedCategoryMap = Map("CATEGORY_1" -> "Category 1")
             fetchSessionByIdReturns(sessionId, session)
+            updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
             val expectedAPIDisplayNames = Map(api1.serviceName -> api1.name, api2.serviceName-> api2.name)
 

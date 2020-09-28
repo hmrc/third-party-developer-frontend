@@ -31,6 +31,7 @@ val testScope = "test, it, component"
 lazy val compile = Seq(
   ws,
   "uk.gov.hmrc" %% "bootstrap-play-26" % "1.8.0",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.30.0-play-26",
   "uk.gov.hmrc" %% "govuk-template" % "5.55.0-play-26",
   "uk.gov.hmrc" %% "play-ui" % "8.11.0-play-26",
   "uk.gov.hmrc" %% "url-builder" % "3.4.0-play-26",
@@ -48,6 +49,7 @@ lazy val compile = Seq(
 )
 
 lazy val test = Seq(
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.21.0-play-26" % testScope,
   "io.cucumber" %% "cucumber-scala" % cucumberVersion % testScope,
   "io.cucumber" % "cucumber-junit" % cucumberVersion % testScope,
   "io.cucumber" % "cucumber-java8" % cucumberVersion % testScope,

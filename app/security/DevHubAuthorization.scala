@@ -51,7 +51,8 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
   def loggedInAction(body: UserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] =
     loggedInActionWithFilter(body)(onlyTrueIfLoggedInFilter)
 
-  private def loggedInActionWithFilter(body: UserRequest[AnyContent] => Future[Result])(filter: DeveloperSession => Boolean)(implicit ec: ExecutionContext): Action[AnyContent] =
+  private def loggedInActionWithFilter(body: UserRequest[AnyContent] => Future[Result])(filter: DeveloperSession => Boolean)
+                                      (implicit ec: ExecutionContext): Action[AnyContent] =
     Action.async {
 
       val loginRedirect = Redirect(controllers.routes.UserLoginAccount.login())
@@ -60,7 +61,10 @@ trait DevHubAuthorization extends Results with FrontendHeaderCarrierProvider wit
         loadSession.flatMap(maybeSession => {
           maybeSession
             .filter(filter)
-            .fold(Future.successful(loginRedirect))(developerSession => body(UserRequest(developerSession, request)))
+            .fold(Future.successful(loginRedirect)) { developerSession =>
+              sessionService.updateUserFlowSessions(developerSession.session.sessionId)
+                .flatMap(_ => body(UserRequest(developerSession, request)))
+            }
         })
     }
 

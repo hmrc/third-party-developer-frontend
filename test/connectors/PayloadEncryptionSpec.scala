@@ -24,7 +24,7 @@ class PayloadEncryptionSpec extends AsyncHmrcSpec {
 
   trait Setup {
     val mockAppConfig = mock[ApplicationConfig]
-    when(mockAppConfig.jsonEncryptionKey).thenReturn("abcdefghijklmnopqrstuv==")
+    when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
     val payloadEncryption = new PayloadEncryption(new LocalCrypto(mockAppConfig))
   }
 
@@ -33,7 +33,7 @@ class PayloadEncryptionSpec extends AsyncHmrcSpec {
     val lastName: String = "lastname"
 
     val form = TestForm(name, lastName)
-    val encryptedForm = JsString("Vmc5z8wslOsGpRiY85wy04AYu1U2IoRRyviDrU+07egsjQll4TmeV/Xp99uFJ6wg")
+    val encryptedForm = JsString("K6SteWOyCf6TsdT03f0h/sbCPiYct4CjPS4+5LhGyLKhhnbSu401qZkv0lPIDiPo")
 
     "encrypt a payload" in new Setup {
       val payload: JsValue = payloadEncryption.encrypt(form)(Json.format[TestForm])

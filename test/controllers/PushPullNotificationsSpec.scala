@@ -134,6 +134,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
 
     when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
       .thenReturn(successful(Some(session)))
+    when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
 
     val sessionParams = Seq("csrfToken" -> fakeApplication().injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)

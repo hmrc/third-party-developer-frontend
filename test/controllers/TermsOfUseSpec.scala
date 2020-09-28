@@ -98,6 +98,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(Some(session)))
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
 
   "termsOfUsePartial" should {

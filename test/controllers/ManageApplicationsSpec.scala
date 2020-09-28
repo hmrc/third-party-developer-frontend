@@ -97,6 +97,7 @@ class ManageApplicationsSpec extends BaseControllerSpec with ApplicationActionSe
     )
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(addApplicationController, implicitly)(sessionId)

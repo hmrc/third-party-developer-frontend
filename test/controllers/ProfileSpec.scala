@@ -84,6 +84,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       val requestCaptor: ArgumentCaptor[UpdateProfileRequest] = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(underTest.connector.updateProfile(eqTo(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(OK))
@@ -105,6 +106,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
           ("confirmpassword", "StrongNewPwd!2")
         )
 
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
       when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
         .thenReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
       when(underTest.connector.changePassword(eqTo(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
@@ -128,6 +130,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
           ("confirmpassword", "StrongNewPwd!2")
         )
 
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
       when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(Future.successful(Some(Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))))
       when(underTest.connector.changePassword(eqTo(ChangePassword(loggedInUser.email, "oldPassword", "StrongNewPwd!2")))(any[HeaderCarrier]))
         .thenReturn(Future.successful(OK))

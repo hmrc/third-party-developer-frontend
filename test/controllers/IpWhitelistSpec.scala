@@ -65,6 +65,7 @@ class IpWhitelistSpec extends BaseControllerSpec with ApplicationActionServiceMo
     def givenTheUserIsLoggedInAs(user: Developer): DeveloperSession = {
       val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
       DeveloperSession(session)
     }
 

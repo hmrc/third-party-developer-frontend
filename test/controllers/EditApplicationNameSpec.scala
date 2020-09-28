@@ -98,6 +98,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 

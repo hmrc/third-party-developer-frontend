@@ -108,6 +108,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     implicit val hc = HeaderCarrier()
 
     fetchSessionByIdReturns(sessionId, session)
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 
