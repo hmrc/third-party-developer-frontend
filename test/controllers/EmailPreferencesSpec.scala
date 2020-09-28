@@ -43,11 +43,12 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
     val mockEmailPreferencesSummaryView = mock[EmailPreferencesSummaryView]
     val mockEmailPreferencesUnsubscribeAllView = mock[EmailPreferencesUnsubscribeAllView]
-    val mockEmailPreferencesStartView = mock[EmailPreferencesStartView]
+    val mockEmailPreferencesStartView = mock[FlowStartView]
+    val mockEmailPreferencesSelectCategoriesView = mock[FlowSelectCategoriesView]
     when(mockEmailPreferencesSummaryView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesUnsubscribeAllView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesStartView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
-
+    when(mockEmailPreferencesSelectCategoriesView.apply(*, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
     val controllerUnderTest =
       new EmailPreferences(
@@ -59,7 +60,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
         mockAPIService,
         mockEmailPreferencesSummaryView,
         mockEmailPreferencesUnsubscribeAllView,
-        mockEmailPreferencesStartView)
+        mockEmailPreferencesStartView,
+        mockEmailPreferencesSelectCategoriesView)
 
     val emailPreferences = model.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
     val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")

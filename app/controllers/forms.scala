@@ -19,6 +19,7 @@ package controllers
 import domain.models.applications.{Application, ApplicationId, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.mvc.{AnyContent, Request}
 
 trait ConfirmPassword {
   val password: String
@@ -417,4 +418,15 @@ object ChangeIpWhitelistForm {
       ChangeIpWhitelistForm.unapply
     )
   )
+}
+
+final case class TaxRegimeEmailPreferencesForm(selectedTaxRegimes: List[String])
+object TaxRegimeEmailPreferencesForm {
+  val form: Form[TaxRegimeEmailPreferencesForm] =
+    Form(mapping("taxRegime" -> list(text))(TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
+  /* API-4407: Bit of a workaround here - should be using the mapping approach above to parse the form submission, but it doesn't seem to handle the repeating
+   * taxRegime field. mapping("taxRegime" -> list(text)) does not seem to return a List of Strings, so TaxRegimeEmailPreferencesForm is not created correctly
+   * (always empty list). */
+  def bindFromRequest()(implicit request: Request[AnyContent]): TaxRegimeEmailPreferencesForm =
+    TaxRegimeEmailPreferencesForm(request.body.asFormUrlEncoded.get("taxRegime").toList)
 }

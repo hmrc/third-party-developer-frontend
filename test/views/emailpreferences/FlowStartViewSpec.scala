@@ -23,16 +23,16 @@ import domain.models.developers.LoggedInState
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
-import views.html.emailpreferences.EmailPreferencesStartView
+import views.html.emailpreferences.FlowStartView
 
-class EmailPreferencesStartViewSpec extends CommonViewSpec with WithCSRFAddToken {
+class FlowStartViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
     val developerSessionWithoutEmailPreferences =
       utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-    val emailPreferencesStartView = app.injector.instanceOf[EmailPreferencesStartView]
+    val flowStartView = app.injector.instanceOf[FlowStartView]
   }
 
   def checkLink(document: Document, id: String, linkText: String, linkVal: String) = {
@@ -44,7 +44,7 @@ class EmailPreferencesStartViewSpec extends CommonViewSpec with WithCSRFAddToken
 
   "Email Preferences Start view page" should {
     "render results table when email preferences have been selected" in new Setup {
-      val page = emailPreferencesStartView.render(messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val page = flowStartView.render(messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       val document = Jsoup.parse(page.body)
 
       document.getElementById("pageHeading").text() should be("Email preferences")
@@ -58,8 +58,8 @@ class EmailPreferencesStartViewSpec extends CommonViewSpec with WithCSRFAddToken
       // Check form is configured correctly
       val form = document.getElementById("emailPreferencesStartForm")
       form.attr("method") should be ("GET")
-      // TODO: Confirm the action attribute of the form once next page is in place
-//      form.attr("action") should be ("/developer/profile/email-preferences/...")
+
+     form.attr("action") should be ("/developer/profile/email-preferences/categories")
 
       // Check submit button is correct
       document.getElementById("submit").text should be ("Continue")

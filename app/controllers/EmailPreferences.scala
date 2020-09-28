@@ -23,6 +23,7 @@ import model.APICategoryDetails
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{APIService, EmailPreferencesService, SessionService}
+import uk.gov.hmrc.http.HeaderCarrier
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 
@@ -36,19 +37,41 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  apiService: APIService,
                                  emailPreferencesSummaryView: EmailPreferencesSummaryView,
                                  emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView,
-                                 emailPreferencesStartView: EmailPreferencesStartView,
-                                emailPreferencesFlowSelectCategoriesView: EmailPreferencesFlowSelectCategoriesView)
+                                 flowStartView: FlowStartView,
+                                flowSelectCategoriesView: FlowSelectCategoriesView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
 
   def flowStartPage: Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(emailPreferencesStartView()))
+    // update cache with whats in the session if its not empty
+    Future.successful(Ok(flowStartView()))
   }
 
   def flowSelectCategoriesPage: Action[AnyContent] = loggedInAction { implicit request =>
+    // cant update cache here as we might have existing cached items?
     for{
-      categories <- apiService.fetchAllAPICategoryDetails().map(_.toList.sortBy(_.name))
-    } yield Ok(emailPreferencesFlowSelectCategoriesView(categories))
+      categories <- fetchCategoriesVisibleToUser()
+      userCategories = fetchUsersCategories()
+    } yield Ok(flowSelectCategoriesView(categories, userCategories))
+  }
+
+  private def fetchCategoriesVisibleToUser()(implicit hc: HeaderCarrier): Future[List[APICategoryDetails]] = {
+    apiService.fetchAllAPICategoryDetails().map(_.toList.sortBy(_.name))
+  }
+
+  private def fetchUsersCategories()(implicit request: UserRequest[AnyContent]): Set[String] = {
+      //try and get values from cache if empty create new cache item based on 
+      // users existing email preferences
+    request.developerSession.developer.emailPreferences.interests.map(_.regime).toSet
+  }
+
+  def flowSelectCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
+    val requestForm: TaxRegimeEmailPreferencesForm = TaxRegimeEmailPreferencesForm.bindFromRequest
+    Future.successful(Ok(requestForm.selectedTaxRegimes.mkString(" - ")))
+
+    // val selectedTaxRegimes: Set[APICategory] = requestForm.selectedTaxRegimes.map(APICategory.withName).toSet
+    //extract selected categories and display as text OK(categoriesselected.mkString(" _ "))
+  
   }
 
   def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>

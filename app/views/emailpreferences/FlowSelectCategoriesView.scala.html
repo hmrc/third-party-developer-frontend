@@ -18,11 +18,11 @@
 @import model.APICategoryDetails
 @import domain.models.developers.DeveloperSession
 @import include._
-@import model.Crumb
+@import domain.models.views.BackButtonWithJavaScript
 
 @this(devMain: DevMain)
 
-@(categories: List[APICategoryDetails])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(categories: List[APICategoryDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
         "Which API categories are you interested in?"
@@ -31,21 +31,33 @@
     @devMain(
         title = pageHeading,
         userFullName = loggedIn.loggedInName,
-        breadcrumbs = Seq(Crumb.emailPreferences, Crumb.home),
+        back = BackButtonWithJavaScript,
         developerSession = Some(loggedIn)
     ) {
         <div>
-            <h2 id="pageHeading" class="heading-xlarge">@pageHeading</h2>
-            <p class="form-hint">
-                Select all that apply.
-            </p>
+            <legend>
+                <h1 id="pageHeading"  class="govuk-fieldset-heading">@pageHeading</h1>
+            </legend>
+    
+            <p>Select all that apply.</p>
         </div>
 
+        @helper.form(action = routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
+            @helper.CSRF.formField
+        <div class="form-group">   
             @for(category <- categories){
               <div class="multiple-choice">
-                <input id="@category.category" type="checkbox" name="selectedCategories" value="@category.category"/>
+                <input id="@category.category" type="checkbox" name="taxRegime" value="@category.category" @if(selectedCategories.contains(category.category)){checked}/>
                 <label for="@category.category">@category.name</label>
               </div>
             }
+        </div>
+
+        <div class="form-group">
+            <button id="selectCategories" class="button" type="submit">Continue</button>
+        </div>
+
+        }
+    
 
     }
