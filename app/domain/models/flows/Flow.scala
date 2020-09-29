@@ -39,7 +39,7 @@ trait Flow {
 /**
  * The name of the class is used on serialisation as a discriminator. Do not change.
  */
-case class IpAllowlistFlow(override val sessionId: String,                       
+case class IpAllowlistFlow(override val sessionId: String,
                            allowlist: Set[String]) extends Flow {
                               override val flowType = FlowType.IP_ALLOW_LIST
                            }

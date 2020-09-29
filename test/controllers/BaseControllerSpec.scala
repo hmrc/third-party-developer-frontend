@@ -25,8 +25,12 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import repositories.FlowRepository
+import mocks.service.SessionServiceMock
+import service.SessionService
+import play.api.inject.bind
 
-class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
+class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock with SessionServiceMock {
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
@@ -41,8 +45,11 @@ class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with Sha
 
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
 
+  val mockFlowRepository = mock[FlowRepository]
+
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
+      .overrides(bind[FlowRepository].to(mockFlowRepository), bind[SessionService].to(sessionServiceMock))
       .configure(("metrics.jvm", false))
       .build()
 }
