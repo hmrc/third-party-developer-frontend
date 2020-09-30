@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import repositories.FlowRepository
 import repositories.ReactiveMongoFormatters.formatEmailPreferencesFlow
 import domain.models.developers.DeveloperSession
-import model.EmailPreferences
+
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -29,9 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class EmailPreferencesFlowService @Inject()(val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
 
     def fetchFlowBySessionId(developerSession: DeveloperSession): Future[EmailPreferencesFlow]= {
-        val sessionId = developerSession.session.sessionId
-        val emailPreferences: EmailPreferences = developerSession.developer.emailPreferences
-        flowRepository.fetchBySessionId(sessionId) map {
+        flowRepository.fetchBySessionId(developerSession.session.sessionId) map {
             case Some(flow) => flow
             case _ => EmailPreferencesFlow.fromDeveloperSession(developerSession)
         }
