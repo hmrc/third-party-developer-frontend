@@ -49,26 +49,23 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def flowSelectCategoriesPage: Action[AnyContent] = loggedInAction { implicit request =>
-    // cant update cache here as we might have existing cached items?
+    
     for {
       categories <- fetchCategoriesVisibleToUser()
-      userCategories = fetchUsersCategories()
-    } yield Ok(flowSelectCategoriesView(categories, userCategories))
+      cacheItem <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
+    } yield Ok(flowSelectCategoriesView(categories, cacheItem))
   }
 
   private def fetchCategoriesVisibleToUser()(implicit hc: HeaderCarrier): Future[List[APICategoryDetails]] = {
     apiService.fetchAllAPICategoryDetails().map(_.toList.sortBy(_.name))
   }
 
-  private def fetchUsersCategories()(implicit request: UserRequest[AnyContent]): Set[String] = {
-    //try and get values from cache if empty create new cache item based on
-    // users existing email preferences
-    request.developerSession.developer.emailPreferences.interests.map(_.regime).toSet
-  }
 
   def flowSelectCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
     val requestForm: TaxRegimeEmailPreferencesForm = TaxRegimeEmailPreferencesForm.bindFromRequest
-    Future.successful(Ok(requestForm.selectedTaxRegimes.mkString(" - ")))
+  
+      emailPreferencesService.updateCategories(request.developerSession, requestForm.selectedTaxRegimes)
+      Future.successful(Ok(requestForm.selectedTaxRegimes.mkString(" - ")))
 
     // val selectedTaxRegimes: Set[APICategory] = requestForm.selectedTaxRegimes.map(APICategory.withName).toSet
     //extract selected categories and display as text OK(categoriesselected.mkString(" _ "))

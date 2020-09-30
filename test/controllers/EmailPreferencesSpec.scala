@@ -23,6 +23,7 @@ import views.html.emailpreferences._
 
 import scala.concurrent.Future
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.flows.EmailPreferencesFlow
 import play.api.test.FakeRequest
 import utils.WithLoggedInSession._
 import play.api.mvc.AnyContentAsEmpty
@@ -34,12 +35,32 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import model.APICategoryDetails
 import mocks.service.SessionServiceMock
 import model.TaxRegimeInterests
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import config.ApplicationConfig
+import mocks.service.ErrorHandlerMock
+import play.api.libs.crypto.CookieSigner
+import play.api.i18n.MessagesApi
+import play.api.mvc.MessagesControllerComponents
 
-class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
+class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with SessionServiceMock with ErrorHandlerMock {
 
   trait Setup {
     val mockEmailPreferencesService = mock[EmailPreferencesService]
     val mockAPIService = mock[APIService]
+
+
+  implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
+
+  implicit lazy val materializer = app.materializer
+
+  lazy val messagesApi = app.injector.instanceOf[MessagesApi]
+
+  val mcc = app.injector.instanceOf[MessagesControllerComponents]
+
+  implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
+  when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+  when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
     val mockEmailPreferencesSummaryView = mock[EmailPreferencesSummaryView]
     val mockEmailPreferencesUnsubscribeAllView = mock[EmailPreferencesUnsubscribeAllView]
@@ -100,7 +121,7 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest)
 
-      status(result) shouldBe OK
+      status(result) mustBe OK
 
       verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(expectedCategoryMap, expectedAPIDisplayNames)))(*, *, *, *)
     }
@@ -113,7 +134,7 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest.withFlash("unsubscribed" -> "true"))
 
-      status(result) shouldBe OK
+      status(result) mustBe OK
 
       verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(Map.empty, Map.empty, unsubscribed = true)))(*, *, *, *)
     }
@@ -123,8 +144,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest)
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(controllers.routes.EmailPreferences.flowStartPage().url)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowStartPage().url)
 
       verifyZeroInteractions(mockAPIService)
       verifyZeroInteractions(mockEmailPreferencesSummaryView)
@@ -135,8 +156,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.emailPreferencesSummaryPage()(FakeRequest())
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockAPIService)
       verifyZeroInteractions(mockEmailPreferencesSummaryView)
@@ -150,7 +171,7 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
 
       val result = controllerUnderTest.unsubscribeAllPage()(loggedInRequest)
-      status(result) shouldBe OK
+      status(result) mustBe OK
 
       verifyZeroInteractions(mockAPIService)
       verifyZeroInteractions(mockEmailPreferencesSummaryView)
@@ -163,8 +184,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.unsubscribeAllPage()(FakeRequest())
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockAPIService)
       verifyZeroInteractions(mockEmailPreferencesUnsubscribeAllView)
@@ -179,10 +200,10 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       when(mockEmailPreferencesService.removeEmailPreferences(*)(*)).thenReturn(Future.successful(true))
       val result = controllerUnderTest.unsubscribeAllAction()(loggedInRequest)
-      status(result) shouldBe SEE_OTHER
+      status(result) mustBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(controllers.routes.EmailPreferences.emailPreferencesSummaryPage().url)
-      flash(result).get("unsubscribed") shouldBe Some("true")
+      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.emailPreferencesSummaryPage().url)
+      flash(result).get("unsubscribed") mustBe Some("true")
     }
 
     "redirect to login screen for non-logged in user" in new Setup {
@@ -190,8 +211,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.unsubscribeAllAction()(FakeRequest())
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockAPIService)
       verifyZeroInteractions(mockEmailPreferencesService)
@@ -205,7 +226,7 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.flowStartPage()(loggedInRequest)
 
-      status(result) shouldBe OK
+      status(result) mustBe OK
       verify(mockEmailPreferencesStartView).apply()(*, *, *, *)
     }
 
@@ -214,8 +235,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.flowStartPage()(FakeRequest())
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesStartView)
     }
@@ -226,15 +247,16 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
     "render the page correctly when the user is logged in" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+  
 
       val expectedSelectedCategories = session.developer.emailPreferences.interests.map(_.regime).toSet
       when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategories))
-
+      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
       val result = controllerUnderTest.flowSelectCategoriesPage()(loggedInRequest)
 
-      status(result) shouldBe OK
+      status(result) mustBe OK
 
-      verify(mockEmailPreferencesSelectCategoriesView).apply(eqTo(apiCategories), eqTo(expectedSelectedCategories))(*, *, *, *)
+      verify(mockEmailPreferencesSelectCategoriesView).apply(eqTo(apiCategories), eqTo(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))(*, *, *, *)
     }
 
     "redirect to login screen for non-logged in user" in new Setup {
@@ -242,8 +264,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.flowSelectCategoriesPage()(FakeRequest())
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectCategoriesView)
     }
@@ -258,7 +280,7 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.flowSelectTopicsPage()(loggedInRequest)
 
-      status(result) shouldBe OK
+      status(result) mustBe OK
 
       verify(mockEmailPreferencesFlowSelectTopicView).apply(eqTo(expectedSelectedTopics))(*, *, *, *)
     }
@@ -268,8 +290,8 @@ class EmailPreferencesSpec extends BaseControllerSpec with SessionServiceMock {
 
       val result = controllerUnderTest.flowSelectTopicsPage()(FakeRequest())
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(controllers.routes.UserLoginAccount.login().url)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesFlowSelectTopicView)
     }

@@ -19,10 +19,11 @@
 @import domain.models.developers.DeveloperSession
 @import include._
 @import domain.models.views.BackButtonWithJavaScript
+@import domain.models.flows.EmailPreferencesFlow
 
 @this(devMain: DevMain)
 
-@(categories: List[APICategoryDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(categories: List[APICategoryDetails], userSelections: EmailPreferencesFlow)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
         "Which API categories are you interested in?"
@@ -47,7 +48,7 @@
         <div class="form-group">   
             @for(category <- categories){
               <div class="multiple-choice">
-                <input id="@category.category" type="checkbox" name="taxRegime" value="@category.category" @if(selectedCategories.contains(category.category)){checked}/>
+                <input id="@category.category" type="checkbox" name="taxRegime" value="@category.category" @if(userSelections.selectedCategories.contains(category.category)){checked}/>
                 <label for="@category.category">@category.name</label>
               </div>
             }

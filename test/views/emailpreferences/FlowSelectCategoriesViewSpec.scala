@@ -27,12 +27,16 @@ import views.html.emailpreferences.FlowSelectCategoriesView
 import model.APICategoryDetails
 
 import scala.collection.JavaConverters._
+import domain.models.flows.EmailPreferencesFlow
 
 class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
+
+
     val developerSessionWithoutEmailPreferences =
       utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
+          val emailpreferencesFlow = EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectCategoriesView = app.injector.instanceOf[FlowSelectCategoriesView]
@@ -79,14 +83,14 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
     val usersCategories = Set("api1", "api2")
 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {
-      val page = flowSelectCategoriesView.render(categoriesFromAPM, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val page = flowSelectCategoriesView.render(categoriesFromAPM, emailpreferencesFlow.copy(selectedCategories = Set.empty), messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
     }
 
     "render the api categories selection Page with boxes selected when user selected categories passed to the view" in new Setup {
-      val page = flowSelectCategoriesView.render(categoriesFromAPM, usersCategories, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val page = flowSelectCategoriesView.render(categoriesFromAPM, emailpreferencesFlow, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
 

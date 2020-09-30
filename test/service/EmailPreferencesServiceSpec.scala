@@ -17,28 +17,73 @@
 package service
 
 import connectors.ThirdPartyDeveloperConnector
+import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.flows.EmailPreferencesFlow
+import model.{EmailTopic, TaxRegimeInterests}
+import repositories.FlowRepository
 import utils.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
-
+  val emailPreferences = model.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
+  val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
+  val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
+  val sessionId = "sessionId"
+  val session: Session = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
+  val sessionNoEMailPrefences: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+  val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
     
  trait SetUp {
   implicit val hc: HeaderCarrier = HeaderCarrier()
+   val mockFlowRepository = mock[FlowRepository]
   val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
-  val underTest = new EmailPreferencesService(mockThirdPartyDeveloperConnector)
+  val underTest = new EmailPreferencesService(mockThirdPartyDeveloperConnector, mockFlowRepository)
 
  }
 
-  "EmailPreferences" should {
+  "EmailPreferences" when {
+
+    "removeEmail Preferences" should {
       "return true when connector is called correctly and true" in new SetUp {
-          when(mockThirdPartyDeveloperConnector.removeEmailPreferences(*)(*)).thenReturn(Future.successful(true))
-          val result = await(underTest.removeEmailPreferences("someEmail"))
-          result shouldBe true
+        when(mockThirdPartyDeveloperConnector.removeEmailPreferences(*)(*)).thenReturn(Future.successful(true))
+        val result = await(underTest.removeEmailPreferences("someEmail"))
+        result shouldBe true
       }
+    }
+
+    "fetchFlowBySessionId" should {
+
+      "call the flow repository correctly and return flow when repository returns data" in new SetUp {
+        val flowObject = EmailPreferencesFlow(sessionId, Set("category1", "category1"), Map("category1" -> Set("api1", "api2")), Set("TECHNICAL"))
+        when(mockFlowRepository.fetchBySessionId[EmailPreferencesFlow](eqTo(sessionId))(*, *, *)).thenReturn(Future.successful(Some(flowObject)))
+        val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper))
+        result shouldBe flowObject
+        verify(mockFlowRepository).fetchBySessionId(eqTo(sessionId))(*, * , *)
+      }
+
+      "call the flow repository correctly and create a new flow object when nothing returned" in new SetUp {
+        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set.empty, Map.empty, Set.empty)
+        when(mockFlowRepository.fetchBySessionId(eqTo(sessionId))(*, *, *)).thenReturn(Future.successful(None))
+        val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper.copy(sessionNoEMailPrefences)))
+
+        result shouldBe expectedFlowObject
+        verify(mockFlowRepository).fetchBySessionId(eqTo(sessionId))(*, * , *)
+      }
+
+
+      "call the flow repository correctly and copy existing email preferences to flow object when nothing in cache" in new SetUp {
+        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"))
+        when(mockFlowRepository.fetchBySessionId(eqTo(sessionId))(*, *, *)).thenReturn(Future.successful(None))
+        val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper))
+
+        result shouldBe expectedFlowObject
+        verify(mockFlowRepository).fetchBySessionId(eqTo(sessionId))(*, * , *)
+      }
+    }
   }
   
 }
