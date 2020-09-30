@@ -24,6 +24,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
+
+    
  trait SetUp {
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
