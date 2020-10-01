@@ -64,22 +64,15 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
 
   def flowSelectCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
-    val requestForm: TaxRegimeEmailPreferencesForm = TaxRegimeEmailPreferencesForm.bindFromRequest
-  
-      emailPreferencesService.updateCategories(request.developerSession, requestForm.selectedTaxRegimes)
-
-    // val selectedTaxRegimes: Set[APICategory] = requestForm.selectedTaxRegimes.map(APICategory.withName).toSet
-    //extract selected categories and display as text OK(categoriesselected.mkString(" _ "))
-    // WHEN CALLING FLOW SELECT API PAGE DETERMINE 1st CATEGORY
-    // cache.selectedCategories.sorted.head
-    val emailpreferences = request.developerSession.developer.emailPreferences
-    val nextCategory =  emailpreferences.interests.map(_.regime).toList.sorted.head
-    Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(nextCategory)))
+    for{
+     flow <- emailPreferencesService.updateCategories(request.developerSession, TaxRegimeEmailPreferencesForm.bindFromRequest.selectedTaxRegimes)
+    } yield Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(flow.categoriesInOrder.head))
   }
 
   def flowSelectApisPage(currentCategory: String): Action[AnyContent] = loggedInAction { implicit  request =>
-     
-     Future.successful(Ok(flowSelectApiView(currentCategory)))
+    // get apis for category
+    
+    Future.successful(Ok(flowSelectApiView(currentCategory)))
 
   }
 

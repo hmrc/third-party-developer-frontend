@@ -42,7 +42,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
 
     val currentFlow: IpAllowlistFlow = IpAllowlistFlow(currentSession, Set("ip1", "ip2"))
     val flowInDifferentSession: IpAllowlistFlow = IpAllowlistFlow(anotherSession, Set("ip3", "ip4"))
-    val flowOfDifferentType: EmailPreferencesFlow = EmailPreferencesFlow(currentSession, Set(EmailTopic.BUSINESS_AND_POLICY))
+    val flowOfDifferentType: EmailPreferencesFlow = EmailPreferencesFlow(currentSession, selectedCategories = Set("category1", "category2"),  selectedAPIs = Map("category1" -> Set("qwqw", "asass")), selectedTopics = Set("BUSINESS_AND_POLICY"))
     await(repository.saveFlow(currentFlow))
     await(repository.saveFlow(flowInDifferentSession))
     await(repository.saveFlow(flowOfDifferentType))
@@ -81,7 +81,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
       }
 
       "save email preferences" in {
-        val flow = EmailPreferencesFlow(currentSession, Set(EmailTopic.BUSINESS_AND_POLICY, EmailTopic.EVENT_INVITES))
+        val flow =  EmailPreferencesFlow(currentSession, selectedCategories= Set("category1", "category2"),  selectedAPIs = Map("category1" -> Set("qwqw", "asass")), selectedTopics = Set("BUSINESS_AND_POLICY",  "EVENT_INVITES"))
 
         await(repository.saveFlow(flow))
 

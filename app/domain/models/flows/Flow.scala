@@ -16,8 +16,10 @@
 
 package domain.models.flows
 
-import model.EmailTopic
+import domain.models.developers.DeveloperSession
+import model.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+
 import scala.collection.immutable
 
 sealed trait FlowType extends EnumEntry
@@ -45,6 +47,27 @@ case class IpAllowlistFlow(override val sessionId: String,
                            }
 
 case class EmailPreferencesFlow(override val sessionId: String,
-                           selectedTopics: Set[EmailTopic]) extends Flow {
-                             override val flowType = FlowType.EMAIL_PREFERENCES
-                           }
+                                selectedCategories: Set[String],
+                                selectedAPIs: Map[String, Set[String]],
+                                selectedTopics: Set[String]) extends Flow {
+                                   override val flowType = FlowType.EMAIL_PREFERENCES
+  def categoriesInOrder = selectedCategories.toList.sorted
+
+}
+
+object EmailPreferencesFlow {
+  def fromDeveloperSession(developerSession: DeveloperSession): EmailPreferencesFlow = {
+
+    val existingEmailPreferences = developerSession.developer.emailPreferences
+    existingEmailPreferences match {
+      case EmailPreferences(i: List[TaxRegimeInterests], t: Set[EmailTopic])  if(i.isEmpty && t.isEmpty) => new EmailPreferencesFlow(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty)
+      case emailPreferences => new EmailPreferencesFlow(
+        developerSession.session.sessionId,
+        emailPreferences.interests.map(_.regime).toSet,
+        emailPreferences.interests.map(i => (i.regime, i.services)).toMap,
+        emailPreferences.topics.map(_.value))
+    }
+  }
+}
+
+

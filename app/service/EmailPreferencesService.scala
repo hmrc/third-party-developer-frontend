@@ -21,20 +21,23 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.developers.DeveloperSession
-import domain.models.flows.EmailPreferencesFlow
+import domain.models.flows.{FlowType, EmailPreferencesFlow}
 import repositories.ReactiveMongoFormatters.formatEmailPreferencesFlow
 import repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
+import connectors.ApmConnector
+import domain.models.connectors.ExtendedAPIDefinition
+
 
 @Singleton
-class EmailPreferencesService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector, flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
+class EmailPreferencesService @Inject()(val apmConnector: ApmConnector, val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector, flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
 
     def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
         thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
     }
 
     def fetchFlowBySessionId(developerSession: DeveloperSession): Future[EmailPreferencesFlow]= {
-        flowRepository.fetchBySessionId[EmailPreferencesFlow](developerSession.session.sessionId) map {
+        flowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlow](developerSession.session.sessionId, FlowType.EMAIL_PREFERENCES) map {
             case Some(flow) => {println("*** - EXISTINGFLOW - ****")
                 flow
             }
@@ -56,4 +59,25 @@ class EmailPreferencesService @Inject()(val thirdPartyDeveloperConnector: ThirdP
         } yield savedFlow   
     }
 
+//     def apisByCategory(userEmail: String): Map[String, Seq[ExtendedAPIDefinition]] = {
+//         for {
+//             apis <- apmConnector.fetchApiDefinitionsVisibleToUser(userEmail)
+
+//         }yield apis.groupBy(api => api.)
+        
+//     }
+
+
+//     def servicesByCategory(apiDefinitions: Seq[APIDefinition]): Map[APICategory, Set[String]] = {
+
+//     def serviceCategories(apiDefinition: APIDefinition): Map[APICategory, Set[String]] =
+//       apiDefinition.categories
+//         .map(category => APICategory.withName(category) -> Set(apiDefinition.serviceName))
+//         .toMap
+
+//     apiDefinitions
+//       .map(serviceCategories)
+//       .fold(Map.empty)(_ combine _)
+//   }
+  
 }

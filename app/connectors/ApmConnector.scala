@@ -52,6 +52,9 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(imp
 
   def fetchAPIDefinition(serviceName: String)(implicit hc: HeaderCarrier): Future[ExtendedAPIDefinition] =
     http.GET[ExtendedAPIDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
+
+  def fetchApiDefinitionsVisibleToUser(userEmail: String)(implicit hc: HeaderCarrier): Future[Seq[ExtendedAPIDefinition]] =
+    http.GET[Seq[ExtendedAPIDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("collaboratorEmail" -> userEmail))
 }
 
 object ApmConnector {

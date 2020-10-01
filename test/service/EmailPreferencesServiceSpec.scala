@@ -18,7 +18,7 @@ package service
 
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import domain.models.flows.EmailPreferencesFlow
+import domain.models.flows.{EmailPreferencesFlow, FlowType}
 import model.{EmailTopic, TaxRegimeInterests}
 import repositories.FlowRepository
 import utils.AsyncHmrcSpec
@@ -59,29 +59,29 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
       "call the flow repository correctly and return flow when repository returns data" in new SetUp {
         val flowObject = EmailPreferencesFlow(sessionId, Set("category1", "category1"), Map("category1" -> Set("api1", "api2")), Set("TECHNICAL"))
-        when(mockFlowRepository.fetchBySessionId[EmailPreferencesFlow](eqTo(sessionId))(*, *, *)).thenReturn(Future.successful(Some(flowObject)))
+        when(mockFlowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlow](eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(Some(flowObject)))
         val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper))
         result shouldBe flowObject
-        verify(mockFlowRepository).fetchBySessionId(eqTo(sessionId))(*, * , *)
+        verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)
       }
 
       "call the flow repository correctly and create a new flow object when nothing returned" in new SetUp {
         val expectedFlowObject = EmailPreferencesFlow(sessionId, Set.empty, Map.empty, Set.empty)
-        when(mockFlowRepository.fetchBySessionId(eqTo(sessionId))(*, *, *)).thenReturn(Future.successful(None))
+        when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(None))
         val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper.copy(sessionNoEMailPrefences)))
 
         result shouldBe expectedFlowObject
-        verify(mockFlowRepository).fetchBySessionId(eqTo(sessionId))(*, * , *)
+        verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)
       }
 
 
       "call the flow repository correctly and copy existing email preferences to flow object when nothing in cache" in new SetUp {
         val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"))
-        when(mockFlowRepository.fetchBySessionId(eqTo(sessionId))(*, *, *)).thenReturn(Future.successful(None))
+        when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(None))
         val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper))
 
         result shouldBe expectedFlowObject
-        verify(mockFlowRepository).fetchBySessionId(eqTo(sessionId))(*, * , *)
+        verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)
       }
     }
   }

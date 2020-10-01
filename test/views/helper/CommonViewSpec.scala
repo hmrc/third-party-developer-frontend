@@ -21,29 +21,22 @@ import java.util.Locale
 import config.ApplicationConfig
 import org.scalatest.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Mode}
-import play.api.inject.bind
+import play.api.Application
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
-import repositories.FlowRepository
-import mocks.service.SessionServiceMock
-import service.SessionService
 
-trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers with SessionServiceMock{
+trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers{
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
   val messagesApi = mcc.messagesApi
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
-  val mockFlowRepository = mock[FlowRepository]
-
 
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
-    .overrides(bind[FlowRepository].to(mockFlowRepository), bind[SessionService].to(sessionServiceMock))
     .configure(("metrics.jvm", false))
     .build()
 
