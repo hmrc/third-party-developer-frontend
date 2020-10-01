@@ -1,7 +1,8 @@
 package repositories
 
 import akka.stream.Materializer
-import domain.models.flows.{EmailPreferencesFlow, Flow, IpAllowlistFlow, FlowType}
+import config.ApplicationConfig
+import domain.models.flows.{EmailPreferencesFlow, Flow, FlowType, IpAllowlistFlow}
 import model.EmailTopic
 import org.joda.time.DateTime
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -13,6 +14,7 @@ import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import domain.models.flows.FlowType._
+import reactivemongo.bson.BSONLong
 
 class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSupport with GuiceOneAppPerSuite {
 
@@ -24,7 +26,8 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
     override val mongoConnector: MongoConnector = mongoConnectorForTest
   }
 
-  private val repository = new FlowRepository(reactiveMongoComponent)
+  private val appConfig = app.injector.instanceOf[ApplicationConfig]
+  private val repository = new FlowRepository(reactiveMongoComponent, appConfig)
 
   override protected def beforeEach() {
     await(repository.drop)
@@ -54,6 +57,16 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
   }
 
   "FlowRepository" when {
+    "Indexes" should {
+      "create ttl index and it should have correct value matching the session timeout in seconds "in {
+        val mayBeIndex = await(repository.collection.indexesManager.list().map(_.find(_.eventualName.equalsIgnoreCase("last_updated_ttl_idx"))))
+        mayBeIndex shouldNot be(None)
+        val mayBeTtlValue: Option[Long] = mayBeIndex.flatMap(_.options.getAs[BSONLong]("expireAfterSeconds").map(_.as[Long]))
+        mayBeTtlValue shouldNot be(None)
+        mayBeTtlValue.head shouldBe appConfig.sessionTimeoutInSeconds
+      }
+    }
+
     "saveFlow" should {
       "save IP allowlist" in {
         val flow = IpAllowlistFlow(currentSession, Set("ip1", "ip2"))

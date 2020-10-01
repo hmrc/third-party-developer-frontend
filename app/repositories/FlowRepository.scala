@@ -17,8 +17,10 @@
 package repositories
 
 import akka.stream.Materializer
+import config.ApplicationConfig
 import domain.models.flows.{Flow, FlowType}
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.Cursor.FailOnError
@@ -30,15 +32,15 @@ import repositories.IndexHelper.createAscendingIndex
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FlowRepository @Inject()(mongo: ReactiveMongoComponent)(implicit val mat: Materializer, val ec: ExecutionContext)
+class FlowRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: ApplicationConfig)(implicit val mat: Materializer, val ec: ExecutionContext)
   extends ReactiveRepository[Flow, BSONObjectID]("flows", mongo.mongoConnector.db,
     ReactiveMongoFormatters.formatFlow, ReactiveMongoFormats.objectIdFormats) {
 
-  val documentTtlInSeconds = 900
+  private lazy val lastUpdatedIndexName = "last_updated_ttl_idx"
+  private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
 
   override def indexes = Seq(
     createAscendingIndex(
@@ -49,11 +51,47 @@ class FlowRepository @Inject()(mongo: ReactiveMongoComponent)(implicit val mat: 
     ),
     Index(
       key = Seq("lastUpdated" -> IndexType.Ascending),
-      name = Some("last_updated_ttl_idx"),
+      name = Some(lastUpdatedIndexName),
       background = true,
-      options = BSONDocument("expireAfterSeconds" -> BSONLong(documentTtlInSeconds))
+      options = BSONDocument(OptExpireAfterSeconds -> BSONLong(appConfig.sessionTimeoutInSeconds))
     )
   )
+
+  override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
+    super.ensureIndexes
+    dropTTLIndexIfChanged
+    ensureLocalIndexes()
+  }
+
+  private def dropTTLIndexIfChanged(implicit ec: ExecutionContext) = {
+    val indexes = collection.indexesManager.list()
+
+    def matchIndexName(index: Index) = {
+      index.eventualName == lastUpdatedIndexName
+    }
+
+    def compareTTLValueWithConfig(index: Index) = {
+      index.options.getAs[BSONLong](OptExpireAfterSeconds).fold(false)(_.as[Long] != appConfig.sessionTimeoutInSeconds)
+    }
+
+    def checkIfTTLChanged(index: Index): Boolean = {
+      matchIndexName(index) && compareTTLValueWithConfig(index)
+    }
+
+    indexes.map(_.exists(checkIfTTLChanged))
+      .map(hasTTLIndexChanged => if (hasTTLIndexChanged) {
+        Logger.info(s"Dropping time to live index for entries in ${collection.name}")
+        Future.sequence(Seq(collection.indexesManager.drop(lastUpdatedIndexName).map(_ > 0),
+          ensureLocalIndexes))
+      })
+  }
+
+  private def ensureLocalIndexes()(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
+    Future.sequence(indexes.map(index => {
+      Logger.info(s"ensuring index ${index.eventualName}")
+      collection.indexesManager.ensure(index)
+    }))
+  }
 
   def saveFlow[A <: Flow](flow: A)(implicit format: OFormat[A]): Future[A] = {
    for {
