@@ -21,12 +21,12 @@ import java.net.URLEncoder.encode
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
-import domain.models.applications._
-import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
-import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
-import domain.models.subscriptions.APISubscription
 import domain._
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
+import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
+import domain.models.applications._
+import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
+import domain.models.subscriptions.APISubscription
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
@@ -210,6 +210,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
   }
 
+  def updateIpAllowlist(applicationId: ApplicationId, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    http.PUT[UpdateIpAllowlistRequest, HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/ipWhitelist", UpdateIpAllowlistRequest(ipAllowlist))
+      .map(_ => ApplicationUpdateSuccessful)
+  }
+
   private def urlEncode(str: String, encoding: String = "UTF-8") = {
     encode(str, encoding)
   }
@@ -242,6 +247,8 @@ private[connectors] object ThirdPartyApplicationConnectorDomain {
   case class TPAClientSecret(id: String, name: String, secret: Option[String], createdOn: DateTime, lastAccess: Option[DateTime])
 
   case class DeleteClientSecretRequest(actorEmailAddress: String)
+
+  case class UpdateIpAllowlistRequest(ipWhitelist: Set[String])
 }
 
 @Singleton

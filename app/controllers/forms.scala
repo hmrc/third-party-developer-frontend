@@ -418,3 +418,23 @@ object ChangeIpWhitelistForm {
     )
   )
 }
+
+final case class AddAnotherIpAddressConfirmForm(confirm: Option[String] = Some(""))
+
+object AddAnotherIpAddressConfirmForm {
+
+  def form: Form[AddAnotherIpAddressConfirmForm] = Form(
+    mapping(
+      "confirm" -> optional(text)
+        .verifying(FormKeys.remove2SVConfirmNoChoiceKey, s => s.isDefined)
+    )(AddAnotherIpAddressConfirmForm.apply)(AddAnotherIpAddressConfirmForm.unapply)
+  )
+}
+
+final case class AddIpAddressForm(ipAddress: String)
+
+object AddIpAddressForm {
+  val form: Form[AddIpAddressForm] = Form(
+    mapping("ipAddress" -> redirectUriValidator)(AddIpAddressForm.apply)(AddIpAddressForm.unapply)
+  )
+}

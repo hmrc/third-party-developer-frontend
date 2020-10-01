@@ -1,0 +1,53 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.models.views.BackButtonWithJavaScript
+@import views.html.include.DevMain
+@import domain.models.applications.Application
+@import domain.models.developers.DeveloperSession
+
+@this(devMain: DevMain)
+
+@(app: Application)(
+implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+
+@devMain(
+    title = "Request received",
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
+) {
+
+    <div class="ip-whitelist">
+        <header>
+            <h1 class="heading-xlarge">IP allow list changes saved</h1>
+            <p class="font-large">
+                API requests can only be made from these IP addresses
+            </p>
+        </header>
+
+        <p>
+            You requested to change your whitelisted IP addresses.
+        </p>
+        <p>
+            We will get back to you within 2 working days.
+        </p>
+        <p>
+            <a href="@routes.Details.details(app.id)">Manage your application</a>
+        </p>
+    </div>
+}

@@ -109,6 +109,10 @@ POST        /applications/:id/delete-principal                                  
 GET         /applications/:id/delete-subordinate-confirm                                                 controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: domain.models.applications.ApplicationId)
 POST        /applications/:id/delete-subordinate                                                         controllers.DeleteApplication.deleteSubordinateApplicationAction(id: domain.models.applications.ApplicationId)
 
+GET         /applications/:id/ip-allowlist                                                               controllers.IpAllowlist.viewIpAllowlist(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/change                                                        controllers.IpAllowlist.editIpAllowlist(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/ip-allowlist/change                                                        controllers.IpAllowlist.editIpAllowlistAction(id: domain.models.applications.ApplicationId)
+
 GET         /applications/:id/ip-whitelist                                                               controllers.IpWhitelist.manageIpWhitelist(id: domain.models.applications.ApplicationId)
 GET         /applications/:id/ip-whitelist/change                                                        controllers.IpWhitelist.changeIpWhitelist(id: domain.models.applications.ApplicationId)
 POST        /applications/:id/ip-whitelist/change                                                        controllers.IpWhitelist.changeIpWhitelistAction(id: domain.models.applications.ApplicationId)
