@@ -17,16 +17,34 @@
 package domain.models.flows
 
 import model.EmailTopic
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import scala.collection.immutable
 
-sealed trait Flow {
-  val sessionId: String
+sealed trait FlowType extends EnumEntry
+
+object FlowType extends  Enum[FlowType] with PlayJsonEnum[FlowType]  {
+  val values: immutable.IndexedSeq[FlowType] = findValues
+
+  case object IP_ALLOW_LIST extends FlowType
+  case object EMAIL_PREFERENCES extends FlowType
+
 }
+
+trait Flow {
+  val sessionId: String
+  val flowType: FlowType
+}
+
 
 /**
  * The name of the class is used on serialisation as a discriminator. Do not change.
  */
-case class IpAllowlistFlow(override val sessionId: String,
-                           allowlist: Set[String]) extends Flow
+case class IpAllowlistFlow(override val sessionId: String,                       
+                           allowlist: Set[String]) extends Flow {
+                              override val flowType = FlowType.IP_ALLOW_LIST
+                           }
 
 case class EmailPreferencesFlow(override val sessionId: String,
-                           selectedTopics: Set[EmailTopic]) extends Flow
+                           selectedTopics: Set[EmailTopic]) extends Flow {
+                             override val flowType = FlowType.EMAIL_PREFERENCES
+                           }

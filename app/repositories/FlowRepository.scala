@@ -17,7 +17,7 @@
 package repositories
 
 import akka.stream.Materializer
-import domain.models.flows.Flow
+import domain.models.flows.{Flow, FlowType}
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -30,8 +30,8 @@ import repositories.IndexHelper.createAscendingIndex
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
+
 import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.{ClassTag, classTag}
 
 @Singleton
 class FlowRepository @Inject()(mongo: ReactiveMongoComponent)(implicit val mat: Materializer, val ec: ExecutionContext)
@@ -55,21 +55,21 @@ class FlowRepository @Inject()(mongo: ReactiveMongoComponent)(implicit val mat: 
     )
   )
 
-  def saveFlow[A <: Flow](flow: A)(implicit ct: ClassTag[A], reads: Reads[A]): Future[A] = {
+  def saveFlow[A <: Flow](flow: A)(implicit format: OFormat[A]): Future[A] = {
    for {
-     something <- findAndUpdate(Json.obj("sessionId" -> flow.sessionId, "flowType" -> classTag[A].runtimeClass.getSimpleName),
+     something <- findAndUpdate(Json.obj("sessionId" -> flow.sessionId, "flowType" -> flow.flowType),
        Json.toJson(flow.asInstanceOf[Flow]).as[JsObject], upsert = true, fetchNewObject = true)
      _ <- updateLastUpdated(flow.sessionId)
    } yield something.result[A].head
   }
 
-  def deleteBySessionId[A <: Flow](sessionId: String)(implicit ct: ClassTag[A]): Future[Boolean] = {
-    remove("sessionId" -> sessionId, "flowType" -> classTag[A].runtimeClass.getSimpleName).map(_.ok)
+  def deleteBySessionIdAndFlowType(sessionId: String, flowType: FlowType): Future[Boolean] = {
+    remove("sessionId" -> sessionId, "flowType" -> flowType).map(_.ok)
   }
 
-  def fetchBySessionId[A <: Flow](sessionId: String)(implicit ct: ClassTag[A], reads: Reads[A], writes: OWrites[A]): Future[Option[A]] = {
+  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String, flowType: FlowType)(implicit formatter: OFormat[A]): Future[Option[A]] = {
     collection
-      .find(Json.obj("sessionId" -> sessionId, "flowType" -> classTag[A].runtimeClass.getSimpleName), Option.empty[A])
+      .find(Json.obj("sessionId" -> sessionId, "flowType" -> flowType), Option.empty[A])
       .cursor[A](ReadPreference.primaryPreferred)
       .collect(maxDocs = -1, FailOnError[List[A]]())
       .map(_.headOption)
