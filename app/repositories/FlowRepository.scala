@@ -58,7 +58,6 @@ class FlowRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: Applica
   )
 
   override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
-    super.ensureIndexes
     dropTTLIndexIfChanged
     ensureLocalIndexes()
   }
