@@ -20,6 +20,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain.models.connectors.ExtendedAPIDefinition
 import javax.inject.Inject
 import model.APICategoryDetails
+import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{APIService, EmailPreferencesService, SessionService}
@@ -39,6 +40,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView,
                                  flowStartView: FlowStartView,
                                  flowSelectCategoriesView: FlowSelectCategoriesView,
+                                 flowSelectApiView: FlowSelectApiView,
                                  flowSelectTopicsview: FlowSelectTopicsView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
@@ -65,11 +67,38 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     val requestForm: TaxRegimeEmailPreferencesForm = TaxRegimeEmailPreferencesForm.bindFromRequest
   
       emailPreferencesService.updateCategories(request.developerSession, requestForm.selectedTaxRegimes)
-      Future.successful(Ok(requestForm.selectedTaxRegimes.mkString(" - ")))
 
     // val selectedTaxRegimes: Set[APICategory] = requestForm.selectedTaxRegimes.map(APICategory.withName).toSet
     //extract selected categories and display as text OK(categoriesselected.mkString(" _ "))
+    // WHEN CALLING FLOW SELECT API PAGE DETERMINE 1st CATEGORY
+    // cache.selectedCategories.sorted.head
+    val emailpreferences = request.developerSession.developer.emailPreferences
+    val nextCategory =  emailpreferences.interests.map(_.regime).toList.sorted.head
+    Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(nextCategory)))
+  }
 
+  def flowSelectApisPage(currentCategory: String): Action[AnyContent] = loggedInAction { implicit  request =>
+     
+     Future.successful(Ok(flowSelectApiView(currentCategory)))
+
+  }
+
+  def flowSelectApisAction: Action[AnyContent] = loggedInAction { implicit request =>
+    // Parse form & update cache
+    // If there are more categories to display redirect back to Select APIs page
+    // Otherwise redirect to topics page
+    val emailpreferences = request.developerSession.developer.emailPreferences
+    val requestForm: Form[SelectedApisEmailPreferencesForm]  = SelectedApisEmailPreferencesForm.form.bindFromRequest
+    val sortedCategories =  emailpreferences.interests.map(_.regime).toList.sorted
+    val currentCategoryIndex : Int = sortedCategories.indexOf(requestForm.value.head.currentCategory)
+
+    // is current category last category?
+    if(sortedCategories.size == currentCategoryIndex+1) {
+       Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectTopicsPage()))
+    }else{
+      val nextCategory: String = sortedCategories(currentCategoryIndex+1)
+      Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(nextCategory)))
+    }
   }
 
   def flowSelectTopicsPage: Action[AnyContent] = loggedInAction { implicit request =>

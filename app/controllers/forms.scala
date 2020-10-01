@@ -432,3 +432,14 @@ object TaxRegimeEmailPreferencesForm {
     TaxRegimeEmailPreferencesForm(formValues.getOrElse(List.empty))
   }
 }
+
+final case class SelectedApisEmailPreferencesForm(currentCategory: String)
+
+object SelectedApisEmailPreferencesForm {
+    def form: Form[SelectedApisEmailPreferencesForm] = Form(
+    mapping(
+      "currentCategory" -> text
+    )(SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
+  )
+}
+
