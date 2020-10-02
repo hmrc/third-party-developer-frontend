@@ -16,7 +16,7 @@
 
 package service
 
-import connectors.ThirdPartyDeveloperConnector
+import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.flows.{EmailPreferencesFlow, FlowType}
 import model.{EmailTopic, TaxRegimeInterests}
@@ -41,7 +41,8 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
   implicit val hc: HeaderCarrier = HeaderCarrier()
    val mockFlowRepository = mock[FlowRepository]
   val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
-  val underTest = new EmailPreferencesService(mockThirdPartyDeveloperConnector, mockFlowRepository)
+   val mockApmConnector = mock[ApmConnector]
+  val underTest = new EmailPreferencesService(mockApmConnector, mockThirdPartyDeveloperConnector,  mockFlowRepository)
 
  }
 

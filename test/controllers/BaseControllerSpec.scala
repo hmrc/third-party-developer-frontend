@@ -49,7 +49,6 @@ class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with Sha
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
-      .overrides(bind[FlowRepository].to(mockFlowRepository), bind[SessionService].to(sessionServiceMock))
       .configure(("metrics.jvm", false))
       .build()
 }

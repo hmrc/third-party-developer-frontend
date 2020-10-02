@@ -30,7 +30,7 @@ import domain.models.connectors.ExtendedAPIDefinition
 
 
 @Singleton
-class EmailPreferencesService @Inject()(val apmConnector: ApmConnector, val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector, flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
+class EmailPreferencesService @Inject()(val apmConnector: ApmConnector, val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector, val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
 
     def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
         thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)

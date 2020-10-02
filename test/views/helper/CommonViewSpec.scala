@@ -27,7 +27,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
-trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers{
+trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers {
   val mcc = app.injector.instanceOf[MessagesControllerComponents]
   val messagesApi = mcc.messagesApi
   implicit val messagesProvider: MessagesProvider = MessagesImpl(Lang(Locale.ENGLISH), messagesApi)
@@ -36,9 +36,11 @@ trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedM
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
-  override def fakeApplication(): Application = GuiceApplicationBuilder()
-    .configure(("metrics.jvm", false))
-    .build()
+
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure(("metrics.jvm", false))
+      .build()
 
 
 }
