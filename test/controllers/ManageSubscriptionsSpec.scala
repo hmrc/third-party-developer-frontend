@@ -92,13 +92,13 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
     ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
   private val sessionParams = Seq(
-    "csrfToken" -> fakeApplication().injector.instanceOf[TokenProvider].generateToken
+    "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
   )
 
   trait ManageSubscriptionsSetup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
     val mockAuditService: AuditService = mock[AuditService]
     val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockErrorHandler: ErrorHandler = fakeApplication().injector.instanceOf[ErrorHandler]
+    val mockErrorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
     val listApiSubscriptionsView = app.injector.instanceOf[ListApiSubscriptionsView]
     val editApiMetadataView = app.injector.instanceOf[EditApiMetadataView]
