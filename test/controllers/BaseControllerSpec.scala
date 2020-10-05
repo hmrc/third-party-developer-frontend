@@ -28,8 +28,6 @@ import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
 class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
 
-  override lazy val app: Application = fakeApplication()
-
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
