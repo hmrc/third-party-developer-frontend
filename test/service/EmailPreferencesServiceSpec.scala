@@ -59,7 +59,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
     "fetchFlowBySessionId" should {
 
       "call the flow repository correctly and return flow when repository returns data" in new SetUp {
-        val flowObject = EmailPreferencesFlow(sessionId, Set("category1", "category1"), Map("category1" -> Set("api1", "api2")), Set("TECHNICAL"))
+        val flowObject = EmailPreferencesFlow(sessionId, Set("category1", "category1"), Map("category1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
         when(mockFlowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlow](eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(Some(flowObject)))
         val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper))
         result shouldBe flowObject
@@ -67,7 +67,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       }
 
       "call the flow repository correctly and create a new flow object when nothing returned" in new SetUp {
-        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set.empty, Map.empty, Set.empty)
+        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set.empty, Map.empty, Set.empty, Seq.empty)
         when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(None))
         val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper.copy(sessionNoEMailPrefences)))
 
@@ -77,7 +77,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
 
       "call the flow repository correctly and copy existing email preferences to flow object when nothing in cache" in new SetUp {
-        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"))
+        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
         when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(None))
         val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper))
 

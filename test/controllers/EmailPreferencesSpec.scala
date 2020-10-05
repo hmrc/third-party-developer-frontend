@@ -17,7 +17,7 @@
 package controllers
 
 import domain.models.apidefinitions.ApiContext
-import domain.models.connectors.ExtendedAPIDefinition
+import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 import service.{APIService, EmailPreferencesService}
 import views.html.emailpreferences._
 
@@ -73,7 +73,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     when(mockEmailPreferencesStartView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectCategoriesView.apply(*, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesFlowSelectTopicView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
-    when(mockEmailPreferencesSelectApiView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockEmailPreferencesSelectApiView.apply(*, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     
     val controllerUnderTest =
       new EmailPreferences(
@@ -108,8 +108,8 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     val mockCategory1 = APICategoryDetails("CATEGORY_1", "Category 1")
     val mockCategory2 = APICategoryDetails("CATEGORY_2", "Category 2")
     val apiCategoryDetails: Seq[APICategoryDetails] = Seq(mockCategory1, mockCategory2)
-    val api1 = ExtendedAPIDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"))
-    val api2 = ExtendedAPIDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"))
+    val api1 = ExtendedApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"))
+    val api2 = ExtendedApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"))
     val apis = Set(api1.serviceName, api2.serviceName)
     val fetchedAPis = Seq(api1, api2)
 
@@ -249,12 +249,13 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
   "flowSelectCategoriesPage" should {
     val apiCategories = List(APICategoryDetails("api1", "API 1"))
 
+    val apiDefinitions = Seq(ApiDefinition("api_1", "Api 1", "api - desc", ApiContext("context"), Seq("api1")))
+
     "render the page correctly when the user is logged in" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
   
-
-      val expectedSelectedCategories = session.developer.emailPreferences.interests.map(_.regime).toSet
       when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategories))
+      when(mockEmailPreferencesService.fetchApiDefinitionsVisibleToUser(*)(*)).thenReturn(Future.successful(apiDefinitions))
       when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
       val result = controllerUnderTest.flowSelectCategoriesPage()(loggedInRequest)
 

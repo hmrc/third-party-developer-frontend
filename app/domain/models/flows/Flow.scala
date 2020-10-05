@@ -16,6 +16,7 @@
 
 package domain.models.flows
 
+import domain.models.connectors.ApiDefinition
 import domain.models.developers.DeveloperSession
 import model.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
@@ -49,7 +50,8 @@ case class IpAllowlistFlow(override val sessionId: String,
 case class EmailPreferencesFlow(override val sessionId: String,
                                 selectedCategories: Set[String],
                                 selectedAPIs: Map[String, Set[String]],
-                                selectedTopics: Set[String]) extends Flow {
+                                selectedTopics: Set[String],
+                                visibleApis: Seq[ApiDefinition]) extends Flow {
                                    override val flowType = FlowType.EMAIL_PREFERENCES
   def categoriesInOrder = selectedCategories.toList.sorted
 
@@ -60,12 +62,14 @@ object EmailPreferencesFlow {
 
     val existingEmailPreferences = developerSession.developer.emailPreferences
     existingEmailPreferences match {
-      case EmailPreferences(i: List[TaxRegimeInterests], t: Set[EmailTopic])  if(i.isEmpty && t.isEmpty) => new EmailPreferencesFlow(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty)
+      case EmailPreferences(i: List[TaxRegimeInterests], t: Set[EmailTopic])  if i.isEmpty && t.isEmpty =>
+        new EmailPreferencesFlow(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty, Seq.empty)
       case emailPreferences => new EmailPreferencesFlow(
         developerSession.session.sessionId,
         emailPreferences.interests.map(_.regime).toSet,
         emailPreferences.interests.map(i => (i.regime, i.services)).toMap,
-        emailPreferences.topics.map(_.value))
+        emailPreferences.topics.map(_.value),
+       Seq.empty)
     }
   }
 }

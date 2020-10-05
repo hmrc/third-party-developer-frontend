@@ -18,7 +18,7 @@ package service
 
 import utils.AsyncHmrcSpec
 import connectors.ApmConnector
-import domain.models.connectors.ExtendedAPIDefinition
+import domain.models.connectors.ExtendedApiDefinition
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -54,8 +54,8 @@ class APIServiceSpec extends AsyncHmrcSpec {
         val apiServiceName1 = "service-1"
         val apiServiceName2 = "service-2"
 
-        val apiDetails1 = mock[ExtendedAPIDefinition]
-        val apiDetails2 = mock[ExtendedAPIDefinition]
+        val apiDetails1 = mock[ExtendedApiDefinition]
+        val apiDetails2 = mock[ExtendedApiDefinition]
 
         "return details of APIs by serviceName" in new Setup {
             when(mockAPMConnector.fetchAPIDefinition(eqTo(apiServiceName1))(*)).thenReturn(Future.successful(apiDetails1))

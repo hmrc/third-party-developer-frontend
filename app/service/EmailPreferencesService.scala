@@ -21,63 +21,92 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.developers.DeveloperSession
-import domain.models.flows.{FlowType, EmailPreferencesFlow}
+import domain.models.flows.{EmailPreferencesFlow, FlowType}
 import repositories.ReactiveMongoFormatters.formatEmailPreferencesFlow
 import repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import connectors.ApmConnector
-import domain.models.connectors.ExtendedAPIDefinition
+import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 
 
 @Singleton
-class EmailPreferencesService @Inject()(val apmConnector: ApmConnector, val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector, val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
+class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
+                                        val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+                                        val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
 
-    def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-        thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
+  def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
+  }
+
+  def fetchFlowBySessionId(developerSession: DeveloperSession): Future[EmailPreferencesFlow] = {
+    flowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlow](developerSession.session.sessionId, FlowType.EMAIL_PREFERENCES) map {
+      case Some(flow) => flow
+      case None => val newFlowObject = EmailPreferencesFlow.fromDeveloperSession(developerSession)
+        flowRepository.saveFlow[EmailPreferencesFlow](newFlowObject)
+        newFlowObject
     }
+  }
 
-    def fetchFlowBySessionId(developerSession: DeveloperSession): Future[EmailPreferencesFlow]= {
-        flowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlow](developerSession.session.sessionId, FlowType.EMAIL_PREFERENCES) map {
-            case Some(flow) => {println("*** - EXISTINGFLOW - ****")
-                flow
-            }
-            case None => { 
-                println("*** - NEW FLOW - ****")
-                val newFlowObject = EmailPreferencesFlow.fromDeveloperSession(developerSession)
-             flowRepository.saveFlow[EmailPreferencesFlow](newFlowObject)
-             newFlowObject
-            }
+  def updateCategories(developerSession: DeveloperSession, categoriesToAdd: List[String]): Future[EmailPreferencesFlow] = {
+    for {
+      existingFlow <- fetchFlowBySessionId(developerSession)
+      savedFlow <- flowRepository.saveFlow[EmailPreferencesFlow](existingFlow.copy(selectedCategories = categoriesToAdd.toSet,
+        selectedAPIs = existingFlow.selectedAPIs.filter(api => categoriesToAdd.contains(api._1))))
+    } yield savedFlow
+  }
 
-        }
-    }
+  def updateVisibleApis(developerSession: DeveloperSession, visibleApisF: Future[Seq[ApiDefinition]]): Future[EmailPreferencesFlow] = {
+    for {
+      visibleApis <- visibleApisF
+      existingFlow <- fetchFlowBySessionId(developerSession)
+      savedFlow <- flowRepository.saveFlow[EmailPreferencesFlow](existingFlow.copy(visibleApis = visibleApis))
+    } yield savedFlow
+  }
 
-    def updateCategories(developerSession: DeveloperSession, categoriesToAdd: List[String]): Future[EmailPreferencesFlow] = {
-        for{ 
-            existingFlow <- fetchFlowBySessionId(developerSession)
-            savedFlow <-  flowRepository.saveFlow[EmailPreferencesFlow](existingFlow.copy(selectedCategories = categoriesToAdd.toSet,
-             selectedAPIs = existingFlow.selectedAPIs.filter(api => categoriesToAdd.contains(api._1))))
-        } yield savedFlow   
-    }
+  def updateSelectedApis(developerSession: DeveloperSession, currentCategory: String, selectedApis: List[String]) = {
 
-//     def apisByCategory(userEmail: String): Map[String, Seq[ExtendedAPIDefinition]] = {
-//         for {
-//             apis <- apmConnector.fetchApiDefinitionsVisibleToUser(userEmail)
-
-//         }yield apis.groupBy(api => api.)
-        
-//     }
+  //get  apis for category... if exists...? do we care? just overrite
+  for {
+    existingFlow <- fetchFlowBySessionId(developerSession)
+    updatedApis  = existingFlow.selectedAPIs ++ Map(currentCategory -> selectedApis.toSet)
+    savedFlow <- flowRepository.saveFlow[EmailPreferencesFlow](existingFlow.copy(selectedAPIs = updatedApis))
+  } yield savedFlow
+}
 
 
-//     def servicesByCategory(apiDefinitions: Seq[APIDefinition]): Map[APICategory, Set[String]] = {
+def fetchApiDefinitionsVisibleToUser (developerSession: DeveloperSession) (implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] = {
+  for {
+  existingFlow <- fetchFlowBySessionId (developerSession)
+  apis <- if (existingFlow.visibleApis.nonEmpty) {
+  Future.successful (existingFlow.visibleApis)
+} else {
+  val visibleApis = apmConnector.fetchApiDefinitionsVisibleToUser (developerSession.developer.email)
+  updateVisibleApis (developerSession, visibleApis)
+  visibleApis
+}
+} yield apis
+}
 
-//     def serviceCategories(apiDefinition: APIDefinition): Map[APICategory, Set[String]] =
-//       apiDefinition.categories
-//         .map(category => APICategory.withName(category) -> Set(apiDefinition.serviceName))
-//         .toMap
 
-//     apiDefinitions
-//       .map(serviceCategories)
-//       .fold(Map.empty)(_ combine _)
-//   }
-  
+  //     def apisByCategory(userEmail: String): Map[String, Seq[ExtendedAPIDefinition]] = {
+  //         for {
+  //             apis <- apmConnector.fetchApiDefinitionsVisibleToUser(userEmail)
+
+  //         }yield apis.groupBy(api => api.)
+
+  //     }
+
+
+  //     def servicesByCategory(apiDefinitions: Seq[APIDefinition]): Map[APICategory, Set[String]] = {
+
+  //     def serviceCategories(apiDefinition: APIDefinition): Map[APICategory, Set[String]] =
+  //       apiDefinition.categories
+  //         .map(category => APICategory.withName(category) -> Set(apiDefinition.serviceName))
+  //         .toMap
+
+  //     apiDefinitions
+  //       .map(serviceCategories)
+  //       .fold(Map.empty)(_ combine _)
+  //   }
+
 }

@@ -17,7 +17,7 @@
 package service
 
 import connectors.ApmConnector
-import domain.models.connectors.ExtendedAPIDefinition
+import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,9 +29,10 @@ class APIService @Inject()(apmConnector: ApmConnector)(implicit val ec: Executio
   
     def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[Seq[APICategoryDetails]] = apmConnector.fetchAllAPICategories()
 
-    def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[Seq[ExtendedAPIDefinition]] =
+    def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[Seq[ExtendedApiDefinition]] =
         Future.sequence(
             apiServiceNames
               .map(apmConnector.fetchAPIDefinition(_))
               .toSeq)
+
 }

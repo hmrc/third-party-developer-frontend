@@ -18,11 +18,13 @@
 @import domain.models.developers.DeveloperSession
 @import include._
 @import model.Crumb
+@import domain.models.connectors.ApiDefinition
 @import domain.models.views.BackButtonWithJavaScript
 
 @this(devMain: DevMain)
 
-@(currentCategory: String)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+
+@(currentCategory: String, apis: Seq[ApiDefinition], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
         "Select Yer API"
@@ -40,10 +42,18 @@
         <p id="firstSentence">
             API PAGE!!!!</p>
         CurrentPage is @currentCategory
-        
+
         @helper.form(action = routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
             @helper.CSRF.formField
-            <input type="hidden" name="currentCategory" value="@currentCategory" />
-            <button id="submit" class="button" type="submit">Continue</button>
+            <div class="form-group">
+                @for(api <- apis) {
+                    <div class="multiple-choice">
+                        <input id="@api.serviceName" type="checkbox" name="selectedApi" value="@api.serviceName" @if(selectedApis.contains(api.serviceName)){checked}/>
+                        <label for="@api.serviceName">@api.name</label>
+                    </div>
+                }
+                <input type="hidden" name="currentCategory" value="@currentCategory" />
+                <button id="submit" class="button" type="submit">Continue</button>
+            </div>
         }
     }

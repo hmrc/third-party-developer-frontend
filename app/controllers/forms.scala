@@ -433,13 +433,20 @@ object TaxRegimeEmailPreferencesForm {
   }
 }
 
-final case class SelectedApisEmailPreferencesForm(currentCategory: String)
+final case class SelectedApisEmailPreferencesForm(selectedApis: List[String], currentCategory: String)
 
 object SelectedApisEmailPreferencesForm {
     def form: Form[SelectedApisEmailPreferencesForm] = Form(
     mapping(
+         "selectedApi" -> list(text),
       "currentCategory" -> text
     )(SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
   )
+
+  def bindFromRequest()(implicit request: Request[AnyContent]): SelectedApisEmailPreferencesForm = {
+    val apisValues: Option[List[String]] = request.body.asFormUrlEncoded.flatMap(_.get("selectedApi").map(_.toList))
+    val categoryValue = request.body.asFormUrlEncoded.flatMap(_.get("currentCategory")).map(x => if(x.nonEmpty) x.head else "")
+    SelectedApisEmailPreferencesForm(apisValues.getOrElse(List.empty), categoryValue.getOrElse(""))
+  }
 }
 
