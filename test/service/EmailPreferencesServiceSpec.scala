@@ -17,9 +17,10 @@
 package service
 
 import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
+import domain.models.connectors.ExtendedApiDefinition
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.flows.{EmailPreferencesFlow, FlowType}
-import model.{EmailTopic, TaxRegimeInterests}
+import model.{APICategoryDetails, EmailTopic, TaxRegimeInterests}
 import repositories.FlowRepository
 import utils.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
@@ -83,6 +84,43 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
         result shouldBe expectedFlowObject
         verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)
+      }
+    }
+
+    "fetchAllAPICategoryDetails" should {
+      val category1 = mock[APICategoryDetails]
+      val category2 = mock[APICategoryDetails]
+
+      "return all APICategoryDetails objects from connector" in new SetUp {
+        when(mockApmConnector.fetchAllAPICategories()(*)).thenReturn(Future.successful(Seq(category1, category2)))
+
+        val result = await(underTest.fetchAllAPICategoryDetails())
+
+        result.size should be (2)
+        result should contain only (category1, category2)
+
+        verify(mockApmConnector).fetchAllAPICategories()(*)
+      }
+    }
+
+    "fetchAPIDetails" should {
+      val apiServiceName1 = "service-1"
+      val apiServiceName2 = "service-2"
+
+      val apiDetails1 = mock[ExtendedApiDefinition]
+      val apiDetails2 = mock[ExtendedApiDefinition]
+
+      "return details of APIs by serviceName" in new SetUp {
+        when(mockApmConnector.fetchAPIDefinition(eqTo(apiServiceName1))(*)).thenReturn(Future.successful(apiDetails1))
+        when(mockApmConnector.fetchAPIDefinition(eqTo(apiServiceName2))(*)).thenReturn(Future.successful(apiDetails2))
+
+        val result = await(underTest.fetchAPIDetails(Set(apiServiceName1, apiServiceName2)))
+
+        result.size should be (2)
+        result should contain only (apiDetails1, apiDetails2)
+
+        verify(mockApmConnector).fetchAPIDefinition(eqTo(apiServiceName1))(*)
+        verify(mockApmConnector).fetchAPIDefinition(eqTo(apiServiceName2))(*)
       }
     }
   }

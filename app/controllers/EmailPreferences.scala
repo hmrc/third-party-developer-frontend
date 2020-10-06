@@ -16,17 +16,14 @@
 
 package controllers
 
+import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
-import domain.models.connectors.ExtendedApiDefinition.toApiDefinition
-import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
-import domain.models.developers.DeveloperSession
+import domain.models.connectors.ExtendedApiDefinition
 import javax.inject.Inject
 import model.APICategoryDetails
-import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import service.{APIService, EmailPreferencesService, SessionService}
-import uk.gov.hmrc.http.HeaderCarrier
+import service.{EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 
@@ -37,7 +34,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  val errorHandler: ErrorHandler,
                                  val cookieSigner: CookieSigner,
                                  emailPreferencesService: EmailPreferencesService,
-                                 apiService: APIService,
                                  emailPreferencesSummaryView: EmailPreferencesSummaryView,
                                  emailPreferencesUnsubscribeAllView: EmailPreferencesUnsubscribeAllView,
                                  flowStartView: FlowStartView,
@@ -48,74 +44,49 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
 
   def flowStartPage: Action[AnyContent] = loggedInAction { implicit request =>
-    // update cache with whats in the session if its not empty
     Future.successful(Ok(flowStartView()))
   }
 
   def flowSelectCategoriesPage: Action[AnyContent] = loggedInAction { implicit request =>
-    
     for {
-      visibleCategories <- fetchCategoriesVisibleToUser(request.developerSession)
-      filteredCategories <- apiService.fetchAllAPICategoryDetails().map(_.filter(x => visibleCategories.contains(x.category)))
       cacheItem <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
-    } yield Ok(flowSelectCategoriesView(filteredCategories.toList, cacheItem))
+      visibleCategories <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession)
+    } yield Ok(flowSelectCategoriesView(visibleCategories.toList, cacheItem.selectedCategories))
   }
-
-  private def fetchCategoriesVisibleToUser(session: DeveloperSession)(implicit hc: HeaderCarrier) = {
-    for {
-      apisDefs <- emailPreferencesService.fetchApiDefinitionsVisibleToUser(session)
-      categories =if(apisDefs.nonEmpty) apisDefs.map(_.categories).reduce(_ ++ _).distinct.sorted else Seq.empty
-    }yield categories
-  }
-
 
   def flowSelectCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
-
     //TODO what do we do if non are selected? for now redirect back to categories select page
-    val formData = TaxRegimeEmailPreferencesForm.bindFromRequest.selectedTaxRegimes
-    if (formData.isEmpty) {
-          Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectCategoriesPage()))
-    } else {
+    NonEmptyList.fromList(TaxRegimeEmailPreferencesForm.bindFromRequest.selectedTaxRegimes)
+      .fold(Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectCategoriesPage())))
+    { categories =>
       for {
-        flow <- emailPreferencesService.updateCategories(request.developerSession, formData)
+        flow <- emailPreferencesService.updateCategories(request.developerSession, categories.toList)
       } yield Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(flow.categoriesInOrder.head))
     }
   }
 
   def flowSelectApisPage(currentCategory: String): Action[AnyContent] = loggedInAction { implicit  request =>
-    // get apis for category
-    for{
-      cacheItem <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
-      filteredAPisByCategory = cacheItem.visibleApis.filter(_.categories.contains(currentCategory))
-      selectedApis = cacheItem.selectedAPIs.get(currentCategory).getOrElse(Set.empty)
-    } yield Ok(flowSelectApiView(currentCategory, filteredAPisByCategory, selectedApis))
-
+    emailPreferencesService.fetchFlowBySessionId(request.developerSession)
+    .map(flow => Ok(flowSelectApiView(currentCategory, flow.visibleApisByCategory(currentCategory), flow.selectedApisByCategory(currentCategory))))
   }
 
   def flowSelectApisAction: Action[AnyContent] = loggedInAction { implicit request =>
-    // Parse form & update cache
-    // If there are more categories to display redirect back to Select APIs page
-    // Otherwise redirect to topics page
+
     val requestForm: SelectedApisEmailPreferencesForm  = SelectedApisEmailPreferencesForm.bindFromRequest
-    // TODO Hanlde None are selected.... do we need an ALL APIS checkbox?
-    requestForm.selectedApis.foreach(x => println(s"selected API $x"))
-    emailPreferencesService.updateSelectedApis(request.developerSession, requestForm.currentCategory,  requestForm.selectedApis)
-    def handleNextPage(sortedCategories: List[String], currentCategoryIndex: Int) = {
+    // TODO Handle when None are selected.... do we need an ALL APIS checkbox?
+    def handleNextPage(sortedCategories: List[String], currentCategory: String) = {
+      val currentCategoryIndex = sortedCategories.indexOf(currentCategory)
       if (sortedCategories.size == currentCategoryIndex + 1) {
         Redirect(controllers.routes.EmailPreferences.flowSelectTopicsPage())
       } else {
-        val nextCategory: String = sortedCategories(currentCategoryIndex + 1)
-       Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(nextCategory))
+        Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(sortedCategories(currentCategoryIndex + 1)))
       }
     }
 
-    for{
-      emailpreferences <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
-      sortedCategories = emailpreferences.selectedCategories.toList.sorted
-      currentCategoryIndex = sortedCategories.indexOf(requestForm.currentCategory)
-    } yield    handleNextPage(sortedCategories, currentCategoryIndex)
-
-
+    emailPreferencesService
+    .updateSelectedApis(request.developerSession, requestForm.currentCategory,  requestForm.selectedApis)
+    .map(flow => handleNextPage(flow.categoriesInOrder, requestForm.currentCategory))
+   
   }
 
   def flowSelectTopicsPage: Action[AnyContent] = loggedInAction { implicit request =>
@@ -141,8 +112,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     } else {
       val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
       for {
-        apiCategoryDetails <- apiService.fetchAllAPICategoryDetails()
-        apiNames <- apiService.fetchAPIDetails(userServices)
+        apiCategoryDetails <- emailPreferencesService.fetchAllAPICategoryDetails()
+        apiNames <- emailPreferencesService.fetchAPIDetails(userServices)
       } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails, unsubscribed)))
     }
   }

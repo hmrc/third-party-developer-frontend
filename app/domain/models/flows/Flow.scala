@@ -54,7 +54,8 @@ case class EmailPreferencesFlow(override val sessionId: String,
                                 visibleApis: Seq[ApiDefinition]) extends Flow {
                                    override val flowType = FlowType.EMAIL_PREFERENCES
   def categoriesInOrder = selectedCategories.toList.sorted
-
+  def visibleApisByCategory(category: String) = visibleApis.filter(_.categories.contains(category)).toList.sortBy(_.name)
+  def selectedApisByCategory(category: String) = selectedAPIs.get(category).getOrElse(Set.empty)
 }
 
 object EmailPreferencesFlow {

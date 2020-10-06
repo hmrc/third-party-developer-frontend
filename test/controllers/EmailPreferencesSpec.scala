@@ -18,7 +18,7 @@ package controllers
 
 import domain.models.apidefinitions.ApiContext
 import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
-import service.{APIService, EmailPreferencesService}
+import service.EmailPreferencesService
 import views.html.emailpreferences._
 
 import scala.concurrent.Future
@@ -47,7 +47,6 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
   trait Setup {
     val mockEmailPreferencesService = mock[EmailPreferencesService]
-    val mockAPIService = mock[APIService]
 
 
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
@@ -82,7 +81,6 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
         mockErrorHandler,
         cookieSigner,
         mockEmailPreferencesService,
-        mockAPIService,
         mockEmailPreferencesSummaryView,
         mockEmailPreferencesUnsubscribeAllView,
         mockEmailPreferencesStartView,
@@ -120,8 +118,8 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
       val expectedAPIDisplayNames = Map(api1.serviceName -> api1.name, api2.serviceName -> api2.name)
 
-      when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
-      when(mockAPIService.fetchAPIDetails(eqTo(apis))(*)).thenReturn(Future.successful(fetchedAPis))
+      when(mockEmailPreferencesService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
+      when(mockEmailPreferencesService.fetchAPIDetails(eqTo(apis))(*)).thenReturn(Future.successful(fetchedAPis))
 
       val result = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest)
 
@@ -133,8 +131,8 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     "return emailPreferencesSummaryView page and set the view data correctly when the flash data value `unsubscribed` is true" in new Setup {
       fetchSessionByIdReturns(sessionId, sessionNoEMailPrefences)
 
-      when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
-      when(mockAPIService.fetchAPIDetails(eqTo(Set.empty))(*)).thenReturn(Future.successful(Seq.empty))
+      when(mockEmailPreferencesService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
+      when(mockEmailPreferencesService.fetchAPIDetails(eqTo(Set.empty))(*)).thenReturn(Future.successful(Seq.empty))
 
       val result = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest.withFlash("unsubscribed" -> "true"))
 
@@ -151,7 +149,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowStartPage().url)
 
-      verifyZeroInteractions(mockAPIService)
+      verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesSummaryView)
     }
 
@@ -163,7 +161,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
-      verifyZeroInteractions(mockAPIService)
+      verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesSummaryView)
     }
   }
@@ -177,7 +175,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val result = controllerUnderTest.unsubscribeAllPage()(loggedInRequest)
       status(result) mustBe OK
 
-      verifyZeroInteractions(mockAPIService)
+      verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesSummaryView)
       verify(mockEmailPreferencesUnsubscribeAllView).apply()(*, *, *, *)
     }
@@ -191,7 +189,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
-      verifyZeroInteractions(mockAPIService)
+      verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesUnsubscribeAllView)
     }
 
@@ -218,7 +216,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
-      verifyZeroInteractions(mockAPIService)
+      verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesService)
     }
 
@@ -249,19 +247,15 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
   "flowSelectCategoriesPage" should {
     val apiCategories = List(APICategoryDetails("api1", "API 1"))
 
-    val apiDefinitions = Seq(ApiDefinition("api_1", "Api 1", "api - desc", ApiContext("context"), Seq("api1")))
-
     "render the page correctly when the user is logged in" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
   
-      when(mockAPIService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategories))
-      when(mockEmailPreferencesService.fetchApiDefinitionsVisibleToUser(*)(*)).thenReturn(Future.successful(apiDefinitions))
+      when(mockEmailPreferencesService.fetchCategoriesVisibleToUser(*)(*)).thenReturn(Future.successful(apiCategories))
       when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
       val result = controllerUnderTest.flowSelectCategoriesPage()(loggedInRequest)
 
       status(result) mustBe OK
-
-      verify(mockEmailPreferencesSelectCategoriesView).apply(eqTo(apiCategories), eqTo(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))(*, *, *, *)
+      verify(mockEmailPreferencesSelectCategoriesView).apply(eqTo(apiCategories), eqTo(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper).selectedCategories))(*, *, *, *)
     }
 
     "redirect to login screen for non-logged in user" in new Setup {

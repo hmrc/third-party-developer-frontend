@@ -16,6 +16,7 @@
 
 package service
 
+import cats.data.NonEmptyList
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,12 +28,56 @@ import repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import connectors.ApmConnector
 import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
+import model.APICategoryDetails
 
 
 @Singleton
 class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
                                         val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
                                         val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
+
+
+  // def flowSelectCategoriesPage: Action[AnyContent] = loggedInAction { implicit request =>
+    
+  //   for {
+  //     visibleCategories <- fetchCategoriesVisibleToUser(request.developerSession)
+  //     filteredCategories <- emailPreferencesService.fetchAllAPICategoryDetails().map(_.filter(x => visibleCategories.contains(x.category)))
+  //     cacheItem <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
+  //   } yield Ok(flowSelectCategoriesView(filteredCategories.toList, cacheItem))
+  // }
+
+  // private def fetchCategoriesVisibleToUser(session: DeveloperSession)(implicit hc: HeaderCarrier) = {
+  //   for {
+  //     apisDefs <- emailPreferencesService.fetchApiDefinitionsVisibleToUser(session)
+  //     categories =if(apisDefs.nonEmpty) apisDefs.map(_.categories).reduce(_ ++ _).distinct.sorted else Seq.empty
+  //   }yield categories
+  // }
+  
+def fetchCategoriesVisibleToUser(developerSession: DeveloperSession) (implicit hc: HeaderCarrier): Future[Seq[APICategoryDetails]] = 
+for {
+  existingFlow <- fetchFlowBySessionId (developerSession)
+  apis <- getOrUpdateFlowWithVisibleApis(existingFlow, developerSession)
+  visibleCategories =  apis.map(_.categories).reduce(_ ++ _).distinct.sorted
+  categories <- fetchAllAPICategoryDetails().map(_.filter(x => visibleCategories.contains(x.category)))
+} yield categories
+
+
+private def getOrUpdateFlowWithVisibleApis(existingFlow: EmailPreferencesFlow, developerSession: DeveloperSession)
+                                          (implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] =  {
+   NonEmptyList.fromList(existingFlow.visibleApis.toList).fold({
+     val visibleApis = apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.email)
+     updateVisibleApis(developerSession, apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.email))
+     visibleApis
+   }){x => Future.successful (x.toList) }
+}
+
+  def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[Seq[APICategoryDetails]] = apmConnector.fetchAllAPICategories()
+
+  def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[Seq[ExtendedApiDefinition]] =
+    Future.sequence(
+      apiServiceNames
+        .map(apmConnector.fetchAPIDefinition(_))
+        .toSeq)
 
   def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
@@ -74,39 +119,8 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
 }
 
 
-def fetchApiDefinitionsVisibleToUser (developerSession: DeveloperSession) (implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] = {
-  for {
-  existingFlow <- fetchFlowBySessionId (developerSession)
-  apis <- if (existingFlow.visibleApis.nonEmpty) {
-  Future.successful (existingFlow.visibleApis)
-} else {
-  val visibleApis = apmConnector.fetchApiDefinitionsVisibleToUser (developerSession.developer.email)
-  updateVisibleApis (developerSession, visibleApis)
-  visibleApis
-}
-} yield apis
-}
 
 
-  //     def apisByCategory(userEmail: String): Map[String, Seq[ExtendedAPIDefinition]] = {
-  //         for {
-  //             apis <- apmConnector.fetchApiDefinitionsVisibleToUser(userEmail)
 
-  //         }yield apis.groupBy(api => api.)
-
-  //     }
-
-
-  //     def servicesByCategory(apiDefinitions: Seq[APIDefinition]): Map[APICategory, Set[String]] = {
-
-  //     def serviceCategories(apiDefinition: APIDefinition): Map[APICategory, Set[String]] =
-  //       apiDefinition.categories
-  //         .map(category => APICategory.withName(category) -> Set(apiDefinition.serviceName))
-  //         .toMap
-
-  //     apiDefinitions
-  //       .map(serviceCategories)
-  //       .fold(Map.empty)(_ combine _)
-  //   }
 
 }
