@@ -28,7 +28,7 @@ import repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import connectors.ApmConnector
 import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
-import model.APICategoryDetails
+import domain.models.emailpreferences.APICategoryDetails
 
 
 @Singleton
@@ -72,6 +72,8 @@ private def getOrUpdateFlowWithVisibleApis(existingFlow: EmailPreferencesFlow, d
 }
 
   def fetchAllAPICategoryDetails()(implicit hc: HeaderCarrier): Future[Seq[APICategoryDetails]] = apmConnector.fetchAllAPICategories()
+
+  def apiCategoryDetails(category: String)(implicit hc: HeaderCarrier): Future[Option[APICategoryDetails]] = fetchAllAPICategoryDetails().map(_.find(_.category == category))
 
   def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[Seq[ExtendedApiDefinition]] =
     Future.sequence(

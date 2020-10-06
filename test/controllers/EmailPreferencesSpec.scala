@@ -32,12 +32,11 @@ import play.api.test.Helpers._
 import views.emailpreferences.EmailPreferencesSummaryViewData
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import model.APICategoryDetails
 import mocks.service.SessionServiceMock
-import model.TaxRegimeInterests
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import config.ApplicationConfig
+import domain.models.emailpreferences.{APICategoryDetails, EmailPreferences, TaxRegimeInterests}
 import mocks.service.ErrorHandlerMock
 import play.api.libs.crypto.CookieSigner
 import play.api.i18n.MessagesApi
@@ -89,7 +88,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
         mockEmailPreferencesFlowSelectTopicView
         )
 
-    val emailPreferences = model.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
+    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
     val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
     val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
     val sessionId = "sessionId"

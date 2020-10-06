@@ -18,7 +18,7 @@ package domain.models.flows
 
 import domain.models.connectors.ApiDefinition
 import domain.models.developers.DeveloperSession
-import model.{EmailPreferences, EmailTopic, TaxRegimeInterests}
+import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
@@ -53,9 +53,9 @@ case class EmailPreferencesFlow(override val sessionId: String,
                                 selectedTopics: Set[String],
                                 visibleApis: Seq[ApiDefinition]) extends Flow {
                                    override val flowType = FlowType.EMAIL_PREFERENCES
-  def categoriesInOrder = selectedCategories.toList.sorted
+  def categoriesInOrder = selectedCategories.toList.sorted    
   def visibleApisByCategory(category: String) = visibleApis.filter(_.categories.contains(category)).toList.sortBy(_.name)
-  def selectedApisByCategory(category: String) = selectedAPIs.get(category).getOrElse(Set.empty)
+  def selectedApisByCategory(category: String) = selectedAPIs.get(category).getOrElse(Set.empty)                           
 }
 
 object EmailPreferencesFlow {

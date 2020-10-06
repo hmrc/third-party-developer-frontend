@@ -17,7 +17,7 @@
 package domain.models.flows
 
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import model.{EmailTopic, TaxRegimeInterests}
+import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import org.scalatest.{Matchers, WordSpec}
 
 class EmailPreferencesFlowSpec extends WordSpec with Matchers {
@@ -26,7 +26,7 @@ class EmailPreferencesFlowSpec extends WordSpec with Matchers {
     val category2 = "CATEGORY_2"
     val category1Apis = Set("api1", "api2")
     val category2Apis =  Set("api3", "api2", "api4")
-    val emailPreferences = model.EmailPreferences(List(TaxRegimeInterests(category1, category1Apis), TaxRegimeInterests(category2, category2Apis)), Set(EmailTopic.TECHNICAL))
+    val emailPreferences = EmailPreferences(List(TaxRegimeInterests(category1, category1Apis), TaxRegimeInterests(category2, category2Apis)), Set(EmailTopic.TECHNICAL))
     val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
     val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
     val sessionId = "sessionId"

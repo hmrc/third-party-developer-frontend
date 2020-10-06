@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import domain.models.connectors.ExtendedApiDefinition
 import javax.inject.Inject
-import model.APICategoryDetails
+import domain.models.emailpreferences.APICategoryDetails
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{EmailPreferencesService, SessionService}
@@ -66,8 +66,10 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def flowSelectApisPage(currentCategory: String): Action[AnyContent] = loggedInAction { implicit  request =>
-    emailPreferencesService.fetchFlowBySessionId(request.developerSession)
-    .map(flow => Ok(flowSelectApiView(currentCategory, flow.visibleApisByCategory(currentCategory), flow.selectedApisByCategory(currentCategory))))
+    for{ 
+      categoryDetails <- emailPreferencesService.apiCategoryDetails(currentCategory)
+      flow <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
+    } yield Ok(flowSelectApiView(categoryDetails.getOrElse(APICategoryDetails(currentCategory, currentCategory)), flow.visibleApisByCategory(currentCategory), flow.selectedApisByCategory(currentCategory)))
   }
 
   def flowSelectApisAction: Action[AnyContent] = loggedInAction { implicit request =>
@@ -107,7 +109,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     }
 
     val emailPreferences = request.developerSession.developer.emailPreferences
-    if (emailPreferences.equals(model.EmailPreferences.noPreferences) && !unsubscribed) {
+    if (emailPreferences.equals(domain.models.emailpreferences.EmailPreferences.noPreferences) && !unsubscribed) {
       Future.successful(Redirect(controllers.routes.EmailPreferences.flowStartPage()))
     } else {
       val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
@@ -129,7 +131,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     }
   }
 
-  def toDataObject(emailPreferences: model.EmailPreferences,
+  def toDataObject(emailPreferences: domain.models.emailpreferences.EmailPreferences,
                    filteredAPIs: Seq[ExtendedApiDefinition],
                    categories: Seq[APICategoryDetails],
                    unsubscribed: Boolean): EmailPreferencesSummaryViewData =

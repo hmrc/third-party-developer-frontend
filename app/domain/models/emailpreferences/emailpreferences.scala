@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package model
+package domain.models.emailpreferences
 
 import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
 import play.api.libs.json.Json

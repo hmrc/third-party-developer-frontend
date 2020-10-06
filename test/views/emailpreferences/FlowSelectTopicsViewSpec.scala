@@ -17,8 +17,8 @@
 package views.emailpreferences
 
 import domain.models.developers.LoggedInState
-import model.EmailTopic
-import model.EmailTopic.{BUSINESS_AND_POLICY, EVENT_INVITES}
+import domain.models.emailpreferences.EmailTopic
+import EmailTopic.{BUSINESS_AND_POLICY, EVENT_INVITES}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.AnyContentAsEmpty

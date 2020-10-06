@@ -19,7 +19,7 @@ package utils
 import java.util.UUID
 
 import domain.models.developers.{Developer, LoggedInState}
-import model.EmailPreferences
+import domain.models.emailpreferences.EmailPreferences
 
 object DeveloperSession {
 

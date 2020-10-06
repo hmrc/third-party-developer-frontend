@@ -16,8 +16,8 @@
 
 package connectors
 
-import model.APICategoryDetails
 import domain.models.connectors.ExtendedApiDefinition
+import domain.models.emailpreferences.APICategoryDetails
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.http.HeaderCarrier

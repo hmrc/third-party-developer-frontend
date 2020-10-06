@@ -21,10 +21,10 @@ import domain.models.applications._
 import domain.models.subscriptions.{ApiData, FieldName}
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import javax.inject.{Inject, Singleton}
-import model.APICategoryDetails
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
+import domain.models.emailpreferences.APICategoryDetails
 
 import scala.concurrent.{ExecutionContext, Future}
 

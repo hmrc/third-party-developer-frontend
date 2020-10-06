@@ -19,15 +19,16 @@
 @import include._
 @import model.Crumb
 @import domain.models.connectors.ApiDefinition
+@import domain.models.emailpreferences.APICategoryDetails
 @import domain.models.views.BackButtonWithJavaScript
 
 @this(devMain: DevMain)
 
 
-@(currentCategory: String, apis: Seq[ApiDefinition], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(currentCategory: APICategoryDetails, apis: List[ApiDefinition], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
-        "Select Yer API"
+       "Which @currentCategory APIs are you interested in?"
     }
 
     @devMain(
@@ -39,13 +40,16 @@
 
         <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
 
-        <p id="firstSentence">
-            API PAGE!!!!</p>
-        CurrentPage is @currentCategory
+        <p>Select all that apply.</p>
 
         @helper.form(action = routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
             @helper.CSRF.formField
             <div class="form-group">
+                <div class="multiple-choice">
+                    <input id="all-apis" type="checkbox" name="selectedApi" value="ALL_APIS"/>
+                    <label for="all-apis">All @currentCategory APIs</label>
+                        <p>You will be subscribed automatically to emails about new @currentCategory APIs</p>
+                </div>
                 @for(api <- apis) {
                     <div class="multiple-choice">
                         <input id="@api.serviceName" type="checkbox" name="selectedApi" value="@api.serviceName" @if(selectedApis.contains(api.serviceName)){checked}/>

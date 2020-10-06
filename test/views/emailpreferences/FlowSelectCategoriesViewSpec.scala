@@ -20,11 +20,11 @@ import views.helper.CommonViewSpec
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import domain.models.developers.LoggedInState
+import domain.models.emailpreferences.APICategoryDetails
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
 import views.html.emailpreferences.FlowSelectCategoriesView
-import model.APICategoryDetails
 
 import scala.collection.JavaConverters._
 import domain.models.flows.EmailPreferencesFlow

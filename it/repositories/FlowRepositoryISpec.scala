@@ -4,8 +4,8 @@ import akka.stream.Materializer
 import config.ApplicationConfig
 import domain.models.apidefinitions.ApiContext
 import domain.models.connectors.ApiDefinition
+import domain.models.emailpreferences.EmailTopic
 import domain.models.flows.{EmailPreferencesFlow, Flow, FlowType, IpAllowlistFlow}
-import model.EmailTopic
 import org.joda.time.DateTime
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsObject, Json}

@@ -19,8 +19,8 @@ package service
 import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import domain.models.connectors.ExtendedApiDefinition
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.emailpreferences.{APICategoryDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import domain.models.flows.{EmailPreferencesFlow, FlowType}
-import model.{APICategoryDetails, EmailTopic, TaxRegimeInterests}
 import repositories.FlowRepository
 import utils.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
-  val emailPreferences = model.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
+  val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
   val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
   val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
   val sessionId = "sessionId"
