@@ -28,7 +28,7 @@
 @(currentCategory: APICategoryDetails, apis: List[ApiDefinition], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
-       "Which @currentCategory APIs are you interested in?"
+       s"Which ${currentCategory.name} APIs are you interested in?"
     }
 
     @devMain(
@@ -47,8 +47,8 @@
             <div class="form-group">
                 <div class="multiple-choice">
                     <input id="all-apis" type="checkbox" name="selectedApi" value="ALL_APIS"/>
-                    <label for="all-apis">All @currentCategory APIs</label>
-                        <p>You will be subscribed automatically to emails about new @currentCategory APIs</p>
+                    <label for="all-apis">All @currentCategory.name APIs</label>
+                        <p>You will be subscribed automatically to emails about new @currentCategory.name APIs</p>
                 </div>
                 @for(api <- apis) {
                     <div class="multiple-choice">
