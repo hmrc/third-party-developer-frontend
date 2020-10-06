@@ -57,24 +57,24 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   def flowSelectCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
     //TODO what do we do if non are selected? for now redirect back to categories select page
     NonEmptyList.fromList(TaxRegimeEmailPreferencesForm.bindFromRequest.selectedTaxRegimes)
-      .fold(Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectCategoriesPage())))
-    { categories =>
-      for {
-        flow <- emailPreferencesService.updateCategories(request.developerSession, categories.toList)
-      } yield Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(flow.categoriesInOrder.head))
-    }
+      .fold(Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectCategoriesPage()))) { categories =>
+        for {
+          flow <- emailPreferencesService.updateCategories(request.developerSession, categories.toList)
+        } yield Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(flow.categoriesInOrder.head))
+      }
   }
 
-  def flowSelectApisPage(currentCategory: String): Action[AnyContent] = loggedInAction { implicit  request =>
-    for{ 
-      categoryDetails <- emailPreferencesService.apiCategoryDetails(currentCategory)
+  def flowSelectApisPage(category: String): Action[AnyContent] = loggedInAction { implicit request =>
+    for {
+      categoryDetails <- emailPreferencesService.apiCategoryDetails(category)
       flow <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
-    } yield Ok(flowSelectApiView(categoryDetails.getOrElse(APICategoryDetails(currentCategory, currentCategory)), flow.visibleApisByCategory(currentCategory), flow.selectedApisByCategory(currentCategory)))
+    } yield Ok(flowSelectApiView(categoryDetails.getOrElse(APICategoryDetails(category, category)), flow.visibleApisByCategory(category), flow.selectedApisByCategory(category)))
   }
 
   def flowSelectApisAction: Action[AnyContent] = loggedInAction { implicit request =>
 
-    val requestForm: SelectedApisEmailPreferencesForm  = SelectedApisEmailPreferencesForm.bindFromRequest
+    val requestForm: SelectedApisEmailPreferencesForm = SelectedApisEmailPreferencesForm.bindFromRequest
+
     // TODO Handle when None are selected.... do we need an ALL APIS checkbox?
     def handleNextPage(sortedCategories: List[String], currentCategory: String) = {
       val currentCategoryIndex = sortedCategories.indexOf(currentCategory)
@@ -86,9 +86,9 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     }
 
     emailPreferencesService
-    .updateSelectedApis(request.developerSession, requestForm.currentCategory,  requestForm.selectedApis)
-    .map(flow => handleNextPage(flow.categoriesInOrder, requestForm.currentCategory))
-   
+      .updateSelectedApis(request.developerSession, requestForm.currentCategory, requestForm.selectedApis)
+      .map(flow => handleNextPage(flow.categoriesInOrder, requestForm.currentCategory))
+
   }
 
   def flowSelectTopicsPage: Action[AnyContent] = loggedInAction { implicit request =>
