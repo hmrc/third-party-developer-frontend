@@ -53,7 +53,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       "retrieve an ExtendedApiDefinition based on a serviceName" in new Setup {
           val serviceName = "api1"
           val name = "API 1"
-         extendedAPIDefinitionByServiceName(serviceName, s"""{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context" """)
+         extendedAPIDefinitionByServiceName(serviceName, s"""{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context" }""")
          val result: ExtendedApiDefinition = await(underTest.fetchAPIDefinition("api1"))
          result.serviceName shouldBe serviceName
          result.name shouldBe name
