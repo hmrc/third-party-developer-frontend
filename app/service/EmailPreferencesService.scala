@@ -97,6 +97,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
   def updateSelectedApis(developerSession: DeveloperSession, currentCategory: String, selectedApis: List[String]) = {
 
     //get  apis for category... if exists...? do we care? just overrite
+
     for {
       existingFlow <- fetchFlowBySessionId(developerSession)
       updatedApis = existingFlow.selectedAPIs ++ Map(currentCategory -> selectedApis.toSet)

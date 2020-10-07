@@ -270,6 +270,82 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
   }
 
+  "flowSelectCategoriesAction" should {
+
+    //TODO TESTS!!
+    "redirect to login screen for non-logged in user" in new Setup {
+      fetchSessionByIdReturnsNone(sessionId)
+
+      val result = controllerUnderTest.flowSelectCategoriesAction()(FakeRequest())
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
+
+      verifyZeroInteractions(mockEmailPreferencesSelectApiView)
+    }
+  }
+
+
+  "flowSelectApisPage" should {
+    val apiCategory = APICategoryDetails("category1", "Category 1")
+    val visibleApis = List(ApiDefinition("serviceNameApi1", "nameApi1", "descriptionApi1", ApiContext("contextApi1"), Seq("category1","category2")))
+
+    "render the page correctly when the user is logged in" in new Setup {
+      fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
+      val emailFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper).copy(visibleApis = visibleApis)
+      when(mockEmailPreferencesService.apiCategoryDetails(eqTo(apiCategory.category))(*)).thenReturn(Future.successful(Some(apiCategory)))
+      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+
+      val result = controllerUnderTest.flowSelectApisPage(apiCategory.category)(loggedInRequest)
+
+      status(result) mustBe OK
+      verify(mockEmailPreferencesSelectApiView).apply(eqTo(apiCategory),
+        eqTo(visibleApis),
+        eqTo(Set.empty))(*, *, *, *)
+    }
+
+    "redirect to login screen for non-logged in user" in new Setup {
+      fetchSessionByIdReturnsNone(sessionId)
+
+      val result = controllerUnderTest.flowSelectApisPage("anyCategory")(FakeRequest())
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
+
+      verifyZeroInteractions(mockEmailPreferencesSelectApiView)
+    }
+
+  }
+
+  "flowSelectApiAction" should {
+    val visibleApis = List(ApiDefinition("serviceNameApi1", "nameApi1", "descriptionApi1", ApiContext("contextApi1"), Seq("category1","category2")))
+     //TODO See below need wizard navigation logic checker
+     // Test when individual APIs selected
+    //redirect to the topics page when last category in list
+    // redirect to next category page when not last category
+    "redirect to the ?" in new Setup {
+      fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
+      val emailFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper).copy(visibleApis = visibleApis)
+      when(mockEmailPreferencesService.updateSelectedApis(*, *, *)).thenReturn(Future.successful(emailFlow))
+      val result = controllerUnderTest.flowSelectApisAction()(loggedInRequest)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
+    }
+
+    "redirect to login screen for non-logged in user" in new Setup {
+      fetchSessionByIdReturnsNone(sessionId)
+
+      val result = controllerUnderTest.flowSelectApisAction()(FakeRequest())
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
+
+      verifyZeroInteractions(mockEmailPreferencesSelectApiView)
+    }
+  }
+
   "flowSelectTopicsPage" should {
 
     "render the page correctly when the user is logged in" in new Setup {

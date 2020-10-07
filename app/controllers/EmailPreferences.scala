@@ -21,6 +21,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain.models.connectors.ExtendedApiDefinition
 import javax.inject.Inject
 import domain.models.emailpreferences.APICategoryDetails
+import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import service.{EmailPreferencesService, SessionService}
@@ -65,15 +66,19 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def flowSelectApisPage(category: String): Action[AnyContent] = loggedInAction { implicit request =>
+    val form = SelectedApisEmailPreferencesForm.form
+    flowSelectApisView(form, category).map(Ok(_))
+  }
+
+  private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: String)(implicit request: UserRequest[AnyContent]) =  {
+    println(s"****  $category ****")
     for {
       categoryDetails <- emailPreferencesService.apiCategoryDetails(category)
       flow <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
-    } yield Ok(flowSelectApiView(categoryDetails.getOrElse(APICategoryDetails(category, category)), flow.visibleApisByCategory(category), flow.selectedApisByCategory(category)))
+    } yield flowSelectApiView(form, categoryDetails.getOrElse(APICategoryDetails(category, category)), flow.visibleApisByCategory(category), flow.selectedApisByCategory(category))
   }
 
   def flowSelectApisAction: Action[AnyContent] = loggedInAction { implicit request =>
-
-    val requestForm: SelectedApisEmailPreferencesForm = SelectedApisEmailPreferencesForm.bindFromRequest
 
     // TODO Handle when None are selected.... do we need an ALL APIS checkbox?
     def handleNextPage(sortedCategories: List[String], currentCategory: String) = {
@@ -85,9 +90,26 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       }
     }
 
-    emailPreferencesService
-      .updateSelectedApis(request.developerSession, requestForm.currentCategory, requestForm.selectedApis)
-      .map(flow => handleNextPage(flow.categoriesInOrder, requestForm.currentCategory))
+  val form = SelectedApisEmailPreferencesForm.form.bindFromRequest
+    form.fold(
+    formWithErrors => {
+      val category = form.data.getOrElse("currentCategory", "")
+
+      println(s"formdata ---> $category")
+
+      flowSelectApisView(formWithErrors, category).map(BadRequest(_))
+    },
+    {
+      form =>
+        val apis = form.selectedApi.mkString(" -> ")
+        println(s"formData2 -> $apis")
+      emailPreferencesService
+      .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi)
+      .map(flow => handleNextPage(flow.categoriesInOrder, form.currentCategory))
+    }
+    )
+
+    
 
   }
 

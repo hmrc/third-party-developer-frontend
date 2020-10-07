@@ -19,6 +19,7 @@ package controllers
 import domain.models.applications.{Application, ApplicationId, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.mvc.{AnyContent, Request}
 
 trait ConfirmPassword {
@@ -433,13 +434,21 @@ object TaxRegimeEmailPreferencesForm {
   }
 }
 
-final case class SelectedApisEmailPreferencesForm(selectedApis: List[String], currentCategory: String)
+final case class SelectedApisEmailPreferencesForm(selectedApi: List[String], currentCategory: String)
+
+
+
 
 object SelectedApisEmailPreferencesForm {
+  def nonEmptyList: Constraint[List[String]] = Constraint[List[String]]("constraint.required") { o =>
+    println(s"FORM VALIDATION ${o.size}")
+    if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedapis.empty"))
+  }
+
     def form: Form[SelectedApisEmailPreferencesForm] = Form(
     mapping(
-         "selectedApi" -> list(text),
-      "currentCategory" -> text
+         "selectedApi" -> list(text).verifying(nonEmptyList),
+         "currentCategory" -> text
     )(SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
   )
 
