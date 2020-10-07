@@ -19,8 +19,8 @@ package controllers
 import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import domain.models.connectors.ExtendedApiDefinition
-import javax.inject.Inject
 import domain.models.emailpreferences.APICategoryDetails
+import javax.inject.Inject
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -67,13 +67,14 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def flowSelectApisPage(category: String): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectedApisEmailPreferencesForm.form
-    if(category.isEmpty()) 
+    if (category.isEmpty) {
       Future.successful(Redirect(controllers.routes.EmailPreferences.emailPreferencesSummaryPage()))
-    else
+    } else {
       flowSelectApisView(form, category).map(Ok(_))
+    }
   }
 
-  private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: String)(implicit request: UserRequest[AnyContent]) =  {
+  private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: String)(implicit request: UserRequest[AnyContent]) = {
     for {
       categoryDetails <- emailPreferencesService.apiCategoryDetails(category)
       flow <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
@@ -92,20 +93,19 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       }
     }
 
-  val form = SelectedApisEmailPreferencesForm.form.bindFromRequest
+    val form = SelectedApisEmailPreferencesForm.form.bindFromRequest
     form.fold(
-    formWithErrors => {
-      flowSelectApisView(formWithErrors, form.data.getOrElse("currentCategory", "")).map(BadRequest(_))
-    },
-    {
-      form =>
-      emailPreferencesService
-      .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi.toList)
-      .map(flow => handleNextPage(flow.categoriesInOrder, form.currentCategory))
-    }
+      formWithErrors => {
+        flowSelectApisView(formWithErrors, form.data.getOrElse("currentCategory", "")).map(BadRequest(_))
+      },
+      {
+        form =>
+          emailPreferencesService
+            .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi.toList)
+            .map(flow => handleNextPage(flow.categoriesInOrder, form.currentCategory))
+      }
     )
 
-    
 
   }
 
