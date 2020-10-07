@@ -434,28 +434,19 @@ object TaxRegimeEmailPreferencesForm {
   }
 }
 
-final case class SelectedApisEmailPreferencesForm(selectedApi: List[String], currentCategory: String)
+final case class SelectedApisEmailPreferencesForm(selectedApi: Seq[String], currentCategory: String)
 
 
 
 
 object SelectedApisEmailPreferencesForm {
-  def nonEmptyList: Constraint[List[String]] = Constraint[List[String]]("constraint.required") { o =>
-    println(s"FORM VALIDATION ${o.size}")
+  def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
     if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedapis.empty"))
   }
 
-    def form: Form[SelectedApisEmailPreferencesForm] = Form(
-    mapping(
-         "selectedApi" -> list(text).verifying(nonEmptyList),
-         "currentCategory" -> text
-    )(SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
-  )
-
-  def bindFromRequest()(implicit request: Request[AnyContent]): SelectedApisEmailPreferencesForm = {
-    val apisValues: Option[List[String]] = request.body.asFormUrlEncoded.flatMap(_.get("selectedApi").map(_.toList))
-    val categoryValue = request.body.asFormUrlEncoded.flatMap(_.get("currentCategory")).map(x => if(x.nonEmpty) x.head else "")
-    SelectedApisEmailPreferencesForm(apisValues.getOrElse(List.empty), categoryValue.getOrElse(""))
-  }
+  def form: Form[SelectedApisEmailPreferencesForm] = Form(mapping(
+         "selectedApi" -> seq(text).verifying(nonEmptyList),
+         "currentCategory" -> text)
+         (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply))
 }
 

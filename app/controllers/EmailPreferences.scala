@@ -67,11 +67,13 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def flowSelectApisPage(category: String): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectedApisEmailPreferencesForm.form
-    flowSelectApisView(form, category).map(Ok(_))
+    if(category.isEmpty()) 
+      Future.successful(Redirect(controllers.routes.EmailPreferences.emailPreferencesSummaryPage()))
+    else
+      flowSelectApisView(form, category).map(Ok(_))
   }
 
   private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: String)(implicit request: UserRequest[AnyContent]) =  {
-    println(s"****  $category ****")
     for {
       categoryDetails <- emailPreferencesService.apiCategoryDetails(category)
       flow <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
@@ -93,18 +95,12 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   val form = SelectedApisEmailPreferencesForm.form.bindFromRequest
     form.fold(
     formWithErrors => {
-      val category = form.data.getOrElse("currentCategory", "")
-
-      println(s"formdata ---> $category")
-
-      flowSelectApisView(formWithErrors, category).map(BadRequest(_))
+      flowSelectApisView(formWithErrors, form.data.getOrElse("currentCategory", "")).map(BadRequest(_))
     },
     {
       form =>
-        val apis = form.selectedApi.mkString(" -> ")
-        println(s"formData2 -> $apis")
       emailPreferencesService
-      .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi)
+      .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi.toList)
       .map(flow => handleNextPage(flow.categoriesInOrder, form.currentCategory))
     }
     )
