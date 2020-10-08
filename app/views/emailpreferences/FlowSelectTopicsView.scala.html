@@ -49,7 +49,7 @@
     @helper.form(action = routes.EmailPreferences.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
         @for(topic <- List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES)) {
-            <input id="@topic.value" type="checkbox" name="topic" value="@topic.value"
+            <input id="@topic.value" type="checkbox" name="topic[]" value="@topic.value"
             @if(selectedTopics.contains(topic.value)) {checked} >
             <label for="@topic.value">@topic.displayName
             <span class="form-hint">
@@ -65,7 +65,7 @@
             <h2 class="heading-medium">Get involved in user research and events</h2>
         </div>
 
-        <input id="@EVENT_INVITES.value" type="checkbox" name="topic" value="@EVENT_INVITES.value"
+        <input id="@EVENT_INVITES.value" type="checkbox" name="topic[]" value="@EVENT_INVITES.value"
         @if(selectedTopics.contains(EVENT_INVITES.value)) {checked} >
         <label for="@EVENT_INVITES.value">@EVENT_INVITES.displayName
             <span class="form-hint">

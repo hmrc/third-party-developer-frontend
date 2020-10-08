@@ -42,7 +42,7 @@
 
         @errorSummary(form)
 
-        <p>Select all that apply.</p>
+        <p id="select-all-description">Select all that apply.</p>
 
         @helper.form(action = routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
             @helper.CSRF.formField
@@ -51,7 +51,7 @@
 
                     <input id="all-apis" type="checkbox" name="selectedApi[]" value="ALL_APIS"/>
                     <label for="all-apis">All @currentCategory.name APIs</label>
-                        <p>You will be subscribed automatically to emails about new @currentCategory.name APIs</p>
+                        <p id="all-apis-description">You will be subscribed automatically to emails about new @currentCategory.name APIs</p>
                 </div>
                 @for(api <- apis) {
                     <div class="multiple-choice">
@@ -59,7 +59,7 @@
                         <label for="@api.serviceName">@api.name</label>
                     </div>
                 }
-                <input type="hidden" name="currentCategory" value="@currentCategory.category" />
+                <input id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />
                 <button id="submit" class="button" type="submit">Continue</button>
             </div>
         }

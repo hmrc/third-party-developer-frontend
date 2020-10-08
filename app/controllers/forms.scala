@@ -425,19 +425,9 @@ final case class TaxRegimeEmailPreferencesForm(selectedTaxRegimes: List[String])
 object TaxRegimeEmailPreferencesForm {
   val form: Form[TaxRegimeEmailPreferencesForm] =
     Form(mapping("taxRegime" -> list(text))(TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
-  /* API-4407: Bit of a workaround here - should be using the mapping approach above to parse the form submission, but it doesn't seem to handle the repeating
-   * taxRegime field. mapping("taxRegime" -> list(text)) does not seem to return a List of Strings, so TaxRegimeEmailPreferencesForm is not created correctly
-   * (always empty list). */
-  def bindFromRequest()(implicit request: Request[AnyContent]): TaxRegimeEmailPreferencesForm = {
-    val formValues: Option[List[String]] = request.body.asFormUrlEncoded.flatMap(_.get("taxRegime").map(_.toList))
-    TaxRegimeEmailPreferencesForm(formValues.getOrElse(List.empty))
-  }
 }
 
 final case class SelectedApisEmailPreferencesForm(selectedApi: Seq[String], currentCategory: String)
-
-
-
 
 object SelectedApisEmailPreferencesForm {
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
@@ -450,3 +440,11 @@ object SelectedApisEmailPreferencesForm {
          (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply))
 }
 
+final case class SelectedTopicsEmailPreferencesForm(selectedTopics: Seq[String])
+
+object SelectedTopicsEmailPreferencesForm {
+
+   def form: Form[SelectedTopicsEmailPreferencesForm] = Form(mapping(
+         "selectedTopics" -> seq(text))
+         (SelectedTopicsEmailPreferencesForm.apply)(SelectedTopicsEmailPreferencesForm.unapply))
+}

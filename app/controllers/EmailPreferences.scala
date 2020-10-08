@@ -50,14 +50,14 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def flowSelectCategoriesPage: Action[AnyContent] = loggedInAction { implicit request =>
     for {
-      cacheItem <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
+      flow <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
       visibleCategories <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession)
-    } yield Ok(flowSelectCategoriesView(visibleCategories.toList, cacheItem.selectedCategories))
+    } yield Ok(flowSelectCategoriesView(visibleCategories.toList, flow.selectedCategories))
   }
 
   def flowSelectCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
     //TODO what do we do if non are selected? for now redirect back to categories select page
-    NonEmptyList.fromList(TaxRegimeEmailPreferencesForm.bindFromRequest.selectedTaxRegimes)
+    NonEmptyList.fromList(TaxRegimeEmailPreferencesForm.form.bindFromRequest.value.map(_.selectedTaxRegimes).getOrElse(List.empty))
       .fold(Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectCategoriesPage()))) { categories =>
         for {
           flow <- emailPreferencesService.updateCategories(request.developerSession, categories.toList)
@@ -110,13 +110,17 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def flowSelectTopicsPage: Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(flowSelectTopicsview(Set.empty)))
+    //get flow
+    for {
+      flow <- emailPreferencesService.fetchFlowBySessionId(request.developerSession)
+    } yield Ok(flowSelectTopicsview(flow.selectedTopics))
   }
 
   def flowSelectTopicsAction: Action[AnyContent] = loggedInAction { implicit request =>
     // val requestForm: TaxRegimeEmailPreferencesForm = TaxRegimeEmailPreferencesForm.bindFromRequest
 
     // Persist Email Preferences changes to TPD
+    // delete the flow object here
     Future.successful(Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()))
   }
 

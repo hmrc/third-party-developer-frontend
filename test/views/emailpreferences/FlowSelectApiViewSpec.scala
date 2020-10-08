@@ -49,9 +49,10 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
     val flowSelectApiView: FlowSelectApiView = app.injector.instanceOf[FlowSelectApiView]
   }
 
-  private def validateCheckboxItemsAgainstApis(document: Document, apis: List[ApiDefinition]) = {
+  private def validateCheckboxItemsAgainstApis(document: Document, apis: List[ApiDefinition], currentCategory: String) = {
     val selectAllApiCheckbox = document.getElementById("all-apis")
     selectAllApiCheckbox.`val`() shouldBe "ALL_APIS"
+    document.getElementById("all-apis-description").text() shouldBe s"You will be subscribed automatically to emails about new $currentCategory APIs"
 
     apis.foreach(api => {
       val checkbox = document.getElementById(api.serviceName)
@@ -66,16 +67,21 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
     })
   }
 
-  def validateStaticElements(document: Document, apis: List[ApiDefinition], expectedCategory: String) {
+  def validateStaticElements(document: Document, apis: List[ApiDefinition], expectedCategory: APICategoryDetails) {
 
-    document.getElementById("pageHeading").text() should be(s"Which ${expectedCategory} APIs are you interested in?")
+    document.getElementById("pageHeading").text() should be(s"Which ${expectedCategory.name} APIs are you interested in?")
+    document.getElementById("select-all-description").text() should be("Select all that apply.")
+
     // Check form is configured correctly
     val form = document.getElementById("emailPreferencesApisForm")
     form.attr("method") should be("POST")
     form.attr("action") should be("/developer/profile/email-preferences/apis")
 
     // check checkboxes are displayed
-    validateCheckboxItemsAgainstApis(document, apis)
+    validateCheckboxItemsAgainstApis(document, apis, expectedCategory.name)
+
+    //check category hidden field and value
+    document.getElementById("current-category").`val`() shouldBe expectedCategory.category
 
     // Check submit button is correct
     document.getElementById("submit").text should be("Continue")
@@ -93,7 +99,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
       val page: Html = flowSelectApiView.render(form,  currentCategory, apiList, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       
       val document: Document = Jsoup.parse(page.body)
-      validateStaticElements(document, apiList, currentCategory.name)
+      validateStaticElements(document, apiList, currentCategory)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe false
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
     }
@@ -105,7 +111,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
       val page: Html = flowSelectApiView.render(form,  currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
      
       val document: Document = Jsoup.parse(page.body)
-      validateStaticElements(document, apiList, currentCategory.name)
+      validateStaticElements(document, apiList, currentCategory)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe false
       val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
 
@@ -120,7 +126,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
       val page: Html = flowSelectApiView.render(form,  currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
      
       val document: Document = Jsoup.parse(page.body)
-      validateStaticElements(document, apiList, currentCategory.name)
+      validateStaticElements(document, apiList, currentCategory)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe true
       val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
 

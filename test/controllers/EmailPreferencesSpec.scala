@@ -274,7 +274,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
     "handle form data and redirectToApisPage" in new Setup {
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("taxRegime" -> "a1", "taxRegime" -> "a2", "taxRegime" -> "a3")
+        .withFormUrlEncodedBody("taxRegime[0]" -> "a1", "taxRegime[1]" -> "a2", "taxRegime[2]" -> "a3")
       val categories = Set("a1", "a2", "a3")
 
 
@@ -336,7 +336,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
         eqTo(Set.empty))(*, *, *, *)
     }
 
-    "redirect to email summary page is category is missing from route" in new Setup {
+    "redirect to email summary page when category is missing from route" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
@@ -401,6 +401,26 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
     }
 
+
+    "return 400 when form has missing elements" in new Setup {
+      val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("currentCategory" -> "category2")
+      val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
+        .copy(selectedCategories = Set(apiCategory.category, apiCategory2.category), visibleApis = visibleApis)
+     
+      fetchSessionByIdReturns(sessionId, session)
+      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+      when(mockEmailPreferencesService.apiCategoryDetails(*)(*)).thenReturn(Future.successful(Some(apiCategory)))
+    
+      val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
+      
+      status(result) mustBe BAD_REQUEST
+      verify(mockEmailPreferencesService, times(0)).updateSelectedApis(*, *, *)
+      verify(mockEmailPreferencesSelectApiView).apply(*,
+        eqTo(apiCategory),
+        eqTo(visibleApis),
+        eqTo(Set.empty))(*, *, *, *)
+    }
+
     "redirect to login screen for non-logged in user" in new Setup {
       fetchSessionByIdReturnsNone(sessionId)
 
@@ -417,8 +437,12 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
     "render the page correctly when the user is logged in" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
-      val expectedSelectedTopics: Set[String] = session.developer.emailPreferences.topics.map(_.value)
 
+      val expectedSelectedTopics: Set[String] = session.developer.emailPreferences.topics.map(_.value)
+      val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
+        .copy(selectedTopics = expectedSelectedTopics)
+      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+      
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsPage()(loggedInRequest)
 
       status(result) mustBe OK
