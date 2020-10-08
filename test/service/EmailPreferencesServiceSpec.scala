@@ -100,6 +100,17 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       }
     }
 
+    "deleteFlowBySessionId" should {
+
+      "call flowRepository correctly" in new SetUp {
+        when(mockFlowRepository.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))).thenReturn(Future.successful(true))
+        val result = await(underTest.deleteFlowBySessionId(loggedInDeveloper))
+
+        result shouldBe true
+        verify(mockFlowRepository).deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))
+      }
+    }
+
     "fetchAllAPICategoryDetails" should {
       val category1 = mock[APICategoryDetails]
       val category2 = mock[APICategoryDetails]

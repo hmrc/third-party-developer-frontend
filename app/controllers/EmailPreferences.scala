@@ -57,7 +57,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def flowSelectCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
     //TODO what do we do if non are selected? for now redirect back to categories select page
-    NonEmptyList.fromList(TaxRegimeEmailPreferencesForm.form.bindFromRequest.value.map(_.selectedTaxRegimes).getOrElse(List.empty))
+    NonEmptyList.fromList(TaxRegimeEmailPreferencesForm.form.bindFromRequest.value.map(_.taxRegime).getOrElse(List.empty))
       .fold(Future.successful(Redirect(controllers.routes.EmailPreferences.flowSelectCategoriesPage()))) { categories =>
         for {
           flow <- emailPreferencesService.updateCategories(request.developerSession, categories.toList)
@@ -118,16 +118,20 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def flowSelectTopicsAction: Action[AnyContent] = loggedInAction { implicit request =>
 
-  NonEmptyList.fromList(SelectedTopicsEmailPreferencesForm.form.bindFromRequest.value.map(_.selectedTopics.toList).getOrElse(List.empty))
+  NonEmptyList.fromList(SelectedTopicsEmailPreferencesForm.form.bindFromRequest.value.map(_.topic.toList).getOrElse(List.empty))
   .fold(
     //Handle when form is empty, no topics selected
     Future.successful(Redirect(routes.EmailPreferences.flowSelectTopicsAction()
     ))){
       selectedTopics => 
       // Persist Email Preferences changes to TPD
-      
-      // delete the flow object here
-      Future.successful(Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()))
+         val session = request.developerSession
+      for{
+        flow <-  emailPreferencesService.fetchFlowBySessionId(session)
+        _    <-  emailPreferencesService.updateEmailPreferences(session.developer.email, flow.copy(selectedTopics = selectedTopics.toList.toSet))
+                 .map(result =>  if(result) emailPreferencesService.deleteFlowBySessionId(session) else result)
+      } yield  Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
+
     }
   }
 

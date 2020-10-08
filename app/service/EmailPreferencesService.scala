@@ -83,6 +83,10 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
     }
   }
 
+  def deleteFlowBySessionId(developerSession: DeveloperSession):  Future[Boolean] = {
+    flowRepository.deleteBySessionIdAndFlowType(developerSession.session.sessionId, FlowType.EMAIL_PREFERENCES)
+  }
+
   def updateCategories(developerSession: DeveloperSession, categoriesToAdd: List[String]): Future[EmailPreferencesFlow] = {
     for {
       existingFlow <- fetchFlowBySessionId(developerSession)

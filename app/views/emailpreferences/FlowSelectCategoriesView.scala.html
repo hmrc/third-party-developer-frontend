@@ -48,7 +48,7 @@
         <div class="form-group">   
             @for(category <- categories){
               <div class="multiple-choice">
-                <input id="@category.category" type="checkbox" name="taxRegime" value="@category.category" @if(selectedCategories.contains(category.category)){checked}/>
+                <input id="@category.category" type="checkbox" name="taxRegime[]" value="@category.category" @if(selectedCategories.contains(category.category)){checked}/>
                 <label for="@category.category">@category.name</label>
               </div>
             }

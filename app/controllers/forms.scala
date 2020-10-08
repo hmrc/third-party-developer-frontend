@@ -421,7 +421,7 @@ object ChangeIpWhitelistForm {
   )
 }
 
-final case class TaxRegimeEmailPreferencesForm(selectedTaxRegimes: List[String])
+final case class TaxRegimeEmailPreferencesForm(taxRegime: List[String])
 object TaxRegimeEmailPreferencesForm {
   val form: Form[TaxRegimeEmailPreferencesForm] =
     Form(mapping("taxRegime" -> list(text))(TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
@@ -440,11 +440,11 @@ object SelectedApisEmailPreferencesForm {
          (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply))
 }
 
-final case class SelectedTopicsEmailPreferencesForm(selectedTopics: Seq[String])
+final case class SelectedTopicsEmailPreferencesForm(topic: Seq[String])
 
 object SelectedTopicsEmailPreferencesForm {
 
    def form: Form[SelectedTopicsEmailPreferencesForm] = Form(mapping(
-         "selectedTopics" -> seq(text))
+         "topic" -> seq(text))
          (SelectedTopicsEmailPreferencesForm.apply)(SelectedTopicsEmailPreferencesForm.unapply))
 }
