@@ -124,13 +124,12 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     Future.successful(Redirect(routes.EmailPreferences.flowSelectTopicsAction()
     ))){
       selectedTopics => 
-      // Persist Email Preferences changes to TPD
-         val session = request.developerSession
+         val developerSession = request.developerSession
       for{
-        flow <-  emailPreferencesService.fetchFlowBySessionId(session)
-        _    <-  emailPreferencesService.updateEmailPreferences(session.developer.email, flow.copy(selectedTopics = selectedTopics.toList.toSet))
-                 .map(result =>  if(result) emailPreferencesService.deleteFlowBySessionId(session) else result)
-      } yield  Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
+        flow <-  emailPreferencesService.fetchFlowBySessionId(developerSession)
+        updateResult <- emailPreferencesService.updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopics.toList.toSet))
+        _ = if(updateResult) emailPreferencesService.deleteFlowBySessionId(developerSession)
+      } yield  if(updateResult) Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()) else Redirect(routes.EmailPreferences.flowSelectTopicsPage())
 
     }
   }

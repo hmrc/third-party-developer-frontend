@@ -462,4 +462,67 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     }
 
   }
+
+   "flowSelectTopicsAction" should {
+
+    "update email preferences then delete flow object when update is successful. Then redirect to summary page" in new Setup {
+      fetchSessionByIdReturns(sessionId, session)
+
+       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
+      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+
+      val requestWithForm = loggedInRequest.withFormUrlEncodedBody("topic[0]" -> "TECHNICAL")
+      when(mockEmailPreferencesService.updateEmailPreferences(eqTo(developer.email), *)(*)).thenReturn(Future.successful(true))
+      when(mockEmailPreferencesService.deleteFlowBySessionId(eqTo(loggedInDeveloper))).thenReturn(Future.successful(true))
+       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
+
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.emailPreferencesSummaryPage().url)
+       
+      verify(mockEmailPreferencesService).fetchFlowBySessionId(eqTo(loggedInDeveloper))
+      verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.email), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)
+      verify(mockEmailPreferencesService).deleteFlowBySessionId(eqTo(loggedInDeveloper))
+    }
+
+  "update email preferences then do not delete flow object when update fails. Then redirect to topics page" in new Setup {
+      fetchSessionByIdReturns(sessionId, session)
+
+       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
+      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+
+      val requestWithForm = loggedInRequest.withFormUrlEncodedBody("topic[0]" -> "TECHNICAL")
+      when(mockEmailPreferencesService.updateEmailPreferences(eqTo(developer.email), *)(*)).thenReturn(Future.successful(false))
+      
+       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
+
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
+       
+      verify(mockEmailPreferencesService).fetchFlowBySessionId(eqTo(loggedInDeveloper))
+      verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.email), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)
+      verify(mockEmailPreferencesService, times(0)).deleteFlowBySessionId(*)
+    }
+
+    "redirect back to topics page when form is empty" in new Setup {
+      fetchSessionByIdReturns(sessionId, session)
+
+      val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(loggedInRequest)
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
+    }
+
+    "redirect to login screen for non-logged in user" in new Setup {
+      fetchSessionByIdReturnsNone(sessionId)
+
+      val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(FakeRequest())
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
+
+      verifyZeroInteractions(mockEmailPreferencesService)
+    }
+   }
 }
