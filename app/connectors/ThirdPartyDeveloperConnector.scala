@@ -33,6 +33,7 @@ import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
+import domain.models.emailpreferences.EmailPreferences
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
@@ -234,6 +235,15 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
 
   def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
       http.DELETE(s"$serviceBaseUrl/developer/$emailAddress/email-preferences")
+      .map(_.status == NO_CONTENT)
+      .recover {
+        case _: NotFoundException => throw new InvalidEmail
+      }
+  }
+
+  def updateEmailPreferences(emailAddress: String, emailPreferences: EmailPreferences)
+  (implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
+    http.PUT(s"$serviceBaseUrl/developer/$emailAddress/email-preferences", Json.toJson(emailPreferences))
       .map(_.status == NO_CONTENT)
       .recover {
         case _: NotFoundException => throw new InvalidEmail

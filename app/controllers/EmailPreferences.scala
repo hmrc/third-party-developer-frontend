@@ -117,11 +117,18 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def flowSelectTopicsAction: Action[AnyContent] = loggedInAction { implicit request =>
-    // val requestForm: TaxRegimeEmailPreferencesForm = TaxRegimeEmailPreferencesForm.bindFromRequest
 
-    // Persist Email Preferences changes to TPD
-    // delete the flow object here
-    Future.successful(Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()))
+  NonEmptyList.fromList(SelectedTopicsEmailPreferencesForm.form.bindFromRequest.value.map(_.selectedTopics.toList).getOrElse(List.empty))
+  .fold(
+    //Handle when form is empty, no topics selected
+    Future.successful(Redirect(routes.EmailPreferences.flowSelectTopicsAction()
+    ))){
+      selectedTopics => 
+      // Persist Email Preferences changes to TPD
+      
+      // delete the flow object here
+      Future.successful(Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()))
+    }
   }
 
   def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>

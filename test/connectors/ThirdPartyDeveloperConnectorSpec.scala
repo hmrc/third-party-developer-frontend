@@ -35,8 +35,11 @@ import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import scala.concurrent.Future
+import domain.models.emailpreferences.{TaxRegimeInterests, EmailPreferences}
+import domain.models.emailpreferences.EmailTopic._
+import org.scalatest.BeforeAndAfterEach
 
-class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
+class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec{
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -381,6 +384,28 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
           await(connector.removeEmailPreferences(email))
          }
         
+    }
+  }
+
+   "updateEmailPreferences" should {
+      val email = "john.smith@example.com"
+      val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
+      val emailPreferencesAsJson = Json.toJson(emailPreferences)
+
+    "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
+     when[Future[HttpResponse]](mockHttp.PUT(eqTo(endpoint(s"developer/$email/email-preferences")), eqTo(emailPreferencesAsJson), *)(*, *, *, *))
+     .thenReturn(successful(HttpResponse(NO_CONTENT)))
+     private val result = await(connector.updateEmailPreferences(email, emailPreferences))
+
+        result shouldBe true
+    }
+
+    "throw InvalidEmail exception if email address not found in TPD" in new Setup {
+         when(mockHttp.PUT(eqTo(endpoint(s"developer/$email/email-preferences")), eqTo(emailPreferencesAsJson), *)(*, *, *, *)).thenReturn(failed(new NotFoundException("")))
+
+         intercept[InvalidEmail] {
+          await(connector.updateEmailPreferences(email, emailPreferences))
+         }
     }
   }
 }

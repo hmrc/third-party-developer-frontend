@@ -19,15 +19,6 @@ package domain.models.emailpreferences
 import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
 import play.api.libs.json.Json
 
-case class UserEmailPreferences(servicesAvailableToUser: Map[APICategory, Set[String]],
-                                servicesSelected: Map[APICategory, Set[String]],
-                                topicsSelected: Set[String]) {
-
-  def availableTaxRegimes: Set[APICategory] = servicesAvailableToUser.keys.toSet
-
-  def selectedTaxRegimes: Set[APICategory] = servicesSelected.keys.toSet
-}
-
 case class TaxRegimeInterests(regime: String, services: Set[String])
 
 object TaxRegimeInterests {
