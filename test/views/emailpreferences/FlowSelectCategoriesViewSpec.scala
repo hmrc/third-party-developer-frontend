@@ -16,18 +16,18 @@
 
 package views.emailpreferences
 
-import views.helper.CommonViewSpec
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import domain.models.developers.LoggedInState
 import domain.models.emailpreferences.APICategoryDetails
+import domain.models.flows.EmailPreferencesFlow
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
+import views.helper.CommonViewSpec
 import views.html.emailpreferences.FlowSelectCategoriesView
 
 import scala.collection.JavaConverters._
-import domain.models.flows.EmailPreferencesFlow
 
 class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -36,7 +36,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
 
     val developerSessionWithoutEmailPreferences =
       utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
-          val emailpreferencesFlow = EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, Seq.empty)
+    val emailpreferencesFlow = EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, Seq.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectCategoriesView = app.injector.instanceOf[FlowSelectCategoriesView]
@@ -52,7 +52,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
   def validateCheckboxItemsAgainstCategories(document: Document, categories: List[APICategoryDetails]) = {
     categories.foreach(category => {
       val checkbox = document.getElementById(category.category)
-      checkbox.attr("name") shouldBe "taxRegime"
+      checkbox.attr("name") shouldBe "taxRegime[]"
       checkbox.`val`() shouldBe category.category
 
       document.select(s"label[for=${category.category}]").text shouldBe category.name

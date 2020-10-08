@@ -22,11 +22,11 @@ import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Ses
 import domain.models.emailpreferences.{APICategoryDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import domain.models.flows.{EmailPreferencesFlow, FlowType}
 import repositories.FlowRepository
-import utils.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.AsyncHmrcSpec
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
@@ -37,15 +37,15 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
   val session: Session = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
   val sessionNoEMailPrefences: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
   val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-    
- trait SetUp {
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-   val mockFlowRepository = mock[FlowRepository]
-  val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
-   val mockApmConnector = mock[ApmConnector]
-  val underTest = new EmailPreferencesService(mockApmConnector, mockThirdPartyDeveloperConnector,  mockFlowRepository)
 
- }
+  trait SetUp {
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+    val mockFlowRepository = mock[FlowRepository]
+    val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
+    val mockApmConnector = mock[ApmConnector]
+    val underTest = new EmailPreferencesService(mockApmConnector, mockThirdPartyDeveloperConnector, mockFlowRepository)
+
+  }
 
   "EmailPreferences" when {
 
@@ -62,7 +62,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
         when(mockThirdPartyDeveloperConnector.updateEmailPreferences(*, *)(*)).thenReturn(Future.successful(true))
         val email = "foo@bar.com"
         val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
-        
+
         val result = await(underTest.updateEmailPreferences(email, expectedFlowObject))
 
         result shouldBe true
@@ -75,7 +75,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       "call the flow repository correctly and return flow when repository returns data" in new SetUp {
         val flowObject = EmailPreferencesFlow(sessionId, Set("category1", "category1"), Map("category1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
         when(mockFlowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlow](eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(Some(flowObject)))
-        val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper))
+        val result = await(underTest.fetchFlow(loggedInDeveloper))
         result shouldBe flowObject
         verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)
       }
@@ -83,7 +83,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       "call the flow repository correctly and create a new flow object when nothing returned" in new SetUp {
         val expectedFlowObject = EmailPreferencesFlow(sessionId, Set.empty, Map.empty, Set.empty, Seq.empty)
         when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(None))
-        val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper.copy(sessionNoEMailPrefences)))
+        val result = await(underTest.fetchFlow(loggedInDeveloper.copy(sessionNoEMailPrefences)))
 
         result shouldBe expectedFlowObject
         verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)
@@ -93,7 +93,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       "call the flow repository correctly and copy existing email preferences to flow object when nothing in cache" in new SetUp {
         val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
         when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(None))
-        val result = await(underTest.fetchFlowBySessionId(loggedInDeveloper))
+        val result = await(underTest.fetchFlow(loggedInDeveloper))
 
         result shouldBe expectedFlowObject
         verify(mockFlowRepository).fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)
@@ -104,7 +104,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
       "call flowRepository correctly" in new SetUp {
         when(mockFlowRepository.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))).thenReturn(Future.successful(true))
-        val result = await(underTest.deleteFlowBySessionId(loggedInDeveloper))
+        val result = await(underTest.deleteFlow(sessionId))
 
         result shouldBe true
         verify(mockFlowRepository).deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))
@@ -120,8 +120,8 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
         val result = await(underTest.fetchAllAPICategoryDetails())
 
-        result.size should be (2)
-        result should contain only (category1, category2)
+        result.size should be(2)
+        result should contain only(category1, category2)
 
         verify(mockApmConnector).fetchAllAPICategories()(*)
       }
@@ -140,13 +140,13 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
         val result = await(underTest.fetchAPIDetails(Set(apiServiceName1, apiServiceName2)))
 
-        result.size should be (2)
-        result should contain only (apiDetails1, apiDetails2)
+        result.size should be(2)
+        result should contain only(apiDetails1, apiDetails2)
 
         verify(mockApmConnector).fetchAPIDefinition(eqTo(apiServiceName1))(*)
         verify(mockApmConnector).fetchAPIDefinition(eqTo(apiServiceName2))(*)
       }
     }
   }
-  
+
 }

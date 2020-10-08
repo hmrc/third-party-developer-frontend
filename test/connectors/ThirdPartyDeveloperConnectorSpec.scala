@@ -19,27 +19,26 @@ package connectors
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
-import domain.{InvalidCredentials, LockedAccount, UnverifiedAccount, InvalidEmail}
 import domain.models.connectors._
 import domain.models.developers._
+import domain.models.emailpreferences.EmailTopic._
+import domain.models.emailpreferences.{EmailPreferences, TaxRegimeInterests}
+import domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status
-import play.api.http.Status.{NOT_FOUND, NO_CONTENT}
-import play.api.libs.json.{Json, JsString, JsValue}
+import play.api.http.Status.NO_CONTENT
+import play.api.libs.json.{JsString, JsValue, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.{failed, successful}
 import scala.concurrent.Future
-import domain.models.emailpreferences.{TaxRegimeInterests, EmailPreferences}
-import domain.models.emailpreferences.EmailTopic._
-import org.scalatest.BeforeAndAfterEach
+import scala.concurrent.Future.{failed, successful}
 
-class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec{
+class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -368,44 +367,44 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec{
 
   "removeEmailPreferences" should {
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
-        val email = "john.smith@example.com"
-         when(mockHttp.DELETE(endpoint(s"developer/$email/email-preferences"))).thenReturn(successful(HttpResponse(NO_CONTENT)))
-         private val result = await(connector.removeEmailPreferences(email))
+      val email = "john.smith@example.com"
+      when(mockHttp.DELETE(endpoint(s"developer/$email/email-preferences"))).thenReturn(successful(HttpResponse(NO_CONTENT)))
+      private val result = await(connector.removeEmailPreferences(email))
 
-        result shouldBe true
-     
+      result shouldBe true
+
     }
 
     "throw InvalidEmail exception if email address not found in TPD" in new Setup {
       val email = "john.smith@example.com"
-         when(mockHttp.DELETE(endpoint(s"developer/$email/email-preferences"))).thenReturn(failed(new NotFoundException("")))
+      when(mockHttp.DELETE(endpoint(s"developer/$email/email-preferences"))).thenReturn(failed(new NotFoundException("")))
 
-         intercept[InvalidEmail] {
-          await(connector.removeEmailPreferences(email))
-         }
-        
+      intercept[InvalidEmail] {
+        await(connector.removeEmailPreferences(email))
+      }
+
     }
   }
 
-   "updateEmailPreferences" should {
-      val email = "john.smith@example.com"
-      val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
-      val emailPreferencesAsJson = Json.toJson(emailPreferences)
+  "updateEmailPreferences" should {
+    val email = "john.smith@example.com"
+    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
+    val emailPreferencesAsJson = Json.toJson(emailPreferences)
 
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
-     when[Future[HttpResponse]](mockHttp.PUT(eqTo(endpoint(s"developer/$email/email-preferences")), eqTo(emailPreferencesAsJson), *)(*, *, *, *))
-     .thenReturn(successful(HttpResponse(NO_CONTENT)))
-     private val result = await(connector.updateEmailPreferences(email, emailPreferences))
+      when[Future[HttpResponse]](mockHttp.PUT(eqTo(endpoint(s"developer/$email/email-preferences")), eqTo(emailPreferencesAsJson), *)(*, *, *, *))
+        .thenReturn(successful(HttpResponse(NO_CONTENT)))
+      private val result = await(connector.updateEmailPreferences(email, emailPreferences))
 
-        result shouldBe true
+      result shouldBe true
     }
 
     "throw InvalidEmail exception if email address not found in TPD" in new Setup {
-         when(mockHttp.PUT(eqTo(endpoint(s"developer/$email/email-preferences")), eqTo(emailPreferencesAsJson), *)(*, *, *, *)).thenReturn(failed(new NotFoundException("")))
+      when(mockHttp.PUT(eqTo(endpoint(s"developer/$email/email-preferences")), eqTo(emailPreferencesAsJson), *)(*, *, *, *)).thenReturn(failed(new NotFoundException("")))
 
-         intercept[InvalidEmail] {
-          await(connector.updateEmailPreferences(email, emailPreferences))
-         }
+      intercept[InvalidEmail] {
+        await(connector.updateEmailPreferences(email, emailPreferences))
+      }
     }
   }
 }

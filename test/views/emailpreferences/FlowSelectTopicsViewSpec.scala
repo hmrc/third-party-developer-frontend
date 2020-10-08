@@ -18,7 +18,7 @@ package views.emailpreferences
 
 import domain.models.developers.LoggedInState
 import domain.models.emailpreferences.EmailTopic
-import EmailTopic.{BUSINESS_AND_POLICY, EVENT_INVITES}
+import domain.models.emailpreferences.EmailTopic.{BUSINESS_AND_POLICY, EVENT_INVITES}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.AnyContentAsEmpty
@@ -64,7 +64,7 @@ class FlowSelectTopicsViewSpec extends CommonViewSpec with WithCSRFAddToken {
   def validateCheckboxItemsAgainstTopics(document: Document) = {
     EmailTopic.values.foreach(topic => {
       val checkbox = document.getElementById(topic.value)
-      checkbox.attr("name") shouldBe "topic"
+      checkbox.attr("name") shouldBe "topic[]"
       checkbox.`val`() shouldBe topic.value
       document.select(s"label[for=${topic.value}]").text.startsWith(topic.displayName) shouldBe true
       document.select(s"label[for=${topic.value}] > span[class=form-hint] > p").text() shouldBe topic.description

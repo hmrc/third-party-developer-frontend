@@ -248,7 +248,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       fetchSessionByIdReturns(sessionId, session)
 
       when(mockEmailPreferencesService.fetchCategoriesVisibleToUser(*)(*)).thenReturn(Future.successful(apiCategories))
-      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
+      when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesPage()(loggedInRequest)
 
       status(result) mustBe OK
@@ -325,7 +325,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper).copy(visibleApis = visibleApis)
       when(mockEmailPreferencesService.apiCategoryDetails(eqTo(apiCategory.category))(*)).thenReturn(Future.successful(Some(apiCategory)))
-      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+      when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(emailFlow))
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisPage(apiCategory.category)(loggedInRequest)
 
@@ -374,7 +374,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedCategories = Set(apiCategory.category, apiCategory2.category), visibleApis = visibleApis)
-      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+      when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(emailFlow))
       when(mockEmailPreferencesService.apiCategoryDetails(*)(*)).thenReturn(Future.successful(Some(apiCategory)))
       when(mockEmailPreferencesService.updateSelectedApis(*, eqTo("category1"), eqTo(List("a1", "a2")))).thenReturn(Future.successful(emailFlow))
 
@@ -392,7 +392,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedCategories = Set(apiCategory.category, apiCategory2.category), visibleApis = visibleApis)
-      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+      when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(emailFlow))
       when(mockEmailPreferencesService.apiCategoryDetails(*)(*)).thenReturn(Future.successful(Some(apiCategory)))
       when(mockEmailPreferencesService.updateSelectedApis(*, eqTo("category2"), eqTo(List("a1", "a2")))).thenReturn(Future.successful(emailFlow))
 
@@ -406,13 +406,13 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("currentCategory" -> "category2")
       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedCategories = Set(apiCategory.category, apiCategory2.category), visibleApis = visibleApis)
-     
+
       fetchSessionByIdReturns(sessionId, session)
-      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+      when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(emailFlow))
       when(mockEmailPreferencesService.apiCategoryDetails(*)(*)).thenReturn(Future.successful(Some(apiCategory)))
-    
+
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
-      
+
       status(result) mustBe BAD_REQUEST
       verify(mockEmailPreferencesService, times(0)).updateSelectedApis(*, *, *)
       verify(mockEmailPreferencesSelectApiView).apply(*,
@@ -441,8 +441,8 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val expectedSelectedTopics: Set[String] = session.developer.emailPreferences.topics.map(_.value)
       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedTopics = expectedSelectedTopics)
-      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
-      
+      when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(emailFlow))
+
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsPage()(loggedInRequest)
 
       status(result) mustBe OK
@@ -463,46 +463,46 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
   }
 
-   "flowSelectTopicsAction" should {
+  "flowSelectTopicsAction" should {
 
     "update email preferences then delete flow object when update is successful. Then redirect to summary page" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
 
-       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
-      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+      val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
+      when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(emailFlow))
 
       val requestWithForm = loggedInRequest.withFormUrlEncodedBody("topic[0]" -> "TECHNICAL")
       when(mockEmailPreferencesService.updateEmailPreferences(eqTo(developer.email), *)(*)).thenReturn(Future.successful(true))
-      when(mockEmailPreferencesService.deleteFlowBySessionId(eqTo(loggedInDeveloper))).thenReturn(Future.successful(true))
-       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
+      when(mockEmailPreferencesService.deleteFlow(eqTo(sessionId))).thenReturn(Future.successful(true))
+      val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.emailPreferencesSummaryPage().url)
-       
-      verify(mockEmailPreferencesService).fetchFlowBySessionId(eqTo(loggedInDeveloper))
+
+      verify(mockEmailPreferencesService).fetchFlow(eqTo(loggedInDeveloper))
       verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.email), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)
-      verify(mockEmailPreferencesService).deleteFlowBySessionId(eqTo(loggedInDeveloper))
+      verify(mockEmailPreferencesService).deleteFlow(eqTo(sessionId))
     }
 
-  "update email preferences then do not delete flow object when update fails. Then redirect to topics page" in new Setup {
+    "update email preferences then do not delete flow object when update fails. Then redirect to topics page" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
 
-       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
-      when(mockEmailPreferencesService.fetchFlowBySessionId(*)).thenReturn(Future.successful(emailFlow))
+      val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
+      when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(emailFlow))
 
       val requestWithForm = loggedInRequest.withFormUrlEncodedBody("topic[0]" -> "TECHNICAL")
       when(mockEmailPreferencesService.updateEmailPreferences(eqTo(developer.email), *)(*)).thenReturn(Future.successful(false))
-      
-       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
+
+      val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
-       
-      verify(mockEmailPreferencesService).fetchFlowBySessionId(eqTo(loggedInDeveloper))
+
+      verify(mockEmailPreferencesService).fetchFlow(eqTo(loggedInDeveloper))
       verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.email), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)
-      verify(mockEmailPreferencesService, times(0)).deleteFlowBySessionId(*)
+      verify(mockEmailPreferencesService, times(0)).deleteFlow(*)
     }
 
     "redirect back to topics page when form is empty" in new Setup {
@@ -524,5 +524,5 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
       verifyZeroInteractions(mockEmailPreferencesService)
     }
-   }
+  }
 }
