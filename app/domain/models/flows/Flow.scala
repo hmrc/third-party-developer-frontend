@@ -55,7 +55,12 @@ case class EmailPreferencesFlow(override val sessionId: String,
                                    override val flowType = FlowType.EMAIL_PREFERENCES
   def categoriesInOrder = selectedCategories.toList.sorted    
   def visibleApisByCategory(category: String) = visibleApis.filter(_.categories.contains(category)).toList.sortBy(_.name)
-  def selectedApisByCategory(category: String) = selectedAPIs.get(category).getOrElse(Set.empty)                           
+  def selectedApisByCategory(category: String) = selectedAPIs.get(category).getOrElse(Set.empty)  
+             
+  def toEmailPreferences: EmailPreferences = {
+    val interests: List[TaxRegimeInterests] = selectedAPIs.map(x => TaxRegimeInterests(x._1, x._2)).toList
+    EmailPreferences(interests, selectedTopics.map(EmailTopic.withValue(_)))
+  }
 }
 
 object EmailPreferencesFlow {
@@ -73,6 +78,7 @@ object EmailPreferencesFlow {
        Seq.empty)
     }
   }
+  
 }
 
 

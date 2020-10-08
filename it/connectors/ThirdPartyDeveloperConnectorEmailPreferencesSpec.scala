@@ -62,6 +62,21 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   }
 
   "removeEmailPreferences" should {
+    "return true when NO_CONTENT is returned" in new Setup {
+      val email = "foo@bar.com"
+      
+      stubFor(
+        delete(urlEqualTo(s"/developer/$email/email-preferences"))
+          .willReturn(
+            aResponse()
+              .withStatus(NO_CONTENT)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      await(underTest.removeEmailPreferences(email)) shouldBe true
+    }
+
     "throw InvalidEmail when the email is not found" in new Setup {
       val email = "foo@bar.com"
       
@@ -82,6 +97,22 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   "updateEmailPreferences" should {
       val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
   
+  "return true when NO_CONTENT is returned" in new Setup {
+      val email = "foo@bar.com"
+      
+      stubFor(
+        put(urlEqualTo(s"/developer/$email/email-preferences"))
+          .withRequestBody(equalToJson(Json.toJson(emailPreferences).toString()))
+          .willReturn(
+            aResponse()
+              .withStatus(NO_CONTENT)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      await(underTest.updateEmailPreferences(email, emailPreferences)) shouldBe true
+    }
+
     "throw InvalidEmail when the email is not found" in new Setup {
       val email = "foo@bar.com"
 

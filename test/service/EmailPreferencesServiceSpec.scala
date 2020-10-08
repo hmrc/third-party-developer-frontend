@@ -49,11 +49,24 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
   "EmailPreferences" when {
 
-    "removeEmail Preferences" should {
+    "removeEmailPreferences" should {
       "return true when connector is called correctly and true" in new SetUp {
         when(mockThirdPartyDeveloperConnector.removeEmailPreferences(*)(*)).thenReturn(Future.successful(true))
         val result = await(underTest.removeEmailPreferences("someEmail"))
         result shouldBe true
+      }
+    }
+
+    "updateEmailPreferences" should {
+      "return true when connector is called correctly and true" in new SetUp {
+        when(mockThirdPartyDeveloperConnector.updateEmailPreferences(*, *)(*)).thenReturn(Future.successful(true))
+        val email = "foo@bar.com"
+        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
+        
+        val result = await(underTest.updateEmailPreferences(email, expectedFlowObject))
+
+        result shouldBe true
+        verify(mockThirdPartyDeveloperConnector).updateEmailPreferences(eqTo(email), eqTo(expectedFlowObject.toEmailPreferences))(*)
       }
     }
 

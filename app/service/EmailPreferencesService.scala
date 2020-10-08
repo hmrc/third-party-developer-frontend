@@ -29,6 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import connectors.ApmConnector
 import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 import domain.models.emailpreferences.APICategoryDetails
+import domain.models.emailpreferences.EmailPreferences
 
 
 @Singleton
@@ -67,6 +68,10 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
 
   def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
+  }
+
+  def updateEmailPreferences(emailAddress: String, flow: EmailPreferencesFlow)(implicit hc: HeaderCarrier): Future[Boolean] ={
+    thirdPartyDeveloperConnector.updateEmailPreferences(emailAddress, flow.toEmailPreferences)
   }
 
   def fetchFlowBySessionId(developerSession: DeveloperSession): Future[EmailPreferencesFlow] = {
