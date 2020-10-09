@@ -39,39 +39,42 @@
         <legend>
             <h1 id="pageHeading" class="govuk-fieldset-heading">Which topics do you want to receive information about?</h1>
         </legend>
-        <p class="form-hint">
+        <p>
             We’ll only send you information about the APIs you are interested in.
         </p>
 
-        <p>Select all that apply.</p>
+        <p class="form-hint">Select all that apply.</p>
     </div>
 
     @helper.form(action = routes.EmailPreferences.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
         @for(topic <- List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES)) {
-            <input id="@topic.value" type="checkbox" name="topic[]" value="@topic.value"
-            @if(selectedTopics.contains(topic.value)) {checked} >
-            <label for="@topic.value">@topic.displayName
-            <span class="form-hint">
-                <p>@topic.description</p>
-            </span>
-            </label>
+            <div class="multiple-choice">
+                <input id="@topic.value" type="checkbox" name="topic[]" value="@topic.value"
+                @if(selectedTopics.contains(topic.value)) {checked} >
+                <label for="@topic.value">@topic.displayName
+                <span class="form-hint">
+                    <p>@topic.description</p>
+                </span>
+                </label>
+            </div>
         }
 
-        <div>
+        <div style="clear: both;">
             <p>Check the <a href="https://api-platform-status.production.tax.service.gov.uk/?_ga=2.73741073.2032328959.1590496078-921174029.1559546962#">
                 service availability page for information about live incidents</a>.</p>
 
             <h2 class="heading-medium">Get involved in user research and events</h2>
         </div>
-
-        <input id="@EVENT_INVITES.value" type="checkbox" name="topic[]" value="@EVENT_INVITES.value"
-        @if(selectedTopics.contains(EVENT_INVITES.value)) {checked} >
-        <label for="@EVENT_INVITES.value">@EVENT_INVITES.displayName
-            <span class="form-hint">
-                <p>@EVENT_INVITES.description</p>
-            </span>
-        </label>
+        <div class="multiple-choice">
+            <input id="@EVENT_INVITES.value" type="checkbox" name="topic[]" value="@EVENT_INVITES.value"
+            @if(selectedTopics.contains(EVENT_INVITES.value)) {checked} >
+            <label for="@EVENT_INVITES.value">@EVENT_INVITES.displayName
+                <span class="form-hint">
+                    <p>@EVENT_INVITES.description</p>
+                </span>
+            </label>
+        </div>
 
         <div class="form-group">
             <button id="selectTopics" class="button" type="submit">Continue</button>

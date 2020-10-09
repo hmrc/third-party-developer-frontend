@@ -28,7 +28,7 @@
 @(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDetails, apis: List[ApiDefinition], selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
-       s"Which ${currentCategory.name} APIs are you interested in?"
+        s"Which ${currentCategory.name} APIs are you interested in?"
     }
 
     @devMain(
@@ -38,29 +38,42 @@
         developerSession = Some(loggedIn)
     ) {
 
-        <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
+        <fieldset>
+            <legend>
+                <h1 id="pageHeading" class="govuk-fieldset-heading">@pageHeading</h1>
+            </legend>
+            @errorSummary(form)
 
-        @errorSummary(form)
+            <p id="select-all-description" class="form-hint">Select all that apply.</p>
 
-        <p id="select-all-description">Select all that apply.</p>
-
-        @helper.form(action = routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
-            @helper.CSRF.formField
-            <div class="form-group">
-                <div class="multiple-choice">
-
-                    <input id="all-apis" type="checkbox" name="selectedApi[]" value="ALL_APIS"/>
-                    <label for="all-apis">All @currentCategory.name APIs</label>
-                        <p id="all-apis-description">You will be subscribed automatically to emails about new @currentCategory.name APIs</p>
-                </div>
-                @for(api <- apis) {
+            @helper.form(action = routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
+                @helper.CSRF.formField
+                <div class="form-group">
                     <div class="multiple-choice">
-                        <input id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName" @if(selectedApis.contains(api.serviceName)){checked}/>
-                        <label for="@api.serviceName">@api.name</label>
+
+                        <input id="all-apis" type="checkbox" name="selectedApi[]" value="ALL_APIS"/>
+                        <label for="all-apis">All @currentCategory.name APIs
+                            <span id="all-apis-description" class="form-hint">
+                                You will be subscribed automatically to emails about new @currentCategory.name APIs</span>
+                        </label>
+
                     </div>
-                }
-                <input id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />
-                <button id="submit" class="button" type="submit">Continue</button>
-            </div>
-        }
+                    @for(api <- apis) {
+                        <div class="multiple-choice">
+                            <input id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
+                            @if(selectedApis.contains(api.serviceName)) {checked}/>
+                            <label for="@api.serviceName">@api.name</label>
+                        </div>
+                    }
+                </div>
+                <div>
+                    <br/>
+                    <input id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />
+                    <button id="submit" class="button" type="submit">Continue</button>
+                </div>
+
+            </fieldset>
+
+
+    }
     }
