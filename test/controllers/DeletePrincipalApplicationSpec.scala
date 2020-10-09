@@ -88,7 +88,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     when(underTest.applicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier])).thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 

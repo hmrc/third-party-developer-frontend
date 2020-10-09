@@ -43,7 +43,7 @@ import scala.concurrent.Future._
 
 class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  Helpers.running(fakeApplication()) {
+  Helpers.running(app) {
     "details" when {
       "logged in as a Developer on an application" should {
         "return the view for a standard production app with no change link" in new Setup {
@@ -366,7 +366,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     when(underTest.applicationService.updateCheckInformation(any[Application], any[CheckInformation])(any[HeaderCarrier]))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication().injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 

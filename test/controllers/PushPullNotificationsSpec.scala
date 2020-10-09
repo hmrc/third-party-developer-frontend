@@ -40,7 +40,7 @@ import scala.concurrent.Future._
 
 class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
 
-  Helpers.running(fakeApplication()) {
+  Helpers.running(app) {
     "showPushSecrets" when {
       "logged in as a Developer on an application" should {
         "return 403 for a prod app" in new Setup {
@@ -136,7 +136,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
       .thenReturn(successful(Some(session)))
     when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
 
-    val sessionParams = Seq("csrfToken" -> fakeApplication().injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
