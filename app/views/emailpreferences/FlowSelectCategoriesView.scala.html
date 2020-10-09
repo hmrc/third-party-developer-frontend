@@ -23,7 +23,7 @@
 
 @this(devMain: DevMain)
 
-@(categories: List[APICategoryDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
         "Which API categories are you interested in?"
@@ -35,6 +35,7 @@
         back = BackButtonWithJavaScript,
         developerSession = Some(loggedIn)
     ) {
+        @errorSummary(form)
         <div>
             <legend>
                 <h1 id="pageHeading"  class="govuk-fieldset-heading">@pageHeading</h1>
@@ -60,7 +61,7 @@
 
         }
     
-        @helper.form(action = routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
+        @helper.form(action = routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
             @helper.CSRF.formField
             <button id="noSelectCategories" class="secondary-button" type="submit" >I'm not interested in any of these categories</button>
         <!-- <a href="@routes.EmailPreferences.flowSelectTopicsPage().url"> I'm not interested in any of these categories</a> -->

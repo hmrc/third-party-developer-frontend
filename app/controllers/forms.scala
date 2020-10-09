@@ -423,8 +423,13 @@ object ChangeIpWhitelistForm {
 
 final case class TaxRegimeEmailPreferencesForm(taxRegime: List[String])
 object TaxRegimeEmailPreferencesForm {
+  def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
+    if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedcategories.empty"))
+  }
+  
   val form: Form[TaxRegimeEmailPreferencesForm] =
-    Form(mapping("taxRegime" -> list(text))(TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
+    Form(mapping("taxRegime" -> list(text).verifying(nonEmptyList))
+    (TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
 }
 
 final case class SelectedApisEmailPreferencesForm(selectedApi: Seq[String], currentCategory: String)

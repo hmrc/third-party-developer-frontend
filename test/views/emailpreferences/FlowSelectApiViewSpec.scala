@@ -115,8 +115,21 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
       Option(document.getElementById("error-summary-display")).isDefined shouldBe false
       val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
 
-      // do we need to check here which items were selected and compare against user selected list?
       selectedBoxes.map(_.attr("value")) should contain allElementsOf userApis
+    }
+
+    "render the api selection Page  with All apis checked when ALL_APIS in flow for current category" in new Setup {
+      when(form.errors).thenReturn(Seq.empty)
+      val selectedApis = userApis + "ALL_APIS"
+      
+      val page: Html = flowSelectApiView.render(form, currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+     
+      val document: Document = Jsoup.parse(page.body)
+      validateStaticElements(document, apiList, currentCategory)
+      Option(document.getElementById("error-summary-display")).isDefined shouldBe false
+      val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
+
+      selectedBoxes.map(_.attr("value")) should contain allElementsOf selectedApis
     }
 
     "render the form errors on the page when they exist" in new Setup {
@@ -130,7 +143,6 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
       Option(document.getElementById("error-summary-display")).isDefined shouldBe true
       val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
 
-      // do we need to check here which items were selected and compare against user selected list?
       selectedBoxes.map(_.attr("value")) should contain allElementsOf userApis
     }
 

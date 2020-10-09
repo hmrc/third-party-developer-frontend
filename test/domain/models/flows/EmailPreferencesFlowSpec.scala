@@ -27,24 +27,60 @@ class EmailPreferencesFlowSpec extends WordSpec with Matchers {
     val category1Apis = Set("api1", "api2")
     val category2Apis =  Set("api3", "api2", "api4")
     val emailPreferences = EmailPreferences(List(TaxRegimeInterests(category1, category1Apis), TaxRegimeInterests(category2, category2Apis)), Set(EmailTopic.TECHNICAL))
-    val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
-    val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
+    val emailPreferencesWithAllApis = EmailPreferences(List(TaxRegimeInterests(category1, Set.empty)), Set(EmailTopic.TECHNICAL))
+
     val sessionId = "sessionId"
-    val session: Session = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
-    val sessionNoEMailPrefences: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-    val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
+
     
+    def developerSession(emailPreferences: EmailPreferences): DeveloperSession = {
+        val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe", emailPreferences = emailPreferences)
+        val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+        DeveloperSession(session)
+    }
+
+    def emailPreferencesFlow(selectedCategories: Set[String], selectedAPIs: Map[String, Set[String]], selectedTopics: Set[String]): EmailPreferencesFlow = {
+        EmailPreferencesFlow(sessionId, selectedCategories, selectedAPIs, selectedTopics, Seq.empty)
+    }
+
     "EmailPreferencesFlow" when {
 
+     
         "fromDeveloperSession" should {
             "map developer session to EmailPreferencesFlow object correctly" in {
-                val flow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
+                val flow = EmailPreferencesFlow.fromDeveloperSession(developerSession(emailPreferences))
                 flow.selectedCategories should contain allElementsOf (emailPreferences.interests.map(_.regime))
                 flow.selectedAPIs.keySet should contain allElementsOf (emailPreferences.interests.map(_.regime))
                 flow.selectedAPIs.get(category1).head should contain allElementsOf category1Apis
                 flow.selectedAPIs.get(category2).head should contain allElementsOf category2Apis
                 flow.selectedTopics should contain allElementsOf Set(EmailTopic.TECHNICAL.toString())
             }
+
+            "map to EmailPreferencesFlow object when ALL APIS in selected Apis" in {
+               val flow = EmailPreferencesFlow.fromDeveloperSession(developerSession(emailPreferencesWithAllApis))
+                flow.selectedCategories should contain allElementsOf (emailPreferencesWithAllApis.interests.map(_.regime))
+                flow.selectedAPIs.keySet should contain allElementsOf (emailPreferencesWithAllApis.interests.map(_.regime))
+                flow.selectedAPIs.get(category1).head should contain only("ALL_APIS")
+                flow.selectedTopics should contain allElementsOf Set(EmailTopic.TECHNICAL.toString())
+            }
+
+        }
+
+        "toEmailPreferences" should {
+
+            "map to email preferences correctly" in {
+              val flow =   emailPreferencesFlow(Set(category1, category2), Map(category1 -> category1Apis, category2 -> category2Apis), Set("TECHNICAL"))
+              val mappedPreferences = flow.toEmailPreferences
+              
+              mappedPreferences shouldBe emailPreferences
+            }
+
+           "map to email preferences correctly when ALL_APIS in an api list" in {
+              val flow =   emailPreferencesFlow(Set(category1, category2), Map(category1 -> Set("ALL_APIS", "api1")), Set("TECHNICAL"))
+              val mappedPreferences = flow.toEmailPreferences
+              
+              mappedPreferences shouldBe emailPreferencesWithAllApis
+            }
+            
         }
     }
   

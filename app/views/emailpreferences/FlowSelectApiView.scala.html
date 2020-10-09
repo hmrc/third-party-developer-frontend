@@ -37,21 +37,20 @@
         back = BackButtonWithJavaScript,
         developerSession = Some(loggedIn)
     ) {
-
+        @errorSummary(form)
         <fieldset>
+          
             <legend>
                 <h1 id="pageHeading" class="govuk-fieldset-heading">@pageHeading</h1>
             </legend>
-            @errorSummary(form)
-
+       
             <p id="select-all-description" class="form-hint">Select all that apply.</p>
-
             @helper.form(action = routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
                 @helper.CSRF.formField
                 <div class="form-group">
                     <div class="multiple-choice">
 
-                        <input id="all-apis" type="checkbox" name="selectedApi[]" value="ALL_APIS"/>
+                        <input id="all-apis" type="checkbox" name="selectedApi[]" value="ALL_APIS" @if(selectedApis.contains("ALL_APIS")) {checked}/>
                         <label for="all-apis">All @currentCategory.name APIs
                             <span id="all-apis-description" class="form-hint">
                                 You will be subscribed automatically to emails about new @currentCategory.name APIs</span>

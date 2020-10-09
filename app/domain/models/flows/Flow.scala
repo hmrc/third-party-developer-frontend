@@ -25,10 +25,11 @@ import scala.collection.immutable
 
 sealed trait FlowType extends EnumEntry
 
-object FlowType extends  Enum[FlowType] with PlayJsonEnum[FlowType]  {
+object FlowType extends Enum[FlowType] with PlayJsonEnum[FlowType] {
   val values: immutable.IndexedSeq[FlowType] = findValues
 
   case object IP_ALLOW_LIST extends FlowType
+
   case object EMAIL_PREFERENCES extends FlowType
 
 }
@@ -44,22 +45,34 @@ trait Flow {
  */
 case class IpAllowlistFlow(override val sessionId: String,
                            allowlist: Set[String]) extends Flow {
-                              override val flowType = FlowType.IP_ALLOW_LIST
-                           }
+  override val flowType: FlowType = FlowType.IP_ALLOW_LIST
+}
 
 case class EmailPreferencesFlow(override val sessionId: String,
                                 selectedCategories: Set[String],
                                 selectedAPIs: Map[String, Set[String]],
                                 selectedTopics: Set[String],
                                 visibleApis: Seq[ApiDefinition]) extends Flow {
-                                   override val flowType = FlowType.EMAIL_PREFERENCES
-  def categoriesInOrder = selectedCategories.toList.sorted    
-  def visibleApisByCategory(category: String) = visibleApis.filter(_.categories.contains(category)).toList.sortBy(_.name)
-  def selectedApisByCategory(category: String) = selectedAPIs.get(category).getOrElse(Set.empty)  
-             
+  override val flowType: FlowType = FlowType.EMAIL_PREFERENCES
+
+  def categoriesInOrder: List[String] = selectedCategories.toList.sorted
+
+  def visibleApisByCategory(category: String): List[ApiDefinition] = visibleApis.filter(_.categories.contains(category)).toList.sortBy(_.name)
+
+  def selectedApisByCategory(category: String): Set[String] = selectedAPIs.getOrElse(category, Set.empty)
+
+  def handleAllApis(apis: Set[String]): Set[String] = {
+    if (apis.contains("ALL_APIS")) Set.empty[String] else apis
+  }
+
   def toEmailPreferences: EmailPreferences = {
-    val interests: List[TaxRegimeInterests] = selectedAPIs.map(x => TaxRegimeInterests(x._1, x._2)).toList
-    EmailPreferences(interests, selectedTopics.map(EmailTopic.withValue(_)))
+
+    // if (contains(ALL_APIS)) empty List else list
+
+    val interests: List[TaxRegimeInterests] =
+      selectedAPIs.map(x => TaxRegimeInterests(x._1, handleAllApis(x._2))).toList
+
+    EmailPreferences(interests, selectedTopics.map(EmailTopic.withValue))
   }
 }
 
@@ -68,17 +81,23 @@ object EmailPreferencesFlow {
 
     val existingEmailPreferences = developerSession.developer.emailPreferences
     existingEmailPreferences match {
-      case EmailPreferences(i: List[TaxRegimeInterests], t: Set[EmailTopic])  if i.isEmpty && t.isEmpty =>
+      case EmailPreferences(i: List[TaxRegimeInterests], t: Set[EmailTopic]) if i.isEmpty && t.isEmpty =>
         new EmailPreferencesFlow(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty, Seq.empty)
       case emailPreferences => new EmailPreferencesFlow(
         developerSession.session.sessionId,
         emailPreferences.interests.map(_.regime).toSet,
-        emailPreferences.interests.map(i => (i.regime, i.services)).toMap,
+        taxRegimeInterestsToCategoryServicesMap(emailPreferences.interests),
         emailPreferences.topics.map(_.value),
-       Seq.empty)
+        Seq.empty)
     }
   }
-  
+
+  def taxRegimeInterestsToCategoryServicesMap(interests: List[TaxRegimeInterests]): Map[String, Set[String]] = {
+    interests.map(i => {
+      val services = if (i.services.isEmpty) Set("ALL_APIS") else i.services
+      (i.regime, services)
+    }).toMap
+  }
 }
 
 

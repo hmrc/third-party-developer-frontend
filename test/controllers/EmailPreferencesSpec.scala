@@ -67,7 +67,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     when(mockEmailPreferencesSummaryView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesUnsubscribeAllView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesStartView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
-    when(mockEmailPreferencesSelectCategoriesView.apply(*, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockEmailPreferencesSelectCategoriesView.apply(*, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesFlowSelectTopicView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectApiView.apply(*, *, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
@@ -252,7 +252,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesPage()(loggedInRequest)
 
       status(result) mustBe OK
-      verify(mockEmailPreferencesSelectCategoriesView).apply(eqTo(apiCategories),
+      verify(mockEmailPreferencesSelectCategoriesView).apply(*, eqTo(apiCategories),
         eqTo(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper).selectedCategories))(*, *, *, *)
     }
 
@@ -270,7 +270,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
   }
 
   "flowSelectCategoriesAction" should {
-
+    val apiCategories = List(APICategoryDetails("api1", "API 1"))
 
     "handle form data and redirectToApisPage" in new Setup {
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
@@ -289,13 +289,17 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     }
 
     "redirect back to self if form data is empty" in new Setup {
-
       fetchSessionByIdReturns(sessionId, session)
+
+      when(mockEmailPreferencesService.fetchCategoriesVisibleToUser(*)(*)).thenReturn(Future.successful(apiCategories))
+      when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
+    
 
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesAction()(loggedInRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectCategoriesPage().url)
+      status(result) mustBe BAD_REQUEST
+        verify(mockEmailPreferencesSelectCategoriesView).apply(*, eqTo(apiCategories),
+        eqTo(Set.empty[String]))(*, *, *, *)
 
     }
 
@@ -308,6 +312,33 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
+    }
+  }
+
+  "flowSelectNoCategoriesAction" should {
+
+    "update categories in flow object and redirect to topics page" in new Setup {
+     fetchSessionByIdReturns(sessionId, session)
+
+     when(mockEmailPreferencesService.updateCategories(eqTo(loggedInDeveloper), *))
+     .thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
+      val result: Future[Result] = controllerUnderTest.flowSelectNoCategoriesAction()(loggedInRequest)
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
+
+    }
+
+
+    "redirect to login screen for non-logged in user" in new Setup {
+      fetchSessionByIdReturnsNone(sessionId)
+
+      val result: Future[Result] = controllerUnderTest.flowSelectNoCategoriesAction()(FakeRequest())
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
+
+      verifyZeroInteractions(mockEmailPreferencesFlowSelectTopicView)
     }
   }
 

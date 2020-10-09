@@ -22,17 +22,19 @@ import domain.models.flows.EmailPreferencesFlow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.AnyContentAsEmpty
+import play.api.data.{Form, FormError}
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.emailpreferences.FlowSelectCategoriesView
 
 import scala.collection.JavaConverters._
+import controllers.TaxRegimeEmailPreferencesForm
 
 class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
-
+    val form = mock[Form[TaxRegimeEmailPreferencesForm]]
 
     val developerSessionWithoutEmailPreferences =
       utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
@@ -83,20 +85,32 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
     val usersCategories = Set("api1", "api2")
 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {
-      val page = flowSelectCategoriesView.render(categoriesFromAPM, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      when(form.errors).thenReturn(Seq.empty)
+      val page = flowSelectCategoriesView.render(form, categoriesFromAPM, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+     
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
+     Option(document.getElementById("error-summary-display")).isDefined shouldBe false
+      document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
+    }
+
+    "render the api categories selection Page with error summary displayed when form has errors" in new Setup {
+      when(form.errors).thenReturn(Seq(FormError.apply("key", "message")))
+      val page = flowSelectCategoriesView.render(form, categoriesFromAPM, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val document = Jsoup.parse(page.body)
+      validateStaticElements(document, categoriesFromAPM)
+      Option(document.getElementById("error-summary-display")).isDefined shouldBe true
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
     }
 
     "render the api categories selection Page with boxes selected when user selected categories passed to the view" in new Setup {
-      val page = flowSelectCategoriesView.render(categoriesFromAPM, emailpreferencesFlow.selectedCategories, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      when(form.errors).thenReturn(Seq.empty)
+      val page = flowSelectCategoriesView.render(form, categoriesFromAPM, emailpreferencesFlow.selectedCategories, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
-
+      Option(document.getElementById("error-summary-display")).isDefined shouldBe false
       val selectedBoxes = document.select("input[type=checkbox][checked]").asScala.toList
 
-      // do we need to check here which items were selected and compare against user selected list?
       selectedBoxes.map(_.attr("value")) should contain allElementsOf usersCategories
     }
 

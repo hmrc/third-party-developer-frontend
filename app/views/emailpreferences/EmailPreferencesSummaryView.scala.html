@@ -37,7 +37,7 @@
     @devMain(
         title = pageHeading,
         userFullName = loggedIn.loggedInName,
-        breadcrumbs = Seq(Crumb.emailPreferences, Crumb.home),
+        breadcrumbs = Seq(Crumb.emailPreferences, Crumb.viewAllApplications, Crumb.home),
         developerSession = Some(loggedIn)
     ) {
 
@@ -74,7 +74,7 @@
                         @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
 
                             <tr>
-                                <td id="regime-col-@taxRegimeInterest._2" class="col-30 bold-small">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</td>
+                                <th id="regime-col-@taxRegimeInterest._2" class="col-30 bold-small">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</th>
                                 <td id="apis-col-@taxRegimeInterest._2">
                                     @if(taxRegimeInterest._1.services.isEmpty) {
                                         All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
@@ -85,11 +85,11 @@
                                         }
                                     }
                                 </td>
-                                <td id="chglnk-col-@taxRegimeInterest._2">
+                                <th id="chglnk-col-@taxRegimeInterest._2">
                                     <div align="right">
-                                        <a id="change-@taxRegimeInterest._2-link" href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a>
+                                       <a id="change-@taxRegimeInterest._2-link" href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a> 
                                     </div>
-                                </td>
+                                </th>
                             </tr>
                         }
                         <tr >
@@ -100,12 +100,12 @@
                                 <br />
                             }
                             </td>
-                            <td>
+                            <th>
                                 <div align="right"><a id="changeTopicsLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage">
                                     Change<span class="visually-hidden">
                                     Change the type of emails you want to receive</span></a>
                                 </div>
-                            </td>
+                            </th>
                         </tr>
                     </tbody>
             </table>
