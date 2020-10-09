@@ -86,7 +86,8 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
         mockEmailPreferencesFlowSelectTopicView
       )
 
-    val emailPreferences: emailpreferences.EmailPreferences = domain.models.emailpreferences.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
+    val emailPreferences: emailpreferences.EmailPreferences =
+      domain.models.emailpreferences.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
     val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
     val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
     val sessionId: String = "sessionId"
@@ -293,12 +294,12 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
       when(mockEmailPreferencesService.fetchCategoriesVisibleToUser(*)(*)).thenReturn(Future.successful(apiCategories))
       when(mockEmailPreferencesService.fetchFlow(*)).thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
-    
+
 
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesAction()(loggedInRequest)
 
       status(result) mustBe BAD_REQUEST
-        verify(mockEmailPreferencesSelectCategoriesView).apply(*, eqTo(apiCategories),
+      verify(mockEmailPreferencesSelectCategoriesView).apply(*, eqTo(apiCategories),
         eqTo(Set.empty[String]))(*, *, *, *)
 
     }
@@ -318,10 +319,10 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
   "flowSelectNoCategoriesAction" should {
 
     "update categories in flow object and redirect to topics page" in new Setup {
-     fetchSessionByIdReturns(sessionId, session)
+      fetchSessionByIdReturns(sessionId, session)
 
-     when(mockEmailPreferencesService.updateCategories(eqTo(loggedInDeveloper), *))
-     .thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
+      when(mockEmailPreferencesService.updateCategories(eqTo(loggedInDeveloper), *))
+        .thenReturn(Future.successful(EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)))
       val result: Future[Result] = controllerUnderTest.flowSelectNoCategoriesAction()(loggedInRequest)
 
       status(result) mustBe SEE_OTHER

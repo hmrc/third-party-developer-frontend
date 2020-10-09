@@ -30,6 +30,7 @@ import views.html.emailpreferences.FlowSelectCategoriesView
 
 import scala.collection.JavaConverters._
 import controllers.TaxRegimeEmailPreferencesForm
+import play.twirl.api.Html
 
 class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -38,7 +39,8 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
 
     val developerSessionWithoutEmailPreferences =
       utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
-    val emailpreferencesFlow = EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, Seq.empty)
+    val emailPreferencesFlow =
+      EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, Seq.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectCategoriesView = app.injector.instanceOf[FlowSelectCategoriesView]
@@ -86,17 +88,34 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {
       when(form.errors).thenReturn(Seq.empty)
-      val page = flowSelectCategoriesView.render(form, categoriesFromAPM, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
-     
+      val page: Html =
+        flowSelectCategoriesView.render(
+          form,
+          categoriesFromAPM,
+          Set.empty,
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig)
+
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
-     Option(document.getElementById("error-summary-display")).isDefined shouldBe false
+      Option(document.getElementById("error-summary-display")).isDefined shouldBe false
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
     }
 
     "render the api categories selection Page with error summary displayed when form has errors" in new Setup {
       when(form.errors).thenReturn(Seq(FormError.apply("key", "message")))
-      val page = flowSelectCategoriesView.render(form, categoriesFromAPM, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val page: Html =
+        flowSelectCategoriesView.render(
+          form,
+          categoriesFromAPM,
+          Set.empty,
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig)
+          
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe true
@@ -105,7 +124,16 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec with WithCSRFAddToken 
 
     "render the api categories selection Page with boxes selected when user selected categories passed to the view" in new Setup {
       when(form.errors).thenReturn(Seq.empty)
-      val page = flowSelectCategoriesView.render(form, categoriesFromAPM, emailpreferencesFlow.selectedCategories, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val page: Html =
+        flowSelectCategoriesView.render(
+          form,
+          categoriesFromAPM,
+          emailPreferencesFlow.selectedCategories,
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig)
+
       val document = Jsoup.parse(page.body)
       validateStaticElements(document, categoriesFromAPM)
       Option(document.getElementById("error-summary-display")).isDefined shouldBe false

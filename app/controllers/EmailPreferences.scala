@@ -75,9 +75,9 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       })
   }
 
-  def flowSelectNoCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>  
+  def flowSelectNoCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
     val developerSession = request.developerSession
-    for{
+    for {
       _ <- emailPreferencesService.updateCategories(developerSession, List.empty[String])
     } yield Redirect(controllers.routes.EmailPreferences.flowSelectTopicsPage())
   }
@@ -127,7 +127,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def flowSelectTopicsPage: Action[AnyContent] = loggedInAction { implicit request =>
-    //get flow
     for {
       flow <- emailPreferencesService.fetchFlow(request.developerSession)
     } yield Ok(flowSelectTopicsView(flow.selectedTopics))
@@ -137,7 +136,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
     NonEmptyList.fromList(SelectedTopicsEmailPreferencesForm.form.bindFromRequest.value.map(_.topic.toList).getOrElse(List.empty))
       .fold(
-        //Handle when form is empty, no topics selected
         Future.successful(Redirect(routes.EmailPreferences.flowSelectTopicsAction()
         ))) {
         selectedTopics =>

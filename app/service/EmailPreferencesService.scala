@@ -64,14 +64,6 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
         .map(apmConnector.fetchAPIDefinition(_))
         .toSeq)
 
-  def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
-  }
-
-  def updateEmailPreferences(emailAddress: String, flow: EmailPreferencesFlow)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    thirdPartyDeveloperConnector.updateEmailPreferences(emailAddress, flow.toEmailPreferences)
-  }
-
   def fetchFlow(developerSession: DeveloperSession): Future[EmailPreferencesFlow] =
     flowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlow](developerSession.session.sessionId, FlowType.EMAIL_PREFERENCES) map {
       case Some(flow) => flow
@@ -98,7 +90,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
     } yield savedFlow
   }
 
-  def updateSelectedApis(developerSession: DeveloperSession, currentCategory: String, selectedApis: List[String]) = {
+  def updateSelectedApis(developerSession: DeveloperSession, currentCategory: String, selectedApis: List[String]): Future[EmailPreferencesFlow] = {
 
     for {
       existingFlow <- fetchFlow(developerSession)
@@ -107,5 +99,9 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
     } yield savedFlow
   }
 
+  def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+    thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
 
+  def updateEmailPreferences(emailAddress: String, flow: EmailPreferencesFlow)(implicit hc: HeaderCarrier): Future[Boolean] =
+    thirdPartyDeveloperConnector.updateEmailPreferences(emailAddress, flow.toEmailPreferences)
 }
