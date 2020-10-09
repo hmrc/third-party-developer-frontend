@@ -15,25 +15,24 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.models.views.BackButtonWithJavaScript
 @import include._
 @import views.html.include.DevMain
-@import domain.models.applications.Role
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
 @import model.Crumb
 
 @this(devMain: DevMain)
 
-@(app: Application, roleOfLoggedIn: Role)(
+@(app: Application)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "IP allow list",
+    title = "Remove IP allow list",
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn),
     breadcrumbs = Seq(
-        Crumb("IP allow list"),
+        Crumb("Remove IP allow list"),
+        Crumb.ipAllowlist(app),
         Crumb.application(app),
         Crumb.viewAllApplications
     )
@@ -41,28 +40,31 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     <div class="ip-allowlist">
         <header>
-            <h1 class="heading-xlarge">IP allow list</h1>
-            @appEnvironment(app)
-            <br>
+            <h1 class="heading-large">
+                Are you sure you want to remove your IP allow list?
+            </h1>
         </header>
 
-        <div class="panel panel-border-wide">
-            <p>API requests can only be made from these IP addresses.
-            </p>
+        <div class="notice">
+            <i class="icon icon-important">
+                <span class="visually-hidden">Warning</span>
+            </i>
+            <strong class="bold-small">
+                Removing your IP allow list means your software can make API requests to HMRC from any IP address
+            </strong>
         </div>
 
-        <table class="narrow">
-            <thead><tr><th>IP addresses</th></tr></thead>
-            <tbody>
-            @for(ipRange <-app.ipWhitelist.toSeq.sorted) {
-                <tr><td>@ipRange</td></tr>
-            }
-            </tbody>
-        </table>
+        <br>
+        @appEnvironment(app)
 
         <br>
-        <p><a class="button" href="@controllers.routes.IpAllowlist.editIpAllowlist(app.id)">Edit IP allow list</a></p>
-        <p><a href="/api-documentation/docs/reference-guide#ip-allow-list">Check how to add IP addresses to your IP allow list</a></p>
-        <p><a href="@routes.IpAllowlist.removeIpAllowlist(app.id)">Remove your IP Allow list</a></p>
+        <p>You can set up a new IP allow list at any time.</p>
+
+        @helper.form(action = controllers.routes.IpAllowlist.removeIpAllowlistAction(app.id)) {
+            @helper.CSRF.formField
+            <button id="submit" class="button" type="submit">Remove IP allow list</button>
+            <a class="secondary-button" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</a>
+        }
+
     </div>
 }

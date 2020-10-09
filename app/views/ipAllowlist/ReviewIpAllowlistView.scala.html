@@ -15,60 +15,118 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.models.views.BackButtonWithJavaScript
+@import domain.models.views.{BackButtonWithJavaScript, NoBackButton}
 @import include._
 @import views.html.include.DevMain
+@import domain.models.flows.IpAllowlistFlow
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
+@import model.Crumb
 
 @this(devMain: DevMain)
 
-@(app: Application)(
+@(app: Application, ipAllowlistFlow: IpAllowlistFlow)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
+@breadcrumbs = @{
+    if(app.ipWhitelist.isEmpty) {
+        Seq.empty
+    } else {
+        Seq(
+            Crumb("Review IP allow list"),
+            Crumb.ipAllowlist(app),
+            Crumb.application(app),
+            Crumb.viewAllApplications
+        )
+    }
+}
+@backButton = @{
+    if(app.ipWhitelist.isEmpty) {
+        BackButtonWithJavaScript
+    } else {
+        NoBackButton
+    }
+}
+
 @devMain(
-    title = "IP allow list",
+    title = "Review IP allow list",
     userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+    back = backButton,
+    developerSession = Some(loggedIn),
+    breadcrumbs = breadcrumbs
 ) {
 
-    <div class="ip-whitelist">
+    <div class="ip-allowlist">
         <header>
-            <h1 class="heading-xlarge">Review updates to the IP allow list before you save changes</h1>
+            <h1 class="heading-large">
+                @if(app.ipWhitelist.isEmpty) {
+                    Check your IP allow list before you make it active
+                } else {
+                    Review updates to your IP allow list before you make your changes active
+                }
+            </h1>
             @appEnvironment(app)
             <br>
         </header>
 
-        <div class="notice">
-            <i class="icon icon-important">
-                <span class="visually-hidden">Warning</span>
-            </i>
-            <strong class="bold-small">Updates to the IP allow list are not active until you save changes
-            </strong>
-        </div>
-
-        <table>
-            <thead><tr><th>IP addresses</th><th></th></tr></thead>
-            <tbody>
-            @for(ipRange <-app.ipWhitelist.toSeq.sorted) {
-                <tr>
-                    <td>@ipRange</td>
-                    <td class="numeric"><a href="/account/applications/app-detail/allow-list/active/confirm?uri=1&amp;name=1.1.1.1/24">Remove</a></td>
-                </tr>
-            }
-            </tbody>
-        </table>
-
-        <p><a href="/account/applications/app-detail/allow-list/active/add-new">Add another IP address</a></p>
-
-        <div class="column-three-quarters">
-            <p>Check you have added all the IP addresses you want to use before saving your changes to the IP allow list.
-            </p>
-            <a class="button" href="/account/applications/app-detail/allow-list/active/index-active">Save changes to IP allow list</a>
-            <div class="secondary-action">
-                <a href="/account/applications/app-detail/allow-list/active/index">Cancel</a>
+        @if(app.ipWhitelist.isEmpty) {
+            <div class="notice">
+                <i class="icon icon-important">
+                    <span class="visually-hidden">Warning</span>
+                </i>
+                <p><strong class="bold-small">IP addresses are not restricted until your IP allow list is active</strong></p>
             </div>
-        </div>
+        } else {
+            <div class="panel panel-border-wide">
+                <p>Updates to your IP allow list are not live until you make your changes active</p>
+            </div>
+        }
+
+        @defining(ipAllowlistFlow.allowlist.size > 1 || app.ipWhitelist.isEmpty) { canRemove =>
+            <table class="@if(canRemove) {wide} else {narrow}">
+            <thead><tr><th>IP addresses</th><th></th></tr></thead>
+                <tbody>
+                    @for(ipRange <- ipAllowlistFlow.allowlist.toSeq.sorted) {
+                        <tr>
+                            <td>@ipRange</td>
+                            <td class="numeric">
+                            @if(canRemove) {
+                                <a href="@routes.IpAllowlist.removeCidrBlock(app.id, ipRange)">Remove</a>
+                            }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <br>
+        <p><a href="@routes.IpAllowlist.addCidrBlock(app.id)">Add another IP address</a></p>
+
+
+        <p>
+            @if(app.ipWhitelist.isEmpty) {
+                Check you have added all the IP addresses you want to use before making your IP allow list active.
+            } else {
+                Check you have added all the IP addresses you want to use.
+            }
+        </p>
+
+        @helper.form(action = controllers.routes.IpAllowlist.activateIpAllowlist(app.id)) {
+            @helper.CSRF.formField
+            <button id="submit" class="button" type="submit">
+                @if(app.ipWhitelist.isEmpty) {
+                    Make IP allow list active
+                } else {
+                    Make changes active
+                }
+            </button>
+            @if(app.ipWhitelist.isEmpty) {
+                <a class="secondary-button" href="@routes.Details.details(app.id)">Cancel</a>
+            } else {
+                <a class="secondary-button" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</a>
+            }
+        }
+
     </div>
 }

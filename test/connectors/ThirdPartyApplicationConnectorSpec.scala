@@ -712,6 +712,30 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     }
   }
 
+  "updateIpAllowlist" should {
+    val allowlist = Set("1.1.1.1/24")
+    val updateRequest = UpdateIpAllowlistRequest(allowlist)
+    val url = s"$baseUrl/application/${applicationId.value}/ipWhitelist"
+
+    "return success response in case of a 204 on backend " in new Setup {
+      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, HttpResponse](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
+        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+
+      val result: ApplicationUpdateSuccessful = await(connector.updateIpAllowlist(applicationId, allowlist))
+
+      result shouldEqual ApplicationUpdateSuccessful
+    }
+
+    "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
+      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, HttpResponse](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
+        .thenReturn(failed(new NotFoundException("")))
+
+      intercept[ApplicationNotFound] {
+        await(connector.updateIpAllowlist(applicationId, allowlist))
+      }
+    }
+  }
+
   "http" when {
     "configured not to use the proxy" should {
       "use the HttpClient" in new Setup {

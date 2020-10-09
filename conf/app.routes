@@ -110,12 +110,18 @@ GET         /applications/:id/delete-subordinate-confirm                        
 POST        /applications/:id/delete-subordinate                                                         controllers.DeleteApplication.deleteSubordinateApplicationAction(id: domain.models.applications.ApplicationId)
 
 GET         /applications/:id/ip-allowlist                                                               controllers.IpAllowlist.viewIpAllowlist(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/allowed-ips                                                   controllers.IpAllowlist.allowedIps(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/setup                                                         controllers.IpAllowlist.settingUpAllowlist(id: domain.models.applications.ApplicationId)
 GET         /applications/:id/ip-allowlist/change                                                        controllers.IpAllowlist.editIpAllowlist(id: domain.models.applications.ApplicationId)
 POST        /applications/:id/ip-allowlist/change                                                        controllers.IpAllowlist.editIpAllowlistAction(id: domain.models.applications.ApplicationId)
-
-GET         /applications/:id/ip-whitelist                                                               controllers.IpWhitelist.manageIpWhitelist(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/ip-whitelist/change                                                        controllers.IpWhitelist.changeIpWhitelist(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/ip-whitelist/change                                                        controllers.IpWhitelist.changeIpWhitelistAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/add                                                           controllers.IpAllowlist.addCidrBlock(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/ip-allowlist/add                                                           controllers.IpAllowlist.addCidrBlockAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/remove                                                        controllers.IpAllowlist.removeCidrBlock(id: domain.models.applications.ApplicationId, cidrBlock: String)
+POST        /applications/:id/ip-allowlist/remove                                                        controllers.IpAllowlist.removeCidrBlockAction(id: domain.models.applications.ApplicationId, cidrBlock: String)
+GET         /applications/:id/ip-allowlist/activate                                                      controllers.IpAllowlist.reviewIpAllowlist(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/ip-allowlist/activate                                                      controllers.IpAllowlist.activateIpAllowlist(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/deactivate                                                    controllers.IpAllowlist.removeIpAllowlist(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/ip-allowlist/deactivate                                                    controllers.IpAllowlist.removeIpAllowlistAction(id: domain.models.applications.ApplicationId)
 
 GET         /applications/:id/subscriptions                                                              controllers.Subscriptions.manageSubscriptions(id: domain.models.applications.ApplicationId)
 

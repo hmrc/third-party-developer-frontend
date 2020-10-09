@@ -52,7 +52,7 @@ class IpAllowlistService @Inject()(flowRepository: FlowRepository, connectorWrap
   def removeCidrBlock(cidrBlock: String, sessionId: String): Future[IpAllowlistFlow] = {
     for {
       optionalFlow <- flowRepository.fetchBySessionId[IpAllowlistFlow](sessionId)
-      flow = optionalFlow.getOrElse(throw new IllegalStateException("Can't remove CIDR block"))
+      flow = optionalFlow.getOrElse(throw new IllegalStateException(s"No IP allowlist flow exists for session ID $sessionId"))
       savedFlow <- flowRepository.saveFlow(flow.copy(allowlist = flow.allowlist - cidrBlock))
     } yield savedFlow
   }
@@ -60,8 +60,15 @@ class IpAllowlistService @Inject()(flowRepository: FlowRepository, connectorWrap
   def activateIpAllowlist(app: Application, sessionId: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     for {
       optionalFlow <- flowRepository.fetchBySessionId[IpAllowlistFlow](sessionId)
-      flow = optionalFlow.getOrElse(throw new IllegalStateException("Can't activate IP allowlist"))
+      flow = optionalFlow.getOrElse(throw new IllegalStateException(s"No IP allowlist flow exists for session ID $sessionId"))
       result <- connectorWrapper.forEnvironment(app.deployedTo).thirdPartyApplicationConnector.updateIpAllowlist(app.id, flow.allowlist)
+      _ <- flowRepository.deleteBySessionId(sessionId)
+    } yield result
+  }
+
+  def deactivateIpAllowlist(app: Application, sessionId: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    for {
+      result <- connectorWrapper.forEnvironment(app.deployedTo).thirdPartyApplicationConnector.updateIpAllowlist(app.id, Set.empty)
       _ <- flowRepository.deleteBySessionId(sessionId)
     } yield result
   }

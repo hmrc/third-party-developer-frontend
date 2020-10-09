@@ -409,32 +409,22 @@ object Remove2SVConfirmForm {
   )
 }
 
-final case class ChangeIpWhitelistForm(description: String)
+final case class AddAnotherCidrBlockConfirmForm(confirm: Option[String] = Some(""))
 
-object ChangeIpWhitelistForm {
-  val form: Form[ChangeIpWhitelistForm] = Form(
-    mapping("description" -> whitelistedIpsValidator)(ChangeIpWhitelistForm.apply)(
-      ChangeIpWhitelistForm.unapply
-    )
-  )
-}
+object AddAnotherCidrBlockConfirmForm {
 
-final case class AddAnotherIpAddressConfirmForm(confirm: Option[String] = Some(""))
-
-object AddAnotherIpAddressConfirmForm {
-
-  def form: Form[AddAnotherIpAddressConfirmForm] = Form(
+  def form: Form[AddAnotherCidrBlockConfirmForm] = Form(
     mapping(
       "confirm" -> optional(text)
-        .verifying(FormKeys.remove2SVConfirmNoChoiceKey, s => s.isDefined)
-    )(AddAnotherIpAddressConfirmForm.apply)(AddAnotherIpAddressConfirmForm.unapply)
+        .verifying(FormKeys.ipAllowlistAddAnotherNoChoiceKey, s => s.isDefined)
+    )(AddAnotherCidrBlockConfirmForm.apply)(AddAnotherCidrBlockConfirmForm.unapply)
   )
 }
 
-final case class AddIpAddressForm(ipAddress: String)
+final case class AddCidrBlockForm(ipAddress: String)
 
-object AddIpAddressForm {
-  val form: Form[AddIpAddressForm] = Form(
-    mapping("ipAddress" -> redirectUriValidator)(AddIpAddressForm.apply)(AddIpAddressForm.unapply)
+object AddCidrBlockForm {
+  val form: Form[AddCidrBlockForm] = Form(
+    mapping("ipAddress" -> cidrBlockValidator)(AddCidrBlockForm.apply)(AddCidrBlockForm.unapply)
   )
 }

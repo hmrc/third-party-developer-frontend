@@ -17,12 +17,13 @@
 import java.net.URL
 
 import domain.models.applications.Environment
+import org.apache.commons.net.util.SubnetUtils
 import play.api.data.Forms
 import play.api.data.Forms.{optional, text}
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
+import play.api.data.validation.{Constraint, Constraints, Invalid, Valid, ValidationError, ValidationResult}
 import uk.gov.hmrc.emailaddress.EmailAddress
 
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 package object controllers {
 
@@ -48,8 +49,10 @@ package object controllers {
     val fullnameMaxLengthKey = "fullname.error.maxLength.field"
     val commentsRequiredKey = "comments.error.required.field"
     val commentsMaxLengthKey = "comments.error.maxLength.field"
-    val whitelistedIpsRequiredKey = "whitelistedIps.error.required.field"
-    val whitelistedIpsMaxLengthKey = "whitelistedIps.error.maxLength.field"
+    val ipAllowlistAddAnotherNoChoiceKey = "ipAllowlist.addAnother.confirmation.no.choice.field"
+    val ipAllowlistInvalidCidrBlockKey = "ipAllowlist.cidrBlock.invalid"
+    val ipAllowlistPrivateCidrBlockKey = "ipAllowlist.cidrBlock.invalid.private"
+    val ipAllowlistInvalidCidrBlockRangeKey = "ipAllowlist.cidrBlock.invalid.range"
     val telephoneRequiredKey = "telephone.error.required.field"
     val emailaddressRequiredKey = "emailaddress.error.required.field"
     val emailaddressNotValidKey = "emailaddress.error.not.valid.field"
@@ -204,7 +207,29 @@ package object controllers {
 
   def commentsValidator = textValidator(commentsRequiredKey, commentsMaxLengthKey, 3000)
 
-  def whitelistedIpsValidator = textValidator(whitelistedIpsRequiredKey, whitelistedIpsMaxLengthKey, 3000)
+  def cidrBlockValidator = {
+    val privateNetworkRanges = Set(
+      new SubnetUtils("10.0.0.0/8"),
+      new SubnetUtils("172.16.0.0/12"),
+      new SubnetUtils("192.168.0.0/16")
+    ) map { su =>
+      su.setInclusiveHostCount(true)
+      su.getInfo
+    }
+
+    def validateCidrBlock(cidrBlock: String): ValidationResult = {
+      Try(new SubnetUtils(cidrBlock)) match {
+        case Failure(_) => Invalid(Seq(ValidationError(ipAllowlistInvalidCidrBlockKey)))
+        case _ =>
+          val ipAndMask = cidrBlock.split("/")
+          if (privateNetworkRanges.exists(_.isInRange(ipAndMask(0)))) Invalid(Seq(ValidationError(ipAllowlistPrivateCidrBlockKey)))
+          else if (ipAndMask(1).toInt < 24) Invalid(Seq(ValidationError(ipAllowlistInvalidCidrBlockRangeKey)))
+          else Valid
+      }
+    }
+
+    Forms.text.verifying(Constraint[String](validateCidrBlock(_)))
+  }
 
   def textValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30) =
     Forms.text.

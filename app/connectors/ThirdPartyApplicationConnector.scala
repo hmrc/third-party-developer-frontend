@@ -210,9 +210,9 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
   }
 
-  def updateIpAllowlist(applicationId: ApplicationId, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def updateIpAllowlist(applicationId: ApplicationId, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.PUT[UpdateIpAllowlistRequest, HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/ipWhitelist", UpdateIpAllowlistRequest(ipAllowlist))
-      .map(_ => ApplicationUpdateSuccessful)
+      .map(_ => ApplicationUpdateSuccessful) recover recovery
   }
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = {
