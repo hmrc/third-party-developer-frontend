@@ -10,9 +10,9 @@ comments.error.required.field=Tell us what you need help with
 comments.error.maxLength.field=You entered too much text - keep it under 3,000 characters
 
 ipAllowlist.addAnother.confirmation.no.choice.field = Tell us if you want to add another IP address
-ipAllowlist.cidrBlock.invalid = Invalid value
-ipAllowlist.cidrBlock.invalid.private = Private range
-ipAllowlist.cidrBlock.invalid.range = Invalid range
+ipAllowlist.cidrBlock.invalid = Enter a CIDR notation in the correct format, for example, 1.1.1.0/24
+ipAllowlist.cidrBlock.invalid.private = You must use a public network range
+ipAllowlist.cidrBlock.invalid.range = Enter a CIDR notation with the correct netmask range. We accept netmask ranges between 24 and 32
 
 firstname.error.required.field=Provide your first name
 firstname.error.required.global=Provide your first name
