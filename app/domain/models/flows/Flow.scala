@@ -66,9 +66,6 @@ case class EmailPreferencesFlow(override val sessionId: String,
   }
 
   def toEmailPreferences: EmailPreferences = {
-
-    // if (contains(ALL_APIS)) empty List else list
-
     val interests: List[TaxRegimeInterests] =
       selectedAPIs.map(x => TaxRegimeInterests(x._1, handleAllApis(x._2))).toList
 

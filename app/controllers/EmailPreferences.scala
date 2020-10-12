@@ -23,7 +23,8 @@ import domain.models.emailpreferences.APICategoryDetails
 import javax.inject.Inject
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.twirl.api.Html
 import service.{EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
@@ -54,9 +55,9 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   private def flowShowSelectCategoriesView(form: Form[TaxRegimeEmailPreferencesForm])(implicit request: UserRequest[AnyContent]) = {
        for {
-      flow <- emailPreferencesService.fetchFlow(request.developerSession)
-      visibleCategories <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession)
-      selectedCategories = if(form.hasErrors) Set.empty[String] else flow.selectedCategories
+      flow                <- emailPreferencesService.fetchFlow(request.developerSession)
+      visibleCategories   <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession)
+      selectedCategories   = if(form.hasErrors) Set.empty[String] else flow.selectedCategories
     } yield flowSelectCategoriesView(form, visibleCategories.toList, selectedCategories)
   }
 
@@ -68,18 +69,14 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         flowShowSelectCategoriesView(formWithErrors).map(BadRequest(_))
       },
       { form =>
-        val categories = form.taxRegime
-        for {
-          flow <- emailPreferencesService.updateCategories(request.developerSession, categories)
-        } yield Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(flow.categoriesInOrder.head))
+        emailPreferencesService.updateCategories(request.developerSession, form.taxRegime)
+        .map(flow => Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(flow.categoriesInOrder.head)))
       })
   }
 
   def flowSelectNoCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
-    val developerSession = request.developerSession
-    for {
-      _ <- emailPreferencesService.updateCategories(developerSession, List.empty[String])
-    } yield Redirect(controllers.routes.EmailPreferences.flowSelectTopicsPage())
+    emailPreferencesService.updateCategories(request.developerSession, List.empty[String])
+    .map(_ => Redirect(controllers.routes.EmailPreferences.flowSelectTopicsPage()))
   }
 
   def flowSelectApisPage(category: String): Action[AnyContent] = loggedInAction { implicit request =>
@@ -91,16 +88,16 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     }
   }
 
-  private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: String)(implicit request: UserRequest[AnyContent]) = {
+  private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: String)(implicit request: UserRequest[AnyContent]): Future[Html] = {
     for {
       categoryDetails <- emailPreferencesService.apiCategoryDetails(category)
-      flow <- emailPreferencesService.fetchFlow(request.developerSession)
+      flow            <- emailPreferencesService.fetchFlow(request.developerSession)
     } yield flowSelectApiView(form, categoryDetails.getOrElse(APICategoryDetails(category, category)), flow.visibleApisByCategory(category), flow.selectedApisByCategory(category))
   }
 
   def flowSelectApisAction: Action[AnyContent] = loggedInAction { implicit request =>
 
-    def handleNextPage(sortedCategories: List[String], currentCategory: String) = {
+    def handleNextPage(sortedCategories: List[String], currentCategory: String): Result = {
       val currentCategoryIndex = sortedCategories.indexOf(currentCategory)
       if (sortedCategories.size == currentCategoryIndex + 1) {
         Redirect(controllers.routes.EmailPreferences.flowSelectTopicsPage())
@@ -115,11 +112,9 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         flowSelectApisView(formWithErrors, form.data.getOrElse("currentCategory", "")).map(BadRequest(_))
       },
       {
-        form =>
-          // TODO Handle when None are selected.... do we need an ALL APIS checkbox?
-          emailPreferencesService
-            .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi.toList)
-            .map(flow => handleNextPage(flow.categoriesInOrder, form.currentCategory))
+        form => emailPreferencesService
+                .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi.toList)
+                .map(flow => handleNextPage(flow.categoriesInOrder, form.currentCategory))
       }
     )
 
@@ -141,19 +136,19 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         selectedTopics =>
           val developerSession = request.developerSession
           for {
-            flow <- emailPreferencesService.fetchFlow(developerSession)
-            updateResult <-
-              emailPreferencesService.updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopics.toList.toSet))
-            _ = if (updateResult) emailPreferencesService.deleteFlow(developerSession.session.sessionId)
-          } yield if (updateResult) Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()) else Redirect(routes.EmailPreferences.flowSelectTopicsPage())
-
+            flow          <- emailPreferencesService.fetchFlow(developerSession)
+            updateResult  <- emailPreferencesService
+                              .updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopics.toList.toSet))
+            _             =   if (updateResult) emailPreferencesService.deleteFlow(developerSession.session.sessionId)
+          } yield if (updateResult) Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
+          else Redirect(routes.EmailPreferences.flowSelectTopicsPage())
       }
   }
 
   def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>
     val unsubscribed: Boolean = request.flash.get("unsubscribed") match {
       case Some("true") => true
-      case _ => false
+      case _            => false
     }
 
     val emailPreferences = request.developerSession.developer.emailPreferences
@@ -163,7 +158,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
       for {
         apiCategoryDetails <- emailPreferencesService.fetchAllAPICategoryDetails()
-        apiNames <- emailPreferencesService.fetchAPIDetails(userServices)
+        apiNames           <- emailPreferencesService.fetchAPIDetails(userServices)
       } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails, unsubscribed)))
     }
   }
@@ -174,8 +169,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def unsubscribeAllAction: Action[AnyContent] = loggedInAction { implicit request =>
     emailPreferencesService.removeEmailPreferences(request.developerSession.developer.email).map {
-      case true => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
-      case false => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
+      case true   => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
+      case false  => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
     }
   }
 
