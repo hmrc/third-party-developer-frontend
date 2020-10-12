@@ -45,4 +45,6 @@ object Crumb {
   def manageProfile = Crumb("Manage profile", s"${routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
 
   def emailPreferences = Crumb("Email preferences", s"${routes.EmailPreferences.emailPreferencesSummaryPage()}", Some("data-breadcrumb-email-preferences"))
+
+  def ipAllowlist(application: Application) = Crumb("IP allow list", s"${routes.IpAllowlist.viewIpAllowlist(application.id)}", Some("data-breadcrumb-ip-allowlist"))
 }

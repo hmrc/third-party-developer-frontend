@@ -40,6 +40,7 @@ lazy val compile = Seq(
   "uk.gov.hmrc" %% "json-encryption" % "4.8.0-play-26",
   "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
   "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.2.0-play-26",
+  "commons-net" % "commons-net" % "3.6",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
   "com.google.zxing" % "core" % "3.2.1",

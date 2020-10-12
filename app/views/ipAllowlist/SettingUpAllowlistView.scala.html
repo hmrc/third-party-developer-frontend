@@ -17,8 +17,8 @@
 @import config.ApplicationConfig
 @import domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain
-@import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
+@import domain.models.applications.Application
 
 @this(devMain: DevMain)
 
@@ -26,25 +26,25 @@
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Request received",
+    title = "Setting up IP allow list",
     userFullName = loggedIn.loggedInName,
     back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
 
-    <div class="ip-whitelist">
+    <div class="ip-allowlist">
         <header>
-            <h1 class="heading-xlarge">Request received</h1>
+            <h1 class="heading-large">Setting up your IP allow list</h1>
         </header>
 
+        <p>Decide which IP addresses are allowed to make API requests to HMRC.</p>
+        <p>Add the IP addresses to your IP allow list.</p>
+        <p>Check the IP addresses you want to use are correct before making your IP allow list active.</p>
+        <p>While your IP allow list is active, all other IP addresses are blocked from making API requests to HMRC.</p>
+
         <p>
-            You requested to change your whitelisted IP addresses.
-        </p>
-        <p>
-            We will get back to you within 2 working days.
-        </p>
-        <p>
-            <a href="@routes.Details.details(app.id)">Manage your application</a>
+            <a class="button" href="@routes.IpAllowlist.addCidrBlock(app.id)">Add an IP address</a>
+            <a class="secondary-button" href="@routes.Details.details(app.id)">Cancel</a>
         </p>
     </div>
 }

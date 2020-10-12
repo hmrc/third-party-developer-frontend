@@ -193,22 +193,15 @@ form.inline-controls {
   margin-top: 0;
 }
 
-.ip-whitelist {
-  .heading-medium {
-    margin-top: 1em;
-    margin-bottom: 0;
+.ip-allowlist {
+  input[type="text"] {
+    width: 33%;
   }
-  .form-group {
+  table.narrow {
+    width: 40%;
+  }
+  table.wide {
     width: 90%;
-    textarea {
-      width: 100%;
-    }
-  }
-  .actions {
-    margin-top: 2em;
-  }
-  table {
-    width: 43%;
   }
 }
 

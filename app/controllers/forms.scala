@@ -20,7 +20,6 @@ import domain.models.applications.{Application, ApplicationId, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import play.api.mvc.{AnyContent, Request}
 
 trait ConfirmPassword {
   val password: String
@@ -411,13 +410,23 @@ object Remove2SVConfirmForm {
   )
 }
 
-final case class ChangeIpWhitelistForm(description: String)
+final case class AddAnotherCidrBlockConfirmForm(confirm: Option[String] = Some(""))
 
-object ChangeIpWhitelistForm {
-  val form: Form[ChangeIpWhitelistForm] = Form(
-    mapping("description" -> whitelistedIpsValidator)(ChangeIpWhitelistForm.apply)(
-      ChangeIpWhitelistForm.unapply
-    )
+object AddAnotherCidrBlockConfirmForm {
+
+  def form: Form[AddAnotherCidrBlockConfirmForm] = Form(
+    mapping(
+      "confirm" -> optional(text)
+        .verifying(FormKeys.ipAllowlistAddAnotherNoChoiceKey, s => s.isDefined)
+    )(AddAnotherCidrBlockConfirmForm.apply)(AddAnotherCidrBlockConfirmForm.unapply)
+  )
+}
+
+final case class AddCidrBlockForm(ipAddress: String)
+
+object AddCidrBlockForm {
+  val form: Form[AddCidrBlockForm] = Form(
+    mapping("ipAddress" -> cidrBlockValidator)(AddCidrBlockForm.apply)(AddCidrBlockForm.unapply)
   )
 }
 

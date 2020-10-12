@@ -69,8 +69,8 @@ object Capabilities {
     def hasCapability(app: Application): Boolean = app.state.name.isInTesting || app.deployedTo.isSandbox
   }
 
-  case object SupportsIpWhitelist extends Capability {
-    def hasCapability(app: Application): Boolean = app.ipWhitelist.nonEmpty
+  case object SupportsIpAllowlist extends Capability {
+    def hasCapability(app: Application): Boolean = true
   }
 
   case object ViewPushSecret extends Capability {

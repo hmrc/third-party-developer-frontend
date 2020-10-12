@@ -66,10 +66,8 @@
                                 Redirect URIs</a></li>
                         }
 
-                        @if(app.ipWhitelist.nonEmpty) {
-                            <li class="side-nav__list @if(section == "manage-ip-whitelist") { side-nav__list--selected }"><a id="nav-manage-ip-whitelist" class="side-nav__link" href="@routes.IpWhitelist.manageIpWhitelist(app.id)">
-                                Whitelisted IPs</a></li>
-                        }
+                        <li class="side-nav__list @if(section == "manage-ip-allowlist") { side-nav__list--selected }"><a id="nav-manage-ip-allowlist" class="side-nav__link" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">
+                            IP allow list</a></li>
 
                         <li class="side-nav__list @if(section == "manage-team") { side-nav__list--selected }"><a id="nav-manage-team" class="side-nav__link" href="@routes.ManageTeam.manageTeam(app.id, None)">Team members</a></li>
 
