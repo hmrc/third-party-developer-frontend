@@ -65,6 +65,8 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       "statusPageLink",
       "service availability page for information about live incidents",
       "https://api-platform-status.production.tax.service.gov.uk/")
+
+  
   }
 
   def checkLink(document: Document, id: String, linkText: String, linkVal: String) = {
@@ -94,7 +96,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
 
     val selectedTopicsCell = document.getElementById("selectedTopicsCell")
     selectedTopicsCell.text shouldBe emailPreferences.topics.map(_.displayName).toList.sorted.mkString(" ")
-    checkLink(document, "changeTopicsLink", "Change", "/developer/profile/email-preferences")
+    checkLink(document, "changeTopicsLink", "Change", "/developer/profile/email-preferences/topics")
 
     checkLink(document, "unsubscribeLink", "Unsubscribe from Developer Hub emails", "/developer/profile/email-preferences/unsubscribe")
   }
