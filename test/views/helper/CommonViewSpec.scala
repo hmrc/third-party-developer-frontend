@@ -36,9 +36,11 @@ trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedM
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
+
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(("metrics.jvm", false))
       .build()
+
 
 }

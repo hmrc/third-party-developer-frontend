@@ -16,7 +16,8 @@
 
 package connectors
 
-import model.APICategoryDetails
+import domain.models.connectors.ExtendedApiDefinition
+import domain.models.emailpreferences.APICategoryDetails
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.http.HeaderCarrier
@@ -53,6 +54,24 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
       result should contain only (category1, category2)
     }
   }
+
+   "fetchApiDefinitionsVisibleToUser" should {
+
+    "return APIs" in new Setup {
+      val userEmail = "foo@bar.com"
+
+      val mockExpectedApi = mock[ExtendedApiDefinition]
+        when(mockHttpClient.GET[Seq[ExtendedApiDefinition]](eqTo(s"$serviceBaseUrl/combined-api-definitions"), eqTo(Seq("collaboratorEmail" -> userEmail)))(*, *, *))
+        .thenReturn(Future.successful(Seq(mockExpectedApi)))
+
+      val result = await(connectorUnderTest.fetchApiDefinitionsVisibleToUser(userEmail))
+
+      result.size should be (1)
+      result should contain only (mockExpectedApi)
+    }
+
+
+   }
 
   
 }
