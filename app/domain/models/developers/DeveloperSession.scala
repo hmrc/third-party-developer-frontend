@@ -19,7 +19,7 @@ package domain.models.developers
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-import model.EmailPreferences
+import domain.models.emailpreferences.EmailPreferences
 import play.api.libs.json.{Format, Json}
 
 case class DeveloperSession(session: Session) {

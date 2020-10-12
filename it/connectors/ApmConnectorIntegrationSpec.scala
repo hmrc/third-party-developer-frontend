@@ -1,7 +1,9 @@
 package connectors
 
+import java.net.URLEncoder
+
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.models.connectors.ExtendedAPIDefinition
+import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
@@ -34,6 +36,17 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
             .withBody(body)
             .withHeader("content-type", "application/json")))
     }
+
+    def fetchApiDefinitionsVisibleToUser(email: String, body: String) = {
+      val encodedEmail = URLEncoder.encode(email, "UTF-8")
+      stubFor(
+        get(urlEqualTo(s"/combined-api-definitions?collaboratorEmail=$encodedEmail"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(body)
+              .withHeader("content-type", "application/json")))
+    }
   }
 
   "fetchAPIDefinition" should {
@@ -41,7 +54,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
           val serviceName = "api1"
           val name = "API 1"
          extendedAPIDefinitionByServiceName(serviceName, s"""{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context" }""")
-         val result: ExtendedAPIDefinition = await(underTest.fetchAPIDefinition("api1"))
+         val result: ExtendedApiDefinition = await(underTest.fetchAPIDefinition("api1"))
          result.serviceName shouldBe serviceName
          result.name shouldBe name
       }
@@ -73,5 +86,34 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
         intercept[NotFoundException](await(underTest.fetchAPIDefinition("unknownapi")))
       }
+  }
+
+
+  "fetchApiDefinitionsVisibleToUser" should {
+    "retrieve a list of service a user can see" in new Setup {
+      val userEmail = "bob.user@digital.hmrc.gov.uk"
+      val serviceName = "api1"
+      val name = "API 1"
+      fetchApiDefinitionsVisibleToUser(userEmail, s"""[{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context", "categories": ["AGENT", "VAT"] }]""")
+      val result: Seq[ApiDefinition] = await(underTest.fetchApiDefinitionsVisibleToUser(userEmail))
+      result.head.serviceName shouldBe serviceName
+      result.head.name shouldBe name
+    }
+
+    "fail on Upstream5xxResponse when the call return a 500" in new Setup {
+      val userEmail = "bob.user@digital.hmrc.gov.uk"
+      val encodedEmail = URLEncoder.encode(userEmail, "UTF-8")
+      stubFor(
+        get(urlEqualTo(s"/combined-api-definitions?collaboratorEmail=$encodedEmail"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+
+      intercept[Upstream5xxResponse] {
+        await(underTest.fetchApiDefinitionsVisibleToUser(userEmail))
+      }
+    }
   }
 }

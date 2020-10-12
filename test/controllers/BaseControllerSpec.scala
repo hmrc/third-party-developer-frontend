@@ -16,6 +16,7 @@
 
 package controllers
 
+import akka.stream.Materializer
 import config.ApplicationConfig
 import mocks.service.ErrorHandlerMock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -25,21 +26,21 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import mocks.service.SessionServiceMock
 
-class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock {
+class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock with SessionServiceMock {
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
-
   implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 
-  implicit lazy val materializer = app.materializer
+  implicit lazy val materializer: Materializer = app.materializer
 
-  lazy val messagesApi = app.injector.instanceOf[MessagesApi]
+  lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 
-  val mcc = app.injector.instanceOf[MessagesControllerComponents]
+  val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

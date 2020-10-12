@@ -2,8 +2,10 @@ package repositories
 
 import akka.stream.Materializer
 import config.ApplicationConfig
+import domain.models.apidefinitions.ApiContext
+import domain.models.connectors.ApiDefinition
+import domain.models.emailpreferences.EmailTopic
 import domain.models.flows.{EmailPreferencesFlow, Flow, FlowType, IpAllowlistFlow}
-import model.EmailTopic
 import org.joda.time.DateTime
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsObject, Json}
@@ -42,7 +44,11 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
 
     val currentFlow: IpAllowlistFlow = IpAllowlistFlow(currentSession, Set("ip1", "ip2"))
     val flowInDifferentSession: IpAllowlistFlow = IpAllowlistFlow(anotherSession, Set("ip3", "ip4"))
-    val flowOfDifferentType: EmailPreferencesFlow = EmailPreferencesFlow(currentSession, Set(EmailTopic.BUSINESS_AND_POLICY))
+    val flowOfDifferentType: EmailPreferencesFlow = EmailPreferencesFlow(currentSession,
+      selectedCategories = Set("category1", "category2"),
+      selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
+      selectedTopics = Set("BUSINESS_AND_POLICY"),
+      visibleApis = Seq(ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), Seq("VAT", "AGENT"))))
     await(repository.saveFlow(currentFlow))
     await(repository.saveFlow(flowInDifferentSession))
     await(repository.saveFlow(flowOfDifferentType))
@@ -81,7 +87,11 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
       }
 
       "save email preferences" in {
-        val flow = EmailPreferencesFlow(currentSession, Set(EmailTopic.BUSINESS_AND_POLICY, EmailTopic.EVENT_INVITES))
+        val flow =  EmailPreferencesFlow(currentSession,
+          selectedCategories= Set("category1", "category2"),
+          selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
+          selectedTopics = Set("BUSINESS_AND_POLICY",  "EVENT_INVITES"),
+        visibleApis = Seq(ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), Seq("VAT", "AGENT"))))
 
         await(repository.saveFlow(flow))
 
@@ -90,6 +100,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
         (result \ "flowType").as[String] shouldBe EMAIL_PREFERENCES.toString()
         (result \ "lastUpdated").asOpt[DateTime] should not be empty
         (result \ "selectedTopics").as[Set[EmailTopic]] should contain only (EmailTopic.BUSINESS_AND_POLICY, EmailTopic.EVENT_INVITES)
+        (result \ "visibleApis").as[Seq[ApiDefinition]] should contain only (ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), Seq("VAT", "AGENT")))
       }
 
       "update the flow when it already exists" in new PopulatedSetup {

@@ -158,3 +158,6 @@ delete.redirect.confirmation.no.choice.field = Tell us if you want to delete thi
 
 accessCode.invalid.name.field = You have entered an invalid access code
 accessCode.invalid.name.global = You have entered an invalid access code
+
+error.selectedcategories.empty = Select a category you are interested in
+error.selectedapis.empty = Select an API you are interested in

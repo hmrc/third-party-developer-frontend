@@ -20,14 +20,11 @@ import views.helper.CommonViewSpec
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import domain.models.developers.LoggedInState
+import domain.models.emailpreferences.{APICategoryDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
 import views.html.emailpreferences.EmailPreferencesSummaryView
-import model.EmailPreferences
-import model.TaxRegimeInterests
-import model.EmailTopic
-import model.APICategoryDetails
 
 class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
