@@ -20,7 +20,6 @@ import domain.models.applications.{Application, ApplicationId, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import play.api.mvc.{AnyContent, Request}
 
 trait ConfirmPassword {
   val password: String
