@@ -33,8 +33,8 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       Seq(APICategoryDetails("VAT", "VAT"), APICategoryDetails("INCOME_TAX_MTD", "Income Tax (Making Tax Digital)"))
     val apiCategoryDetailsMap = Map("VAT" -> "VAT", "INCOME_TAX_MTD" -> "Income Tax (Making Tax Digital)")
 
-    val api1 =  "income-tax-mtd-api-1"
-    val api2  = "income-tax-mtd-api-2"
+    val api1 = "income-tax-mtd-api-1"
+    val api2 = "income-tax-mtd-api-2"
     val extendedServiceDetails = Map(api1 -> "API1", api2 -> "API2")
     val emailPreferences =
       EmailPreferences(
@@ -62,31 +62,33 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       "service availability page for information about live incidents",
       "https://api-platform-status.production.tax.service.gov.uk/")
 
-  
+
   }
 
   def checkLink(document: Document, id: String, linkText: String, linkVal: String) = {
-    withClue(s"Link text not as expected: for element: $id"){document.getElementById(id).text().startsWith(linkText) shouldBe true}
+    withClue(s"Link text not as expected: for element: $id") {
+      document.getElementById(id).text().startsWith(linkText) shouldBe true
+    }
     document.getElementById(id).attr("href") shouldBe linkVal
   }
 
   def checkEmailPreferencesApisSection(document: Document,
-                                 emailPreferences: EmailPreferences,
-                                 apiCategoryDetails: Seq[APICategoryDetails],
-                                 extendedServiceDetails: Map[String, String]): Unit = {
+                                       emailPreferences: EmailPreferences,
+                                       apiCategoryDetails: Seq[APICategoryDetails],
+                                       extendedServiceDetails: Map[String, String]): Unit = {
 
     for (interest <- emailPreferences.interests.sortBy(_.regime)) {
       val textRegimeDisplayNameVal = taxRegimeDisplayName(apiCategoryDetails, interest.regime)
-       val categoryHeading = document.getElementById(s"category-heading-${interest.regime}")
+      val categoryHeading = document.getElementById(s"category-heading-${interest.regime}")
       categoryHeading.text shouldBe textRegimeDisplayNameVal
-   
+
       val services = interest.services
       if (services.isEmpty) {
         document.getElementById(s"all-api-${interest.regime}").text() shouldBe s"All $textRegimeDisplayNameVal APIs"
       } else {
-          for(service <- services){
-            document.getElementById(s"${service}").text() shouldBe extendedServiceDetails.get(service).getOrElse("")
-          }
+        for (service <- services) {
+          document.getElementById(s"${service}").text() shouldBe extendedServiceDetails.get(service).getOrElse("")
+        }
       }
 
       checkLink(document, "change-apis-link", "Edit your preferences or get emails about other APIs", "/developer/profile/email-preferences/categories")
@@ -94,12 +96,12 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
   }
 
 
-   def checkEmailTopicsSection(document: Document,
-                                 emailPreferences: EmailPreferences): Unit = {                                 
+  def checkEmailTopicsSection(document: Document,
+                              emailPreferences: EmailPreferences): Unit = {
 
     val topicsHeading = document.getElementById("topics-heading")
     topicsHeading.text shouldBe "Topics"
-    for(topic <- emailPreferences.topics){
+    for (topic <- emailPreferences.topics) {
       val selectedTopicsCell = document.getElementById(topic.value)
       selectedTopicsCell.text shouldBe topic.displayName
     }
@@ -130,21 +132,21 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       validateStaticElements(document)
       checkEmailPreferencesApisSection(document, developerSession.developer.emailPreferences, apiCategoryDetails, extendedServiceDetails)
       checkEmailTopicsSection(document, developerSession.developer.emailPreferences)
- 
+
     }
 
     "display 'no email preferences selected' page for users that have not yet selected any" in new Setup {
-        val page =
-          emailPreferencesSummaryView.render(
-            EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty),
-            messagesProvider.messages,
-            developerSessionWithoutEmailPreferences,
-            request,
-            appConfig)
+      val page =
+        emailPreferencesSummaryView.render(
+          EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty),
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig)
 
-        val document = Jsoup.parse(page.body)
-        validateStaticElements(document)
-        checkNoEmailPreferencesPageElements(document)
+      val document = Jsoup.parse(page.body)
+      validateStaticElements(document)
+      checkNoEmailPreferencesPageElements(document)
     }
   }
 }
