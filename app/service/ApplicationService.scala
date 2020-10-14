@@ -19,7 +19,6 @@ package service
 import connectors._
 import domain._
 import domain.models.apidefinitions._
-import domain.models.apidefinitions.APIStatus._
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketResult}
@@ -28,7 +27,6 @@ import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.subscriptions.{FieldName, _}
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
-import service.SubscriptionFieldsService.DefinitionsByApiVersion
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
@@ -63,45 +61,6 @@ class ApplicationService @Inject() (
   type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName,V]]
 
-
-  // TODO - Candidate for removal as no longer used
-  def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
-
-    def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription, fieldDefinitions: DefinitionsByApiVersion): Future[APISubscriptionStatus] = {
-
-      val apiIdentifier = ApiIdentifier(api.context, version.version.version)
-
-      val subscriptionFieldsWithOutValues: Seq[SubscriptionFieldDefinition] =
-        fieldDefinitions.getOrElse(apiIdentifier, Seq.empty)
-
-      val subscriptionFieldsWithValues: Future[Seq[SubscriptionFieldValue]] =
-        subscriptionFieldsService.fetchFieldsValues(application, subscriptionFieldsWithOutValues, apiIdentifier)
-
-      subscriptionFieldsWithValues.map { fields: Seq[SubscriptionFieldValue] =>
-        {
-          val wrapper = SubscriptionFieldsWrapper(application.id, application.clientId, api.context, version.version.version, fields)
-          APISubscriptionStatus(api.name, api.serviceName, api.context, version.version, version.subscribed, api.requiresTrust.getOrElse(false), wrapper, api.isTestSupport)
-        }
-      }
-    }
-
-    def toApiVersions(api: APISubscription, fieldDefinitions: DefinitionsByApiVersion): Seq[Future[APISubscriptionStatus]] = {
-
-      api.versions
-        .filterNot(_.version.status == RETIRED)
-        .filterNot(s => s.version.status == DEPRECATED && !s.subscribed)
-        .sortWith(APIDefinition.descendingVersion)
-        .map(toApiSubscriptionStatuses(api, _, fieldDefinitions))
-    }
-
-    val thirdPartyAppConnector = connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector
-
-    for {
-      fieldDefinitions: DefinitionsByApiVersion <- subscriptionFieldsService.getAllFieldDefinitions(application.deployedTo)
-      subscriptions: Seq[APISubscription] <- thirdPartyAppConnector.fetchSubscriptions(application.id)
-      apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions(_, fieldDefinitions)))
-    } yield apiVersions
-  }
 
   def subscribeToApi(application: Application, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val connectors = connectorWrapper.forEnvironment(application.deployedTo)

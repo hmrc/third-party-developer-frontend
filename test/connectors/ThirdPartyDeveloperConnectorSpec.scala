@@ -25,7 +25,7 @@ import domain.models.developers._
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status
-import play.api.http.Status.{NOT_FOUND, NO_CONTENT}
+import play.api.http.Status.NO_CONTENT
 import play.api.libs.json.{Json, JsString, JsValue}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient

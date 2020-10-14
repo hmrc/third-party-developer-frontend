@@ -17,7 +17,6 @@
 package controllers
 
 import domain.ApplicationUpdateSuccessful
-import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
@@ -90,9 +89,6 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       )
 
       givenApplicationAction(application, developerSession)
-
-      when(underTest.applicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-        .thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
       application
     }

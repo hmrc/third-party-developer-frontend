@@ -585,7 +585,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return 404 NOT FOUND when no API subscriptions are retrieved" in new Setup with BasicApplicationProvider {
-      givenApplicationHasNoSubs(application)
+      // givenApplicationHasNoSubs(application)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 

@@ -19,7 +19,7 @@ package mocks.service
 import java.util.UUID
 
 import domain._
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, ApiVersion}
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications._
 import domain.models.developers.DeveloperSession
 import domain.models.subscriptions.APISubscription
@@ -59,12 +59,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
     when(applicationServiceMock.fetchAllSubscriptions(any[Application])(any[HeaderCarrier]))
       .thenReturn(successful(subscriptions))
   }
-
-  def givenApplicationHasSubs(application: Application, returns: Seq[APISubscriptionStatus]) =
-    when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(*)).thenReturn(successful(returns))
-
-  def givenApplicationHasNoSubs(application: Application) =
-    when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(*)).thenReturn(successful(Seq.empty))
 
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
@@ -139,6 +133,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
 
     when(applicationServiceMock.fetchCredentials(eqTo(appData.application))(*)).thenReturn(successful(tokens()))
 
-    givenApplicationHasNoSubs(appData.application)
+    // givenApplicationHasNoSubs(appData.application)
   }
 }
