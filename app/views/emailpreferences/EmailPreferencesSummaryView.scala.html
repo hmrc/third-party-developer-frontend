@@ -51,7 +51,7 @@
             <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
 
             @if(userHasEmailPreferences) {
-                <p id="firstLine">You can change your preferences at any time.</p>
+                <p id="firstLine">You will receive emails about these APIs and topics.</p>
             } else {
                 <p id="firstLine">You have selected no email preferences.</p>
             }
@@ -68,7 +68,7 @@
                                           <span id="all-api-@taxRegimeInterest._1.regime">All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs</span>
                                     } else {
                                         @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
-                                          <span id="@selectedAPI">@viewData.apiDisplayName(selectedAPI)</span>
+                                          <span id="@selectedAPI">@viewData.apiDisplayName(selectedAPI)</span><br />
                                         }
                                     }
                                 </p>
