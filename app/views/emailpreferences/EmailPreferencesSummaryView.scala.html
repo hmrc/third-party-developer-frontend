@@ -41,7 +41,6 @@
         developerSession = Some(loggedIn)
     ) {
 
-       
 
         @if(viewData.unsubscribed) {
             <div class="govuk-box-highlight">
@@ -58,57 +57,45 @@
             }
         }
 
-     
-
-@EmailPrefsBulletInfoView()
-
         @if(userHasEmailPreferences) {
-            <table>
-                <caption class="heading-medium">Email preferences<caption>
-                    <tbody>
-                        <tr>
-                            <th strong class="col-30 bold-small">Category</th>
-                            <th strong class="col-30 bold-small">APIs</th>
-                            <th></th>
-                        </tr>
-                        @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
 
-                            <tr>
-                                <th id="regime-col-@taxRegimeInterest._2" class="col-30 bold-small">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</th>
-                                <td id="apis-col-@taxRegimeInterest._2">
+                        @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
+                            <div>
+                             
+                               <p> <h3>@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h3>
+                                
                                     @if(taxRegimeInterest._1.services.isEmpty) {
-                                        All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs
+                                       <span id="all-api-@taxRegimeInterest._1.regime">All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs</span>
                                     } else {
                                         @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
-                                            @viewData.apiDisplayName(selectedAPI)
-                                            <br />
+                                          <span id="@selectedAPI">@viewData.apiDisplayName(selectedAPI)</span>
                                         }
                                     }
-                                </td>
-                                <th id="chglnk-col-@taxRegimeInterest._2">
-                                    <div align="right">
-                                       <a id="change-@taxRegimeInterest._2-link" href="@routes.EmailPreferences.emailPreferencesSummaryPage">Change<span class="visually-hidden">Change the APIs you're interested in</span></a> 
-                                    </div>
-                                </th>
-                            </tr>
+                                </p>
+                                 
+
                         }
-                        <tr >
-                            <th id="topicsHeading" strong class="bold-small">Topics</th>
-                            <td id="selectedTopicsCell">
+                   
+                            <a id="change-apis-link" href="@routes.EmailPreferences.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a> 
+                         </div>
+
+                        <hr />
+                        <div>
+                            <p>
+                        <h3>Topics</h3>
+                               
                             @for(topicName <- loggedIn.developer.emailPreferences.topics.map(_.displayName).toList.sorted) {
                                 @topicName
                                 <br />
                             }
-                            </td>
-                            <th>
-                                <div align="right"><a id="changeTopicsLink" href="@routes.EmailPreferences.flowSelectTopicsPage">
-                                    Change<span class="visually-hidden">
-                                    Change the type of emails you want to receive</span></a>
-                                </div>
-                            </th>
-                        </tr>
-                    </tbody>
-            </table>
+                        </p>
+                              
+                                    <a id="changeTopicsLink" href="@routes.EmailPreferences.flowSelectTopicsPage">Change the topics you are interested in</a>
+                           
+
+                    </div>
+                        <hr />
+
         } else {
             <p><a id="setupEmailPreferencesLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage">Set up email preferences</a></p>
         }
@@ -122,6 +109,4 @@
             <p><a id="unsubscribeLink" href="@routes.EmailPreferences.unsubscribeAllPage">
                 Unsubscribe from Developer Hub emails</a></p>
         }
-
-        <p><a id="viewAllApplicationsLink" href="@routes.AddApplication.manageApps()">View all applications</a></p>
     }
