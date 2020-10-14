@@ -55,11 +55,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
   def validateStaticElements(document: Document) = {
 
     document.getElementById("pageHeading").text() shouldNot be("Email Preferences")
-    val elements = document.select("ul#info > li")
-    elements.get(0).text() shouldBe "important notices and service updates"
-    elements.get(1).text() shouldBe "changes to any applications you have"
-    elements.get(2).text() shouldBe "making your application accessible"
-    checkLink(document, "viewAllApplicationsLink", "View all applications", "/developer/applications")
+
     checkLink(
       document,
       "statusPageLink",
@@ -74,29 +70,42 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     document.getElementById(id).attr("href") shouldBe linkVal
   }
 
-  def checkEmailPreferencesTable(document: Document,
+  def checkEmailPreferencesApisSection(document: Document,
                                  emailPreferences: EmailPreferences,
                                  apiCategoryDetails: Seq[APICategoryDetails],
                                  extendedServiceDetails: Map[String, String]): Unit = {
-    val tableHeaders = document.getElementsByTag("th")
-    tableHeaders.get(0).text() shouldBe "Category"
-    tableHeaders.get(1).text() shouldBe "APIs"
 
-    for (interest <- emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
-      val textRegimeDisplayNameVal = taxRegimeDisplayName(apiCategoryDetails, interest._1.regime)
-      document.getElementById(s"regime-col-${interest._2}").text() shouldBe textRegimeDisplayNameVal
-      val services = interest._1.services
-      val apisColText = if (services.isEmpty) s"All $textRegimeDisplayNameVal APIs" else services.map(extendedServiceDetails.getOrElse(_, "")).mkString(" ")
-      document.getElementById(s"apis-col-${interest._2}").text() shouldBe apisColText
-      checkLink(document, s"change-${interest._2}-link", "Change", "/developer/profile/email-preferences")
+    for (interest <- emailPreferences.interests.sortBy(_.regime)) {
+      val textRegimeDisplayNameVal = taxRegimeDisplayName(apiCategoryDetails, interest.regime)
+       val categoryHeading = document.getElementById(s"category-heading-${interest.regime}")
+      categoryHeading.text shouldBe textRegimeDisplayNameVal
+   
+      val services = interest.services
+      if (services.isEmpty) {
+        document.getElementById(s"all-api-${interest.regime}").text() shouldBe s"All $textRegimeDisplayNameVal APIs"
+      } else {
+          for(service <- services){
+            document.getElementById(s"${service}").text() shouldBe extendedServiceDetails.get(service).getOrElse("")
+          }
+      }
+
+      checkLink(document, "change-apis-link", "Edit your preferences or get emails about other APIs", "/developer/profile/email-preferences/categories")
+    }
+  }
+
+
+   def checkEmailTopicsSection(document: Document,
+                                 emailPreferences: EmailPreferences): Unit = {                                 
+
+    val topicsHeading = document.getElementById("topics-heading")
+    topicsHeading.text shouldBe "Topics"
+    for(topic <- emailPreferences.topics){
+      val selectedTopicsCell = document.getElementById(topic.value)
+      selectedTopicsCell.text shouldBe topic.displayName
     }
 
-    val topicsHeading = document.getElementById("topicsHeading")
-    topicsHeading.text shouldBe "Topics"
 
-    val selectedTopicsCell = document.getElementById("selectedTopicsCell")
-    selectedTopicsCell.text shouldBe emailPreferences.topics.map(_.displayName).toList.sorted.mkString(" ")
-    checkLink(document, "changeTopicsLink", "Change", "/developer/profile/email-preferences/topics")
+    checkLink(document, "changeTopicsLink", "Change the topics you are interested in", "/developer/profile/email-preferences/topics")
 
     checkLink(document, "unsubscribeLink", "Unsubscribe from Developer Hub emails", "/developer/profile/email-preferences/unsubscribe")
   }
@@ -112,14 +121,16 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
   }
 
   "Email Preferences Summary view page" should {
-    "render results table when email preferences have been selected" in new Setup {
+    "render results when email preferences have been selected" in new Setup {
 
       val page =
         emailPreferencesSummaryView.render(
           EmailPreferencesSummaryViewData(apiCategoryDetailsMap, extendedServiceDetails), messagesProvider.messages, developerSession, request, appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document)
-      checkEmailPreferencesTable(document, developerSession.developer.emailPreferences, apiCategoryDetails, extendedServiceDetails)
+      checkEmailPreferencesApisSection(document, developerSession.developer.emailPreferences, apiCategoryDetails, extendedServiceDetails)
+      checkEmailTopicsSection(document, developerSession.developer.emailPreferences)
+ 
     }
 
     "display 'no email preferences selected' page for users that have not yet selected any" in new Setup {

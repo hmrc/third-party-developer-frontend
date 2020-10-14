@@ -62,10 +62,10 @@
                         @for(taxRegimeInterest <- loggedIn.developer.emailPreferences.interests.sortBy(_.regime).zipWithIndex) {
                             <div>
                              
-                               <p> <h3>@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h3>
+                               <p> <h3 id="category-heading-@taxRegimeInterest._1.regime">@viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime)</h3>
                                 
                                     @if(taxRegimeInterest._1.services.isEmpty) {
-                                       <span id="all-api-@taxRegimeInterest._1.regime">All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs</span>
+                                          <span id="all-api-@taxRegimeInterest._1.regime">All @viewData.taxRegimeDisplayName(taxRegimeInterest._1.regime) APIs</span>
                                     } else {
                                         @for(selectedAPI <- taxRegimeInterest._1.services.toList.sorted) {
                                           <span id="@selectedAPI">@viewData.apiDisplayName(selectedAPI)</span>
@@ -82,10 +82,10 @@
                         <hr />
                         <div>
                             <p>
-                        <h3>Topics</h3>
+                        <h3 id="topics-heading">Topics</h3>
                                
-                            @for(topicName <- loggedIn.developer.emailPreferences.topics.map(_.displayName).toList.sorted) {
-                                @topicName
+                            @for(topic <- loggedIn.developer.emailPreferences.topics.toList.sortBy(_.displayName)) {
+                                <span id="@topic.value">@topic.displayName</span>
                                 <br />
                             }
                         </p>
