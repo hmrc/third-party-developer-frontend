@@ -20,14 +20,11 @@ import views.helper.CommonViewSpec
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import domain.models.developers.LoggedInState
+import domain.models.emailpreferences.{APICategoryDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
 import views.html.emailpreferences.EmailPreferencesSummaryView
-import model.EmailPreferences
-import model.TaxRegimeInterests
-import model.EmailTopic
-import model.APICategoryDetails
 
 class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -68,6 +65,8 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       "statusPageLink",
       "service availability page for information about live incidents",
       "https://api-platform-status.production.tax.service.gov.uk/")
+
+  
   }
 
   def checkLink(document: Document, id: String, linkText: String, linkVal: String) = {
@@ -97,7 +96,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
 
     val selectedTopicsCell = document.getElementById("selectedTopicsCell")
     selectedTopicsCell.text shouldBe emailPreferences.topics.map(_.displayName).toList.sorted.mkString(" ")
-    checkLink(document, "changeTopicsLink", "Change", "/developer/profile/email-preferences")
+    checkLink(document, "changeTopicsLink", "Change", "/developer/profile/email-preferences/topics")
 
     checkLink(document, "unsubscribeLink", "Unsubscribe from Developer Hub emails", "/developer/profile/email-preferences/unsubscribe")
   }

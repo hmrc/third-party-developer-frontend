@@ -36,6 +36,14 @@ POST        /profile                                                            
 GET         /profile/email-preferences                                                      controllers.EmailPreferences.emailPreferencesSummaryPage
 GET         /profile/email-preferences/unsubscribe                                          controllers.EmailPreferences.unsubscribeAllPage
 POST        /profile/email-preferences/unsubscribe                                          controllers.EmailPreferences.unsubscribeAllAction
+GET         /profile/email-preferences/start                                                controllers.EmailPreferences.flowStartPage
+GET         /profile/email-preferences/categories                                           controllers.EmailPreferences.flowSelectCategoriesPage
+POST        /profile/email-preferences/categories                                           controllers.EmailPreferences.flowSelectCategoriesAction
+POST        /profile/email-preferences/no-categories                                        controllers.EmailPreferences.flowSelectNoCategoriesAction
+GET         /profile/email-preferences/apis                                                 controllers.EmailPreferences.flowSelectApisPage(category: String)
+POST         /profile/email-preferences/apis                                                 controllers.EmailPreferences.flowSelectApisAction
+GET         /profile/email-preferences/topics                                               controllers.EmailPreferences.flowSelectTopicsPage
+POST        /profile/email-preferences/topics                                               controllers.EmailPreferences.flowSelectTopicsAction
 
 GET         /profile/protect-account                                                        controllers.ProtectAccount.getProtectAccount
 GET         /profile/protect-account/setup                                                  controllers.ProtectAccount.getQrCode
@@ -109,9 +117,19 @@ POST        /applications/:id/delete-principal                                  
 GET         /applications/:id/delete-subordinate-confirm                                                 controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: domain.models.applications.ApplicationId)
 POST        /applications/:id/delete-subordinate                                                         controllers.DeleteApplication.deleteSubordinateApplicationAction(id: domain.models.applications.ApplicationId)
 
-GET         /applications/:id/ip-whitelist                                                               controllers.IpWhitelist.manageIpWhitelist(id: domain.models.applications.ApplicationId)
-GET         /applications/:id/ip-whitelist/change                                                        controllers.IpWhitelist.changeIpWhitelist(id: domain.models.applications.ApplicationId)
-POST        /applications/:id/ip-whitelist/change                                                        controllers.IpWhitelist.changeIpWhitelistAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist                                                               controllers.IpAllowlist.viewIpAllowlist(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/allowed-ips                                                   controllers.IpAllowlist.allowedIps(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/setup                                                         controllers.IpAllowlist.settingUpAllowlist(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/change                                                        controllers.IpAllowlist.editIpAllowlist(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/ip-allowlist/change                                                        controllers.IpAllowlist.editIpAllowlistAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/add                                                           controllers.IpAllowlist.addCidrBlock(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/ip-allowlist/add                                                           controllers.IpAllowlist.addCidrBlockAction(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/remove                                                        controllers.IpAllowlist.removeCidrBlock(id: domain.models.applications.ApplicationId, cidrBlock: String)
+POST        /applications/:id/ip-allowlist/remove                                                        controllers.IpAllowlist.removeCidrBlockAction(id: domain.models.applications.ApplicationId, cidrBlock: String)
+GET         /applications/:id/ip-allowlist/activate                                                      controllers.IpAllowlist.reviewIpAllowlist(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/ip-allowlist/activate                                                      controllers.IpAllowlist.activateIpAllowlist(id: domain.models.applications.ApplicationId)
+GET         /applications/:id/ip-allowlist/deactivate                                                    controllers.IpAllowlist.removeIpAllowlist(id: domain.models.applications.ApplicationId)
+POST        /applications/:id/ip-allowlist/deactivate                                                    controllers.IpAllowlist.removeIpAllowlistAction(id: domain.models.applications.ApplicationId)
 
 GET         /applications/:id/subscriptions                                                              controllers.Subscriptions.manageSubscriptions(id: domain.models.applications.ApplicationId)
 

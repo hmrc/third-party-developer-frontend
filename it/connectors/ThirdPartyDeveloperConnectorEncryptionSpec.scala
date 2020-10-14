@@ -56,7 +56,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      val result = await(underTest.register(new Registration("first", "last", "email@example.com", "password")))
+      await(underTest.register(new Registration("first", "last", "email@example.com", "password")))
       verify(
         1,
         postRequestedFor(urlMatching("/developer"))
@@ -77,7 +77,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      val result = await(underTest.createUnregisteredUser("email@example.com"))
+      await(underTest.createUnregisteredUser("email@example.com"))
       verify(
         1,
         postRequestedFor(urlMatching("/unregistered-developer"))
@@ -96,7 +96,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      val result = await(underTest.reset(new PasswordReset("email@example.com", "newPassword")))
+      await(underTest.reset(new PasswordReset("email@example.com", "newPassword")))
       verify(
         1,
         postRequestedFor(urlMatching("/reset-password"))
@@ -115,7 +115,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      val result = await(underTest.changePassword(new ChangePassword("email@example.com", "oldPassword", "newPassword")))
+      await(underTest.changePassword(new ChangePassword("email@example.com", "oldPassword", "newPassword")))
       verify(
         1,
         postRequestedFor(urlMatching("/change-password"))

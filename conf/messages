@@ -9,8 +9,10 @@ telephone.error.required.field=Provide your telephone number
 comments.error.required.field=Tell us what you need help with
 comments.error.maxLength.field=You entered too much text - keep it under 3,000 characters
 
-whitelistedIps.error.required.field=Tell us what you want to change
-whitelistedIps.error.maxLength.field=Provide details with fewer than 3000 characters
+ipAllowlist.addAnother.confirmation.no.choice.field = Tell us if you want to add another IP address
+ipAllowlist.cidrBlock.invalid = Enter a CIDR notation in the correct format, for example, 1.1.1.0/24
+ipAllowlist.cidrBlock.invalid.private = You must use a public network range
+ipAllowlist.cidrBlock.invalid.range = Enter a CIDR notation with the correct netmask range. We accept netmask ranges between 24 and 32
 
 firstname.error.required.field=Provide your first name
 firstname.error.required.global=Provide your first name
@@ -156,3 +158,6 @@ delete.redirect.confirmation.no.choice.field = Tell us if you want to delete thi
 
 accessCode.invalid.name.field = You have entered an invalid access code
 accessCode.invalid.name.global = You have entered an invalid access code
+
+error.selectedcategories.empty = Select a category you are interested in
+error.selectedapis.empty = Select an API you are interested in

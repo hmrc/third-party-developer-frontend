@@ -18,40 +18,39 @@
 @import domain.models.views.BackButtonWithJavaScript
 @import include._
 @import views.html.include.DevMain
-@import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
+@import domain.models.applications.Application
 
 @this(devMain: DevMain)
 
-@(app: Application, form: Form[ChangeIpWhitelistForm])(
+@(app: Application)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Change whitelisted IPs",
+    title = "IP allow list",
     userFullName = loggedIn.loggedInName,
     back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
-    @errorSummary(form)
 
-    <div class="ip-whitelist">
+    <div class="ip-allowlist">
         <header>
-            <h1 class="heading-xlarge">Change whitelisted IPs</h1>
+            <h1 class="heading-xlarge">IP allow list</h1>
             @appEnvironment(app)
+            <br>
         </header>
 
-        @helper.form(action = controllers.routes.IpWhitelist.changeIpWhitelistAction(app.id), 'class -> "form") {
-            @helper.CSRF.formField
-            <div class="form-group @if(form.errors("description").nonEmpty) {form-group-error}">
-                <label class="heading-medium">
-                    Tell us what you want to change
-                </label>
-                @fieldError(form.errors, "description", form.error("submissionError").isEmpty)
-                <textarea class="form-control @if(form.errors("description").nonEmpty) {form-control-error}"
-                          id="description" name="description"
-                          rows="4" aria-required="true">@form.data.get("description")</textarea>
-            </div>
-            <button class="button" id="submit" type="submit">Submit</button>
-        }
+        <p>An IP allow list is a security feature that lets you control which IP addresses are allowed to make API requests to HMRC.</p>
+        <div class="panel panel-border-wide">
+            <p>The IP allow list is optional and is only suitable if you have a static set of IP addresses where your software is hosted.</p>
+        </div>
+        <p>If you have dynamic IP addresses, consider switching to static IP addresses to use the IP allow list.</p>
+        <p>The IP allow list limits access to HMRC services to approved IP addresses associated with your application.</p>
+
+        <h2 class="heading-medium">Before you start</h2>
+        <p>You will need:</p>
+        <ul class="list list-bullet"><li>one or more static IP addresses</li></ul>
+
+        <p><a class="button" href="@routes.IpAllowlist.allowedIps(app.id)">Continue</a></p>
     </div>
 }

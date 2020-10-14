@@ -19,6 +19,7 @@ package controllers
 import domain.models.applications.{Application, ApplicationId, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 
 trait ConfirmPassword {
   val password: String
@@ -409,12 +410,55 @@ object Remove2SVConfirmForm {
   )
 }
 
-final case class ChangeIpWhitelistForm(description: String)
+final case class AddAnotherCidrBlockConfirmForm(confirm: Option[String] = Some(""))
 
-object ChangeIpWhitelistForm {
-  val form: Form[ChangeIpWhitelistForm] = Form(
-    mapping("description" -> whitelistedIpsValidator)(ChangeIpWhitelistForm.apply)(
-      ChangeIpWhitelistForm.unapply
-    )
+object AddAnotherCidrBlockConfirmForm {
+
+  def form: Form[AddAnotherCidrBlockConfirmForm] = Form(
+    mapping(
+      "confirm" -> optional(text)
+        .verifying(FormKeys.ipAllowlistAddAnotherNoChoiceKey, s => s.isDefined)
+    )(AddAnotherCidrBlockConfirmForm.apply)(AddAnotherCidrBlockConfirmForm.unapply)
   )
+}
+
+final case class AddCidrBlockForm(ipAddress: String)
+
+object AddCidrBlockForm {
+  val form: Form[AddCidrBlockForm] = Form(
+    mapping("ipAddress" -> cidrBlockValidator)(AddCidrBlockForm.apply)(AddCidrBlockForm.unapply)
+  )
+}
+
+final case class TaxRegimeEmailPreferencesForm(taxRegime: List[String])
+object TaxRegimeEmailPreferencesForm {
+  def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
+    if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedcategories.empty"))
+  }
+  
+  val form: Form[TaxRegimeEmailPreferencesForm] =
+    Form(mapping("taxRegime" -> list(text).verifying(nonEmptyList))
+    (TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
+}
+
+final case class SelectedApisEmailPreferencesForm(selectedApi: Seq[String], currentCategory: String)
+
+object SelectedApisEmailPreferencesForm {
+  def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
+    if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedapis.empty"))
+  }
+
+  def form: Form[SelectedApisEmailPreferencesForm] = Form(mapping(
+         "selectedApi" -> seq(text).verifying(nonEmptyList),
+         "currentCategory" -> text)
+         (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply))
+}
+
+final case class SelectedTopicsEmailPreferencesForm(topic: Seq[String])
+
+object SelectedTopicsEmailPreferencesForm {
+
+   def form: Form[SelectedTopicsEmailPreferencesForm] = Form(mapping(
+         "topic" -> seq(text))
+         (SelectedTopicsEmailPreferencesForm.apply)(SelectedTopicsEmailPreferencesForm.unapply))
 }
