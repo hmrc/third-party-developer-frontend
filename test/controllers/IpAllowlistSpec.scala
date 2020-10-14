@@ -103,12 +103,30 @@ class IpAllowlistSpec extends BaseControllerSpec with ApplicationActionServiceMo
       body should include("API requests can only be made from these IP addresses.")
     }
 
-    "return 403 when a developer tries to access a production app" in new Setup {
+    "return the start page and tell the user to contact an admin when a developer accesses a prod app that does not have an active allowlist" in new Setup {
       givenApplicationAction(anApplicationWithoutIpWhitelist, givenTheUserIsLoggedInAs(developer))
+      when(mockIpAllowlistService.discardIpAllowlistFlow(sessionId)).thenReturn(successful(true))
 
       val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithoutIpWhitelist.id)(loggedInRequest)
 
-      status(result) shouldBe FORBIDDEN
+      status(result) shouldBe OK
+      val body: String = contentAsString(result)
+      body should include("An IP allow list is a security feature that lets you control which IP addresses are allowed to make API requests to HMRC")
+      body should include("You cannot set up the IP allow list because you are not an administrator")
+      body should include("The administrator <a href=\"mailto:admin@example.com\">admin@example.com</a> has access.")
+    }
+
+    "return the allowlist and tell the user to contact an admin when a developer accesses a prod app that has an active allowlist" in new Setup {
+      givenApplicationAction(anApplicationWithIpWhitelist, givenTheUserIsLoggedInAs(developer))
+      when(mockIpAllowlistService.discardIpAllowlistFlow(sessionId)).thenReturn(successful(true))
+
+      val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithIpWhitelist.id)(loggedInRequest)
+
+      status(result) shouldBe OK
+      val body: String = contentAsString(result)
+      body should include("API requests can only be made from these IP addresses.")
+      body should include("You cannot edit the IP allow list because you are not an administrator")
+      body should include("The administrator <a href=\"mailto:admin@example.com\">admin@example.com</a> has access.")
     }
   }
 
