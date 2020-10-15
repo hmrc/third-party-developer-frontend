@@ -44,16 +44,16 @@
 
         @if(viewData.unsubscribed) {
             <div class="govuk-box-highlight">
-                <h1 class="heading-xlarge">You are unsubscribed</h1>
-                <h2 class="heading-medium">You can change your email preferences at any time</h2>
+                <h1 id="page-heading" class="heading-xlarge">You are unsubscribed</h1>
+                <p id="first-line" class="font-large">You can change your email preferences at any time</p>
             </div>
         } else {
-            <h1 id="pageHeading" class="heading-xlarge">@pageHeading</h1>
+            <h1 id="page-heading" class="heading-xlarge">@pageHeading</h1>
 
             @if(userHasEmailPreferences) {
-                <p id="firstLine">You will receive emails about these APIs and topics.</p>
+                <p id="first-line">You will receive emails about these APIs and topics.</p>
             } else {
-                <p id="firstLine">You have selected no email preferences.</p>
+                <p id="first-line">You have selected no email preferences.</p>
             }
         }
 
@@ -93,7 +93,7 @@
                 }
                 </p>
 
-                <a id="changeTopicsLink" href="@routes.EmailPreferences.flowSelectTopicsPage">
+                <a id="change-topics-link" href="@routes.EmailPreferences.flowSelectTopicsPage">
                     Change the topics you are interested in</a>
 
 
@@ -101,17 +101,16 @@
             <hr />
 
         } else {
-            <p><a id="setupEmailPreferencesLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage">
+            <p><a id="setup-emailpreferences-link" href="@routes.EmailPreferences.emailPreferencesSummaryPage">
                 Set up email preferences</a></p>
         }
-        <br />
 
         <p>Check the @{
-            Link.toExternalPage(id = Some("statusPageLink"), url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
+            Link.toExternalPage(id = Some("status-page-link"), url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
         }.</p>
 
         @if(userHasEmailPreferences) {
-            <p><a id="unsubscribeLink" href="@routes.EmailPreferences.unsubscribeAllPage">
+            <p><a id="unsubscribe-link" href="@routes.EmailPreferences.unsubscribeAllPage">
                 Unsubscribe from Developer Hub emails</a></p>
         }
     }

@@ -54,11 +54,11 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
 
   def validateStaticElements(document: Document) = {
 
-    document.getElementById("pageHeading").text() shouldNot be("Email Preferences")
+    document.getElementById("page-heading").text() shouldNot be("Email Preferences")
 
     checkLink(
       document,
-      "statusPageLink",
+      "status-page-link",
       "service availability page for information about live incidents",
       "https://api-platform-status.production.tax.service.gov.uk/")
 
@@ -107,9 +107,9 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
     }
 
 
-    checkLink(document, "changeTopicsLink", "Change the topics you are interested in", "/developer/profile/email-preferences/topics")
+    checkLink(document, "change-topics-link", "Change the topics you are interested in", "/developer/profile/email-preferences/topics")
 
-    checkLink(document, "unsubscribeLink", "Unsubscribe from Developer Hub emails", "/developer/profile/email-preferences/unsubscribe")
+    checkLink(document, "unsubscribe-link", "Unsubscribe from Developer Hub emails", "/developer/profile/email-preferences/unsubscribe")
   }
 
   def taxRegimeDisplayName(apiCategoryDetails: Seq[APICategoryDetails], taxRegime: String): String = {
@@ -117,9 +117,16 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
   }
 
   def checkNoEmailPreferencesPageElements(document: Document): Unit = {
-    document.getElementById("firstLine").text shouldBe "You have selected no email preferences."
-    checkLink(document, "setupEmailPreferencesLink", "Set up email preferences", "/developer/profile/email-preferences")
-    document.select("a#unsubscribeLink").isEmpty shouldBe true
+    document.getElementById("first-line").text shouldBe "You have selected no email preferences."
+    checkLink(document, "setup-emailpreferences-link", "Set up email preferences", "/developer/profile/email-preferences")
+    document.select("a#unsubscribe-link").isEmpty shouldBe true
+  }
+
+    def checkUnsubscribedPageElements(document: Document): Unit = {
+    document.getElementById("page-heading").text shouldBe "You are unsubscribed"
+    document.getElementById("first-line").text shouldBe "You can change your email preferences at any time"
+    checkLink(document, "setup-emailpreferences-link", "Set up email preferences", "/developer/profile/email-preferences")
+    document.select("a#unsubscribe-link").isEmpty shouldBe true
   }
 
   "Email Preferences Summary view page" should {
@@ -147,6 +154,21 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       val document = Jsoup.parse(page.body)
       validateStaticElements(document)
       checkNoEmailPreferencesPageElements(document)
+    }
+  
+
+   "display 'unsubscribed' elements when user has unsubscribed" in new Setup {
+      val page =
+        emailPreferencesSummaryView.render(
+          EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty, unsubscribed = true),
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig)
+
+      val document = Jsoup.parse(page.body)
+      validateStaticElements(document)
+      checkUnsubscribedPageElements(document)
     }
   }
 }

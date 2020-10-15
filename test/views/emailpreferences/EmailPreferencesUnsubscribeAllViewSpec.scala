@@ -46,6 +46,13 @@ class EmailPreferencesUnsubscribeAllViewSpec extends CommonViewSpec with WithCSR
       form.attr("method") should be ("POST")
       form.attr("action") should be ("/developer/profile/email-preferences/unsubscribe")
 
+      document.getElementById("info-heading").text() shouldBe "Having a Developer Hub account means you will receive mandatory emails about:"
+      //check the bullet points 
+      val elements = document.select("ul#info > li")
+      elements.get(0).text() shouldBe "important notices and service updates"
+      elements.get(1).text() shouldBe "changes to any applications you have"
+      elements.get(2).text() shouldBe "making your application accessible"
+
       // Ensure CSRF token exists
       document.select("input[type=hidden][name=csrfToken]").isEmpty should be (false)
 
