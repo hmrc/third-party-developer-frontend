@@ -19,7 +19,7 @@ package controllers
 import config.{ApplicationConfig, ErrorHandler}
 import domain.models.applications.ApplicationId
 import domain.models.applications.Capabilities.SupportsIpAllowlist
-import domain.models.applications.Permissions.SandboxOrAdmin
+import domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -54,33 +54,36 @@ class IpAllowlist @Inject()(
     extends ApplicationController(mcc) {
 
   private def canViewIpAllowlistAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+    checkActionForApprovedApps(SupportsIpAllowlist, TeamMembersOnly)(applicationId)(fun)
+
+  private def canEditIpAllowlistAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsIpAllowlist, SandboxOrAdmin)(applicationId)(fun)
 
   def viewIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.discardIpAllowlistFlow(request.user.session.sessionId) map { _ =>
       if (request.application.ipWhitelist.isEmpty) {
-        Ok(startIpAllowlistView(request.application))
+        Ok(startIpAllowlistView(request.application, request.role))
       } else {
         Ok(ipAllowlistView(request.application, request.role))
       }
     }
   }
 
-  def allowedIps(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def allowedIps(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     successful(Ok(allowedIpsView(request.application)))
   }
 
-  def settingUpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def settingUpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     successful(Ok(settingUpAllowlistView(request.application)))
   }
 
-  def editIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def editIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.getIpAllowlistFlow(request.application, request.user.session.sessionId) map { flow =>
       Ok(editIpAllowlistView(request.application, flow, AddAnotherCidrBlockConfirmForm.form.fill(AddAnotherCidrBlockConfirmForm())))
     }
   }
 
-  def editIpAllowlistAction(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def editIpAllowlistAction(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     def handleValidForm(form: AddAnotherCidrBlockConfirmForm): Future[Result] = {
       form.confirm match {
         case Some("Yes") => successful(Redirect(routes.IpAllowlist.addCidrBlock(applicationId)))
@@ -97,13 +100,13 @@ class IpAllowlist @Inject()(
     AddAnotherCidrBlockConfirmForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def addCidrBlock(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def addCidrBlock(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.getIpAllowlistFlow(request.application, request.user.session.sessionId) map { flow =>
       Ok(addCidrBlockView(request.application, flow, AddCidrBlockForm.form.fill(AddCidrBlockForm(""))))
     }
   }
 
-  def addCidrBlockAction(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def addCidrBlockAction(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     def handleValidForm(form: AddCidrBlockForm): Future[Result] = {
       ipAllowlistService.addCidrBlock(form.ipAddress, request.application, request.user.session.sessionId) map { _ =>
         Redirect(routes.IpAllowlist.editIpAllowlist(applicationId))
@@ -119,11 +122,11 @@ class IpAllowlist @Inject()(
     AddCidrBlockForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm)
   }
 
-  def removeCidrBlock(applicationId: ApplicationId, cidrBlock: String): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def removeCidrBlock(applicationId: ApplicationId, cidrBlock: String): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     successful(Ok(removeCidrBlockView(request.application, cidrBlock)))
   }
 
-  def removeCidrBlockAction(applicationId: ApplicationId, cidrBlock: String): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def removeCidrBlockAction(applicationId: ApplicationId, cidrBlock: String): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.removeCidrBlock(cidrBlock, request.user.session.sessionId) map { updatedFlow =>
       if (updatedFlow.allowlist.isEmpty) {
         Redirect(routes.IpAllowlist.settingUpAllowlist(applicationId))
@@ -133,13 +136,13 @@ class IpAllowlist @Inject()(
     }
   }
 
-  def reviewIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def reviewIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.getIpAllowlistFlow(request.application, request.user.session.sessionId) map { flow =>
       Ok(reviewIpAllowlistView(request.application, flow))
     }
   }
 
-  def activateIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def activateIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.getIpAllowlistFlow(request.application, request.user.session.sessionId) flatMap { flow =>
       ipAllowlistService.activateIpAllowlist(request.application, request.user.session.sessionId) map { _ =>
         Ok(changeIpAllowlistSuccessView(request.application, flow))
@@ -147,11 +150,11 @@ class IpAllowlist @Inject()(
     }
   }
 
-  def removeIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def removeIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     successful(Ok(removeIpAllowlistView(request.application)))
   }
 
-  def removeIpAllowlistAction(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
+  def removeIpAllowlistAction(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.deactivateIpAllowlist(request.application, request.user.session.sessionId) map { _ =>
       Ok(removeIpAllowlistSuccessView(request.application))
     }

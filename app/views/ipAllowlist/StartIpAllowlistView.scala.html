@@ -18,13 +18,15 @@
 @import domain.models.views.BackButtonWithJavaScript
 @import include._
 @import views.html.include.DevMain
+@import domain.models.applications.Role
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
 
 @this(devMain: DevMain)
 
-@(app: Application)(
+@(app: Application, roleOfLoggedIn: Role)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+@sandboxOrAdmin = @{app.deployedTo.isSandbox || roleOfLoggedIn.isAdministrator}
 
 @devMain(
     title = "IP allow list",
@@ -41,16 +43,23 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         </header>
 
         <p>An IP allow list is a security feature that lets you control which IP addresses are allowed to make API requests to HMRC.</p>
-        <div class="panel panel-border-wide">
+        <div class="@if(sandboxOrAdmin){panel panel-border-wide}">
             <p>The IP allow list is optional and is only suitable if you have a static set of IP addresses where your software is hosted.</p>
         </div>
         <p>If you have dynamic IP addresses, consider switching to static IP addresses to use the IP allow list.</p>
         <p>The IP allow list limits access to HMRC services to approved IP addresses associated with your application.</p>
 
-        <h2 class="heading-medium">Before you start</h2>
-        <p>You will need:</p>
-        <ul class="list list-bullet"><li>one or more static IP addresses</li></ul>
+        @if(sandboxOrAdmin) {
+            <h2 class="heading-medium">Before you start</h2>
+            <p>You will need:</p>
+            <ul class="list list-bullet"><li>one or more static IP addresses</li></ul>
 
-        <p><a class="button" href="@routes.IpAllowlist.allowedIps(app.id)">Continue</a></p>
+            <p><a class="button" href="@routes.IpAllowlist.allowedIps(app.id)">Continue</a></p>
+        } else {
+            <div class="panel panel-border-wide">
+                <p>You cannot set up the IP allow list because you are not an administrator.</p>
+            </div>
+            @administrators(app)
+        }
     </div>
 }

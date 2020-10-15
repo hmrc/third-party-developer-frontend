@@ -26,6 +26,7 @@
 
 @(app: Application, roleOfLoggedIn: Role)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+@sandboxOrAdmin = @{app.deployedTo.isSandbox || roleOfLoggedIn.isAdministrator}
 
 @devMain(
     title = "IP allow list",
@@ -45,7 +46,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
             <br>
         </header>
 
-        <div class="panel panel-border-wide">
+        <div class="@if(sandboxOrAdmin){panel panel-border-wide}">
             <p>API requests can only be made from these IP addresses.</p>
         </div>
 
@@ -57,10 +58,17 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
             }
             </tbody>
         </table>
-
         <br>
-        <p><a class="button" href="@controllers.routes.IpAllowlist.editIpAllowlist(app.id)">Edit IP allow list</a></p>
-        <p><a href="/api-documentation/docs/reference-guide#ip-allow-list">Check how to add IP addresses to your IP allow list</a></p>
-        <p><a href="@routes.IpAllowlist.removeIpAllowlist(app.id)">Remove your IP Allow list</a></p>
+
+        @if(sandboxOrAdmin) {
+            <p><a class="button" href="@controllers.routes.IpAllowlist.editIpAllowlist(app.id)">Edit IP allow list</a></p>
+            <p><a href="/api-documentation/docs/reference-guide#ip-allow-list">Check how to add IP addresses to your IP allow list</a></p>
+            <p><a href="@routes.IpAllowlist.removeIpAllowlist(app.id)">Remove your IP Allow list</a></p>
+        } else {
+            <div class="panel panel-border-wide">
+                <p>You cannot edit the IP allow list because you are not an administrator.</p>
+            </div>
+            @administrators(app)
+        }
     </div>
 }
