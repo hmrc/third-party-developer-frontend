@@ -17,7 +17,7 @@
 @import config.ApplicationConfig
 @import domain.models.developers.DeveloperSession
 @import include._
-@import model.Crumb
+@import domain.models.views.BackButtonWithJavaScript
 
 @this(devMain: DevMain)
 
@@ -30,12 +30,12 @@
     @devMain(
         title = pageHeading,
         userFullName = loggedIn.loggedInName,
-        breadcrumbs = Seq(Crumb(pageHeading), Crumb.emailPreferences, Crumb.home),
+        back = BackButtonWithJavaScript,
         developerSession = Some(loggedIn)
     ) {
 
-    <h1 id="pageHeading" class="heading-xlarge">Are you sure you want to unsubscribe from Developer Hub emails?</h1>
-
+    <h2 id="pageHeading" class="heading-large">Are you sure you want to unsubscribe from Developer Hub emails?</h2>
+        @EmailPrefsBulletInfoView()
     @helper.form(action = routes.EmailPreferences.unsubscribeAllAction(), 'class -> "form", 'id -> "unsubscribeForm") {
         @helper.CSRF.formField
         <button id="submit" class="button" type="submit">Unsubscribe</button>
