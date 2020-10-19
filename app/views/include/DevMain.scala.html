@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import domain.models.views.{BackButton, NoBackButton, StaticNavLinks, UserNavLinks}
+@import domain.models.views.{BackButton, FeedbackBanner, NoBackButton, StaticNavLinks, UserNavLinks}
 @import model.Crumb
 @import domain.models.developers.DeveloperSession
 
@@ -27,7 +27,8 @@
     leftNav: Option[Html] = None,
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
-    developerSession: Option[DeveloperSession]
+    developerSession: Option[DeveloperSession],
+    feedbackBanner: Option[FeedbackBanner] = None
 )(mainContent: Html)(
     implicit request: Request[_],
         messages: Messages,
@@ -54,6 +55,7 @@
     leftNav = leftNav,
     back = back,
     fullWidthContent = fullWidthContent,
-    developerSession = developerSession) {
+    developerSession = developerSession,
+    feedbackBanner = feedbackBanner) {
     @mainContent
 }

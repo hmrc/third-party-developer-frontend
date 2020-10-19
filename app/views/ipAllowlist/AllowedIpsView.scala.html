@@ -15,7 +15,7 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.models.views.BackButtonWithJavaScript
+@import domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
 @import views.html.include.DevMain
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
@@ -29,7 +29,8 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     title = "Allowed IP addresses",
     userFullName = loggedIn.loggedInName,
     back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+    developerSession = Some(loggedIn),
+    feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
 
     <div class="ip-allowlist">

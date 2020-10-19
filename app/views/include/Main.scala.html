@@ -14,9 +14,10 @@
  * limitations under the License.
  *@
 
-@import domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, NoBackButton}
+@import domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
 @import model.Crumb
 @import play.twirl.api.HtmlFormat
+@import views.html.include.FeedbackBannerView
 @import views.html.layouts.GovUkTemplate
 @import uk.gov.hmrc.play.views.html.layouts.{BetaBanner, Footer, Head, HeaderNav, MainContentHeader, ServiceInfo}
 @import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
@@ -29,7 +30,8 @@
         layoutsServiceInfo: ServiceInfo,
         layoutsMainContentHeader: MainContentHeader,
         helpersReportAProblemLink: ReportAProblemLink,
-        govUkTemplate: GovUkTemplate
+        govUkTemplate: GovUkTemplate,
+        feedbackBannerView: FeedbackBannerView
 )
 
 @(title: String,
@@ -44,7 +46,8 @@
     breadcrumbs: Seq[Crumb] = Seq.empty,
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
-    developerSession: Option[DeveloperSession]
+    developerSession: Option[DeveloperSession],
+    feedbackBanner: Option[FeedbackBanner] = None
 )(mainContent: Html = HtmlFormat.empty)(implicit messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig, request: play.api.mvc.Request[Any])
 
 @headScripts = {
@@ -211,6 +214,12 @@
                 @if(leftNav.isDefined) { @contentWithLeftNav } else { @content }
             </div>
         </div>
+        @feedbackBanner match {
+            case Some(fb) => {
+                @feedbackBannerView(fb)
+            }
+            case _ => {}
+        }
     </main>
 }
 
