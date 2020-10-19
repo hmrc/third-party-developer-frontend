@@ -20,6 +20,7 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 @import domain.models.flows.IpAllowlistFlow
+@import domain.models.views.IpAllowlistFeedbackBanner
 @import model.Crumb
 
 @this(devMain: DevMain)
@@ -35,7 +36,8 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         Crumb("IP allow list"),
         Crumb.application(app),
         Crumb.viewAllApplications
-    )
+    ),
+    feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
 
     <div class="ip-allowlist">

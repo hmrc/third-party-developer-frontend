@@ -15,7 +15,7 @@
  *@
 
 @import config.ApplicationConfig
-@import domain.models.views.{BackButtonWithJavaScript, NoBackButton}
+@import domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner, NoBackButton}
 @import include._
 @import views.html.include.DevMain
 @import domain.models.developers.DeveloperSession
@@ -52,7 +52,8 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     userFullName = loggedIn.loggedInName,
     back = backButton,
     developerSession = Some(loggedIn),
-    breadcrumbs = breadcrumbs
+    breadcrumbs = breadcrumbs,
+    feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
 
     <div class="ip-allowlist">

@@ -176,6 +176,15 @@ $(document).ready(function () {
 
     var charCount = new GOVUK.CharCount()
     charCount.init({ selector: '.js-char-count' });
+
+    $("#show-survey").click(function(){
+        $("#feedback").hide();
+        $("#survey").show();
+    });
+    $("#close-survey").click(function(){
+        $("#survey").hide();
+        $("#feedback").show();
+    });
 });
 
 var showHide = function () {

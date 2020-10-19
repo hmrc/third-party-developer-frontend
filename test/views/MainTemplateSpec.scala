@@ -52,7 +52,8 @@ class MainTemplateSpec extends CommonViewSpec {
         mainContent = HtmlFormat.empty,
         messagesProvider = messagesProvider,
         applicationConfig = appConfig, 
-        request = request)
+        request = request,
+        feedbackBanner = None)
 
       view.body should include("data-title=\"Application Title")
     }

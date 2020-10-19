@@ -347,3 +347,42 @@ tr.teamMembers, th {
 .compressed-header {
   margin-top: 0px;
 }
+
+.feedback-banner {
+  $blue: #1d70b8;
+  $light-grey: #f3f2f1;
+  border-bottom: 10px solid $blue;
+  #feedback {
+    padding: 25px;
+    background-color: $blue;
+    color: white;
+    overflow: auto;
+    border-bottom: 1px solid white;
+    p {
+      margin: 10px 25px 0 0;
+      font-size: 16px;
+      font-weight: bold;
+      display: inline-block;
+    }
+    button {
+      background-color: $light-grey;
+      color: black;
+      box-shadow: 0 2px 0 black;
+    }
+  }
+  #survey {
+    border-top: 10px solid $blue;
+    display: none;
+    h2 {
+      margin-top: 30px;
+    }
+    button {
+      float: right;
+      margin-top: 30px;
+      margin-right: 5px;
+      background-color: $light-grey;
+      color: black;
+      box-shadow: 0 2px 0 grey;
+    }
+  }
+}
