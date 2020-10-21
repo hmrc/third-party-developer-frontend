@@ -112,7 +112,6 @@ trait SubscriptionsJsonFormatters {
 
   implicit val formatVersionSubscription = Json.format[VersionSubscription]
 
-  implicit val formatAPISubscription = Json.format[APISubscription]
 }
 
 object SubscriptionsJsonFormatters extends SubscriptionsJsonFormatters

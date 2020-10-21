@@ -25,12 +25,15 @@ import domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_RE
 import domain.models.developers.Developer
 import helpers.string.Digest
 import org.joda.time.DateTime
+import java.util.UUID
 
 case class ApplicationId(value: String) extends AnyVal
 
 object ApplicationId {
   import play.api.libs.json.Json
   implicit val applicationIdFormat = Json.valueFormat[ApplicationId]
+
+  def random: ApplicationId = ApplicationId(UUID.randomUUID().toString)
 }
 
 case class ClientId(value: String) extends AnyVal

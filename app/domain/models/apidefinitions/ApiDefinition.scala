@@ -22,6 +22,7 @@ import play.api.libs.json.Json
 
 import scala.util.Try
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
+import scala.util.Random
 
 object APIDefinition {
   private val nonNumericOrPeriodRegex = "[^\\d^.]*"
@@ -67,6 +68,8 @@ object ApiContext {
   implicit val ordering: Ordering[ApiContext] = new Ordering[ApiContext] {
     override def compare(x: ApiContext, y: ApiContext): Int = x.value.compareTo(y.value)
   }
+
+  def random = ApiContext(Random.alphanumeric.take(10).mkString)
 }
 
 case class ApiVersion(value: String) extends AnyVal
@@ -78,6 +81,8 @@ object ApiVersion {
   implicit val ordering: Ordering[ApiVersion] = new Ordering[ApiVersion] {
     override def compare(x: ApiVersion, y: ApiVersion): Int = x.value.compareTo(y.value)
   }
+
+  def random = ApiVersion(Random.nextDouble().toString)
 }
 
 case class ApiIdentifier(context: ApiContext, version: ApiVersion)

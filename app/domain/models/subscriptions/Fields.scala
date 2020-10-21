@@ -16,12 +16,16 @@
 
 package domain.models.subscriptions
 
+import scala.util.Random
+
 case class FieldName(value: String) extends AnyVal
 
 object FieldName {
   implicit val ordering: Ordering[FieldName] = new Ordering[FieldName] {
     override def compare(x: FieldName, y: FieldName): Int = x.value.compareTo(y.value)
   }
+
+  def random = FieldName(Random.alphanumeric.take(8).mkString)
 }
 
 case class FieldValue(value: String) extends AnyVal {
@@ -30,6 +34,7 @@ case class FieldValue(value: String) extends AnyVal {
 
 object FieldValue {
   def empty = FieldValue("")
+  def random = FieldValue(Random.alphanumeric.take(8).mkString)
 
   import play.api.libs.json.Json
   val formatFieldValue = Json.valueFormat[FieldValue]

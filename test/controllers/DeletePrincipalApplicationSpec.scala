@@ -16,7 +16,6 @@
 
 package controllers
 
-import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications._
 import domain.models.connectors.TicketCreated
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
@@ -32,7 +31,6 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future.successful
 
 class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken with TestApplications with ErrorHandlerMock {
 
@@ -86,7 +84,6 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     givenApplicationAction(application, loggedInUser)
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
-    when(underTest.applicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier])).thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
@@ -154,7 +151,6 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       val nonApprovedApplication = aStandardNonApprovedApplication(loggedInUser.email)
 
       givenApplicationAction(nonApprovedApplication, loggedInUser)
-      when(underTest.applicationService.apisWithSubscriptions(*)(any[HeaderCarrier])).thenReturn(successful(Seq.empty[APISubscriptionStatus]))
 
       when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(any[HeaderCarrier]))
         .thenReturn(Future.successful(TicketCreated))

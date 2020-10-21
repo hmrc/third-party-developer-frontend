@@ -23,7 +23,6 @@ import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import domain.models.applications.{Application, ApplicationToken, Environment}
 import domain.models.developers.{Registration, UpdateProfileRequest}
-import domain.models.subscriptions.APISubscription
 import domain.services.ApiDefinitionsJsonFormatters._
 import domain.services.SubscriptionsJsonFormatters._
 import org.scalatest.Matchers
@@ -121,13 +120,6 @@ object ApplicationStub {
     stubFor(
       get(urlEqualTo(s"/application/${id.value}/subscription"))
         .willReturn(aResponse().withStatus(status).withBody("[]"))
-    )
-  }
-
-  def setUpFetchSubscriptions(id: ApplicationId, status: Int, response: Seq[APISubscription]) = {
-    stubFor(
-      get(urlEqualTo(s"/application/${id.value}/subscription"))
-        .willReturn(aResponse().withStatus(status).withBody(Json.toJson(response).toString()))
     )
   }
 
