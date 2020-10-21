@@ -108,9 +108,7 @@ class ApplicationService @Inject() (
 
     for {
       app <- apmConnector.fetchApplicationById(applicationId)
-      _= println(app)
       subs = app.map(_.subscriptions).getOrElse(Set.empty)
-      _= println(subs)
     } yield subs.contains(ApiIdentifier(apiContext,apiVersion))
   }
 

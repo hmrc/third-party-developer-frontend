@@ -90,9 +90,6 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       givenApplicationAction(application, developerSession)
 
-      // when(underTest.applicationService.apisWithSubscriptions(eqTo(application))(any[HeaderCarrier]))
-      //   .thenReturn(successful(Seq.empty[APISubscriptionStatus]))
-
       application
     }
 

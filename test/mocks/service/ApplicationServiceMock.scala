@@ -66,10 +66,10 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   def ungivenSubscribeToApiSucceeds(app: Application, apiContext: ApiContext, apiVersion: ApiVersion) =
     when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenAppIsSubscribedToApi(appId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion) =
+  def givenAppIsSubscribedToApi(appId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion) =
     when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(true))
 
-  def givenAppIsNotSubscribedToApi(appId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion) =
+  def givenAppIsNotSubscribedToApi(appId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion) =
     when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(false))
 
   def givenApplicationNameIsValid() =
