@@ -20,15 +20,6 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion, APIStatus, APIAcces
 
 case class VersionSubscription(version: ApiVersionDefinition, subscribed: Boolean)
 
-case class APISubscription(
-    name: String,
-    serviceName: String,
-    context: ApiContext,
-    versions: Seq[VersionSubscription],
-    requiresTrust: Option[Boolean],
-    isTestSupport: Boolean = false
-)
-
 case class VersionData(status: APIStatus, access: APIAccess)
 
 case class ApiData(

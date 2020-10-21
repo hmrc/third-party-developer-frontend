@@ -345,8 +345,6 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
         givenApplicationAction(app, loggedInUser)
 
-        givenApplicationHasSubs(app, subsData)
-
         val result = executeAction
 
         status(result) shouldBe NOT_FOUND

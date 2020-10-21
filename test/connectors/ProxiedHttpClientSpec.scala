@@ -28,7 +28,6 @@ import utils.AsyncHmrcSpec
 
 class ProxiedHttpClientSpec extends AsyncHmrcSpec {
 
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
   private val actorSystem = ActorSystem("test-actor-system")
 
   trait Setup {

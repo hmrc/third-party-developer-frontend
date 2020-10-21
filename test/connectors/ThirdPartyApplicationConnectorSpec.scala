@@ -28,7 +28,6 @@ import domain.models.apidefinitions._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain.models.applications._
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
-import domain.models.subscriptions.APISubscription
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
 import org.mockito.Mockito
@@ -45,8 +44,6 @@ import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
-import domain.models.subscriptions.VersionSubscription
-import domain.models.subscriptions.VersionSubscription
 
 class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
@@ -84,7 +81,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     when(mockEnvironment.toString).thenReturn(environmentName)
   }
 
-  private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
   private val upstream409Response = Upstream4xxResponse("", CONFLICT, CONFLICT)
 
   private val updateApplicationRequest = new UpdateApplicationRequest(
@@ -286,57 +282,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
       Json.toJson(result) shouldBe Json.toJson(tokens)
     }
-  }
-
-  "fetch subscriptions for application" should {
-
-    val apiSubscription1 = createApiSubscription(ApiContext("api"), ApiVersion("1.0"), subscribed = true)
-    val apiSubscription2 = createApiSubscription(ApiContext("api"), ApiVersion("2.0"), subscribed = false)
-    val subscriptions = Seq(apiSubscription1, apiSubscription2)
-    val url = baseUrl + s"/application/${applicationId.value}/subscription"
-
-    "return the subscriptions when they are successfully retrieved" in new Setup {
-
-      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(*, *, *))
-        .thenReturn(Future.successful(subscriptions))
-
-      val result = await(connector.fetchSubscriptions(applicationId))
-
-      result shouldBe subscriptions
-    }
-
-    "return an empty sequence when an error occurs retrieving the subscriptions" in new Setup {
-
-      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(*, *, *))
-        .thenReturn(failed(upstream500Response))
-
-      val result = await(connector.fetchSubscriptions(applicationId))
-
-      result shouldBe Seq.empty
-    }
-
-    "throw ApplicationNotFound if the application cannot be found" in new Setup {
-
-      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(*, *, *))
-        .thenReturn(failed(new NotFoundException("")))
-
-      intercept[ApplicationNotFound](
-        await(connector.fetchSubscriptions(applicationId))
-      )
-    }
-
-    "when retry logic is enabled should retry on failure" in new Setup {
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[Seq[APISubscription]](eqTo(url))(*, *, *)).thenReturn(
-        failed(new BadRequestException("")),
-        Future.successful(subscriptions)
-      )
-
-      val result = await(connector.fetchSubscriptions(applicationId))
-
-      result shouldBe subscriptions
-    }
-
   }
 
   "subscribe to api" should {
@@ -783,16 +728,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
   }
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
-
-  private def createApiSubscription(context: ApiContext, version: ApiVersion, subscribed: Boolean) = {
-    APISubscription(
-      "a",
-      "b",
-      context,
-      Seq(VersionSubscription(ApiVersionDefinition(version, APIStatus.STABLE, None), subscribed)),
-      None
-    )
-  }
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
 }

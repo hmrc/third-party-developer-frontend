@@ -26,7 +26,6 @@ import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.applications._
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
-import domain.models.subscriptions.APISubscription
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
@@ -123,20 +122,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
     } else {
       Future.successful(None)
-    }
-
-  def fetchSubscriptions(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Seq[APISubscription]] =
-    if (isEnabled) {
-      metrics.record(api) {
-        retry {
-          http.GET[Seq[APISubscription]](s"$serviceBaseUrl/application/${id.value}/subscription") recover {
-            case _: Upstream5xxResponse => Seq.empty
-            case _: NotFoundException   => throw new ApplicationNotFound
-          }
-        }
-      }
-    } else {
-      Future.successful(Seq.empty)
     }
 
   def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {

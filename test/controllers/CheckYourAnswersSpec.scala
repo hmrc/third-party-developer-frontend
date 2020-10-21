@@ -25,7 +25,6 @@ import domain.models.apidefinitions._
 import domain.models.applications._
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import domain.models.subscriptions.APISubscription
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -200,8 +199,6 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     )
 
     val groupedSubs = GroupedSubscriptions(Seq.empty, subscriptions)
-
-    fetchAllSubscriptionsReturns(Seq(mock[APISubscription]))
 
     givenApplicationNameIsValid()
 

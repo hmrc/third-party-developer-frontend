@@ -29,7 +29,7 @@ import domain.models.apidefinitions.APIStatus._
 import domain.models.applications._
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketCreated}
 import domain.models.developers.{Developer, LoggedInState, User}
-import domain.models.subscriptions.{APISubscription, ApiSubscriptionFields, FieldValue}
+import domain.models.subscriptions.{ApiSubscriptionFields, FieldValue}
 import domain.models.subscriptions.ApiSubscriptionFields._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
@@ -46,7 +46,7 @@ import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.VersionSubscription
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 
-class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
+class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder{
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
@@ -121,9 +121,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
 
   def version(version: ApiVersion, status: APIStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersionDefinition(version, status), subscribed)
-
-  def api(name: String, context: String, requiresTrust: Option[Boolean], versions: VersionSubscription*): APISubscription =
-    APISubscription(name, name, ApiContext(context), versions, requiresTrust)
 
   val productionApplicationId = ApplicationId("Application ID")
   val productionClientId = ClientId(s"client-id-${randomUUID().toString}")
@@ -215,158 +212,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
       intercept[Upstream5xxResponse] {
         await(applicationService.fetchByTeamMemberEmail(emailAddress))
       }
-    }
-  }
-
-  "Fetch api subscriptions" should {
-
-    "identify subscribed apis from available definitions" in new Setup {
-      private val apiIdentifier1 = ApiIdentifier(ApiContext("api-1/ctx"), versionOne)
-
-      val apis = Seq(
-        api("api-1", apiIdentifier1.context.value, None, version(apiIdentifier1.version, STABLE, subscribed = true), version(versionTwo, BETA, subscribed = false)),
-        api("api-2", "api-2/ctx", None, version(versionOne, BETA, subscribed = true), version(ApiVersion("1.0-RC"), STABLE, subscribed = false))
-      )
-
-      val value1 = buildSubscriptionFieldValue("question1", Some("value1"))
-      val value2 = buildSubscriptionFieldValue("question2", Some(""))
-
-      val subscriptionFieldDefinitions = Seq(value1.definition, value2.definition)
-      val subscriptionFieldsWithValue = Seq(value1, value2)
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).thenReturn(successful(apis))
-
-      theSubscriptionFieldsServiceGetAllDefinitionsthenReturn(Map(apiIdentifier1 -> subscriptionFieldDefinitions))
-
-      when(mockSubscriptionFieldsService.fetchFieldsValues(any[Application], *, *)(any[HeaderCarrier]))
-        .thenReturn(successful(Seq.empty))
-
-      when(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(subscriptionFieldDefinitions), eqTo(apiIdentifier1))(any[HeaderCarrier]))
-        .thenReturn(successful(subscriptionFieldsWithValue))
-
-      private val result = await(applicationService.apisWithSubscriptions(productionApplication))
-
-      result.size shouldBe 4
-
-      result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", apiIdentifier1.context.value, versionTwo, BETA),
-        subStatus(
-          productionApplicationId,
-          productionClientId,
-          "api-1",
-          apiIdentifier1.context.value,
-          apiIdentifier1.version,
-          STABLE,
-          subscribed = true,
-          subscriptionFieldWithValues = subscriptionFieldsWithValue
-        ),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", ApiVersion("1.0-RC"), STABLE),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", versionOne, BETA, subscribed = true)
-      )
-    }
-
-    "include deprecated apis with subscriptions" in new Setup {
-      val apis = Seq(
-        api(
-          "api-1",
-          "api-1",
-          None,
-          version(ApiVersion("0.1"), DEPRECATED, subscribed = true),
-          version(versionOne, STABLE, subscribed = false),
-          version(versionTwo, BETA, subscribed = false)
-        ),
-        api("api-2", "api-2/ctx", None, version(versionOne, BETA, subscribed = true))
-      )
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).thenReturn(successful(apis))
-
-      theSubscriptionFieldsServiceGetAllDefinitionsthenReturn(Map.empty)
-      theSubscriptionFieldsServiceValuesthenReturn(Seq.empty)
-
-      private val result = await(applicationService.apisWithSubscriptions(productionApplication))
-
-      result.size shouldBe 4
-
-      result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", versionTwo, BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", versionOne, STABLE),
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", ApiVersion("0.1"), DEPRECATED, subscribed = true),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", versionOne, BETA, subscribed = true)
-      )
-    }
-
-    "filter out deprecated apis with no subscriptions" in new Setup {
-      val apis = Seq(
-        api(
-          "api-1",
-          "api-1",
-          None,
-          version(ApiVersion("0.1"), DEPRECATED, subscribed = false),
-          version(versionOne, STABLE, subscribed = true),
-          version(versionTwo, BETA, subscribed = false)
-        ),
-        api("api-2", "api-2/ctx", None, version(versionOne, BETA, subscribed = true))
-      )
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).thenReturn(successful(apis))
-
-      theSubscriptionFieldsServiceGetAllDefinitionsthenReturn(Map.empty)
-      theSubscriptionFieldsServiceValuesthenReturn(Seq.empty)
-
-      private val result = await(applicationService.apisWithSubscriptions(productionApplication))
-
-      result.size shouldBe 3
-
-      result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", versionTwo, BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", versionOne, STABLE, subscribed = true),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", versionOne, BETA, subscribed = true)
-      )
-    }
-
-    "filter out retired apis with no subscriptions" in new Setup {
-      val apis = Seq(
-        api(
-          "api-1",
-          "api-1",
-          None,
-          version(ApiVersion("0.1"), RETIRED, subscribed = false),
-          version(versionOne, STABLE, subscribed = true),
-          version(versionTwo, BETA, subscribed = false)
-        ),
-        api("api-2", "api-2/ctx", None, version(versionOne, BETA, subscribed = true))
-      )
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).thenReturn(successful(apis))
-
-      theSubscriptionFieldsServiceGetAllDefinitionsthenReturn(Map.empty)
-      theSubscriptionFieldsServiceValuesthenReturn(Seq.empty)
-
-      private val result = await(applicationService.apisWithSubscriptions(productionApplication))
-
-      result.size shouldBe 3
-
-      result should contain inOrder (
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", versionTwo, BETA),
-        subStatus(productionApplicationId, productionClientId, "api-1", "api-1", versionOne, STABLE, subscribed = true),
-        subStatus(productionApplicationId, productionClientId, "api-2", "api-2/ctx", versionOne, BETA, subscribed = true)
-      )
-    }
-
-    "return empty sequence when the connector returns empty sequence" in new Setup {
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.fetchSubscriptions(productionApplicationId)).thenReturn(successful(Seq.empty))
-
-      theSubscriptionFieldsServiceGetAllDefinitionsthenReturn(Map.empty)
-      theSubscriptionFieldsServiceValuesthenReturn(Seq.empty)
-
-      private val result = applicationService.apisWithSubscriptions(productionApplication)
-
-      await(result) shouldBe empty
     }
   }
 
@@ -956,61 +801,32 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
   }
 
   "isSubscribedToApi" should {
-    val subscriptions = Seq(
-      APISubscription(
-        "First API",
-        "",
-        ApiContext("first context"),
-        Seq(
-          VersionSubscription(ApiVersionDefinition(versionOne, APIStatus.STABLE), subscribed = true),
-          VersionSubscription(ApiVersionDefinition(versionTwo, APIStatus.BETA), subscribed = false)
-        ),
-        None
-      ),
-      APISubscription(
-        "Second API",
-        "",
-        ApiContext("second context"),
-        Seq(VersionSubscription(ApiVersionDefinition(versionOne, APIStatus.ALPHA), subscribed = true)),
-        None
-      )
+    val subscriptions = Set(
+      ApiIdentifier(ApiContext("first context"),versionOne),
+      ApiIdentifier(ApiContext("second context"),versionOne)
     )
+    val appWithData = ApplicationWithSubscriptionData(buildApplication("email@example.com"), subscriptions)
 
     "return false when the application has no subscriptions to the requested api version" in new Setup {
-      val apiName = "Third API"
       val apiContext = ApiContext("third context")
       val apiVersion = ApiVersion("3.0")
 
-      when(mockProductionApplicationConnector.fetchSubscriptions(eqTo(productionApplication.id))(eqTo(hc)))
-        .thenReturn(successful(subscriptions))
+      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
+
       private val result =
-        await(applicationService.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
-
-      result shouldBe false
-    }
-
-    "return false when the application has unsubscribed to the requested api version" in new Setup {
-      val apiName = "First API"
-      val apiContext = ApiContext("first context")
-      val apiVersion = versionTwo
-
-      when(mockProductionApplicationConnector.fetchSubscriptions(eqTo(productionApplication.id))(eqTo(hc)))
-        .thenReturn(successful(subscriptions))
-      val result: Boolean =
-        await(applicationService.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
+        await(applicationService.isSubscribedToApi(appWithData.application.id, apiContext, apiVersion))
 
       result shouldBe false
     }
 
     "return true when the application is subscribed to the requested api version" in new Setup {
-      val apiName = "First API"
       val apiContext = ApiContext("first context")
       val apiVersion = versionOne
 
-      when(mockProductionApplicationConnector.fetchSubscriptions(eqTo(productionApplication.id))(eqTo(hc)))
-        .thenReturn(successful(subscriptions))
+      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
+      
       private val result =
-        await(applicationService.isSubscribedToApi(productionApplication, apiName, apiContext, apiVersion))
+        await(applicationService.isSubscribedToApi(appWithData.application.id, apiContext, apiVersion))
 
       result shouldBe true
     }

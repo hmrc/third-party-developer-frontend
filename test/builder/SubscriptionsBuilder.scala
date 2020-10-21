@@ -18,14 +18,10 @@ package builder
 
 import domain.models.apidefinitions._
 import domain.models.applications.{Application, ApplicationId, ClientId}
-import domain.models.subscriptions.{APISubscription, AccessRequirements, FieldName, FieldValue}
+import domain.models.subscriptions.{AccessRequirements, FieldName, FieldValue}
 import domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 
 trait SubscriptionsBuilder {
-
-  def buildSubscription(name: String) = {
-    APISubscription(name, s"service-$name", ApiContext(s"context-$name"), Seq.empty, Some(false), false)
-  }
 
   def buildAPISubscriptionStatus(name: String, context: Option[ApiContext] = None, fields: Option[SubscriptionFieldsWrapper] = None): APISubscriptionStatus = {
 

@@ -19,10 +19,9 @@ package mocks.service
 import java.util.UUID
 
 import domain._
-import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, ApiVersion}
+import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications._
 import domain.models.developers.DeveloperSession
-import domain.models.subscriptions.APISubscription
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -55,17 +54,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
     when(applicationServiceMock.fetchByTeamMemberEmail(eqTo(email))(any[HeaderCarrier]))
       .thenReturn(successful(apps))
 
-  def fetchAllSubscriptionsReturns(subscriptions: Seq[APISubscription]) = {
-    when(applicationServiceMock.fetchAllSubscriptions(any[Application])(any[HeaderCarrier]))
-      .thenReturn(successful(subscriptions))
-  }
-
-  def givenApplicationHasSubs(application: Application, returns: Seq[APISubscriptionStatus]) =
-    when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(*)).thenReturn(successful(returns))
-
-  def givenApplicationHasNoSubs(application: Application) =
-    when(applicationServiceMock.apisWithSubscriptions(eqTo(application))(*)).thenReturn(successful(Seq.empty))
-
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
 
@@ -78,11 +66,11 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   def ungivenSubscribeToApiSucceeds(app: Application, apiContext: ApiContext, apiVersion: ApiVersion) =
     when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenAppIsSubscribedToApi(app: Application, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion) =
-    when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(true))
+  def givenAppIsSubscribedToApi(appId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion) =
+    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(true))
 
-  def givenAppIsNotSubscribedToApi(app: Application, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion) =
-    when(applicationServiceMock.isSubscribedToApi(eqTo(app), eqTo(apiName), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(false))
+  def givenAppIsNotSubscribedToApi(appId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion) =
+    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(false))
 
   def givenApplicationNameIsValid() =
     when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(any[HeaderCarrier])).thenReturn(successful(Valid))
@@ -139,6 +127,5 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
 
     when(applicationServiceMock.fetchCredentials(eqTo(appData.application))(*)).thenReturn(successful(tokens()))
 
-    givenApplicationHasNoSubs(appData.application)
   }
 }
