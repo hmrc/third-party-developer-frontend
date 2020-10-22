@@ -23,7 +23,6 @@ import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketResult}
 import domain.models.developers.DeveloperSession
-import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.subscriptions._
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
@@ -38,6 +37,7 @@ class ApplicationService @Inject() (
     apmConnector: ApmConnector,
     connectorWrapper: ConnectorsWrapper,
     subscriptionFieldsService: SubscriptionFieldsService,
+    subscriptionService: SubscriptionsService,
     deskproConnector: DeskproConnector,
     developerConnector: ThirdPartyDeveloperConnector,
     sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
@@ -61,55 +61,17 @@ class ApplicationService @Inject() (
   type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
   type FieldMap[V] = ApiMap[Map[FieldName,V]]
 
-  def subscribeToApi(application: Application, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val connectors = connectorWrapper.forEnvironment(application.deployedTo)
-
-    val apiIdentifier = ApiIdentifier(context, version)
-
-    trait HasSucceeded
-    object HasSucceeded extends HasSucceeded
-
-    def ensureEmptyValuesWhenNoneExists(fieldDefinitions: Seq[SubscriptionFieldDefinition]): Future[HasSucceeded] = {
-
-      for {
-        oldValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
-        saveResponse <- subscriptionFieldsService.saveBlankFieldValues(application, context, version, oldValues)
-      } yield saveResponse match {
-        case SaveSubscriptionFieldsSuccessResponse => HasSucceeded
-        case error =>
-          val errorMessage = s"Failed to save blank subscription field values: $error"
-          throw new RuntimeException(errorMessage)
-      }
-    }
-
-    def ensureSavedValuesForAnyDefinitions(defns: Seq[SubscriptionFieldDefinition]): Future[HasSucceeded] = {
-      if (defns.nonEmpty) {
-        ensureEmptyValuesWhenNoneExists(defns)
-      } else {
-        Future.successful(HasSucceeded)
-      }
-    }
-
-    val subscribeResponse: Future[ApplicationUpdateSuccessful] = connectors.thirdPartyApplicationConnector.subscribeToApi(application.id, apiIdentifier)
-    val fieldDefinitions: Future[Seq[SubscriptionFieldDefinition]] = subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
-
-    fieldDefinitions
-      .flatMap(ensureSavedValuesForAnyDefinitions)
-      .flatMap(_ => subscribeResponse)
+  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    subscriptionService.subscribeToApi(application, apiIdentifier)
   }
 
-  def unsubscribeFromApi(application: Application, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def unsubscribeFromApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val connectors = connectorWrapper.forEnvironment(application.deployedTo)
-    connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, context, version)
+    connectors.thirdPartyApplicationConnector.unsubscribeFromApi(application.id, apiIdentifier)
   }
 
-  def isSubscribedToApi(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    import domain.models.apidefinitions.ApiIdentifier
-
-    for {
-      app <- apmConnector.fetchApplicationById(applicationId)
-      subs = app.map(_.subscriptions).getOrElse(Set.empty)
-    } yield subs.contains(ApiIdentifier(apiContext,apiVersion))
+  def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    subscriptionService.isSubscribedToApi(applicationId,apiIdentifier)
   }
 
   def addClientSecret(application: Application, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[(String, String)] = {
@@ -296,8 +258,6 @@ object ApplicationService {
         implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful]
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]]
-    def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
-    def unsubscribeFromApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
     def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful]
     def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse]
@@ -306,5 +266,8 @@ object ApplicationService {
     def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
     def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit]
+
+    def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+
   }
 }

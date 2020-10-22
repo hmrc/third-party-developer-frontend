@@ -22,7 +22,6 @@ import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
 import domain._
-import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.applications._
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
@@ -40,6 +39,7 @@ import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
+import domain.models.apidefinitions.ApiIdentifier
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
@@ -124,15 +124,9 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       Future.successful(None)
     }
 
-  def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/${applicationId.value}/subscription", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { _ =>
-      ApplicationUpdateSuccessful
-    } recover recovery
-  }
-
-  def unsubscribeFromApi(applicationId: ApplicationId, context: ApiContext, version: ApiVersion)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
+  def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      http.DELETE(s"$serviceBaseUrl/application/${applicationId.value}/subscription?context=${context.value}&version=${version.value}") map { _ =>
+      http.DELETE(s"$serviceBaseUrl/application/${applicationId.value}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.version.value}") map { _ =>
         ApplicationUpdateSuccessful
       } recover recovery
     }
@@ -168,8 +162,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
 
     http.POST[ClientSecretRequest, AddClientSecretResponse](s"$serviceBaseUrl/application/${id.value}/client-secret", clientSecretRequest) map { response =>
-      // API-4275: Once actual secret is only returned by TPA for new ones, will be able to find based on 'secret' field being defined
-//      val newSecret: TPAClientSecret = response.clientSecrets.find(_.secret.isDefined).getOrElse(throw new NotFoundException("New Client Secret Not Found"))
       val newSecret: TPAClientSecret = response.clientSecrets.last
       (newSecret.id, newSecret.secret.get)
     } recover {

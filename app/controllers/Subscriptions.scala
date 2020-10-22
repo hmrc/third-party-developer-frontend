@@ -38,6 +38,7 @@ import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRe
 import views.html.include.ChangeSubscriptionConfirmationView
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.apidefinitions.ApiIdentifier
 
 @Singleton
 class Subscriptions @Inject() (
@@ -106,11 +107,13 @@ class Subscriptions @Inject() (
 
   def changeApiSubscription(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
+      val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
+      
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
           def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
 
-          service(request.application, apiContext, apiVersion) andThen { case _ => updateCheckInformation(request.application) }
+          service(request.application, apiIdentifier) andThen { case _ => updateCheckInformation(request.application) }
         case _ =>
           Future.successful(redirect(redirectTo, applicationId))
       }
@@ -130,8 +133,9 @@ class Subscriptions @Inject() (
 
   def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
+      val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
       applicationService
-        .isSubscribedToApi(request.application.id, apiContext, apiVersion)
+        .isSubscribedToApi(request.application.id, apiIdentifier)
         .map(subscribed =>
           Ok(
             changeSubscriptionConfirmationView(
@@ -149,6 +153,8 @@ class Subscriptions @Inject() (
 
   def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
+      val apiIdentifier = ApiIdentifier(apiContext,apiVersion)
+      
       def requestChangeSubscription(subscribed: Boolean) = {
         if (subscribed) {
           subscriptionsService
@@ -172,7 +178,7 @@ class Subscriptions @Inject() (
         )
 
       applicationService
-        .isSubscribedToApi(request.application.id, apiContext, apiVersion)
+        .isSubscribedToApi(request.application.id, apiIdentifier)
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
 

@@ -29,7 +29,7 @@ import domain.models.apidefinitions.APIStatus._
 import domain.models.applications._
 import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketCreated}
 import domain.models.developers.{Developer, LoggedInState, User}
-import domain.models.subscriptions.{ApiSubscriptionFields, FieldValue}
+import domain.models.subscriptions.ApiSubscriptionFields
 import domain.models.subscriptions.ApiSubscriptionFields._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
@@ -60,6 +60,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
       mock[ThirdPartyApplicationProductionConnector]
     val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
       mock[ThirdPartyApplicationSandboxConnector]
+    val mockSubscriptionsService: SubscriptionsService = mock[SubscriptionsService]
 
     val mockProductionSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
     val mockSandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector = mock[SubscriptionFieldsConnector]
@@ -87,6 +88,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
       mockApmConnector,
       connectorsWrapper,
       mockSubscriptionFieldsService,
+      mockSubscriptionsService,
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
@@ -215,109 +217,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     }
   }
 
-  "Subscribe to API" should {
-    "with no subscription fields definitions" in new Setup {
-
-      private val context = ApiContext("api1")
-      private val version = versionOne
-
-      private val subscription = ApiIdentifier(context, version)
-
-      private val fieldDefinitions = Seq.empty
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-      when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(any[HeaderCarrier]))
-        .thenReturn(successful(fieldDefinitions))
-
-      when(mockProductionApplicationConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier]))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
-
-      await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
-
-      verify(mockProductionApplicationConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier])
-      verify(mockSubscriptionFieldsService, never).saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier])
-    }
-
-    "with subscription fields definitions" should {
-      "save blank subscription values" in new Setup {
-        private val context = ApiContext("api1")
-        private val version = versionOne
-
-        private val subscription = ApiIdentifier(context, version)
-
-        private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
-
-        private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, FieldValue.empty))
-
-        theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-        when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(any[HeaderCarrier]))
-          .thenReturn(successful(fieldDefinitions))
-        when(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(any[HeaderCarrier]))
-          .thenReturn(successful(fieldDefinitionsWithoutValues))
-
-        when(mockProductionApplicationConnector.subscribeToApi(eqTo(productionApplicationId), *)(any[HeaderCarrier]))
-          .thenReturn(successful(ApplicationUpdateSuccessful))
-        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
-          .thenReturn(successful(SaveSubscriptionFieldsSuccessResponse))
-
-        await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
-
-        verify(mockProductionApplicationConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(
-          any[HeaderCarrier]
-        )
-        verify(mockSubscriptionFieldsService)
-          .saveBlankFieldValues(eqTo(productionApplication), eqTo(context), eqTo(version), eqTo(fieldDefinitionsWithoutValues))(any[HeaderCarrier])
-      }
-
-      "but fails to save subscription fields" in new Setup {
-        private val context = ApiContext("api1")
-        private val version = versionOne
-
-        private val subscription = ApiIdentifier(context, version)
-
-        private val fieldDefinitions = Seq(buildSubscriptionFieldValue("name").definition)
-
-        private val fieldDefinitionsWithoutValues = fieldDefinitions.map(d => SubscriptionFieldValue(d, FieldValue.empty))
-
-        theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-        when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(any[HeaderCarrier]))
-          .thenReturn(successful(fieldDefinitions))
-        when(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(any[HeaderCarrier]))
-          .thenReturn(successful(fieldDefinitionsWithoutValues))
-
-        when(mockProductionApplicationConnector.subscribeToApi(eqTo(productionApplicationId), *)(any[HeaderCarrier]))
-          .thenReturn(successful(ApplicationUpdateSuccessful))
-
-        val errors = Map("fieldName" -> "failure reason")
-
-        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
-          .thenReturn(successful(SaveSubscriptionFieldsFailureResponse(errors)))
-
-        private val exception = intercept[RuntimeException](
-          await(applicationService.subscribeToApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
-        )
-
-        exception.getMessage should include("failure reason")
-        exception.getMessage should include("Failed to save blank subscription field values")
-      }
-    }
-  }
-
   "Unsubscribe from API" should {
     "unsubscribe application from an API version" in new Setup {
       private val context = ApiContext("api1")
       private val version = versionOne
+      private val apiIdentifier = ApiIdentifier(context,version)
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.unsubscribeFromApi(productionApplicationId, context, version))
+      when(mockProductionApplicationConnector.unsubscribeFromApi(productionApplicationId, apiIdentifier))
         .thenReturn(successful(ApplicationUpdateSuccessful))
       when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionClientId, context, version))
         .thenReturn(successful(FieldsDeleteSuccessResult))
 
-      await(applicationService.unsubscribeFromApi(productionApplication, context, version)) shouldBe ApplicationUpdateSuccessful
+      await(applicationService.unsubscribeFromApi(productionApplication, apiIdentifier)) shouldBe ApplicationUpdateSuccessful
     }
   }
 
@@ -800,37 +712,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     }
   }
 
-  "isSubscribedToApi" should {
-    val subscriptions = Set(
-      ApiIdentifier(ApiContext("first context"),versionOne),
-      ApiIdentifier(ApiContext("second context"),versionOne)
-    )
-    val appWithData = ApplicationWithSubscriptionData(buildApplication("email@example.com"), subscriptions)
-
-    "return false when the application has no subscriptions to the requested api version" in new Setup {
-      val apiContext = ApiContext("third context")
-      val apiVersion = ApiVersion("3.0")
-
-      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
-
-      private val result =
-        await(applicationService.isSubscribedToApi(appWithData.application.id, apiContext, apiVersion))
-
-      result shouldBe false
-    }
-
-    "return true when the application is subscribed to the requested api version" in new Setup {
-      val apiContext = ApiContext("first context")
-      val apiVersion = versionOne
-
-      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
-      
-      private val result =
-        await(applicationService.isSubscribedToApi(appWithData.application.id, apiContext, apiVersion))
-
-      result shouldBe true
-    }
-  }
 
   "request 2SV removal" should {
 
