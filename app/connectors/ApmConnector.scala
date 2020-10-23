@@ -21,16 +21,26 @@ import domain.models.applications._
 import domain.models.subscriptions.{ApiData, FieldName}
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import javax.inject.{Inject, Singleton}
+import play.api.http.ContentTypes.JSON
+import play.api.http.HeaderNames.CONTENT_TYPE
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 import domain.models.emailpreferences.APICategoryDetails
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.apidefinitions.ApiIdentifier
+import domain.ApplicationUpdateSuccessful
+import service.SubscriptionsService.SubscriptionsConnector
+import uk.gov.hmrc.play.http.metrics.API
+import uk.gov.hmrc.http.NotFoundException
+import domain.ApplicationNotFound
 
 @Singleton
-class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(implicit ec: ExecutionContext) {
+class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) extends SubscriptionsConnector {
   import ApmConnectorJsonFormatters._
+
+  val api = API("api-platform-microservice")
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
     http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId.value}")
@@ -55,6 +65,19 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config)(imp
 
   def fetchApiDefinitionsVisibleToUser(userEmail: String)(implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] =
     http.GET[Seq[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("collaboratorEmail" -> userEmail))
+
+    
+  def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+    http.POST(s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { _ =>
+      ApplicationUpdateSuccessful
+    } recover recovery
+  }
+
+  private def recovery: PartialFunction[Throwable, Nothing] = {
+    case _: NotFoundException => throw new ApplicationNotFound
+  }
+
+
 }
 
 object ApmConnector {

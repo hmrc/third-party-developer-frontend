@@ -284,38 +284,10 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     }
   }
 
-  "subscribe to api" should {
-    val apiIdentifier = ApiIdentifier(ApiContext("app1"), ApiVersion("2.0"))
-    val url = baseUrl + s"/application/${applicationId.value}/subscription"
-
-    "subscribe application to an api" in new Setup {
-
-      when(
-        mockHttpClient
-          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
-
-      val result = await(connector.subscribeToApi(applicationId, apiIdentifier))
-
-      result shouldBe ApplicationUpdateSuccessful
-    }
-
-    "throw ApplicationNotFound if the application cannot be found" in new Setup {
-
-      when(
-        mockHttpClient
-          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
-
-      intercept[ApplicationNotFound](
-        await(connector.subscribeToApi(applicationId, apiIdentifier))
-      )
-    }
-  }
-
   "unsubscribe from api" should {
     val context = ApiContext("app1")
     val version = ApiVersion("2.0")
+    val apiIdentifier = ApiIdentifier(context,version)
     val url = baseUrl + s"/application/${applicationId.value}/subscription?context=${context.value}&version=${version.value}"
 
     "unsubscribe application from an api" in new Setup {
@@ -323,7 +295,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       when(mockHttpClient.DELETE(url))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
-      val result = await(connector.unsubscribeFromApi(applicationId, context, version))
+      val result = await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
 
       result shouldBe ApplicationUpdateSuccessful
     }
@@ -334,7 +306,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
         .thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound](
-        await(connector.unsubscribeFromApi(applicationId, context, version))
+        await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
       )
     }
   }

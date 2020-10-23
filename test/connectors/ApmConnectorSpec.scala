@@ -23,9 +23,20 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.AsyncHmrcSpec
-
+import play.api.http.ContentTypes.JSON
+import play.api.http.HeaderNames.CONTENT_TYPE
+import play.api.http.Status._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.Future.{failed,successful}
+import domain.models.apidefinitions.ApiIdentifier
+import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.ApiVersion
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.NotFoundException
+import domain.ApplicationNotFound
+import domain.models.applications.ApplicationId
+import domain.ApplicationUpdateSuccessful
 
 class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite {
 
@@ -34,10 +45,11 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
 
     val serviceBaseUrl = "http://api-platform-microservice"
     val mockHttpClient: HttpClient = mock[HttpClient]
+    val mockMetrics = new NoopConnectorMetrics()
 
     val config: ApmConnector.Config = ApmConnector.Config(serviceBaseUrl)
 
-    val connectorUnderTest: ApmConnector = new ApmConnector(mockHttpClient, config)
+    val connectorUnderTest: ApmConnector = new ApmConnector(mockHttpClient, config, mockMetrics)
   }
 
   "fetchAllAPICategories" should {
@@ -46,7 +58,7 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
 
     "return all API Category details" in new Setup {
       when(mockHttpClient.GET[Seq[APICategoryDetails]](eqTo(s"$serviceBaseUrl/api-categories"))(*, *, *))
-        .thenReturn(Future.successful(Seq(category1, category2)))
+        .thenReturn(successful(Seq(category1, category2)))
 
       val result = await(connectorUnderTest.fetchAllAPICategories())
 
@@ -62,16 +74,45 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
 
       val mockExpectedApi = mock[ExtendedApiDefinition]
         when(mockHttpClient.GET[Seq[ExtendedApiDefinition]](eqTo(s"$serviceBaseUrl/combined-api-definitions"), eqTo(Seq("collaboratorEmail" -> userEmail)))(*, *, *))
-        .thenReturn(Future.successful(Seq(mockExpectedApi)))
+        .thenReturn(successful(Seq(mockExpectedApi)))
 
       val result = await(connectorUnderTest.fetchApiDefinitionsVisibleToUser(userEmail))
 
       result.size should be (1)
       result should contain only (mockExpectedApi)
     }
+  }
 
+  "subscribe to api" should {
+    val applicationId = ApplicationId.random
+    val apiIdentifier = ApiIdentifier(ApiContext("app1"), ApiVersion("2.0"))
 
-   }
+    "subscribe application to an api" in new Setup {
+      val url = s"${serviceBaseUrl}/applications/${applicationId.value}/subscriptions"
+
+      when(
+        mockHttpClient
+          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+
+      val result = await(connectorUnderTest.subscribeToApi(applicationId, apiIdentifier))
+
+      result shouldBe ApplicationUpdateSuccessful
+    }
+
+    "throw ApplicationNotFound if the application cannot be found" in new Setup {
+      val url = s"${serviceBaseUrl}/applications/${applicationId.value}/subscriptions"
+
+      when(
+        mockHttpClient
+          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(failed(new NotFoundException("")))
+
+      intercept[ApplicationNotFound](
+        await(connectorUnderTest.subscribeToApi(applicationId, apiIdentifier))
+      )
+    }
+  }
 
   
 }

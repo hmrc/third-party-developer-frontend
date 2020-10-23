@@ -19,7 +19,6 @@ package mocks.service
 import java.util.UUID
 
 import domain._
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications._
 import domain.models.developers.DeveloperSession
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
@@ -27,6 +26,7 @@ import service.ApplicationService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future.{failed, successful}
+import domain.models.apidefinitions.ApiIdentifier
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationServiceMock = mock[ApplicationService]
@@ -57,20 +57,20 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
 
-  def givenSubscribeToApiSucceeds(app: Application, apiContext: ApiContext, apiVersion: ApiVersion) =
-    when(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+  def givenSubscribeToApiSucceeds(app: Application, apiIdentifier: ApiIdentifier) =
+    when(applicationServiceMock.subscribeToApi(eqTo(app), eqTo(apiIdentifier))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
 
   def givenSubscribeToApiSucceeds() =
-    when(applicationServiceMock.subscribeToApi(*, *[ApiContext], *[ApiVersion])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+    when(applicationServiceMock.subscribeToApi(*, *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def ungivenSubscribeToApiSucceeds(app: Application, apiContext: ApiContext, apiVersion: ApiVersion) =
-    when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+  def ungivenSubscribeToApiSucceeds(app: Application, apiIdentifier: ApiIdentifier) =
+    when(applicationServiceMock.unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
 
-  def givenAppIsSubscribedToApi(appId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion) =
-    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(true))
+  def givenAppIsSubscribedToApi(appId: ApplicationId, apiIdentifier: ApiIdentifier) =
+    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)).thenReturn(successful(true))
 
-  def givenAppIsNotSubscribedToApi(appId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion) =
-    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiContext), eqTo(apiVersion))(*)).thenReturn(successful(false))
+  def givenAppIsNotSubscribedToApi(appId: ApplicationId, apiIdentifier: ApiIdentifier) =
+    when(applicationServiceMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)).thenReturn(successful(false))
 
   def givenApplicationNameIsValid() =
     when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(any[HeaderCarrier])).thenReturn(successful(Valid))

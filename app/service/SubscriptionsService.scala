@@ -25,9 +25,21 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import domain.models.apidefinitions._
+import domain.ApplicationUpdateSuccessful
+import domain.models.subscriptions.FieldName
+import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
+import domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
+import connectors.ApmConnector
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, auditService: AuditService) {
+class SubscriptionsService @Inject() (
+  deskproConnector: DeskproConnector,
+  apmConnector: ApmConnector,
+  subscriptionFieldsService: SubscriptionFieldsService,
+  auditService: AuditService
+)(implicit ec: ExecutionContext) {
 
   private def doRequest(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(
       f: (String, String, String, ApplicationId, String, ApiVersion) => DeskproTicket
@@ -42,4 +54,54 @@ class SubscriptionsService @Inject() (deskproConnector: DeskproConnector, auditS
   def requestApiUnsubscribe(requester: DeveloperSession, application: Application, apiName: String, apiVersion: ApiVersion)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     deskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiUnsubscribe))
   }
+
+  type ApiMap[V] = Map[ApiContext, Map[ApiVersion, V]]
+  type FieldMap[V] = ApiMap[Map[FieldName,V]]
+
+  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+
+    def ensureEmptyValuesWhenNoneExists(fieldDefinitions: Seq[SubscriptionFieldDefinition]): Future[Unit] = {
+      for {
+        oldValues <- subscriptionFieldsService.fetchFieldsValues(application, fieldDefinitions, apiIdentifier)
+        saveResponse <- subscriptionFieldsService.saveBlankFieldValues(application, apiIdentifier.context, apiIdentifier.version, oldValues)
+      } yield saveResponse match {
+        case SaveSubscriptionFieldsSuccessResponse => ()
+        case error =>
+          val errorMessage = s"Failed to save blank subscription field values: $error"
+          throw new RuntimeException(errorMessage)
+      }
+    }
+
+    def ensureSavedValuesForAnyDefinitions(defns: Seq[SubscriptionFieldDefinition]): Future[Unit] = {
+      if (defns.nonEmpty) {
+        ensureEmptyValuesWhenNoneExists(defns)
+      } else {
+        Future.successful(())
+      }
+    }
+
+    val subscribeResponse: Future[ApplicationUpdateSuccessful] = apmConnector.subscribeToApi(application.id, apiIdentifier)
+    
+    val fieldDefinitions: Future[Seq[SubscriptionFieldDefinition]] = subscriptionFieldsService.getFieldDefinitions(application, apiIdentifier)
+
+    fieldDefinitions
+      .flatMap(ensureSavedValuesForAnyDefinitions)
+      .flatMap(_ => subscribeResponse)
+  }
+  
+  def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    for {
+      app <- apmConnector.fetchApplicationById(applicationId)
+      subs = app.map(_.subscriptions).getOrElse(Set.empty)
+    } yield subs.contains(apiIdentifier)
+  }
+
 }
+  
+object SubscriptionsService {
+  
+  trait SubscriptionsConnector {
+    def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+  }
+}
+
