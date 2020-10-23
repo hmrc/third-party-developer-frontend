@@ -33,16 +33,24 @@ object EmailPreferences {
   def noPreferences: EmailPreferences = EmailPreferences(List.empty, Set.empty)
 }
 
-sealed abstract class EmailTopic(val value: String, val displayName: String, val description: String) extends StringEnumEntry
+sealed abstract class EmailTopic(val value: String, val displayName: String, val description: String, val displayOrder: Byte) extends StringEnumEntry
 
 object EmailTopic extends StringEnum[EmailTopic] with StringPlayJsonValueEnum[EmailTopic] {
 
   val values = findValues
 
-  case object BUSINESS_AND_POLICY extends EmailTopic("BUSINESS_AND_POLICY", "Business and policy", "Policy compliance, legislative changes and business guidance support")
-  case object TECHNICAL extends EmailTopic("TECHNICAL", "Technical", "Specifications, service guides, bug fixes and known errors")
-  case object RELEASE_SCHEDULES extends EmailTopic("RELEASE_SCHEDULES", "Release schedules", "Notifications about planned releases and outages")
-  case object EVENT_INVITES extends EmailTopic("EVENT_INVITES", "Event invites", "Get invites to knowledge share events and user research opportunities")
+  case object BUSINESS_AND_POLICY
+    extends EmailTopic("BUSINESS_AND_POLICY", "Business and policy", "Policy compliance, legislative changes and business guidance support", 1)
+  case object TECHNICAL
+    extends EmailTopic("TECHNICAL", "Technical", "Specifications, service guides, bug fixes and known errors", 2)
+  case object RELEASE_SCHEDULES
+    extends EmailTopic("RELEASE_SCHEDULES", "Release schedules", "Notifications about planned releases and outages", 3)
+  case object EVENT_INVITES
+    extends EmailTopic(
+      "EVENT_INVITES",
+      "Event invites",
+      "Get invites to knowledge share events and user research opportunities",
+      Byte.MaxValue) // Event Invites is displayed separately, after the other topics
 
 }
 
