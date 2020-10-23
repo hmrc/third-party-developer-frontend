@@ -43,7 +43,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     <div class="ip-allowlist">
         <div class="govuk-box-highlight">
             <h1 class="heading-xlarge">
-                @if(app.ipWhitelist.isEmpty) {
+                @if(app.ipAllowlist.allowlist.isEmpty) {
                     Your IP allow list is active
                 } else {
                     IP allow list changes active

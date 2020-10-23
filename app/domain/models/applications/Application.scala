@@ -56,7 +56,7 @@ case class Application(
     access: Access = Standard(),
     state: ApplicationState = ApplicationState.testing,
     checkInformation: Option[CheckInformation] = None,
-    ipWhitelist: Set[String] = Set.empty
+    ipAllowlist: IpAllowlist = IpAllowlist()
 ) {
 
   def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
