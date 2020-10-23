@@ -25,6 +25,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import service._
+import uk.gov.hmrc.http.ForbiddenException
 import views.html.ipAllowlist._
 
 import scala.concurrent.Future.successful
@@ -61,7 +62,7 @@ class IpAllowlist @Inject()(
 
   def viewIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.discardIpAllowlistFlow(request.user.session.sessionId) map { _ =>
-      if (request.application.ipWhitelist.isEmpty) {
+      if (request.application.ipAllowlist.allowlist.isEmpty) {
         Ok(startIpAllowlistView(request.application, request.role))
       } else {
         Ok(ipAllowlistView(request.application, request.role))
@@ -147,6 +148,8 @@ class IpAllowlist @Inject()(
       ipAllowlistService.activateIpAllowlist(request.application, request.user.session.sessionId) map { _ =>
         Ok(changeIpAllowlistSuccessView(request.application, flow))
       }
+    } recover {
+      case _: ForbiddenException => Forbidden(errorHandler.forbiddenTemplate)
     }
   }
 
@@ -157,6 +160,8 @@ class IpAllowlist @Inject()(
   def removeIpAllowlistAction(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.deactivateIpAllowlist(request.application, request.user.session.sessionId) map { _ =>
       Ok(removeIpAllowlistSuccessView(request.application))
+    } recover {
+      case _: ForbiddenException => Forbidden(errorHandler.forbiddenTemplate)
     }
   }
 }

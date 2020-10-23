@@ -29,7 +29,7 @@
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @breadcrumbs = @{
-    if(app.ipWhitelist.isEmpty) {
+    if(app.ipAllowlist.allowlist.isEmpty) {
         Seq.empty
     } else {
         Seq(
@@ -41,7 +41,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     }
 }
 @backButton = @{
-    if(app.ipWhitelist.isEmpty) {
+    if(app.ipAllowlist.allowlist.isEmpty) {
         BackButtonWithJavaScript
     } else {
         NoBackButton

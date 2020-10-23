@@ -659,14 +659,14 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
   "updateIpAllowlist" should {
     val allowlist = Set("1.1.1.1/24")
-    val updateRequest = UpdateIpAllowlistRequest(allowlist)
-    val url = s"$baseUrl/application/${applicationId.value}/ipWhitelist"
+    val updateRequest = UpdateIpAllowlistRequest(required = false, allowlist)
+    val url = s"$baseUrl/application/${applicationId.value}/ipAllowlist"
 
     "return success response in case of a 204 on backend " in new Setup {
       when(mockHttpClient.PUT[UpdateIpAllowlistRequest, HttpResponse](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
         .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
 
-      val result: ApplicationUpdateSuccessful = await(connector.updateIpAllowlist(applicationId, allowlist))
+      val result: ApplicationUpdateSuccessful = await(connector.updateIpAllowlist(applicationId, required = false, allowlist))
 
       result shouldEqual ApplicationUpdateSuccessful
     }
@@ -676,7 +676,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
         .thenReturn(failed(new NotFoundException("")))
 
       intercept[ApplicationNotFound] {
-        await(connector.updateIpAllowlist(applicationId, allowlist))
+        await(connector.updateIpAllowlist(applicationId, required = false, allowlist))
       }
     }
   }

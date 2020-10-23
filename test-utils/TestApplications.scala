@@ -47,7 +47,7 @@ trait TestApplications {
       adminEmail: String = "admin@example.com",
       developerEmail: String = "developer@example.com",
       access: Access = standardAccess(),
-      ipWhitelist: Set[String] = Set.empty
+      ipAllowlist: IpAllowlist = IpAllowlist()
   ): Application = {
 
     Application(
@@ -61,7 +61,7 @@ trait TestApplications {
       collaborators = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER)),
       state = state,
       access = access,
-      ipWhitelist = ipWhitelist
+      ipAllowlist = ipAllowlist
     )
   }
 

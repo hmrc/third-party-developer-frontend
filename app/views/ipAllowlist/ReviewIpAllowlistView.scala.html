@@ -29,7 +29,7 @@
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @breadcrumbs = @{
-    if(app.ipWhitelist.isEmpty) {
+    if(app.ipAllowlist.allowlist.isEmpty) {
         Seq.empty
     } else {
         Seq(
@@ -41,7 +41,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     }
 }
 @backButton = @{
-    if(app.ipWhitelist.isEmpty) {
+    if(app.ipAllowlist.allowlist.isEmpty) {
         BackButtonWithJavaScript
     } else {
         NoBackButton
@@ -60,7 +60,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     <div class="ip-allowlist">
         <header>
             <h1 class="heading-large">
-                @if(app.ipWhitelist.isEmpty) {
+                @if(app.ipAllowlist.allowlist.isEmpty) {
                     Check your IP allow list before you make it active
                 } else {
                     Review updates to your IP allow list before you make your changes active
@@ -70,7 +70,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
             <br>
         </header>
 
-        @if(app.ipWhitelist.isEmpty) {
+        @if(app.ipAllowlist.allowlist.isEmpty) {
             <div class="notice">
                 <i class="icon icon-important">
                     <span class="visually-hidden">Warning</span>
@@ -83,7 +83,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
             </div>
         }
 
-        @defining(ipAllowlistFlow.allowlist.size > 1 || app.ipWhitelist.isEmpty) { canRemove =>
+        @defining(ipAllowlistFlow.allowlist.size > 1 || app.ipAllowlist.allowlist.isEmpty) { canRemove =>
             <table class="@if(canRemove) {wide} else {narrow}">
             <thead><tr><th>IP addresses</th><th></th></tr></thead>
                 <tbody>
@@ -106,7 +106,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
 
         <p>
-            @if(app.ipWhitelist.isEmpty) {
+            @if(app.ipAllowlist.allowlist.isEmpty) {
                 Check you have added all the IP addresses you want to use before making your IP allow list active.
             } else {
                 Check you have added all the IP addresses you want to use.
@@ -116,13 +116,13 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         @helper.form(action = controllers.routes.IpAllowlist.activateIpAllowlist(app.id)) {
             @helper.CSRF.formField
             <button id="submit" class="button" type="submit">
-                @if(app.ipWhitelist.isEmpty) {
+                @if(app.ipAllowlist.allowlist.isEmpty) {
                     Make IP allow list active
                 } else {
                     Make changes active
                 }
             </button>
-            @if(app.ipWhitelist.isEmpty) {
+            @if(app.ipAllowlist.allowlist.isEmpty) {
                 <a class="secondary-button" href="@routes.Details.details(app.id)">Cancel</a>
             } else {
                 <a class="secondary-button" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</a>

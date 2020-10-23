@@ -75,6 +75,7 @@ trait ApplicationsJsonFormatters
   implicit val keyReadsApiVersion: KeyReads[ApiVersion] = key => JsSuccess(ApiVersion(key))
   implicit val keyWritesApiVersion: KeyWrites[ApiVersion] = _.value
 
+  implicit val formatIpAllowlist = Json.format[IpAllowlist]
 
   implicit val formatApplication = Json.format[Application]
 

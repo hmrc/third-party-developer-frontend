@@ -55,7 +55,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         <table class="narrow">
             <thead><tr><th>IP addresses</th></tr></thead>
             <tbody>
-            @for(ipRange <-app.ipWhitelist.toSeq.sorted) {
+            @for(ipRange <-app.ipAllowlist.allowlist.toSeq.sorted) {
                 <tr><td>@ipRange</td></tr>
             }
             </tbody>
@@ -65,7 +65,9 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         @if(sandboxOrAdmin) {
             <p><a class="button" href="@controllers.routes.IpAllowlist.editIpAllowlist(app.id)">Edit IP allow list</a></p>
             <p><a href="/api-documentation/docs/reference-guide#ip-allow-list">Check how to add IP addresses to your IP allow list</a></p>
-            <p><a href="@routes.IpAllowlist.removeIpAllowlist(app.id)">Remove your IP Allow list</a></p>
+            @if(!app.ipAllowlist.required) {
+                <p><a href="@routes.IpAllowlist.removeIpAllowlist(app.id)">Remove your IP Allow list</a></p>
+            }
         } else {
             <div class="panel panel-border-wide">
                 <p>You cannot edit the IP allow list because you are not an administrator.</p>

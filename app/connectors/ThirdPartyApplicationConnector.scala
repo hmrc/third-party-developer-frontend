@@ -195,8 +195,8 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
   }
 
-  def updateIpAllowlist(applicationId: ApplicationId, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.PUT[UpdateIpAllowlistRequest, HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/ipWhitelist", UpdateIpAllowlistRequest(ipAllowlist))
+  def updateIpAllowlist(applicationId: ApplicationId, required: Boolean, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+    http.PUT[UpdateIpAllowlistRequest, HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/ipAllowlist", UpdateIpAllowlistRequest(required, ipAllowlist))
       .map(_ => ApplicationUpdateSuccessful) recover recovery
   }
 
@@ -233,7 +233,7 @@ private[connectors] object ThirdPartyApplicationConnectorDomain {
 
   case class DeleteClientSecretRequest(actorEmailAddress: String)
 
-  case class UpdateIpAllowlistRequest(ipWhitelist: Set[String])
+  case class UpdateIpAllowlistRequest(required: Boolean, allowlist: Set[String])
 }
 
 @Singleton
