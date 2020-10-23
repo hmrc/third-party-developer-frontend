@@ -62,7 +62,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       "service availability page for information about live incidents",
       "https://api-platform-status.production.tax.service.gov.uk/")
 
-
+    checkLink(document, "view-all-applications-link", "View all applications", "/developer/applications")
   }
 
   def checkLink(document: Document, id: String, linkText: String, linkVal: String) = {
@@ -115,14 +115,14 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
 
   def checkNoEmailPreferencesPageElements(document: Document): Unit = {
     document.getElementById("first-line").text shouldBe "You have selected no email preferences."
-    checkLink(document, "setup-emailpreferences-link", "Set up email preferences", "/developer/profile/email-preferences")
+    checkLink(document, "setup-emailpreferences-link", "Set up email preferences", "/developer/profile/email-preferences/start")
     document.select("a#unsubscribe-link").isEmpty shouldBe true
   }
 
-    def checkUnsubscribedPageElements(document: Document): Unit = {
+  def checkUnsubscribedPageElements(document: Document): Unit = {
     document.getElementById("page-heading").text shouldBe "You are unsubscribed"
     document.getElementById("first-line").text shouldBe "You can change your email preferences at any time"
-    checkLink(document, "setup-emailpreferences-link", "Set up email preferences", "/developer/profile/email-preferences")
+    checkLink(document, "setup-emailpreferences-link", "Set up email preferences", "/developer/profile/email-preferences/start")
     document.select("a#unsubscribe-link").isEmpty shouldBe true
   }
 
@@ -152,9 +152,9 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       validateStaticElements(document)
       checkNoEmailPreferencesPageElements(document)
     }
-  
 
-   "display 'unsubscribed' elements when user has unsubscribed" in new Setup {
+
+    "display 'unsubscribed' elements when user has unsubscribed" in new Setup {
       val page =
         emailPreferencesSummaryView.render(
           EmailPreferencesSummaryViewData(apiCategoryDetailsMap, Map.empty, unsubscribed = true),
