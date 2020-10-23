@@ -51,13 +51,24 @@
                 <div class="form-group">
                     <div class="multiple-choice">
 
-                        <input id="all-apis" type="checkbox" name="selectedApi[]" value="ALL_APIS" @if(selectedApis.contains("ALL_APIS")) {checked}/>
+                        <input id="all-apis" type="radio" name="select-api-radio" value="ALL_APIS" @if(selectedApis.contains("ALL_APIS")) {checked}/>
                         <label for="all-apis">All @currentCategory.name APIs
                             <span id="all-apis-description" class="form-hint">
                                 You will be subscribed automatically to emails about new @currentCategory.name APIs</span>
                         </label>
 
                     </div>
+                    <div class="multiple-choice">
+
+                        <input id=select-api-radio" type="radio" name="select-api-radio" value="ALL_APIS" @if(selectedApis.contains("ALL_APIS")) {checked}/>
+                        <label for="select-api-radio">Individual @currentCategory.name APIs
+                            <span id="select-api-radio-description" class="form-hint">
+                                Select individual APIs. You will not get emails about new Income Tax APIs
+                            </span>
+                        </label>
+
+                    </div>
+                    <div id="api-checklist">
                     @for(api <- apis) {
                         <div class="multiple-choice">
                             <input id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
@@ -65,6 +76,7 @@
                             <label for="@api.serviceName">@api.name</label>
                         </div>
                     }
+                    </div>
                 </div>
                 <div>
                     <input id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />

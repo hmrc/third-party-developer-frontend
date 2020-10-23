@@ -220,6 +220,11 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
   background: #1d70b8;
 }
 
+#select-api-radio:checked ~ #api-checklist
+{
+  display: block;
+}
+
 @media (min-width: 1000px) {
   .interrupt {
     padding: 1em 26em 1em 2em;
