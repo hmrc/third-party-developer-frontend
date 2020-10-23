@@ -54,10 +54,10 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   private def flowShowSelectCategoriesView(form: Form[TaxRegimeEmailPreferencesForm])(implicit request: UserRequest[AnyContent]) = {
-       for {
-      flow                <- emailPreferencesService.fetchFlow(request.developerSession)
-      visibleCategories   <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession)
-      selectedCategories   = if(form.hasErrors) Set.empty[String] else flow.selectedCategories
+    for {
+      flow <- emailPreferencesService.fetchFlow(request.developerSession)
+      visibleCategories <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession)
+      selectedCategories = if (form.hasErrors) Set.empty[String] else flow.selectedCategories
     } yield flowSelectCategoriesView(form, visibleCategories.toList, selectedCategories)
   }
 
@@ -70,13 +70,13 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       },
       { form =>
         emailPreferencesService.updateCategories(request.developerSession, form.taxRegime)
-        .map(flow => Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(flow.categoriesInOrder.head)))
+          .map(flow => Redirect(controllers.routes.EmailPreferences.flowSelectApisPage(flow.categoriesInOrder.head)))
       })
   }
 
   def flowSelectNoCategoriesAction: Action[AnyContent] = loggedInAction { implicit request =>
     emailPreferencesService.updateCategories(request.developerSession, List.empty[String])
-    .map(_ => Redirect(controllers.routes.EmailPreferences.flowSelectTopicsPage()))
+      .map(_ => Redirect(controllers.routes.EmailPreferences.flowSelectTopicsPage()))
   }
 
   def flowSelectApisPage(category: String): Action[AnyContent] = loggedInAction { implicit request =>
@@ -91,7 +91,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: String)(implicit request: UserRequest[AnyContent]): Future[Html] = {
     for {
       categoryDetails <- emailPreferencesService.apiCategoryDetails(category)
-      flow            <- emailPreferencesService.fetchFlow(request.developerSession)
+      flow <- emailPreferencesService.fetchFlow(request.developerSession)
     } yield flowSelectApiView(form, categoryDetails.getOrElse(APICategoryDetails(category, category)), flow.visibleApisByCategory(category), flow.selectedApisByCategory(category))
   }
 
@@ -112,9 +112,10 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         flowSelectApisView(formWithErrors, form.data.getOrElse("currentCategory", "")).map(BadRequest(_))
       },
       {
-        form => emailPreferencesService
-                .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi.toList)
-                .map(flow => handleNextPage(flow.categoriesInOrder, form.currentCategory))
+        form =>
+          emailPreferencesService
+            .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi.toList)
+            .map(flow => handleNextPage(flow.categoriesInOrder, form.currentCategory))
       }
     )
 
@@ -136,10 +137,10 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         selectedTopics =>
           val developerSession = request.developerSession
           for {
-            flow          <- emailPreferencesService.fetchFlow(developerSession)
-            updateResult  <- emailPreferencesService
-                              .updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopics.toList.toSet))
-            _             =   if (updateResult) emailPreferencesService.deleteFlow(developerSession.session.sessionId)
+            flow <- emailPreferencesService.fetchFlow(developerSession)
+            updateResult <- emailPreferencesService
+              .updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopics.toList.toSet))
+            _ = if (updateResult) emailPreferencesService.deleteFlow(developerSession.session.sessionId)
           } yield if (updateResult) Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
           else Redirect(routes.EmailPreferences.flowSelectTopicsPage())
       }
@@ -148,19 +149,15 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>
     val unsubscribed: Boolean = request.flash.get("unsubscribed") match {
       case Some("true") => true
-      case _            => false
+      case _ => false
     }
 
     val emailPreferences = request.developerSession.developer.emailPreferences
-    if (emailPreferences.equals(domain.models.emailpreferences.EmailPreferences.noPreferences) && !unsubscribed) {
-      Future.successful(Redirect(controllers.routes.EmailPreferences.flowStartPage()))
-    } else {
-      val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
-      for {
-        apiCategoryDetails <- emailPreferencesService.fetchAllAPICategoryDetails()
-        apiNames           <- emailPreferencesService.fetchAPIDetails(userServices)
-      } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails, unsubscribed)))
-    }
+    val userServices: Set[String] = emailPreferences.interests.flatMap(_.services).toSet
+    for {
+      apiCategoryDetails <- emailPreferencesService.fetchAllAPICategoryDetails()
+      apiNames <- emailPreferencesService.fetchAPIDetails(userServices)
+    } yield Ok(emailPreferencesSummaryView(toDataObject(emailPreferences, apiNames, apiCategoryDetails, unsubscribed)))
   }
 
   def unsubscribeAllPage: Action[AnyContent] = loggedInAction { implicit request =>
@@ -169,8 +166,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def unsubscribeAllAction: Action[AnyContent] = loggedInAction { implicit request =>
     emailPreferencesService.removeEmailPreferences(request.developerSession.developer.email).map {
-      case true   => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
-      case false  => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
+      case true => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
+      case false => Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
     }
   }
 

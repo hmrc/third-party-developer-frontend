@@ -139,18 +139,6 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(Map.empty, Map.empty, unsubscribed = true)))(*, *, *, *)
     }
 
-    "redirect to flow start page if user has no email preferences set (and has not just unsubscribed)" in new Setup {
-      fetchSessionByIdReturns(sessionId, sessionNoEMailPrefences)
-
-      val result: Future[Result] = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest)
-
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowStartPage().url)
-
-      verifyZeroInteractions(mockEmailPreferencesService)
-      verifyZeroInteractions(mockEmailPreferencesSummaryView)
-    }
-
     "redirect to login screen for non-logged in user" in new Setup {
       fetchSessionByIdReturnsNone(sessionId)
 
