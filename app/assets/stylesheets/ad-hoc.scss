@@ -220,7 +220,11 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
   background: #1d70b8;
 }
 
-#select-api-radio:checked ~ #api-checklist
+#apis-checklist {
+  display:none;
+}
+
+#individual-apis:checked ~ #apis-checklist
 {
   display: block;
 }

@@ -160,5 +160,7 @@ accessCode.invalid.name.field = You have entered an invalid access code
 accessCode.invalid.name.global = You have entered an invalid access code
 
 error.selectedcategories.empty = Select a category you are interested in
+
+when-selected-apis-chosen.nonempty = Select an API you are interested in
 error.selectedapis.empty = Select an API you are interested in
 error.selectedtopics.empty = Select a topic you are interested in

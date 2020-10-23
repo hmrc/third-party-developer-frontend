@@ -432,17 +432,41 @@ object TaxRegimeEmailPreferencesForm {
     (TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
 }
 
-final case class SelectedApisEmailPreferencesForm(selectedApi: Seq[String], currentCategory: String)
+final case class SelectedApisEmailPreferencesForm(apiRadio: String, selectedApi: Seq[String], currentCategory: String)
 
 object SelectedApisEmailPreferencesForm {
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
     if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedapis.empty"))
   }
 
+  def validateApisNotEmptyWhenSelected(apiRadio: String, selectedApi: Seq[String], currentCategory: String) = apiRadio match {
+    case "ALL_APIS" =>
+      Some(SelectedApisEmailPreferencesForm(apiRadio, Seq("ALL_APIS"), currentCategory))
+    case "SOME_APIS" =>
+      if (selectedApi.isEmpty) {
+        None
+      } else {
+        Some(SelectedApisEmailPreferencesForm(apiRadio, selectedApi, currentCategory))
+      }
+    case _ =>
+      None
+  }
+
   def form: Form[SelectedApisEmailPreferencesForm] = Form(mapping(
-    "selectedApi" -> seq(text).verifying(nonEmptyList),
+    "apiRadio" -> nonEmptyText,
+    "selectedApi" -> seq(text),
     "currentCategory" -> text)
-  (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply))
+  (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
+    .verifying(
+      "when-selected-apis-chosen.nonempty",
+      fields =>
+        fields match {
+          case data: SelectedApisEmailPreferencesForm => {
+            validateApisNotEmptyWhenSelected(data.apiRadio, data.selectedApi, data.currentCategory).isDefined
+          }
+        }
+    )
+  )
 }
 
 final case class SelectedTopicsEmailPreferencesForm(topic: Seq[String])

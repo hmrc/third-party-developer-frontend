@@ -21,6 +21,7 @@ import config.{ApplicationConfig, ErrorHandler}
 import domain.models.connectors.ExtendedApiDefinition
 import domain.models.emailpreferences.APICategoryDetails
 import javax.inject.Inject
+import play.api.Logger
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -113,13 +114,24 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         flowSelectApisView(formWithErrors, form.data.getOrElse("currentCategory", "")).map(BadRequest(_))
       },
       {
-        form =>
+        form => {val apiList = getListFromApiForm(form)
           emailPreferencesService
-            .updateSelectedApis(request.developerSession, form.currentCategory, form.selectedApi.toList)
+            .updateSelectedApis(request.developerSession, form.currentCategory, apiList)
             .map(flow => handleNextPage(flow.categoriesInOrder, form.currentCategory))
+        }
       }
     )
 
+
+  }
+
+  private def getListFromApiForm(form: SelectedApisEmailPreferencesForm): List[String] = {
+    Logger.error(s"****${form.apiRadio}*****")
+    if(form.apiRadio.equalsIgnoreCase("ALL_APIS")){
+      List("ALL_APIS")
+    }else {
+      form.selectedApi.toList
+    }
   }
 
   def flowSelectTopicsPage(): Action[AnyContent] = loggedInAction {
