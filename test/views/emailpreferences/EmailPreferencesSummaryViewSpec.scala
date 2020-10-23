@@ -87,7 +87,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
         document.getElementById(s"all-api-${interest.regime}").text() shouldBe s"All $textRegimeDisplayNameVal APIs"
       } else {
         for (service <- services) {
-          document.getElementById(s"${service}").text() shouldBe extendedServiceDetails.get(service).getOrElse("")
+          document.getElementById(s"$service").text() shouldBe extendedServiceDetails.getOrElse(service, "")
         }
       }
 
@@ -96,8 +96,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
   }
 
 
-  def checkEmailTopicsSection(document: Document,
-                              emailPreferences: EmailPreferences): Unit = {
+  def checkEmailTopicsSection(document: Document, emailPreferences: EmailPreferences): Unit = {
 
     val topicsHeading = document.getElementById("topics-heading")
     topicsHeading.text shouldBe "Topics"
@@ -106,9 +105,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec with WithCSRFAddTok
       selectedTopicsCell.text shouldBe topic.displayName
     }
 
-
     checkLink(document, "change-topics-link", "Change the topics you are interested in", "/developer/profile/email-preferences/topics")
-
     checkLink(document, "unsubscribe-link", "Unsubscribe from Developer Hub emails", "/developer/profile/email-preferences/unsubscribe")
   }
 
