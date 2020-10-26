@@ -35,6 +35,7 @@ import service.SubscriptionsService.SubscriptionsConnector
 import uk.gov.hmrc.play.http.metrics.API
 import uk.gov.hmrc.http.NotFoundException
 import domain.ApplicationNotFound
+import play.api.Logger
 
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) extends SubscriptionsConnector {
@@ -74,7 +75,7 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
 
   private def recovery: PartialFunction[Throwable, Nothing] = {
     case e: NotFoundException => {
-      println(e)
+      Logger.warn(e.message)
       throw new ApplicationNotFound
     }
   }
