@@ -23,6 +23,8 @@ import play.api.libs.json.Json
 import scala.util.Try
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 import scala.util.Random
+import domain.models.apidefinitions.APIAccessType.PRIVATE
+import domain.models.apidefinitions.APIAccessType.PUBLIC
 
 object APIDefinition {
   private val nonNumericOrPeriodRegex = "[^\\d^.]*"
@@ -97,8 +99,11 @@ case class APISubscriptionStatus(
     fields: SubscriptionFieldsWrapper,
     isTestSupport: Boolean = false
 ) {
-  def canUnsubscribe: Boolean = {
-    apiVersion.status != APIStatus.DEPRECATED
+  def isPrivate: Boolean = {
+    apiVersion.accessType match {
+      case PRIVATE => true
+      case PUBLIC => false
+    }
   }
 }
 

@@ -66,7 +66,6 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   def fetchApiDefinitionsVisibleToUser(userEmail: String)(implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] =
     http.GET[Seq[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("collaboratorEmail" -> userEmail))
 
-    
   def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST(s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { _ =>
       ApplicationUpdateSuccessful
@@ -74,7 +73,10 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   }
 
   private def recovery: PartialFunction[Throwable, Nothing] = {
-    case _: NotFoundException => throw new ApplicationNotFound
+    case e: NotFoundException => {
+      println(e)
+      throw new ApplicationNotFound
+    }
   }
 
 

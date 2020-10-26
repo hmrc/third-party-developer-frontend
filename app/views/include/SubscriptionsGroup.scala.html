@@ -71,7 +71,7 @@
                                             </a>
                                         }
                                     </div>
-                                    @if(app.hasLockedSubscriptions && role.isAdministrator) {
+                                    @if((app.hasLockedSubscriptions || api.isPrivate) && role.isAdministrator) {
                                         <div class="accordion__body__row__right accordion__body__row__right--link">
                                           <a href="@routes.Subscriptions.changeLockedApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)"
                                              aria-label="Request to @if(api.subscribed) {unsubscribe from} else {subscribe to} @apiVersionFullName">
@@ -85,7 +85,7 @@
                                       <div class="toggle float--right">
                                         @helper.form(action = routes.Subscriptions.changeApiSubscription(app.id, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString), 'class -> "slider") {
                                         @helper.CSRF.formField
-                                        <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.version)-toggle" @if(app.hasLockedSubscriptions) { disabled } aria-live="assertive">
+                                        <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.version)-toggle" @if(app.hasLockedSubscriptions || api.isPrivate) { disabled } aria-live="assertive">
                                           <div class="slider__radios">
                                             <input id="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" class="slider__on" type="radio" name="subscribed" value="true" aria-label="You have now subscribed to @apiVersionFullName" @if(api.subscribed) { checked } />
                                             <label for="@IdFormatter.identifier(api.context, api.apiVersion.version)-on" class="slider__on--label" aria-label="@if(api.subscribed){You are subscribed to @apiVersionFullName} else {You are not subscribed to @apiVersionFullName}">On</label>
