@@ -19,6 +19,7 @@
 @import domain.models.developers.DeveloperSession
 @import include._
 @import domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.urls.Link
 
 @this(devMain: DevMain)
 
@@ -61,8 +62,9 @@
         }
 
         <div style="clear: both;">
-            <p>Check the <a href="https://api-platform-status.production.tax.service.gov.uk/?_ga=2.73741073.2032328959.1590496078-921174029.1559546962#">
-                service availability page for information about live incidents</a>.</p>
+            <p>Check the @{
+                Link.toExternalPage(id = Some("status-page-link"), url = "https://api-platform-status.production.tax.service.gov.uk/", value = Some("service availability page for information about live incidents")).toHtml
+            }.</p>
 
             <h2 class="heading-medium">Get involved in user research and events</h2>
         </div>
