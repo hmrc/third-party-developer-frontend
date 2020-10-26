@@ -26,7 +26,7 @@
 @(selectedTopics: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
-    "Email preferences"
+    "Which topics do you want to receive information about?"
 }
 
 @devMain(
@@ -38,7 +38,7 @@
 
     <div>
         <legend>
-            <h1 id="pageHeading" class="govuk-fieldset-heading">Which topics do you want to receive information about?</h1>
+            <h1 id="pageHeading" class="govuk-fieldset-heading">@pageHeading</h1>
         </legend>
         <p>
             We’ll only send you information about the APIs you are interested in.
