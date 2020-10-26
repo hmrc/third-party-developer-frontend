@@ -63,7 +63,6 @@
     
         @helper.form(action = routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
             @helper.CSRF.formField
-            <button id="noSelectCategories" class="secondary-button" type="submit" >I'm not interested in any of these categories</button>
-        <!-- <a href="@routes.EmailPreferences.flowSelectTopicsPage().url"> I'm not interested in any of these categories</a> -->
+            <button id="noSelectCategories" class="secondary-button" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
         }
     }
