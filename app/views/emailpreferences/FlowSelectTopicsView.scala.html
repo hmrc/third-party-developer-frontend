@@ -50,6 +50,7 @@
 
     @helper.form(action = routes.EmailPreferences.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
+        <a name="topic"></a>
         @for(topic <- List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES).sortBy(_.displayOrder)) {
             <div class="multiple-choice">
                 <input id="@topic.value" type="checkbox" name="topic[]" value="@topic.value"
