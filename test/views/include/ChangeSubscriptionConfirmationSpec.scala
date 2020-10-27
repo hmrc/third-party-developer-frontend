@@ -30,6 +30,7 @@ import utils.ViewHelpers.elementExistsByText
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
+import play.api.mvc.Call
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken {
   val request = FakeRequest().withCSRFToken
@@ -40,6 +41,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
   val apiName = "Test API"
   val apiContext = ApiContext("test")
   val apiVersion = ApiVersion("1.0")
+  val callMock = mock[Call]
 
   val loggedInUser = utils.DeveloperSession("givenname.familyname@example.com", "Givenname", "Familyname", loggedInState = LoggedInState.LOGGED_IN)
 
@@ -68,6 +70,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
       apiVersion,
       subscribed,
       SubscriptionRedirect.API_SUBSCRIPTIONS_PAGE.toString,
+      callMock,
       request,
       loggedInUser,
       messagesProvider,

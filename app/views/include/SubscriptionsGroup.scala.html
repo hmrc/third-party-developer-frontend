@@ -71,12 +71,19 @@
                                             </a>
                                         }
                                     </div>
-                                    @if((app.hasLockedSubscriptions || api.isPrivate) && role.isAdministrator) {
+                                    @if(app.hasLockedSubscriptions && role.isAdministrator) {
                                         <div class="accordion__body__row__right accordion__body__row__right--link">
                                           <a href="@routes.Subscriptions.changeLockedApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)"
                                              aria-label="Request to @if(api.subscribed) {unsubscribe from} else {subscribe to} @apiVersionFullName">
                                               Request change
                                           </a>
+                                        </div>
+                                    } else if (api.isPrivate && role.isAdministrator) {
+                                        <div class="accordion__body__row__right accordion__body__row__right--link">
+                                            <a href="@routes.Subscriptions.changePrivateApiSubscription(app.id, api.name, api.context, api.apiVersion.version, afterSubscriptionRedirectTo.toString)"
+                                               aria-label="Request to @if(api.subscribed) {unsubscribe from} else {subscribe to} @apiVersionFullName">
+                                                Request change
+                                            </a>
                                         </div>
                                     } else {
                                         <div id="@IdFormatter.identifier(api.context, api.apiVersion.version)-state" class="accordion__body__row__right api-subscriber__state-container subscription-error"></div>

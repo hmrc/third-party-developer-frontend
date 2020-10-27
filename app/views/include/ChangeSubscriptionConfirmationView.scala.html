@@ -22,7 +22,7 @@
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
-@(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: ApiContext, version: ApiVersion, subscribed: Boolean, redirectTo: String)(
+@(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: ApiContext, version: ApiVersion, subscribed: Boolean, redirectTo: String, formAction: Call)(
     implicit request: play.api.mvc.Request[Any],
     loggedIn: DeveloperSession,
     messagesProvider: MessagesProvider,
@@ -62,7 +62,7 @@
 
     <div class="panel panel-border-wide"><p>For security reasons we must approve any API subscription changes. This takes up to 2 working days.</p></div>
 
-    @helper.form(action = routes.Subscriptions.changeLockedApiSubscriptionAction(app.id, name, context, version, redirectTo.toString), 'class -> "no-fields-subscription") {
+    @helper.form(action = formAction, 'class -> "no-fields-subscription") {
         <fieldset class="inline @if(form.errors("confirm").nonEmpty) {form-group-error}">
           <div class="form-group">
                 @if(subscribed) {
