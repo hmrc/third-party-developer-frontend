@@ -135,29 +135,6 @@ class Subscriptions @Inject() (
       ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
     }
 
-  def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
-    canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
-      val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
-      val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
-      
-      applicationService
-        .isSubscribedToApi(request.application.id, apiIdentifier)
-        .map(subscribed =>
-          Ok(
-            changeSubscriptionConfirmationView(
-              applicationViewModelFromApplicationRequest,
-              ChangeSubscriptionConfirmationForm.form,
-              apiName,
-              apiContext,
-              apiVersion,
-              subscribed,
-              redirectTo,
-              call
-            )
-          )
-        )
-    }
-
   def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
       val apiIdentifier = ApiIdentifier(apiContext,apiVersion)
@@ -191,10 +168,11 @@ class Subscriptions @Inject() (
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
     
-  def changePrivateApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
-    canManagePrivateApiSubscriptionsAction(applicationId) { implicit request =>
+  
+  def changeApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String, call: Call): ApplicationRequest[AnyContent] => Future[Result] = 
+    (request: ApplicationRequest[AnyContent]) => {
       val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
-      val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      implicit val r = request
       applicationService
         .isSubscribedToApi(request.application.id, apiIdentifier)
         .map(subscribed =>
@@ -211,6 +189,18 @@ class Subscriptions @Inject() (
             )
           )
         )
+    }
+
+  def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+    canManageLockedApiSubscriptionsAction(applicationId) {
+      val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      changeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
+    }
+
+  def changePrivateApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+    canManagePrivateApiSubscriptionsAction(applicationId) {
+      val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      changeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
   def changePrivateApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
