@@ -86,14 +86,12 @@ object PasswordResetForm {
 
 }
 
-case class RegisterForm(
-                         firstName: String,
+case class RegisterForm(firstName: String,
                          lastName: String,
                          emailaddress: String,
                          password: String,
                          confirmPassword: String,
-                         organisation: Option[String] = None
-                       ) extends ConfirmPassword
+                         organisation: Option[String] = None) extends ConfirmPassword
 
 object RegistrationForm {
 
@@ -235,13 +233,11 @@ object AddApplicationNameForm {
   )
 }
 
-case class EditApplicationForm(
-                                applicationId: ApplicationId,
+case class EditApplicationForm(applicationId: ApplicationId,
                                 applicationName: String,
                                 description: Option[String] = None,
                                 privacyPolicyUrl: Option[String] = None,
-                                termsAndConditionsUrl: Option[String] = None
-                              )
+                                termsAndConditionsUrl: Option[String] = None)
 
 object EditApplicationForm {
 
@@ -269,11 +265,9 @@ object EditApplicationForm {
   }
 }
 
-case class SubmitApplicationNameForm(
-                                      applicationName: String,
+case class SubmitApplicationNameForm(applicationName: String,
                                       originalApplicationName: String,
-                                      password: String = ""
-                                    ) extends PasswordConfirmation
+                                      password: String = "") extends PasswordConfirmation
 
 object SubmitApplicationNameForm {
 
@@ -286,13 +280,11 @@ object SubmitApplicationNameForm {
   )
 }
 
-case class SignOutSurveyForm(
-                              rating: Option[Int],
+case class SignOutSurveyForm(rating: Option[Int],
                               improvementSuggestions: String,
                               name: String,
                               email: String,
-                              isJavascript: Boolean
-                            )
+                              isJavascript: Boolean)
 
 object SignOutSurveyForm {
   val form: Form[SignOutSurveyForm] = Form(
@@ -371,10 +363,8 @@ object DeleteRedirectForm {
   )
 }
 
-final case class DeleteRedirectConfirmationForm(
-                                                 redirectUri: String,
-                                                 deleteRedirectConfirm: Option[String] = Some("")
-                                               )
+final case class DeleteRedirectConfirmationForm(redirectUri: String,
+                                                 deleteRedirectConfirm: Option[String] = Some(""))
 
 object DeleteRedirectConfirmationForm {
 

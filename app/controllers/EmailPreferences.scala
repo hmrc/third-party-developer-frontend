@@ -127,9 +127,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       emailPreferencesService.fetchFlow(request.developerSession)
         .flatMap(flow => renderFlowSelectTopicsView(selectedTopics = flow.selectedTopics))
         .map(Ok(_))
-//      for {
-//        flow <- emailPreferencesService.fetchFlow(request.developerSession)
-//      } yield Ok(flowSelectTopicsView(selectedTopics = flow.selectedTopics))
   }
 
   private def renderFlowSelectTopicsView(form: Form[SelectedTopicsEmailPreferencesForm] = SelectedTopicsEmailPreferencesForm.form,
@@ -156,21 +153,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
           else Redirect(routes.EmailPreferences.flowSelectTopicsPage())
       }
     )
-
-//    NonEmptyList.fromList(form.value.map(_.topic.toList).getOrElse(List.empty))
-//      .fold(
-//        Future.successful(Redirect(routes.EmailPreferences.flowSelectTopicsAction()
-//        ))) {
-//        selectedTopics =>
-//          val developerSession = request.developerSession
-//          for {
-//            flow <- emailPreferencesService.fetchFlow(developerSession)
-//            updateResult <- emailPreferencesService
-//              .updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopics.toList.toSet))
-//            _ = if (updateResult) emailPreferencesService.deleteFlow(developerSession.session.sessionId)
-//          } yield if (updateResult) Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
-//          else Redirect(routes.EmailPreferences.flowSelectTopicsPage())
-//      }
   }
 
   def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>
