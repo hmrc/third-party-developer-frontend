@@ -24,7 +24,7 @@
 @()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
     @pageHeading = @{
-        "Unsubscribe from Developer Hub emails"
+        "Are you sure you want to unsubscribe from Developer Hub emails?"
     }
 
     @devMain(
@@ -34,7 +34,7 @@
         developerSession = Some(loggedIn)
     ) {
 
-    <h2 id="pageHeading" class="heading-large">Are you sure you want to unsubscribe from Developer Hub emails?</h2>
+    <h2 id="pageHeading" class="heading-large">@pageHeading</h2>
         @EmailPrefsBulletInfoView()
     @helper.form(action = routes.EmailPreferences.unsubscribeAllAction(), 'class -> "form", 'id -> "unsubscribeForm") {
         @helper.CSRF.formField

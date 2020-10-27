@@ -86,14 +86,12 @@ object PasswordResetForm {
 
 }
 
-case class RegisterForm(
-    firstName: String,
-    lastName: String,
-    emailaddress: String,
-    password: String,
-    confirmPassword: String,
-    organisation: Option[String] = None
-) extends ConfirmPassword
+case class RegisterForm(firstName: String,
+                         lastName: String,
+                         emailaddress: String,
+                         password: String,
+                         confirmPassword: String,
+                         organisation: Option[String] = None) extends ConfirmPassword
 
 object RegistrationForm {
 
@@ -235,13 +233,11 @@ object AddApplicationNameForm {
   )
 }
 
-case class EditApplicationForm(
-    applicationId: ApplicationId,
-    applicationName: String,
-    description: Option[String] = None,
-    privacyPolicyUrl: Option[String] = None,
-    termsAndConditionsUrl: Option[String] = None
-)
+case class EditApplicationForm(applicationId: ApplicationId,
+                                applicationName: String,
+                                description: Option[String] = None,
+                                privacyPolicyUrl: Option[String] = None,
+                                termsAndConditionsUrl: Option[String] = None)
 
 object EditApplicationForm {
 
@@ -269,11 +265,9 @@ object EditApplicationForm {
   }
 }
 
-case class SubmitApplicationNameForm(
-    applicationName: String,
-    originalApplicationName: String,
-    password: String = ""
-) extends PasswordConfirmation
+case class SubmitApplicationNameForm(applicationName: String,
+                                      originalApplicationName: String,
+                                      password: String = "") extends PasswordConfirmation
 
 object SubmitApplicationNameForm {
 
@@ -286,13 +280,11 @@ object SubmitApplicationNameForm {
   )
 }
 
-case class SignOutSurveyForm(
-    rating: Option[Int],
-    improvementSuggestions: String,
-    name: String,
-    email: String,
-    isJavascript: Boolean
-)
+case class SignOutSurveyForm(rating: Option[Int],
+                              improvementSuggestions: String,
+                              name: String,
+                              email: String,
+                              isJavascript: Boolean)
 
 object SignOutSurveyForm {
   val form: Form[SignOutSurveyForm] = Form(
@@ -371,10 +363,8 @@ object DeleteRedirectForm {
   )
 }
 
-final case class DeleteRedirectConfirmationForm(
-    redirectUri: String,
-    deleteRedirectConfirm: Option[String] = Some("")
-)
+final case class DeleteRedirectConfirmationForm(redirectUri: String,
+                                                 deleteRedirectConfirm: Option[String] = Some(""))
 
 object DeleteRedirectConfirmationForm {
 
@@ -431,11 +421,12 @@ object AddCidrBlockForm {
 }
 
 final case class TaxRegimeEmailPreferencesForm(taxRegime: List[String])
+
 object TaxRegimeEmailPreferencesForm {
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
     if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedcategories.empty"))
   }
-  
+
   val form: Form[TaxRegimeEmailPreferencesForm] =
     Form(mapping("taxRegime" -> list(text).verifying(nonEmptyList))
     (TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
@@ -449,16 +440,19 @@ object SelectedApisEmailPreferencesForm {
   }
 
   def form: Form[SelectedApisEmailPreferencesForm] = Form(mapping(
-         "selectedApi" -> seq(text).verifying(nonEmptyList),
-         "currentCategory" -> text)
-         (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply))
+    "selectedApi" -> seq(text).verifying(nonEmptyList),
+    "currentCategory" -> text)
+  (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply))
 }
 
 final case class SelectedTopicsEmailPreferencesForm(topic: Seq[String])
 
 object SelectedTopicsEmailPreferencesForm {
+  def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
+    if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedtopics.empty"))
+  }
 
-   def form: Form[SelectedTopicsEmailPreferencesForm] = Form(mapping(
-         "topic" -> seq(text))
-         (SelectedTopicsEmailPreferencesForm.apply)(SelectedTopicsEmailPreferencesForm.unapply))
+  def form: Form[SelectedTopicsEmailPreferencesForm] = Form(mapping(
+    "topic" -> seq(text).verifying(nonEmptyList))
+  (SelectedTopicsEmailPreferencesForm.apply)(SelectedTopicsEmailPreferencesForm.unapply))
 }

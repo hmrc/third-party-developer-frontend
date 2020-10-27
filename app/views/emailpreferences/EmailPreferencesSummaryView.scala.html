@@ -26,7 +26,7 @@
 @(viewData: EmailPreferencesSummaryViewData)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
-    "Email preferences"
+    if(viewData.unsubscribed) "You are unsubscribed" else "Email preferences"
 }
 
 @userHasEmailPreferences = @{
@@ -42,7 +42,7 @@
 
     @if(viewData.unsubscribed) {
         <div class="govuk-box-highlight">
-            <h1 id="page-heading" class="heading-xlarge">You are unsubscribed</h1>
+            <h1 id="page-heading" class="heading-xlarge">@pageHeading</h1>
             <p id="first-line" class="font-large">You can change your email preferences at any time</p>
         </div>
     } else {

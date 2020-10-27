@@ -29,6 +29,7 @@ import service.{EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
@@ -119,31 +120,39 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       }
     )
 
-
   }
 
-  def flowSelectTopicsPage: Action[AnyContent] = loggedInAction { implicit request =>
-    for {
-      flow <- emailPreferencesService.fetchFlow(request.developerSession)
-    } yield Ok(flowSelectTopicsView(flow.selectedTopics))
+  def flowSelectTopicsPage(): Action[AnyContent] = loggedInAction {
+    implicit request =>
+      emailPreferencesService.fetchFlow(request.developerSession)
+        .flatMap(flow => renderFlowSelectTopicsView(selectedTopics = flow.selectedTopics))
+        .map(Ok(_))
   }
+
+  private def renderFlowSelectTopicsView(form: Form[SelectedTopicsEmailPreferencesForm] = SelectedTopicsEmailPreferencesForm.form,
+                                         selectedTopics: Set[String])
+                                        (implicit request: UserRequest[AnyContent]): Future[Html] =
+    successful(flowSelectTopicsView.apply(form, selectedTopics))
 
   def flowSelectTopicsAction: Action[AnyContent] = loggedInAction { implicit request =>
+    val form = SelectedTopicsEmailPreferencesForm.form.bindFromRequest
 
-    NonEmptyList.fromList(SelectedTopicsEmailPreferencesForm.form.bindFromRequest.value.map(_.topic.toList).getOrElse(List.empty))
-      .fold(
-        Future.successful(Redirect(routes.EmailPreferences.flowSelectTopicsAction()
-        ))) {
-        selectedTopics =>
+    form.fold(
+      formWithErrors => {
+        renderFlowSelectTopicsView(formWithErrors, Set.empty).map(BadRequest(_))
+      },
+      {
+        selectedTopicsForm =>
           val developerSession = request.developerSession
           for {
             flow <- emailPreferencesService.fetchFlow(developerSession)
             updateResult <- emailPreferencesService
-              .updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopics.toList.toSet))
+              .updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
             _ = if (updateResult) emailPreferencesService.deleteFlow(developerSession.session.sessionId)
           } yield if (updateResult) Redirect(routes.EmailPreferences.emailPreferencesSummaryPage())
           else Redirect(routes.EmailPreferences.flowSelectTopicsPage())
       }
+    )
   }
 
   def emailPreferencesSummaryPage(): Action[AnyContent] = loggedInAction { implicit request =>
