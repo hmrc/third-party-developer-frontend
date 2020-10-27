@@ -17,9 +17,9 @@
 package controllers
 
 import domain.models.applications.{Application, ApplicationId, Standard}
-import play.api.data.Form
+import play.api.data.{Form, Forms}
 import play.api.data.Forms._
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
+import play.api.data.validation.{Constraint, Constraints, Invalid, Valid, ValidationError}
 
 trait ConfirmPassword {
   val password: String
@@ -435,25 +435,11 @@ object TaxRegimeEmailPreferencesForm {
 final case class SelectedApisEmailPreferencesForm(apiRadio: String, selectedApi: Seq[String], currentCategory: String)
 
 object SelectedApisEmailPreferencesForm {
-  def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
-    if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedapis.empty"))
-  }
 
-  def validateApisNotEmptyWhenSelected(apiRadio: String, selectedApi: Seq[String], currentCategory: String) = apiRadio match {
-    case "ALL_APIS" =>
-      Some(SelectedApisEmailPreferencesForm(apiRadio, Seq("ALL_APIS"), currentCategory))
-    case "SOME_APIS" =>
-      if (selectedApi.isEmpty) {
-        None
-      } else {
-        Some(SelectedApisEmailPreferencesForm(apiRadio, selectedApi, currentCategory))
-      }
-    case _ =>
-      None
-  }
+  private def isNotBlankString: String => Boolean = s => s.trim.length > 0
 
   def form: Form[SelectedApisEmailPreferencesForm] = Form(mapping(
-    "apiRadio" -> nonEmptyText,
+    "apiRadio" -> text,
     "selectedApi" -> seq(text),
     "currentCategory" -> text)
   (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
@@ -461,9 +447,7 @@ object SelectedApisEmailPreferencesForm {
       "when-selected-apis-chosen.nonempty",
       fields =>
         fields match {
-          case data: SelectedApisEmailPreferencesForm => {
-            validateApisNotEmptyWhenSelected(data.apiRadio, data.selectedApi, data.currentCategory).isDefined
-          }
+          case data: SelectedApisEmailPreferencesForm => if(data.apiRadio.equalsIgnoreCase("SOME_APIS") && data.selectedApi.isEmpty) false else true
         }
     )
   )
