@@ -68,7 +68,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     when(mockEmailPreferencesUnsubscribeAllView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesStartView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectCategoriesView.apply(*, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
-    when(mockEmailPreferencesFlowSelectTopicView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockEmailPreferencesFlowSelectTopicView.apply(*, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectApiView.apply(*, *, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
     val controllerUnderTest: EmailPreferences =
@@ -467,7 +467,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
       status(result) mustBe OK
 
-      verify(mockEmailPreferencesFlowSelectTopicView).apply(eqTo(expectedSelectedTopics))(*, *, *, *)
+      verify(mockEmailPreferencesFlowSelectTopicView).apply(*, eqTo(expectedSelectedTopics))(*, *, *, *)
     }
 
     "redirect to login screen for non-logged in user" in new Setup {
@@ -496,7 +496,6 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       when(mockEmailPreferencesService.deleteFlow(eqTo(sessionId))).thenReturn(Future.successful(true))
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
-
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.emailPreferencesSummaryPage().url)
 
@@ -516,7 +515,6 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
-
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
 
@@ -525,13 +523,13 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       verify(mockEmailPreferencesService, times(0)).deleteFlow(*)
     }
 
-    "redirect back to topics page when form is empty" in new Setup {
+    "return 400 and re-display topics page when form is empty" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
 
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(loggedInRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
+      status(result) mustBe BAD_REQUEST
+      verify(mockEmailPreferencesFlowSelectTopicView).apply(*, eqTo(Set.empty))(*, *, *, *)
     }
 
     "redirect to login screen for non-logged in user" in new Setup {

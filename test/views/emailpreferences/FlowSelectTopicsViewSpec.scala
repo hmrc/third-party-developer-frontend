@@ -16,6 +16,7 @@
 
 package views.emailpreferences
 
+import controllers.SelectedTopicsEmailPreferencesForm
 import domain.models.developers.LoggedInState
 import domain.models.emailpreferences.EmailTopic
 import domain.models.emailpreferences.EmailTopic.{BUSINESS_AND_POLICY, EVENT_INVITES}
@@ -74,7 +75,14 @@ class FlowSelectTopicsViewSpec extends CommonViewSpec with WithCSRFAddToken {
   "Email Preferences Select Topics view page" should {
 
     "render the topics selection Page with no check boxes selected when no user selected topics passed into the view" in new Setup {
-      val page = flowSelectTopicsView.render(Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val page =
+        flowSelectTopicsView.render(
+          SelectedTopicsEmailPreferencesForm.form,
+          Set.empty,
+          messagesProvider.messages,
+          developerSessionWithoutEmailPreferences,
+          request,
+          appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document)
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
@@ -82,7 +90,9 @@ class FlowSelectTopicsViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
     "render the topics selection Page with boxes selected when user selected topics passed to the view" in new Setup {
       val usersTopics = Set(BUSINESS_AND_POLICY.value, EVENT_INVITES.value)
-      val page = flowSelectTopicsView.render(usersTopics, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val page =
+        flowSelectTopicsView.render(
+          SelectedTopicsEmailPreferencesForm.form, usersTopics, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       val document = Jsoup.parse(page.body)
       validateStaticElements(document)
 

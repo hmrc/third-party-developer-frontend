@@ -23,7 +23,7 @@
 
 @this(devMain: DevMain)
 
-@(selectedTopics: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[SelectedTopicsEmailPreferencesForm], selectedTopics: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
     "Which topics do you want to receive information about?"
@@ -36,6 +36,7 @@
     developerSession = Some(loggedIn)
 ) {
 
+    @errorSummary(form)
     <div>
         <legend>
             <h1 id="pageHeading" class="govuk-fieldset-heading">@pageHeading</h1>
