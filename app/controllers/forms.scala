@@ -439,7 +439,7 @@ object SelectedApisEmailPreferencesForm {
   private def isNotBlankString: String => Boolean = s => s.trim.length > 0
 
   def form: Form[SelectedApisEmailPreferencesForm] = Form(mapping(
-    "apiRadio" -> text,
+    "apiRadio" -> text.verifying("some.errror.key", isNotBlankString),
     "selectedApi" -> seq(text),
     "currentCategory" -> text)
   (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
@@ -447,7 +447,7 @@ object SelectedApisEmailPreferencesForm {
       "when-selected-apis-chosen.nonempty",
       fields =>
         fields match {
-          case data: SelectedApisEmailPreferencesForm => if(data.apiRadio.equalsIgnoreCase("SOME_APIS") && data.selectedApi.isEmpty) false else true
+          case data: SelectedApisEmailPreferencesForm => !(data.apiRadio.equalsIgnoreCase("SOME_APIS") && data.selectedApi.isEmpty)
         }
     )
   )
