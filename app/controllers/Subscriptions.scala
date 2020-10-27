@@ -40,6 +40,7 @@ import views.html.include.ChangeSubscriptionConfirmationView
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.apidefinitions.ApiIdentifier
 import play.api.mvc.Call
+import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
 
 @Singleton
 class Subscriptions @Inject() (
@@ -133,46 +134,13 @@ class Subscriptions @Inject() (
       def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = Future.successful(BadRequest(errorHandler.badRequestTemplate))
 
       ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
-    }
-
-  def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
-    canManageLockedApiSubscriptionsAction(applicationId) { implicit request =>
-      val apiIdentifier = ApiIdentifier(apiContext,apiVersion)
-      
-      def requestChangeSubscription(subscribed: Boolean) = {
-        if (subscribed) {
-          subscriptionsService
-            .requestApiUnsubscribe(request.user, request.application, apiName, apiVersion)
-            .map(_ => Ok(unsubscribeRequestSubmittedView(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
-        } else {
-          subscriptionsService
-            .requestApiSubscription(request.user, request.application, apiName, apiVersion)
-            .map(_ => Ok(subscribeRequestSubmittedView(applicationViewModelFromApplicationRequest, apiName, apiVersion)))
-        }
-      }
-
-      def handleValidForm(subscribed: Boolean)(form: ChangeSubscriptionConfirmationForm) = form.confirm match {
-        case Some(_) => requestChangeSubscription(subscribed)
-        case _       => Future.successful(redirect(redirectTo, applicationId))
-      }
-
-      def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) = {
-        val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
-        Future.successful(
-          BadRequest(changeSubscriptionConfirmationView(applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo, call))
-        )
-      }
-
-      applicationService
-        .isSubscribedToApi(request.application.id, apiIdentifier)
-        .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
-    }
-    
+    }   
   
-  def changeApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String, call: Call): ApplicationRequest[AnyContent] => Future[Result] = 
+  def requestChangeApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String, call: Call): ApplicationRequest[AnyContent] => Future[Result] = 
     (request: ApplicationRequest[AnyContent]) => {
       val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
       implicit val r = request
+
       applicationService
         .isSubscribedToApi(request.application.id, apiIdentifier)
         .map(subscribed =>
@@ -194,19 +162,21 @@ class Subscriptions @Inject() (
   def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
       val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
-      changeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
+      requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
   def changePrivateApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
       val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
-      changeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
+      requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  def changePrivateApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
-    canManagePrivateApiSubscriptionsAction(applicationId) { implicit request =>
+  def requestChangeApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String, call: Call): ApplicationRequest[AnyContent] => Future[Result] = 
+    (request: ApplicationRequest[AnyContent]) => {
       val apiIdentifier = ApiIdentifier(apiContext,apiVersion)
       
+      implicit val r = request
+
       def requestChangeSubscription(subscribed: Boolean) = {
         if (subscribed) {
           subscriptionsService
@@ -220,21 +190,30 @@ class Subscriptions @Inject() (
       }
 
       def handleValidForm(subscribed: Boolean)(form: ChangeSubscriptionConfirmationForm) = form.confirm match {
-        case Some(_) => requestChangeSubscription(subscribed)
+        case Some(true) => requestChangeSubscription(subscribed)
         case _       => Future.successful(redirect(redirectTo, applicationId))
       }
 
-      def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) = {
-        val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
-        
+      def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
         Future.successful(
           BadRequest(changeSubscriptionConfirmationView(applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo, call))
         )
-      }
 
       applicationService
         .isSubscribedToApi(request.application.id, apiIdentifier)
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
+    }
+
+  def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+    canManageLockedApiSubscriptionsAction(applicationId) {
+      val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
+    }
+ 
+  def changePrivateApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+    canManagePrivateApiSubscriptionsAction(applicationId) {
+      val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
   private def updateCheckInformation(app: Application)(implicit hc: HeaderCarrier): Future[Any] = {
