@@ -144,6 +144,18 @@ package object controllers {
     val accessCodeInvalidKey = "accessCode.invalid.name.field"
     val accessCodeInvalidGlobalKey = "accessCode.invalid.name.global"
 
+    val selectedCategoryNonSelectedKey = "error.selectedcategories.nonselected.field"
+    val selectedCategoryNonSelectedGlobalKey = "error.selectedcategories.nonselected.global"
+
+    val selectedApiRadioKey = "error.select.apiradio.nonselected.field"
+    val selectedApiRadioGlobalKey = "error.select.apiradio.nonselected.global"
+
+    val selectedApisNonSelectedKey =  "error.selectedapis.nonselected.field"
+    val selectedApisNonSelectedGlobalKey = "error.selectedapis.nonselected.global"
+
+    val selectedTopicsNonSelectedKey = "error.selectedtopics.nonselected.field"
+    val selectedTopicsNonSelectedGlobalKey = "error.selectedtopics.nonselected.global"
+
     val formKeysMap = Map(
       firstnameRequiredKey -> firstnameRequiredGlobalKey,
       firstnameMaxLengthKey -> firstnameMaxLengthGlobalKey,
@@ -166,7 +178,11 @@ package object controllers {
       privacyPolicyUrlInvalidKey -> privacyPolicyUrlInvalidGlobalKey,
       tNcUrlInvalidKey -> tNcUrlInvalidGlobalKey,
       termsOfUseAgreeKey -> termsOfUseAgreeGlobalKey,
-      accessCodeInvalidKey -> accessCodeInvalidGlobalKey
+      accessCodeInvalidKey -> accessCodeInvalidGlobalKey,
+      selectedCategoryNonSelectedKey -> selectedCategoryNonSelectedGlobalKey,
+      selectedApisNonSelectedKey -> selectedApisNonSelectedGlobalKey,
+      selectedApiRadioKey -> selectedApiRadioGlobalKey,
+      selectedTopicsNonSelectedKey -> selectedTopicsNonSelectedGlobalKey
     )
 
     val globalKeys = formKeysMap.values.toSeq
@@ -190,7 +206,11 @@ package object controllers {
       currentPasswordRequiredGlobalKey -> currentPasswordField,
       currentPasswordInvalidGlobalKey -> currentPasswordField,
       emailMaxLengthGlobalKey -> emailaddressField,
-      accessCodeInvalidGlobalKey -> accessCodeInvalidKey
+      accessCodeInvalidGlobalKey -> accessCodeInvalidKey,
+      selectedCategoryNonSelectedGlobalKey -> selectedCategoryNonSelectedKey,
+      selectedApisNonSelectedGlobalKey -> selectedApisNonSelectedKey,
+      selectedApiRadioGlobalKey -> selectedApiRadioKey,
+      selectedTopicsNonSelectedGlobalKey -> selectedTopicsNonSelectedKey
     )
   }
 

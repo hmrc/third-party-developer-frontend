@@ -126,7 +126,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   private def getListFromApiForm(form: SelectedApisEmailPreferencesForm): List[String] = {
-    if(form.apiRadio.equalsIgnoreCase("ALL_APIS")){
+    if(form.apiRadio.contains("ALL_APIS")){
       List("ALL_APIS")
     }else {
       form.selectedApi.toList
