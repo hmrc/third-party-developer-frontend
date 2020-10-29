@@ -159,6 +159,14 @@ delete.redirect.confirmation.no.choice.field = Tell us if you want to delete thi
 accessCode.invalid.name.field = You have entered an invalid access code
 accessCode.invalid.name.global = You have entered an invalid access code
 
-error.selectedcategories.empty = Select a category you are interested in
-error.selectedapis.empty = Select an API you are interested in
-error.selectedtopics.empty = Select a topic you are interested in
+error.selectedcategories.nonselected.field = Select a category you are interested in
+error.selectedcategories.nonselected.global = Select a category you are interested in
+
+error.select.apiradio.nonselected.field =   Select all APIs or choose specific APIs
+error.select.apiradio.nonselected.global =   Select all APIs or choose specific APIs
+
+error.selectedapis.nonselected.field =   Select at least 1 specific API
+error.selectedapis.nonselected.global =  Select at least 1 specific API
+
+error.selectedtopics.nonselected.field = Select a topic you are interested in
+error.selectedtopics.nonselected.global = Select a topic you are interested in

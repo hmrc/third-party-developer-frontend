@@ -17,9 +17,9 @@
 package controllers
 
 import domain.models.applications.{Application, ApplicationId, Standard}
-import play.api.data.Form
+import play.api.data.{Form, Forms}
 import play.api.data.Forms._
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
+import play.api.data.validation.{Constraint, Constraints, Invalid, Valid, ValidationError}
 
 trait ConfirmPassword {
   val password: String
@@ -424,7 +424,7 @@ final case class TaxRegimeEmailPreferencesForm(taxRegime: List[String])
 
 object TaxRegimeEmailPreferencesForm {
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
-    if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedcategories.empty"))
+    if (o.nonEmpty) Valid else Invalid(ValidationError(FormKeys.selectedCategoryNonSelectedKey))
   }
 
   val form: Form[TaxRegimeEmailPreferencesForm] =
@@ -432,24 +432,37 @@ object TaxRegimeEmailPreferencesForm {
     (TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
 }
 
-final case class SelectedApisEmailPreferencesForm(selectedApi: Seq[String], currentCategory: String)
+final case class SelectedApisEmailPreferencesForm(apiRadio: Option[String] = Some(""), selectedApi: Seq[String], currentCategory: String)
 
 object SelectedApisEmailPreferencesForm {
-  def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
-    if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedapis.empty"))
+
+  def nonEmpty(message: String): Constraint[String] = Constraint[String] { s: String =>
+    if (Option(s).isDefined) Invalid(message) else Valid
   }
 
+
   def form: Form[SelectedApisEmailPreferencesForm] = Form(mapping(
-    "selectedApi" -> seq(text).verifying(nonEmptyList),
+    "apiRadio" -> optional(text)
+                      .verifying(FormKeys.selectedApiRadioGlobalKey, s => s.isDefined),
+    "selectedApi" -> seq(text),
     "currentCategory" -> text)
-  (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply))
+  (SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
+    .verifying(
+      FormKeys.selectedApisNonSelectedGlobalKey,
+      fields =>
+        fields match {
+          case data: SelectedApisEmailPreferencesForm =>
+            if(data.apiRadio.contains("SOME_APIS") && data.selectedApi.isEmpty) false else true
+        }
+    )
+  )
 }
 
 final case class SelectedTopicsEmailPreferencesForm(topic: Seq[String])
 
 object SelectedTopicsEmailPreferencesForm {
   def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
-    if (o.nonEmpty) Valid else Invalid(ValidationError("error.selectedtopics.empty"))
+    if (o.nonEmpty) Valid else Invalid(ValidationError(FormKeys.selectedTopicsNonSelectedKey))
   }
 
   def form: Form[SelectedTopicsEmailPreferencesForm] = Form(mapping(

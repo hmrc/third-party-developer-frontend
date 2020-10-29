@@ -390,7 +390,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("currentCategory" -> "category1", "selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2")
+        .withFormUrlEncodedBody("currentCategory" -> "category1", "selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "apiRadio" -> "SOME_APIS")
 
       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedCategories = Set(apiCategory.category, apiCategory2.category), visibleApis = visibleApis)
@@ -408,7 +408,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("currentCategory" -> "category2", "selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2")
+        .withFormUrlEncodedBody("currentCategory" -> "category2", "selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "apiRadio" -> "SOME_APIS")
 
       val emailFlow: EmailPreferencesFlow = EmailPreferencesFlow.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedCategories = Set(apiCategory.category, apiCategory2.category), visibleApis = visibleApis)

@@ -16,7 +16,7 @@
 
 package views.emailpreferences
 
-import controllers.SelectedApisEmailPreferencesForm
+import controllers.{FormKeys, SelectedApisEmailPreferencesForm}
 import domain.models.apidefinitions.ApiContext
 import domain.models.connectors.ApiDefinition
 import domain.models.developers.{DeveloperSession, LoggedInState}
@@ -50,9 +50,15 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
   }
 
   private def validateCheckboxItemsAgainstApis(document: Document, apis: List[ApiDefinition], currentCategory: String) = {
-    val selectAllApiCheckbox = document.getElementById("all-apis")
-    selectAllApiCheckbox.`val`() shouldBe "ALL_APIS"
+    val selectAllApiRadio = document.getElementById("all-apis")
+    selectAllApiRadio.`val`() shouldBe "ALL_APIS"
     document.getElementById("all-apis-description").text() shouldBe s"You will be subscribed automatically to emails about new $currentCategory APIs"
+
+    val SelectSpecificApiRadio = document.getElementById("individual-apis")
+    SelectSpecificApiRadio.`val`() shouldBe "SOME_APIS"
+    document.getElementById("individual-api-description").text() shouldBe s"Select specific APIs. You will not get emails about new Income Tax APIs"
+
+
 
     apis.foreach(api => {
       val checkbox = document.getElementById(api.serviceName)
@@ -62,7 +68,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
       document.select(s"label[for=${api.serviceName}]").text shouldBe api.name
 
       withClue("Expected number of checkboxes differs from number of apis sent to view") {
-        document.select("input[type=checkbox]").size shouldBe (apis.size +1) // Include ALL_APIS checkbox
+        document.select("input[type=checkbox]").size shouldBe (apis.size) // Include ALL_APIS checkbox
       }
     })
   }
@@ -95,6 +101,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {
       when(form.errors).thenReturn(Seq.empty)
+      when(form.errors(any[String])).thenReturn(Seq.empty)
 
       val page: Html = flowSelectApiView.render(form,  currentCategory, apiList, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       
@@ -106,6 +113,8 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
     "render the api selection Page with boxes selected when user selected apis passed to the view" in new Setup {
       when(form.errors).thenReturn(Seq.empty)
+      when(form.errors(any[String])).thenReturn(Seq.empty)
+
       val selectedApis = emailpreferencesFlow.selectedAPIs.get(currentCategory.category).getOrElse(Set.empty)
       
       val page: Html = flowSelectApiView.render(form,  currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
@@ -120,7 +129,9 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
     "render the api selection Page  with All apis checked when ALL_APIS in flow for current category" in new Setup {
       when(form.errors).thenReturn(Seq.empty)
-      val selectedApis = userApis + "ALL_APIS"
+      when(form.errors(any[String])).thenReturn(Seq.empty)
+
+      val selectedApis = userApis
       
       val page: Html = flowSelectApiView.render(form, currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
      
@@ -133,7 +144,9 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
     }
 
     "render the form errors on the page when they exist" in new Setup {
-      when(form.errors).thenReturn(Seq(FormError.apply("key", "message")))
+      when(form.errors).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
+      when(form.errors(any[String])).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
+
       val selectedApis = emailpreferencesFlow.selectedAPIs.get(currentCategory.category).getOrElse(Set.empty)
       
       val page: Html = flowSelectApiView.render(form,  currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
