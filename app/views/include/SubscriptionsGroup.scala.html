@@ -55,7 +55,7 @@
             <div class="accordion__body conditionallyHide" data-accordion-body @if(apiSubscription.isExpanded) {aria-hidden="false"} else {aria-hidden="true"}>
                 <ul>
                     @apiSubscription.subscriptions.map { case api =>
-                        @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
+                        @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.version.value} (${api.apiVersion.displayedStatus})") { apiVersionFullName =>
                             <li class="accordion__body__row api-subscriber">
                                 <div class="accordion__body__row accordion__body__row--no-border ">
                                     <div class="accordion__body__row__left">
