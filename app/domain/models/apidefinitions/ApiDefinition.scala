@@ -58,10 +58,7 @@ case class ApiVersionDefinition(version: ApiVersion, status: APIStatus, access: 
 
   val accessType = access.map(_.`type`).getOrElse(APIAccessType.PUBLIC)
 
-  val displayedAccessType = {
-    val text = accessType.toString()
-    text.take(1) + text.toLowerCase.takeRight(text.length()-1)
-  }
+  val displayedAccessType = accessType.toString().toLowerCase().capitalize
 }
 
 case class APIAccess(`type`: APIAccessType)
