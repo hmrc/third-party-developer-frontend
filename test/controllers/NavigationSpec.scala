@@ -85,7 +85,7 @@ class NavigationSpec extends BaseControllerSpec {
       }
 
       "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
-        links.head shouldBe NavLink("John Doe", controllers.routes.Profile.showProfile().url)
+        links.head shouldBe NavLink("John Doe", controllers.profile.routes.Profile.showProfile().url)
       }
 
       "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {

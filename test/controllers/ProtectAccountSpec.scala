@@ -42,6 +42,7 @@ import views.html.protectaccount._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import controllers.profile.ProtectAccount
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -64,8 +65,6 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     val protectAccountRemovalConfirmationView = app.injector.instanceOf[ProtectAccountRemovalConfirmationView]
     val protectAccountRemovalAccessCodeView = app.injector.instanceOf[ProtectAccountRemovalAccessCodeView]
     val protectAccountRemovalCompleteView = app.injector.instanceOf[ProtectAccountRemovalCompleteView]
-    val userDidNotAdd2SVView = app.injector.instanceOf[UserDidNotAdd2SVView]
-    val add2SVView = app.injector.instanceOf[Add2SVView]
 
     val underTest: ProtectAccount = new ProtectAccount(
       mock[ThirdPartyDeveloperConnector],
@@ -83,9 +82,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       protectAccountCompletedView,
       protectAccountRemovalConfirmationView,
       protectAccountRemovalAccessCodeView,
-      protectAccountRemovalCompleteView,
-      userDidNotAdd2SVView,
-      add2SVView
+      protectAccountRemovalCompleteView
     ) {
       override val qrCode: QRCode = mock[QRCode]
     }
@@ -237,7 +234,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         private val result = addToken(underTest.protectAccount())(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.ProtectAccount.getProtectAccountCompletedPage().url)
+        redirectLocation(result) shouldBe Some(controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage().url)
 
         verify(underTest.thirdPartyDeveloperConnector)
           .updateSessionLoggedInState(eqTo(sessionId), eqTo(UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)))(any[HeaderCarrier])
@@ -268,54 +265,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         private val result = addToken(underTest.remove2SV())(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2SVRemovalCompletePage().url)
-      }
-    }
-
-    "Given a user with MFA enabled" when {
-      "they have logged in when MFA is mandated in the future" should {
-        "be shown the MFA recommendation with 10 days warning" in new LoggedIn {
-
-          when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*)(any[HeaderCarrier]))
-            .thenReturn(Future.successful(true))
-
-          private val daysInTheFuture = 10
-          when(underTest.mfaMandateService.daysTillAdminMfaMandate)
-            .thenReturn(Some(daysInTheFuture))
-
-          private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
-
-          private val result = underTest.get2svRecommendationPage()(request)
-
-          status(result) shouldBe OK
-
-          contentAsString(result) should include("Add 2-step verification")
-          contentAsString(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
-
-          verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.email))(any[HeaderCarrier])
-        }
-      }
-    }
-
-    "they have logged in when MFA is mandated yet" should {
-      "they have logged in when MFA is mandated is not configured" in new LoggedIn {
-        when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*)(any[HeaderCarrier]))
-          .thenReturn(Future.successful(true))
-
-        private val mfaMandateNotConfigured = None
-        when(underTest.mfaMandateService.daysTillAdminMfaMandate)
-          .thenReturn(mfaMandateNotConfigured)
-
-        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
-
-        private val result = underTest.get2svRecommendationPage()(request)
-
-        status(result) shouldBe OK
-
-        contentAsString(result) should include("Add 2-step verification")
-        contentAsString(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
-
-        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.email))(any[HeaderCarrier])
+        redirectLocation(result) shouldBe Some(controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage().url)
       }
     }
   }

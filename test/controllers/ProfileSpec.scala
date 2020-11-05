@@ -38,6 +38,7 @@ import views.html._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
+import controllers.profile.Profile
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 

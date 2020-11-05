@@ -31,7 +31,6 @@ import views.html.{Add2SVView, UserDidNotAdd2SVView}
 import views.html.protectaccount._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.successful
 import controllers.LoggedInController
 import controllers.Remove2SVConfirmForm
 import controllers.FormKeys
@@ -52,9 +51,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
                                protectAccountCompletedView: ProtectAccountCompletedView,
                                protectAccountRemovalConfirmationView: ProtectAccountRemovalConfirmationView,
                                protectAccountRemovalAccessCodeView: ProtectAccountRemovalAccessCodeView,
-                               protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView,
-                               userDidNotAdd2SVView: UserDidNotAdd2SVView,
-                               add2SVView: Add2SVView
+                               protectAccountRemovalCompleteView: ProtectAccountRemovalCompleteView
                               )
                               (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedInController(mcc) {

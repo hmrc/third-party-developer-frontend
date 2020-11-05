@@ -38,6 +38,8 @@ import views.html.protectaccount.{ProtectAccountNoAccessCodeCompleteView, Protec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
+import views.html.UserDidNotAdd2SVView
+import views.html.Add2SVView
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -66,6 +68,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   trait Setup extends SessionServiceMock {
     private val daysRemaining = 10
 
+    val sessionId = "sessionId"
+    val loggedInUser = Developer("johnsmith@example.com", "John", "Doe")
+
     val mfaMandateService: MfaMandateService = mock[MfaMandateService]
 
     val signInView = app.injector.instanceOf[SignInView]
@@ -73,6 +78,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
     val logInAccessCodeView = app.injector.instanceOf[LogInAccessCodeView]
     val protectAccountNoAccessCodeView = app.injector.instanceOf[ProtectAccountNoAccessCodeView]
     val protectAccountNoAccessCodeCompleteView = app.injector.instanceOf[ProtectAccountNoAccessCodeCompleteView]
+    val userDidNotAdd2SVView = app.injector.instanceOf[UserDidNotAdd2SVView]
+    val add2SVView = app.injector.instanceOf[Add2SVView]
 
     val underTest = new UserLoginAccount(
       mock[AuditService],
@@ -87,8 +94,13 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       accountLockedView,
       logInAccessCodeView,
       protectAccountNoAccessCodeView,
-      protectAccountNoAccessCodeCompleteView
+      protectAccountNoAccessCodeCompleteView,
+      userDidNotAdd2SVView,
+      add2SVView
     )
+
+    updateUserFlowSessionsReturnsSuccessfully(sessionId)
+
     when(mfaMandateService.daysTillAdminMfaMandate).thenReturn(Some(daysRemaining))
     when(mfaMandateService.showAdminMfaMandatedMessage(*)(any[HeaderCarrier])).thenReturn(successful(true))
 
@@ -119,6 +131,16 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       when(underTest.auditService.audit(eqTo(auditAction), eqTo(Map.empty))(any[HeaderCarrier])).thenReturn(result)
   }
 
+  trait PartLogged extends Setup {
+    def loggedInState: LoggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, loggedInState))
+  }
+
+  trait LoggedIn extends Setup {
+    def loggedInState: LoggedInState = LoggedInState.LOGGED_IN
+    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, loggedInState))
+  }
+  
   "authenticate" should {
 
     "display the 2-step verification code page when logging in with 2SV configured" in new Setup {
@@ -161,7 +183,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2svRecommendationPage.url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
 
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
@@ -179,7 +201,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2svRecommendationPage.url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage.url)
 
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
@@ -384,6 +406,52 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/developer/applications")
+      }
+    }
+
+    "Given a user with MFA enabled" when {
+      "they have logged in when MFA is mandated in the future" should {
+        "be shown the MFA recommendation with 10 days warning" in new LoggedIn {
+          when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*)(any[HeaderCarrier]))
+            .thenReturn(Future.successful(true))
+
+          private val daysInTheFuture = 10
+          when(underTest.mfaMandateService.daysTillAdminMfaMandate)
+            .thenReturn(Some(daysInTheFuture))
+
+          private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+
+          private val result = underTest.get2svRecommendationPage()(request)
+
+          status(result) shouldBe OK
+
+          contentAsString(result) should include("Add 2-step verification")
+          contentAsString(result) should include("If you are the Administrator of an application you have 10 days until 2-step verification is mandatory")
+
+          verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.email))(any[HeaderCarrier])
+        }
+      }
+    }
+
+    "they have logged in when MFA is mandated yet" should {
+      "they have logged in when MFA is mandated is not configured" in new LoggedIn {
+        when(underTest.mfaMandateService.showAdminMfaMandatedMessage(*)(any[HeaderCarrier]))
+          .thenReturn(Future.successful(true))
+
+        private val mfaMandateNotConfigured = None
+        when(underTest.mfaMandateService.daysTillAdminMfaMandate)
+          .thenReturn(mfaMandateNotConfigured)
+
+        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+
+        private val result = underTest.get2svRecommendationPage()(request)
+
+        status(result) shouldBe OK
+
+        contentAsString(result) should include("Add 2-step verification")
+        contentAsString(result) should include("Use 2-step verification to protect your Developer Hub account and application details from being compromised.")
+
+        verify(underTest.mfaMandateService).showAdminMfaMandatedMessage(eqTo(loggedInUser.email))(any[HeaderCarrier])
       }
     }
   }
