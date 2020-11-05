@@ -40,7 +40,7 @@
         <h1 class="heading-xlarge">Change profile details</h1>
     </header>
 
-    @helper.form(action = controllers.routes.Profile.updateProfile) {
+    @helper.form(action = controllers.profile.routes.Profile.updateProfile) {
         @helper.CSRF.formField
         <div class="form-group @if(form.errors("firstname").nonEmpty) {form-group-error form-field--error}">
             <label class="form-label-bold" for="firstname" id="firstname-label">First name</label>

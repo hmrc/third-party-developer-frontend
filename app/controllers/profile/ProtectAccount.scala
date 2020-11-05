@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.profile
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.UpdateLoggedInStateRequest
 import domain.models.developers.LoggedInState
 import javax.inject.{Inject, Singleton}
-import model.MfaMandateDetails
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
@@ -33,6 +32,9 @@ import views.html.protectaccount._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import controllers.LoggedInController
+import controllers.Remove2SVConfirmForm
+import controllers.FormKeys
 
 @Singleton
 class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
@@ -89,7 +91,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
 
     def logonAndComplete(): Result = {
       thirdPartyDeveloperConnector.updateSessionLoggedInState(loggedIn.session.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
-      Redirect(routes.ProtectAccount.getProtectAccountCompletedPage())
+      Redirect(controllers.profile.routes.ProtectAccount.getProtectAccountCompletedPage())
     }
 
     def invalidCode(form: ProtectAccountForm): Result = {
@@ -125,8 +127,8 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
     },
       form => {
         form.removeConfirm match {
-          case Some("Yes") => Future.successful(Redirect(routes.ProtectAccount.get2SVRemovalAccessCodePage()))
-          case _ => Future.successful(Redirect(routes.ProtectAccount.getProtectAccount()))
+          case Some("Yes") => Future.successful(Redirect(controllers.profile.routes.ProtectAccount.get2SVRemovalAccessCodePage()))
+          case _ => Future.successful(Redirect(controllers.profile.routes.ProtectAccount.getProtectAccount()))
         }
       })
   }
@@ -142,7 +144,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       form => {
         mfaService.removeMfa(loggedIn.email, form.accessCode).map(r =>
           r.totpVerified match {
-            case true => Redirect(routes.ProtectAccount.get2SVRemovalCompletePage())
+            case true => Redirect(controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage())
             case _ =>
               val protectAccountForm = ProtectAccountForm.form.fill(form)
                 .withError("accessCode", "You have entered an incorrect access code")
@@ -155,20 +157,6 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
 
   def get2SVRemovalCompletePage(): Action[AnyContent] = loggedInAction { implicit request =>
     Future.successful(Ok(protectAccountRemovalCompleteView()))
-  }
-
-  def get2SVNotSetPage(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(userDidNotAdd2SVView()))
-  }
-  
-  def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
-    implicit request => {
-
-      for {
-        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn.email)
-        mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
-      }  yield (Ok(add2SVView(mfaMandateDetails)))
-    }
   }
 }
 

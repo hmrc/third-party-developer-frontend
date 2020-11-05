@@ -36,9 +36,9 @@
 
     <h2 id="pageHeading" class="heading-large">@pageHeading</h2>
         @EmailPrefsBulletInfoView()
-    @helper.form(action = routes.EmailPreferences.unsubscribeAllAction(), 'class -> "form", 'id -> "unsubscribeForm") {
+    @helper.form(action = controllers.profile.routes.EmailPreferences.unsubscribeAllAction(), 'class -> "form", 'id -> "unsubscribeForm") {
         @helper.CSRF.formField
         <button id="submit" class="button" type="submit">Unsubscribe</button>
-        <a id="cancelLink" href="@routes.EmailPreferences.emailPreferencesSummaryPage()" class="secondary-button">Cancel</a>
+        <a id="cancelLink" href="@controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage()" class="secondary-button">Cancel</a>
     }
 }

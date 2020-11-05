@@ -48,7 +48,7 @@
         <p class="form-hint">Select all that apply.</p>
     </div>
 
-    @helper.form(action = routes.EmailPreferences.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
+    @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectTopicsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
         <a name="topic"></a>
         @for(topic <- List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES).sortBy(_.displayOrder)) {

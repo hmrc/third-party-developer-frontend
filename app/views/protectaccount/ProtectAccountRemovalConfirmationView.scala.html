@@ -32,7 +32,7 @@
 ) {
     @errorSummary(form)
 
-    @helper.form(action = controllers.routes.ProtectAccount.confirm2SVRemoval(), 'class -> "form") {
+    @helper.form(action = controllers.profile.routes.ProtectAccount.confirm2SVRemoval(), 'class -> "form") {
         <div class="form-group @if(form.errors("removeConfirm").nonEmpty) {form-group-error}">
             <fieldset id="removeConfirm" class="inline">
                 <legend><h1 class="heading-xlarge">Are you sure you want to remove 2-step verification?</h1></legend>

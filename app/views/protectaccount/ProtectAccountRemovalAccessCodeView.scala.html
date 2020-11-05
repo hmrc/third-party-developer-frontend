@@ -22,7 +22,7 @@
 
 @this(devMain: DevMain)
 
-@(form: Form[controllers.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, applicationConfig: ApplicationConfig)
+@(form: Form[controllers.profile.ProtectAccountForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, applicationConfig: ApplicationConfig)
 
 @devMain(
     title = "Enter your access code",
@@ -37,7 +37,7 @@
     <div>
         @errorSummary(form)
 
-        @helper.form(action = controllers.routes.ProtectAccount.remove2SV()) {
+        @helper.form(action = controllers.profile.routes.ProtectAccount.remove2SV()) {
             @helper.CSRF.formField
             @fieldError(form.errors, "invalidCredentials", true)
             <div>

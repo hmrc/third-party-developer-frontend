@@ -190,7 +190,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val result: Future[Result] = controllerUnderTest.unsubscribeAllAction()(loggedInRequest)
       status(result) mustBe SEE_OTHER
 
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.emailPreferencesSummaryPage().url)
+      redirectLocation(result) mustBe Some(controllers.controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage().url)
       flash(result).get("unsubscribed") mustBe Some("true")
     }
 
@@ -274,7 +274,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesAction()(requestWithForm)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectApisPage("a1").url)
+      redirectLocation(result) mustBe Some(controllers.controllers.profile.routes.EmailPreferences.flowSelectApisPage("a1").url)
     }
 
     "redirect back to self if form data is empty" in new Setup {
@@ -314,7 +314,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val result: Future[Result] = controllerUnderTest.flowSelectNoCategoriesAction()(loggedInRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
+      redirectLocation(result) mustBe Some(controllers.controllers.profile.routes.EmailPreferences.flowSelectTopicsPage().url)
 
     }
 
@@ -363,7 +363,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val result: Future[Result] = controllerUnderTest.flowSelectApisPage("")(loggedInRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.emailPreferencesSummaryPage().url)
+      redirectLocation(result) mustBe Some(controllers.controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage().url)
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }
 
@@ -400,7 +400,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectApisPage(apiCategory2.category).url)
+      redirectLocation(result) mustBe Some(controllers.controllers.profile.routes.EmailPreferences.flowSelectApisPage(apiCategory2.category).url)
     }
 
     "redirect to the topics page when category last in alphabetical order" in new Setup {
@@ -418,7 +418,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
+      redirectLocation(result) mustBe Some(controllers.controllers.profile.routes.EmailPreferences.flowSelectTopicsPage().url)
     }
 
 
@@ -497,7 +497,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.emailPreferencesSummaryPage().url)
+      redirectLocation(result) mustBe Some(controllers.controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage().url)
 
       verify(mockEmailPreferencesService).fetchFlow(eqTo(loggedInDeveloper))
       verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.email), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)
@@ -516,7 +516,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(controllers.routes.EmailPreferences.flowSelectTopicsPage().url)
+      redirectLocation(result) mustBe Some(controllers.controllers.profile.routes.EmailPreferences.flowSelectTopicsPage().url)
 
       verify(mockEmailPreferencesService).fetchFlow(eqTo(loggedInDeveloper))
       verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.email), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)

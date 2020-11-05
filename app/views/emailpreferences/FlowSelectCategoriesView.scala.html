@@ -44,7 +44,7 @@
             <p class="form-hint">Select all that apply.</p>
         </div>
 
-        @helper.form(action = routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
+        @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesCategoriesForm") {
             @helper.CSRF.formField
             <a name="taxRegime"></a>
         <div class="form-group">   
@@ -62,7 +62,7 @@
 
         }
     
-        @helper.form(action = routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
+        @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectNoCategoriesAction(), 'class -> "form", 'id -> "emailPreferencesNoCategoriesForm") {
             @helper.CSRF.formField
             <button id="noSelectCategories" class="secondary-button" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
         }

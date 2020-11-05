@@ -1,0 +1,32 @@
+GET         /                                                                                    controllers.profile.Profile.showProfile
+GET         /change                                                                              controllers.profile.Profile.changeProfile
+POST        /                                                                                    controllers.profile.Profile.updateProfile
+
+GET         /email-preferences                                                                   controllers.profile.EmailPreferences.emailPreferencesSummaryPage
+GET         /email-preferences/unsubscribe                                                       controllers.profile.EmailPreferences.unsubscribeAllPage
+POST        /email-preferences/unsubscribe                                                       controllers.profile.EmailPreferences.unsubscribeAllAction
+GET         /email-preferences/start                                                             controllers.profile.EmailPreferences.flowStartPage
+GET         /email-preferences/categories                                                        controllers.profile.EmailPreferences.flowSelectCategoriesPage
+POST        /email-preferences/categories                                                        controllers.profile.EmailPreferences.flowSelectCategoriesAction
+POST        /email-preferences/no-categories                                                     controllers.profile.EmailPreferences.flowSelectNoCategoriesAction
+GET         /email-preferences/apis                                                              controllers.profile.EmailPreferences.flowSelectApisPage(category: String)
+POST        /email-preferences/apis                                                              controllers.profile.EmailPreferences.flowSelectApisAction
+GET         /email-preferences/topics                                                            controllers.profile.EmailPreferences.flowSelectTopicsPage
+POST        /email-preferences/topics                                                            controllers.profile.EmailPreferences.flowSelectTopicsAction
+
+GET         /protect-account                                                                     controllers.profile.ProtectAccount.getProtectAccount
+GET         /protect-account/setup                                                               controllers.profile.ProtectAccount.getQrCode
+GET         /protect-account/access-code                                                         controllers.profile.ProtectAccount.getAccessCodePage
+GET         /protect-account/complete                                                            controllers.profile.ProtectAccount.getProtectAccountCompletedPage
+POST        /protect-account/enable                                                              controllers.profile.ProtectAccount.protectAccount
+GET         /protect-account/confirm-removal                                                     controllers.profile.ProtectAccount.get2SVRemovalConfirmationPage
+POST        /protect-account/confirm-removal                                                     controllers.profile.ProtectAccount.confirm2SVRemoval
+GET         /protect-account/remove                                                              controllers.profile.ProtectAccount.get2SVRemovalAccessCodePage
+POST        /protect-account/remove                                                              controllers.profile.ProtectAccount.remove2SV
+GET         /protect-account/remove/complete                                                     controllers.profile.ProtectAccount.get2SVRemovalCompletePage
+
+GET         /password                                                                            controllers.profile.Profile.showPasswordPage
+POST        /password                                                                            controllers.profile.Profile.updatePassword
+
+GET         /delete                                                                              controllers.profile.Profile.requestDeletion
+POST        /delete                                                                              controllers.profile.Profile.deleteAccount

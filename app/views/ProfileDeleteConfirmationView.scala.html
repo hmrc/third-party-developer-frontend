@@ -39,7 +39,7 @@
 
     <h1 class="heading-xlarge">Delete account</h1>
 
-    @helper.form(action = controllers.routes.Profile.deleteAccount) {
+    @helper.form(action = controllers.profile.routes.Profile.deleteAccount) {
         @helper.CSRF.formField
 
         <div class="form-group @if(form.errors("confirmation").nonEmpty) {form-group-error}">
@@ -61,7 +61,7 @@
 
         <div class="form-group">
             <button id="submit" class="button" type="submit">Continue</button>
-            <a id="cancel" href="@routes.Profile.showProfile" class="secondary-button">Cancel</a>
+            <a id="cancel" href="@controllers.profile.routes.Profile.showProfile" class="secondary-button">Cancel</a>
         </div>
     }
 }
