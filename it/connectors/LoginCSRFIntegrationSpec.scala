@@ -135,7 +135,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.ProtectAccount.get2svRecommendationPage().url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.get2svRecommendationPage().url)
 
         verify(1, postRequestedFor(urlMatching("/authenticate")))
       }

@@ -29,6 +29,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import views.html._
 import views.html.protectaccount._
+import controllers.profile.ProtectAccountForm
+import model.MfaMandateDetails
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
@@ -58,7 +60,9 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
                                  accountLockedView: AccountLockedView,
                                  logInAccessCodeView: LogInAccessCodeView,
                                  protectAccountNoAccessCodeView: ProtectAccountNoAccessCodeView,
-                                 protectAccountNoAccessCodeCompleteView: ProtectAccountNoAccessCodeCompleteView
+                                 protectAccountNoAccessCodeCompleteView: ProtectAccountNoAccessCodeCompleteView,
+                                 userDidNotAdd2SVView: UserDidNotAdd2SVView,
+                                 add2SVView: Add2SVView
                                 )
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig)
   extends LoggedOutController(mcc) with Auditing {
@@ -80,6 +84,20 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
     } yield Locked(accountLockedView())
   }
 
+  
+  def get2SVNotSetPage(): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Ok(userDidNotAdd2SVView()))
+  }
+
+  def get2svRecommendationPage(): Action[AnyContent] = loggedInAction {
+    implicit request => {
+      for {
+        showAdminMfaMandateMessage <- mfaMandateService.showAdminMfaMandatedMessage(loggedIn.email)
+        mfaMandateDetails = MfaMandateDetails(showAdminMfaMandateMessage, mfaMandateService.daysTillAdminMfaMandate.getOrElse(0))
+      }  yield (Ok(add2SVView(mfaMandateDetails)))
+    }
+  }
+
   private def routeToLoginOr2SV(login: LoginForm,
                                 userAuthenticationResponse: UserAuthenticationResponse,
                                 playSession: PlaySession)(implicit request: Request[AnyContent]): Future[Result] = {
@@ -89,7 +107,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case Some(session) if session.loggedInState.isLoggedIn => audit(LoginSucceeded, DeveloperSession.apply(session))
         successful(
           withSessionCookie(
-            Redirect(routes.ProtectAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
+            Redirect(routes.UserLoginAccount.get2svRecommendationPage(), SEE_OTHER).withSession(playSession),
             session.sessionId
           )
         )
@@ -107,7 +125,7 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
       case Some(session) if session.loggedInState.isPartLoggedInEnablingMFA => {
         successful(
           withSessionCookie(
-            Redirect(routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
+            Redirect(controllers.profile.routes.ProtectAccount.getProtectAccount().url).withSession(playSession),
             session.sessionId
           )
         )

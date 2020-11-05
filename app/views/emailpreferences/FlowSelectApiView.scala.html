@@ -45,7 +45,7 @@
         </legend>
 
         <p id="select-all-description" class="form-hint">Select all that apply.</p>
-        @helper.form(action = routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
+        @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
             @helper.CSRF.formField
             <a name="apiRadio"></a>
             <div class="form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {form-group-error}">

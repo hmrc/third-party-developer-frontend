@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.profile
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
@@ -26,6 +26,13 @@ import service.{ApplicationService, AuditService, SessionService}
 import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
+import controllers.LoggedInController
+import controllers.PasswordChange
+import controllers.ProfileForm
+import controllers.DeleteProfileForm
+import controllers.ChangePasswordForm
+import controllers.UserRequest
+import controllers.ErrorFormBuilder
 
 @Singleton
 class Profile @Inject()(

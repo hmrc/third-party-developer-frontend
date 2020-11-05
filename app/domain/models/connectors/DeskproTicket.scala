@@ -131,7 +131,7 @@ object DeskproTicket extends FieldTransformer {
     val message =
       s"""I '$email' want my Developer Hub account to be deleted"""
 
-    DeskproTicket(name, email, "Request for developer account to be deleted", message, routes.Profile.deleteAccount().url)
+    DeskproTicket(name, email, "Request for developer account to be deleted", message, controllers.profile.routes.Profile.deleteAccount().url)
   }
   def removeDeveloper2SV(email: String): DeskproTicket = {
     val message =

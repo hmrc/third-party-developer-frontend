@@ -9,14 +9,14 @@ GET         /resend-verification                                                
 GET         /resend-confirmation                                                                         controllers.Registration.resendConfirmation
 
 GET         /login                                                                                       controllers.UserLoginAccount.login
-GET         /login/2sv-recommendation                                                                    controllers.ProtectAccount.get2svRecommendationPage
+GET         /login/2sv-recommendation                                                                    controllers.UserLoginAccount.get2svRecommendationPage
 POST        /login                                                                                       controllers.UserLoginAccount.authenticate
 GET         /login/2SV-help                                                                              controllers.UserLoginAccount.get2SVHelpConfirmationPage
 POST        /login/2SV-help                                                                              controllers.UserLoginAccount.confirm2SVHelp
 GET         /login/2SV-help/complete                                                                     controllers.UserLoginAccount.get2SVHelpCompletionPage
 GET         /login-totp                                                                                  controllers.UserLoginAccount.enterTotp
 POST        /login-totp                                                                                  controllers.UserLoginAccount.authenticateTotp
-GET         /login/2SV-not-set                                                                           controllers.ProtectAccount.get2SVNotSetPage
+GET         /login/2SV-not-set                                                                           controllers.UserLoginAccount.get2SVNotSetPage
 
 GET         /logout                                                                                      controllers.UserLogoutAccount.logout
 
@@ -29,39 +29,7 @@ GET         /support/submitted                                                  
 
 GET         /locked                                                                                      controllers.UserLoginAccount.accountLocked
 
-GET         /profile                                                                                     controllers.Profile.showProfile
-GET         /profile/change                                                                              controllers.Profile.changeProfile
-POST        /profile                                                                                     controllers.Profile.updateProfile
-
-GET         /profile/email-preferences                                                      controllers.EmailPreferences.emailPreferencesSummaryPage
-GET         /profile/email-preferences/unsubscribe                                          controllers.EmailPreferences.unsubscribeAllPage
-POST        /profile/email-preferences/unsubscribe                                          controllers.EmailPreferences.unsubscribeAllAction
-GET         /profile/email-preferences/start                                                controllers.EmailPreferences.flowStartPage
-GET         /profile/email-preferences/categories                                           controllers.EmailPreferences.flowSelectCategoriesPage
-POST        /profile/email-preferences/categories                                           controllers.EmailPreferences.flowSelectCategoriesAction
-POST        /profile/email-preferences/no-categories                                        controllers.EmailPreferences.flowSelectNoCategoriesAction
-GET         /profile/email-preferences/apis                                                 controllers.EmailPreferences.flowSelectApisPage(category: String)
-POST         /profile/email-preferences/apis                                                 controllers.EmailPreferences.flowSelectApisAction
-GET         /profile/email-preferences/topics                                               controllers.EmailPreferences.flowSelectTopicsPage
-POST        /profile/email-preferences/topics                                               controllers.EmailPreferences.flowSelectTopicsAction
-
-GET         /profile/protect-account                                                        controllers.ProtectAccount.getProtectAccount
-GET         /profile/protect-account/setup                                                  controllers.ProtectAccount.getQrCode
-GET         /profile/protect-account/access-code                                            controllers.ProtectAccount.getAccessCodePage
-GET         /profile/protect-account/complete                                               controllers.ProtectAccount.getProtectAccountCompletedPage
-POST        /profile/protect-account/enable                                                 controllers.ProtectAccount.protectAccount
-GET         /profile/protect-account/confirm-removal                                        controllers.ProtectAccount.get2SVRemovalConfirmationPage
-POST        /profile/protect-account/confirm-removal                                        controllers.ProtectAccount.confirm2SVRemoval
-GET         /profile/protect-account/remove                                                 controllers.ProtectAccount.get2SVRemovalAccessCodePage
-POST        /profile/protect-account/remove                                                 controllers.ProtectAccount.remove2SV
-GET         /profile/protect-account/remove/complete                                        controllers.ProtectAccount.get2SVRemovalCompletePage
-
-
-GET         /profile/password                                                                            controllers.Profile.showPasswordPage
-POST        /profile/password                                                                            controllers.Profile.updatePassword
-
-GET         /profile/delete                                                                              controllers.Profile.requestDeletion
-POST        /profile/delete                                                                              controllers.Profile.deleteAccount
+->          /profile                                                                                     profile.Routes
 
 GET         /forgot-password                                                                             controllers.Password.showForgotPassword
 POST        /forgot-password                                                                             controllers.Password.requestReset
