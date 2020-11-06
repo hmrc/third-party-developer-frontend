@@ -36,6 +36,10 @@ import uk.gov.hmrc.play.http.metrics.API
 import uk.gov.hmrc.http.NotFoundException
 import domain.ApplicationNotFound
 import play.api.Logger
+import domain.models.connectors.AddTeamMemberRequest
+import uk.gov.hmrc.http.Upstream4xxResponse
+import domain.TeamMemberAlreadyExists
+import uk.gov.hmrc.http.HttpResponse
 
 @Singleton
 class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) extends SubscriptionsConnector {
@@ -72,6 +76,17 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
       ApplicationUpdateSuccessful
     } recover recovery
   }
+
+  def addTeamMember(applicationId: ApplicationId, addTeamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[Unit] = metrics.record(api) {
+    val handleTeamMemberAlreadyExists: PartialFunction[Throwable, Unit] = {
+      case e: Upstream4xxResponse if e.upstreamResponseCode == 409 => throw new TeamMemberAlreadyExists
+    }
+
+    http.POST[AddTeamMemberRequest, HttpResponse](s"${config.serviceBaseUrl}/applications/${applicationId.value}/collaborators", addTeamMember)
+    .map(_ => ())
+    .recover(handleTeamMemberAlreadyExists orElse recovery)
+  }
+
 
   private def recovery: PartialFunction[Throwable, Nothing] = {
     case e: NotFoundException => {

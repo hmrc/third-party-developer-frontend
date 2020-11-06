@@ -21,7 +21,6 @@ import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
 import domain.models.applications._
-import domain.models.connectors.AddTeamMemberResponse
 import domain.models.controllers.AddTeamMemberPageMode
 import helpers.string._
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
@@ -74,7 +73,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     when(applicationServiceMock.addTeamMember(any[Application], any[String], any[Collaborator])(any[HeaderCarrier]))
-      .thenReturn(successful(AddTeamMemberResponse(registeredUser = true)))
+      .thenReturn(successful(()))
     when(applicationServiceMock.removeTeamMember(any[Application], any[String], eqTo(loggedInUser.email))(any[HeaderCarrier]))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 

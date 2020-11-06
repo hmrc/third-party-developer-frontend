@@ -27,7 +27,6 @@ import domain._
 import domain.models.apidefinitions._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain.models.applications._
-import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
 import org.mockito.Mockito
@@ -400,52 +399,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
       intercept[ApplicationNotFound] {
         await(connector.updateApproval(applicationId, updateRequest))
-      }
-    }
-  }
-
-  "addTeamMember" should {
-    val applicationId = ApplicationId("applicationId")
-    val admin = "john.requestor@example.com"
-    val teamMember = "john.teamMember@example.com"
-    val role = Role.ADMINISTRATOR
-    val adminsToEmail = Set("bobby@example.com", "daisy@example.com")
-    val addTeamMemberRequest =
-      AddTeamMemberRequest(admin, Collaborator(teamMember, role), isRegistered = true, adminsToEmail)
-    val url = s"$baseUrl/application/${applicationId.value}/collaborator"
-
-    "return success" in new Setup {
-      val addTeamMemberResponse = AddTeamMemberResponse(true)
-
-      when(
-        mockHttpClient
-          .POST[AddTeamMemberRequest, HttpResponse](eqTo(url), eqTo(addTeamMemberRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(OK, Some(Json.toJson(addTeamMemberResponse)))))
-
-      val result = await(connector.addTeamMember(applicationId, addTeamMemberRequest))
-
-      result shouldEqual addTeamMemberResponse
-    }
-
-    "return teamMember already exists response" in new Setup {
-      when(
-        mockHttpClient
-          .POST[AddTeamMemberRequest, HttpResponse](eqTo(url), eqTo(addTeamMemberRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(failed(Upstream4xxResponse("409 exception", CONFLICT, CONFLICT)))
-
-      intercept[TeamMemberAlreadyExists] {
-        await(connector.addTeamMember(applicationId, addTeamMemberRequest))
-      }
-    }
-
-    "return application not found response" in new Setup {
-      when(
-        mockHttpClient
-          .POST[AddTeamMemberRequest, HttpResponse](eqTo(url), eqTo(addTeamMemberRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
-
-      intercept[ApplicationNotFound] {
-        await(connector.addTeamMember(applicationId, addTeamMemberRequest))
       }
     }
   }

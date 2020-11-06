@@ -16,7 +16,7 @@
 
 package domain.models.subscriptions
 
-import domain.models.apidefinitions.{ApiContext, ApiVersion, APIStatus, APIAccess, ApiVersionDefinition}
+import domain.models.apidefinitions.{ApiVersion, APIStatus, APIAccess, ApiVersionDefinition}
 
 case class VersionSubscription(version: ApiVersionDefinition, subscribed: Boolean)
 

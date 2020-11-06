@@ -17,9 +17,9 @@
 package controllers
 
 import domain.models.applications.{Application, ApplicationId, Standard}
-import play.api.data.{Form, Forms}
+import play.api.data.Form
 import play.api.data.Forms._
-import play.api.data.validation.{Constraint, Constraints, Invalid, Valid, ValidationError}
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 
 trait ConfirmPassword {
   val password: String

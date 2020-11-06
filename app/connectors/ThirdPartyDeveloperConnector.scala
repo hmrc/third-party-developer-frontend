@@ -32,7 +32,6 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.control.NonFatal
 import domain.models.emailpreferences.EmailPreferences
 
 @Singleton

@@ -36,7 +36,6 @@ import service.{MfaMandateService, MFAResponse, MFAService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
-import views.html.{Add2SVView, UserDidNotAdd2SVView}
 import views.html.protectaccount._
 
 import scala.concurrent.ExecutionContext.Implicits.global

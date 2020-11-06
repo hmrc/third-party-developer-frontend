@@ -40,7 +40,6 @@ import views.html.include.ChangeSubscriptionConfirmationView
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.apidefinitions.ApiIdentifier
 import play.api.mvc.Call
-import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
 
 @Singleton
 class Subscriptions @Inject() (

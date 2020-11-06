@@ -16,7 +16,7 @@
 
 package controllers
 
-import cats.data.{NonEmptyList, OptionT}
+import cats.data.NonEmptyList
 import config.{ApplicationConfig, ErrorHandler}
 import controllers.ManageSubscriptions.toDetails
 import domain.models.apidefinitions.{ApiContext, APISubscriptionStatusWithSubscriptionFields,APISubscriptionStatusWithWritableSubscriptionField, ApiVersion}

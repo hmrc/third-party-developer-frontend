@@ -24,7 +24,6 @@ import config.ApplicationConfig
 import domain._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.applications._
-import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse}
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
@@ -88,14 +87,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } else {
       Future.successful(Seq.empty)
     }
-
-  def addTeamMember(applicationId: ApplicationId, teamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/${applicationId.value}/collaborator", teamMember, Seq(CONTENT_TYPE -> JSON)) map { result =>
-      result.json.as[AddTeamMemberResponse]
-    } recover {
-      case e: Upstream4xxResponse if e.upstreamResponseCode == 409 => throw new TeamMemberAlreadyExists
-    } recover recovery
-  }
 
   def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Seq[String])(
       implicit hc: HeaderCarrier
