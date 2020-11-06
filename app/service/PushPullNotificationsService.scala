@@ -20,12 +20,10 @@ import domain.models.applications.{Application, ClientId}
 import javax.inject.{Inject, Singleton}
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
-class PushPullNotificationsService @Inject()(connectorsWrapper: ConnectorsWrapper)
-                                            (implicit ec: ExecutionContext) {
+class PushPullNotificationsService @Inject()(connectorsWrapper: ConnectorsWrapper) {
 
   def fetchPushSecrets(application: Application)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
     val connector: PushPullNotificationsConnector = connectorsWrapper.forEnvironment(application.deployedTo).pushPullNotificationsConnector

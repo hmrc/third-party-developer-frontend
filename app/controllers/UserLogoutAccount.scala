@@ -27,6 +27,7 @@ import service.{ApplicationService, DeskproService, SessionService}
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Failure
 
 @Singleton
 class UserLogoutAccount @Inject() (
@@ -52,8 +53,9 @@ class UserLogoutAccount @Inject() (
     SignOutSurveyForm.form.bindFromRequest.value match {
       case Some(form) =>
         val res: Future[TicketId] = deskproService.submitSurvey(form)
-        res.onFailure {
-          case _ => Logger.error("Failed to create deskpro ticket")
+        res.onComplete {
+          case Failure(_) => Logger.error("Failed to create deskpro ticket")
+          case _ => ()
         }
 
         applicationService

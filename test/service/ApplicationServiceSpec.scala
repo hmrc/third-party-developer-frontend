@@ -27,13 +27,12 @@ import domain._
 import domain.models.apidefinitions._
 import domain.models.apidefinitions.APIStatus._
 import domain.models.applications._
-import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketCreated}
-import domain.models.developers.{Developer, LoggedInState, User}
+import domain.models.connectors.{DeskproTicket, TicketCreated}
+import domain.models.developers.{LoggedInState, User}
 import domain.models.subscriptions.ApiSubscriptionFields
 import domain.models.subscriptions.ApiSubscriptionFields._
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
-import play.api.http.Status.OK
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
@@ -370,127 +369,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
         .thenReturn(successful(ApplicationVerificationFailed))
 
       await(applicationService.verify(verificationCode)) shouldBe ApplicationVerificationFailed
-    }
-  }
-
-  "add teamMember" should {
-    val email = "email@testuser.com"
-    val teamMember = Collaborator(email, Role.ADMINISTRATOR)
-    val developer = Developer(teamMember.emailAddress, "name", "surname")
-    val adminEmail = "admin.email@example.com"
-    val adminsToEmail = Set.empty[String]
-    val request = AddTeamMemberRequest(adminEmail, teamMember, isRegistered = true, adminsToEmail)
-
-    "add teamMember successfully in production app" in new Setup {
-      private val response = AddTeamMemberResponse(registeredUser = true)
-
-      when(mockDeveloperConnector.fetchDeveloper(email)).thenReturn(successful(Some(developer)))
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request)).thenReturn(successful(response))
-
-      await(applicationService.addTeamMember(productionApplication, adminEmail, teamMember)) shouldBe response
-    }
-
-    "create unregistered user when developer is not registered" in new Setup {
-      when(mockDeveloperConnector.fetchDeveloper(email)).thenReturn(successful(None))
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request.copy(isRegistered = false)))
-        .thenReturn(successful(AddTeamMemberResponse(registeredUser = false)))
-      when(mockDeveloperConnector.createUnregisteredUser(teamMember.emailAddress)).thenReturn(successful(OK))
-
-      await(applicationService.addTeamMember(productionApplication, adminEmail, teamMember))
-
-      verify(mockDeveloperConnector, times(1)).createUnregisteredUser(eqTo(teamMember.emailAddress))(*)
-    }
-
-    "not create unregistered user when developer is already registered" in new Setup {
-      when(mockDeveloperConnector.fetchDeveloper(email)).thenReturn(successful(Some(Developer(teamMember.emailAddress, "name", "surname"))))
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request))
-        .thenReturn(successful(AddTeamMemberResponse(registeredUser = true)))
-
-      await(applicationService.addTeamMember(productionApplication, adminEmail, teamMember))
-
-      verify(mockDeveloperConnector, times(0)).createUnregisteredUser(eqTo(teamMember.emailAddress))(*)
-    }
-
-    "propagate TeamMemberAlreadyExists from connector in production app" in new Setup {
-      when(mockDeveloperConnector.fetchDeveloper(email)).thenReturn(successful(Some(developer)))
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request))
-        .thenReturn(failed(new TeamMemberAlreadyExists))
-
-      intercept[TeamMemberAlreadyExists] {
-        await(applicationService.addTeamMember(productionApplication, adminEmail, teamMember))
-      }
-    }
-
-    "propagate ApplicationNotFound from connector in production app" in new Setup {
-      when(mockDeveloperConnector.fetchDeveloper(email)).thenReturn(successful(Some(developer)))
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.addTeamMember(productionApplicationId, request))
-        .thenReturn(failed(new ApplicationAlreadyExists))
-      intercept[ApplicationAlreadyExists] {
-        await(applicationService.addTeamMember(productionApplication, adminEmail, teamMember))
-      }
-    }
-    "add teamMember successfully in sandbox app" in new Setup {
-      private val response = AddTeamMemberResponse(registeredUser = true)
-
-      when(mockDeveloperConnector.fetchDeveloper(email)).thenReturn(successful(Some(developer)))
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      when(mockSandboxApplicationConnector.addTeamMember(sandboxApplicationId, request)).thenReturn(successful(response))
-
-      await(applicationService.addTeamMember(sandboxApplication, adminEmail, teamMember)) shouldBe response
-    }
-
-    "propagate TeamMemberAlreadyExists from connector in sandbox app" in new Setup {
-      when(mockDeveloperConnector.fetchDeveloper(email)).thenReturn(successful(Some(developer)))
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      when(mockSandboxApplicationConnector.addTeamMember(sandboxApplicationId, request))
-        .thenReturn(failed(new TeamMemberAlreadyExists))
-      intercept[TeamMemberAlreadyExists] {
-        await(applicationService.addTeamMember(sandboxApplication, adminEmail, teamMember))
-      }
-    }
-
-    "propagate ApplicationNotFound from connector in sandbox app" in new Setup {
-      when(mockDeveloperConnector.fetchDeveloper(email)).thenReturn(successful(Some(developer)))
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      when(mockSandboxApplicationConnector.addTeamMember(sandboxApplicationId, request))
-        .thenReturn(failed(new ApplicationAlreadyExists))
-      intercept[ApplicationAlreadyExists] {
-        await(applicationService.addTeamMember(sandboxApplication, adminEmail, teamMember))
-      }
-    }
-
-    "include correct set of admins to email" in new Setup {
-      private val verifiedAdmin = Collaborator("verified@example.com", Role.ADMINISTRATOR)
-      private val unverifiedAdmin = Collaborator("unverified@example.com", Role.ADMINISTRATOR)
-      private val adderAdmin = Collaborator(adminEmail, Role.ADMINISTRATOR)
-      private val verifiedDeveloper = Collaborator("developer@example.com", Role.DEVELOPER)
-      private val nonAdderAdmins = Seq(User("verified@example.com", Some(true)), User("unverified@example.com", Some(false)))
-
-      private val application = productionApplication.copy(collaborators = Set(verifiedAdmin, unverifiedAdmin, adderAdmin, verifiedDeveloper))
-
-      private val response = AddTeamMemberResponse(registeredUser = true)
-
-      when(mockDeveloperConnector.fetchDeveloper(email)).thenReturn(successful(Some(developer)))
-      when(mockDeveloperConnector.fetchByEmails(eqTo(Set("verified@example.com", "unverified@example.com")))(*))
-        .thenReturn(successful(nonAdderAdmins))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, application)
-      when(mockProductionApplicationConnector.addTeamMember(*[ApplicationId], *)(*)).thenReturn(successful(response))
-
-      await(applicationService.addTeamMember(application, adderAdmin.emailAddress, teamMember)) shouldBe response
-      verify(mockProductionApplicationConnector).addTeamMember(eqTo(productionApplicationId), eqTo(request.copy(adminsToEmail = Set("verified@example.com"))))(*)
     }
   }
 

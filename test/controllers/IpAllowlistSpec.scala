@@ -17,7 +17,7 @@
 package controllers
 
 import domain.ApplicationUpdateSuccessful
-import domain.models.applications.{Application, IpAllowlist}
+import domain.models.applications.Application
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.flows.IpAllowlistFlow
 import mocks.service._
@@ -69,7 +69,7 @@ class IpAllowlistSpec extends BaseControllerSpec with ApplicationActionServiceMo
     val developer: Developer = Developer("developer@example.com", "John", "Doe")
 
     val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
-    val anApplicationWithIpAllowlist: Application = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
+    val anApplicationWithIpAllowlist: Application = anApplicationWithoutIpAllowlist.copy(ipAllowlist = domain.models.applications.IpAllowlist(allowlist = Set("1.1.1.0/24")))
 
     def givenTheUserIsLoggedInAs(user: Developer): DeveloperSession = {
       val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
@@ -212,7 +212,7 @@ class IpAllowlistSpec extends BaseControllerSpec with ApplicationActionServiceMo
     }
 
     "not show the remove allowlist link when the IP allowlist is required" in new Setup {
-      val application: Application = anApplicationWithIpAllowlist.copy(ipAllowlist = IpAllowlist(required = true, allowlist = Set("1.1.1.0/24")))
+      val application: Application = anApplicationWithIpAllowlist.copy(ipAllowlist = domain.models.applications.IpAllowlist(required = true, allowlist = Set("1.1.1.0/24")))
       givenApplicationAction(application, givenTheUserIsLoggedInAs(admin))
       when(mockIpAllowlistService.getIpAllowlistFlow(application, sessionId))
         .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))

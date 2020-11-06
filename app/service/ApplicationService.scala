@@ -21,7 +21,7 @@ import domain._
 import domain.models.apidefinitions._
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.connectors.{AddTeamMemberRequest, AddTeamMemberResponse, DeskproTicket, TicketResult}
+import domain.models.connectors.{AddTeamMemberRequest, DeskproTicket, TicketResult}
 import domain.models.developers.DeveloperSession
 import domain.models.subscriptions._
 import javax.inject.{Inject, Singleton}
@@ -149,23 +149,9 @@ class ApplicationService @Inject() (
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
   }
 
-  def addTeamMember(app: Application, requestingEmail: String, teamMember: Collaborator)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse] = {
-
-    val otherAdminEmails = app.collaborators
-      .filter(_.role.isAdministrator)
-      .map(_.emailAddress)
-      .filterNot(_ == requestingEmail)
-
-    for {
-      otherAdmins <- developerConnector.fetchByEmails(otherAdminEmails)
-      adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email)
-      developer <- developerConnector.fetchDeveloper(teamMember.emailAddress)
-      _ <- if (developer.isEmpty) developerConnector.createUnregisteredUser(teamMember.emailAddress) else Future.successful(())
-      request = domain.models.connectors.AddTeamMemberRequest(requestingEmail, teamMember, developer.isDefined, adminsToEmail.toSet)
-      connector = connectorWrapper.forEnvironment(app.deployedTo)
-      appConnector = connector.thirdPartyApplicationConnector
-      response <- appConnector.addTeamMember(app.id, request)
-    } yield response
+  def addTeamMember(app: Application, requestingEmail: String, teamMember: Collaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val request = domain.models.connectors.AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
+    apmConnector.addTeamMember(app.id, request)
   }
 
   def removeTeamMember(app: Application, teamMemberToRemove: String, requestingEmail: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
@@ -253,7 +239,6 @@ object ApplicationService {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]]
-    def addTeamMember(applicationId: ApplicationId, teamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[AddTeamMemberResponse]
     def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Seq[String])(
         implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful]

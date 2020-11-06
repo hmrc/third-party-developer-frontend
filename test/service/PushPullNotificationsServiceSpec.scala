@@ -29,7 +29,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
 class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with Matchers {
