@@ -87,15 +87,12 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
     .recover(handleTeamMemberAlreadyExists orElse recovery)
   }
 
-
   private def recovery: PartialFunction[Throwable, Nothing] = {
     case e: NotFoundException => {
       Logger.warn(e.message)
       throw new ApplicationNotFound
     }
   }
-
-
 }
 
 object ApmConnector {

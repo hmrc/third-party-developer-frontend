@@ -150,21 +150,6 @@ class ApplicationService @Inject() (
   }
 
   def addTeamMember(app: Application, requestingEmail: String, teamMember: Collaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
-
-    // val otherAdminEmails = app.collaborators
-    //   .filter(_.role.isAdministrator)
-    //   .map(_.emailAddress)
-    //   .filterNot(_ == requestingEmail)
-
-    // for {
-      // otherAdmins <- developerConnector.fetchByEmails(otherAdminEmails)
-      // adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email)
-      // developer <- developerConnector.fetchDeveloper(teamMember.emailAddress)
-      // _ <- if (developer.isEmpty) developerConnector.createUnregisteredUser(teamMember.emailAddress) else Future.successful(())
-    //   request = domain.models.connectors.AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
-    //   response <- apmConnector.addTeamMember(app.id, request)
-    // } yield response
-
     val request = domain.models.connectors.AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
     apmConnector.addTeamMember(app.id, request)
   }
