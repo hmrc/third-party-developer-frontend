@@ -21,6 +21,7 @@ import domain.models.applications._
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.elementExistsByText
@@ -79,7 +80,8 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
       }
 
       "display server token link for old apps" in new Setup {
-        val oldAppWithoutSubsFields = ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
+        val oldAppWithoutSubsFields =
+          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
         val page = leftHandNavView.render(Some(oldAppWithoutSubsFields), Some("details"), request, loggedInUser, appConfig)
 
         page.contentType should include("text/html")
@@ -107,7 +109,8 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
       }
 
       "display server token link for old apps" in new Setup {
-        val oldAppWithSubsFields = ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
+        val oldAppWithSubsFields =
+          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
         val page = leftHandNavView.render(Some(oldAppWithSubsFields), Some("details"), request, loggedInUser, appConfig)
 
         page.contentType should include("text/html")
@@ -125,7 +128,10 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to the sandbox") shouldBe true
         elementExistsByText(document, "a", "Get production credentials") shouldBe true
+
+        userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
+
       "render correct wording for QA and Development config" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
@@ -136,7 +142,10 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Development") shouldBe true
         elementExistsByText(document, "a", "Add an application to QA") shouldBe true
+
+        userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
+
       "render correct wording for Staging" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("Staging")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Staging")
@@ -147,7 +156,10 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Staging") shouldBe true
         elementExistsByText(document, "a", "Add an application to Staging") shouldBe true
+
+        userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
+
       "render correct wording for Integration" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("Integration")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Integration")
@@ -155,10 +167,18 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Integration") shouldBe true
         elementExistsByText(document, "a", "Add an application to Integration") shouldBe true
+
+        userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
     }
   }
+
+  def userProfileSectionCorrectlyDisplayed(document: Document): Boolean =
+    elementExistsByText(document, "a", "Manage profile") &&
+      elementExistsByText(document, "a", "Email preferences") &&
+      elementExistsByText(document, "a", "Change password") &&
+      elementExistsByText(document, "a", "Account protection")
 }
