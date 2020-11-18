@@ -24,7 +24,7 @@ import domain.models.connectors._
 import domain.models.developers._
 import javax.inject.{Inject, Singleton}
 import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.CONTENT_TYPE
+import play.api.http.HeaderNames.{CONTENT_TYPE, CONTENT_LENGTH}
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http._
@@ -77,7 +77,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def resendVerificationEmail(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POSTEmpty(s"$serviceBaseUrl/$email/resend-verification") map status
+    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/$email/resend-verification", Seq((CONTENT_LENGTH -> "0"))) map status
   }
 
   def verify(code: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
@@ -96,7 +96,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POSTEmpty(s"$serviceBaseUrl/$email/password-reset-request").map(status).recover {
+    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/$email/password-reset-request", Seq((CONTENT_LENGTH -> "0"))).map(status).recover {
       case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
     }
   }
@@ -161,7 +161,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
 
   def completeAccountSetup(email: String)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.POSTEmpty(s"$serviceBaseUrl/developer/account-setup/$email/complete")
+      http.POSTEmpty(s"$serviceBaseUrl/developer/account-setup/$email/complete", Seq((CONTENT_LENGTH -> "0")))
         .map(_.json.as[Developer])
     }
 
@@ -182,7 +182,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
 
   def createMfaSecret(email: String)(implicit hc: HeaderCarrier): Future[String] =
     metrics.record(api) {
-      http.POSTEmpty(s"$serviceBaseUrl/developer/$email/mfa")
+      http.POSTEmpty(s"$serviceBaseUrl/developer/$email/mfa", Seq((CONTENT_LENGTH -> "0")))
         .map(r => (r.json \ "secret").as[String])
     }
 
