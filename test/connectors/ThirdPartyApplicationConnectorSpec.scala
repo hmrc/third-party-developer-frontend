@@ -326,7 +326,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "return failure response in case of a 400 on backend" in new Setup {
 
-      when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *))
+      when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url),*)(*, *, *))
         .thenReturn(failed(new BadRequestException("")))
 
       val result = await(connector.verify(verificationCode))

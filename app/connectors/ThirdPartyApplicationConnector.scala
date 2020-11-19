@@ -28,7 +28,7 @@ import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.{CONTENT_TYPE, CONTENT_LENGTH}
+import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status.NO_CONTENT
 import play.api.libs.json.Json
 import service.ApplicationService.ApplicationConnector
@@ -137,7 +137,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
-    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/verify-uplift/$verificationCode", Seq((CONTENT_LENGTH -> "0"))) map { _ =>
+    http.POSTEmpty(s"$serviceBaseUrl/verify-uplift/$verificationCode") map { _ =>
       ApplicationVerificationSuccessful
     } recover {
       case _: BadRequestException => ApplicationVerificationFailed
@@ -193,7 +193,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit] = {
     http
-      .POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/delete", Seq((CONTENT_LENGTH -> "0")))
+      .POSTEmpty(s"$serviceBaseUrl/application/${applicationId.value}/delete")
       .map(response =>
         response.status match {
           case NO_CONTENT => ()

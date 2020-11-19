@@ -195,22 +195,22 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     "send verification mail" in new Setup {
       val email = "john.smith@example.com"
 
-      when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/resend-verification")), *)(*, *, *)).thenReturn(successful(HttpResponse(Status.OK)))
+      when(mockHttp.POSTEmpty(endpoint(s"$email/resend-verification"))).thenReturn(successful(HttpResponse(Status.OK)))
 
       await(connector.resendVerificationEmail(email)) shouldBe Status.OK
 
-      verify(mockHttp).POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/resend-verification")), *)(*, *, *)
+      verify(mockHttp).POSTEmpty(eqTo(endpoint(s"$email/resend-verification")), *)(*, *, *)
     }
   }
 
   "Reset password" should {
     "successfully request reset" in new Setup {
       val email = "user@example.com"
-      when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/password-reset-request")),*)(*, *, *)).thenReturn(successful(HttpResponse(Status.OK)))
+      when(mockHttp.POSTEmpty(endpoint(s"$email/password-reset-request"))).thenReturn(successful(HttpResponse(Status.OK)))
 
       await(connector.requestReset(email))
 
-      verify(mockHttp).POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/password-reset-request")), *)(*, *, *)
+      verify(mockHttp).POSTEmpty(eqTo(endpoint(s"$email/password-reset-request")), *)(*, *, *)
     }
 
     "successfully validate reset code" in new Setup {
@@ -241,7 +241,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     val developer = Developer(email, "test", "testington", None)
 
     "successfully complete a developer account setup" in new Setup {
-      when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"developer/account-setup/$email/complete")), *)(*, *, *)).thenReturn(successful(HttpResponse(Status.OK, Some(Json.toJson(developer)))))
+      when(mockHttp.POSTEmpty(endpoint(s"developer/account-setup/$email/complete"))).thenReturn(successful(HttpResponse(Status.OK, Some(Json.toJson(developer)))))
 
       await(connector.completeAccountSetup(email)) shouldBe developer
     }
@@ -307,11 +307,11 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
       val email = "john.smith@example.com"
       val expectedSecret = "ABCDEF"
 
-      when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"developer/$email/mfa")), *)(*, *, *)).thenReturn(successful(HttpResponse(Status.CREATED, Some(Json.obj("secret" -> expectedSecret)))))
+      when(mockHttp.POSTEmpty(endpoint(s"developer/$email/mfa"))).thenReturn(successful(HttpResponse(Status.CREATED, Some(Json.obj("secret" -> expectedSecret)))))
 
       await(connector.createMfaSecret(email)) shouldBe expectedSecret
 
-      verify(mockHttp).POSTEmpty[HttpResponse](eqTo(endpoint(s"developer/$email/mfa")), *)(*, *, *)
+      verify(mockHttp).POSTEmpty(eqTo(endpoint(s"developer/$email/mfa")), *)(*, *, *)
     }
   }
 
