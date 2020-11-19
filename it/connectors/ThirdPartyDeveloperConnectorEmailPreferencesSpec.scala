@@ -81,7 +81,6 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
         1,
         postRequestedFor(urlMatching(s"/$email/resend-verification"))
           .withHeader(HeaderNames.CONTENT_LENGTH, equalTo("0"))
-          .withHeader("X-SPOT-THIS", equalTo("Boo"))
       )
     }
   }
