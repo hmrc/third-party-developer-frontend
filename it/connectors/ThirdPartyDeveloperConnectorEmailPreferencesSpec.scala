@@ -17,19 +17,20 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
-import domain.models.developers.{Developer, LoggedInState, Session, SessionInvalid}
-import domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
+import domain.InvalidEmail
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.emailpreferences.EmailPreferences
 import domain.models.emailpreferences.TaxRegimeInterests
 import domain.models.emailpreferences.EmailTopic._
+import domain.models.connectors.LoginRequest
+import domain.models.connectors.TotpAuthenticationRequest
+import play.api.http.HeaderNames
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -59,6 +60,30 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
     val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
     val encryptedTotpAuthenticationRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(totpAuthenticationRequest).as[String]))
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
+  }
+
+  "resendVerificationEmail" should {
+    "return" in new Setup {
+      val email = "foo@bar.com"
+      
+      stubFor(
+        post(urlEqualTo(s"/$email/resend-verification"))
+          .willReturn(
+            aResponse()
+              .withStatus(NO_CONTENT)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      await(underTest.resendVerificationEmail(email)) shouldBe 204
+
+      verify(
+        1,
+        postRequestedFor(urlMatching(s"/$email/resend-verification"))
+          .withHeader(HeaderNames.CONTENT_LENGTH, equalTo("0"))
+          .withHeader("X-SPOT-THIS", equalTo("Boo"))
+      )
+    }
   }
 
   "removeEmailPreferences" should {
