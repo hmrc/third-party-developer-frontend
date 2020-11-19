@@ -77,7 +77,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def resendVerificationEmail(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/$email/resend-verification", Seq((CONTENT_LENGTH -> "0"))) map status
+    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/$email/resend-verification", Seq(CONTENT_LENGTH -> "0")) map status
   }
 
   def verify(code: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
