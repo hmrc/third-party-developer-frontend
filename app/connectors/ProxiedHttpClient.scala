@@ -52,9 +52,7 @@ class ProxiedHttpClient @Inject()(config: Configuration,
     val extraHeadersWithMaybeApiKeyHeader =
       if (apiKeyHeader.isDefined) extraHeaders :+ apiKeyHeader.get
       else extraHeaders
-
     val hcWithBearerAndAccept = hc.copy(extraHeaders = extraHeadersWithMaybeApiKeyHeader)
-
-    super.buildRequest(url)(hcWithBearerAndAccept)
+    super.buildRequest(url, headers)(hcWithBearerAndAccept)
   }
 }
