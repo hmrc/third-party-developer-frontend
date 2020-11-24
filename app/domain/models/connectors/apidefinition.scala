@@ -20,21 +20,11 @@ import domain.models.apidefinitions.ApiContext
 import play.api.libs.json.Json
 
 /*
- * requiresTrust, isTestSupport and versions fields have been deliberately left out as they are not currently required. Adding them back in here should mean 
- * they are automatically deserialised as part of the call to api-platform-microservice.
-*/
-case class ExtendedApiDefinition(serviceName: String, name: String, description: String, context: ApiContext, categories: Seq[String])
-
-object ExtendedApiDefinition {
-    implicit val formatExtendedApiDefinition = Json.format[ExtendedApiDefinition]
-    def toApiDefinition(apiDefinition: ExtendedApiDefinition): ApiDefinition ={
-        ApiDefinition(apiDefinition.serviceName, apiDefinition.name, apiDefinition.description, apiDefinition.context, apiDefinition.categories)
-    }
-}
-
+ * This version of ApiDefinition currently covers everything we're interested in for TPDFE. api-platform-microservice can actually return one of two (similar, but not the same)
+ * API Definition types - ApiDefinition or ExtendedApiDefinition. We're currently only interested in elements that are common to both, hence the single type here.
+ */
 case class ApiDefinition(serviceName: String, name: String, description: String, context: ApiContext, categories: Seq[String])
 
 object ApiDefinition {
     implicit val formatApiDefinition = Json.format[ApiDefinition]
-
 }

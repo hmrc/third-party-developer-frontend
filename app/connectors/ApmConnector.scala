@@ -16,30 +16,24 @@
 
 package connectors
 
-import domain.models.apidefinitions.{ApiContext, ApiVersion}
+import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
+import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications._
-import domain.models.subscriptions.{ApiData, FieldName}
+import domain.models.connectors.{AddTeamMemberRequest, ApiDefinition}
+import domain.models.emailpreferences.APICategoryDetails
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
+import domain.models.subscriptions.{ApiData, FieldName}
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
-import uk.gov.hmrc.http.HeaderCarrier
+import service.SubscriptionsService.SubscriptionsConnector
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
-import domain.models.emailpreferences.APICategoryDetails
+import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
-import domain.models.apidefinitions.ApiIdentifier
-import domain.ApplicationUpdateSuccessful
-import service.SubscriptionsService.SubscriptionsConnector
 import uk.gov.hmrc.play.http.metrics.API
-import uk.gov.hmrc.http.NotFoundException
-import domain.ApplicationNotFound
-import play.api.Logger
-import domain.models.connectors.AddTeamMemberRequest
-import uk.gov.hmrc.http.Upstream4xxResponse
-import domain.TeamMemberAlreadyExists
-import uk.gov.hmrc.http.HttpResponse
 import service.OpenAccessApiService.OpenAccessApisConnector
 
 @Singleton
@@ -70,13 +64,14 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   def fetchAllAPICategories()(implicit  hc: HeaderCarrier): Future[Seq[APICategoryDetails]] =
     http.GET[Seq[APICategoryDetails]](s"${config.serviceBaseUrl}/api-categories")
 
-  def fetchAPIDefinition(serviceName: String)(implicit hc: HeaderCarrier): Future[ExtendedApiDefinition] =
-    http.GET[ExtendedApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
+  def fetchAPIDefinition(serviceName: String)(implicit hc: HeaderCarrier): Future[ApiDefinition] =
+    http.GET[ApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
 
   def fetchApiDefinitionsVisibleToUser(userEmail: String)(implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] =
     http.GET[Seq[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("collaboratorEmail" -> userEmail))
 
-  def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
+  def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)
+                    (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST(s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { _ =>
       ApplicationUpdateSuccessful
     } recover recovery

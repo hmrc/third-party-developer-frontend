@@ -17,9 +17,12 @@
 package controllers.profile
 
 import config.{ApplicationConfig, ErrorHandler}
-import domain.models.connectors.ExtendedApiDefinition
+import controllers._
+import domain.models.applications.ApplicationId
+import domain.models.connectors.ApiDefinition
 import domain.models.emailpreferences.APICategoryDetails
 import javax.inject.Inject
+import play.api.Logger
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -28,11 +31,8 @@ import service.{EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 
-import scala.concurrent.Future.{foldLeft, successful}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import controllers.{LoggedInController, SelectApisFromSubscriptionsForm, SelectTopicsFromSubscriptionsForm, SelectedApisEmailPreferencesForm, SelectedTopicsEmailPreferencesForm, TaxRegimeEmailPreferencesForm, UserRequest}
-import play.api.Logger
-import domain.models.applications.ApplicationId
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
@@ -195,7 +195,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def toDataObject(emailPreferences: domain.models.emailpreferences.EmailPreferences,
-                   filteredAPIs: Seq[ExtendedApiDefinition],
+                   filteredAPIs: Seq[ApiDefinition],
                    categories: Seq[APICategoryDetails],
                    unsubscribed: Boolean): EmailPreferencesSummaryViewData =
     EmailPreferencesSummaryViewData(
@@ -230,7 +230,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def renderSelectApisFromSubscriptionsPage(form: Form[SelectApisFromSubscriptionsForm] = SelectApisFromSubscriptionsForm.form,
-                                            apis: List[ExtendedApiDefinition],
+                                            apis: List[ApiDefinition],
                                             applicationId: ApplicationId)(implicit request: UserRequest[AnyContent]): Html =
     selectApisFromSubscriptionsView(form, apis.sortBy(_.serviceName), applicationId)
 

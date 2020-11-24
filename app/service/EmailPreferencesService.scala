@@ -18,7 +18,7 @@ package service
 
 import cats.data.NonEmptyList
 import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
-import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
+import domain.models.connectors.ApiDefinition
 import domain.models.developers.DeveloperSession
 import domain.models.emailpreferences.APICategoryDetails
 import domain.models.flows.{EmailPreferencesFlow, FlowType}
@@ -58,7 +58,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
   def apiCategoryDetails(category: String)(implicit hc: HeaderCarrier): Future[Option[APICategoryDetails]] =
     fetchAllAPICategoryDetails().map(_.find(_.category == category))
 
-  def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[Seq[ExtendedApiDefinition]] =
+  def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] =
     Future.sequence(
       apiServiceNames
         .map(apmConnector.fetchAPIDefinition(_))
