@@ -28,13 +28,14 @@ import service.{EmailPreferencesService, SessionService}
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 
-import scala.concurrent.Future.successful
+import scala.concurrent.Future.{foldLeft, successful}
 import scala.concurrent.{ExecutionContext, Future}
 import controllers.LoggedInController
 import controllers.TaxRegimeEmailPreferencesForm
 import controllers.SelectedApisEmailPreferencesForm
 import controllers.SelectedTopicsEmailPreferencesForm
 import controllers.UserRequest
+import play.api.Logger
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
@@ -46,7 +47,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  flowStartView: FlowStartView,
                                  flowSelectCategoriesView: FlowSelectCategoriesView,
                                  flowSelectApiView: FlowSelectApiView,
-                                 flowSelectTopicsView: FlowSelectTopicsView)
+                                 flowSelectTopicsView: FlowSelectTopicsView,
+                                 selectApisFromSubscriptionsView: SelectApisFromSubscriptionsView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
 
@@ -209,4 +211,32 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       .toMap
   }
 
+  /*
+   * Page displayed as part of 'Add new Sandbox Application' flow. Allows users to add newly-subscribed APIs to their Email Preferences. Any APIs they already
+   * have within their Email Preferences will not be shown.
+   */
+  def selectApisFromSubscriptionsPage(): Action[AnyContent] = loggedInAction { implicit request =>
+    val maybeMissingSubscriptionsCSV = request.flash.data.get("missingSubscriptions")
+    Logger.warn(s"From Flash: $maybeMissingSubscriptionsCSV")
+    maybeMissingSubscriptionsCSV match {
+      case Some(missingSubscriptionsCSV) =>
+        val missingAPIs = emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet)
+
+        missingAPIs.map(apiDetails => {
+          apiDetails.map(apiDef => Logger.warn(s"Missing APIs: ${apiDef.serviceName}"))
+          
+          Ok(renderSelectApisFromSubscriptionsPage(apis = apiDetails.toList))
+        })
+      case None => Future.successful(InternalServerError)
+    }
+  }
+
+  def renderSelectApisFromSubscriptionsPage(form: Form[SelectedApisEmailPreferencesForm] = SelectedApisEmailPreferencesForm.form,
+                                            apis: List[ExtendedApiDefinition])(implicit request: UserRequest[AnyContent]): Html =
+    selectApisFromSubscriptionsView(form, apis.sortBy(_.serviceName))
+
+  // def selectApisFromSubscriptionsAction: Action[AnyContent] = loggedInAction { implicit request =>
+  //   val form = SelectedApisEmailPreferencesForm.form.bindFromRequest
+    
+  // }
 }

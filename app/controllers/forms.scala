@@ -469,3 +469,25 @@ object SelectedTopicsEmailPreferencesForm {
     "topic" -> seq(text).verifying(nonEmptyList))
   (SelectedTopicsEmailPreferencesForm.apply)(SelectedTopicsEmailPreferencesForm.unapply))
 }
+
+final case class SelectApisFromSubscriptionsForm(selectedApi: Seq[String])
+
+object SelectApisFromSubscriptionsForm {
+
+  def nonEmpty(message: String): Constraint[String] = Constraint[String] { s: String =>
+    if (Option(s).isDefined) Invalid(message) else Valid
+  }
+
+
+  def form: Form[SelectApisFromSubscriptionsForm] = Form(mapping("selectedApi" -> seq(text))
+  (SelectApisFromSubscriptionsForm.apply)(SelectApisFromSubscriptionsForm.unapply)
+    .verifying(
+      FormKeys.selectedApisNonSelectedGlobalKey,
+      fields =>
+        fields match {
+          case data: SelectApisFromSubscriptionsForm =>
+            if(data.selectedApi.isEmpty) false else true
+        }
+    )
+  )
+}

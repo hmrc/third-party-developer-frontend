@@ -65,12 +65,14 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     val mockEmailPreferencesSelectCategoriesView: FlowSelectCategoriesView = mock[FlowSelectCategoriesView]
     val mockEmailPreferencesFlowSelectTopicView: FlowSelectTopicsView = mock[FlowSelectTopicsView]
     val mockEmailPreferencesSelectApiView: FlowSelectApiView = mock[FlowSelectApiView]
+    val mockSelectApisFromSubscriptionsView: SelectApisFromSubscriptionsView = mock[SelectApisFromSubscriptionsView]
     when(mockEmailPreferencesSummaryView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesUnsubscribeAllView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesStartView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectCategoriesView.apply(*, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesFlowSelectTopicView.apply(*, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectApiView.apply(*, *, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockSelectApisFromSubscriptionsView.apply(*, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
     val controllerUnderTest: EmailPreferences =
       new EmailPreferences(
@@ -84,7 +86,8 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
         mockEmailPreferencesStartView,
         mockEmailPreferencesSelectCategoriesView,
         mockEmailPreferencesSelectApiView,
-        mockEmailPreferencesFlowSelectTopicView
+        mockEmailPreferencesFlowSelectTopicView,
+        mockSelectApisFromSubscriptionsView
       )
 
     val emailPreferences: emailpreferences.EmailPreferences =
