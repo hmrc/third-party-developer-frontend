@@ -19,10 +19,11 @@
 @import domain.models.connectors.ExtendedApiDefinition
 @import domain.models.views.BackButtonWithJavaScript
 @import config.ApplicationConfig
+@import domain.models.applications.ApplicationId
 
 @this(devMain: DevMain)
 
-@(form: Form[SelectedApisEmailPreferencesForm], apis: List[ExtendedApiDefinition])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
+@(form: Form[SelectApisFromSubscriptionsForm], apis: List[ExtendedApiDefinition], applicationId: ApplicationId)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
 
 @pageHeading = @{
     "Do you want to receive emails about the APIs you have subscribed to?"
@@ -42,7 +43,7 @@
         </legend>
 
         <p id="select-all-description" class="form-hint">Select all that apply.</p>
-        @helper.form(action = controllers.profile.routes.EmailPreferences.flowSelectApisAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
+        @helper.form(action = controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsAction(), 'class -> "form", 'id -> "emailPreferencesApisForm") {
             @helper.CSRF.formField
             <div class="form-group @if(form.errors("apiRadio").nonEmpty || form.errors.map(_.message).contains(FormKeys.selectedApisNonSelectedGlobalKey)) {form-group-error}">
                 <a name="error.selectedapis.nonselected.field"></a>
@@ -53,6 +54,7 @@
                             <label for="@api.serviceName">@api.name</label>
                         </div>
                     }
+                    <input type="hidden" value="@applicationId.value" name="applicationId" />
                 </div>
             </div>
             <div>

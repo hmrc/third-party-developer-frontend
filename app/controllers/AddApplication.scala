@@ -93,11 +93,13 @@ class AddApplication @Inject() (
       successful(
         deployedTo match {
           case SANDBOX    => {
+            val alreadySelectedEmailPreferences: Boolean = request.flash.get("emailPreferencesSelected").contains("true")
             val missingSubscriptions = subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), user.developer.emailPreferences)
-            if(missingSubscriptions.isEmpty) {
+
+            if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
               Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
             } else {
-              Redirect(controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsPage())
+              Redirect(controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsPage(applicationId))
                 .flashing("missingSubscriptions" -> missingSubscriptions.mkString(","))
             }
           }
