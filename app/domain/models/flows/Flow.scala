@@ -51,7 +51,7 @@ case class EmailPreferencesFlow(override val sessionId: String,
                                 selectedCategories: Set[String],
                                 selectedAPIs: Map[String, Set[String]],
                                 selectedTopics: Set[String],
-                                visibleApis: Seq[ApiDefinition]) extends Flow {
+                                visibleApis: Seq[ApiDefinition]) extends Flow with EmailPreferencesProducer {
   override val flowType: FlowType = FlowType.EMAIL_PREFERENCES
 
   def categoriesInOrder: List[String] = selectedCategories.toList.sorted
@@ -64,7 +64,7 @@ case class EmailPreferencesFlow(override val sessionId: String,
     if (apis.contains("ALL_APIS")) Set.empty[String] else apis
   }
 
-  def toEmailPreferences: EmailPreferences = {
+  override def toEmailPreferences: EmailPreferences = {
     val interests: List[TaxRegimeInterests] =
       selectedAPIs.map(x => TaxRegimeInterests(x._1, handleAllApis(x._2))).toList
 
@@ -96,8 +96,32 @@ object EmailPreferencesFlow {
   }
 }
 
-case class NewApplicationEmailPreferencesFlow(override val sessionId: String, applicationId: ApplicationId, missingSubscriptions: Set[ApiDefinition], selectedApis: Set[ApiDefinition], selectedTopics: Set[String]) extends Flow {
+case class NewApplicationEmailPreferencesFlow(override val sessionId: String,
+                                              applicationId: ApplicationId,
+                                              missingSubscriptions: Set[ApiDefinition],
+                                              selectedApis: Set[ApiDefinition],
+                                              selectedTopics: Set[String]) extends Flow with EmailPreferencesProducer {
   override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES
+
+  def mergeEmailPreferences(existingEmailPreferences: EmailPreferences): EmailPreferences = {
+    val existingInterests: Map[String, Set[String]] =
+      existingEmailPreferences.interests
+        .map(interests => Map(interests.regime -> interests.services))
+        .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
+
+
+    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.toSet)).toMap
+
+    val updatedTaxRegimeInterests = existingEmailPreferences.interests // TODO: Merge in newly selected APIs with existing records
+
+    EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(EmailTopic.withValue))
+  }
+
+  override def toEmailPreferences: EmailPreferences = ???
+}
+
+trait EmailPreferencesProducer {
+  def toEmailPreferences: EmailPreferences
 }
 
 
