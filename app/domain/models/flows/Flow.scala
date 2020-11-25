@@ -22,6 +22,7 @@ import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeIn
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
+import domain.models.applications.ApplicationId
 
 sealed trait FlowType extends EnumEntry
 
@@ -29,16 +30,14 @@ object FlowType extends Enum[FlowType] with PlayJsonEnum[FlowType] {
   val values: immutable.IndexedSeq[FlowType] = findValues
 
   case object IP_ALLOW_LIST extends FlowType
-
   case object EMAIL_PREFERENCES extends FlowType
-
+  case object NEW_APPLICATION_EMAIL_PREFERENCES extends FlowType
 }
 
 trait Flow {
   val sessionId: String
   val flowType: FlowType
 }
-
 
 /**
  * The name of the class is used on serialisation as a discriminator. Do not change.
@@ -75,8 +74,8 @@ case class EmailPreferencesFlow(override val sessionId: String,
 
 object EmailPreferencesFlow {
   def fromDeveloperSession(developerSession: DeveloperSession): EmailPreferencesFlow = {
-
     val existingEmailPreferences = developerSession.developer.emailPreferences
+
     existingEmailPreferences match {
       case EmailPreferences(i: List[TaxRegimeInterests], t: Set[EmailTopic]) if i.isEmpty && t.isEmpty =>
         new EmailPreferencesFlow(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty, Seq.empty)
@@ -95,6 +94,10 @@ object EmailPreferencesFlow {
       (i.regime, services)
     }).toMap
   }
+}
+
+case class NewApplicationEmailPreferencesFlow(override val sessionId: String, applicationId: ApplicationId, missingSubscriptions: Set[ApiDefinition], selectedApis: Set[ApiDefinition], selectedTopics: Set[String]) extends Flow {
+  override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES
 }
 
 

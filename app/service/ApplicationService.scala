@@ -150,7 +150,7 @@ class ApplicationService @Inject() (
   }
 
   def addTeamMember(app: Application, requestingEmail: String, teamMember: Collaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val request = domain.models.connectors.AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
+    val request = AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
     apmConnector.addTeamMember(app.id, request)
   }
 
