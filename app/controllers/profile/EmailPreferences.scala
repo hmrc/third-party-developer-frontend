@@ -33,8 +33,9 @@ import views.html.emailpreferences._
 import domain.models.flows.FlowType._
 import domain.models.flows.{EmailPreferencesFlow, NewApplicationEmailPreferencesFlow}
 
-import scala.concurrent.Future.successful
+import scala.concurrent.Future.{failed, successful}
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.apidefinitions.APIDefinition
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
@@ -214,19 +215,45 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
    * have within their Email Preferences will not be shown.
    */
   def selectApisFromSubscriptionsPage(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    val maybeMissingSubscriptionsCSV = request.flash.data.get("missingSubscriptions")
-
-    maybeMissingSubscriptionsCSV match {
-      case Some(missingSubscriptionsCSV) =>
-        val missingAPIs = emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet)
-
-        for {
-          apis <- missingAPIs
-          flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
-          updatedFlow <- emailPreferencesService.updateMissingSubscriptions(request.developerSession, applicationId, apis.toSet)
-         } yield Ok(renderSelectApisFromSubscriptionsPage(flow = updatedFlow))
-      case None => Future.successful(InternalServerError)
+    def missingAPIsFromFlash: Future[Seq[ApiDefinition]] = {
+      request.flash.data.get("missingSubscriptions").fold[Future[Seq[ApiDefinition]]](
+        successful(Seq.empty)
+      )(missingSubscriptionsCSV =>
+        emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet)
+      )
     }
+
+    // val flow = for {
+    //   flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
+    //   // If flow.missingSubscriptions empty, update it from flash data
+      
+    //   // Otherwise just return flow from above
+    //   updatedFlow <- flow.missingSubscriptions
+    // } yield ()
+    
+    emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId).flatMap(f => {
+      if(f.missingSubscriptions.isEmpty) {
+          for {
+            missingAPIs <- missingAPIsFromFlash
+            updatedFlow <- emailPreferencesService.updateMissingSubscriptions(request.developerSession, applicationId, missingAPIs.toSet)
+          } yield updatedFlow
+      }
+      else
+        successful(f)
+    }).map(b => Ok(renderSelectApisFromSubscriptionsPage(flow = b)))
+    // Ok(renderSelectApisFromSubscriptionsPage(flow = a))
+
+    // maybeMissingSubscriptionsCSV match {
+    //   case Some(missingSubscriptionsCSV) =>
+    //     val missingAPIs = emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet)
+
+    //     for {
+    //       apis <- missingAPIs
+    //       flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
+    //       updatedFlow <- emailPreferencesService.updateMissingSubscriptions(request.developerSession, applicationId, apis.toSet)
+    //      } yield Ok(renderSelectApisFromSubscriptionsPage(flow = updatedFlow))
+    //   case None => Future.successful(InternalServerError)
+    // }
   }
 
   def renderSelectApisFromSubscriptionsPage(form: Form[SelectApisFromSubscriptionsForm] = SelectApisFromSubscriptionsForm.form,

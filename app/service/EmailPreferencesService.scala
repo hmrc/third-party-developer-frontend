@@ -75,7 +75,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
                           newFlowObject
     }
 
-  def fetchNewApplicationEmailPreferencesFlow(developerSession: DeveloperSession, applicationId: ApplicationId) = 
+  def fetchNewApplicationEmailPreferencesFlow(developerSession: DeveloperSession, applicationId: ApplicationId): Future[NewApplicationEmailPreferencesFlow] = 
     flowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlow](developerSession.session.sessionId, FlowType.NEW_APPLICATION_EMAIL_PREFERENCES) map {
       case Some(flow) => flow
       case None       => val newFlowObject = new NewApplicationEmailPreferencesFlow(developerSession.session.sessionId, applicationId, Set.empty, Set.empty, developerSession.developer.emailPreferences.topics.map(_.value))
@@ -109,7 +109,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
     } yield savedFlow
   }
 
-  def updateMissingSubscriptions(developerSession: DeveloperSession, applicationId: ApplicationId, missingSubscriptions: Set[ApiDefinition]) = {
+  def updateMissingSubscriptions(developerSession: DeveloperSession, applicationId: ApplicationId, missingSubscriptions: Set[ApiDefinition]): Future[NewApplicationEmailPreferencesFlow] = {
     for {
       existingFlow  <- fetchNewApplicationEmailPreferencesFlow(developerSession, applicationId)
       savedFlow     <- flowRepository.saveFlow[NewApplicationEmailPreferencesFlow](existingFlow.copy(missingSubscriptions = missingSubscriptions))
