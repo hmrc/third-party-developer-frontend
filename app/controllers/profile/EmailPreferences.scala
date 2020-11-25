@@ -225,17 +225,13 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
           flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
           updatedFlow <- emailPreferencesService.updateMissingSubscriptions(request.developerSession, applicationId, apis.toSet)
          } yield Ok(renderSelectApisFromSubscriptionsPage(flow = updatedFlow))
-
-        // emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(developerSession, applicationId, missingAPIs)
-
-        // missingAPIs.map(apiDetails => Ok(renderSelectApisFromSubscriptionsPage(apis = apiDetails.toList, applicationId = applicationId)))
       case None => Future.successful(InternalServerError)
     }
   }
 
   def renderSelectApisFromSubscriptionsPage(form: Form[SelectApisFromSubscriptionsForm] = SelectApisFromSubscriptionsForm.form,
                                             flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
-    selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId)
+    selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectApisFromSubscriptionsForm.form.bindFromRequest
@@ -254,9 +250,12 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       },
       {
         selectedApisForm =>
-          emailPreferencesService.fetchAPIDetails(selectedApisForm.selectedApi.toSet)
+          emailPreferencesService.updateNewApplicationSelectedApis(request.developerSession, applicationId, selectedApisForm.selectedApi.toSet)
+          .map(_ => Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
+          
+
           // Future.successful(Redirect(controllers.routes.AddApplication.manageApps))
-          successful(Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
+          // successful()
           // val developerSession = request.developerSession
           // for {
           //   flow <- emailPreferencesService.fetchFlow(developerSession)

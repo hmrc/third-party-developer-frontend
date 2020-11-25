@@ -102,7 +102,6 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
   }
 
   def updateSelectedApis(developerSession: DeveloperSession, currentCategory: String, selectedApis: List[String]): Future[EmailPreferencesFlow] = {
-
     for {
       existingFlow <- fetchEmailPreferencesFlow(developerSession)
       updatedApis   = existingFlow.selectedAPIs ++ Map(currentCategory -> selectedApis.toSet)
@@ -114,6 +113,14 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
     for {
       existingFlow  <- fetchNewApplicationEmailPreferencesFlow(developerSession, applicationId)
       savedFlow     <- flowRepository.saveFlow[NewApplicationEmailPreferencesFlow](existingFlow.copy(missingSubscriptions = missingSubscriptions))
+    } yield savedFlow
+  }
+
+  def updateNewApplicationSelectedApis(developerSession: DeveloperSession, applicationId: ApplicationId, selectedApis: Set[String])(implicit hc: HeaderCarrier) = {
+    for {
+      apis <- fetchAPIDetails(selectedApis)
+      existingFlow  <- fetchNewApplicationEmailPreferencesFlow(developerSession, applicationId)
+      savedFlow     <- flowRepository.saveFlow[NewApplicationEmailPreferencesFlow](existingFlow.copy(selectedApis = apis.toSet))
     } yield savedFlow
   }
 

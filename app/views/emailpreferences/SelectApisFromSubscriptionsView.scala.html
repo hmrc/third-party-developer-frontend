@@ -23,7 +23,7 @@
 
 @this(devMain: DevMain)
 
-@(form: Form[SelectApisFromSubscriptionsForm], apis: List[ApiDefinition], applicationId: ApplicationId)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
+@(form: Form[SelectApisFromSubscriptionsForm], apis: List[ApiDefinition], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
 
 @pageHeading = @{
     "Do you want to receive emails about the APIs you have subscribed to?"
@@ -50,7 +50,8 @@
                 <div>
                     @for(api <- apis) {
                         <div class="multiple-choice">
-                            <input id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName" />
+                            <input id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
+                            @if(selectedApis.contains(api.serviceName)) {checked} />
                             <label for="@api.serviceName">@api.name</label>
                         </div>
                     }
