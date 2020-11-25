@@ -223,14 +223,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       )
     }
 
-    // val flow = for {
-    //   flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
-    //   // If flow.missingSubscriptions empty, update it from flash data
-      
-    //   // Otherwise just return flow from above
-    //   updatedFlow <- flow.missingSubscriptions
-    // } yield ()
-    
     emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId).flatMap(f => {
       if(f.missingSubscriptions.isEmpty) {
           for {
@@ -241,19 +233,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       else
         successful(f)
     }).map(b => Ok(renderSelectApisFromSubscriptionsPage(flow = b)))
-    // Ok(renderSelectApisFromSubscriptionsPage(flow = a))
-
-    // maybeMissingSubscriptionsCSV match {
-    //   case Some(missingSubscriptionsCSV) =>
-    //     val missingAPIs = emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet)
-
-    //     for {
-    //       apis <- missingAPIs
-    //       flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
-    //       updatedFlow <- emailPreferencesService.updateMissingSubscriptions(request.developerSession, applicationId, apis.toSet)
-    //      } yield Ok(renderSelectApisFromSubscriptionsPage(flow = updatedFlow))
-    //   case None => Future.successful(InternalServerError)
-    // }
   }
 
   def renderSelectApisFromSubscriptionsPage(form: Form[SelectApisFromSubscriptionsForm] = SelectApisFromSubscriptionsForm.form,
@@ -262,12 +241,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectApisFromSubscriptionsForm.form.bindFromRequest
-    
-    // Logger.warn(s"Form: $form")
-    // val applicationId = form.value.get.applicationId
-    // successful(Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
-
-    // val flow = emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
     
     form.fold(
       formWithErrors => {
@@ -279,41 +252,36 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         selectedApisForm =>
           emailPreferencesService.updateNewApplicationSelectedApis(request.developerSession, applicationId, selectedApisForm.selectedApi.toSet)
           .map(_ => Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
-          
-
-          // Future.successful(Redirect(controllers.routes.AddApplication.manageApps))
-          // successful()
-          // val developerSession = request.developerSession
-          // for {
-          //   flow <- emailPreferencesService.fetchFlow(developerSession)
-          //   updateResult <- emailPreferencesService
-          //     .updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
-          //   _ = if (updateResult) emailPreferencesService.deleteFlow(developerSession.session.sessionId)
-          // } yield if (updateResult) Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage())
-          // else Redirect(controllers.profile.routes.EmailPreferences.flowSelectTopicsPage())
       }
     )
   }
 
   def selectTopicsFromSubscriptionsPage(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    renderSelectTopicsFromSubscriptionsView(
-      selectedTopics = request.developerSession.developer.emailPreferences.topics.map(_.toString),
-      applicationId = applicationId)
-        .map(Ok(_))
-    
+    emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId).map(f => Ok(renderSelectTopicsFromSubscriptionsView(flow = f)))
   }
 
   private def renderSelectTopicsFromSubscriptionsView(form: Form[SelectTopicsFromSubscriptionsForm] = SelectTopicsFromSubscriptionsForm.form,
-                                                      selectedTopics: Set[String],
-                                                      applicationId: ApplicationId)(implicit request: UserRequest[AnyContent]): Future[Html] =
-    successful(selectTopicsFromSubscriptionsView.apply(form, selectedTopics, applicationId))
+                                                      flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
+    selectTopicsFromSubscriptionsView.apply(form, flow.selectedTopics, flow.applicationId)
 
-  def selectTopicsFromSubscriptionsAction: Action[AnyContent] = loggedInAction { implicit request =>
+  def selectTopicsFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectTopicsFromSubscriptionsForm.form.bindFromRequest
 
-    Logger.warn(s"Form: $form")
-    val applicationId = form.value.get.applicationId
+    form.fold(
+      formWithErrors => {
+        emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId).map(
+          f => BadRequest(renderSelectTopicsFromSubscriptionsView(formWithErrors, f))
+        )
+      },
+      {
+        selectedTopicsForm =>
+        emailPreferencesService.deleteFlow(request.developerSession.session.sessionId)
+          .map(_ => Redirect(controllers.routes.AddApplication.addApplicationSuccess(applicationId)).flashing("emailPreferencesSelected" -> "true"))
+        //   emailPreferencesService.updateNewApplicationSelectedApis(request.developerSession, applicationId, selectedApisForm.selectedApi.toSet)
+        //   .map(_ => Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
+      }
+    )
 
-    successful(Redirect(controllers.routes.AddApplication.addApplicationSuccess(applicationId)).flashing("emailPreferencesSelected" -> "true"))
+    // successful(Redirect(controllers.routes.AddApplication.addApplicationSuccess(applicationId)).flashing("emailPreferencesSelected" -> "true"))
   }
 }

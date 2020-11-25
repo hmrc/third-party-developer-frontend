@@ -49,7 +49,7 @@
         <p class="form-hint">Select all that apply.</p>
     </div>
 
-    @helper.form(action = controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsAction(), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
+    @helper.form(action = controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsAction(applicationId), 'class -> "form", 'id -> "emailPreferencesTopicsForm") {
         @helper.CSRF.formField
         <input type="hidden" value="@applicationId.value" name="applicationId" />
         <a name="topic"></a>
