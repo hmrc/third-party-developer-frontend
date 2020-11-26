@@ -35,6 +35,7 @@ import views.helper.EnvironmentNameService
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import service.EmailPreferencesService
 
 class ManageApplicationsSpec extends BaseControllerSpec with ApplicationActionServiceMock with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
@@ -81,6 +82,7 @@ class ManageApplicationsSpec extends BaseControllerSpec with ApplicationActionSe
       mock[ErrorHandler],
       applicationServiceMock,
       applicationActionServiceMock,
+      mock[EmailPreferencesService],
       sessionServiceMock,
       mock[AuditService],
       mcc,

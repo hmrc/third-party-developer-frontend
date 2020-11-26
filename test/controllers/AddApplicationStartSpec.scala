@@ -60,7 +60,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -76,6 +76,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
       mock[ErrorHandler],
       applicationServiceMock,
       applicationActionServiceMock,
+      emailPreferencesServiceMock,
       sessionServiceMock,
       mock[AuditService],
       mcc,

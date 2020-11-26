@@ -3,7 +3,7 @@ package connectors
 import java.net.URLEncoder
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
+import domain.models.connectors.ApiDefinition
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
@@ -54,7 +54,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
           val serviceName = "api1"
           val name = "API 1"
          extendedAPIDefinitionByServiceName(serviceName, s"""{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context" }""")
-         val result: ExtendedApiDefinition = await(underTest.fetchAPIDefinition("api1"))
+         val result: ApiDefinition = await(underTest.fetchAPIDefinition("api1"))
          result.serviceName shouldBe serviceName
          result.name shouldBe name
       }
