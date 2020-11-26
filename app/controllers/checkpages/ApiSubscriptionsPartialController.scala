@@ -20,11 +20,14 @@ import controllers.{APISubscriptions, ApplicationController, ApplicationRequest}
 import domain.models
 import domain.models.applications.{Application, ApplicationId, CheckInformation}
 import domain.models.controllers.SubscriptionData
+import domain.models.apidefinitions.ApiContext
+import domain.models.subscriptions.ApiData
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import views.html.checkpages.ApiSubscriptionsView
 
 import scala.concurrent.Future
+
 
 trait ApiSubscriptionsPartialController {
   self: ApplicationController with CanUseCheckActions =>
@@ -36,12 +39,13 @@ trait ApiSubscriptionsPartialController {
 
   def apiSubscriptionsPage(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
-    Future.successful(Ok(apiSubscriptionsView(app, asSubscriptionData(request))))
+    Future.successful(Ok(apiSubscriptionsView(app, asSubscriptionData(request), request.openAccessApis)))
   }
 
   def apiSubscriptionsAction(appId: ApplicationId): Action[AnyContent] = canUseChecksAction(appId) { implicit request =>
     val app = request.application
     val subscriptionData = asSubscriptionData(request)
+    val openAccessApis = request.openAccessApis
     val information = app.checkInformation.getOrElse(CheckInformation())
 
     // Grouped subscriptons removed API-EXAMPLE-MICROSERVICE before this code is ever executed
@@ -50,7 +54,7 @@ trait ApiSubscriptionsPartialController {
 
     if (!hasNonExampleSubscription(subscriptionData)) {
       val form = DummySubscriptionsForm.form.bind(Map("hasNonExampleSubscription" -> "false"))
-      Future.successful(BadRequest(apiSubscriptionsView(app, subscriptionData, Some(form))))
+      Future.successful(BadRequest(apiSubscriptionsView(app, subscriptionData, openAccessApis, Some(form))))
     } else {
       for {
         _ <- applicationService.updateCheckInformation(app, information.copy(apiSubscriptionsConfirmed = true))
@@ -61,12 +65,14 @@ trait ApiSubscriptionsPartialController {
   private def apiSubscriptionsView(
       app: Application,
       subscriptionData: SubscriptionData,
+      openAccessApis: Map[ApiContext, ApiData],
       form: Option[Form[DummySubscriptionsForm]] = None
   )(implicit request: ApplicationRequest[AnyContent]) = {
     apiSubscriptionsViewTemplate(
       app,
       subscriptionData.role,
       subscriptionData.subscriptions,
+      openAccessApis,
       app.id,
       apiSubscriptionsActionRoute(app.id),
       form

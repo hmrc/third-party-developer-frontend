@@ -29,6 +29,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.apidefinitions.ApiContext
+import domain.models.subscriptions.ApiData
 
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationActionServiceMock = mock[ApplicationActionService]
@@ -40,7 +42,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
   def givenApplicationAction[A](application: Application, developerSession: DeveloperSession): Unit =
    givenApplicationAction[A](ApplicationWithSubscriptionData(application, Set.empty, Map.empty), developerSession)
 
-  def givenApplicationAction[A](appData: ApplicationWithSubscriptionData, developerSession: DeveloperSession, subscriptions: Seq[APISubscriptionStatus] = Seq.empty): Unit = {
+  def givenApplicationAction[A](appData: ApplicationWithSubscriptionData, developerSession: DeveloperSession, subscriptions: Seq[APISubscriptionStatus] = Seq.empty, openAccessApis: Map[ApiContext, ApiData] = Map.empty): Unit = {
 
     def returns(req: MessagesRequest[A]): OptionT[Future,ApplicationRequest[A]] =
       appData.application.role(developerSession.developer.email) match {
@@ -50,6 +52,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
             application = appData.application,
             deployedTo = appData.application.deployedTo,
             subscriptions,
+            openAccessApis,
             role,
             user = developerSession,
             request = req)

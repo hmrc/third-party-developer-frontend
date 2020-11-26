@@ -18,15 +18,22 @@
 @import domain.models.applications.Role
 @import domain.models.applications.Application
 @import views.html.include.SubscriptionsGroup
+@import views.html.include.OpenAccessApisGroup
+@import domain.models.apidefinitions.ApiContext
+@import domain.models.subscriptions.ApiData
 
-@this(subscriptionsGroup: SubscriptionsGroup)
+@this(subscriptionsGroup: SubscriptionsGroup, openAccessApisGroup: OpenAccessApisGroup)
 
-@(role: Role,
-        subscriptions: GroupedSubscriptions,
-        app: Application,
-        afterUnsubscribeRedirectTo: SubscriptionRedirect,
-        showSubscriptionFields: Boolean)(
-        implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
+@(
+    role: Role,
+    subscriptions: GroupedSubscriptions,
+    openAccessApis: Map[ApiContext, ApiData],
+    app: Application,
+    afterUnsubscribeRedirectTo: SubscriptionRedirect,
+    showSubscriptionFields: Boolean
+)(
+    implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig
+)
 
 @if(subscriptions.exampleApi.nonEmpty) {
     <h2 class="heading-large">Example API</h2>
@@ -36,6 +43,11 @@
 @if(subscriptions.apis.nonEmpty) {
     <h2 class="heading-large">APIs</h2>
     @subscriptionsGroup(role, app, subscriptions.apis, "API", afterUnsubscribeRedirectTo,showSubscriptionFields)
+}
+
+@if(openAccessApis.nonEmpty) {
+    <h2 class="heading-large">Open Access APIs</h2>
+    @openAccessApisGroup(role, app, openAccessApis)
 }
 
 @if(subscriptions.testApis.nonEmpty) {

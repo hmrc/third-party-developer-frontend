@@ -21,7 +21,7 @@ import domain._
 import domain.models.apidefinitions._
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.connectors.{AddTeamMemberRequest, DeskproTicket, TicketResult}
+import domain.models.connectors.{DeskproTicket, TicketResult}
 import domain.models.developers.DeveloperSession
 import domain.models.subscriptions._
 import javax.inject.{Inject, Singleton}

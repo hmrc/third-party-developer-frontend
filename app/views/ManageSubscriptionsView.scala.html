@@ -24,11 +24,22 @@
 @import domain.models.applications.Application
 @import domain.models.applications.State
 @import domain.models.applications.ApplicationId
+@import domain.models.applications.Role
+@import domain.models.apidefinitions.ApiContext
+@import domain.models.subscriptions.ApiData
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
 
-@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], applicationView: ApplicationViewModel, subscriptions: Option[GroupedSubscriptions], id: ApplicationId)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
+@(
+    role: Role, 
+    data: PageData, 
+    form: Form[controllers.EditApplicationForm], 
+    applicationView: ApplicationViewModel, 
+    subscriptions: Option[GroupedSubscriptions], 
+    openAccessApis: Map[ApiContext, ApiData],
+    id: ApplicationId
+)(
+    implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig, navSection: String = "subscriptions")
 
 @app = @{applicationView.application}
 
@@ -51,9 +62,7 @@
     leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
-
     <h1 class="heading-xlarge">Manage API subscriptions</h1>
-
 
     @appEnvironment(app)
     <br>
@@ -74,7 +83,7 @@
                 <p class="panel panel-border-wide">You need admin rights to make API subscription changes.</p>
             }
 
-            @subscriptionGroups(role, groupedSubscriptions, app, API_SUBSCRIPTIONS_PAGE, true)
+            @subscriptionGroups(role, groupedSubscriptions, openAccessApis, app, API_SUBSCRIPTIONS_PAGE, true)
         }
 
         case _ => {
