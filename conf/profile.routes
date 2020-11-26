@@ -16,6 +16,7 @@ POST        /email-preferences/topics                                           
 
 GET         /email-preferences/apis-from-subscriptions                                           controllers.profile.EmailPreferences.selectApisFromSubscriptionsPage(applicationId: domain.models.applications.ApplicationId)
 POST        /email-preferences/apis-from-subscriptions                                           controllers.profile.EmailPreferences.selectApisFromSubscriptionsAction(applicationId: domain.models.applications.ApplicationId)
+POST        /email-preferences/no-apis-from-subscriptions                                        controllers.profile.EmailPreferences.selectNoApisFromSubscriptionsAction(applicationId: domain.models.applications.ApplicationId)
 GET         /email-preferences/topics-from-subscriptions                                         controllers.profile.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId: domain.models.applications.ApplicationId)
 POST        /email-preferences/topics-from-subscriptions                                         controllers.profile.EmailPreferences.selectTopicsFromSubscriptionsAction(applicationId: domain.models.applications.ApplicationId)
 

@@ -254,6 +254,10 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     )
   }
 
+  def selectNoApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
+  }
+
   def selectTopicsFromSubscriptionsPage(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
       .map(f => Ok(renderSelectTopicsFromSubscriptionsView(flow = f)))
@@ -277,7 +281,6 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
           for {
             flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
             updatedFlow = flow.copy(selectedTopics = selectedTopicsForm.topic.toSet)
-            // updatedEmailPreferences = updatedFlow.mergeEmailPreferences(request.developerSession.developer.emailPreferences)
             savedEmailPreferences <- emailPreferencesService.updateEmailPreferences(request.developerSession.developer.email, updatedFlow)
           }
 
