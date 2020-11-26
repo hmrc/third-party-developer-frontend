@@ -23,6 +23,8 @@ import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
 import domain.models.applications.ApplicationId
+import cats.Semigroup
+import cats.implicits._
 
 sealed trait FlowType extends EnumEntry
 
@@ -97,27 +99,72 @@ object EmailPreferencesFlow {
 }
 
 case class NewApplicationEmailPreferencesFlow(override val sessionId: String,
+                                              existingEmailPreferences: EmailPreferences,
                                               applicationId: ApplicationId,
                                               missingSubscriptions: Set[ApiDefinition],
                                               selectedApis: Set[ApiDefinition],
                                               selectedTopics: Set[String]) extends Flow with EmailPreferencesProducer {
   override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES
 
-  def mergeEmailPreferences(existingEmailPreferences: EmailPreferences): EmailPreferences = {
+  def optionCombine[A: Semigroup](a: A, opt: Option[A]): A = opt.map(a combine _).getOrElse(a)
+
+  def mergeMap[K, V: Semigroup](lhs: Map[K, V], rhs: Map[K, V]): Map[K, V] =
+    lhs.foldLeft(rhs) {
+      case (acc, (k, v)) => acc.updated(k, optionCombine(v, acc.get(k)))
+    }
+
+  // def mergeEmailPreferences(existingEmailPreferences: EmailPreferences): EmailPreferences = {
+  //   val existingInterests: Map[String, Set[String]] =
+  //     existingEmailPreferences.interests
+  //       .map(interests => Map(interests.regime -> interests.services))
+  //       .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
+
+  //   // Map[ServiceName -> Set[Category]]
+  //   val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.toSet)).toMap
+
+  //   // Map[Category -> Set.empty[ServiceName]]
+  //   val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap
+
+  //   val newInterests: Map[String, Set[String]] = invertedSelectedApisCategories.map(p => {
+  //     val serviceNames = selectedApisCategories.filter(p2 => p2._2.contains(p._1)).keys
+  //     val newServiceNames = p._2 ++ serviceNames
+
+  //     p._1 -> newServiceNames
+  //   })
+
+  //   val combinedInterests: Map[String, Set[String]] = mergeMap(existingInterests, newInterests)
+
+  //   val updatedTaxRegimeInterests = combinedInterests.map(i => TaxRegimeInterests(i._1, i._2)).toList
+
+  //   EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(EmailTopic.withValue))
+  // }
+
+  // TODO do we need API categories here?
+  override def toEmailPreferences: EmailPreferences = {
     val existingInterests: Map[String, Set[String]] =
       existingEmailPreferences.interests
         .map(interests => Map(interests.regime -> interests.services))
         .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
 
-
+    // Map[ServiceName -> Set[Category]]
     val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.toSet)).toMap
 
-    val updatedTaxRegimeInterests = existingEmailPreferences.interests // TODO: Merge in newly selected APIs with existing records
+    // Map[Category -> Set.empty[ServiceName]]
+    val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap
+
+    val newInterests: Map[String, Set[String]] = invertedSelectedApisCategories.map(p => {
+      val serviceNames = selectedApisCategories.filter(p2 => p2._2.contains(p._1)).keys
+      val newServiceNames = p._2 ++ serviceNames
+
+      p._1 -> newServiceNames
+    })
+
+    val combinedInterests: Map[String, Set[String]] = mergeMap(existingInterests, newInterests)
+
+    val updatedTaxRegimeInterests = combinedInterests.map(i => TaxRegimeInterests(i._1, i._2)).toList
 
     EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(EmailTopic.withValue))
   }
-
-  override def toEmailPreferences: EmailPreferences = ???
 }
 
 trait EmailPreferencesProducer {

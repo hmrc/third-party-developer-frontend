@@ -19,7 +19,9 @@ package domain.models.emailpreferences
 import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
 import play.api.libs.json.Json
 
-case class TaxRegimeInterests(regime: String, services: Set[String])
+case class TaxRegimeInterests(regime: String, services: Set[String]) {
+  def addService(serviceName: String): TaxRegimeInterests = copy(services = services ++ Set(serviceName))
+}
 
 object TaxRegimeInterests {
   implicit val format = Json.format[TaxRegimeInterests]
