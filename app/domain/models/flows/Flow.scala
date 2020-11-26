@@ -113,33 +113,6 @@ case class NewApplicationEmailPreferencesFlow(override val sessionId: String,
       case (acc, (k, v)) => acc.updated(k, optionCombine(v, acc.get(k)))
     }
 
-  // def mergeEmailPreferences(existingEmailPreferences: EmailPreferences): EmailPreferences = {
-  //   val existingInterests: Map[String, Set[String]] =
-  //     existingEmailPreferences.interests
-  //       .map(interests => Map(interests.regime -> interests.services))
-  //       .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
-
-  //   // Map[ServiceName -> Set[Category]]
-  //   val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.toSet)).toMap
-
-  //   // Map[Category -> Set.empty[ServiceName]]
-  //   val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap
-
-  //   val newInterests: Map[String, Set[String]] = invertedSelectedApisCategories.map(p => {
-  //     val serviceNames = selectedApisCategories.filter(p2 => p2._2.contains(p._1)).keys
-  //     val newServiceNames = p._2 ++ serviceNames
-
-  //     p._1 -> newServiceNames
-  //   })
-
-  //   val combinedInterests: Map[String, Set[String]] = mergeMap(existingInterests, newInterests)
-
-  //   val updatedTaxRegimeInterests = combinedInterests.map(i => TaxRegimeInterests(i._1, i._2)).toList
-
-  //   EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(EmailTopic.withValue))
-  // }
-
-  // TODO do we need API categories here?
   override def toEmailPreferences: EmailPreferences = {
     val existingInterests: Map[String, Set[String]] =
       existingEmailPreferences.interests

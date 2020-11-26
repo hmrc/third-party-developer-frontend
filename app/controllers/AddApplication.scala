@@ -31,15 +31,18 @@ import service._
 import views.helper.EnvironmentNameService
 import views.html._
 
-import scala.collection.Set
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import uk.gov.hmrc.http.HeaderCarrier
+import domain.models.connectors.ApiDefinition
+import play.api.Logger
 
 @Singleton
 class AddApplication @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
+    val emailPreferencesService: EmailPreferencesService,
     val sessionService: SessionService,
     val auditService: AuditService,
     mcc: MessagesControllerComponents,
@@ -80,32 +83,33 @@ class AddApplication @Inject() (
   def addApplicationSuccess(applicationId: ApplicationId): Action[AnyContent] = {
 
     def subscriptionsNotInUserEmailPreferences(applicationSubscriptions: Seq[APISubscriptionStatus],
-                                               userEmailPreferences: EmailPreferences): Set[String] = {
-      applicationSubscriptions
-        .map(_.serviceName)
-        .diff(userEmailPreferences.interests.flatMap(_.services))
-        .toSet
+                                               userEmailPreferences: EmailPreferences)(implicit hc: HeaderCarrier): Future[Set[String]] = {
+      emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
+        val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime)
+        val filteredApis = apiDetails.filter(api => api.categories.intersect(allInCategories).isEmpty)
+        filteredApis.map(_.serviceName).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
+      }
     }
 
     whenTeamMemberOnApp(applicationId) { implicit appRequest =>
       import appRequest._
 
-      successful(
-        deployedTo match {
-          case SANDBOX    => {
-            val alreadySelectedEmailPreferences: Boolean = request.flash.get("emailPreferencesSelected").contains("true")
-            val missingSubscriptions = subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), user.developer.emailPreferences)
+      deployedTo match {
+        case SANDBOX    => {
+          val alreadySelectedEmailPreferences: Boolean = request.flash.get("emailPreferencesSelected").contains("true")
+          subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), user.developer.emailPreferences) map { missingSubscriptions =>
 
-            if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
-              Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
-            } else {
-              Redirect(controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsPage(applicationId))
-                .flashing("missingSubscriptions" -> missingSubscriptions.mkString(","))
-            }
+          if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
+            Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
+          } else {
+            Redirect(controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsPage(applicationId))
+              .flashing("missingSubscriptions" -> missingSubscriptions.mkString(","))
           }
-          case PRODUCTION => NotFound(errorHandler.notFoundTemplate(request))
         }
-      )
+      }
+        case PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(request)))
+      }
+      
     }
   }
 
