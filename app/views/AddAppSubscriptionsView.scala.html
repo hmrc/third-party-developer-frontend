@@ -24,12 +24,27 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.State
+@import domain.models.apidefinitions.ApiContext
+@import domain.models.subscriptions.ApiData
 @import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
-@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, environment: Environment, subscriptions: Option[GroupedSubscriptions])(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
+@(
+    role: Role, 
+    data: PageData, 
+    form: Form[controllers.EditApplicationForm], 
+    app: Application, 
+    environment: Environment, 
+    subscriptions: Option[GroupedSubscriptions],
+    openAccessApis: Map[ApiContext, ApiData]
+)(
+    implicit request: play.api.mvc.Request[Any],
+    loggedIn: DeveloperSession, 
+    messages: Messages, 
+    applicationConfig: config.ApplicationConfig, 
+    environmentNameService: EnvironmentNameService
+)
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
     application.deployedTo.isProduction && (
@@ -70,7 +85,7 @@
                 <p class="panel panel-border-wide">You need admin rights to make API subscription changes.</p>
             }
 
-            @subscriptionGroups(role, groupedSubscriptions, app, API_SUBSCRIPTIONS_PAGE, app.deployedTo == PRODUCTION)
+            @subscriptionGroups(role, groupedSubscriptions, openAccessApis, app, API_SUBSCRIPTIONS_PAGE, app.deployedTo == PRODUCTION)
         }
 
         case _ => {

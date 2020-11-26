@@ -75,7 +75,7 @@ class Subscriptions @Inject() (
       request.application,
       request.user,
       (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-        manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.app.id)
+        manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.openAccessApis ,data.app.id)
       }
     )
   }
@@ -85,7 +85,7 @@ class Subscriptions @Inject() (
       request.application,
       request.user,
       (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-        addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
+        addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions, data.openAccessApis)
       }
     )
   }
@@ -94,10 +94,9 @@ class Subscriptions @Inject() (
       implicit request: ApplicationRequest[AnyContent]
   ): Future[Result] = {
     val subsData = APISubscriptions.groupSubscriptions(request.subscriptions)
-    val role = request.role
     val form = EditApplicationForm.withData(request.application)
 
-    val html = renderHtml(role, PageData(request.application, subsData), form)
+    val html = renderHtml(request.role, PageData(request.application, subsData, request.openAccessApis), form)
 
     Future.successful(Ok(html))
   }

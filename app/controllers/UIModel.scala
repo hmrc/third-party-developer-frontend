@@ -25,8 +25,9 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
+import domain.models.subscriptions.ApiData
 
-case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions])
+case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: Map[ApiContext, ApiData])
 
 case class ApplicationSummary(
     id: ApplicationId,

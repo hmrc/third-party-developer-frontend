@@ -76,6 +76,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
         EditApplicationForm.withData(productionApplicationTesting),
         ApplicationViewModel(application, false, false),
         Some(GroupedSubscriptions(Seq.empty, Seq.empty)),
+        Map.empty,
         ApplicationId(""),
         request,
         developer,
@@ -88,7 +89,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     "render for an Admin with a PRODUCTION app in ACTIVE state" in new Setup {
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData: PageData = PageData(productionApplication, None)
+      val pageData: PageData = PageData(productionApplication, None, Map.empty)
 
       val page: Html = renderPageForApplicationAndRole(productionApplication, Role.ADMINISTRATOR, pageData, request)
 
@@ -103,7 +104,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     "render for a Developer with a PRODUCTION app in ACTIVE state" in new Setup {
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData: PageData = PageData(productionApplication, None)
+      val pageData: PageData = PageData(productionApplication, None, Map.empty)
 
       val page: Html = renderPageForApplicationAndRole(productionApplication, Role.DEVELOPER, pageData, request)
 
@@ -118,7 +119,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     "render for an Admin with a PRODUCTION app in CREATED state" in new Setup {
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData: PageData = PageData(productionApplicationTesting, None)
+      val pageData: PageData = PageData(productionApplicationTesting, None, Map.empty)
 
       val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, Role.ADMINISTRATOR, pageData, request)
 
@@ -133,7 +134,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     "render for a Develolper with a PRODUCTION app in CREATED state" in new Setup {
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData: PageData = PageData(productionApplicationTesting, None)
+      val pageData: PageData = PageData(productionApplicationTesting, None, Map.empty)
 
       val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, Role.DEVELOPER, pageData, request)
 
@@ -148,7 +149,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     "render for an Admin with a PRODUCTION app in PENDING_GATEKEEPER_APPROVAL state" in new Setup {
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData: PageData = PageData(productionApplicationPendingGatekeeperApproval, None)
+      val pageData: PageData = PageData(productionApplicationPendingGatekeeperApproval, None, Map.empty)
 
       val page: Html = renderPageForApplicationAndRole(productionApplicationPendingGatekeeperApproval, Role.ADMINISTRATOR, pageData, request)
 
@@ -163,7 +164,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     "render for an Admin with a PRODUCTION app in PENDING_REQUESTER_APPROVAL state" in new Setup {
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData: PageData = PageData(productionApplicationPendingRequesterVerification, None)
+      val pageData: PageData = PageData(productionApplicationPendingRequesterVerification, None, Map.empty)
 
       val page: Html = renderPageForApplicationAndRole(productionApplicationPendingRequesterVerification, Role.ADMINISTRATOR, pageData, request)
 
@@ -178,7 +179,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     "render for an Admin with a SANDBOX app in CREATED state" in new Setup {
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData: PageData = PageData(sandboxApplicationTesting, None)
+      val pageData: PageData = PageData(sandboxApplicationTesting, None, Map.empty)
 
       val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, Role.ADMINISTRATOR, pageData, request)
 
@@ -193,7 +194,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
     "render for a Developer with a SANDBOX app in CREATED state" in new Setup {
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-      val pageData: PageData = PageData(sandboxApplicationTesting, None)
+      val pageData: PageData = PageData(sandboxApplicationTesting, None, Map.empty)
 
       val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, Role.DEVELOPER, pageData, request)
 
