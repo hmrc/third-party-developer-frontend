@@ -41,6 +41,7 @@ import views.html.emailpreferences._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import controllers.profile.EmailPreferences
+import domain.models.applications.ApplicationId
 
 class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with SessionServiceMock with ErrorHandlerMock {
 
@@ -67,14 +68,15 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     val mockEmailPreferencesSelectApiView: FlowSelectApiView = mock[FlowSelectApiView]
     val mockSelectApisFromSubscriptionsView: SelectApisFromSubscriptionsView = mock[SelectApisFromSubscriptionsView]
     val mockSelectTopicsFromSubscriptionsView: SelectTopicsFromSubscriptionsView = mock[SelectTopicsFromSubscriptionsView]
+    
     when(mockEmailPreferencesSummaryView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesUnsubscribeAllView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesStartView.apply()(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectCategoriesView.apply(*, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesFlowSelectTopicView.apply(*, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     when(mockEmailPreferencesSelectApiView.apply(*, *, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
-    when(mockSelectApisFromSubscriptionsView.apply(*, *, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
-    when(mockSelectTopicsFromSubscriptionsView.apply(*, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockSelectApisFromSubscriptionsView.apply(*, *, *[ApplicationId], *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockSelectTopicsFromSubscriptionsView.apply(*, *, *[ApplicationId])(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
     val controllerUnderTest: EmailPreferences =
       new EmailPreferences(
@@ -93,8 +95,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
         mockSelectTopicsFromSubscriptionsView
       )
 
-    val emailPreferences: emailpreferences.EmailPreferences =
-      domain.models.emailpreferences.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
+    val emailPreferences: emailpreferences.EmailPreferences = domain.models.emailpreferences.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
     val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
     val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
     val sessionId: String = "sessionId"
@@ -102,9 +103,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     val sessionNoEMailPrefences: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
     private val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] =
-      FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 
   "emailPreferencesSummaryPage" should {
@@ -337,7 +336,6 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       verifyZeroInteractions(mockEmailPreferencesFlowSelectTopicView)
     }
   }
-
 
   "flowSelectApisPage" should {
     val apiCategory = APICategoryDetails("category1", "Category 1")
