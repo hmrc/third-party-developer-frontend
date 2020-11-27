@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package mocks.service
+package domain.models.apidefinitions
 
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import service.EmailPreferencesService
-
-import scala.concurrent.Future.successful
 import domain.models.connectors.ApiDefinition
 
-trait EmailPreferencesServiceMock extends MockitoSugar with ArgumentMatchersSugar {
-  val emailPreferencesServiceMock = mock[EmailPreferencesService]
+trait ApiDefinitionTestDataHelper {
+  def apiDefinition(name: String): ApiDefinition = apiDefinition(name, Seq("category"))
 
-  def fetchAPIDetailsReturns(apis: Seq[ApiDefinition]) = {
-    when(emailPreferencesServiceMock.fetchAPIDetails(*)(*)).thenReturn(successful(apis))
-  }
+  def apiDefinition(name: String, categories: Seq[String]) = ApiDefinition(name, name, name, ApiContext(name), categories)
 }

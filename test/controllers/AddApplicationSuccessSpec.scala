@@ -34,6 +34,9 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.connectors.ApiDefinition
+import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.ApiDefinitionTestDataHelper
 
 class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
@@ -74,7 +77,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with ApiDefinitionTestDataHelper {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -126,9 +129,27 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
 
   "Add applications subordinate success page" should {
 
+    "send the user on a email preferences journey when logged in and environment is Sandbox" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+
+      // Have the lookup for subscribed apis not already in email preferences return an seq containing some api definitions
+      // so that we follow the new email preferences route through this journey.
+      fetchAPIDetailsReturns(Seq(apiDefinition("Test Api Definition")))
+      givenApplicationAction(subordinateApp, loggedInUser)
+
+      private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
+
+      status(result) shouldBe SEE_OTHER
+    }
+
     "return the page with the user is logged in and the environment is Sandbox" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+
+      // Have the lookup for subscribed apis not already in email preferences return an empty seq so that we follow
+      // the original route through this journey.
+      fetchAPIDetailsReturns(Seq.empty)
       givenApplicationAction(subordinateApp, loggedInUser)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
@@ -145,6 +166,10 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     "return the page with the user is logged in and the environment is Development" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      
+      // Have the lookup for subscribed apis not already in email preferences return an empty seq so that we follow
+      // the original route through this journey.
+      fetchAPIDetailsReturns(Seq.empty)
       givenApplicationAction(subordinateApp, loggedInUser)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
