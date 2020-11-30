@@ -42,6 +42,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import controllers.profile.EmailPreferences
 import domain.models.applications.ApplicationId
+import domain.models.flows.NewApplicationEmailPreferencesFlow
 
 class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with SessionServiceMock with ErrorHandlerMock {
 
@@ -546,6 +547,34 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       redirectLocation(result) mustBe Some(controllers.routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesService)
+    }
+  }
+
+  "selectApisFromSubscriptionsPage" should {
+    val applicationId = ApplicationId.random
+
+    "render the page correctly" in new Setup {
+      val newApplicationEmailPreferencesFlow = NewApplicationEmailPreferencesFlow(
+        loggedInDeveloper.session.sessionId,
+        loggedInDeveloper.developer.emailPreferences,
+        applicationId,
+        Set.empty,
+        Set.empty,
+        Set.empty
+      )
+
+      fetchSessionByIdReturns(sessionId, session)
+
+      when(mockEmailPreferencesService.fetchNewApplicationEmailPreferencesFlow(*, *[ApplicationId])).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
+      when(mockEmailPreferencesService.updateMissingSubscriptions(*, *[ApplicationId], *)).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
+      
+      val result: Future[Result] = controllerUnderTest.selectApisFromSubscriptionsPage(applicationId)(loggedInRequest)
+
+      status(result) mustBe OK
+      verify(mockSelectApisFromSubscriptionsView).apply(*,
+        *,
+        eqTo(applicationId),
+        eqTo(Set.empty))(*, *, *, *)
     }
   }
 }
