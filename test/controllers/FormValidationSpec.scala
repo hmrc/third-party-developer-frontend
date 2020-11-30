@@ -462,10 +462,14 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
       boundForm.globalErrors shouldBe List()
     }
 
-    val validFormData = Map("selectedApi[0]" -> "ApiOne", "applicationId" -> ApplicationId.random.value)
+    val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.value)
 
     "accept valid form" in {
       validateNoErrors(validFormData)
+    }
+
+    "accept valid form without any selected apis" in {
+      validateNoErrors(validFormData + ("selectedApis[0]" -> ""))
     }
   }
 
@@ -480,6 +484,14 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
 
     "accept valid form" in {
       validateNoErrors(validFormData)
+    }
+
+    "reject a form when now topic is supplied" in {
+      val formDataWithoutTopic = Map("applicationId" -> ApplicationId.random.value)
+      val boundForm = SelectTopicsFromSubscriptionsForm.form.bind(formDataWithoutTopic)
+      val err = boundForm.errors.head
+      err.key shouldBe "topic"
+      err.messages shouldBe List("error.selectedtopics.nonselected.field")
     }
   }
 }
