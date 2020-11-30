@@ -30,7 +30,6 @@ class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with
     val category1Apis = Set("api1", "api2")
     val category2Apis =  Set("api3", "api2", "api4")
     val emailPreferences = EmailPreferences(List(TaxRegimeInterests(category1, category1Apis), TaxRegimeInterests(category2, category2Apis)), Set(EmailTopic.TECHNICAL))
-    val emailPreferencesWithAllApis = EmailPreferences(List(TaxRegimeInterests(category1, Set.empty)), Set(EmailTopic.TECHNICAL))
 
     val applicationId = ApplicationId.random
     val sessionId = "sessionId"
