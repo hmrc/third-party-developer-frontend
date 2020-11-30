@@ -486,7 +486,6 @@ object SelectApisFromSubscriptionsForm {
     if (Option(s).isDefined) Invalid(message) else Valid
   }
 
-
   def form: Form[SelectApisFromSubscriptionsForm] = Form(mapping("selectedApi" -> seq(text), "applicationId" -> of[ApplicationId])
   (SelectApisFromSubscriptionsForm.apply)(SelectApisFromSubscriptionsForm.unapply)
     .verifying(
@@ -513,7 +512,10 @@ object SelectTopicsFromSubscriptionsForm {
     if (o.nonEmpty) Valid else Invalid(ValidationError(FormKeys.selectedTopicsNonSelectedKey))
   }
 
-  def form: Form[SelectTopicsFromSubscriptionsForm] = Form(mapping(
-    "topic" -> seq(text).verifying(nonEmptyList), "applicationId" -> of[ApplicationId])
-  (SelectTopicsFromSubscriptionsForm.apply)(SelectTopicsFromSubscriptionsForm.unapply))
+  def form: Form[SelectTopicsFromSubscriptionsForm] = Form(
+    mapping(
+      "topic" -> seq(text).verifying(nonEmptyList),
+      "applicationId" -> of[ApplicationId]
+    )(SelectTopicsFromSubscriptionsForm.apply)(SelectTopicsFromSubscriptionsForm.unapply)
+  )
 }
