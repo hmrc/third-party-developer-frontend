@@ -16,7 +16,8 @@
 
 package views.emailpreferences
 
-import controllers.SelectedTopicsEmailPreferencesForm
+import controllers.SelectTopicsFromSubscriptionsForm
+import domain.models.applications.ApplicationId
 import domain.models.developers.LoggedInState
 import domain.models.emailpreferences.EmailTopic
 import domain.models.emailpreferences.EmailTopic.{BUSINESS_AND_POLICY, EVENT_INVITES}
@@ -29,8 +30,6 @@ import views.helper.CommonViewSpec
 import views.html.emailpreferences.SelectTopicsFromSubscriptionsView
 
 import scala.collection.JavaConverters._
-import controllers.SelectTopicsFromSubscriptionsForm
-import domain.models.applications.ApplicationId
 
 class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -92,16 +91,22 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRF
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
     }
 
-    // "render the topics selection Page with boxes selected when user selected topics passed to the view" in new Setup {
-    //   val usersTopics = Set(BUSINESS_AND_POLICY.value, EVENT_INVITES.value)
-    //   val page =
-    //     viewUnderTest.render(
-    //       SelectedTopicsEmailPreferencesForm.form, usersTopics, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
-    //   val document = Jsoup.parse(page.body)
-    //   validateStaticElements(document)
+     "render the topics selection Page with boxes selected when user selected topics passed to the view" in new Setup {
+       val usersTopics = Set(BUSINESS_AND_POLICY.value, EVENT_INVITES.value)
+       val page =
+         viewUnderTest.render(
+           SelectTopicsFromSubscriptionsForm.form,
+           usersTopics,
+           applicationId,
+           messagesProvider.messages,
+           developerSessionWithoutEmailPreferences,
+           request,
+           appConfig)
+       val document = Jsoup.parse(page.body)
+       validateStaticElements(document, applicationId)
 
-    //   val selectedBoxes = document.select("input[type=checkbox][checked]").asScala.toList
-    //   selectedBoxes.map(_.attr("value")) should contain allElementsOf usersTopics
-    // }
+       val selectedBoxes = document.select("input[type=checkbox][checked]").asScala.toList
+       selectedBoxes.map(_.attr("value")) should contain allElementsOf usersTopics
+     }
   }
 }

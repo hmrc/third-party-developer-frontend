@@ -16,12 +16,12 @@
 
 package views.emailpreferences
 
-import controllers.{FormKeys, SelectedApisEmailPreferencesForm}
+import controllers.{FormKeys, SelectApisFromSubscriptionsForm}
 import domain.models.apidefinitions.ApiContext
+import domain.models.applications.ApplicationId
 import domain.models.connectors.ApiDefinition
 import domain.models.developers.{DeveloperSession, LoggedInState}
-import domain.models.emailpreferences.APICategoryDetails
-import domain.models.flows.EmailPreferencesFlow
+import domain.models.flows.NewApplicationEmailPreferencesFlow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.data.{Form, FormError}
@@ -33,9 +33,6 @@ import views.helper.CommonViewSpec
 import views.html.emailpreferences.SelectApisFromSubscriptionsView
 
 import scala.collection.JavaConverters._
-import controllers.SelectApisFromSubscriptionsForm
-import domain.models.flows.NewApplicationEmailPreferencesFlow
-import domain.models.applications.ApplicationId
 
 class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -44,7 +41,6 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
       utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)
     }
     val form = mock[Form[SelectApisFromSubscriptionsForm]]
-    val currentCategory = APICategoryDetails("CATEGORY1", "Category 1")
     val apis = Set("api1", "api2")
     val applicationId = ApplicationId.random
     val newApplicationEmailPreferencesFlow = NewApplicationEmailPreferencesFlow(
@@ -102,7 +98,9 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
       when(form.errors).thenReturn(Seq.empty)
       when(form.errors(any[String])).thenReturn(Seq.empty)
 
-      val page: Html = viewUnderTest.render(form, missingAPIs, applicationId, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+      val page: Html =
+        viewUnderTest.render(
+          form, missingAPIs, applicationId, Set.empty, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
       
       val document: Document = Jsoup.parse(page.body)
       validateStaticElements(document, missingAPIs, applicationId)
@@ -110,37 +108,43 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
       document.select("input[type=checkbox][checked]").asScala.toList shouldBe List.empty
     }
 
-    // "render the api selection Page with user selected apis passed to the view" in new Setup {
-    //   // Missing APIs = some, Selected APIs = some
-    //   when(form.errors).thenReturn(Seq.empty)
-    //   when(form.errors(any[String])).thenReturn(Seq.empty)
+     "render the api selection Page with user selected apis passed to the view" in new Setup {
+       when(form.errors).thenReturn(Seq.empty)
+       when(form.errors(any[String])).thenReturn(Seq.empty)
 
-    //   val selectedApis = emailpreferencesFlow.selectedAPIs.get(currentCategory.category).getOrElse(Set.empty)
-      
-    //   val page: Html = viewUnderTest.render(form,  currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+       val selectedAPIs = Set("api1")
+
+       val page: Html =
+         viewUnderTest.render(
+           form, missingAPIs, applicationId, selectedAPIs, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
      
-    //   val document: Document = Jsoup.parse(page.body)
-    //   validateStaticElements(document, apiList, currentCategory)
-    //   Option(document.getElementById("error-summary-display")).isDefined shouldBe false
-    //   val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
+       val document: Document = Jsoup.parse(page.body)
+       validateStaticElements(document, missingAPIs, applicationId)
+       Option(document.getElementById("error-summary-display")).isDefined shouldBe false
 
-    //   selectedBoxes.map(_.attr("value")) should contain allElementsOf userApis
-    // }
+       val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
+       selectedBoxes.map(_.attr("value")) should contain allElementsOf selectedAPIs
+     }
 
-    // "render the form errors on the page when they exist" in new Setup {
-    //   when(form.errors).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
-    //   when(form.errors(any[String])).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
+     "render the form errors on the page when they exist" in new Setup {
+       when(form.errors).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
+       when(form.errors(any[String])).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
 
-    //   val selectedApis = emailpreferencesFlow.selectedAPIs.get(currentCategory.category).getOrElse(Set.empty)
-      
-    //   val page: Html = viewUnderTest.render(form,  currentCategory, apiList, selectedApis, messagesProvider.messages, developerSessionWithoutEmailPreferences, request, appConfig)
+       val page: Html =
+         viewUnderTest.render(
+           form,
+           missingAPIs,
+           applicationId,
+           Set.empty,
+           messagesProvider.messages,
+           developerSessionWithoutEmailPreferences,
+           request,
+           appConfig)
      
-    //   val document: Document = Jsoup.parse(page.body)
-    //   validateStaticElements(document, apiList, currentCategory)
-    //   Option(document.getElementById("error-summary-display")).isDefined shouldBe true
-    //   val selectedBoxes: Seq[Element] = document.select("input[type=checkbox][checked]").asScala.toList
+       val document: Document = Jsoup.parse(page.body)
+       validateStaticElements(document, missingAPIs, applicationId)
 
-    //   selectedBoxes.map(_.attr("value")) should contain allElementsOf userApis
-    // }
+       Option(document.getElementById("error-summary-display")).isDefined shouldBe true
+     }
   }
 }
