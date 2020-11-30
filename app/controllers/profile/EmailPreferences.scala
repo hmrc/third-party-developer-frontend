@@ -280,14 +280,9 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         selectedTopicsForm =>
           for {
             flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
-            updatedFlow = flow.copy(selectedTopics = selectedTopicsForm.topic.toSet)
-            savedEmailPreferences <- emailPreferencesService.updateEmailPreferences(request.developerSession.developer.email, updatedFlow)
-          }
-
-          emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
-          emailPreferencesService.deleteFlow(request.developerSession.session.sessionId, FlowType.NEW_APPLICATION_EMAIL_PREFERENCES).map(_ => 
-            Redirect(controllers.routes.AddApplication.addApplicationSuccess(applicationId)).flashing("emailPreferencesSelected" -> "true")
-          )
+            _ <- emailPreferencesService.updateEmailPreferences(request.developerSession.developer.email, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
+            _ <- emailPreferencesService.deleteFlow(request.developerSession.session.sessionId, FlowType.NEW_APPLICATION_EMAIL_PREFERENCES)
+          } yield Redirect(controllers.routes.AddApplication.addApplicationSuccess(applicationId)).flashing("emailPreferencesSelected" -> "true")
       }
     )
   }
