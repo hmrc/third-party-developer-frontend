@@ -32,7 +32,7 @@ import scala.collection.JavaConverters._
 import controllers.SelectTopicsFromSubscriptionsForm
 import domain.models.applications.ApplicationId
 
-class FlowSelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAddToken {
+class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
     val developerSessionWithoutEmailPreferences =

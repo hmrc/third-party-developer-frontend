@@ -37,7 +37,7 @@ import controllers.SelectApisFromSubscriptionsForm
 import domain.models.flows.NewApplicationEmailPreferencesFlow
 import domain.models.applications.ApplicationId
 
-class FlowSelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAddToken {
+class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
   trait Setup {
     val developerSessionWithoutEmailPreferences: DeveloperSession = {
