@@ -571,10 +571,41 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       val result: Future[Result] = controllerUnderTest.selectApisFromSubscriptionsPage(applicationId)(loggedInRequest)
 
       status(result) mustBe OK
-      verify(mockSelectApisFromSubscriptionsView).apply(*,
+      verify(mockSelectApisFromSubscriptionsView).apply(
+        *,
         *,
         eqTo(applicationId),
         eqTo(Set.empty))(*, *, *, *)
+    }
+  }
+
+  "selectTopicsFromSubscriptionsPage" should {
+    val applicationId = ApplicationId.random
+
+    "render the page correctly" in new Setup {
+      val newApplicationEmailPreferencesFlow = NewApplicationEmailPreferencesFlow(
+        loggedInDeveloper.session.sessionId,
+        loggedInDeveloper.developer.emailPreferences,
+        applicationId,
+        Set.empty,
+        Set.empty,
+        Set.empty
+      )
+
+      fetchSessionByIdReturns(sessionId, session)
+
+      when(mockEmailPreferencesService.fetchNewApplicationEmailPreferencesFlow(*, *[ApplicationId])).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
+      when(mockEmailPreferencesService.updateEmailPreferences(eqTo(developer.email), *)(*)).thenReturn(Future.successful(true))
+      // when(mockEmailPreferencesService.updateMissingSubscriptions(*, *[ApplicationId], *)).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
+      
+      val result: Future[Result] = controllerUnderTest.selectTopicsFromSubscriptionsPage(applicationId)(loggedInRequest)
+
+      status(result) mustBe OK
+      verify(mockSelectTopicsFromSubscriptionsView).apply(
+        *,
+        eqTo(Set.empty),
+        eqTo(applicationId)
+      )(*, *, *, *)
     }
   }
 }
