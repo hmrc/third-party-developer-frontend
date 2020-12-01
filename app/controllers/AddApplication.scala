@@ -69,8 +69,7 @@ class AddApplication @Inject() (
 
   def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(accessTokenSwitchView())) }
 
-  def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] =
-    loggedInAction { implicit request => successful(Ok(usingPrivilegedApplicationCredentialsView())) }
+  def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(usingPrivilegedApplicationCredentialsView())) }
 
   def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(tenDaysWarningView())) }
 
