@@ -19,7 +19,7 @@ package controllers.profile
 import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import domain.models.applications.ApplicationId
-import domain.models.connectors.ApiDefinition
+import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 import domain.models.emailpreferences.APICategoryDetails
 import domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlow}
 import javax.inject.Inject
@@ -193,7 +193,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def toDataObject(emailPreferences: domain.models.emailpreferences.EmailPreferences,
-                   filteredAPIs: Seq[ApiDefinition],
+                   filteredAPIs: Seq[ExtendedApiDefinition],
                    categories: Seq[APICategoryDetails],
                    unsubscribed: Boolean): EmailPreferencesSummaryViewData =
     EmailPreferencesSummaryViewData(
@@ -212,8 +212,8 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
    * have within their Email Preferences will not be shown.
    */
   def selectApisFromSubscriptionsPage(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    def missingAPIsFromFlash: Future[Seq[ApiDefinition]] = {
-      request.flash.data.get("missingSubscriptions").fold[Future[Seq[ApiDefinition]]](
+    def missingAPIsFromFlash: Future[Seq[ExtendedApiDefinition]] = {
+      request.flash.data.get("missingSubscriptions").fold[Future[Seq[ExtendedApiDefinition]]](
         successful(Seq.empty)
       )(missingSubscriptionsCSV =>
         emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet)

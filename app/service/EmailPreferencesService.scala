@@ -19,7 +19,7 @@ package service
 import cats.data.NonEmptyList
 import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import domain.models.applications.ApplicationId
-import domain.models.connectors.ApiDefinition
+import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 import domain.models.developers.DeveloperSession
 import domain.models.emailpreferences.APICategoryDetails
 import domain.models.flows.{EmailPreferencesFlow, EmailPreferencesProducer, FlowType, NewApplicationEmailPreferencesFlow}
@@ -59,7 +59,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
   def apiCategoryDetails(category: String)(implicit hc: HeaderCarrier): Future[Option[APICategoryDetails]] =
     fetchAllAPICategoryDetails().map(_.find(_.category == category))
 
-  def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] =
+  def fetchAPIDetails(apiServiceNames: Set[String])(implicit hc: HeaderCarrier): Future[Seq[ExtendedApiDefinition]] =
     Future.sequence(
       apiServiceNames
         .map(apmConnector.fetchAPIDefinition(_))
@@ -109,7 +109,7 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
 
   def updateMissingSubscriptions(developerSession: DeveloperSession,
                                  applicationId: ApplicationId,
-                                 missingSubscriptions: Set[ApiDefinition]): Future[NewApplicationEmailPreferencesFlow] = {
+                                 missingSubscriptions: Set[ExtendedApiDefinition]): Future[NewApplicationEmailPreferencesFlow] = {
     for {
       existingFlow  <- fetchNewApplicationEmailPreferencesFlow(developerSession, applicationId)
       savedFlow     <- flowRepository.saveFlow[NewApplicationEmailPreferencesFlow](existingFlow.copy(missingSubscriptions = missingSubscriptions))
