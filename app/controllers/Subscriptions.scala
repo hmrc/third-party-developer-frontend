@@ -101,10 +101,10 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
   }
 
   private def redirect(redirectTo: String, applicationId: ApplicationId) = SubscriptionRedirect.withNameOption(redirectTo) match {
-    case Some(MANAGE_PAGE) => Redirect(routes.Details.details(applicationId))
+    case Some(MANAGE_PAGE)            => Redirect(routes.Details.details(applicationId))
     case Some(APPLICATION_CHECK_PAGE) => Redirect(controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
     case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.Subscriptions.manageSubscriptions(applicationId))
-    case None => Redirect(routes.Details.details(applicationId))
+    case None                         => Redirect(routes.Details.details(applicationId))
   }
 
   def changeApiSubscription(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
@@ -206,7 +206,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
 
       def handleValidForm(subscribed: Boolean)(form: ChangeSubscriptionConfirmationForm) = form.confirm match {
         case Some(true) => requestChangeSubscription(subscribed)
-        case _ => Future.successful(redirect(redirectTo, applicationId))
+        case _          => Future.successful(redirect(redirectTo, applicationId))
       }
 
       def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
@@ -245,7 +245,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     app.deployedTo match {
       case Environment.PRODUCTION =>
         applicationService.updateCheckInformation(app, app.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionsConfirmed = false))
-      case _ => Future.successful(())
+      case _                      => Future.successful(())
     }
   }
 }
