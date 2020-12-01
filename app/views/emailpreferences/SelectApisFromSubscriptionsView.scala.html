@@ -16,14 +16,14 @@
 
 @import domain.models.developers.DeveloperSession
 @import include._
-@import domain.models.connectors.ApiDefinition
+@import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 @import domain.models.views.BackButtonWithJavaScript
 @import config.ApplicationConfig
 @import domain.models.applications.ApplicationId
 
 @this(devMain: DevMain)
 
-@(form: Form[SelectApisFromSubscriptionsForm], apis: List[ApiDefinition], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
+@(form: Form[SelectApisFromSubscriptionsForm], apis: List[ExtendedApiDefinition], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
 
 @pageHeading = @{
     "Do you want to receive emails about the APIs you have subscribed to?"

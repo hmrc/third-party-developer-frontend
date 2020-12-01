@@ -10,6 +10,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
+import domain.models.connectors.ExtendedApiDefinition
 
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -54,7 +55,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
           val serviceName = "api1"
           val name = "API 1"
          extendedAPIDefinitionByServiceName(serviceName, s"""{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context", "categories": [ "VAT" ] }""")
-         val result: ApiDefinition = await(underTest.fetchAPIDefinition("api1"))
+         val result: ExtendedApiDefinition = await(underTest.fetchAPIDefinition("api1"))
          result.serviceName shouldBe serviceName
          result.name shouldBe name
       }

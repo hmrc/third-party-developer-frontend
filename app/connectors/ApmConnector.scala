@@ -19,7 +19,7 @@ package connectors
 import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
 import domain.models.applications._
-import domain.models.connectors.{AddTeamMemberRequest, ApiDefinition}
+import domain.models.connectors.{AddTeamMemberRequest, ApiDefinition, ExtendedApiDefinition}
 import domain.models.emailpreferences.APICategoryDetails
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import domain.models.subscriptions.{ApiData, FieldName}
@@ -64,8 +64,8 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   def fetchAllAPICategories()(implicit  hc: HeaderCarrier): Future[Seq[APICategoryDetails]] =
     http.GET[Seq[APICategoryDetails]](s"${config.serviceBaseUrl}/api-categories")
 
-  def fetchAPIDefinition(serviceName: String)(implicit hc: HeaderCarrier): Future[ApiDefinition] =
-    http.GET[ApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
+  def fetchAPIDefinition(serviceName: String)(implicit hc: HeaderCarrier): Future[ExtendedApiDefinition] =
+    http.GET[ExtendedApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
 
   def fetchApiDefinitionsVisibleToUser(userEmail: String)(implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] =
     http.GET[Seq[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("collaboratorEmail" -> userEmail))

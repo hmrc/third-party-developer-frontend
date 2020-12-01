@@ -20,10 +20,10 @@ import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Ses
 import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import org.scalatest.{Matchers, WordSpec}
 import domain.models.applications.ApplicationId
-import domain.models.connectors.ApiDefinition
-import domain.models.apidefinitions.ApiDefinitionTestDataHelper
+import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
+import domain.models.connectors.ExtendedApiDefinition
 
-class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with ApiDefinitionTestDataHelper {
+class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with ExtendedApiDefinitionTestDataHelper {
 
     val category1 = "CATEGORY_1"
     val category2 = "CATEGORY_2"
@@ -40,15 +40,15 @@ class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with
         DeveloperSession(session)
     }
 
-    def newApplicationEmailPreferencesFlow(selectedApis: Set[ApiDefinition], selectedTopics: Set[String]): NewApplicationEmailPreferencesFlow = {
+    def newApplicationEmailPreferencesFlow(selectedApis: Set[ExtendedApiDefinition], selectedTopics: Set[String]): NewApplicationEmailPreferencesFlow = {
         NewApplicationEmailPreferencesFlow(sessionId, emailPreferences, applicationId, Set.empty, selectedApis, selectedTopics)
     }
 
     "NewApplicationEmailPreferencesFlow" when {
         "toEmailPreferences" should {
             "map to email preferences correctly" in {
-                val newApiInExistingCategory = apiDefinition("new-api", Seq(category1))
-                val newApiInNewCategory = apiDefinition("new-api-2", Seq("CATEGORY_3"))
+                val newApiInExistingCategory = extendedApiDefinition("new-api", Seq(category1))
+                val newApiInNewCategory = extendedApiDefinition("new-api-2", Seq("CATEGORY_3"))
 
                 val selectedTopics = Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY)
 

@@ -43,6 +43,7 @@ import scala.concurrent.Future
 import controllers.profile.EmailPreferences
 import domain.models.applications.ApplicationId
 import domain.models.flows.NewApplicationEmailPreferencesFlow
+import domain.models.connectors.ExtendedApiDefinition
 
 class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with SessionServiceMock with ErrorHandlerMock {
 
@@ -114,7 +115,10 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     val api1: ApiDefinition = ApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"), Seq("INCOME_TAX"))
     val api2: ApiDefinition = ApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"), Seq("VAT"))
     val apis: Set[String] = Set(api1.serviceName, api2.serviceName)
-    val fetchedAPis: Seq[ApiDefinition] = Seq(api1, api2)
+
+    val extendedApiOne: ExtendedApiDefinition = ExtendedApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"), Seq("INCOME_TAX"))
+    val extendedApiTwo: ExtendedApiDefinition = ExtendedApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"), Seq("VAT"))
+    val fetchedAPis: Seq[ExtendedApiDefinition] = Seq(extendedApiOne, extendedApiTwo)
 
     "return emailPreferencesSummaryView page for logged in user" in new Setup {
       val expectedCategoryMap: Map[String, String] = Map("CATEGORY_1" -> "Category 1")

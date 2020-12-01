@@ -17,9 +17,8 @@
 package service
 
 import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
-import domain.models.apidefinitions.ApiDefinitionTestDataHelper
+import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 import domain.models.applications.ApplicationId
-import domain.models.connectors.ApiDefinition
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.emailpreferences.{APICategoryDetails, EmailPreferences, EmailTopic, TaxRegimeInterests}
 import domain.models.flows.{EmailPreferencesFlow, FlowType, NewApplicationEmailPreferencesFlow}
@@ -29,6 +28,7 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import domain.models.connectors.ExtendedApiDefinition
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
@@ -41,7 +41,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
   val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
   val applicationId = ApplicationId.random
 
-  trait SetUp extends ApiDefinitionTestDataHelper {
+  trait SetUp extends ExtendedApiDefinitionTestDataHelper {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val mockFlowRepository = mock[FlowRepository]
     val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
@@ -103,7 +103,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
     "fetchNewApplicationEmailPreferencesFlow" should {
       "call the flow repository correctly and return flow when repository returns data" in new SetUp {
         val flowObject =
-          NewApplicationEmailPreferencesFlow(sessionId, emailPreferences, applicationId, Set(apiDefinition("Test Api Definition")), Set.empty, Set("TECHNICAL"))
+          NewApplicationEmailPreferencesFlow(sessionId, emailPreferences, applicationId, Set(extendedApiDefinition("Test Api Definition")), Set.empty, Set("TECHNICAL"))
         when(mockFlowRepository.fetchBySessionIdAndFlowType[NewApplicationEmailPreferencesFlow](eqTo(sessionId), eqTo(FlowType.NEW_APPLICATION_EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(Some(flowObject)))
         val result = await(underTest.fetchNewApplicationEmailPreferencesFlow(loggedInDeveloper, applicationId))
         result shouldBe flowObject
@@ -151,8 +151,8 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       val apiServiceName1 = "service-1"
       val apiServiceName2 = "service-2"
 
-      val apiDetails1 = mock[ApiDefinition]
-      val apiDetails2 = mock[ApiDefinition]
+      val apiDetails1 = mock[ExtendedApiDefinition]
+      val apiDetails2 = mock[ExtendedApiDefinition]
 
       "return details of APIs by serviceName" in new SetUp {
         when(mockApmConnector.fetchAPIDefinition(eqTo(apiServiceName1))(*)).thenReturn(Future.successful(apiDetails1))
@@ -171,9 +171,9 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
     "updateNewApplicationSelectedApis" should {
       "persist changes to flow object" in new SetUp {
         val api1Name = "first-api"
-        val api1 = mock[ApiDefinition]
+        val api1 = mock[ExtendedApiDefinition]
         val api2Name = "second-api"
-        val api2 = mock[ApiDefinition]
+        val api2 = mock[ExtendedApiDefinition]
 
         val existingFlowObject =
           NewApplicationEmailPreferencesFlow(sessionId, EmailPreferences.noPreferences, applicationId, Set(api1, api2), Set.empty, Set.empty)

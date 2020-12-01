@@ -36,7 +36,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import domain.models.connectors.ApiDefinition
 import domain.models.apidefinitions.ApiContext
-import domain.models.apidefinitions.ApiDefinitionTestDataHelper
+import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 
 class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
 
@@ -77,7 +77,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with ApiDefinitionTestDataHelper {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with ExtendedApiDefinitionTestDataHelper {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -135,7 +135,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
 
       // Have the lookup for subscribed apis not already in email preferences return an seq containing some api definitions
       // so that we follow the new email preferences route through this journey.
-      fetchAPIDetailsReturns(Seq(apiDefinition("Test Api Definition")))
+      fetchAPIDetailsReturns(Seq(extendedApiDefinition("Test Api Definition")))
       givenApplicationAction(subordinateApp, loggedInUser)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)

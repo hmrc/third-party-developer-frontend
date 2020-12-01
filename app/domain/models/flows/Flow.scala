@@ -16,7 +16,7 @@
 
 package domain.models.flows
 
-import domain.models.connectors.ApiDefinition
+import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 import domain.models.developers.DeveloperSession
 import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
@@ -101,8 +101,8 @@ object EmailPreferencesFlow {
 case class NewApplicationEmailPreferencesFlow(override val sessionId: String,
                                               existingEmailPreferences: EmailPreferences,
                                               applicationId: ApplicationId,
-                                              missingSubscriptions: Set[ApiDefinition],
-                                              selectedApis: Set[ApiDefinition],
+                                              missingSubscriptions: Set[ExtendedApiDefinition],
+                                              selectedApis: Set[ExtendedApiDefinition],
                                               selectedTopics: Set[String]) extends Flow with EmailPreferencesProducer {
   override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES
 

@@ -19,7 +19,7 @@ package views.emailpreferences
 import controllers.{FormKeys, SelectApisFromSubscriptionsForm}
 import domain.models.apidefinitions.ApiContext
 import domain.models.applications.ApplicationId
-import domain.models.connectors.ApiDefinition
+import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
 import domain.models.developers.{DeveloperSession, LoggedInState}
 import domain.models.flows.NewApplicationEmailPreferencesFlow
 import org.jsoup.Jsoup
@@ -56,7 +56,7 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
     val viewUnderTest: SelectApisFromSubscriptionsView = app.injector.instanceOf[SelectApisFromSubscriptionsView]
   }
 
-  private def validateCheckboxItemsAgainstApis(document: Document, apis: List[ApiDefinition]) = {
+  private def validateCheckboxItemsAgainstApis(document: Document, apis: List[ExtendedApiDefinition]) = {
     apis.foreach(api => {
       val checkbox = document.getElementById(api.serviceName)
       checkbox.attr("name") shouldBe "selectedApi[]"
@@ -70,7 +70,7 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
     })
   }
 
-  def validateStaticElements(document: Document, apis: List[ApiDefinition], applicationId: ApplicationId) {
+  def validateStaticElements(document: Document, apis: List[ExtendedApiDefinition], applicationId: ApplicationId) {
     document.getElementById("pageHeading").text() should be("Do you want to receive emails about the APIs you have subscribed to?")
     document.getElementById("select-all-description").text() should be("Select all that apply.")
 
@@ -89,9 +89,9 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
   }
 
   "New Application Email Preferences Select Api view page" should {
-    val missingAPIs = List(ApiDefinition("api1", "Api One", "api1Desc", ApiContext("api1context"), Seq("category1", "category2")),
-      ApiDefinition("api2", "Api Two", "api2Desc", ApiContext("api2context"), Seq("category2", "category4")),
-      ApiDefinition("api3", "Api Three", "api3Desc", ApiContext("api3context"), Seq("category3", "category2")))
+    val missingAPIs = List(ExtendedApiDefinition("api1", "Api One", "api1Desc", ApiContext("api1context"), Seq("category1", "category2")),
+      ExtendedApiDefinition("api2", "Api Two", "api2Desc", ApiContext("api2context"), Seq("category2", "category4")),
+      ExtendedApiDefinition("api3", "Api Three", "api3Desc", ApiContext("api3context"), Seq("category3", "category2")))
 
     "render the api selection page with APIs that are missing from user's email preferences" in new Setup {
       // Missing APIs = some, Selected APIs = none
