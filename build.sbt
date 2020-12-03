@@ -33,7 +33,7 @@ lazy val compile = Seq(
   "uk.gov.hmrc" %% "bootstrap-play-26" % "1.16.0",
   "uk.gov.hmrc" %% "time" % "3.9.0",
   "uk.gov.hmrc" %% "simple-reactivemongo" % "7.30.0-play-26",
-  "uk.gov.hmrc" %% "govuk-template" % "5.55.0-play-26",
+  "uk.gov.hmrc" %% "govuk-template" % "5.57.0-play-26",
   "uk.gov.hmrc" %% "play-ui" % "8.11.0-play-26",
   "uk.gov.hmrc" %% "url-builder" % "3.4.0-play-26",
   "uk.gov.hmrc" %% "play-json-union-formatter" % "1.11.0",
