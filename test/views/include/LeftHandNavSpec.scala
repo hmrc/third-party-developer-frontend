@@ -79,7 +79,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         elementExistsByText(document, "a", "Delete application") shouldBe true
       }
 
-      "display server token link for old apps" in new Setup {
+      "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
         val page = leftHandNavView.render(Some(oldAppWithoutSubsFields), Some("details"), request, loggedInUser, appConfig)
@@ -87,7 +87,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
-        elementExistsByText(document, "a", "Server token") shouldBe true
+        elementExistsByText(document, "a", "Server token") shouldBe false
       }
     }
 
@@ -108,7 +108,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         elementExistsByText(document, "a", "Delete application") shouldBe true
       }
 
-      "display server token link for old apps" in new Setup {
+      "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
         val page = leftHandNavView.render(Some(oldAppWithSubsFields), Some("details"), request, loggedInUser, appConfig)
@@ -116,7 +116,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
-        elementExistsByText(document, "a", "Server token") shouldBe true
+        elementExistsByText(document, "a", "Server token") shouldBe false
       }
     }
 

@@ -32,25 +32,25 @@ def findOutOfDateDependencies(dependencies):
     return outOfDateDependencies
 
 def reportOnDependencies(dependencyType, dependencies):
-    print dependencyType + " to upgrade:"
+    print (dependencyType + " to upgrade:")
     outOfDateDependencies = findOutOfDateDependencies(dependencies)
     if len(outOfDateDependencies) > 0:
         for i in range(len(outOfDateDependencies)):
             dependency = outOfDateDependencies[i]
-            print '    \033[38;5;15m\033[48;5;1m{} {}.{}.{} -> {}.{}.{}\033[39;49m'.format(
+            print ('    \033[38;5;15m\033[48;5;1m{} {}.{}.{} -> {}.{}.{}\033[39;49m'.format(
                 dependency['name'],
                 dependency['currentVersion']['major'],
                 dependency['currentVersion']['minor'],
                 dependency['currentVersion']['patch'],
                 dependency['latestVersion']['major'],
                 dependency['latestVersion']['minor'],
-                dependency['latestVersion']['patch'])
+                dependency['latestVersion']['patch']))
     else:
-        print '\033[38;5;2m    No upgrades required\033[39;49m'
+        print ('\033[38;5;2m    No upgrades required\033[39;49m')
 
 
 def generateReport(repositoryName):
-    print 'Generating dependency report for {}...'.format(repositoryName)
+    print ('Generating dependency report for {}...'.format(repositoryName))
     dependencies = fetchDependencies(repositoryName)
 
     reportOnDependencies('Libraries', dependencies['libraryDependencies'])
@@ -66,4 +66,4 @@ if __name__ == "__main__":
     if 'CATALOGUE_DEPENDENCIES_URL' in os.environ:
         generateReport(getRepoName())
     else:
-        print 'CATALOGUE_DEPENDENCIES_URL environment variable not set - cannot generate dependency report'
+        print ('CATALOGUE_DEPENDENCIES_URL environment variable not set - cannot generate dependency report')
