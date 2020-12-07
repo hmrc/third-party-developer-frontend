@@ -21,15 +21,17 @@ import org.joda.time.DateTime
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.play.json.Union
-import domain.models.flows.EmailPreferencesFlow
+import domain.models.flows.{EmailPreferencesFlow, NewApplicationEmailPreferencesFlow}
 import domain.models.flows.FlowType
 
 object ReactiveMongoFormatters {
   implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats
   implicit val formatIpAllowlistFlow: OFormat[IpAllowlistFlow] = Json.format[IpAllowlistFlow]
   implicit val formatEmailPreferencesFlow: OFormat[EmailPreferencesFlow] = Json.format[EmailPreferencesFlow]
+  implicit val formatNewApplicationEmailPreferencesFlow: OFormat[NewApplicationEmailPreferencesFlow] = Json.format[NewApplicationEmailPreferencesFlow]
   implicit val formatFlow: Format[Flow] = Union.from[Flow]("flowType")
     .and[IpAllowlistFlow](FlowType.IP_ALLOW_LIST.toString())
     .and[EmailPreferencesFlow](FlowType.EMAIL_PREFERENCES.toString())
+    .and[NewApplicationEmailPreferencesFlow](FlowType.NEW_APPLICATION_EMAIL_PREFERENCES.toString())
     .format
 }

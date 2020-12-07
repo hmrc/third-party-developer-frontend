@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.connectors.AddTeamMemberRequest
 
 @Singleton
 class ApplicationService @Inject() (
@@ -150,7 +151,7 @@ class ApplicationService @Inject() (
   }
 
   def addTeamMember(app: Application, requestingEmail: String, teamMember: Collaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val request = domain.models.connectors.AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
+    val request = AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
     apmConnector.addTeamMember(app.id, request)
   }
 

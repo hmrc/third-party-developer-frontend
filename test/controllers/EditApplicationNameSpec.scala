@@ -64,7 +64,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
 
   val tokens: ApplicationToken = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -80,6 +80,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
       mock[ErrorHandler],
       applicationServiceMock,
       applicationActionServiceMock,
+      emailPreferencesServiceMock,
       sessionServiceMock,
       mock[AuditService],
       mcc,

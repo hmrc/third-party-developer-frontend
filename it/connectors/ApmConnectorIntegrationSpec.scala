@@ -3,13 +3,14 @@ package connectors
 import java.net.URLEncoder
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
+import domain.models.connectors.ApiDefinition
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
+import domain.models.connectors.ExtendedApiDefinition
 
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -50,10 +51,10 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
   }
 
   "fetchAPIDefinition" should {
-      "retrieve an ExtendedApiDefinition based on a serviceName" in new Setup {
+      "retrieve an ApiDefinition based on a serviceName" in new Setup {
           val serviceName = "api1"
           val name = "API 1"
-         extendedAPIDefinitionByServiceName(serviceName, s"""{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context" }""")
+         extendedAPIDefinitionByServiceName(serviceName, s"""{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context", "categories": [ "VAT" ] }""")
          val result: ExtendedApiDefinition = await(underTest.fetchAPIDefinition("api1"))
          result.serviceName shouldBe serviceName
          result.name shouldBe name
