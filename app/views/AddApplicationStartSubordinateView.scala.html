@@ -24,7 +24,8 @@
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
 
-@pageHeading = @{s"Add an application to ${environmentNameService.subordinateWording}"}
+@subordinateEnvName = @{environmentNameService.subordinateWording}
+@pageHeading = @{s"Add an application to ${subordinateEnvName}"}
 
     @devMain(
     title = pageHeading,
@@ -41,19 +42,32 @@
         <h1 class="heading-xlarge">@pageHeading</h1>
     </header>
 
-    <p>Add your application to @environmentNameService.subordinateWording so you can test it.</p>
-
-    <p>Once you add your application and subscribe it to the @environmentNameService.subordinateEnvName APIs you want to integrate with you can:</p>
-
-    <ul class="list list-bullet">
-        <li>get its @environmentNameService.subordinateEnvName credentials</li>
-        <li>use its credentials for integration testing</li>
-    </ul>
-
-    <h2 class="heading-medium">Terms of use</h2>
-
-    <p>In production, your application will need to comply with the expectations set out in our
-        <a href="/api-documentation/docs/terms-of-use">terms of use.</a>
+    <p>To use APIs for accessing secure data:</p>
+    <ol class="list list-number">
+        <li>
+            create an application in @subordinateEnvName
+        </li>
+        <li>
+            choose which APIs you want to use
+        </li>
+        <li>
+            get credentials to use our APIs
+        </li>
+        <li>
+            test your software integrates with our APIs
+        </li>
+    </ol>
+    <div class="notice">
+        <i class="icon icon-important">
+            <span class="visually-hidden">Warning</span>
+        </i>
+        <strong class="bold-small">
+            You must comply with our <a href="/api-documentation/docs/terms-of-use">terms of use</a>
+        </strong>
+    </div>
+    <br>
+    <p>
+        You do not need a sandbox application to use APIs with only <a href="/api-documentation/docs/authorisation/open-access-endpoints">open access endpoints</a>.
     </p>
 
     <p>
