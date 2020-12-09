@@ -70,7 +70,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
       val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
 
       when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(successful(HttpResponse(Status.CREATED)))
+        .thenReturn(successful(HttpResponse(Status.CREATED,"")))
 
       await(connector.register(registrationToTest)) shouldBe RegistrationSuccessful
 
@@ -81,7 +81,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
       val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
 
       when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(Upstream4xxResponse("409 exception", Status.CONFLICT, Status.CONFLICT)))
+        .thenReturn(failed(UpstreamErrorResponse("409 exception", Status.CONFLICT, Status.CONFLICT)))
 
       await(connector.register(registrationToTest)) shouldBe EmailAlreadyInUse
 
@@ -91,7 +91,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     "successfully verify a developer" in new Setup {
       val code = "A1234"
 
-      when(mockHttp.GET(endpoint(s"verification?code=$code"))).thenReturn(successful(HttpResponse(Status.OK)))
+      when(mockHttp.GET(endpoint(s"verification?code=$code"))).thenReturn(successful(HttpResponse(Status.OK,"")))
 
       await(connector.verify(code)) shouldBe Status.OK
 
@@ -104,7 +104,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
 
     "successfully create an unregistered user" in new Setup {
       when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("unregistered-developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(successful(HttpResponse(Status.OK)))
+        .thenReturn(successful(HttpResponse(Status.OK,"")))
 
       val result = await(connector.createUnregisteredUser(email))
 
@@ -114,9 +114,9 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
 
     "propagate error when the request fails" in new Setup {
       when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("unregistered-developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(Upstream5xxResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
+        .thenReturn(failed(UpstreamErrorResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(connector.createUnregisteredUser(email))
       }
     }
@@ -145,7 +145,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     val sessionId = "sessionId"
 
     "delete the session" in new Setup {
-      when(mockHttp.DELETE(endpoint(s"session/$sessionId"))).thenReturn(successful(HttpResponse(Status.NO_CONTENT)))
+      when(mockHttp.DELETE(endpoint(s"session/$sessionId"))).thenReturn(successful(HttpResponse(Status.NO_CONTENT,"")))
 
       await(connector.deleteSession(sessionId)) shouldBe Status.NO_CONTENT
     }
@@ -185,7 +185,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
       val email = "john.smith@example.com"
       val updated = UpdateProfileRequest("First", "Last")
 
-      when(mockHttp.POST(endpoint(s"developer/$email"), updated)).thenReturn(successful(HttpResponse(Status.OK)))
+      when(mockHttp.POST(endpoint(s"developer/$email"), updated)).thenReturn(successful(HttpResponse(Status.OK,"")))
 
       await(connector.updateProfile(email, updated)) shouldBe Status.OK
     }
@@ -195,7 +195,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     "send verification mail" in new Setup {
       val email = "john.smith@example.com"
 
-      when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/resend-verification")), *)(*, *, *)).thenReturn(successful(HttpResponse(Status.OK)))
+      when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/resend-verification")), *)(*, *, *)).thenReturn(successful(HttpResponse(Status.OK,"")))
 
       await(connector.resendVerificationEmail(email)) shouldBe Status.OK
 
@@ -206,7 +206,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
   "Reset password" should {
     "successfully request reset" in new Setup {
       val email = "user@example.com"
-      when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/password-reset-request")),*)(*, *, *)).thenReturn(successful(HttpResponse(Status.OK)))
+      when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/password-reset-request")),*)(*, *, *)).thenReturn(successful(HttpResponse(Status.OK,"")))
 
       await(connector.requestReset(email))
 
@@ -227,7 +227,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
       val passwordReset = PasswordReset("user@example.com", "newPassword")
 
       when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("reset-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(successful(HttpResponse(Status.OK)))
+        .thenReturn(successful(HttpResponse(Status.OK,"")))
 
       await(connector.reset(passwordReset))
 
@@ -274,7 +274,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {
       when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("change-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(Upstream4xxResponse("Unauthorised error", Status.UNAUTHORIZED, Status.UNAUTHORIZED)))
+        .thenReturn(failed(UpstreamErrorResponse("Unauthorised error", Status.UNAUTHORIZED, Status.UNAUTHORIZED)))
 
       await(connector.changePassword(changePasswordRequest).failed) shouldBe a[InvalidCredentials]
 
@@ -283,7 +283,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
 
     "throw Unverified Account if the response is Forbidden" in new Setup {
       when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("change-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(Upstream4xxResponse("Forbidden error", Status.FORBIDDEN, Status.FORBIDDEN)))
+        .thenReturn(failed(UpstreamErrorResponse("Forbidden error", Status.FORBIDDEN, Status.FORBIDDEN)))
 
       await(connector.changePassword(changePasswordRequest).failed) shouldBe a[UnverifiedAccount]
 
@@ -292,7 +292,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
 
     "throw Locked Account if the response is Locked" in new Setup {
       when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("change-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(Upstream4xxResponse("Locked error", Status.LOCKED, Status.LOCKED)))
+        .thenReturn(failed(UpstreamErrorResponse("Locked error", Status.LOCKED, Status.LOCKED)))
 
       await(connector.changePassword(changePasswordRequest).failed) shouldBe a[LockedAccount]
 
@@ -333,7 +333,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
       val verifyMfaRequest = VerifyMfaRequest(code)
 
       when(mockHttp.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON)))
-        .thenReturn(successful(HttpResponse(Status.NO_CONTENT)))
+        .thenReturn(successful(HttpResponse(Status.NO_CONTENT,"")))
 
       await(connector.verifyMfa(email, code)) shouldBe true
     }
@@ -344,9 +344,9 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
       val verifyMfaRequest = VerifyMfaRequest(code)
 
       when(mockHttp.POST(endpoint(s"developer/$email/mfa/verification"), verifyMfaRequest, Seq(CONTENT_TYPE -> JSON)))
-        .thenReturn(failed(Upstream5xxResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
+        .thenReturn(failed(UpstreamErrorResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(connector.verifyMfa(email, code))
       }
     }
@@ -356,7 +356,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     "return no_content if successfully enabled" in new Setup {
       val email = "john.smith@example.com"
 
-      when(mockHttp.PUT(endpoint(s"developer/$email/mfa/enable"), "")).thenReturn(successful(HttpResponse(NO_CONTENT)))
+      when(mockHttp.PUT(endpoint(s"developer/$email/mfa/enable"), "")).thenReturn(successful(HttpResponse(NO_CONTENT,"")))
 
       private val result = await(connector.enableMfa(email))
 
@@ -368,7 +368,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
   "removeEmailPreferences" should {
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
       val email = "john.smith@example.com"
-      when(mockHttp.DELETE(endpoint(s"developer/$email/email-preferences"))).thenReturn(successful(HttpResponse(NO_CONTENT)))
+      when(mockHttp.DELETE(endpoint(s"developer/$email/email-preferences"))).thenReturn(successful(HttpResponse(NO_CONTENT,"")))
       private val result = await(connector.removeEmailPreferences(email))
 
       result shouldBe true
@@ -393,7 +393,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
 
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
       when[Future[HttpResponse]](mockHttp.PUT(eqTo(endpoint(s"developer/$email/email-preferences")), eqTo(emailPreferencesAsJson), *)(*, *, *, *))
-        .thenReturn(successful(HttpResponse(NO_CONTENT)))
+        .thenReturn(successful(HttpResponse(NO_CONTENT,"")))
       private val result = await(connector.updateEmailPreferences(email, emailPreferences))
 
       result shouldBe true

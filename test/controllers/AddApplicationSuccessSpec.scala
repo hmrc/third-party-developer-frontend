@@ -34,8 +34,6 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import domain.models.connectors.ApiDefinition
-import domain.models.apidefinitions.ApiContext
 import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 
 class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {

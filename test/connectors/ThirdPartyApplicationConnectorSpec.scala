@@ -79,7 +79,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     when(mockEnvironment.toString).thenReturn(environmentName)
   }
 
-  private val upstream409Response = Upstream4xxResponse("", CONFLICT, CONFLICT)
+  private val upstream409Response = UpstreamErrorResponse("", CONFLICT, CONFLICT)
 
   private val updateApplicationRequest = new UpdateApplicationRequest(
     ApplicationId("My Id"),
@@ -145,7 +145,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
       when(
         mockHttpClient
           .POST[JsValue, HttpResponse](eqTo(url), eqTo(updateApplicationRequestJsValue), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT,"")))
 
       val result = await(connector.update(applicationId, updateApplicationRequest))
 
@@ -291,7 +291,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "unsubscribe application from an api" in new Setup {
 
       when(mockHttpClient.DELETE(url))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+        .thenReturn(Future.successful(HttpResponse(NO_CONTENT,"")))
 
       val result = await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
 
@@ -316,7 +316,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "return success response in case of a 204 NO CONTENT on backend" in new Setup {
 
       when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+        .thenReturn(Future.successful(HttpResponse(NO_CONTENT,"")))
 
       val result = await(connector.verify(verificationCode))
 
@@ -345,7 +345,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
       when(
         mockHttpClient
           .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT,"")))
 
       val result = await(connector.requestUplift(applicationId, upliftRequest))
 
@@ -384,7 +384,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
       when(
         mockHttpClient
           .POST[JsValue, HttpResponse](eqTo(url), eqTo(Json.toJson(updateRequest)), *)(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT,"")))
 
       val result = await(connector.updateApproval(applicationId, updateRequest))
       result shouldEqual ApplicationUpdateSuccessful
@@ -413,7 +413,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
       when(
         mockHttpClient
           .DELETE[HttpResponse](eqTo(url), *)(*, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT,"")))
 
       val result = await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail))
       result shouldEqual ApplicationUpdateSuccessful
@@ -423,7 +423,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
       when(
         mockHttpClient
           .DELETE[HttpResponse](eqTo(url), *)(*, *, *)
-      ).thenReturn(failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
+      ).thenReturn(failed(UpstreamErrorResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
 
       intercept[ApplicationNeedsAdmin](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
     }
@@ -483,7 +483,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
       when(
         mockHttpClient
           .POST[ClientSecretRequest, ApplicationToken](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
-      ).thenReturn(failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
+      ).thenReturn(failed(UpstreamErrorResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
 
       intercept[ClientSecretLimitExceeded] {
         await(connector.addClientSecrets(applicationId, clientSecretRequest))
@@ -502,7 +502,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
       when(
         mockHttpClient
           .POST[DeleteClientSecretRequest, HttpResponse](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT,"")))
 
       val result = await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
 
@@ -588,7 +588,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
 
     "return success response in case of a 204 on backend " in new Setup {
       when(mockHttpClient.PUT[UpdateIpAllowlistRequest, HttpResponse](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+        .thenReturn(Future.successful(HttpResponse(NO_CONTENT,"")))
 
       val result: ApplicationUpdateSuccessful = await(connector.updateIpAllowlist(applicationId, required = false, allowlist))
 
@@ -631,7 +631,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
       when(
         mockHttpClient
           .POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT,"")))
 
       val result = await(connector.deleteApplication(applicationId))
 

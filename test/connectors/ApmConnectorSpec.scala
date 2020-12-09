@@ -93,7 +93,7 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
       when(
         mockHttpClient
           .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      ).thenReturn(Future.successful(HttpResponse.apply(NO_CONTENT, "")))
 
       val result = await(connectorUnderTest.subscribeToApi(applicationId, apiIdentifier))
 

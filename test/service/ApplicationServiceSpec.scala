@@ -35,7 +35,7 @@ import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
@@ -44,6 +44,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.VersionSubscription
 import service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder{
 
@@ -198,7 +199,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
       when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
         .thenReturn(successful(productionApps))
       when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-        .thenReturn(failed(Upstream5xxResponse("Expected exception", 504, 504)))
+        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
 
       private val result = await(applicationService.fetchByTeamMemberEmail(emailAddress))
       result shouldBe Seq(app3, app1)
@@ -206,11 +207,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
 
     "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
       when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-        .thenReturn(failed(Upstream5xxResponse("Expected exception", 504, 504)))
+        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
       when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
         .thenReturn(successful(sandboxApps))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(applicationService.fetchByTeamMemberEmail(emailAddress))
       }
     }

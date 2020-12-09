@@ -19,7 +19,7 @@ package views.emailpreferences
 import controllers.{FormKeys, SelectApisFromSubscriptionsForm}
 import domain.models.apidefinitions.ApiContext
 import domain.models.applications.ApplicationId
-import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
+import domain.models.connectors.ExtendedApiDefinition
 import domain.models.developers.{DeveloperSession, LoggedInState}
 import domain.models.flows.NewApplicationEmailPreferencesFlow
 import org.jsoup.Jsoup

@@ -25,7 +25,7 @@ import org.scalatest.Matchers
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
 
@@ -65,9 +65,9 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with Matchers {
     "propagate exception from the connector" in new Setup {
       val expectedErrorMessage = "failed"
       when(pushPullNotificationsConnector.fetchPushSecrets(clientId))
-        .thenReturn(failed(Upstream5xxResponse(expectedErrorMessage, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
+        .thenReturn(failed(UpstreamErrorResponse(expectedErrorMessage, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      val exception: Upstream5xxResponse = intercept[Upstream5xxResponse](await(underTest.fetchPushSecrets(anApplication)))
+      val exception: UpstreamErrorResponse = intercept[UpstreamErrorResponse](await(underTest.fetchPushSecrets(anApplication)))
 
       exception.getMessage shouldBe expectedErrorMessage
     }

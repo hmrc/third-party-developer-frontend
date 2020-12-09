@@ -53,7 +53,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
   private val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   private val fieldsId = UUID.randomUUID()
   private val urlPrefix = "/field"
-  private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
+  private val upstream500Response = UpstreamErrorResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
 
   trait Setup {
@@ -165,12 +165,12 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
           .GET[ApplicationApiFieldValues](eqTo(getUrl))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .fetchFieldsValuesWithPrefetchedDefinitions(clientId, apiIdentifier, prefetchedDefinitions)
         )
-      }
+      }.statusCode shouldBe 500
     }
 
     "return empty when api-subscription-fields returns a 404" in new Setup {
@@ -255,9 +255,9 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
           .GET[AllApiFieldDefinitions](eqTo(url))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(subscriptionFieldsConnector.fetchAllFieldDefinitions())
-      }
+      }.statusCode shouldBe 500
     }
 
     "fail when api-subscription-fields returns unexpected response" in new Setup {
@@ -333,7 +333,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
         mockHttpClient.GET[ApiFieldDefinitions](eqTo(url))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .fetchFieldDefinitions(apiContext, apiVersion)
@@ -414,7 +414,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
           .GET[ApiFieldDefinitions](eqTo(definitionsUrl))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .fetchFieldValues(clientId, apiContext, apiVersion)
@@ -433,7 +433,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
           .GET[ApiFieldDefinitions](eqTo(valuesUrl))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .fetchFieldValues(clientId, apiContext, apiVersion)
@@ -454,7 +454,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
     val putUrl = s"$urlPrefix/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     "save the fields" in new Setup {
-      val response = HttpResponse(OK)
+      val response = HttpResponse(OK,"")
 
       when(
         mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](
@@ -487,7 +487,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
         )(*, *, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
@@ -546,7 +546,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
     "return success after delete call has returned 204 NO CONTENT" in new Setup {
       when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(successful(HttpResponse(NO_CONTENT)))
+        .thenReturn(successful(HttpResponse(NO_CONTENT,"")))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -558,7 +558,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
     "return failure if api-subscription-fields returns unexpected status" in new Setup {
       when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(successful(HttpResponse(ACCEPTED)))
+        .thenReturn(successful(HttpResponse(ACCEPTED,"")))
 
       private val result = await(
         subscriptionFieldsConnector
