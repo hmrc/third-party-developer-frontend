@@ -26,7 +26,6 @@ import domain.models.applications.{Application, ApplicationToken, ClientId, Envi
 import domain.models.connectors.UserAuthenticationResponse
 import domain.models.developers.{Registration, Session, UpdateProfileRequest}
 import domain.services.ApiDefinitionsJsonFormatters._
-import domain.services.SubscriptionsJsonFormatters._
 import org.scalatest.Matchers
 import play.api.Logger
 import play.api.http.Status._

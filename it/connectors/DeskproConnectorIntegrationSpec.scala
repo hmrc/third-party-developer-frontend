@@ -24,7 +24,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.API
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
@@ -108,7 +108,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
       "throw Upstream5xxResponse for an 500 response" in new Setup {
         stubFor(post(urlEqualTo(feedbackPath)).willReturn(aResponse().withStatus(500)))
 
-        intercept[Upstream5xxResponse](await(connector.createFeedback(feedback)))
+        intercept[UpstreamErrorResponse](await(connector.createFeedback(feedback)))
         verify(1, postRequestedFor(urlEqualTo(feedbackPath)).withRequestBody(equalTo(expectedBody)))
       }
 

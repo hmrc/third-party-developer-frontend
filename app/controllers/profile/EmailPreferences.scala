@@ -19,7 +19,7 @@ package controllers.profile
 import config.{ApplicationConfig, ErrorHandler}
 import controllers._
 import domain.models.applications.ApplicationId
-import domain.models.connectors.{ApiDefinition, ExtendedApiDefinition}
+import domain.models.connectors.ExtendedApiDefinition
 import domain.models.emailpreferences.APICategoryDetails
 import domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlow}
 import javax.inject.Inject
@@ -254,7 +254,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
     )
   }
 
-  def selectNoApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+  def selectNoApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { _ =>
     successful(Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
   }
 

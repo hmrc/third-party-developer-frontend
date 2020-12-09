@@ -21,13 +21,14 @@ import domain._
 import domain.models.connectors._
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HttpResponse
 import scala.util.control.NonFatal
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 @Singleton
 class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext) {
@@ -45,7 +46,7 @@ class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, me
 
   def createFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[TicketId] = metrics.record(api) {
     http.POST[Feedback, TicketId](requestUrl("/deskpro/feedback"), feedback) recover {
-      case nf: NotFoundException => throw Upstream5xxResponse(nf.getMessage, 404, 500)
+      case nf: NotFoundException => throw UpstreamErrorResponse(nf.getMessage, 404, 500)
     }
   }
 
