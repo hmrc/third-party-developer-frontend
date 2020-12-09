@@ -119,6 +119,7 @@ lazy val microservice = Project(appName, file("."))
       Resolver.jcenterRepo
     )
   )
+  .settings(SilencerSettings())
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
   .settings(
