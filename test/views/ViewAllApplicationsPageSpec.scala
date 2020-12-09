@@ -243,16 +243,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
-      elementExistsByText(document, "h1", "Add an application to the sandbox") shouldBe true
-      elementExistsByText(document, "p", "To start using our RESTful APIs with your application, you'll need to:") shouldBe true
-      elementExistsByText(document, "li", "add it to our test environment (sandbox)") shouldBe true
-      elementExistsByText(document, "li", "choose which sandbox APIs you want to use") shouldBe true
-      elementExistsByText(document, "li", "get credentials your application needs to interact with our APIs") shouldBe true
-      elementExistsByText(document, "li", "test how your application integrates with our APIs") shouldBe true
-      elementExistsByText(document, "strong", "Make sure your application complies with our terms of use") shouldBe true
-      elementExistsByText(document, "li", "find out which RESTful and XML APIs are offered by HMRC") shouldBe true
-      elementExistsByText(document, "li", "read up on authorisation") shouldBe true
-      elementExistsByText(document, "li", "familiarise yourself with the OAuth 2.0 specification (opens in a new tab)") shouldBe true
+      elementExistsByText(document, "h1", "Start using our APIs") shouldBe true
     }
 
     "show the empty nest page when there are no applications when environment is QA/Dev" in new Setup {
@@ -263,16 +254,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
-      elementExistsByText(document, "h1", "Add an application to development") shouldBe true
-      elementExistsByText(document, "p", "To start using our RESTful APIs with your application, you'll need to:") shouldBe true
-      elementExistsByText(document, "li", "add it to our test environment (development)") shouldBe true
-      elementExistsByText(document, "li", "choose which development APIs you want to use") shouldBe true
-      elementExistsByText(document, "li", "get credentials your application needs to interact with our APIs") shouldBe true
-      elementExistsByText(document, "li", "test how your application integrates with our APIs") shouldBe true
-      elementExistsByText(document, "strong", "Make sure your application complies with our terms of use") shouldBe true
-      elementExistsByText(document, "li", "find out which RESTful and XML APIs are offered by HMRC") shouldBe true
-      elementExistsByText(document, "li", "read up on authorisation") shouldBe true
-      elementExistsByText(document, "li", "familiarise yourself with the OAuth 2.0 specification (opens in a new tab)") shouldBe true
+      elementExistsByText(document, "h1", "Start using our APIs") shouldBe true
     }
 
   }
