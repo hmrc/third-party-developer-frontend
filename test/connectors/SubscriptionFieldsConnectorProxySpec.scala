@@ -18,7 +18,6 @@ package connectors
 
 import java.util.UUID
 
-import akka.actor.ActorSystem
 import config.ApplicationConfig
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications.{ClientId, Environment}
@@ -41,7 +40,6 @@ class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndA
   val apiContext: ApiContext = ApiContext("i-am-a-test")
   val apiVersion: ApiVersion = ApiVersion("1.0")
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
-  private val testActorSystem = ActorSystem("test-actor-system")
 
   class Setup(proxyEnabled: Boolean = false) {
     val testApiKey: String = UUID.randomUUID().toString
@@ -60,7 +58,7 @@ class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndA
       val useProxy = proxyEnabled
       val environment = mockEnvironment
       val apiKey = testApiKey
-      val actorSystem = testActorSystem
+      val actorSystem = app.actorSystem
       val futureTimeout = futureTimeoutSupport
       val appConfig = mockAppConfig
       implicit val ec: ExecutionContext = global

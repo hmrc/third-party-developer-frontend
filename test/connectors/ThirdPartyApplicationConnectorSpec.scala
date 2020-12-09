@@ -20,7 +20,6 @@ import java.net.URLEncoder.encode
 import java.util.UUID
 import java.util.UUID.randomUUID
 
-import akka.actor.ActorSystem
 import config.ApplicationConfig
 import connectors.ThirdPartyApplicationConnectorDomain._
 import domain._
@@ -43,8 +42,9 @@ import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
 
-class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
+class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 
   private val applicationId = ApplicationId("applicationId")
   private val clientId = ClientId("client-id")
@@ -59,7 +59,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     protected val mockEnvironment = mock[Environment]
     protected val mockMetrics = new NoopConnectorMetrics()
     private val futureTimeoutSupport = new FutureTimeoutSupportImpl
-    private val actorSystemTest = ActorSystem("test-actor-system")
     val apiKeyTest = "5bb51bca-8f97-4f2b-aee4-81a4a70a42d3"
 
     val connector = new ThirdPartyApplicationConnector(mockAppConfig, mockMetrics) {
@@ -71,7 +70,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       val environment = mockEnvironment
       val apiKey = apiKeyTest
       val appConfig = mockAppConfig
-      val actorSystem = actorSystemTest
+      val actorSystem = app.actorSystem
       val futureTimeout = futureTimeoutSupport
       val metrics = mockMetrics
       val isEnabled = true

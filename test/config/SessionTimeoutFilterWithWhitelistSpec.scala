@@ -16,8 +16,6 @@
 
 package config
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.concurrent.ScalaFutures.whenReady
@@ -33,8 +31,7 @@ import scala.concurrent.Future
 class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown {
 
   trait Setup {
-    implicit val sys = ActorSystem("SessionTimeoutFilterWithWhitelistSpec")
-    implicit val mat = ActorMaterializer()
+    implicit val m = app.materializer
     val config = SessionTimeoutFilterConfig(timeoutDuration = Duration.standardSeconds(1), onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]

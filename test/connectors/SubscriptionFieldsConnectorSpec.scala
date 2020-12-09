@@ -18,7 +18,6 @@ package connectors
 
 import java.util.UUID
 
-import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import builder.SubscriptionsBuilder
 import config.ApplicationConfig
@@ -36,8 +35,10 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.{failed, successful}
+import akka.actor.ActorSystem
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
+class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SubscriptionsBuilder {
   def fields(tpl: (FieldName, FieldValue)*): Fields.Alias =
     Map(tpl: _*)
 
@@ -54,7 +55,6 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   private val urlPrefix = "/field"
   private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
-  private val actorSystem = ActorSystem("test-actor-system")
 
   trait Setup {
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -74,7 +74,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       mockHttpClient,
       mockProxiedHttpClient,
       mockAppConfig,
-      actorSystem,
+      app.actorSystem,
       futureTimeoutSupport
     )
   }
@@ -93,7 +93,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
         mockHttpClient,
         mockProxiedHttpClient,
         mockAppConfig,
-        actorSystem,
+        app.actorSystem,
         futureTimeoutSupport
       )
   }
