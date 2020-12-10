@@ -242,8 +242,9 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
   }
 
   "accountSetupQuestions" should {
+    val email = "john.smith@example.com"
+
     "successfully complete a developer account setup" in new Setup {
-      val email = "john.smith@example.com"
       val developer = buildDeveloper(emailAddress = email)
 
       when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"developer/account-setup/$email/complete")), *)(*, *, *)).thenReturn(successful(HttpResponse(Status.OK, Some(Json.toJson(developer)))))
@@ -252,7 +253,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     }
 
     "successfully update roles" in new Setup {
-      val email = "john.smith@example.com"
       val developer = buildDeveloper(emailAddress = email)
 
       private val request = AccountSetupRequest(roles = Some(Seq("aRole")), rolesOther = Some("otherRole"))
@@ -262,7 +262,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     }
 
     "successfully update services" in new Setup {
-      val email = "john.smith@example.com"
       val developer = buildDeveloper(emailAddress = email)
 
       private val request = AccountSetupRequest(services = Some(Seq("aService")), servicesOther = Some("otherService"))
@@ -272,7 +271,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec {
     }
 
     "successfully update targets" in new Setup {
-      val email = "john.smith@example.com"
       val developer = buildDeveloper(emailAddress = email)
       
       private val request = AccountSetupRequest(targets = Some(Seq("aTarget")), targetsOther = Some("otherTargets"))
