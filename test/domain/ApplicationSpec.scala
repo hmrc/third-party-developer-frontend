@@ -16,6 +16,7 @@
 
 package domain
 
+import builder.DeveloperBuilder
 import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import domain.models.applications._
 import domain.models.applications.Permissions.SandboxOrAdmin
@@ -24,12 +25,12 @@ import helpers.string._
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
 
-class ApplicationSpec extends FunSpec with Matchers {
+class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder {
 
-  val developer = Developer("developerEmail", "DEVELOPER    ", "developerLast")
+  val developer = buildDeveloper(emailAddress = "developerEmail", firstName = "DEVELOPER    ", lastName = "developerLast")
   val developerCollaborator = Collaborator(developer.email, Role.DEVELOPER)
 
-  val administrator = Developer("administratorEmail", "ADMINISTRATOR", "administratorLast")
+  val administrator = buildDeveloper(emailAddress = "administratorEmail", firstName = "ADMINISTRATOR", lastName = "administratorLast")
 
   val productionApplicationState: ApplicationState = ApplicationState.production(requestedBy = "other email", verificationCode = "123")
   val testingApplicationState: ApplicationState = ApplicationState.testing
@@ -54,7 +55,6 @@ class ApplicationSpec extends FunSpec with Matchers {
   }
 
   describe("Application.isPermittedToEditAppDetails") {
-
     val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
       (Environment.SANDBOX, Standard(), developer, true),
       (Environment.SANDBOX, Standard(), administrator, true),

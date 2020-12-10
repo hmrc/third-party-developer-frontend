@@ -18,8 +18,9 @@ package controllers
 
 import java.util.UUID
 
+import builder.DeveloperBuilder
 import domain.models.connectors.TicketId
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import play.api.mvc.Request
 import play.api.test.FakeRequest
@@ -37,13 +38,13 @@ import scala.concurrent.Future
 
 class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
-  val sessionId = UUID.randomUUID().toString
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+  trait Setup extends SessionServiceMock with DeveloperBuilder {
+    val developer = buildDeveloper()
+    val sessionId = UUID.randomUUID().toString
+    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-  val developerSession: DeveloperSession = DeveloperSession(session)
+    val developerSession: DeveloperSession = DeveloperSession(session)
 
-  trait Setup extends SessionServiceMock {
     val signoutSurveyView = app.injector.instanceOf[SignoutSurveyView]
     val logoutConfirmationView = app.injector.instanceOf[LogoutConfirmationView]
 

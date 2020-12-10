@@ -32,6 +32,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
 import play.filters.csrf.CSRF
+import domain.models.developers.UserId
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
   private val config = Configuration("play.filters.csrf.token.sign" -> false)
@@ -63,6 +64,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   }
 
   trait Setup {
+    val userId = UserId.random
     val userEmail = "thirdpartydeveloper@example.com"
     val userPassword = "password1!"
     val headers = Headers(AUTHORIZATION -> "AUTH_TOKEN")
@@ -104,7 +106,6 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
 
     "there is a valid CSRF token" should {
       "redirect to the 2SV sign-up reminder if user does not have it set up" in new Setup {
-
         stubFor(
           post(urlEqualTo("/authenticate"))
             .willReturn(
@@ -118,6 +119,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                    |    "sessionId": "$sessionId",
                    |    "loggedInState": "LOGGED_IN",
                    |    "developer": {
+                   |      "userId":"${userId.value}",
                    |      "email":"$userEmail",
                    |      "firstName":"John",
                    |      "lastName": "Doe",

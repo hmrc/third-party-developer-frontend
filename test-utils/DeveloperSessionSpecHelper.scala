@@ -20,6 +20,7 @@ import java.util.UUID
 
 import domain.models.developers.{Developer, LoggedInState}
 import domain.models.emailpreferences.EmailPreferences
+import domain.models.developers.UserId
 
 object DeveloperSession {
 
@@ -36,7 +37,9 @@ object DeveloperSession {
     domain.models.developers.DeveloperSession(
       loggedInState,
       sessionId,
-      Developer(email,
+      Developer(
+        UserId.random,
+        email,
         firstName,
         lastName,
         organisation,

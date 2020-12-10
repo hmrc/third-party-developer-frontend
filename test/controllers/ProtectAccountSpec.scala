@@ -18,10 +18,11 @@ package controllers
 
 import java.net.URI
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.UpdateLoggedInStateRequest
-import domain.models.developers.{Developer, LoggedInState, Session}
+import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.scalatest.Assertion
@@ -45,11 +46,11 @@ import controllers.profile.ProtectAccount
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends SessionServiceMock {
+  trait Setup extends SessionServiceMock with DeveloperBuilder {
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
-    val loggedInUser = Developer("johnsmith@example.com", "John", "Doe")
+    val loggedInUser = buildDeveloper()
     val qrImage = "qrImage"
     val otpUri = new URI("OTPURI")
     val correctCode = "123123"
@@ -98,13 +99,13 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait SetupUnprotectedAccount extends Setup {
-    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier]))
-      .thenReturn(successful(Some(Developer(loggedInUser.email, "Bob", "Smith", None))))
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.userId))(any[HeaderCarrier]))
+      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInUser.email, organisation = None))))
   }
 
   trait SetupProtectedAccount extends Setup {
-    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier]))
-      .thenReturn(successful(Some(Developer(loggedInUser.email, "Bob", "Smith", None, Some(true)))))
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.userId))(any[HeaderCarrier]))
+      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInUser.email, organisation = None, mfaEnabled = Some(true)))))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {

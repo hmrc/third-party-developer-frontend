@@ -18,9 +18,10 @@ package controllers
 
 import java.util.UUID
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
-import domain.models.developers.{Developer, LoggedInState, Session}
+import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import play.api.test.Helpers.{redirectLocation, _}
@@ -32,7 +33,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout {
 
-  trait Setup extends SessionServiceMock {
+  trait Setup extends SessionServiceMock with DeveloperBuilder {
     val sessionController = new SessionController(
       mock[AuditService],
       sessionServiceMock,
@@ -46,7 +47,7 @@ class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout 
   "keepAlive" should {
     "reset the session if logged in" in new Setup {
 
-      val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+      val developer = buildDeveloper()
       val sessionId = UUID.randomUUID().toString
       val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
       val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)

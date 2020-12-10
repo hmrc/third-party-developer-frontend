@@ -16,9 +16,10 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import domain._
 import domain.models.applications._
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
@@ -320,7 +321,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
@@ -341,7 +342,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val developer = buildDeveloper()
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
