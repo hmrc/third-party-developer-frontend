@@ -16,6 +16,7 @@
 
 package domain.models.flows
 
+import builder.DeveloperBuilder
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import org.scalatest.{Matchers, WordSpec}
@@ -23,7 +24,7 @@ import domain.models.applications.ApplicationId
 import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 import domain.models.connectors.ExtendedApiDefinition
 
-class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with ExtendedApiDefinitionTestDataHelper {
+class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with ExtendedApiDefinitionTestDataHelper with DeveloperBuilder {
 
     val category1 = "CATEGORY_1"
     val category2 = "CATEGORY_2"
@@ -35,7 +36,7 @@ class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with
     val sessionId = "sessionId"
     
     def developerSession(emailPreferences: EmailPreferences): DeveloperSession = {
-        val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe", emailPreferences = emailPreferences)
+        val developer: Developer = buildDeveloper(emailPreferences = emailPreferences)
         val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
         DeveloperSession(session)
     }

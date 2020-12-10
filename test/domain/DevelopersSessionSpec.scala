@@ -18,14 +18,15 @@ package domain
 
 import java.util.UUID
 
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import builder.DeveloperBuilder
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import utils.AsyncHmrcSpec
 
-class DevelopersSessionSpec extends AsyncHmrcSpec {
+class DevelopersSessionSpec extends AsyncHmrcSpec with DeveloperBuilder {
   val email = "thirdpartydeveloper@example.com"
   val firstName = "John"
   val lastName = "Doe"
-  val developer = Developer(email, firstName = firstName, lastName = lastName)
+  val developer = buildDeveloper(emailAddress = email, firstName = firstName, lastName = lastName)
 
   val loggedInSession = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
   val partLoggedInSession = Session(UUID.randomUUID().toString, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)

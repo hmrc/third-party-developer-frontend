@@ -16,9 +16,10 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.connectors.TicketCreated
-import domain.models.developers.{Developer, LoggedInState, Session}
+import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
@@ -38,7 +39,7 @@ import scala.concurrent.Future.successful
 
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends SessionServiceMock {
+  trait Setup extends SessionServiceMock with DeveloperBuilder {
     val supportEnquiryView = app.injector.instanceOf[SupportEnquiryView]
     val supportThankYouView = app.injector.instanceOf[SupportThankyouView]
 
@@ -53,7 +54,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
       )
 
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val developer = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com")
 
     val sessionId = "sessionId"
   }

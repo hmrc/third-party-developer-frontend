@@ -16,10 +16,11 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.ChangePassword
-import domain.models.developers.{Developer, LoggedInState, Session, UpdateProfileRequest}
+import domain.models.developers.{LoggedInState, Session, UpdateProfileRequest}
 import domain.InvalidCredentials
 import mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
@@ -42,7 +43,7 @@ import controllers.profile.Profile
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with DeveloperBuilder {
     val changeProfileView = app.injector.instanceOf[ChangeProfileView]
     val profileView = app.injector.instanceOf[ProfileView]
     val profileUpdatedView = app.injector.instanceOf[ProfileUpdatedView]
@@ -68,7 +69,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       profileDeleteSubmittedView
     )
 
-    val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val loggedInUser = buildDeveloper()
 
     val sessionId = "sessionId"
   }

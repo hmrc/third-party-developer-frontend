@@ -18,6 +18,7 @@ package controllers
 
 import java.util.UUID.randomUUID
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.controllers.SaveSubsFieldsPageMode
 import domain.models.subscriptions.{AccessRequirements, DevhubAccessLevel, DevhubAccessRequirements}
@@ -47,10 +48,10 @@ import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.FieldValue
 import domain.models.subscriptions.FieldName
 
-class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
+class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with DeveloperBuilder {
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)
 
-  val developer: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer: Developer = buildDeveloper()
   val sessionId = "sessionId"
   val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 

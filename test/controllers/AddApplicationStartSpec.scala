@@ -16,9 +16,10 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -33,9 +34,9 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
 
-  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer = buildDeveloper()
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 

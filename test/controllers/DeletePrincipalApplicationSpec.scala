@@ -16,9 +16,10 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import domain.models.applications._
 import domain.models.connectors.TicketCreated
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.joda.time.DateTime
 import play.api.test.FakeRequest
@@ -33,8 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken with TestApplications with ErrorHandlerMock {
-
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with DeveloperBuilder {
     val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
     val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
     val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
@@ -59,7 +59,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     val clientId = ClientId("clientIdzzz")
     val appName: String = "Application Name"
 
-    val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val developer = buildDeveloper()
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 

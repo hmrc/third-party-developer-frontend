@@ -24,7 +24,7 @@ import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTic
 import domain.models.apidefinitions._
 import domain.models.applications._
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -47,7 +47,7 @@ import views.html.checkpages.checkyouranswers.team.TeamView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
-class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder {
+class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder with DeveloperBuilder {
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
@@ -55,7 +55,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val sessionId = "sessionId"
   val apiVersion = ApiVersion("version")
 
-  val developerDto = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developerDto = buildDeveloper()
   val session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
 
   val loggedInUser = DeveloperSession(session)

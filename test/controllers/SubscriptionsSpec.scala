@@ -18,6 +18,7 @@ package controllers
 
 import java.util.UUID.randomUUID
 
+import builder.DeveloperBuilder
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.apidefinitions.{ApiContext, ApiVersion,ApiIdentifier}
 import domain.models.applications._
@@ -42,7 +43,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
 
   val apiName = "api-1"
   val apiVersion = ApiVersion("1.0")
@@ -50,7 +51,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   val displayStatus = "Status"
 
-  val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
+  val developer: Developer = buildDeveloper()
   val sessionId = "sessionId"
   val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
