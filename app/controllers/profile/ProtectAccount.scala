@@ -67,9 +67,6 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   }
 
   def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    println("**********")
-    println(loggedIn.developer)
-    println("**********")
     thirdPartyDeveloperConnector.fetchDeveloper(loggedIn.developer.userId).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
         case true => Ok(protectedAccountView())

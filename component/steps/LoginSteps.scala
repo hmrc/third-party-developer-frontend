@@ -113,10 +113,8 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   private def setupGettingDeveloperByEmail(developer: Developer): Unit = {
-    val encodedEmail = URLEncoder.encode(developer.email, "UTF-8")
-
     stubFor(get(urlPathEqualTo("/developer"))
-      .withQueryParam("email", equalTo(encodedEmail))
+      .withQueryParam("developerId", equalTo(developer.userId.asText))
       .willReturn(aResponse()
         .withStatus(OK)
         .withBody(Json.toJson(developer).toString())))
