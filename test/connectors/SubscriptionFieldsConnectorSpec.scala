@@ -113,15 +113,6 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
     val environment: Environment = Environment.SANDBOX
   }
 
-  private def squidProxyRelatedBadRequest = {
-    new BadRequestException(
-      "GET of 'https://api.development.tax.service.gov.uk:443/testing/api-subscription-fields/field/application/" +
-        "xxxyyyzzz/context/api-platform-test/version/7.0' returned 400 (Bad Request). Response body " +
-        "'<html>\n<head><title>400 Bad Request</title></head>\n<body bgcolor=\"white\">\n" +
-        "<center><h1>400 Bad Request</h1></center>\n<hr><center>nginx</center>\n</body>\n</html>\n'"
-    )
-  }
-
   "fetchFieldsValuesWithPrefetchedDefinitions" should {
 
     val subscriptionFieldValue = buildSubscriptionFieldValue("my-name", Some("my-value"))
@@ -147,8 +138,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
     "return subscription fields for an API" in new Setup {
       when(
         mockHttpClient
-          .GET[ApplicationApiFieldValues](eqTo(getUrl))(*, *, *)
-      ).thenReturn(successful(subscriptionFields))
+          .GET[Option[ApplicationApiFieldValues]](eqTo(getUrl))(*, *, *)
+      ).thenReturn(successful(Some(subscriptionFields)))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -162,7 +153,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
       when(
         mockHttpClient
-          .GET[ApplicationApiFieldValues](eqTo(getUrl))(*, *, *)
+          .GET[Option[ApplicationApiFieldValues]](eqTo(getUrl))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
       intercept[UpstreamErrorResponse] {
@@ -175,8 +166,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
     "return empty when api-subscription-fields returns a 404" in new Setup {
 
-      when(mockHttpClient.GET[ApplicationApiFieldValues](eqTo(getUrl))(*, *, *))
-        .thenReturn(failed(new NotFoundException("")))
+      when(mockHttpClient.GET[Option[ApplicationApiFieldValues]](eqTo(getUrl))(*, *, *))
+        .thenReturn(successful(None))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -189,8 +180,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
       when(
         mockProxiedHttpClient
-          .GET[ApplicationApiFieldValues](*)(*, *, *)
-      ).thenReturn(successful(subscriptionFields))
+          .GET[Option[ApplicationApiFieldValues]](*)(*, *, *)
+      ).thenReturn(successful(Some(subscriptionFields)))
 
       await(
         subscriptionFieldsConnector
@@ -198,26 +189,6 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
       )
 
       verify(mockProxiedHttpClient).withHeaders(eqTo(apiKey))
-    }
-
-    "when retry logic is enabled should retry on failure" in new Setup {
-
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[ApplicationApiFieldValues](eqTo(getUrl))(*, *, *))
-        .thenReturn(
-          failed(squidProxyRelatedBadRequest),
-          successful(subscriptionFields)
-        )
-
-      private val result = await(
-        subscriptionFieldsConnector.fetchFieldsValuesWithPrefetchedDefinitions(
-          clientId,
-          apiIdentifier,
-          prefetchedDefinitions
-        )
-      )
-
-      result shouldBe Seq(subscriptionFieldValue)
     }
   }
 
@@ -237,8 +208,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
       when(
         mockHttpClient
-          .GET[AllApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(successful(validResponse))
+          .GET[Option[AllApiFieldDefinitions]](eqTo(url))(*, *, *)
+      ).thenReturn(successful(Some(validResponse)))
 
       private val result =
         await(subscriptionFieldsConnector.fetchAllFieldDefinitions())
@@ -252,7 +223,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
       when(
         mockHttpClient
-          .GET[AllApiFieldDefinitions](eqTo(url))(*, *, *)
+          .GET[Option[AllApiFieldDefinitions]](eqTo(url))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
       intercept[UpstreamErrorResponse] {
@@ -264,40 +235,13 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
       when(
         mockHttpClient
-          .GET[AllApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+          .GET[Option[AllApiFieldDefinitions]](eqTo(url))(*, *, *)
+      ).thenReturn(successful(None))
 
       private val result =
         await(subscriptionFieldsConnector.fetchAllFieldDefinitions())
 
       result shouldBe Map.empty[String, String]
-    }
-
-    "when retry logic is enabled should retry on failure" in new Setup {
-
-      val definitions = List(
-        FieldDefinition(FieldName("field1"), "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default),
-        FieldDefinition(FieldName("field2"), "desc2", "sdesc2", "hint2", "some other type", AccessRequirements.Default)
-      )
-
-      private val validResponse =
-        AllApiFieldDefinitions(apis = Seq(ApiFieldDefinitions(apiContext, apiVersion, definitions)))
-
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(
-        mockHttpClient
-          .GET[AllApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(
-        failed(new BadRequestException("")),
-        successful(validResponse)
-      )
-
-      private val result =
-        await(subscriptionFieldsConnector.fetchAllFieldDefinitions())
-
-      val expectedResult = Map(apiIdentifier -> definitions.map(toDomain))
-
-      result shouldBe expectedResult
     }
   }
 
@@ -316,8 +260,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
     "return definitions" in new Setup {
       when(
-        mockHttpClient.GET[ApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(successful(validResponse))
+        mockHttpClient.GET[Option[ApiFieldDefinitions]](eqTo(url))(*, *, *)
+      ).thenReturn(successful(Some(validResponse)))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -330,33 +274,12 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
     "fail when api-subscription-fields returns a 500" in new Setup {
 
       when(
-        mockHttpClient.GET[ApiFieldDefinitions](eqTo(url))(*, *, *)
+        mockHttpClient.GET[Option[ApiFieldDefinitions]](eqTo(url))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
       intercept[UpstreamErrorResponse] {
-        await(
-          subscriptionFieldsConnector
-            .fetchFieldDefinitions(apiContext, apiVersion)
-        )
+        await(subscriptionFieldsConnector.fetchFieldDefinitions(apiContext, apiVersion))
       }
-    }
-
-    "when retry logic is enabled should retry on failure" in new Setup {
-
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(
-        mockHttpClient.GET[ApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(
-        failed(new BadRequestException("")),
-        successful(validResponse)
-      )
-
-      private val result = await(
-        subscriptionFieldsConnector
-          .fetchFieldDefinitions(apiContext, apiVersion)
-      )
-
-      result shouldBe expectedDefinitions
     }
   }
 
@@ -392,13 +315,13 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
       when(
         mockHttpClient
-          .GET[ApiFieldDefinitions](eqTo(definitionsUrl))(*, *, *)
-      ).thenReturn(successful(validDefinitionsResponse))
+          .GET[Option[ApiFieldDefinitions]](eqTo(definitionsUrl))(*, *, *)
+      ).thenReturn(successful(Some(validDefinitionsResponse)))
 
       when(
         mockHttpClient
-          .GET[ApplicationApiFieldValues](eqTo(valuesUrl))(*, *, *)
-      ).thenReturn(successful(validValuesResponse))
+          .GET[Option[ApplicationApiFieldValues]](eqTo(valuesUrl))(*, *, *)
+      ).thenReturn(successful(Some(validValuesResponse)))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -411,7 +334,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
     "fail when fetching field definitions returns a 500" in new Setup {
       when(
         mockHttpClient
-          .GET[ApiFieldDefinitions](eqTo(definitionsUrl))(*, *, *)
+          .GET[Option[ApiFieldDefinitions]](eqTo(definitionsUrl))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
       intercept[UpstreamErrorResponse] {
@@ -425,12 +348,12 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
     "fail when fetching field definition values returns a 500" in new Setup {
       when(
         mockHttpClient
-          .GET[ApiFieldDefinitions](eqTo(definitionsUrl))(*, *, *)
-      ).thenReturn(successful(validDefinitionsResponse))
+          .GET[Option[ApiFieldDefinitions]](eqTo(definitionsUrl))(*, *, *)
+      ).thenReturn(successful(Some(validDefinitionsResponse)))
 
       when(
         mockHttpClient
-          .GET[ApiFieldDefinitions](eqTo(valuesUrl))(*, *, *)
+          .GET[Option[ApiFieldDefinitions]](eqTo(valuesUrl))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
       intercept[UpstreamErrorResponse] {
@@ -502,14 +425,14 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
           eqTo(subFieldsPutRequest),
           any[Seq[(String, String)]]
         )(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+      ).thenReturn(successful(HttpResponse(NOT_FOUND,"")))
 
-      intercept[NotFoundException] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
         )
-      }
+      }.statusCode shouldBe NOT_FOUND
     }
 
     "fail when api-subscription-fields returns a 400 with validation error messages" in new Setup {
@@ -519,8 +442,9 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
           |}""".stripMargin
 
       val response = HttpResponse(
-        responseStatus = BAD_REQUEST,
-        responseJson = Some(Json.parse(errorJson))
+        BAD_REQUEST,
+        Json.parse(errorJson),
+        Map.empty[String, Seq[String]]
       )
 
       when(
@@ -571,7 +495,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
     "return failure when api-subscription-fields returns a 500" in new Setup {
 
       when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(failed(upstream500Response))
+        .thenReturn(successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -583,7 +507,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerS
 
     "return success when api-subscription-fields returns a 404" in new Setup {
       when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(failed(new NotFoundException("")))
+        .thenReturn(successful(HttpResponse(NOT_FOUND,"")))
 
       private val result = await(
         subscriptionFieldsConnector

@@ -112,10 +112,10 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
         verify(1, postRequestedFor(urlEqualTo(feedbackPath)).withRequestBody(equalTo(expectedBody)))
       }
 
-      "throw BadRequestException for an 400 response" in new Setup {
-        stubFor(post(urlEqualTo(feedbackPath)).willReturn(aResponse().withStatus(400)))
+      "throw Upstream5xxResponse for an 404 response" in new Setup {
+        stubFor(post(urlEqualTo(feedbackPath)).willReturn(aResponse().withStatus(404)))
 
-        intercept[BadRequestException](await(connector.createFeedback(feedback)))
+        intercept[UpstreamErrorResponse](await(connector.createFeedback(feedback))).statusCode shouldBe 404
         verify(1, postRequestedFor(urlEqualTo(feedbackPath)).withRequestBody(equalTo(expectedBody)))
       }
     }

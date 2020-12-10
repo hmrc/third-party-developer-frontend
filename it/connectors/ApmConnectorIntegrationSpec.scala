@@ -9,7 +9,7 @@ import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.connectors.ExtendedApiDefinition
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
@@ -86,7 +86,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
             )
         )
 
-        intercept[NotFoundException](await(underTest.fetchAPIDefinition("unknownapi")))
+        intercept[UpstreamErrorResponse](await(underTest.fetchAPIDefinition("unknownapi"))).statusCode shouldBe NOT_FOUND
       }
   }
 

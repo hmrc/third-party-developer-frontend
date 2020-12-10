@@ -27,12 +27,11 @@ import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future.{failed,successful}
+import scala.concurrent.Future.successful
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.apidefinitions.ApiContext
 import domain.models.apidefinitions.ApiVersion
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.http.NotFoundException
 import domain.ApplicationNotFound
 import domain.models.applications.ApplicationId
 import domain.ApplicationUpdateSuccessful
@@ -92,8 +91,8 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
 
       when(
         mockHttpClient
-          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse.apply(NO_CONTENT, "")))
+          .POST[ApiIdentifier, Option[Unit]](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(successful(Some(())))
 
       val result = await(connectorUnderTest.subscribeToApi(applicationId, apiIdentifier))
 
@@ -105,8 +104,8 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
 
       when(
         mockHttpClient
-          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+          .POST[ApiIdentifier, Option[Unit]](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(successful(None))
 
       intercept[ApplicationNotFound](
         await(connectorUnderTest.subscribeToApi(applicationId, apiIdentifier))

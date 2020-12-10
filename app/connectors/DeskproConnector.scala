@@ -21,14 +21,14 @@ import domain._
 import domain.models.connectors._
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.HttpResponse
 import scala.util.control.NonFatal
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 @Singleton
 class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext) {
@@ -37,7 +37,8 @@ class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, me
   val api = API("deskpro")
 
   def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
-    http.POST[DeskproTicket,HttpResponse](requestUrl("/deskpro/ticket"), deskproTicket) map (_ => TicketCreated) recover {
+
+    http.POST[DeskproTicket,Unit](requestUrl("/deskpro/ticket"), deskproTicket) map (_ => TicketCreated) recover {
       case NonFatal(e) =>
         Logger.error(s"Deskpro ticket creation failed for: $deskproTicket", e)
         throw new DeskproTicketCreationFailed(e.getMessage)
@@ -45,9 +46,8 @@ class DeskproConnector @Inject()(http: HttpClient, config: ApplicationConfig, me
   }
 
   def createFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[TicketId] = metrics.record(api) {
-    http.POST[Feedback, TicketId](requestUrl("/deskpro/feedback"), feedback) recover {
-      case nf: NotFoundException => throw UpstreamErrorResponse(nf.getMessage, 404, 500)
-    }
+    http.POST[Feedback, Option[TicketId]](requestUrl("/deskpro/feedback"), feedback)
+    .map( _.fold(throw UpstreamErrorResponse("Create Feedback failed", 404, 500))(x => x))
   }
 
   override def toString = "DeskproConnector()"
