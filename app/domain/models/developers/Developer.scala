@@ -44,3 +44,4 @@ case class Developer(
 object Developer {
   implicit val format: Format[Developer] = Json.format[Developer]
 }
+
