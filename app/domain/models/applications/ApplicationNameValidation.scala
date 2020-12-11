@@ -18,9 +18,20 @@ package domain.models.applications
 
 import controllers.FormKeys.{applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 
+import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
+
 sealed trait ApplicationNameValidation
 
 case object Valid extends ApplicationNameValidation
+
+object ApplicationNameValidation {
+  def apply(applicationNameValidationResult: ApplicationNameValidationResult): ApplicationNameValidation = {
+    applicationNameValidationResult.errors match {
+      case Some(errors) => Invalid(errors.invalidName, errors.duplicateName)
+      case None         => Valid
+    }
+  }
+}
 
 case class Invalid(invalidName: Boolean, duplicateName: Boolean) extends ApplicationNameValidation{
   def validationErrorMessageKey: String = {

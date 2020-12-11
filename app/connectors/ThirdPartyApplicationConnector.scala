@@ -29,7 +29,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.{CONTENT_TYPE, CONTENT_LENGTH}
-import play.api.http.Status.NO_CONTENT
+import play.api.http.Status._
 import play.api.libs.json.Json
 import service.ApplicationService.ApplicationConnector
 import uk.gov.hmrc.http._
@@ -39,6 +39,7 @@ import uk.gov.hmrc.play.http.metrics.API
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 import domain.models.apidefinitions.ApiIdentifier
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector with Retries {
 
@@ -58,18 +59,19 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   val api = API("third-party-application")
 
-  def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application", Json.toJson(request), Seq(CONTENT_TYPE -> JSON)) map { result => ApplicationCreatedResponse((result.json \ "id").as[ApplicationId]) }
-  }
+
+  def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
+    metrics.record(api) {
+      http.POST[CreateApplicationRequest, Application](s"$serviceBaseUrl/application", request).map(a => ApplicationCreatedResponse(a.id))
+    }
 
   def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/${applicationId.value}", Json.toJson(request), Seq(CONTENT_TYPE -> JSON)) map { _ => ApplicationUpdateSuccessful }
+    http.POST[UpdateApplicationRequest,Unit](s"$serviceBaseUrl/application/${applicationId.value}", request).map { _ => ApplicationUpdateSuccessful }
   }
 
   def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
     if (isEnabled) {
       metrics.record(api) {
-        retry {
           val url = s"$serviceBaseUrl/developer/applications"
 
           Logger.debug(s"fetchByTeamMemberEmail() - About to call $url for $email in ${environment.toString}")
@@ -82,7 +84,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
               case _ =>
                 Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
             }
-        }
       }
     } else {
       Future.successful(Seq.empty)
@@ -93,23 +94,19 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   ): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     val url = s"$serviceBaseUrl/application/${applicationId.value}/collaborator/${urlEncode(teamMemberToDelete)}" +
       s"?admin=${urlEncode(requestingEmail)}&adminsToEmail=${urlEncode(adminsToEmail.mkString(","))}"
-    http.DELETE(url) map { _ =>
-      ApplicationUpdateSuccessful
-    } recover {
-      case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => throw new ApplicationNeedsAdmin
-    } recover recovery
+    http.DELETE[Either[UpstreamErrorResponse, Unit]](url)
+    .map(_ match {
+      case Right(_)                                               => ApplicationUpdateSuccessful
+      case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _))        => throw new ApplicationNeedsAdmin
+      case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))        => throw new ApplicationNotFound
+      case Left(err)                                              => throw err
+    })
   }
-
+  
   def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
     if (isEnabled) {
       metrics.record(api) {
-        retry {
-          http.GET[Application](s"$serviceBaseUrl/application/${id.value}") map {
-            Some(_)
-          } recover {
-            case _: NotFoundException => None
-          }
-        }
+        http.GET[Option[Application]](s"$serviceBaseUrl/application/${id.value}")
       }
     } else {
       Future.successful(None)
@@ -117,78 +114,92 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      http.DELETE(s"$serviceBaseUrl/application/${applicationId.value}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.version.value}") map { _ =>
-        ApplicationUpdateSuccessful
-      } recover recovery
+      http.DELETE[Option[Unit]](s"$serviceBaseUrl/application/${applicationId.value}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.version.value}")
+      .map(_ match {
+        case Some(_)  => ApplicationUpdateSuccessful
+        case None     => throw new ApplicationNotFound
+      })
     }
 
   def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken] = metrics.record(api) {
-    retry {
-      http.GET[ApplicationToken](s"$serviceBaseUrl/application/${id.value}/credentials") recover recovery
-    }
+      http.GET[Option[ApplicationToken]](s"$serviceBaseUrl/application/${id.value}/credentials")
+      .map(_ match {
+        case Some(applicationToken)  => applicationToken
+        case None     => throw new ApplicationNotFound
+      })
   }
-
+  
   def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/${applicationId.value}/request-uplift", upliftRequest, Seq(CONTENT_TYPE -> JSON)) map { _ =>
-      ApplicationUpliftSuccessful
-    } recover {
-      case e: Upstream4xxResponse if e.upstreamResponseCode == 409 => throw new ApplicationAlreadyExists
-    } recover recovery
+    http.POST[UpliftRequest, Either[UpstreamErrorResponse, Unit]](s"$serviceBaseUrl/application/${applicationId.value}/request-uplift", upliftRequest)
+    .map(_ match {
+      case Right(_) => ApplicationUpliftSuccessful
+      case Left(UpstreamErrorResponse(_, CONFLICT, _, _))   => throw new ApplicationAlreadyExists
+      case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))  => throw new ApplicationNotFound
+      case Left(err) => throw err
+    })
   }
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
-    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/verify-uplift/$verificationCode", Seq((CONTENT_LENGTH -> "0"))) map { _ =>
-      ApplicationVerificationSuccessful
-    } recover {
-      case _: BadRequestException => ApplicationVerificationFailed
-    } recover recovery
+    http.POSTEmpty[Either[UpstreamErrorResponse, Unit]](s"$serviceBaseUrl/verify-uplift/$verificationCode", Seq((CONTENT_LENGTH -> "0")))
+    .map(_ match {
+      case Right(_)                                        => ApplicationVerificationSuccessful
+      case Left(UpstreamErrorResponse(_,BAD_REQUEST, _,_)) => ApplicationVerificationFailed
+      case Left(UpstreamErrorResponse(_,NOT_FOUND, _, _))  => throw new ApplicationNotFound
+      case Left(err)                                       => throw err
+    })
   }
 
   def updateApproval(id: ApplicationId, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/application/${id.value}/check-information", Json.toJson(approvalInformation)) map { _ =>
-      ApplicationUpdateSuccessful
-    } recover recovery
+    http.POST[CheckInformation, Option[Unit]](s"$serviceBaseUrl/application/${id.value}/check-information", approvalInformation)
+    .map(_ match {
+        case Some(_)  => ApplicationUpdateSuccessful
+        case None     => throw new ApplicationNotFound
+      })
   }
 
   def addClientSecrets(id: ApplicationId, clientSecretRequest: ClientSecretRequest)(implicit hc: HeaderCarrier): Future[(String, String)] = metrics.record(api) {
-
-    http.POST[ClientSecretRequest, AddClientSecretResponse](s"$serviceBaseUrl/application/${id.value}/client-secret", clientSecretRequest) map { response =>
-      val newSecret: TPAClientSecret = response.clientSecrets.last
-      (newSecret.id, newSecret.secret.get)
-    } recover {
-      case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => throw new ClientSecretLimitExceeded
-    } recover recovery
+   http.POST[ClientSecretRequest, Either[UpstreamErrorResponse, AddClientSecretResponse]](s"$serviceBaseUrl/application/${id.value}/client-secret", clientSecretRequest)
+    .map( _ match {
+      case Right(response) => { 
+        val newSecret: TPAClientSecret = response.clientSecrets.last
+        ((newSecret.id, newSecret.secret.get))
+      }
+      case Left(UpstreamErrorResponse(_,FORBIDDEN,_,_))   => throw new ClientSecretLimitExceeded
+      case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_))   => throw new ApplicationNotFound
+      case Left(err) => throw err
+    })
   }
 
   def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
 
-      http.POST(s"$serviceBaseUrl/application/${applicationId.value}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress)) map { _ =>
-        ApplicationUpdateSuccessful
-      } recover recovery
+      http.POST[DeleteClientSecretRequest, Option[Unit]](s"$serviceBaseUrl/application/${applicationId.value}/client-secret/$clientSecretId", DeleteClientSecretRequest(actorEmailAddress))
+      .map(_ match {
+        case Some(_)  => ApplicationUpdateSuccessful
+        case None     => throw new ApplicationNotFound
+      })
     }
 
   def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
     val body = ApplicationNameValidationRequest(name, selfApplicationId)
 
-    retry {
-      http.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](s"$serviceBaseUrl/application/name/validate", body) map {
-        ApplicationNameValidationResult.apply
-      } recover recovery
-    }
+    http.POST[ApplicationNameValidationRequest, Option[ApplicationNameValidationResult]](s"$serviceBaseUrl/application/name/validate", body)
+      .map(_ match {
+        case Some(x)  => ApplicationNameValidation(x)
+        case None     => throw new ApplicationNotFound
+      })
   }
 
   def updateIpAllowlist(applicationId: ApplicationId, required: Boolean, ipAllowlist: Set[String])(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.PUT[UpdateIpAllowlistRequest, HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/ipAllowlist", UpdateIpAllowlistRequest(required, ipAllowlist))
-      .map(_ => ApplicationUpdateSuccessful) recover recovery
+    http.PUT[UpdateIpAllowlistRequest, Option[Unit]](s"$serviceBaseUrl/application/${applicationId.value}/ipAllowlist", UpdateIpAllowlistRequest(required, ipAllowlist))
+      .map(_ match {
+        case Some(_)  => ApplicationUpdateSuccessful
+        case None     => throw new ApplicationNotFound
+    })
   }
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = {
     encode(str, encoding)
-  }
-
-  private def recovery: PartialFunction[Throwable, Nothing] = {
-    case _: NotFoundException => throw new ApplicationNotFound
   }
 
   def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit] = {
