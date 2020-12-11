@@ -33,18 +33,47 @@ import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.emailpreferences.EmailPreferences
+import connectors.ThirdPartyDeveloperConnector.RemoveMfaRequest
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
                                             )(implicit val ec: ExecutionContext) {
 
-  def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+  import ThirdPartyDeveloperConnector._
 
-    http.PUT(s"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState}", "")
+  def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
+    encryptedJson.secretRequestJson(
+      Json.toJson(loginRequest),
+      http.POST(s"$serviceBaseUrl/authenticate", _, Seq(CONTENT_TYPE -> JSON)))
+      .map(_.json.as[UserAuthenticationResponse])
+      .recover {
+        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
+        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
+        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
+        case _: NotFoundException => throw new InvalidEmail
+      }
+  }
+
+  def authenticateTotp(totpAuthenticationRequest: TotpAuthenticationRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+    encryptedJson.secretRequestJson(
+      Json.toJson(totpAuthenticationRequest),
+      http.POST(s"$serviceBaseUrl/authenticate-totp", _, Seq(CONTENT_TYPE -> JSON)))
       .map(_.json.as[Session])
       .recover {
-        case _: NotFoundException => throw new SessionInvalid
+        case _: BadRequestException => throw new InvalidCredentials
+        case _: NotFoundException => throw new InvalidEmail
       }
+  }
+
+  def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+
+    import uk.gov.hmrc.http.HttpReads.Implicits._
+
+    http.PUT[String, Option[Session]](s"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState}", "")
+      .map(_ match {
+        case Some(session) => session
+        case None => throw new SessionInvalid
+      })
   }
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
@@ -196,64 +225,46 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     }
   }
 
-  def enableMfa(email: String)(implicit hc: HeaderCarrier): Future[Int] = {
+  import uk.gov.hmrc.http.HttpReads.Implicits._
+
+  def enableMfa(email: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     metrics.record(api) {
-      http.PUT(s"$serviceBaseUrl/developer/$email/mfa/enable", "").map(status)
+      http.PUT[String, Unit](s"$serviceBaseUrl/developer/$email/mfa/enable", "")
     }
   }
 
-  def removeMfa(email: String)(implicit hc: HeaderCarrier): Future[Int] =
+  def removeMfa(email: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+    implicit val RemoveMfaRequestFormat = Json.format[RemoveMfaRequest]
     metrics.record(api) {
-      http.POST(s"$serviceBaseUrl/developer/$email/mfa/remove", Json.obj("removedBy" -> email)).map(status)
+      http.POST[RemoveMfaRequest, Unit](s"$serviceBaseUrl/developer/$email/mfa/remove", RemoveMfaRequest(email))
     }
-
-  def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
-    encryptedJson.secretRequestJson(
-      Json.toJson(loginRequest),
-      http.POST(s"$serviceBaseUrl/authenticate", _, Seq(CONTENT_TYPE -> JSON)))
-      .map(_.json.as[UserAuthenticationResponse])
-      .recover {
-        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
-        case _: NotFoundException => throw new InvalidEmail
-      }
   }
-
-  def authenticateTotp(totpAuthenticationRequest: TotpAuthenticationRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
-    encryptedJson.secretRequestJson(
-      Json.toJson(totpAuthenticationRequest),
-      http.POST(s"$serviceBaseUrl/authenticate-totp", _, Seq(CONTENT_TYPE -> JSON)))
-      .map(_.json.as[Session])
-      .recover {
-        case _: BadRequestException => throw new InvalidCredentials
-        case _: NotFoundException => throw new InvalidEmail
-      }
-  }
-
 
   def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
-      http.DELETE(s"$serviceBaseUrl/developer/$emailAddress/email-preferences")
-      .map(_.status == NO_CONTENT)
-      .recover {
-        case _: NotFoundException => throw new InvalidEmail
-      }
+      http.DELETE[Option[Unit]](s"$serviceBaseUrl/developer/$emailAddress/email-preferences")
+      .map(_ match {
+        case Some(_) => true
+        case None => throw new InvalidEmail
+      })
   }
 
   def updateEmailPreferences(emailAddress: String, emailPreferences: EmailPreferences)
-  (implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
-    http.PUT(s"$serviceBaseUrl/developer/$emailAddress/email-preferences", Json.toJson(emailPreferences))
-      .map(_.status == NO_CONTENT)
-      .recover {
-        case _: NotFoundException => throw new InvalidEmail
-      }
+      (implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
+    val url = s"$serviceBaseUrl/developer/$emailAddress/email-preferences"
+
+    http.PUT[EmailPreferences, Option[Unit]](url, emailPreferences)
+      .map(_ match {
+        case Some(_) => true
+        case None => throw new InvalidEmail
+      })
   }
-
-
 }
 
 object ThirdPartyDeveloperConnector {
   private[connectors] case class UnregisteredUserCreationRequest(email: String)
+
+  case class RemoveMfaRequest(removedBy: String)
+
 
   object JsonFormatters {
     implicit val formatUnregisteredUserCreationRequest: Format[UnregisteredUserCreationRequest] = Json.format[UnregisteredUserCreationRequest]
