@@ -160,6 +160,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } recover recovery
   }
 
+
   def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
 
