@@ -40,7 +40,9 @@ import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 
-class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
+class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec 
+  with GuiceOneAppPerTest 
+  with CommonResponseHandlers {
 
   private val applicationId = ApplicationId("applicationId")
   private val clientId = ClientId("client-id")
@@ -132,8 +134,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
 
       val url = baseUrl + s"/application/${applicationId.value}"
       when(
-        mockHttpClient.POST[UpdateApplicationRequest,Unit](eqTo(url), eqTo(updateApplicationRequest), *)(*, *, *, *)
-      ).thenReturn(successful(()))
+        mockHttpClient.POST[UpdateApplicationRequest,ErrorOrUnit](eqTo(url), eqTo(updateApplicationRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Right(())))
 
       val result = await(connector.update(applicationId, updateApplicationRequest))
 
@@ -238,8 +240,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
 
     "unsubscribe application from an api" in new Setup {
 
-      when(mockHttpClient.DELETE[Option[Unit]](eqTo(url),*)(*,*,*))
-        .thenReturn(successful(Some(())))
+      when(mockHttpClient.DELETE[ErrorOrUnit](eqTo(url),*)(*,*,*))
+        .thenReturn(successful(Right(())))
 
       val result = await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
 
@@ -248,8 +250,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
 
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
 
-      when(mockHttpClient.DELETE[Option[Unit]](eqTo(url),*)(*,*,*))
-        .thenReturn(successful(None))
+      when(mockHttpClient.DELETE[ErrorOrUnit](eqTo(url),*)(*,*,*))
+        .thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound](
         await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
@@ -263,7 +265,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
 
     "return success response in case of a 204 NO CONTENT on backend" in new Setup {
 
-      when(mockHttpClient.POSTEmpty[Either[UpstreamErrorResponse, Unit]](eqTo(url), *)(*, *, *))
+      when(mockHttpClient.POSTEmpty[ErrorOrUnit](eqTo(url), *)(*, *, *))
         .thenReturn(Future.successful(Right(())))
 
       val result = await(connector.verify(verificationCode))
@@ -272,7 +274,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     }
 
     "return failure response in case of a 400 on backend" in new Setup {
-      when(mockHttpClient.POSTEmpty[Either[UpstreamErrorResponse, Unit]](eqTo(url), *)(*, *, *))
+      when(mockHttpClient.POSTEmpty[ErrorOrUnit](eqTo(url), *)(*, *, *))
         .thenReturn(successful(Left(UpstreamErrorResponse("",BAD_REQUEST))))
 
       val result = await(connector.verify(verificationCode))
@@ -291,7 +293,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
 
       when(
         mockHttpClient
-          .POST[UpliftRequest, Either[UpstreamErrorResponse, Unit]](eqTo(url), eqTo(upliftRequest),*)(*, *, *, *)
+          .POST[UpliftRequest, ErrorOrUnit](eqTo(url), eqTo(upliftRequest),*)(*, *, *, *)
       ).thenReturn(successful(Right(())))
 
       val result = await(connector.requestUplift(applicationId, upliftRequest))
@@ -301,7 +303,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
 
     "return ApplicationAlreadyExistsResponse response in case of a 409 CONFLICT on backend " in new Setup {
       when(
-        mockHttpClient.POST[UpliftRequest, Either[UpstreamErrorResponse, Unit]](eqTo(url), eqTo(upliftRequest),*)(*, *, *, *)
+        mockHttpClient.POST[UpliftRequest, ErrorOrUnit](eqTo(url), eqTo(upliftRequest),*)(*, *, *, *)
       ).thenReturn(successful(Left(UpstreamErrorResponse("",CONFLICT))))
 
       intercept[ApplicationAlreadyExists] {
@@ -311,7 +313,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
 
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
       when(
-        mockHttpClient.POST[UpliftRequest, Either[UpstreamErrorResponse, Unit]](eqTo(url), eqTo(upliftRequest),*)(*, *, *, *)
+        mockHttpClient.POST[UpliftRequest, ErrorOrUnit](eqTo(url), eqTo(upliftRequest),*)(*, *, *, *)
       ).thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound] {
@@ -327,8 +329,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "return success response in case of a 204 on backend " in new Setup {
       when(
         mockHttpClient
-          .POST[CheckInformation, Option[Unit]](eqTo(url), eqTo(updateRequest), *)(*, *, *, *)
-      ).thenReturn(successful(Some(())))
+          .POST[CheckInformation, ErrorOrUnit](eqTo(url), eqTo(updateRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Right(())))
 
       val result = await(connector.updateApproval(applicationId, updateRequest))
       result shouldEqual ApplicationUpdateSuccessful
@@ -337,8 +339,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
       when(
         mockHttpClient
-          .POST[CheckInformation, Option[Unit]](eqTo(url), eqTo(updateRequest), *)(*, *, *, *)
-      ).thenReturn(successful(None))
+          .POST[CheckInformation, ErrorOrUnit](eqTo(url), eqTo(updateRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound] {
         await(connector.updateApproval(applicationId, updateRequest))
@@ -356,7 +358,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "return success" in new Setup {
       when(
         mockHttpClient
-          .DELETE[Either[UpstreamErrorResponse, Unit]](eqTo(url), *)(*, *, *)
+          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
       ).thenReturn(successful(Right(Unit)))
 
       val result = await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail))
@@ -366,7 +368,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "return application needs administrator response" in new Setup {
       when(
         mockHttpClient
-          .DELETE[Either[UpstreamErrorResponse, Unit]](eqTo(url), *)(*, *, *)
+          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
       ).thenReturn(successful(Left(UpstreamErrorResponse("403 Forbidden", FORBIDDEN))))
 
       intercept[ApplicationNeedsAdmin](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
@@ -375,7 +377,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "return application not found response" in new Setup {
       when(
         mockHttpClient
-          .DELETE[Either[UpstreamErrorResponse, Unit]](eqTo(url), *)(*, *, *)
+          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
       ).thenReturn(successful(Left(UpstreamErrorResponse("404 Not Found", NOT_FOUND))))
 
       intercept[ApplicationNotFound](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
@@ -384,7 +386,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "other upstream error response should be rethrown" in new Setup {
       when(
         mockHttpClient
-          .DELETE[Either[UpstreamErrorResponse, Unit]](eqTo(url), *)(*, *, *)
+          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
       ).thenReturn(successful(Left(UpstreamErrorResponse("500 Internal Server Error", INTERNAL_SERVER_ERROR))))
 
       intercept[Exception](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
@@ -454,8 +456,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "delete a client secret" in new Setup {
       when(
         mockHttpClient
-          .POST[DeleteClientSecretRequest, Option[Unit]](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
-      ).thenReturn(Future.successful(Some(())))
+          .POST[DeleteClientSecretRequest, ErrorOrUnit](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(Future.successful(Right(())))
 
       val result = await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
 
@@ -465,8 +467,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
       when(
         mockHttpClient
-          .POST[DeleteClientSecretRequest, Option[Unit]](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
-      ).thenReturn(successful(None))
+          .POST[DeleteClientSecretRequest, ErrorOrUnit](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound] {
         await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
@@ -519,8 +521,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     val url = s"$baseUrl/application/${applicationId.value}/ipAllowlist"
 
     "return success response in case of a 204 on backend " in new Setup {
-      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, Option[Unit]](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
-        .thenReturn(successful(Some(())))
+      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
+        .thenReturn(successful(Right(())))
 
       val result: ApplicationUpdateSuccessful = await(connector.updateIpAllowlist(applicationId, required = false, allowlist))
 
@@ -528,8 +530,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec with GuiceOneAppP
     }
 
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, Option[Unit]](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
-        .thenReturn(successful(None))
+      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
+        .thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound] {
         await(connector.updateIpAllowlist(applicationId, required = false, allowlist))

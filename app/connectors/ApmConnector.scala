@@ -39,7 +39,10 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
 @Singleton
-class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) extends SubscriptionsConnector with OpenAccessApisConnector {
+class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) 
+extends SubscriptionsConnector 
+with OpenAccessApisConnector 
+with CommonResponseHandlers {
   import ApmConnectorJsonFormatters._
 
   val api = API("api-platform-microservice")
@@ -74,14 +77,16 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
 
   def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)
                     (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[ApiIdentifier, Option[Unit]](s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { 
+    http.POST[ApiIdentifier, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON))
+    .map(throwOrOptionOf)
+    .map { 
       case Some(_) => ApplicationUpdateSuccessful
       case None => throw new ApplicationNotFound
     }
   }
 
   def addTeamMember(applicationId: ApplicationId, addTeamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[Unit] = metrics.record(api) {
-    http.POST[AddTeamMemberRequest, Either[UpstreamErrorResponse, Unit]](s"${config.serviceBaseUrl}/applications/${applicationId.value}/collaborators", addTeamMember)
+    http.POST[AddTeamMemberRequest, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/collaborators", addTeamMember)
     .map(r => r match {
       case Left(UpstreamErrorResponse(_, CONFLICT, _, _))  => throw new TeamMemberAlreadyExists
       case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound

@@ -18,7 +18,7 @@ package service
 
 import connectors.ThirdPartyDeveloperConnector
 import org.scalatest.Matchers
-import play.api.http.Status.{INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
+import play.api.http.Status.INTERNAL_SERVER_ERROR
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import utils.AsyncHmrcSpec
 
@@ -32,8 +32,8 @@ class MFAServiceSpec extends AsyncHmrcSpec with Matchers {
     val totpCode = "12345678"
     val connector = mock[ThirdPartyDeveloperConnector]
 
-    when(connector.enableMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(NO_CONTENT))
-    when(connector.removeMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(OK))
+    when(connector.enableMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(()))
+    when(connector.removeMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(()))
 
     val service = new MFAService(connector)
   }
