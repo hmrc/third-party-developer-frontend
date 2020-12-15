@@ -16,16 +16,27 @@
 
 package connectors
 
-import play.api.http.Status.BAD_REQUEST
-import uk.gov.hmrc.http.{HttpErrorFunctions, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.UpstreamErrorResponse
+import play.api.http.Status._
 
-object CustomResponseHandlers extends HttpErrorFunctions {
-  implicit val permissiveBadRequestResponseHandler: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
-    override def read(method: String, url: String, response: HttpResponse): HttpResponse = {
-      response.status match {
-        case BAD_REQUEST => response
-        case _ => handleResponse(method, url)(response)
-      }
+trait CommonResponseHandlers {
+  
+  type ErrorOr[A] = Either[UpstreamErrorResponse, A]
+  
+  type ErrorOrUnit = Either[UpstreamErrorResponse, Unit]
+
+  val throwOrUnit = throwOr(()) _
+
+  def throwOr[A](successValue: A)(either: ErrorOrUnit): A =
+    either match {
+      case Left(err) => throw err
+      case Right(_) => successValue
     }
-  }
+
+  def throwOrOptionOf[A](either: ErrorOr[A]): Option[A] =
+    either match {
+      case Right(a) => Some(a)
+      case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => None
+      case Left(err) => throw err
+    }
 }

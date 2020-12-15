@@ -22,7 +22,7 @@ import domain.models.applications.{Application, ApplicationId, ClientId, Environ
 import play.api.http.Status
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
 
@@ -62,7 +62,7 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
     }
 
     def givenSandboxFailure(errorCode: Int): Any = {
-      val error = if (errorCode / 100 == 4) Upstream4xxResponse("message", errorCode, errorCode) else Upstream5xxResponse("message", errorCode, errorCode)
+      val error = if (errorCode / 100 == 4) UpstreamErrorResponse("message", errorCode, errorCode) else UpstreamErrorResponse("message", errorCode, errorCode)
       when(connectors.sandboxApplicationConnector.fetchApplicationById(productionApplicationId)).thenReturn(failed(error))
     }
   }

@@ -29,8 +29,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.failed
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Random
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
 
-class RetriesSpec extends AsyncHmrcSpec {
+class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 
   trait Setup {
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]

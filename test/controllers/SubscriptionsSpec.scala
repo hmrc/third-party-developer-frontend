@@ -198,7 +198,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include("Subscribe to APIs so your application can access them in the sandbox")
+      contentAsString(result) should include("Subscribe to the APIs you want to use in the sandbox")
     }
 
     "return the subscriptions page for a developer on a standard app in the Development environment" in new Setup {
@@ -210,7 +210,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include("Subscribe to APIs so your application can access them in development")
+      contentAsString(result) should include("Subscribe to the APIs you want to use in development")
     }
   }
 

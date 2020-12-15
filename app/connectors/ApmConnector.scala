@@ -24,20 +24,25 @@ import domain.models.emailpreferences.APICategoryDetails
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import domain.models.subscriptions.{ApiData, FieldName}
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.CONTENT_TYPE
 import service.SubscriptionsService.SubscriptionsConnector
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
+import play.api.http.Status.{NOT_FOUND, CONFLICT}
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.play.http.metrics.API
 import service.OpenAccessApiService.OpenAccessApisConnector
+import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 @Singleton
-class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) extends SubscriptionsConnector with OpenAccessApisConnector {
+class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext) 
+extends SubscriptionsConnector 
+with OpenAccessApisConnector 
+with CommonResponseHandlers {
   import ApmConnectorJsonFormatters._
 
   val api = API("api-platform-microservice")
@@ -72,26 +77,22 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
 
   def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)
                     (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST(s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON)) map { _ =>
-      ApplicationUpdateSuccessful
-    } recover recovery
+    http.POST[ApiIdentifier, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/subscriptions", apiIdentifier, Seq(CONTENT_TYPE -> JSON))
+    .map(throwOrOptionOf)
+    .map { 
+      case Some(_) => ApplicationUpdateSuccessful
+      case None => throw new ApplicationNotFound
+    }
   }
 
   def addTeamMember(applicationId: ApplicationId, addTeamMember: AddTeamMemberRequest)(implicit hc: HeaderCarrier): Future[Unit] = metrics.record(api) {
-    val handleTeamMemberAlreadyExists: PartialFunction[Throwable, Unit] = {
-      case e: Upstream4xxResponse if e.upstreamResponseCode == 409 => throw new TeamMemberAlreadyExists
-    }
-
-    http.POST[AddTeamMemberRequest, HttpResponse](s"${config.serviceBaseUrl}/applications/${applicationId.value}/collaborators", addTeamMember)
-    .map(_ => ())
-    .recover(handleTeamMemberAlreadyExists orElse recovery)
-  }
-
-  private def recovery: PartialFunction[Throwable, Nothing] = {
-    case e: NotFoundException => {
-      Logger.warn(e.message)
-      throw new ApplicationNotFound
-    }
+    http.POST[AddTeamMemberRequest, ErrorOrUnit](s"${config.serviceBaseUrl}/applications/${applicationId.value}/collaborators", addTeamMember)
+    .map(r => r match {
+      case Left(UpstreamErrorResponse(_, CONFLICT, _, _))  => throw new TeamMemberAlreadyExists
+      case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
+      case Left(err) => throw err
+      case Right(_) => ()
+    })
   }
 }
 

@@ -31,13 +31,6 @@ object ApplicationNameValidationJson {
   case class Errors(invalidName: Boolean, duplicateName: Boolean)
 
   object ApplicationNameValidationResult {
-    def apply(applicationNameValidationResult: ApplicationNameValidationResult): ApplicationNameValidation = {
-      applicationNameValidationResult.errors match {
-        case Some(errors) => Invalid(errors.invalidName, errors.duplicateName)
-        case None         => Valid
-      }
-    }
-
     implicit val formatErrors: OFormat[Errors] = Json.format[Errors]
     implicit val format: OFormat[ApplicationNameValidationResult] = Json.format[ApplicationNameValidationResult]
   }

@@ -9,8 +9,9 @@ import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.connectors.ExtendedApiDefinition
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -70,7 +71,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
           )
       )
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(underTest.fetchAPIDefinition("api1"))
       }
     }
@@ -85,7 +86,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
             )
         )
 
-        intercept[NotFoundException](await(underTest.fetchAPIDefinition("unknownapi")))
+        intercept[UpstreamErrorResponse](await(underTest.fetchAPIDefinition("unknownapi"))).statusCode shouldBe NOT_FOUND
       }
   }
 
@@ -112,7 +113,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
           )
       )
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(underTest.fetchApiDefinitionsVisibleToUser(userEmail))
       }
     }

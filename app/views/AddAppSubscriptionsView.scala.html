@@ -71,11 +71,11 @@
 
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            <p>Subscribe to APIs so your application can access them in @environmentNameService.subordinateWording. You can change them at any time.</p>
+            <p>Subscribe to the APIs you want to use in @environmentNameService.subordinateWording.</p>
 
-            <p>Once you subscribe, we'll send you email updates such as new API versions, new endpoints or version retirements.</p>
+            <p>You can change the APIs you subscribe to in @environmentNameService.subordinateWording at any time.</p>
 
-            <p>Learn more about our APIs in @Link.toExternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation (opens in a new tab)")).toHtml.</p>
+            <p>Check the @Link.toExternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation (opens in a new tab)")).toHtml for information about specific APIs.</p>
 
             @if(role.isAdministrator && isPendingOrActiveProductionApplication(app)) {
                 <p class="panel panel-border-wide">For security reasons we must review any API subscription changes. This takes up to 2 working days.</p>

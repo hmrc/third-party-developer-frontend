@@ -119,10 +119,6 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
       contentAsString(result) should include("Add an application to the sandbox")
       contentAsString(result) should include(loggedInUser.displayedName)
       contentAsString(result) should include("Sign out")
-      contentAsString(result) should include("get its sandbox credentials")
-      contentAsString(result) should include("use its credentials for integration testing")
-      contentAsString(result) should include("In production, your application will need to comply with the expectations set out in our")
-      contentAsString(result) should include("Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:")
       contentAsString(result) should not include "Sign in"
     }
 
@@ -134,11 +130,6 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
         status(result) shouldBe OK
         contentAsString(result) should include("Add an application to development")
         contentAsString(result) should include(loggedInUser.displayedName)
-        contentAsString(result) should include("Sign out")
-        contentAsString(result) should include("get its development credentials")
-        contentAsString(result) should include("use its credentials for integration testing")
-        contentAsString(result) should include("In production, your application will need to comply with the expectations set out in our")
-        contentAsString(result) should include("Once you add your application and subscribe it to the development APIs you want to integrate with you can:")
         contentAsString(result) should not include "Sign in"
       }
 

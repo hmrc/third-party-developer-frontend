@@ -27,7 +27,8 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import domain.models.developers.UserId
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
@@ -109,9 +110,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(underTest.fetchSession(sessionId))
-      }
+      }.statusCode shouldBe INTERNAL_SERVER_ERROR
     }
 
   }
@@ -121,23 +122,21 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val email = "test.user@example.com"
       stubFor(post(urlPathEqualTo(s"/developer/$email/mfa/remove")).willReturn(aResponse().withStatus(OK)))
 
-      val result: Int = await(underTest.removeMfa(email))
-
-      result shouldBe OK
+      await(underTest.removeMfa(email))
     }
 
-    "throw NotFoundException if user not found" in new Setup {
+    "throw UpstreamErrorResponse with status of 404 if user not found" in new Setup {
       val email = "invalid.user@example.com"
       stubFor(post(urlPathEqualTo(s"/developer/$email/mfa/remove")).willReturn(aResponse().withStatus(NOT_FOUND)))
 
-      intercept[NotFoundException](await(underTest.removeMfa(email)))
+      intercept[UpstreamErrorResponse](await(underTest.removeMfa(email))).statusCode shouldBe NOT_FOUND
     }
 
-    "throw Upstream5xxResponse if it failed to remove MFA" in new Setup {
+    "throw UpstreamErrorResponse with status of 500 if it failed to remove MFA" in new Setup {
       val email = "test.user@example.com"
       stubFor(post(urlPathEqualTo(s"/developer/$email/mfa/remove")).willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
 
-      intercept[Upstream5xxResponse](await(underTest.removeMfa(email)))
+      intercept[UpstreamErrorResponse](await(underTest.removeMfa(email))).statusCode shouldBe INTERNAL_SERVER_ERROR
     }
   }
 
@@ -258,9 +257,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)))
-      }
+      }.statusCode shouldBe INTERNAL_SERVER_ERROR
     }
   }
 

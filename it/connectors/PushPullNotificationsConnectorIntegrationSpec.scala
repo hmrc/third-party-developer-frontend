@@ -26,7 +26,7 @@ import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.API
 
 class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
@@ -102,7 +102,7 @@ class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegra
       "throw Upstream5xxResponse for a 500 response" in new Setup {
         stubFor(get(urlEqualTo(fetchPushSecretsPath)).willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
 
-        intercept[Upstream5xxResponse](await(connector.fetchPushSecrets(clientId)))
+        intercept[UpstreamErrorResponse](await(connector.fetchPushSecrets(clientId)))
       }
     }
   }

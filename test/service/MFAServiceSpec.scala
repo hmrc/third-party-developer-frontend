@@ -18,8 +18,8 @@ package service
 
 import connectors.ThirdPartyDeveloperConnector
 import org.scalatest.Matchers
-import play.api.http.Status.{INTERNAL_SERVER_ERROR, NO_CONTENT, OK}
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import play.api.http.Status.INTERNAL_SERVER_ERROR
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,8 +32,8 @@ class MFAServiceSpec extends AsyncHmrcSpec with Matchers {
     val totpCode = "12345678"
     val connector = mock[ThirdPartyDeveloperConnector]
 
-    when(connector.enableMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(NO_CONTENT))
-    when(connector.removeMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(OK))
+    when(connector.enableMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(()))
+    when(connector.removeMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(()))
 
     val service = new MFAService(connector)
   }
@@ -69,9 +69,9 @@ class MFAServiceSpec extends AsyncHmrcSpec with Matchers {
 
     "throw exception if update fails" in new SuccessfulTotpVerification {
       when(connector.enableMfa(eqTo(email))(any[HeaderCarrier]))
-        .thenReturn(failed(Upstream5xxResponse("failed to enable MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
+        .thenReturn(failed(UpstreamErrorResponse("failed to enable MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      intercept[Upstream5xxResponse](await(service.enableMfa(email, totpCode)(HeaderCarrier())))
+      intercept[UpstreamErrorResponse](await(service.enableMfa(email, totpCode)(HeaderCarrier())))
     }
   }
 
@@ -100,9 +100,9 @@ class MFAServiceSpec extends AsyncHmrcSpec with Matchers {
 
     "throw exception if removal fails" in new SuccessfulTotpVerification {
       when(connector.removeMfa(eqTo(email))(any[HeaderCarrier]))
-        .thenReturn(failed(Upstream5xxResponse("failed to remove MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
+        .thenReturn(failed(UpstreamErrorResponse("failed to remove MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      intercept[Upstream5xxResponse](await(service.removeMfa(email, totpCode)(HeaderCarrier())))
+      intercept[UpstreamErrorResponse](await(service.removeMfa(email, totpCode)(HeaderCarrier())))
     }
   }
 }

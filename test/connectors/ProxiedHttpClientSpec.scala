@@ -18,16 +18,14 @@ package connectors
 
 import java.util.UUID
 
-import akka.actor.ActorSystem
 import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.{Configuration, Environment, Mode}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.bootstrap.config.RunMode
 import utils.AsyncHmrcSpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-class ProxiedHttpClientSpec extends AsyncHmrcSpec {
-
-  private val actorSystem = ActorSystem("test-actor-system")
+class ProxiedHttpClientSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite {
 
   trait Setup {
     val apiKey: String = UUID.randomUUID().toString
@@ -44,7 +42,7 @@ class ProxiedHttpClientSpec extends AsyncHmrcSpec {
     when(mockConfig.getOptional[Boolean]("Test.proxy.proxyRequiredForThisEnvironment")).thenReturn(Some(true))
     when(mockWsClient.url(url)).thenReturn(mock[WSRequest])
 
-    val underTest = new ProxiedHttpClient(mockConfig, mockHttpAuditing, mockWsClient, mockEnvironment, actorSystem, mockRunMode)
+    val underTest = new ProxiedHttpClient(mockConfig, mockHttpAuditing, mockWsClient, mockEnvironment, app.actorSystem, mockRunMode)
   }
 
   "withHeaders" should {
