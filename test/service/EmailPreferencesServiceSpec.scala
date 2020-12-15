@@ -16,6 +16,7 @@
 
 package service
 
+import builder.DeveloperBuilder
 import connectors.{ApmConnector, ThirdPartyDeveloperConnector}
 import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 import domain.models.applications.ApplicationId
@@ -31,18 +32,18 @@ import scala.concurrent.Future
 import domain.models.connectors.ExtendedApiDefinition
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
-
-  val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
-  val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
-  val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
-  val sessionId = "sessionId"
-  val session: Session = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
-  val sessionNoEMailPrefences: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-  val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-  val applicationId = ApplicationId.random
-
-  trait SetUp extends ExtendedApiDefinitionTestDataHelper {
+  trait SetUp extends ExtendedApiDefinitionTestDataHelper with DeveloperBuilder {
     implicit val hc: HeaderCarrier = HeaderCarrier()
+
+    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
+    val developer: Developer = buildDeveloper()
+    val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
+    val sessionId = "sessionId"
+    val session: Session = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
+    val sessionNoEMailPrefences: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
+    val applicationId = ApplicationId.random
+
     val mockFlowRepository = mock[FlowRepository]
     val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
     val mockApmConnector = mock[ApmConnector]

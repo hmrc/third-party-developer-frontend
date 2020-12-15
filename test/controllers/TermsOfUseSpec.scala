@@ -16,12 +16,13 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import domain.ApplicationUpdateSuccessful
 import domain.models.applications
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.applications.Role.ADMINISTRATOR
-import domain.models.developers.{Developer, LoggedInState, Session}
+import domain.models.developers.{LoggedInState, Session}
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -42,7 +43,7 @@ import domain.models.developers.DeveloperSession
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
     val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
     val underTest = new TermsOfUse(
@@ -55,7 +56,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       termsOfUseView
     )
 
-    val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val loggedInUser = buildDeveloper()
     val sessionId = "sessionId"
     val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)

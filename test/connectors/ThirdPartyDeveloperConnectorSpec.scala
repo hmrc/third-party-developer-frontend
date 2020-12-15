@@ -16,6 +16,7 @@
 
 package connectors
 
+import builder.DeveloperBuilder
 import config.ApplicationConfig
 import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
@@ -38,7 +39,9 @@ import scala.concurrent.Future.{failed, successful}
 import connectors.ThirdPartyDeveloperConnector.CreateMfaResponse
 
 class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponseHandlers { 
-  trait Setup {
+
+  trait Setup extends DeveloperBuilder {
+
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockHttp: HttpClient = mock[HttpClient]
@@ -122,10 +125,11 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "fetchSession" should {
-    val sessionId = "sessionId"
-    val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
+      val sessionId = "sessionId"
 
-    "return session" in new Setup {
+      "return session" in new Setup {
+      val session = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
+
       when(mockHttp.GET[Option[Session]](eqTo(endpoint(s"session/$sessionId")))(*,*,*))
         .thenReturn(successful(Some(session)))
 
@@ -163,10 +167,11 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
 
   "updateSessionLoggedInState" should {
     val sessionId = "sessionId"
-    val updateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-    val session = Session(sessionId, Developer("John", "Smith", "john.smith@example.com"), LoggedInState.LOGGED_IN)
 
     "update session logged in state" in new Setup {
+      val updateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+      val session = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
+
       when(mockHttp.PUT[String, Option[Session]](eqTo(endpoint(s"session/$sessionId/loggedInState/LOGGED_IN")), eqTo(""), *)(*,*,*,*))
         .thenReturn(successful(Some(session)))
 
@@ -175,6 +180,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     }
 
     "error with SessionInvalid if we get a 404 response" in new Setup {
+      val updateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+
       when(mockHttp.PUT[String, Option[Session]](eqTo(endpoint(s"session/$sessionId/loggedInState/LOGGED_IN")), eqTo(""), *)(*,*,*,*))
         .thenReturn(successful(None))
 
@@ -245,18 +252,20 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
 
   // TODO - remove this to integration testing
   "accountSetupQuestions" should {
-
     val email = "john.smith@example.com"
-    val developer = Developer(email, "test", "testington", None)
 
     "successfully complete a developer account setup" in new Setup {
+      val aDeveloper = buildDeveloper(emailAddress = email)
+  
       when(mockHttp.POSTEmpty[Developer](eqTo(endpoint(s"developer/account-setup/$email/complete")), *)(*, *, *))
-      .thenReturn(successful(developer))
+      .thenReturn(successful(aDeveloper))
 
-      await(connector.completeAccountSetup(email)) shouldBe developer
+      await(connector.completeAccountSetup(email)) shouldBe aDeveloper
     }
 
     "successfully update roles" in new Setup {
+      val developer = buildDeveloper(emailAddress = email)
+
       private val request = AccountSetupRequest(roles = Some(Seq("aRole")), rolesOther = Some("otherRole"))
       when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/$email/roles")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 
@@ -264,6 +273,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     }
 
     "successfully update services" in new Setup {
+      val developer = buildDeveloper(emailAddress = email)
+
       private val request = AccountSetupRequest(services = Some(Seq("aService")), servicesOther = Some("otherService"))
       when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/$email/services")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 
@@ -271,6 +282,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     }
 
     "successfully update targets" in new Setup {
+      val developer = buildDeveloper(emailAddress = email)
+      
       private val request = AccountSetupRequest(targets = Some(Seq("aTarget")), targetsOther = Some("otherTargets"))
       when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/$email/targets")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 

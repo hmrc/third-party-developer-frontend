@@ -16,7 +16,8 @@
 
 package controllers
 
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import builder.DeveloperBuilder
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
 import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
@@ -41,14 +42,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 
 class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
-
-  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
-  val sessionId = "sessionId"
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-  val loggedInUser = DeveloperSession(session)
-
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TestApplications {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TestApplications with DeveloperBuilder {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
     val addTeamMemberView = app.injector.instanceOf[AddTeamMemberView]
     val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
@@ -69,6 +63,12 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     )
 
     implicit val hc = HeaderCarrier()
+
+    val developer = buildDeveloper()
+    val sessionId = "sessionId"
+    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+
+    val loggedInUser = DeveloperSession(session)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)

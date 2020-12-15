@@ -19,10 +19,11 @@ package controllers
 import java.util.UUID
 import java.util.UUID.randomUUID
 
+import builder.DeveloperBuilder
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.applications.ApplicationState._
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.ClientSecretLimitExceeded
 import domain.models.applications._
 import mocks.service._
@@ -41,9 +42,9 @@ import views.html.editapplication.DeleteClientSecretView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar {
+class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with DeveloperBuilder {
 
-  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer = buildDeveloper()
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 

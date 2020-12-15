@@ -18,6 +18,7 @@ package controllers
 
 import java.util.UUID.randomUUID
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
@@ -37,9 +38,9 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionServiceMock with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionServiceMock with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
 
-  val developer: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer: Developer = buildDeveloper()
   val sessionId = "sessionId"
   val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 

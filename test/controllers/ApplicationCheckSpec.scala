@@ -46,7 +46,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder {
+class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder with DeveloperBuilder {
 
   override val appId = ApplicationId("1234")
 
@@ -56,7 +56,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   val exampleContext = ApiContext("exampleContext")
   val version = ApiVersion("version")
 
-  val developerDto: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developerDto: Developer = buildDeveloper()
   val session: Session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
   val anotherCollaboratorEmail = "collaborator@example.com"
   val yetAnotherCollaboratorEmail = "collaborator2@example.com"

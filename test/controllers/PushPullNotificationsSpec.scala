@@ -16,9 +16,10 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import domain.models.apidefinitions.APISubscriptionStatus
 import domain.models.applications._
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.subscriptions.ApiSubscriptionFields
 import mocks.service._
 import org.jsoup.Jsoup
@@ -109,7 +110,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
     private val pushSecretsView = app.injector.instanceOf[PushSecretsView]
     private val pushPullNotificationsServiceMock = mock[PushPullNotificationsService]
 
@@ -126,7 +127,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val developer = buildDeveloper()
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 

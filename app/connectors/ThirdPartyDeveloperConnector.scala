@@ -27,10 +27,9 @@ import play.api.http.ContentTypes.JSON
 import play.api.http.HeaderNames.{CONTENT_TYPE, CONTENT_LENGTH}
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.{UserId => _, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
-
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.emailpreferences.EmailPreferences
 import connectors.ThirdPartyDeveloperConnector.RemoveMfaRequest
@@ -210,9 +209,9 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       http.POSTEmpty[Developer](s"$serviceBaseUrl/developer/account-setup/$email/complete", Seq((CONTENT_LENGTH -> "0")))
     }
 
-  def fetchDeveloper(email: String)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
+  def fetchDeveloper(id: UserId)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
     metrics.record(api) {
-      http.GET[Option[Developer]](s"$serviceBaseUrl/developer", Seq("email" -> email))
+      http.GET[Option[Developer]](s"$serviceBaseUrl/developer", Seq("developerId" -> id.asText))
     }
   }
 

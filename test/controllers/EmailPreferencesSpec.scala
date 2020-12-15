@@ -17,6 +17,7 @@
 package controllers
 
 import akka.stream.Materializer
+import builder.DeveloperBuilder
 import config.ApplicationConfig
 import domain.models.apidefinitions.ApiContext
 import domain.models.connectors.ApiDefinition
@@ -47,7 +48,7 @@ import domain.models.connectors.ExtendedApiDefinition
 
 class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with SessionServiceMock with ErrorHandlerMock {
 
-  trait Setup {
+  trait Setup extends DeveloperBuilder {
     val mockEmailPreferencesService: EmailPreferencesService = mock[EmailPreferencesService]
 
     implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
@@ -98,7 +99,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       )
 
     val emailPreferences: emailpreferences.EmailPreferences = domain.models.emailpreferences.EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set.empty)
-    val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
+    val developer: Developer = buildDeveloper()
     val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
     val sessionId: String = "sessionId"
     val session: Session = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)

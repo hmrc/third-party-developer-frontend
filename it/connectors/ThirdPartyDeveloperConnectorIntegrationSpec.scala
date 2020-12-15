@@ -16,9 +16,10 @@
 
 package connectors
 
+import builder.DeveloperBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
-import domain.models.developers.{Developer, LoggedInState, Session, SessionInvalid}
+import domain.models.developers.{LoggedInState, Session, SessionInvalid}
 import domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
@@ -28,6 +29,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import domain.models.developers.UserId
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -42,9 +44,10 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       .in(Mode.Test)
       .build()
 
-  trait Setup {
+  trait Setup extends DeveloperBuilder {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
+    val userId = UserId.random
     val userEmail = "thirdpartydeveloper@example.com"
     val userPassword = "password1!"
     val sessionId = "sessionId"
@@ -60,9 +63,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   }
 
   "fetchSession" should {
-
     "return the session" in new Setup {
-
       stubFor(
         get(urlPathEqualTo(s"/session/$sessionId"))
           .willReturn(
@@ -73,6 +74,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                  |  "sessionId": "$sessionId",
                  |  "loggedInState": "LOGGED_IN",
                  |  "developer": {
+                 |    "userId":"${userId.value}",
                  |    "email":"$userEmail",
                  |    "firstName":"John",
                  |    "lastName": "Doe",
@@ -84,11 +86,10 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       private val result = await(underTest.fetchSession(sessionId))
 
-      result shouldBe Session(sessionId, Developer(userEmail, "John", "Doe"), loggedInState = LoggedInState.LOGGED_IN)
+      result shouldBe Session(sessionId, buildDeveloper(userId = userId, emailAddress = userEmail), loggedInState = LoggedInState.LOGGED_IN)
     }
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
-
       stubFor(
         get(urlPathEqualTo(s"/session/$sessionId"))
           .willReturn(
@@ -157,6 +158,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                  |    "sessionId": "$sessionId",
                  |    "loggedInState": "LOGGED_IN",
                  |    "developer": {
+                 |      "userId":"${userId.value}",
                  |      "email":"$userEmail",
                  |      "firstName":"John",
                  |      "lastName": "Doe",
@@ -170,7 +172,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
-      result shouldBe UserAuthenticationResponse(accessCodeRequired = false, session = Some(Session(sessionId, Developer(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)))
+      result shouldBe UserAuthenticationResponse(accessCodeRequired = false, session = Some(Session(sessionId, buildDeveloper(userId = userId, emailAddress = userEmail), LoggedInState.LOGGED_IN)))
     }
 
     "return the nonce when the credentials are valid and MFA is enabled" in new Setup {
@@ -277,6 +279,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                  |  "sessionId": "$sessionId",
                  |  "loggedInState": "LOGGED_IN",
                  |  "developer": {
+                 |    "userId":"${userId.value}",
                  |    "email":"$userEmail",
                  |    "firstName":"John",
                  |    "lastName": "Doe",
@@ -289,7 +292,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: Session = await(underTest.authenticateTotp(totpAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-totp")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
-      result shouldBe Session(sessionId, Developer(userEmail, "John", "Doe"), LoggedInState.LOGGED_IN)
+      result shouldBe Session(sessionId, buildDeveloper(userId = userId, emailAddress = userEmail), LoggedInState.LOGGED_IN)
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {

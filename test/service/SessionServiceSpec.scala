@@ -16,9 +16,10 @@
 
 package service
 
+import builder.DeveloperBuilder
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.{LoginRequest, TotpAuthenticationRequest, UserAuthenticationResponse}
-import domain.models.developers.{Developer, LoggedInState, Session, SessionInvalid}
+import domain.models.developers.{LoggedInState, Session, SessionInvalid}
 import repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
@@ -27,8 +28,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
 class SessionServiceSpec extends AsyncHmrcSpec {
-
-  trait Setup {
+  trait Setup extends DeveloperBuilder {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], mock[MfaMandateService], mock[FlowRepository])
@@ -38,7 +38,7 @@ class SessionServiceSpec extends AsyncHmrcSpec {
     val password = "Password1!"
     val totp = "123456"
     val nonce = "ABC-123"
-    val developer = Developer(email, "firstName", "lastName")
+    val developer = buildDeveloper(emailAddress = email)
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
