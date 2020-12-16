@@ -116,15 +116,15 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   import uk.gov.hmrc.http.HttpReads.Implicits._
 
   def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/$email/password-reset-request", Seq((CONTENT_LENGTH -> "0"))).map(status).recover {
-      case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-    }
+    http.POSTEmpty[Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/$email/password-reset-request", Seq((CONTENT_LENGTH -> "0")))
+    .map(_ match {
+      case Right(response) => response.status
+      case Left(UpstreamErrorResponse(_,FORBIDDEN,_,_)) => throw new UnverifiedAccount
+      case Left(err) => throw err
+    })
   }
 
   def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
-
-    import uk.gov.hmrc.http.HttpReads.Implicits._
-
     http.PUT[String, Option[Session]](s"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState}", "")
       .map(_ match {
         case Some(session) => session

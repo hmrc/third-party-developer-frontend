@@ -218,11 +218,20 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   "Reset password" should {
     "successfully request reset" in new Setup {
       val email = "user@example.com"
-      when(mockHttp.POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/password-reset-request")),*)(*, *, *)).thenReturn(successful(HttpResponse(Status.OK,"")))
+      when(mockHttp.POSTEmpty[Either[UpstreamErrorResponse, HttpResponse]](eqTo(endpoint(s"$email/password-reset-request")),*)(*, *, *)).thenReturn(successful(Right(HttpResponse(Status.OK,""))))
 
       await(connector.requestReset(email))
 
-      verify(mockHttp).POSTEmpty[HttpResponse](eqTo(endpoint(s"$email/password-reset-request")), *)(*, *, *)
+      verify(mockHttp).POSTEmpty[Either[UpstreamErrorResponse, HttpResponse]](eqTo(endpoint(s"$email/password-reset-request")), *)(*, *, *)
+    }
+
+    "forbidden response results in UnverifiedAccount exception for request reset" in new Setup {
+      val email = "user@example.com"
+      when(mockHttp.POSTEmpty[Either[UpstreamErrorResponse, HttpResponse]](eqTo(endpoint(s"$email/password-reset-request")),*)(*, *, *)).thenReturn(successful(Left(UpstreamErrorResponse("Forbidden", Status.FORBIDDEN))))
+
+      intercept[UnverifiedAccount] {
+        await(connector.requestReset(email))
+      }
     }
 
     "successfully validate reset code" in new Setup {
