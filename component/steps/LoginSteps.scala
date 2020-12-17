@@ -16,8 +16,6 @@
 
 package steps
 
-import java.net.URLEncoder
-
 import builder.DeveloperBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import domain.models.connectors.{LoginRequest, UserAuthenticationResponse, VerifyMfaRequest}

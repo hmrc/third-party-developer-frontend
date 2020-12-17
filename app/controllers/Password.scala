@@ -32,6 +32,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 @Singleton
 class Password @Inject()(val auditService: AuditService,
@@ -65,9 +66,9 @@ class Password @Inject()(val auditService: AuditService,
       data => connector.requestReset(data.emailaddress) map {
         _ => Ok(checkEmailView(data.emailaddress))
       } recover {
-        case _: UnverifiedAccount => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
+        case _ : UnverifiedAccount => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
           .withSession("email" -> data.emailaddress)
-        case _: NotFoundException => Ok(checkEmailView(data.emailaddress))
+        case UpstreamErrorResponse(_,NOT_FOUND,_,_) => Ok(checkEmailView(data.emailaddress))
       }
     )
   }
