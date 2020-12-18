@@ -29,6 +29,7 @@ import repositories.ReactiveMongoFormatters.{formatEmailPreferencesFlow, formatN
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.developers.UserId
 
 
 @Singleton
@@ -129,6 +130,6 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
   def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
 
-  def updateEmailPreferences(emailAddress: String, flow: EmailPreferencesProducer)(implicit hc: HeaderCarrier): Future[Boolean] =
-    thirdPartyDeveloperConnector.updateEmailPreferences(emailAddress, flow.toEmailPreferences)
+  def updateEmailPreferences(userId: UserId, flow: EmailPreferencesProducer)(implicit hc: HeaderCarrier): Future[Boolean] =
+    thirdPartyDeveloperConnector.updateEmailPreferences(userId, flow.toEmailPreferences)
 }

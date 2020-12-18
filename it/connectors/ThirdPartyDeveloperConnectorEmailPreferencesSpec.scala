@@ -31,6 +31,7 @@ import domain.models.emailpreferences.EmailTopic._
 import domain.models.connectors.LoginRequest
 import domain.models.connectors.TotpAuthenticationRequest
 import play.api.http.HeaderNames
+import domain.models.developers.UserId
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -122,10 +123,10 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
       val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
   
   "return true when NO_CONTENT is returned" in new Setup {
-      val email = "foo@bar.com"
+      val userId = UserId.random
       
       stubFor(
-        put(urlEqualTo(s"/developer/$email/email-preferences"))
+        put(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
           .withRequestBody(equalToJson(Json.toJson(emailPreferences).toString()))
           .willReturn(
             aResponse()
@@ -134,14 +135,14 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
           )
       )
 
-      await(underTest.updateEmailPreferences(email, emailPreferences)) shouldBe true
+      await(underTest.updateEmailPreferences(userId, emailPreferences)) shouldBe true
     }
 
     "throw InvalidEmail when the email is not found" in new Setup {
-      val email = "foo@bar.com"
+      val userId = UserId.random
 
       stubFor(
-        put(urlEqualTo(s"/developer/$email/email-preferences"))
+        put(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
           .withRequestBody(equalToJson(Json.toJson(emailPreferences).toString()))
           .willReturn(
             aResponse()
@@ -150,7 +151,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
           )
       )
 
-      intercept[InvalidEmail](await(underTest.updateEmailPreferences(email, emailPreferences)))
+      intercept[InvalidEmail](await(underTest.updateEmailPreferences(userId, emailPreferences)))
     }
   
   }
