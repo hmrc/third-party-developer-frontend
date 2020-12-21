@@ -263,9 +263,9 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       })
   }
 
-  def updateEmailPreferences(emailAddress: String, emailPreferences: EmailPreferences)
+  def updateEmailPreferences(userId: UserId, emailPreferences: EmailPreferences)
       (implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
-    val url = s"$serviceBaseUrl/developer/$emailAddress/email-preferences"
+    val url = s"$serviceBaseUrl/developer/${userId.value}/email-preferences"
 
     http.PUT[EmailPreferences, ErrorOrUnit](url, emailPreferences)
       .map(_ match {

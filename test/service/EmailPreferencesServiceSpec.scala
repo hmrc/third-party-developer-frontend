@@ -30,6 +30,7 @@ import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import domain.models.connectors.ExtendedApiDefinition
+import domain.models.developers.UserId
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
   trait SetUp extends ExtendedApiDefinitionTestDataHelper with DeveloperBuilder {
@@ -62,14 +63,14 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
     "updateEmailPreferences" should {
       "return true when connector is called correctly and true" in new SetUp {
-        when(mockThirdPartyDeveloperConnector.updateEmailPreferences(*, *)(*)).thenReturn(Future.successful(true))
-        val email = "foo@bar.com"
+        when(mockThirdPartyDeveloperConnector.updateEmailPreferences(*[UserId], *)(*)).thenReturn(Future.successful(true))
+        val userId = UserId.random
         val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
 
-        val result = await(underTest.updateEmailPreferences(email, expectedFlowObject))
+        val result = await(underTest.updateEmailPreferences(userId, expectedFlowObject))
 
         result shouldBe true
-        verify(mockThirdPartyDeveloperConnector).updateEmailPreferences(eqTo(email), eqTo(expectedFlowObject.toEmailPreferences))(*)
+        verify(mockThirdPartyDeveloperConnector).updateEmailPreferences(eqTo(userId), eqTo(expectedFlowObject.toEmailPreferences))(*)
       }
     }
 

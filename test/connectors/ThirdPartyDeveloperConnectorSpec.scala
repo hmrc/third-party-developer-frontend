@@ -28,7 +28,7 @@ import domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccoun
 import play.api.http.Status._
 import play.api.http.Status
 import play.api.libs.json.{JsString, JsValue, Json}
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 import utils.AsyncHmrcSpec
@@ -414,23 +414,23 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "updateEmailPreferences" should {
-    val email = "john.smith@example.com"
+    val userId = UserId.random
     val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
 
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
-      when(mockHttp.PUT[EmailPreferences, ErrorOrUnit](eqTo(endpoint(s"developer/$email/email-preferences")), eqTo(emailPreferences), *)(*, *, *, *))
+      when(mockHttp.PUT[EmailPreferences, ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/email-preferences")), eqTo(emailPreferences), *)(*, *, *, *))
         .thenReturn(successful(Right(())))
-      private val result = await(connector.updateEmailPreferences(email, emailPreferences))
+      private val result = await(connector.updateEmailPreferences(userId, emailPreferences))
 
       result shouldBe true
     }
 
     "throw InvalidEmail exception if email address not found in TPD" in new Setup {
-      when(mockHttp.PUT[EmailPreferences, ErrorOrUnit](eqTo(endpoint(s"developer/$email/email-preferences")), eqTo(emailPreferences), *)(*, *, *, *))
+      when(mockHttp.PUT[EmailPreferences, ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/email-preferences")), eqTo(emailPreferences), *)(*, *, *, *))
         .thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[InvalidEmail] {
-        await(connector.updateEmailPreferences(email, emailPreferences))
+        await(connector.updateEmailPreferences(userId, emailPreferences))
       }
     }
   }
