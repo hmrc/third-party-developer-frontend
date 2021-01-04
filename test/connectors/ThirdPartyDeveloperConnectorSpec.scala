@@ -387,28 +387,27 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "removeEmailPreferences" should {
+    val userId = UserId.random
+
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
-      val email = "john.smith@example.com"
-      when(mockHttp.DELETE[ErrorOrUnit](eqTo(endpoint(s"developer/$email/email-preferences")), *)(*,*,*)).thenReturn(successful(Right(())))
+      when(mockHttp.DELETE[ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/email-preferences")), *)(*,*,*)).thenReturn(successful(Right(())))
       
-      await(connector.removeEmailPreferences(email))
+      await(connector.removeEmailPreferences(userId))
     }
 
     "throw InvalidEmail exception if email address not found in TPD" in new Setup {
-      val email = "john.smith@example.com"
-      when(mockHttp.DELETE[ErrorOrUnit](eqTo(endpoint(s"developer/$email/email-preferences")), *)(*,*,*)).thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
+      when(mockHttp.DELETE[ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/email-preferences")), *)(*,*,*)).thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[InvalidEmail] {
-        await(connector.removeEmailPreferences(email))
+        await(connector.removeEmailPreferences(userId))
       }
     }
 
     "throw UpstreamErrorResponse exception for other issues with TPD" in new Setup {
-      val email = "john.smith@example.com"
-      when(mockHttp.DELETE[ErrorOrUnit](eqTo(endpoint(s"developer/$email/email-preferences")), *)(*,*,*)).thenReturn(successful(Left(UpstreamErrorResponse("",INTERNAL_SERVER_ERROR))))
+      when(mockHttp.DELETE[ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/email-preferences")), *)(*,*,*)).thenReturn(successful(Left(UpstreamErrorResponse("",INTERNAL_SERVER_ERROR))))
 
       intercept[UpstreamErrorResponse] {
-        await(connector.removeEmailPreferences(email))
+        await(connector.removeEmailPreferences(userId))
       }
     }
   }
