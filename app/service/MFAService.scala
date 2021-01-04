@@ -22,6 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import domain.models.developers.UserId
 
 @Singleton
 class MFAService @Inject()(tpdConnector: ThirdPartyDeveloperConnector)(implicit val ec: ExecutionContext) {
@@ -33,9 +34,9 @@ class MFAService @Inject()(tpdConnector: ThirdPartyDeveloperConnector)(implicit 
     }
   }
 
-  def removeMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
+  def removeMfa(userId: UserId, email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
     tpdConnector.verifyMfa(email, totpCode) flatMap {
-      case true => tpdConnector.removeMfa(email).map(_ => MFAResponse(true))
+      case true => tpdConnector.removeMfa(userId, email).map(_ => MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }
   }

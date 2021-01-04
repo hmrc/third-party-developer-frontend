@@ -43,6 +43,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import controllers.profile.ProtectAccount
+import domain.models.developers.UserId
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -132,11 +133,11 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait SetupFailedRemoval extends Setup {
-    when(underTest.mfaService.removeMfa(any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.removeMfa(any[UserId], any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    when(underTest.mfaService.removeMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.removeMfa(eqTo(loggedInUser.userId), eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   "Given a user is not logged in" when {

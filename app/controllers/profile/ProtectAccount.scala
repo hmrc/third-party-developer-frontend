@@ -138,7 +138,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       Future.successful(BadRequest(protectAccountRemovalAccessCodeView(form)))
     },
       form => {
-        mfaService.removeMfa(loggedIn.email, form.accessCode).map(r =>
+        mfaService.removeMfa(loggedIn.developer.userId, loggedIn.email, form.accessCode).map(r =>
           r.totpVerified match {
             case true => Redirect(controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage())
             case _ =>

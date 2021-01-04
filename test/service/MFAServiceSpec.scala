@@ -24,16 +24,18 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
+import domain.models.developers.UserId
 
 class MFAServiceSpec extends AsyncHmrcSpec with Matchers {
 
   trait Setup {
+    val userId = UserId.random
     val email = "bob.smith@example.com"
     val totpCode = "12345678"
     val connector = mock[ThirdPartyDeveloperConnector]
 
     when(connector.enableMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(()))
-    when(connector.removeMfa(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(()))
+    when(connector.removeMfa(eqTo(userId), eqTo(email))(any[HeaderCarrier])).thenReturn(successful(()))
 
     val service = new MFAService(connector)
   }
@@ -77,32 +79,32 @@ class MFAServiceSpec extends AsyncHmrcSpec with Matchers {
 
   "removeMfa" should {
     "return failed totp when totp verification fails" in new FailedTotpVerification {
-      val result: MFAResponse = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
+      val result: MFAResponse = await(service.removeMfa(userId, email, totpCode)(HeaderCarrier()))
       result.totpVerified shouldBe false
     }
 
     "not call remove mfa when totp verification fails" in new FailedTotpVerification {
-      await(service.removeMfa(email, totpCode)(HeaderCarrier()))
-      verify(connector, never).removeMfa(eqTo(email))(any[HeaderCarrier])
+      await(service.removeMfa(userId, email, totpCode)(HeaderCarrier()))
+      verify(connector, never).removeMfa(eqTo(userId), eqTo(email))(any[HeaderCarrier])
     }
 
     "return successful totp when totp verification passes" in new SuccessfulTotpVerification {
-      val result: MFAResponse = await(service.removeMfa(email, totpCode)(HeaderCarrier()))
+      val result: MFAResponse = await(service.removeMfa(userId, email, totpCode)(HeaderCarrier()))
 
       result.totpVerified shouldBe true
     }
 
     "remove MFA when totp verification passes" in new SuccessfulTotpVerification {
-      await(service.removeMfa(email, totpCode)(HeaderCarrier()))
+      await(service.removeMfa(userId, email, totpCode)(HeaderCarrier()))
 
-      verify(connector, times(1)).removeMfa(eqTo(email))(any[HeaderCarrier])
+      verify(connector, times(1)).removeMfa(eqTo(userId), eqTo(email))(any[HeaderCarrier])
     }
 
     "throw exception if removal fails" in new SuccessfulTotpVerification {
-      when(connector.removeMfa(eqTo(email))(any[HeaderCarrier]))
+      when(connector.removeMfa(eqTo(userId), eqTo(email))(any[HeaderCarrier]))
         .thenReturn(failed(UpstreamErrorResponse("failed to remove MFA", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      intercept[UpstreamErrorResponse](await(service.removeMfa(email, totpCode)(HeaderCarrier())))
+      intercept[UpstreamErrorResponse](await(service.removeMfa(userId, email, totpCode)(HeaderCarrier())))
     }
   }
 }
