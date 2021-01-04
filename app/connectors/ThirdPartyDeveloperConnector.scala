@@ -254,8 +254,8 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     }
   }
 
-  def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
-      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/$emailAddress/email-preferences")
+  def removeEmailPreferences(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
+      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/email-preferences")
       .map(throwOrOptionOf)
       .map(_ match {
         case Some(_) => true

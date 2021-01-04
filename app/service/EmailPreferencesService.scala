@@ -127,8 +127,8 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
     } yield savedFlow
   }
 
-  def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    thirdPartyDeveloperConnector.removeEmailPreferences(emailAddress)
+  def removeEmailPreferences(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] =
+    thirdPartyDeveloperConnector.removeEmailPreferences(userId)
 
   def updateEmailPreferences(userId: UserId, flow: EmailPreferencesProducer)(implicit hc: HeaderCarrier): Future[Boolean] =
     thirdPartyDeveloperConnector.updateEmailPreferences(userId, flow.toEmailPreferences)

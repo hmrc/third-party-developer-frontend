@@ -199,7 +199,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
     "call unsubscribe all emailpreferences service and redirect to the summary page with session value set" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
 
-      when(mockEmailPreferencesService.removeEmailPreferences(*)(*)).thenReturn(Future.successful(true))
+      when(mockEmailPreferencesService.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
       val result: Future[Result] = controllerUnderTest.unsubscribeAllAction()(loggedInRequest)
       status(result) mustBe SEE_OTHER
 

@@ -87,11 +87,11 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   }
 
   "removeEmailPreferences" should {
+    val userId = UserId.random
+
     "return true when NO_CONTENT is returned" in new Setup {
-      val email = "foo@bar.com"
-      
       stubFor(
-        delete(urlEqualTo(s"/developer/$email/email-preferences"))
+        delete(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
           .willReturn(
             aResponse()
               .withStatus(NO_CONTENT)
@@ -99,14 +99,12 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
           )
       )
 
-      await(underTest.removeEmailPreferences(email)) shouldBe true
+      await(underTest.removeEmailPreferences(userId)) shouldBe true
     }
 
     "throw InvalidEmail when the email is not found" in new Setup {
-      val email = "foo@bar.com"
-      
       stubFor(
-        delete(urlEqualTo(s"/developer/$email/email-preferences"))
+        delete(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
           .willReturn(
             aResponse()
               .withStatus(NOT_FOUND)
@@ -114,7 +112,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
           )
       )
 
-      intercept[InvalidEmail](await(underTest.removeEmailPreferences(email)))
+      intercept[InvalidEmail](await(underTest.removeEmailPreferences(userId)))
     }
   
   }

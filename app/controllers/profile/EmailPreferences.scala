@@ -186,7 +186,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def unsubscribeAllAction: Action[AnyContent] = loggedInAction { implicit request =>
-    emailPreferencesService.removeEmailPreferences(request.developerSession.developer.email).map {
+    emailPreferencesService.removeEmailPreferences(request.developerSession.developer.userId).map {
       case true => Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
       case false => Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage())
     }
