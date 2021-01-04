@@ -120,23 +120,23 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   "removeMfa" should {
     "return OK on successful removal" in new Setup {
       val email = "test.user@example.com"
-      stubFor(post(urlPathEqualTo(s"/developer/$email/mfa/remove")).willReturn(aResponse().withStatus(OK)))
+      stubFor(post(urlPathEqualTo(s"/developer/${userId.value}/mfa/remove")).willReturn(aResponse().withStatus(OK)))
 
-      await(underTest.removeMfa(email))
+      await(underTest.removeMfa(userId, email))
     }
 
     "throw UpstreamErrorResponse with status of 404 if user not found" in new Setup {
       val email = "invalid.user@example.com"
-      stubFor(post(urlPathEqualTo(s"/developer/$email/mfa/remove")).willReturn(aResponse().withStatus(NOT_FOUND)))
+      stubFor(post(urlPathEqualTo(s"/developer/${userId.value}/mfa/remove")).willReturn(aResponse().withStatus(NOT_FOUND)))
 
-      intercept[UpstreamErrorResponse](await(underTest.removeMfa(email))).statusCode shouldBe NOT_FOUND
+      intercept[UpstreamErrorResponse](await(underTest.removeMfa(userId, email))).statusCode shouldBe NOT_FOUND
     }
 
     "throw UpstreamErrorResponse with status of 500 if it failed to remove MFA" in new Setup {
       val email = "test.user@example.com"
-      stubFor(post(urlPathEqualTo(s"/developer/$email/mfa/remove")).willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
+      stubFor(post(urlPathEqualTo(s"/developer/${userId.value}/mfa/remove")).willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR)))
 
-      intercept[UpstreamErrorResponse](await(underTest.removeMfa(email))).statusCode shouldBe INTERNAL_SERVER_ERROR
+      intercept[UpstreamErrorResponse](await(underTest.removeMfa(userId, email))).statusCode shouldBe INTERNAL_SERVER_ERROR
     }
   }
 
@@ -213,7 +213,6 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "throw LockedAccount exception when the account is locked" in new Setup {
-
       stubFor(
         post(urlEqualTo("/authenticate"))
           .withRequestBody(equalToJson(encryptedLoginRequest.toString))
@@ -230,7 +229,6 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "throw UnverifiedAccount exception when the account is unverified" in new Setup {
-
       stubFor(
         post(urlEqualTo("/authenticate"))
           .withRequestBody(equalToJson(encryptedLoginRequest.toString))
@@ -247,7 +245,6 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
-
       stubFor(
         post(urlEqualTo("/authenticate"))
           .withRequestBody(equalToJson(encryptedLoginRequest.toString))
@@ -266,7 +263,6 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   "authenticateTotp" should {
 
     "return the session containing the user when the TOTP and nonce are valid" in new Setup {
-
       stubFor(
         post(urlEqualTo("/authenticate-totp"))
           .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))

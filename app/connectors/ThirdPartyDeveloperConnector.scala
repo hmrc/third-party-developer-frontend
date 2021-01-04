@@ -246,10 +246,10 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     }
   }
 
-  def removeMfa(email: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def removeMfa(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     implicit val RemoveMfaRequestFormat = Json.format[RemoveMfaRequest]
     metrics.record(api) {
-      http.POST[RemoveMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/$email/mfa/remove", RemoveMfaRequest(email))
+      http.POST[RemoveMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/remove", RemoveMfaRequest(email))
       .map(throwOrUnit)
     }
   }
