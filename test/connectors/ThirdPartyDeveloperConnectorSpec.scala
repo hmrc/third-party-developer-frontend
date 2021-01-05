@@ -333,14 +333,13 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
 
   "create MFA" should {
     "return the created secret" in new Setup {
-      val email = "john.smith@example.com"
       val expectedSecret = "ABCDEF"
 
-      when(mockHttp.POSTEmpty[CreateMfaResponse](eqTo(endpoint(s"developer/$email/mfa")), *)(*, *, *)).thenReturn(successful(CreateMfaResponse(expectedSecret)))
+      when(mockHttp.POSTEmpty[CreateMfaResponse](eqTo(endpoint(s"developer/${userId.value}/mfa")), *)(*, *, *)).thenReturn(successful(CreateMfaResponse(expectedSecret)))
 
-      await(connector.createMfaSecret(email)) shouldBe expectedSecret
+      await(connector.createMfaSecret(userId)) shouldBe expectedSecret
 
-      verify(mockHttp).POSTEmpty[HttpResponse](eqTo(endpoint(s"developer/$email/mfa")), *)(*, *, *)
+      verify(mockHttp).POSTEmpty[HttpResponse](eqTo(endpoint(s"developer/${userId.value}/mfa")), *)(*, *, *)
     }
   }
 
