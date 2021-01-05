@@ -228,9 +228,9 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     }
   }
 
-  def verifyMfa(email: String, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def verifyMfa(userId: UserId, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
-      http.POST[VerifyMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/$email/mfa/verification", VerifyMfaRequest(code))
+      http.POST[VerifyMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/verification", VerifyMfaRequest(code))
       .map(_ match {
         case Right(()) => true
         case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
@@ -239,9 +239,9 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     }
   }
 
-  def enableMfa(email: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def enableMfa(userId: UserId)(implicit hc: HeaderCarrier): Future[Unit] = {
     metrics.record(api) {
-      http.PUT[String, ErrorOrUnit](s"$serviceBaseUrl/developer/$email/mfa/enable", "")
+      http.PUT[String, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/enable", "")
       .map(throwOrUnit)
     }
   }

@@ -104,7 +104,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   },
       (form: ProtectAccountForm) => {
         for {
-          mfaResponse <- mfaService.enableMfa(loggedIn.email, form.accessCode)
+          mfaResponse <- mfaService.enableMfa(loggedIn.developer.userId, form.accessCode)
           result = {
             if (mfaResponse.totpVerified) logonAndComplete()
             else invalidCode(form)

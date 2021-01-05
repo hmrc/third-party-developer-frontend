@@ -125,11 +125,11 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait SetupFailedVerification extends Setup {
-    when(underTest.mfaService.enableMfa(any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.enableMfa(any[UserId], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    when(underTest.mfaService.enableMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.enableMfa(eqTo(loggedInUser.userId), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   trait SetupFailedRemoval extends Setup {

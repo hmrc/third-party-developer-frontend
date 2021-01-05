@@ -27,15 +27,15 @@ import domain.models.developers.UserId
 @Singleton
 class MFAService @Inject()(tpdConnector: ThirdPartyDeveloperConnector)(implicit val ec: ExecutionContext) {
 
-  def enableMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
-    tpdConnector.verifyMfa(email, totpCode) flatMap {
-      case true => tpdConnector.enableMfa(email).map(_ => MFAResponse(true))
+  def enableMfa(userId: UserId, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
+    tpdConnector.verifyMfa(userId, totpCode) flatMap {
+      case true => tpdConnector.enableMfa(userId).map(_ => MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }
   }
 
   def removeMfa(userId: UserId, email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
-    tpdConnector.verifyMfa(email, totpCode) flatMap {
+    tpdConnector.verifyMfa(userId, totpCode) flatMap {
       case true => tpdConnector.removeMfa(userId, email).map(_ => MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }

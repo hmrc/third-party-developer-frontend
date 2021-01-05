@@ -41,7 +41,6 @@ import connectors.ThirdPartyDeveloperConnector.CreateMfaResponse
 class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponseHandlers { 
 
   trait Setup extends DeveloperBuilder {
-
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockHttp: HttpClient = mock[HttpClient]
@@ -58,6 +57,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     val connector = new ThirdPartyDeveloperConnector(mockHttp, encryptedJson, mockAppConfig, mockMetrics)
 
     def endpoint(path: String) = s"${connector.serviceBaseUrl}/$path"
+    val userId = UserId.random
   }
 
   "api" should {
@@ -301,7 +301,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "change password" should {
-
     val changePasswordRequest = ChangePassword("email@example.com", "oldPassword123", "newPassword321")
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {
@@ -333,9 +332,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "create MFA" should {
-
     "return the created secret" in new Setup {
-
       val email = "john.smith@example.com"
       val expectedSecret = "ABCDEF"
 
@@ -348,47 +345,42 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "verify MFA" should {
-      val email = "john.smith@example.com"
-      val code = "12341234"
-      val verifyMfaRequest = VerifyMfaRequest(code)
+    val code = "12341234"
+    val verifyMfaRequest = VerifyMfaRequest(code)
 
     "return false if verification fails due to InvalidCode" in new Setup {
-      when(mockHttp.POST[VerifyMfaRequest, ErrorOrUnit](eqTo(endpoint(s"developer/$email/mfa/verification")), eqTo(verifyMfaRequest), *)(*,*,*,*))
+      when(mockHttp.POST[VerifyMfaRequest, ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/mfa/verification")), eqTo(verifyMfaRequest), *)(*,*,*,*))
         .thenReturn(successful(Left(UpstreamErrorResponse("",BAD_REQUEST))))
 
-      await(connector.verifyMfa(email, code)) shouldBe false
+      await(connector.verifyMfa(userId, code)) shouldBe false
     }
 
     "return true if verification is successful" in new Setup {
-      when(mockHttp.POST[VerifyMfaRequest, ErrorOrUnit](eqTo(endpoint(s"developer/$email/mfa/verification")), eqTo(verifyMfaRequest), *)(*,*,*,*))
+      when(mockHttp.POST[VerifyMfaRequest, ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/mfa/verification")), eqTo(verifyMfaRequest), *)(*,*,*,*))
         .thenReturn(successful(Right(())))
 
-      await(connector.verifyMfa(email, code)) shouldBe true
+      await(connector.verifyMfa(userId, code)) shouldBe true
     }
 
     "throw if verification fails due to error" in new Setup {
-      when(mockHttp.POST[VerifyMfaRequest, ErrorOrUnit](eqTo(endpoint(s"developer/$email/mfa/verification")), eqTo(verifyMfaRequest), *)(*,*,*,*))
+      when(mockHttp.POST[VerifyMfaRequest, ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/mfa/verification")), eqTo(verifyMfaRequest), *)(*,*,*,*))
         .thenReturn(successful(Left(UpstreamErrorResponse("Internal server error", Status.INTERNAL_SERVER_ERROR))))
 
       intercept[UpstreamErrorResponse] {
-        await(connector.verifyMfa(email, code))
+        await(connector.verifyMfa(userId, code))
       }
     }
   }
 
   "enableMFA" should {
     "return no_content if successfully enabled" in new Setup {
-      val email = "john.smith@example.com"
+      when(mockHttp.PUT[String, ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/mfa/enable")), eqTo(""), *)(*,*,*,*)).thenReturn(successful(Right(())))
 
-      when(mockHttp.PUT[String, ErrorOrUnit](eqTo(endpoint(s"developer/$email/mfa/enable")), eqTo(""), *)(*,*,*,*)).thenReturn(successful(Right(())))
-
-      await(connector.enableMfa(email))
+      await(connector.enableMfa(userId))
     }
   }
 
   "removeEmailPreferences" should {
-    val userId = UserId.random
-
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
       when(mockHttp.DELETE[ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/email-preferences")), *)(*,*,*)).thenReturn(successful(Right(())))
       
@@ -413,7 +405,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "updateEmailPreferences" should {
-    val userId = UserId.random
     val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
 
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
