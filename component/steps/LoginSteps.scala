@@ -104,7 +104,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   private def setupGettingMfaSecret(developer: Developer): Unit = {
     stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.email}/mfa"))
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa"))
         .willReturn(aResponse()
           .withStatus(OK)
           .withBody(Json.toJson(MfaSecret("mySecret")).toString())))

@@ -219,11 +219,11 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     http.GET[Seq[User]](s"$serviceBaseUrl/developers", Seq("emails" -> emails.mkString(",")))
   }
 
-  def createMfaSecret(email: String)(implicit hc: HeaderCarrier): Future[String] = {
+  def createMfaSecret(userId: UserId)(implicit hc: HeaderCarrier): Future[String] = {
     implicit val CreateMfaResponseReads = Json.reads[CreateMfaResponse]
 
     metrics.record(api) {
-      http.POSTEmpty[CreateMfaResponse](s"$serviceBaseUrl/developer/$email/mfa", Seq((CONTENT_LENGTH -> "0")))
+      http.POSTEmpty[CreateMfaResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa", Seq((CONTENT_LENGTH -> "0")))
       .map(_.secret)
     }
   }

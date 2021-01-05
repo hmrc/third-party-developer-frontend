@@ -59,7 +59,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   val qrCode = QRCode(scale)
 
   def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperConnector.createMfaSecret(loggedIn.email).map(secret => {
+    thirdPartyDeveloperConnector.createMfaSecret(loggedIn.developer.userId).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(protectAccountSetupView(secret.toLowerCase().grouped(4).mkString(" "), qrImg))

@@ -112,7 +112,7 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   trait SetupSuccessfulStart2SV extends Setup {
     when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
-    when(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInUser.email))(any[HeaderCarrier]))
+    when(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInUser.userId))(any[HeaderCarrier]))
       .thenReturn(successful(secret))
   }
 
