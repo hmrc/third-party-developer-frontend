@@ -79,7 +79,7 @@ class Profile @Inject()(
       formWithErrors => {
         Future.successful(BadRequest(changeProfileViewTemplate(formWithErrors.firstnameGlobal().lastnameGlobal())))
       },
-      profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
+      profile => connector.updateProfile(loggedIn.developer.userId, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ => {
 
           val updatedDeveloper = loggedIn.developer.copy(

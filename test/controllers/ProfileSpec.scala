@@ -88,7 +88,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN))
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-      when(underTest.connector.updateProfile(eqTo(loggedInUser.email), requestCaptor.capture())(any[HeaderCarrier]))
+      when(underTest.connector.updateProfile(eqTo(loggedInUser.userId), requestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(OK))
 
       val result = addToken(underTest.updateProfile())(request)
