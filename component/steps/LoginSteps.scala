@@ -87,7 +87,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   private def setupVerificationOfAccessCode(developer: Developer): Unit = {
     stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.email}/mfa/verification"))
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/verification"))
         .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT)
@@ -96,7 +96,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   private def setupEnablingMfa(developer: Developer): Unit = {
     stubFor(
-      put(urlPathEqualTo(s"/developer/${developer.email}/mfa/enable"))
+      put(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/enable"))
         .willReturn(aResponse()
           .withStatus(OK)
         ))
