@@ -193,13 +193,12 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
 
   "Update profile" should {
     "update profile" in new Setup {
-      val email = "john.smith@example.com"
       val updated = UpdateProfileRequest("First", "Last")
 
-      when(mockHttp.POST[UpdateProfileRequest, ErrorOr[HttpResponse]](eqTo(endpoint(s"developer/$email")), eqTo(updated), *)(*,*,*,*))
+      when(mockHttp.POST[UpdateProfileRequest, ErrorOr[HttpResponse]](eqTo(endpoint(s"developer/${userId.value}")), eqTo(updated), *)(*,*,*,*))
       .thenReturn(successful(Right(HttpResponse(Status.OK,""))))
 
-      await(connector.updateProfile(email, updated)) shouldBe Status.OK
+      await(connector.updateProfile(userId, updated)) shouldBe Status.OK
     }
   }
 

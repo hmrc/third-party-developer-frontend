@@ -32,6 +32,7 @@ import domain.models.apidefinitions.ApiIdentifier
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications.ClientId
 import domain.models.applications.ApplicationId
+import domain.models.developers.UserId
 
 object Stubs {
 
@@ -82,9 +83,9 @@ object DeveloperStub {
         .willReturn(aResponse().withStatus(status))
     )
 
-  def update(email: String, profile: UpdateProfileRequest, status: Int) =
+  def update(userId: UserId, profile: UpdateProfileRequest, status: Int) =
     stubFor(
-      post(urlMatching(s"/developer/$email"))
+      post(urlMatching(s"/developer/${userId.value}"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))
         .willReturn(aResponse().withStatus(status))
     )
