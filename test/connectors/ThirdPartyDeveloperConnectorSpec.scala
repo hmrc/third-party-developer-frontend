@@ -41,7 +41,6 @@ import connectors.ThirdPartyDeveloperConnector.CreateMfaResponse
 class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponseHandlers { 
 
   trait Setup extends DeveloperBuilder {
-
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockHttp: HttpClient = mock[HttpClient]
@@ -58,6 +57,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     val connector = new ThirdPartyDeveloperConnector(mockHttp, encryptedJson, mockAppConfig, mockMetrics)
 
     def endpoint(path: String) = s"${connector.serviceBaseUrl}/$path"
+    val userId = UserId.random
   }
 
   "api" should {
@@ -301,7 +301,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "change password" should {
-
     val changePasswordRequest = ChangePassword("email@example.com", "oldPassword123", "newPassword321")
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {
@@ -346,7 +345,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "verify MFA" should {
-    val userId = UserId.random
     val code = "12341234"
     val verifyMfaRequest = VerifyMfaRequest(code)
 
@@ -375,8 +373,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "enableMFA" should {
-    val userId = UserId.random
-
     "return no_content if successfully enabled" in new Setup {
       when(mockHttp.PUT[String, ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/mfa/enable")), eqTo(""), *)(*,*,*,*)).thenReturn(successful(Right(())))
 
@@ -385,8 +381,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "removeEmailPreferences" should {
-    val userId = UserId.random
-
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
       when(mockHttp.DELETE[ErrorOrUnit](eqTo(endpoint(s"developer/${userId.value}/email-preferences")), *)(*,*,*)).thenReturn(successful(Right(())))
       
@@ -411,7 +405,6 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "updateEmailPreferences" should {
-    val userId = UserId.random
     val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
 
     "return true when connector receives NO-CONTENT in response from TPD" in new Setup {
