@@ -16,7 +16,9 @@
 
 package domain.models.applications
 
-case class Collaborator(emailAddress: String, role: Role)
+import domain.models.developers.UserId
+
+case class Collaborator(emailAddress: String, role: Role, userId: Option[UserId])
 
 object Collaborator {
   import play.api.libs.json.Json

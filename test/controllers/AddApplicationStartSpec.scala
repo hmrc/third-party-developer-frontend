@@ -31,6 +31,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -45,7 +46,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val collaborator: Collaborator = Collaborator(loggedInUser.email, Role.ADMINISTRATOR)
+  val collaborator: Collaborator = Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))
 
   val application = Application(
     appId,

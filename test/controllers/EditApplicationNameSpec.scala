@@ -35,6 +35,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -58,7 +59,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )

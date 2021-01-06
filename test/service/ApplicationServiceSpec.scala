@@ -39,6 +39,7 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
@@ -428,11 +429,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
 
     "include correct set of admins to email" in new Setup {
 
-      private val verifiedAdmin = Collaborator("verified@example.com", Role.ADMINISTRATOR)
-      private val unverifiedAdmin = Collaborator("unverified@example.com", Role.ADMINISTRATOR)
-      private val removerAdmin = Collaborator("admin.email@example.com", Role.ADMINISTRATOR)
-      private val verifiedDeveloper = Collaborator("developer@example.com", Role.DEVELOPER)
-      private val teamMemberToRemove = Collaborator("to.remove@example.com", Role.ADMINISTRATOR)
+      private val verifiedAdmin = Collaborator("verified@example.com", Role.ADMINISTRATOR, Some(UserId.random))
+      private val unverifiedAdmin = Collaborator("unverified@example.com", Role.ADMINISTRATOR, Some(UserId.random))
+      private val removerAdmin = Collaborator("admin.email@example.com", Role.ADMINISTRATOR, Some(UserId.random))
+      private val verifiedDeveloper = Collaborator("developer@example.com", Role.DEVELOPER, Some(UserId.random))
+      private val teamMemberToRemove = Collaborator("to.remove@example.com", Role.ADMINISTRATOR, Some(UserId.random))
 
       val nonRemoverAdmins = Seq(
         User("verified@example.com", Some(true)),
@@ -464,7 +465,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     val adminRequester = utils.DeveloperSession(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
     val developerEmail = "developer@example.com"
     val developerRequester = utils.DeveloperSession(developerEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
-    val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER))
+    val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR, Some(UserId.random)), Collaborator(developerEmail, Role.DEVELOPER, Some(UserId.random)))
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val productionApp = productionApplication.copy(collaborators = teamMembers)
     val subject = "Request to delete an application"
@@ -522,7 +523,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     val adminRequester = utils.DeveloperSession(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
     val developerEmail = "developer@example.com"
     val developerRequester = utils.DeveloperSession(developerEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
-    val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER))
+    val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR, Some(UserId.random)), Collaborator(developerEmail, Role.DEVELOPER, Some(UserId.random)))
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val invalidROPCApp = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
     val productionApp = productionApplication.copy(collaborators = teamMembers)

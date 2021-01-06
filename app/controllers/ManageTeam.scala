@@ -98,7 +98,7 @@ class ManageTeam @Inject() (
 
       def handleValidForm(form: AddTeamMemberForm) = {
         applicationService
-          .addTeamMember(request.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER)))
+          .addTeamMember(request.application, request.user.email, Collaborator(form.email, Role.from(form.role).getOrElse(Role.DEVELOPER), None)) // TODO - change type or lookup id first - this currently works becuase APM does this for us.
           .map(_ => Redirect(successRedirect)) recover {
           case _: ApplicationNotFound     => NotFound(errorHandler.notFoundTemplate)
           case _: TeamMemberAlreadyExists => createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))

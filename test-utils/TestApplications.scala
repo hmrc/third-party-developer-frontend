@@ -22,6 +22,7 @@ import domain.models.apidefinitions.AccessType
 import domain.models.applications._
 import org.joda.time.DateTimeZone
 import uk.gov.hmrc.time.DateTimeUtils
+import domain.models.developers.UserId
 
 import scala.util.Random
 
@@ -58,7 +59,7 @@ trait TestApplications {
       lastAccess = DateTimeUtils.now,
       deployedTo = environment,
       description = Some("Description 1"),
-      collaborators = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER)),
+      collaborators = Set(Collaborator(adminEmail, Role.ADMINISTRATOR, Some(UserId.random)), Collaborator(developerEmail, Role.DEVELOPER, Some(UserId.random))),
       state = state,
       access = access,
       ipAllowlist = ipAllowlist
@@ -104,7 +105,7 @@ trait TestApplications {
 
     final def withDescription(description: Option[String]): Application = app.copy(description = description)
 
-    final def withTeamMember(email: String, userRole: Role): Application = app.copy(collaborators = app.collaborators + Collaborator(email, userRole))
+    final def withTeamMember(email: String, userRole: Role): Application = app.copy(collaborators = app.collaborators + Collaborator(email, userRole, Some(UserId.random)))
 
     final def withTeamMembers(teamMembers: Set[Collaborator]): Application = app.copy(collaborators = teamMembers)
 

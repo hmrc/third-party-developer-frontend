@@ -77,7 +77,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
     None,
     Environment.SANDBOX,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, role)),
+    Set(Collaborator(loggedInUser.email, role, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(
       redirectUris = Seq("https://red1", "https://red2"),
