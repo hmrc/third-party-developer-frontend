@@ -199,9 +199,9 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       http.PUT[AccountSetupRequest,Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/services", services)
     }
 
-  def updateTargets(email: String, targets: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
+  def updateTargets(userId: UserId, targets: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.PUT[AccountSetupRequest,Developer](s"$serviceBaseUrl/developer/account-setup/$email/targets", targets)
+      http.PUT[AccountSetupRequest,Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/targets", targets)
     }
 
   def completeAccountSetup(email: String)(implicit hc: HeaderCarrier): Future[Developer] =
