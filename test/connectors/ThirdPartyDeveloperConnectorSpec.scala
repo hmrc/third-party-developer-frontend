@@ -272,12 +272,12 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     }
 
     "successfully update roles" in new Setup {
-      val developer = buildDeveloper(emailAddress = email)
+      val developer = buildDeveloper(userId = userId)
 
       private val request = AccountSetupRequest(roles = Some(Seq("aRole")), rolesOther = Some("otherRole"))
-      when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/$email/roles")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
+      when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${userId.value}/roles")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 
-      await(connector.updateRoles(email, request)) shouldBe developer
+      await(connector.updateRoles(userId, request)) shouldBe developer
     }
 
     "successfully update services" in new Setup {
