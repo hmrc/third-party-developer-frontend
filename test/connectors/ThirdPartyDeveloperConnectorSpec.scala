@@ -260,15 +260,13 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
 
   // TODO - remove this to integration testing
   "accountSetupQuestions" should {
-    val email = "john.smith@example.com"
-
     "successfully complete a developer account setup" in new Setup {
-      val aDeveloper = buildDeveloper(emailAddress = email)
+      val developer = buildDeveloper(userId = userId)
   
-      when(mockHttp.POSTEmpty[Developer](eqTo(endpoint(s"developer/account-setup/$email/complete")), *)(*, *, *))
-      .thenReturn(successful(aDeveloper))
+      when(mockHttp.POSTEmpty[Developer](eqTo(endpoint(s"developer/account-setup/${userId.value}/complete")), *)(*, *, *))
+      .thenReturn(successful(developer))
 
-      await(connector.completeAccountSetup(email)) shouldBe aDeveloper
+      await(connector.completeAccountSetup(userId)) shouldBe developer
     }
 
     "successfully update roles" in new Setup {
