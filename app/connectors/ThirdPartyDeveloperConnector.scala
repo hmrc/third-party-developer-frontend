@@ -33,6 +33,7 @@ import uk.gov.hmrc.play.http.metrics.API
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.emailpreferences.EmailPreferences
 import connectors.ThirdPartyDeveloperConnector.RemoveMfaRequest
+import play.api.libs.json.JsValue
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
@@ -216,7 +217,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
-    http.GET[Seq[User]](s"$serviceBaseUrl/developers", Seq("emails" -> emails.mkString(",")))
+    http.POST[Set[String], Seq[User]](s"$serviceBaseUrl/developers/get-by-emails", emails)
   }
 
   def createMfaSecret(userId: UserId)(implicit hc: HeaderCarrier): Future[String] = {
