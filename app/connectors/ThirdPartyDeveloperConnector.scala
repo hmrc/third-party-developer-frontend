@@ -218,14 +218,8 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
 
   def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
     val postHeaders: Seq[(String, String)] = Seq(CONTENT_TYPE -> JSON)
-    // http.GET[Seq[User]](s"$serviceBaseUrl/developers", Seq("emails" -> emails.mkString(",")))
     http.POST[JsValue, Seq[User]](s"$serviceBaseUrl/developers/get-by-emails", Json.toJson(emails), postHeaders)
   }
-
-  // From GK using new endpoint
-  // def fetchByEmails(emails: Iterable[String])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
-  //   http.POST[JsValue, Seq[User]](s"${appConfig.developerBaseUrl}/developers/get-by-emails", Json.toJson(emails), postHeaders)
-  // }
 
   def createMfaSecret(userId: UserId)(implicit hc: HeaderCarrier): Future[String] = {
     implicit val CreateMfaResponseReads = Json.reads[CreateMfaResponse]
