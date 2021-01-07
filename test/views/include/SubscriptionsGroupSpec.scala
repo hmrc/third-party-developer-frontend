@@ -29,6 +29,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.include.SubscriptionsGroup
+import domain.models.developers.UserId
 
 class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with SubscriptionsBuilder {
   implicit val request = FakeRequest().withCSRFToken
@@ -60,7 +61,7 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
         None,
         environment,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, role)),
+        Set(Collaborator(loggedInUser.email, role, Some(UserId.random))),
         state = state,
         access = Standard(redirectUris = Seq("https://red1.example.com", "https://red2.example.con"), termsAndConditionsUrl = Some("http://tnc-url.example.com"))
       )

@@ -36,6 +36,7 @@ import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -90,7 +91,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
       val developerSession = DeveloperSession(session)
 
-      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(Collaborator(developerSession.email, userRole))
+      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(Collaborator(developerSession.email, userRole, Some(UserId.random)))
       val application = aStandardApplication.copy(id = appId, collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = DateTime.parse("2018-04-06T09:00"))
 
       givenApplicationAction(application, developerSession)
@@ -159,7 +160,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), any[Collaborator])(any[HeaderCarrier])
     }
 
     "check if team member already exists on the application" in new Setup {
@@ -169,7 +170,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
-      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), any[Collaborator])(any[HeaderCarrier])
 
     }
 
@@ -180,7 +181,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe NOT_FOUND
-      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), any[Collaborator])(any[HeaderCarrier])
 
     }
 
@@ -192,7 +193,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
-      verify(applicationServiceMock, never).addTeamMember(eqTo(application), eqTo(loggedInUser.email), eqTo(Collaborator(email, role)))(any[HeaderCarrier])
+      verify(applicationServiceMock, never).addTeamMember(eqTo(application), eqTo(loggedInUser.email), any[Collaborator])(any[HeaderCarrier])
 
     }
 
@@ -218,10 +219,10 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     val teamMemberEmail = "teamMemberToDelete@example.com"
     val teamMemberEmailHash = teamMemberEmail.toSha256
     val additionalTeamMembers = Seq(
-      Collaborator("email1@example.com", DEVELOPER),
-      Collaborator("email2@example.com", DEVELOPER),
-      Collaborator("email3@example.com", DEVELOPER),
-      Collaborator(teamMemberEmail, DEVELOPER)
+      Collaborator("email1@example.com", DEVELOPER, Some(UserId.random)),
+      Collaborator("email2@example.com", DEVELOPER, Some(UserId.random)),
+      Collaborator("email3@example.com", DEVELOPER, Some(UserId.random)),
+      Collaborator(teamMemberEmail, DEVELOPER, Some(UserId.random))
     )
 
     "show the remove team member page when logged in as an admin" in new Setup {

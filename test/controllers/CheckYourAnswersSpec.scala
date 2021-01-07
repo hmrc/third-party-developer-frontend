@@ -43,6 +43,7 @@ import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
@@ -75,7 +76,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -221,8 +222,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     ): Application = {
 
       val collaborators = Set(
-        Collaborator(loggedInUser.email, userRole),
-        Collaborator(anotherCollaboratorEmail, Role.DEVELOPER)
+        Collaborator(loggedInUser.email, userRole, Some(UserId.random)),
+        Collaborator(anotherCollaboratorEmail, Role.DEVELOPER, Some(UserId.random))
       )
 
       val application = Application(

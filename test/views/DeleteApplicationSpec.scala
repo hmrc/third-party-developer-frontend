@@ -26,6 +26,7 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeleteApplicationView
+import domain.models.developers.UserId
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -42,7 +43,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -95,7 +96,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
       }
 
       "there are multiple administrators" in {
-        val extraAdmin = Collaborator("admin@test.com", Role.ADMINISTRATOR)
+        val extraAdmin = Collaborator("admin@test.com", Role.ADMINISTRATOR, Some(UserId.random))
         Seq(prodApp.copy(collaborators = prodApp.collaborators + extraAdmin), sandboxApp.copy(collaborators = sandboxApp.collaborators + extraAdmin))
           .foreach { application =>
             val request = FakeRequest().withCSRFToken

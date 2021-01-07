@@ -45,6 +45,7 @@ import views.html.editapplication.NameSubmittedView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import domain.models.developers.UserId
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder with DeveloperBuilder {
 
@@ -111,7 +112,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
           redirectUris = Seq("https://red1", "https://red2"),
@@ -157,8 +158,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     val anotherRole = if (userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
 
     val collaborators = Set(
-      Collaborator(loggedInUser.email, userRole),
-      Collaborator(anotherCollaboratorEmail, anotherRole)
+      Collaborator(loggedInUser.email, userRole, Some(UserId.random)),
+      Collaborator(anotherCollaboratorEmail, anotherRole, Some(UserId.random))
     )
 
     createFullyConfigurableApplication(collaborators, appId, clientId, state, checkInformation, access)
@@ -1336,9 +1337,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     "return unauthorised App details page with 2 Admins " in new Setup {
       lazy val collaborators = Set(
-        Collaborator(loggedInUser.email, DEVELOPER),
-        Collaborator(anotherCollaboratorEmail, ADMINISTRATOR),
-        Collaborator(yetAnotherCollaboratorEmail, ADMINISTRATOR)
+        Collaborator(loggedInUser.email, DEVELOPER, Some(UserId.random)),
+        Collaborator(anotherCollaboratorEmail, ADMINISTRATOR, Some(UserId.random)),
+        Collaborator(yetAnotherCollaboratorEmail, ADMINISTRATOR, Some(UserId.random))
       )
 
       def createApplication() = createFullyConfigurableApplication(collaborators = collaborators)

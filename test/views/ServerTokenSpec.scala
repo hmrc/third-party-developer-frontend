@@ -29,6 +29,7 @@ import play.twirl.api.Html
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.ServerTokenView
+import domain.models.developers.UserId
 
 import scala.collection.JavaConverters._
 
@@ -54,7 +55,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken {
       None,
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR)),
+      collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR, Some(UserId.random))),
       access = Standard(),
       state = ApplicationState.testing,
       checkInformation = None

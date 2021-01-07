@@ -22,6 +22,7 @@ import domain.models.applications.Role.DEVELOPER
 import domain.models.applications.State.TESTING
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
+import domain.models.developers.UserId
 
 class ApplicationSummaryTest extends WordSpec with Matchers {
 
@@ -67,7 +68,7 @@ class ApplicationSummaryTest extends WordSpec with Matchers {
   }
 
   "from" should {
-    val user = new Collaborator("foo@bar.com", DEVELOPER)
+    val user = new Collaborator("foo@bar.com", DEVELOPER, Some(UserId.random))
 
     val serverTokenApplication =
       new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), Environment.PRODUCTION, collaborators = Set(user))

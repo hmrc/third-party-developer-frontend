@@ -36,6 +36,7 @@ import views.html._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
+import domain.models.developers.UserId
 
 class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
 
@@ -57,7 +58,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -71,7 +72,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     None,
     Environment.SANDBOX,
     Some("Description 2"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )

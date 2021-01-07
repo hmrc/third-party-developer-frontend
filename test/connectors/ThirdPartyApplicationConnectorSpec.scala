@@ -26,6 +26,7 @@ import domain._
 import domain.models.apidefinitions._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain.models.applications._
+import domain.models.developers.UserId
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
 import play.api.http.Status._
@@ -89,7 +90,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
     "My Application",
     Environment.PRODUCTION,
     Some("Description"),
-    Seq(Collaborator("admin@example.com", Role.ADMINISTRATOR)),
+    Seq(Collaborator("admin@example.com", Role.ADMINISTRATOR, Some(UserId.random))),
     Standard(Seq("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
   )
 
@@ -102,7 +103,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
     None,
     Environment.PRODUCTION,
     Some("Description"),
-    Set(Collaborator("john@example.com", Role.ADMINISTRATOR)),
+    Set(Collaborator("john@example.com", Role.ADMINISTRATOR, Some(UserId.random))),
     Standard(Seq("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
     state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"))
   )

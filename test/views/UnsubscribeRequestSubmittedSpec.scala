@@ -27,6 +27,7 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.UnsubscribeRequestSubmittedView
+import domain.models.developers.UserId
 
 class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Unsubscribe request submitted page" should {
@@ -48,7 +49,7 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
         None,
         Environment.PRODUCTION,
         Some("Test Application Description"),
-        Set(Collaborator(developer.email, Role.ADMINISTRATOR)),
+        Set(Collaborator(developer.email, Role.ADMINISTRATOR, Some(UserId.random))),
         state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )

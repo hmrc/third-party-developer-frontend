@@ -39,6 +39,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithLoggedInSession._
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -68,7 +69,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
           redirectUris = Seq("https://red1", "https://red2"),
@@ -93,7 +94,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       DateTimeUtils.now,
       None,
       environment,
-      collaborators = Set(Collaborator(loggedInUser.email, userRole)),
+      collaborators = Set(Collaborator(loggedInUser.email, userRole, Some(UserId.random))),
       state = state,
       access = access
     )

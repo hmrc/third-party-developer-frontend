@@ -25,6 +25,7 @@ import utils.ViewHelpers.elementExistsByText
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeleteSubordinateApplicationConfirmView
+import domain.models.developers.UserId
 
 class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -45,7 +46,7 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
       None,
       Environment.SANDBOX,
       Some("Description 1"),
-      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
