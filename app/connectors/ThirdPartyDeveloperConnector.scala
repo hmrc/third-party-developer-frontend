@@ -217,8 +217,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
-    val postHeaders: Seq[(String, String)] = Seq(CONTENT_TYPE -> JSON)
-    http.POST[JsValue, Seq[User]](s"$serviceBaseUrl/developers/get-by-emails", Json.toJson(emails), postHeaders)
+    http.POST[Set[String], Seq[User]](s"$serviceBaseUrl/developers/get-by-emails", emails)
   }
 
   def createMfaSecret(userId: UserId)(implicit hc: HeaderCarrier): Future[String] = {
