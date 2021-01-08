@@ -64,4 +64,11 @@ class EncryptedJson @Inject() (payloadEncryption: PayloadEncryption) {
     Json.toJson(SecretRequest(payloadEncryption.encrypt(payload).as[String]))
   }
 
+  def secretRequest[I,R](input: I, block: SecretRequest => Future[R])(implicit w: Writes[I]) = {
+    block(toSecretRequest(w.writes(input)))
+  }
+
+  def toSecretRequest[T](payload: T)(implicit writes: Writes[T]): SecretRequest = {
+    SecretRequest(payloadEncryption.encrypt(payload).as[String])
+  }
 }

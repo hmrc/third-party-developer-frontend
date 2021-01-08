@@ -49,7 +49,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     val mockMetrics = new NoopConnectorMetrics()
     val encryptedString: JsString = JsString("someEncryptedStringOfData")
-    val encryptedBody: JsValue = Json.toJson(SecretRequest(encryptedString.as[String]))
+    val encryptedBody = SecretRequest(encryptedString.as[String])
 
     when(mockAppConfig.thirdPartyDeveloperUrl).thenReturn("http://THIRD_PARTY_DEVELOPER:9000")
     when(mockPayloadEncryption.encrypt(*)(*)).thenReturn(encryptedString)
@@ -70,8 +70,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     "successfully register a developer" in new Setup {
       val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
 
-      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(successful(HttpResponse(Status.CREATED,"")))
+      when(mockHttp.POST[SecretRequest,ErrorOr[HttpResponse]](eqTo(endpoint("developer")), eqTo(encryptedBody), *)(*, *, *, *))
+        .thenReturn(successful(Right(HttpResponse(Status.CREATED,""))))
 
       await(connector.register(registrationToTest)) shouldBe RegistrationSuccessful
 
@@ -81,8 +81,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     "fail to register a developer when the email address is already in use" in new Setup {
       val registrationToTest = Registration("john", "smith", "john.smith@example.com", "XXXYYYY")
 
-      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(UpstreamErrorResponse("409 exception", Status.CONFLICT, Status.CONFLICT)))
+      when(mockHttp.POST[SecretRequest,ErrorOr[HttpResponse]](eqTo(endpoint("developer")), eqTo(encryptedBody), *)(*, *, *, *))
+        .thenReturn(successful(Left(UpstreamErrorResponse("409 exception", Status.CONFLICT, Status.CONFLICT))))
 
       await(connector.register(registrationToTest)) shouldBe EmailAlreadyInUse
 
@@ -97,7 +97,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
 
       await(connector.verify(code)) shouldBe Status.OK
 
-      verify(mockHttp).GET[ErrorOr[HttpResponse]](eqTo(endpoint(s"verification")), eqTo(Seq("code" -> code)))(*,*,*)  
+      verify(mockHttp).GET[ErrorOr[HttpResponse]](eqTo(endpoint(s"verification")), eqTo(Seq("code" -> code)))(*,*,*)
     }
   }
 
@@ -105,8 +105,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     val email = "john.smith@example.com"
 
     "successfully create an unregistered user" in new Setup {
-      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("unregistered-developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(successful(HttpResponse(Status.OK,"")))
+      when(mockHttp.POST[SecretRequest, ErrorOr[HttpResponse]](eqTo(endpoint("unregistered-developer")), eqTo(encryptedBody), *)(*, *, *, *))
+        .thenReturn(successful(Right(HttpResponse(Status.OK,""))))
 
       val result = await(connector.createUnregisteredUser(email))
 
@@ -115,8 +115,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     }
 
     "propagate error when the request fails" in new Setup {
-      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("unregistered-developer")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(UpstreamErrorResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR)))
+      when(mockHttp.POST[SecretRequest, ErrorOr[HttpResponse]](eqTo(endpoint("unregistered-developer")), eqTo(encryptedBody), *)(*, *, *, *))
+        .thenReturn(successful(Left(UpstreamErrorResponse("Internal server error", Status.INTERNAL_SERVER_ERROR, Status.INTERNAL_SERVER_ERROR))))
 
       intercept[UpstreamErrorResponse] {
         await(connector.createUnregisteredUser(email))
@@ -249,8 +249,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     "successfully reset password" in new Setup {
       val passwordReset = PasswordReset("user@example.com", "newPassword")
 
-      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("reset-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(successful(HttpResponse(Status.OK,"")))
+      when(mockHttp.POST[SecretRequest, ErrorOr[HttpResponse]](eqTo(endpoint("reset-password")), eqTo(encryptedBody), *)(*, *, *, *))
+        .thenReturn(successful(Right(HttpResponse(Status.OK,""))))
 
       await(connector.reset(passwordReset))
 
@@ -301,8 +301,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     val changePasswordRequest = ChangePassword("email@example.com", "oldPassword123", "newPassword321")
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {
-      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("change-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(UpstreamErrorResponse("Unauthorised error", Status.UNAUTHORIZED, Status.UNAUTHORIZED)))
+      when(mockHttp.POST[SecretRequest, ErrorOr[HttpResponse]](eqTo(endpoint("change-password")), eqTo(encryptedBody), *)(*, *, *, *))
+        .thenReturn(successful(Left(UpstreamErrorResponse("Unauthorised error", Status.UNAUTHORIZED, Status.UNAUTHORIZED))))
 
       await(connector.changePassword(changePasswordRequest).failed) shouldBe a[InvalidCredentials]
 
@@ -310,8 +310,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     }
 
     "throw Unverified Account if the response is Forbidden" in new Setup {
-      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("change-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(UpstreamErrorResponse("Forbidden error", Status.FORBIDDEN, Status.FORBIDDEN)))
+      when(mockHttp.POST[SecretRequest, ErrorOr[HttpResponse]](eqTo(endpoint("change-password")), eqTo(encryptedBody), *)(*, *, *, *))
+        .thenReturn(successful(Left(UpstreamErrorResponse("Forbidden error", Status.FORBIDDEN, Status.FORBIDDEN))))
 
       await(connector.changePassword(changePasswordRequest).failed) shouldBe a[UnverifiedAccount]
 
@@ -319,8 +319,8 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     }
 
     "throw Locked Account if the response is Locked" in new Setup {
-      when[Future[HttpResponse]](mockHttp.POST(eqTo(endpoint("change-password")), eqTo(encryptedBody), eqTo(Seq("Content-Type" -> "application/json")))(*, *, *, *))
-        .thenReturn(failed(UpstreamErrorResponse("Locked error", Status.LOCKED, Status.LOCKED)))
+      when(mockHttp.POST[SecretRequest, ErrorOr[HttpResponse]](eqTo(endpoint("change-password")), eqTo(encryptedBody), *)(*, *, *, *))
+        .thenReturn(successful(Left(UpstreamErrorResponse("Locked error", Status.LOCKED, Status.LOCKED))))
 
       await(connector.changePassword(changePasswordRequest).failed) shouldBe a[LockedAccount]
 

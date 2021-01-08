@@ -23,8 +23,7 @@ import domain._
 import domain.models.connectors._
 import domain.models.developers._
 import javax.inject.{Inject, Singleton}
-import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.{CONTENT_TYPE, CONTENT_LENGTH}
+import play.api.http.HeaderNames.CONTENT_LENGTH
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http.{UserId => _, _}
@@ -33,7 +32,8 @@ import uk.gov.hmrc.play.http.metrics.API
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.emailpreferences.EmailPreferences
 import connectors.ThirdPartyDeveloperConnector.RemoveMfaRequest
-import play.api.libs.json.JsValue
+
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
@@ -42,79 +42,83 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   import ThirdPartyDeveloperConnector._
 
   def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
-    encryptedJson.secretRequestJson(
-      Json.toJson(loginRequest),
-      http.POST(s"$serviceBaseUrl/authenticate", _, Seq(CONTENT_TYPE -> JSON)))
-      .map(_.json.as[UserAuthenticationResponse])
-      .recover {
-        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
-        case _: NotFoundException => throw new InvalidEmail
-      }
+    encryptedJson.secretRequest(
+      loginRequest,
+      http.POST[SecretRequest, ErrorOr[UserAuthenticationResponse]](s"$serviceBaseUrl/authenticate", _))
+      .map(_ match {
+        case Right(response) => response
+        case Left(UpstreamErrorResponse(_, UNAUTHORIZED, _, _)) => throw new InvalidCredentials
+        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new UnverifiedAccount
+        case Left(UpstreamErrorResponse(_, LOCKED, _, _)) => throw new LockedAccount
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new InvalidEmail
+        case Left(err) => throw err
+      })
   }
 
   def authenticateTotp(totpAuthenticationRequest: TotpAuthenticationRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
-    encryptedJson.secretRequestJson(
-      Json.toJson(totpAuthenticationRequest),
-      http.POST(s"$serviceBaseUrl/authenticate-totp", _, Seq(CONTENT_TYPE -> JSON)))
-      .map(_.json.as[Session])
-      .recover {
-        case _: BadRequestException => throw new InvalidCredentials
-        case _: NotFoundException => throw new InvalidEmail
-      }
+    encryptedJson.secretRequest(
+      totpAuthenticationRequest,
+      http.POST[SecretRequest, ErrorOr[Session]](s"$serviceBaseUrl/authenticate-totp", _))
+      .map(_ match {
+        case Right(response) => response
+        case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => throw new InvalidCredentials
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new InvalidEmail
+        case Left(err) => throw err
+      })
   }
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api = API("third-party-developer")
 
   def register(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationDownstreamResponse] = metrics.record(api) {
-    encryptedJson.secretRequestJson[RegistrationDownstreamResponse](
-      Json.toJson(registration), { secretRequestJson =>
-        http.POST(s"$serviceBaseUrl/developer", secretRequestJson, Seq(CONTENT_TYPE -> JSON)) map {
-          r =>
-            r.status match {
-              case CREATED => RegistrationSuccessful
-              case _ => throw new InternalServerException("Unexpected 2xx code")
-            }
-        } recover {
-          case Upstream4xxResponse(_, CONFLICT, _, _) => EmailAlreadyInUse
-        }
+    encryptedJson.secretRequest(
+      registration,
+      http.POST[SecretRequest,ErrorOr[HttpResponse]](s"$serviceBaseUrl/developer", _)
+      .map(_ match {
+        case Right(response) if(response.status == CREATED) => RegistrationSuccessful
+        case Right(response) => throw new InternalServerException("Unexpected 2xx code")
+        case Left(UpstreamErrorResponse(_, CONFLICT, _, _)) => EmailAlreadyInUse
+        case Left(err) => throw err
       })
+    )
   }
 
   def createUnregisteredUser(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    encryptedJson.secretRequestJson[Int](
-      Json.toJson(UnregisteredUserCreationRequest(email)), { secretRequestJson =>
-        http.POST(s"$serviceBaseUrl/unregistered-developer", secretRequestJson, Seq(CONTENT_TYPE -> JSON)) map status
+    encryptedJson.secretRequest(
+      UnregisteredUserCreationRequest(email),
+      http.POST[SecretRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/unregistered-developer", _)
+      .map( _ match {
+        case Right(response) => response.status
+        case Left(err) => throw err
       })
+    )
   }
 
-  private def status: HttpResponse => Int = _.status
-
   def reset(reset: PasswordReset)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    encryptedJson.secretRequestJson[Int](
-      Json.toJson(reset), { secretRequestJson =>
-        http.POST(s"$serviceBaseUrl/reset-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
-          .map(status).recover {
-          case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-        }
+    encryptedJson.secretRequest(
+      reset,
+      http.POST[SecretRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/reset-password", _)
+      .map( _ match {
+        case Right(response) => response.status
+        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new UnverifiedAccount
+        case Left(err) => throw err
       })
+    )
   }
 
   def changePassword(change: ChangePassword)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    encryptedJson.secretRequestJson[Int](
-      Json.toJson(change), { secretRequestJson =>
-        http.POST(s"$serviceBaseUrl/change-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
-          .map(status).recover {
-          case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
-          case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-          case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
-        }
+    encryptedJson.secretRequest(
+      change,
+      http.POST[SecretRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/change-password", _)
+      .map( _ match {
+        case Right(response) => response.status
+        case Left(UpstreamErrorResponse(_, UNAUTHORIZED, _, _)) => throw new InvalidCredentials
+        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new UnverifiedAccount
+        case Left(UpstreamErrorResponse(_, LOCKED, _, _)) => throw new LockedAccount
+        case Left(err) => throw err
       })
+    )
   }
-
-  import uk.gov.hmrc.http.HttpReads.Implicits._
 
   def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     http.POSTEmpty[Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/$email/password-reset-request", Seq((CONTENT_LENGTH -> "0")))
