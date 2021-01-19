@@ -121,7 +121,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POSTEmpty[Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/$email/password-reset-request", Seq((CONTENT_LENGTH -> "0")))
+    http.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/password-reset-request", PasswordResetRequest(email), Seq((CONTENT_LENGTH -> "0")))
     .map(_ match {
       case Right(response) => response.status
       case Left(UpstreamErrorResponse(_,FORBIDDEN,_,_)) => throw new UnverifiedAccount
