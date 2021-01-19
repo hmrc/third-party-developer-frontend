@@ -33,6 +33,7 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications.ClientId
 import domain.models.applications.ApplicationId
 import domain.models.developers.UserId
+import domain.models.connectors.PasswordResetRequest
 
 object Stubs {
 
@@ -97,8 +98,8 @@ object DeveloperStub {
     )
   }
 
-  def verifyResetPassword(email: String) = {
-    verify(1, postRequestedFor(urlPathEqualTo(s"/$email/password-reset-request")))
+  def verifyResetPassword(request: PasswordResetRequest) = {
+    verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(equalToJson(Json.toJson(request).toString())))
   }
 }
 

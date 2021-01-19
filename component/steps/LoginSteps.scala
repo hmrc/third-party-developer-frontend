@@ -30,6 +30,7 @@ import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, Stubs}
+import domain.models.connectors.PasswordResetRequest
 
 case class MfaSecret(secret: String)
 
@@ -167,7 +168,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email : String =>
-    DeveloperStub.verifyResetPassword(email)
+    DeveloperStub.verifyResetPassword(PasswordResetRequest(email))
   }
 
 

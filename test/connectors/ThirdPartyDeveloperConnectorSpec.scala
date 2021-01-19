@@ -27,7 +27,7 @@ import domain.models.emailpreferences.{EmailPreferences, TaxRegimeInterests}
 import domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import play.api.http.Status._
 import play.api.http.Status
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json.{JsString, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
@@ -217,16 +217,16 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   "Reset password" should {
     "successfully request reset" in new Setup {
       val email = "user@example.com"
-      when(mockHttp.POSTEmpty[Either[UpstreamErrorResponse, HttpResponse]](eqTo(endpoint(s"$email/password-reset-request")),*)(*, *, *)).thenReturn(successful(Right(HttpResponse(Status.OK,""))))
+      when(mockHttp.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](eqTo(endpoint("password-reset-request")), *, *)(*, *, *, *)).thenReturn(successful(Right(HttpResponse(Status.OK,""))))
 
       await(connector.requestReset(email))
 
-      verify(mockHttp).POSTEmpty[Either[UpstreamErrorResponse, HttpResponse]](eqTo(endpoint(s"$email/password-reset-request")), *)(*, *, *)
+      verify(mockHttp).POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](eqTo(endpoint("password-reset-request")), *, *)(*, *, *, *)
     }
 
     "forbidden response results in UnverifiedAccount exception for request reset" in new Setup {
       val email = "user@example.com"
-      when(mockHttp.POSTEmpty[Either[UpstreamErrorResponse, HttpResponse]](eqTo(endpoint(s"$email/password-reset-request")),*)(*, *, *)).thenReturn(successful(Left(UpstreamErrorResponse("Forbidden", Status.FORBIDDEN))))
+      when(mockHttp.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](eqTo(endpoint("password-reset-request")), *, *)(*, *, *, *)).thenReturn(successful(Left(UpstreamErrorResponse("Forbidden", Status.FORBIDDEN))))
 
       intercept[UnverifiedAccount] {
         await(connector.requestReset(email))
