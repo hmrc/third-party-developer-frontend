@@ -28,7 +28,7 @@ import play.api.mvc._
 import play.twirl.api.HtmlFormat
 import service.{AuditService, SessionService}
 import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}

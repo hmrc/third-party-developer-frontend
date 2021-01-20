@@ -23,10 +23,10 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
 import service.SessionService
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import views.html._
-
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 @Singleton
 class Registration @Inject()(override val sessionService: SessionService,
@@ -76,11 +76,10 @@ class Registration @Inject()(override val sessionService: SessionService,
   def resendVerification = Action.async {
     implicit request =>
       request.session.get("email").fold(Future.successful(BadRequest(signInView("Sign in", LoginForm.form)))) { email =>
-        connector.resendVerificationEmail(email) map {
-          case status if status >= 200 && status < 300 => Redirect(controllers.routes.Registration.confirmation())
-          case _ => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
-        } recover {
-          case _: NotFoundException => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
+        connector.resendVerificationEmail(email)
+        .map(_ => Redirect(controllers.routes.Registration.confirmation()))
+        .recover {
+          case NonFatal(e) => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
         }
       }
   }

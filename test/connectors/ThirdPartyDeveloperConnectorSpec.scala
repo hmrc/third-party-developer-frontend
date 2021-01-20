@@ -34,9 +34,10 @@ import uk.gov.hmrc.play.http.metrics.API
 import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import connectors.ThirdPartyDeveloperConnector.CreateMfaResponse
+import connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
+import connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 
 class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponseHandlers { 
 
@@ -206,11 +207,12 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     "send verification mail" in new Setup {
       val email = "john.smith@example.com"
 
-      when(mockHttp.POSTEmpty[ErrorOr[HttpResponse]](eqTo(endpoint(s"$email/resend-verification")), *)(*, *, *)).thenReturn(successful(Right(HttpResponse(Status.OK,""))))
+      when(mockHttp.POST[FindUserIdRequest, FindUserIdResponse](eqTo(endpoint("developers/find-user-id")), *, *)(*, *, *, *)).thenReturn(successful(FindUserIdResponse(userId)))
+      when(mockHttp.POSTEmpty[ErrorOr[HttpResponse]](eqTo(endpoint(s"${userId.value}/resend-verification")), *)(*, *, *)).thenReturn(successful(Right(HttpResponse(Status.OK,""))))
 
       await(connector.resendVerificationEmail(email)) shouldBe Status.OK
 
-      verify(mockHttp).POSTEmpty[ErrorOr[HttpResponse]](eqTo(endpoint(s"$email/resend-verification")), *)(*, *, *)
+      verify(mockHttp).POSTEmpty[ErrorOr[HttpResponse]](eqTo(endpoint(s"${userId.value}/resend-verification")), *)(*, *, *)
     }
   }
 
