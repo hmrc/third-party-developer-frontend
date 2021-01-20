@@ -32,6 +32,7 @@ import domain.models.connectors.LoginRequest
 import domain.models.connectors.TotpAuthenticationRequest
 import play.api.http.HeaderNames
 import domain.models.developers.UserId
+import connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -66,9 +67,22 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   "resendVerificationEmail" should {
     "return" in new Setup {
       val email = "foo@bar.com"
+      val userId = UserId.random
+
+      implicit val writes = Json.writes[FindUserIdResponse]
+
+      stubFor(
+        post(urlEqualTo("/developers/find-user-id"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(Json.toJson(FindUserIdResponse(userId)).toString)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
       
       stubFor(
-        post(urlEqualTo(s"/$email/resend-verification"))
+        post(urlEqualTo(s"/${userId.value}/resend-verification"))
           .willReturn(
             aResponse()
               .withStatus(NO_CONTENT)
@@ -80,7 +94,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
       verify(
         1,
-        postRequestedFor(urlMatching(s"/$email/resend-verification"))
+        postRequestedFor(urlMatching(s"/${userId.value}/resend-verification"))
           .withHeader(HeaderNames.CONTENT_LENGTH, equalTo("0"))
       )
     }

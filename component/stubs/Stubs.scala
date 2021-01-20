@@ -34,6 +34,7 @@ import domain.models.applications.ClientId
 import domain.models.applications.ApplicationId
 import domain.models.developers.UserId
 import domain.models.connectors.PasswordResetRequest
+import connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 
 object Stubs {
 
@@ -92,8 +93,22 @@ object DeveloperStub {
     )
 
   def setupResend(email: String, status: Int) = {
+    val userId = UserId.random
+
+    implicit val writes = Json.writes[FindUserIdResponse]
+    
     stubFor(
-      post(urlPathEqualTo(s"/$email/resend-verification"))
+      post(urlEqualTo("/developers/find-user-id"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(Json.toJson(FindUserIdResponse(userId)).toString)
+            .withHeader("Content-Type", "application/json")
+        )
+    )
+    
+    stubFor(
+      post(urlPathEqualTo(s"/${userId.value}/resend-verification"))
         .willReturn(aResponse().withStatus(status))
     )
   }

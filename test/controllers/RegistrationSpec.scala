@@ -29,6 +29,7 @@ import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class RegistrationSpec extends BaseControllerSpec {
 
@@ -136,7 +137,7 @@ class RegistrationSpec extends BaseControllerSpec {
       val email = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
       val request = FakeRequest().withSession(newSessionParams: _*)
-      when(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(NOT_FOUND))
+      when(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).thenReturn(failed(UpstreamErrorResponse("Bang", NOT_FOUND)))
       val result = underTest.resendVerification()(request)
 
       status(result) shouldBe NOT_FOUND
