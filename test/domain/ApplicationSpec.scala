@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package domain
 
+import builder.DeveloperBuilder
 import domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import domain.models.applications._
 import domain.models.applications.Permissions.SandboxOrAdmin
@@ -23,13 +24,14 @@ import domain.models.developers.Developer
 import helpers.string._
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
+import domain.models.developers.UserId
 
-class ApplicationSpec extends FunSpec with Matchers {
+class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder {
 
-  val developer = Developer("developerEmail", "DEVELOPER    ", "developerLast")
-  val developerCollaborator = Collaborator(developer.email, Role.DEVELOPER)
+  val developer = buildDeveloper(emailAddress = "developerEmail", firstName = "DEVELOPER    ", lastName = "developerLast")
+  val developerCollaborator = Collaborator(developer.email, Role.DEVELOPER, Some(UserId.random))
 
-  val administrator = Developer("administratorEmail", "ADMINISTRATOR", "administratorLast")
+  val administrator = buildDeveloper(emailAddress = "administratorEmail", firstName = "ADMINISTRATOR", lastName = "administratorLast")
 
   val productionApplicationState: ApplicationState = ApplicationState.production(requestedBy = "other email", verificationCode = "123")
   val testingApplicationState: ApplicationState = ApplicationState.testing
@@ -54,7 +56,6 @@ class ApplicationSpec extends FunSpec with Matchers {
   }
 
   describe("Application.isPermittedToEditAppDetails") {
-
     val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
       (Environment.SANDBOX, Standard(), developer, true),
       (Environment.SANDBOX, Standard(), administrator, true),
@@ -145,7 +146,7 @@ class ApplicationSpec extends FunSpec with Matchers {
   private def createApp(environment: Environment, access: Access, defaultApplicationState: ApplicationState): Application = {
     val collaborators = Set(
       developerCollaborator,
-      Collaborator(administrator.email, Role.ADMINISTRATOR)
+      Collaborator(administrator.email, Role.ADMINISTRATOR, Some(UserId.random))
     )
 
     val app = Application(

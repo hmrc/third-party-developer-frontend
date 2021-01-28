@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,21 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
+import domain.models.developers.UserId
 
 @Singleton
 class MFAService @Inject()(tpdConnector: ThirdPartyDeveloperConnector)(implicit val ec: ExecutionContext) {
 
-  def enableMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
-    tpdConnector.verifyMfa(email, totpCode) flatMap {
-      case true => tpdConnector.enableMfa(email).map(_ => MFAResponse(true))
+  def enableMfa(userId: UserId, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
+    tpdConnector.verifyMfa(userId, totpCode) flatMap {
+      case true => tpdConnector.enableMfa(userId).map(_ => MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }
   }
 
-  def removeMfa(email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
-    tpdConnector.verifyMfa(email, totpCode) flatMap {
-      case true => tpdConnector.removeMfa(email).map(_ => MFAResponse(true))
+  def removeMfa(userId: UserId, email: String, totpCode: String)(implicit hc: HeaderCarrier): Future[MFAResponse] = {
+    tpdConnector.verifyMfa(userId, totpCode) flatMap {
+      case true => tpdConnector.removeMfa(userId, email).map(_ => MFAResponse(true))
       case _ => successful(MFAResponse(false))
     }
   }

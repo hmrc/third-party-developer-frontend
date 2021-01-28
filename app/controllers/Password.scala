@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,11 @@ import play.api.mvc._
 import play.twirl.api.HtmlFormat
 import service.{AuditService, SessionService}
 import service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.HeaderCarrier
 import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 @Singleton
 class Password @Inject()(val auditService: AuditService,
@@ -65,9 +66,9 @@ class Password @Inject()(val auditService: AuditService,
       data => connector.requestReset(data.emailaddress) map {
         _ => Ok(checkEmailView(data.emailaddress))
       } recover {
-        case _: UnverifiedAccount => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
+        case _ : UnverifiedAccount => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, data.emailaddress)))
           .withSession("email" -> data.emailaddress)
-        case _: NotFoundException => Ok(checkEmailView(data.emailaddress))
+        case UpstreamErrorResponse(_,NOT_FOUND,_,_) => Ok(checkEmailView(data.emailaddress))
       }
     )
   }

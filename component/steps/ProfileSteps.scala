@@ -28,7 +28,9 @@ class ProfileSteps extends ScalaDsl with EN with Matchers with NavigationSugar {
   implicit val webDriver: WebDriver = Env.driver
 
   Given( """^I want to successfully change my profile$""") { () =>
-    DeveloperStub.update("john.smith@example.com", UpdateProfileRequest("Joe", "Bloggs", None), OK)
+    // Pulling the user id from the developer in the test context defined in LoginSteps
+    val userId = TestContext.developer.userId
+    DeveloperStub.update(userId, UpdateProfileRequest("Joe", "Bloggs", None), OK)
   }
 
   Given( """^I want to successfully change my password""") { () =>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.UUID
 
 import domain.models.developers.{Developer, LoggedInState}
 import domain.models.emailpreferences.EmailPreferences
+import domain.models.developers.UserId
 
 object DeveloperSession {
 
@@ -36,7 +37,9 @@ object DeveloperSession {
     domain.models.developers.DeveloperSession(
       loggedInState,
       sessionId,
-      Developer(email,
+      Developer(
+        UserId.random,
+        email,
         firstName,
         lastName,
         organisation,

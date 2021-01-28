@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,23 +42,22 @@ import domain.models.apidefinitions.ApiIdentifier
 import play.api.mvc.Call
 
 @Singleton
-class Subscriptions @Inject() (
-    val developerConnector: ThirdPartyDeveloperConnector,
-    val auditService: AuditService,
-    val errorHandler: ErrorHandler,
-    val applicationService: ApplicationService,
-    val subscriptionsService: SubscriptionsService,
-    val applicationActionService: ApplicationActionService,
-    val sessionService: SessionService,
-    mcc: MessagesControllerComponents,
-    val cookieSigner: CookieSigner,
-    manageSubscriptionsView: ManageSubscriptionsView,
-    addAppSubscriptionsView: AddAppSubscriptionsView,
-    changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
-    unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
-    subscribeRequestSubmittedView: SubscribeRequestSubmittedView
-)(implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
-    extends ApplicationController(mcc)
+class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnector,
+                              val auditService: AuditService,
+                              val errorHandler: ErrorHandler,
+                              val applicationService: ApplicationService,
+                              val subscriptionsService: SubscriptionsService,
+                              val applicationActionService: ApplicationActionService,
+                              val sessionService: SessionService,
+                              mcc: MessagesControllerComponents,
+                              val cookieSigner: CookieSigner,
+                              manageSubscriptionsView: ManageSubscriptionsView,
+                              addAppSubscriptionsView: AddAppSubscriptionsView,
+                              changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
+                              unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
+                              subscribeRequestSubmittedView: SubscribeRequestSubmittedView)
+                             (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig, val environmentNameService: EnvironmentNameService)
+  extends ApplicationController(mcc)
     with ApplicationHelper {
 
   private def canManagePrivateApiSubscriptionsAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
@@ -75,7 +74,7 @@ class Subscriptions @Inject() (
       request.application,
       request.user,
       (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-        manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.app.id)
+        manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.openAccessApis ,data.app.id)
       }
     )
   }
@@ -85,19 +84,18 @@ class Subscriptions @Inject() (
       request.application,
       request.user,
       (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
-        addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions)
+        addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions, data.openAccessApis)
       }
     )
   }
 
   def renderSubscriptions(application: Application, user: DeveloperSession, renderHtml: (Role, PageData, Form[EditApplicationForm]) => Html)(
-      implicit request: ApplicationRequest[AnyContent]
+    implicit request: ApplicationRequest[AnyContent]
   ): Future[Result] = {
     val subsData = APISubscriptions.groupSubscriptions(request.subscriptions)
-    val role = request.role
     val form = EditApplicationForm.withData(request.application)
 
-    val html = renderHtml(role, PageData(request.application, subsData), form)
+    val html = renderHtml(request.role, PageData(request.application, subsData, request.openAccessApis), form)
 
     Future.successful(Ok(html))
   }
@@ -112,7 +110,7 @@ class Subscriptions @Inject() (
   def changeApiSubscription(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
       val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
-      
+
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
           def service = if (subscribe) applicationService.subscribeToApi _ else applicationService.unsubscribeFromApi _
@@ -133,9 +131,14 @@ class Subscriptions @Inject() (
       def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = Future.successful(BadRequest(errorHandler.badRequestTemplate))
 
       ChangeSubscriptionForm.form.bindFromRequest.fold(handleInvalidForm, handleValidForm);
-    }   
-  
-  def requestChangeApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String, call: Call): ApplicationRequest[AnyContent] => Future[Result] = 
+    }
+
+  def requestChangeApiSubscription(applicationId: ApplicationId,
+                                   apiName: String,
+                                   apiContext: ApiContext,
+                                   apiVersion: ApiVersion,
+                                   redirectTo: String,
+                                   call: Call): ApplicationRequest[AnyContent] => Future[Result] =
     (request: ApplicationRequest[AnyContent]) => {
       val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
       implicit val r = request
@@ -158,22 +161,35 @@ class Subscriptions @Inject() (
         )
     }
 
-  def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscription(applicationId: ApplicationId,
+                                  apiName: String,
+                                  apiContext: ApiContext,
+                                  apiVersion: ApiVersion,
+                                  redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
       val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
       requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  def changePrivateApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changePrivateApiSubscription(applicationId: ApplicationId,
+                                   apiName: String,
+                                   apiContext: ApiContext,
+                                   apiVersion: ApiVersion,
+                                   redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
-      val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  def requestChangeApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String, call: Call): ApplicationRequest[AnyContent] => Future[Result] = 
+  def requestChangeApiSubscriptionAction(applicationId: ApplicationId,
+                                         apiName: String,
+                                         apiContext: ApiContext,
+                                         apiVersion: ApiVersion,
+                                         redirectTo: String,
+                                         call: Call): ApplicationRequest[AnyContent] => Future[Result] =
     (request: ApplicationRequest[AnyContent]) => {
-      val apiIdentifier = ApiIdentifier(apiContext,apiVersion)
-      
+      val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
+
       implicit val r = request
 
       def requestChangeSubscription(subscribed: Boolean) = {
@@ -190,12 +206,14 @@ class Subscriptions @Inject() (
 
       def handleValidForm(subscribed: Boolean)(form: ChangeSubscriptionConfirmationForm) = form.confirm match {
         case Some(true) => requestChangeSubscription(subscribed)
-        case _       => Future.successful(redirect(redirectTo, applicationId))
+        case _          => Future.successful(redirect(redirectTo, applicationId))
       }
 
       def handleInvalidForm(subscribed: Boolean)(formWithErrors: Form[ChangeSubscriptionConfirmationForm]) =
         Future.successful(
-          BadRequest(changeSubscriptionConfirmationView(applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo, call))
+          BadRequest(
+            changeSubscriptionConfirmationView(
+              applicationViewModelFromApplicationRequest, formWithErrors, apiName, apiContext, apiVersion, subscribed, redirectTo, call))
         )
 
       applicationService
@@ -203,15 +221,23 @@ class Subscriptions @Inject() (
         .flatMap(subscribed => ChangeSubscriptionConfirmationForm.form.bindFromRequest.fold(handleInvalidForm(subscribed), handleValidForm(subscribed)))
     }
 
-  def changeLockedApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+  def changeLockedApiSubscriptionAction(applicationId: ApplicationId,
+                                        apiName: String,
+                                        apiContext: ApiContext,
+                                        apiVersion: ApiVersion,
+                                        redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
-      val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      val call: Call = routes.Subscriptions.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
- 
-  def changePrivateApiSubscriptionAction(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersion, redirectTo: String): Action[AnyContent] =
+
+  def changePrivateApiSubscriptionAction(applicationId: ApplicationId,
+                                         apiName: String,
+                                         apiContext: ApiContext,
+                                         apiVersion: ApiVersion,
+                                         redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
-      val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
+      val call: Call = routes.Subscriptions.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
@@ -219,7 +245,7 @@ class Subscriptions @Inject() (
     app.deployedTo match {
       case Environment.PRODUCTION =>
         applicationService.updateCheckInformation(app, app.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionsConfirmed = false))
-      case _ => Future.successful(())
+      case _                      => Future.successful(())
     }
   }
 }

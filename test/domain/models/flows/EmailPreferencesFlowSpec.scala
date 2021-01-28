@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package domain.models.flows
 
+import builder.DeveloperBuilder
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import org.scalatest.{Matchers, WordSpec}
 
-class EmailPreferencesFlowSpec extends WordSpec with Matchers {
-
+class EmailPreferencesFlowSpec extends WordSpec with Matchers with DeveloperBuilder {
     val category1 = "CATEGORY_1"
     val category2 = "CATEGORY_2"
     val category1Apis = Set("api1", "api2")
@@ -30,10 +30,9 @@ class EmailPreferencesFlowSpec extends WordSpec with Matchers {
     val emailPreferencesWithAllApis = EmailPreferences(List(TaxRegimeInterests(category1, Set.empty)), Set(EmailTopic.TECHNICAL))
 
     val sessionId = "sessionId"
-
     
     def developerSession(emailPreferences: EmailPreferences): DeveloperSession = {
-        val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe", emailPreferences = emailPreferences)
+        val developer: Developer = buildDeveloper(emailPreferences = emailPreferences)
         val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
         DeveloperSession(session)
     }
@@ -43,8 +42,6 @@ class EmailPreferencesFlowSpec extends WordSpec with Matchers {
     }
 
     "EmailPreferencesFlow" when {
-
-     
         "fromDeveloperSession" should {
             "map developer session to EmailPreferencesFlow object correctly" in {
                 val flow = EmailPreferencesFlow.fromDeveloperSession(developerSession(emailPreferences))
@@ -62,11 +59,9 @@ class EmailPreferencesFlowSpec extends WordSpec with Matchers {
                 flow.selectedAPIs.get(category1).head should contain only("ALL_APIS")
                 flow.selectedTopics should contain allElementsOf Set(EmailTopic.TECHNICAL.toString())
             }
-
         }
 
         "toEmailPreferences" should {
-
             "map to email preferences correctly" in {
               val flow =   emailPreferencesFlow(Set(category1, category2), Map(category1 -> category1Apis, category2 -> category2Apis), Set("TECHNICAL"))
               val mappedPreferences = flow.toEmailPreferences
@@ -80,8 +75,6 @@ class EmailPreferencesFlowSpec extends WordSpec with Matchers {
               
               mappedPreferences shouldBe emailPreferencesWithAllApis
             }
-            
         }
     }
-  
 }

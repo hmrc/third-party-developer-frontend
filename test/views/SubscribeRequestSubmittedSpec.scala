@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.SubscribeRequestSubmittedView
+import domain.models.developers.UserId
 
 class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
   "Subscribe request submitted page" should {
@@ -49,7 +50,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
         None,
         Environment.PRODUCTION,
         Some("Test Application Description"),
-        Set(Collaborator(developer.email, Role.ADMINISTRATOR)),
+        Set(Collaborator(developer.email, Role.ADMINISTRATOR, Some(UserId.random))),
         state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )

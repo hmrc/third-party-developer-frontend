@@ -26,11 +26,11 @@ import domain.models.applications.{Application, ApplicationToken, ClientId, Envi
 import domain.models.connectors.UserAuthenticationResponse
 import domain.models.developers.{Registration, Session, UpdateProfileRequest}
 import domain.services.ApiDefinitionsJsonFormatters._
-import domain.services.SubscriptionsJsonFormatters._
 import org.scalatest.Matchers
 import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.{Json, Writes}
+import domain.models.connectors.PasswordResetRequest
 
 object Stubs {
 
@@ -95,8 +95,8 @@ object DeveloperStub {
     )
   }
 
-  def verifyResetPassword(email: String) = {
-    verify(1, postRequestedFor(urlPathEqualTo(s"/$email/password-reset-request")))
+  def verifyResetPassword(email: String, request: PasswordResetRequest) = {
+    verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(matching(Json.toJson(request).toString())))
   }
 }
 

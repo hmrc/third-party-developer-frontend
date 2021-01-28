@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,16 @@ import java.net.URLEncoder.encode
 import java.util.UUID
 import java.util.UUID.randomUUID
 
-import akka.actor.ActorSystem
 import config.ApplicationConfig
 import connectors.ThirdPartyApplicationConnectorDomain._
 import domain._
 import domain.models.apidefinitions._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult, Errors}
 import domain.models.applications._
+import domain.models.developers.UserId
 import helpers.FutureTimeoutSupportImpl
 import org.joda.time.DateTimeZone
-import org.mockito.Mockito
-import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status._
-import play.api.libs.json.{Json, JsValue}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
@@ -42,9 +38,12 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future.failed
+import scala.concurrent.Future.{failed, successful}
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
 
-class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
+class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec 
+  with GuiceOneAppPerTest 
+  with CommonResponseHandlers {
 
   private val applicationId = ApplicationId("applicationId")
   private val clientId = ClientId("client-id")
@@ -59,7 +58,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     protected val mockEnvironment = mock[Environment]
     protected val mockMetrics = new NoopConnectorMetrics()
     private val futureTimeoutSupport = new FutureTimeoutSupportImpl
-    private val actorSystemTest = ActorSystem("test-actor-system")
     val apiKeyTest = "5bb51bca-8f97-4f2b-aee4-81a4a70a42d3"
 
     val connector = new ThirdPartyApplicationConnector(mockAppConfig, mockMetrics) {
@@ -71,7 +69,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       val environment = mockEnvironment
       val apiKey = apiKeyTest
       val appConfig = mockAppConfig
-      val actorSystem = actorSystemTest
+      val actorSystem = app.actorSystem
       val futureTimeout = futureTimeoutSupport
       val metrics = mockMetrics
       val isEnabled = true
@@ -79,8 +77,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     when(mockEnvironment.toString).thenReturn(environmentName)
   }
-
-  private val upstream409Response = Upstream4xxResponse("", CONFLICT, CONFLICT)
 
   private val updateApplicationRequest = new UpdateApplicationRequest(
     ApplicationId("My Id"),
@@ -90,17 +86,13 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     Standard(Seq("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
   )
 
-  private val updateApplicationRequestJsValue = Json.toJson(updateApplicationRequest)
-
   private val createApplicationRequest = new CreateApplicationRequest(
     "My Application",
     Environment.PRODUCTION,
     Some("Description"),
-    Seq(Collaborator("admin@example.com", Role.ADMINISTRATOR)),
+    Seq(Collaborator("admin@example.com", Role.ADMINISTRATOR, Some(UserId.random))),
     Standard(Seq("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
   )
-
-  private val createApplicationRequestJsValue = Json.toJson(createApplicationRequest)
 
   private def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: String = "My Application") = new Application(
     appId,
@@ -111,7 +103,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     None,
     Environment.PRODUCTION,
     Some("Description"),
-    Set(Collaborator("john@example.com", Role.ADMINISTRATOR)),
+    Set(Collaborator("john@example.com", Role.ADMINISTRATOR, Some(UserId.random))),
     Standard(Seq("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
     state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"))
   )
@@ -128,9 +120,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       val url = baseUrl + "/application"
 
       when(
-        mockHttpClient
-          .POST[JsValue, HttpResponse](eqTo(url), eqTo(createApplicationRequestJsValue), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(OK, Some(Json.toJson(applicationResponse(applicationId, ClientId("appName")))))))
+        mockHttpClient.POST[CreateApplicationRequest, Application](eqTo(url), eqTo(createApplicationRequest), *)(*, *, *, *)
+      ).thenReturn(successful(applicationResponse(applicationId, ClientId("appName"))))
 
       val result = await(connector.create(createApplicationRequest))
 
@@ -144,9 +135,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
       val url = baseUrl + s"/application/${applicationId.value}"
       when(
-        mockHttpClient
-          .POST[JsValue, HttpResponse](eqTo(url), eqTo(updateApplicationRequestJsValue), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+        mockHttpClient.POST[UpdateApplicationRequest,ErrorOrUnit](eqTo(url), eqTo(updateApplicationRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Right(())))
 
       val result = await(connector.update(applicationId, updateApplicationRequest))
 
@@ -175,19 +165,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       result.size shouldBe 2
       result.map(_.name) shouldBe response
     }
-
-    "when retry logic is enabled should retry on failure" in new Setup {
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[Seq[Application]](eqTo(url), eqTo(Seq("emailAddress" -> email, "environment" -> environmentName)))(*, *, *)).thenReturn(
-        failed(new BadRequestException("")),
-        Future.successful(applicationResponses)
-      )
-
-      val result = await(connector.fetchByTeamMemberEmail(email))
-
-      result.size shouldBe 2
-      result.map(_.name) shouldBe response
-    }
   }
 
   "fetch application by id" should {
@@ -197,8 +174,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     val appName = "app name"
 
     "return an application" in new Setup {
-      when(mockHttpClient.GET[Application](eqTo(url))(*, *, *))
-        .thenReturn(Future.successful(applicationResponse(applicationId, clientId, appName)))
+      when(mockHttpClient.GET[Option[Application]](eqTo(url))(*, *, *))
+        .thenReturn(successful(Some(applicationResponse(applicationId, clientId, appName))))
 
       val result = await(connector.fetchApplicationById(applicationId))
 
@@ -208,32 +185,17 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     }
 
     "return None if the application cannot be found" in new Setup {
-
-      when(mockHttpClient.GET[Application](eqTo(url))(*, *, *))
-        .thenReturn(failed(new NotFoundException("")))
+      when(mockHttpClient.GET[Option[Application]](eqTo(url))(*, *, *))       
+        .thenReturn(successful(None))
 
       val result = await(connector.fetchApplicationById(applicationId))
 
       result shouldBe empty
     }
 
-    "when retry logic is enabled should retry on failure" in new Setup {
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[Application](eqTo(url))(*, *, *)).thenReturn(
-        failed(new BadRequestException("")),
-        Future.successful(applicationResponse(applicationId, clientId, appName))
-      )
-
-      val result = await(connector.fetchApplicationById(applicationId))
-
-      result shouldBe defined
-      result.get.id shouldBe applicationId
-      result.get.name shouldBe appName
-    }
-
     "when useProxy is enabled returns an application from proxy" in new Setup(proxyEnabled = true) {
-      when(mockProxiedHttpClient.GET[Application](eqTo(url))(*, *, *))
-        .thenReturn(Future.successful(applicationResponse(applicationId, clientId, appName)))
+      when(mockProxiedHttpClient.GET[Option[Application]](eqTo(url))(*, *, *))
+        .thenReturn(successful(Some(applicationResponse(applicationId, clientId, appName))))
       when(connector.http).thenReturn(mockProxiedHttpClient)
 
       val result = await(connector.fetchApplicationById(applicationId))
@@ -252,37 +214,25 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "return credentials" in new Setup {
 
-      when(mockHttpClient.GET[ApplicationToken](eqTo(url))(*, *, *))
-        .thenReturn(Future.successful(tokens))
+      when(mockHttpClient.GET[Option[ApplicationToken]](eqTo(url))(*, *, *))
+        .thenReturn(Future.successful(Some(tokens)))
 
       val result = await(connector.fetchCredentials(applicationId))
 
-      Json.toJson(result) shouldBe Json.toJson(tokens)
+      result shouldBe tokens
     }
 
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
 
-      when(mockHttpClient.GET[ApplicationToken](eqTo(url))(*, *, *))
-        .thenReturn(failed(new NotFoundException("")))
+      when(mockHttpClient.GET[Option[ApplicationToken]](eqTo(url))(*, *, *))
+        .thenReturn(successful(None))
 
       intercept[ApplicationNotFound](
         await(connector.fetchCredentials(applicationId))
       )
     }
-
-    "when retry logic is enabled should retry on failure" in new Setup {
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[ApplicationToken](eqTo(url))(*, *, *)).thenReturn(
-        failed(new BadRequestException("")),
-        Future.successful(tokens)
-      )
-
-      val result = await(connector.fetchCredentials(applicationId))
-
-      Json.toJson(result) shouldBe Json.toJson(tokens)
-    }
   }
-
+  
   "unsubscribe from api" should {
     val context = ApiContext("app1")
     val version = ApiVersion("2.0")
@@ -291,8 +241,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "unsubscribe application from an api" in new Setup {
 
-      when(mockHttpClient.DELETE(url))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(mockHttpClient.DELETE[ErrorOrUnit](eqTo(url),*)(*,*,*))
+        .thenReturn(successful(Right(())))
 
       val result = await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
 
@@ -301,8 +251,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "throw ApplicationNotFound if the application cannot be found" in new Setup {
 
-      when(mockHttpClient.DELETE(url))
-        .thenReturn(failed(new NotFoundException("")))
+      when(mockHttpClient.DELETE[ErrorOrUnit](eqTo(url),*)(*,*,*))
+        .thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound](
         await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
@@ -316,8 +266,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "return success response in case of a 204 NO CONTENT on backend" in new Setup {
 
-      when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(mockHttpClient.POSTEmpty[ErrorOrUnit](eqTo(url), *)(*, *, *))
+        .thenReturn(Future.successful(Right(())))
 
       val result = await(connector.verify(verificationCode))
 
@@ -325,9 +275,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     }
 
     "return failure response in case of a 400 on backend" in new Setup {
-
-      when(mockHttpClient.POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(failed(new BadRequestException("")))
+      when(mockHttpClient.POSTEmpty[ErrorOrUnit](eqTo(url), *)(*, *, *))
+        .thenReturn(successful(Left(UpstreamErrorResponse("",BAD_REQUEST))))
 
       val result = await(connector.verify(verificationCode))
 
@@ -345,8 +294,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
       when(
         mockHttpClient
-          .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+          .POST[UpliftRequest, ErrorOrUnit](eqTo(url), eqTo(upliftRequest),*)(*, *, *, *)
+      ).thenReturn(successful(Right(())))
 
       val result = await(connector.requestUplift(applicationId, upliftRequest))
 
@@ -354,11 +303,9 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     }
 
     "return ApplicationAlreadyExistsResponse response in case of a 409 CONFLICT on backend " in new Setup {
-
       when(
-        mockHttpClient
-          .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(failed(upstream409Response))
+        mockHttpClient.POST[UpliftRequest, ErrorOrUnit](eqTo(url), eqTo(upliftRequest),*)(*, *, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("",CONFLICT))))
 
       intercept[ApplicationAlreadyExists] {
         await(connector.requestUplift(applicationId, upliftRequest))
@@ -367,9 +314,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
       when(
-        mockHttpClient
-          .POST[UpliftRequest, HttpResponse](eqTo(url), eqTo(upliftRequest), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+        mockHttpClient.POST[UpliftRequest, ErrorOrUnit](eqTo(url), eqTo(upliftRequest),*)(*, *, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound] {
         await(connector.requestUplift(applicationId, upliftRequest))
@@ -384,8 +330,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     "return success response in case of a 204 on backend " in new Setup {
       when(
         mockHttpClient
-          .POST[JsValue, HttpResponse](eqTo(url), eqTo(Json.toJson(updateRequest)), *)(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+          .POST[CheckInformation, ErrorOrUnit](eqTo(url), eqTo(updateRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Right(())))
 
       val result = await(connector.updateApproval(applicationId, updateRequest))
       result shouldEqual ApplicationUpdateSuccessful
@@ -394,8 +340,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
       when(
         mockHttpClient
-          .POST[JsValue, HttpResponse](eqTo(url), eqTo(Json.toJson(updateRequest)), *)(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+          .POST[CheckInformation, ErrorOrUnit](eqTo(url), eqTo(updateRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound] {
         await(connector.updateApproval(applicationId, updateRequest))
@@ -413,8 +359,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     "return success" in new Setup {
       when(
         mockHttpClient
-          .DELETE[HttpResponse](eqTo(url), *)(*, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
+      ).thenReturn(successful(Right(Unit)))
 
       val result = await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail))
       result shouldEqual ApplicationUpdateSuccessful
@@ -423,8 +369,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     "return application needs administrator response" in new Setup {
       when(
         mockHttpClient
-          .DELETE[HttpResponse](eqTo(url), *)(*, *, *)
-      ).thenReturn(failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
+          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("403 Forbidden", FORBIDDEN))))
 
       intercept[ApplicationNeedsAdmin](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
     }
@@ -432,10 +378,19 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     "return application not found response" in new Setup {
       when(
         mockHttpClient
-          .DELETE[HttpResponse](eqTo(url), *)(*, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("404 Not Found", NOT_FOUND))))
 
       intercept[ApplicationNotFound](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
+    }
+
+    "other upstream error response should be rethrown" in new Setup {
+      when(
+        mockHttpClient
+          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("500 Internal Server Error", INTERNAL_SERVER_ERROR))))
+
+      intercept[Exception](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
     }
   }
 
@@ -460,8 +415,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
       when(
         mockHttpClient
-          .POST[ClientSecretRequest, AddClientSecretResponse](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
-      ).thenReturn(Future.successful(response))
+          .POST[ClientSecretRequest, Either[UpstreamErrorResponse, AddClientSecretResponse]](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(Future.successful(Right(response)))
 
       val result = await(connector.addClientSecrets(applicationId, clientSecretRequest))
 
@@ -472,8 +427,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     "throw an ApplicationNotFound exception when the application does not exist" in new Setup {
       when(
         mockHttpClient
-          .POST[ClientSecretRequest, ApplicationToken](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+          .POST[ClientSecretRequest, Either[UpstreamErrorResponse, AddClientSecretResponse]](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("404 Not Found",NOT_FOUND))))
 
       intercept[ApplicationNotFound] {
         await(connector.addClientSecrets(applicationId, clientSecretRequest))
@@ -483,8 +438,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     "throw a ClientSecretLimitExceeded exception when the max number of client secret has been exceeded" in new Setup {
       when(
         mockHttpClient
-          .POST[ClientSecretRequest, ApplicationToken](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
-      ).thenReturn(failed(Upstream4xxResponse("403 Forbidden", FORBIDDEN, FORBIDDEN)))
+          .POST[ClientSecretRequest, Either[UpstreamErrorResponse, AddClientSecretResponse]](eqTo(url), eqTo(clientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("403 Forbidden", FORBIDDEN, FORBIDDEN))))
 
       intercept[ClientSecretLimitExceeded] {
         await(connector.addClientSecrets(applicationId, clientSecretRequest))
@@ -502,8 +457,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     "delete a client secret" in new Setup {
       when(
         mockHttpClient
-          .POST[DeleteClientSecretRequest, HttpResponse](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+          .POST[DeleteClientSecretRequest, ErrorOrUnit](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(Future.successful(Right(())))
 
       val result = await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
 
@@ -513,8 +468,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
       when(
         mockHttpClient
-          .POST[DeleteClientSecretRequest, HttpResponse](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+          .POST[DeleteClientSecretRequest, ErrorOrUnit](eqTo(url), eqTo(expectedDeleteClientSecretRequest), *)(*, *, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound] {
         await(connector.deleteClientSecret(applicationId, clientSecretId, actorEmailAddress))
@@ -529,8 +484,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       val applicationName = "my valid application name"
       val appId = ApplicationId(randomUUID().toString)
 
-      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](*, *, *)(*, *, *, *))
-        .thenReturn(Future.successful(ApplicationNameValidationResult(None)))
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, Option[ApplicationNameValidationResult]](*, *, *)(*, *, *, *))
+        .thenReturn(successful(Some(ApplicationNameValidationResult(None))))
 
       val result = await(connector.validateName(applicationName, Some(appId)))
 
@@ -546,8 +501,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
 
       val applicationName = "my invalid application name"
 
-      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](*, *, *)(*, *, *, *))
-        .thenReturn(Future.successful(ApplicationNameValidationResult(Some(Errors(invalidName = true, duplicateName = false)))))
+      when(mockHttpClient.POST[ApplicationNameValidationRequest, Option[ApplicationNameValidationResult]](*, *, *)(*, *, *, *))
+        .thenReturn(successful(Some(ApplicationNameValidationResult(Some(Errors(invalidName = true, duplicateName = false))))))
 
       val result = await(connector.validateName(applicationName, None))
 
@@ -556,30 +511,9 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       val expectedRequest = ApplicationNameValidationRequest(applicationName, None)
 
       verify(mockHttpClient)
-        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](eqTo(url), eqTo(expectedRequest), *)(*, *, *, *)
+        .POST[ApplicationNameValidationRequest, Option[ApplicationNameValidationResult]](eqTo(url), eqTo(expectedRequest), *)(*, *, *, *)
     }
 
-    "when retry logic is enabled should retry on failure" in new Setup {
-      val applicationName = "my valid application name"
-      val appId = ApplicationId(randomUUID().toString)
-
-      when(mockAppConfig.retryCount).thenReturn(1)
-
-      when(mockHttpClient.POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](*, *, *)(*, *, *, *))
-        .thenReturn(
-          failed(new BadRequestException("")),
-          Future.successful(ApplicationNameValidationResult(None))
-        )
-
-      val result = await(connector.validateName(applicationName, Some(appId)))
-
-      result shouldBe Valid
-
-      val expectedRequest = ApplicationNameValidationRequest(applicationName, Some(appId))
-
-      verify(mockHttpClient, Mockito.atLeastOnce)
-        .POST[ApplicationNameValidationRequest, ApplicationNameValidationResult](eqTo(url), eqTo(expectedRequest), *)(*, *, *, *)
-    }
   }
 
   "updateIpAllowlist" should {
@@ -588,8 +522,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     val url = s"$baseUrl/application/${applicationId.value}/ipAllowlist"
 
     "return success response in case of a 204 on backend " in new Setup {
-      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, HttpResponse](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
-        .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
+        .thenReturn(successful(Right(())))
 
       val result: ApplicationUpdateSuccessful = await(connector.updateIpAllowlist(applicationId, required = false, allowlist))
 
@@ -597,8 +531,8 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
     }
 
     "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, HttpResponse](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
-        .thenReturn(failed(new NotFoundException("")))
+      when(mockHttpClient.PUT[UpdateIpAllowlistRequest, ErrorOrUnit](eqTo(url), eqTo(updateRequest), *)(*, *, *, *))
+        .thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound] {
         await(connector.updateIpAllowlist(applicationId, required = false, allowlist))
@@ -632,7 +566,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec {
       when(
         mockHttpClient
           .POSTEmpty[HttpResponse](eqTo(url), *)(*, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+      ).thenReturn(successful(HttpResponse(NO_CONTENT,"")))
 
       val result = await(connector.deleteApplication(applicationId))
 

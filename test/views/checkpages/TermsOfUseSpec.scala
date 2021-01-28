@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.checkpages.TermsOfUseView
+import domain.models.developers.UserId
 
 class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -44,7 +45,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
         None,
         Environment.PRODUCTION,
         Some("APPLICATION DESCRIPTION"),
-        Set(Collaborator("sample@example.com", Role.ADMINISTRATOR), Collaborator("someone@example.com", Role.DEVELOPER)),
+        Set(Collaborator("sample@example.com", Role.ADMINISTRATOR, Some(UserId.random)), Collaborator("someone@example.com", Role.DEVELOPER, Some(UserId.random))),
         Standard(),
         ApplicationState(State.TESTING, None, None, DateTimeUtils.now)
       )

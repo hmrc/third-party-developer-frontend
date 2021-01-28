@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,15 +46,7 @@ object APIDefinition {
 
 
 case class ApiVersionDefinition(version: ApiVersion, status: APIStatus, access: Option[APIAccess] = None) {
-  val displayedStatus = {
-    status match {
-      case APIStatus.ALPHA      => "Alpha"
-      case APIStatus.BETA       => "Beta"
-      case APIStatus.STABLE     => "Stable"
-      case APIStatus.DEPRECATED => "Deprecated"
-      case APIStatus.RETIRED    => "Retired"
-    }
-  }
+  val displayedStatus = status.displayedStatus
 
   val accessType = access.map(_.`type`).getOrElse(APIAccessType.PUBLIC)
 
@@ -91,6 +83,7 @@ object ApiVersion {
 
 case class ApiIdentifier(context: ApiContext, version: ApiVersion)
 
+// TODO - 5090 - Add new open access class
 case class APISubscriptionStatus(
     name: String,
     serviceName: String,

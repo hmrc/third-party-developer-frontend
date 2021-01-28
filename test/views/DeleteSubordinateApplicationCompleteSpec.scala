@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import utils.ViewHelpers.elementExistsByText
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeleteSubordinateApplicationCompleteView
+import domain.models.developers.UserId
 
 class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken {
 
@@ -47,7 +48,7 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
         None,
         Environment.SANDBOX,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )

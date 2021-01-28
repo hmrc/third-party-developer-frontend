@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package controllers
 import org.scalatest.Matchers
 import play.api.data.FormError
 import utils.AsyncHmrcSpec
+import domain.models.applications.ApplicationId
 
 class FormValidationSpec extends AsyncHmrcSpec with Matchers {
   "ForgotPasswordForm " should {
@@ -280,16 +281,16 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
       boundForm.globalErrors shouldBe List()
     }
 
-    val VALID_FORM: Map[String, String] = Map("rating" -> "", "improvementSuggestions" -> "", "name" -> "", "email" -> "", "isJavascript" -> "false")
+    val validFormData: Map[String, String] = Map("rating" -> "", "improvementSuggestions" -> "", "name" -> "", "email" -> "", "isJavascript" -> "false")
 
     "accept no improvement suggestions and no ratings" in {
-      val emptySignoutSurveyForm: Map[String, String] = VALID_FORM
+      val emptySignoutSurveyForm: Map[String, String] = validFormData
 
       validateNoErrors(emptySignoutSurveyForm)
     }
 
     "accept improvement suggestions with up to 2000 chars." in {
-      val signoutSurveyFormWithImprovement = VALID_FORM + ("improvementSuggestions" -> "a" * 2000)
+      val signoutSurveyFormWithImprovement = validFormData + ("improvementSuggestions" -> "a" * 2000)
 
       validateNoErrors(signoutSurveyFormWithImprovement)
 
@@ -297,13 +298,13 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
 
     "accept a rating between 1 and 5 inclusive" in {
       Seq("1", "2", "3", "4", "5").foreach(x => {
-        val ratingSignoutSurveyForm = VALID_FORM + ("rating" -> x)
+        val ratingSignoutSurveyForm = validFormData + ("rating" -> x)
         validateNoErrors(ratingSignoutSurveyForm)
       })
     }
 
     "reject an improvement suggestion with more than 2000 charaters" in {
-      val signoutSurveyFormWithTooLongImprovement = VALID_FORM + ("improvementSuggestions" -> "a" * 2001)
+      val signoutSurveyFormWithTooLongImprovement = validFormData + ("improvementSuggestions" -> "a" * 2001)
 
       val boundForm = SignOutSurveyForm.form.bind(signoutSurveyFormWithTooLongImprovement)
       val err = boundForm.errors.head
@@ -312,7 +313,7 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "reject a form that has missing improvement suggestion field" in {
-      val signoutSurveyFormWithNoImprovementField = VALID_FORM - "improvementSuggestions"
+      val signoutSurveyFormWithNoImprovementField = validFormData - "improvementSuggestions"
 
       val boundForm = SignOutSurveyForm.form.bind(signoutSurveyFormWithNoImprovementField)
       val err = boundForm.errors.head
@@ -321,14 +322,14 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "accept a form that has missing ratings field" in {
-      val signoutSurveyFormWithNoRatingsField = VALID_FORM - "rating"
+      val signoutSurveyFormWithNoRatingsField = validFormData - "rating"
 
       validateNoErrors(signoutSurveyFormWithNoRatingsField)
     }
 
     "reject any rating outside of the 1 to 5 range" in {
       Seq(("-1", "error.min"), ("0", "error.min"), ("6", "error.max")).foreach(Function.tupled((x: String, err: String) => {
-        val ratingSignoutSurveyForm = VALID_FORM + ("rating" -> x)
+        val ratingSignoutSurveyForm = validFormData + ("rating" -> x)
         val boundForm = SignOutSurveyForm.form.bind(ratingSignoutSurveyForm)
         val error = boundForm.errors.head
         error.key shouldBe "rating"
@@ -344,19 +345,19 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
       boundForm.globalErrors shouldBe List()
     }
 
-    val VALID_FORM = Map("fullname" -> "Terry Jones", "emailaddress" -> "test@example.com", "comments" -> "this is fine")
+    val validFormData = Map("fullname" -> "Terry Jones", "emailaddress" -> "test@example.com", "comments" -> "this is fine")
 
     "accept valid form" in {
-      validateNoErrors(VALID_FORM)
+      validateNoErrors(validFormData)
     }
 
     "accept comments with up to 3000 chars." in {
-      val formData = VALID_FORM + ("comments" -> "a" * 3000)
+      val formData = validFormData + ("comments" -> "a" * 3000)
       validateNoErrors(formData)
     }
 
     "reject when comments with more than 3000 charaters" in {
-      val formData = VALID_FORM + ("comments" -> "a" * 3001)
+      val formData = validFormData + ("comments" -> "a" * 3001)
       val boundForm = SupportEnquiryForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "comments"
@@ -364,7 +365,7 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "reject a form that has missing comments" in {
-      val formData = VALID_FORM - "comments"
+      val formData = validFormData - "comments"
       val boundForm = SupportEnquiryForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "comments"
@@ -372,7 +373,7 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "reject a form that has missing name" in {
-      val formData = VALID_FORM - "fullname"
+      val formData = validFormData - "fullname"
       val boundForm = SupportEnquiryForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "fullname"
@@ -380,7 +381,7 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "reject a form that when the name is too long" in {
-      val formData = VALID_FORM + ("fullname" -> "a" * 101)
+      val formData = validFormData + ("fullname" -> "a" * 101)
       val boundForm = SupportEnquiryForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "fullname"
@@ -388,7 +389,7 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "reject a form that has missing email address" in {
-      val formData = VALID_FORM - "emailaddress"
+      val formData = validFormData - "emailaddress"
       val boundForm = SupportEnquiryForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "emailaddress"
@@ -396,7 +397,7 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "reject a form that when the email is too long" in {
-      val formData = VALID_FORM + ("emailaddress" -> s"${"a" * 320}@example.com")
+      val formData = validFormData + ("emailaddress" -> s"${"a" * 320}@example.com")
       val boundForm = SupportEnquiryForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "emailaddress"
@@ -411,18 +412,18 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
       boundForm.globalErrors shouldBe List()
     }
 
-    val VALID_FORM = Map("firstname" -> "Terry", "lastname" -> "Jones", "organisation" -> "HMRC")
+    val validFormData = Map("firstname" -> "Terry", "lastname" -> "Jones", "organisation" -> "HMRC")
 
     "accept valid form" in {
-      validateNoErrors(VALID_FORM)
+      validateNoErrors(validFormData)
     }
 
     "accept valid form without organisation" in {
-      validateNoErrors(VALID_FORM + ("organisation" -> ""))
+      validateNoErrors(validFormData + ("organisation" -> ""))
     }
 
     "reject a form when the first name is too long" in {
-      val formData = VALID_FORM + ("firstname" -> "a" * 31)
+      val formData = validFormData + ("firstname" -> "a" * 31)
       val boundForm = ProfileForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "firstname"
@@ -430,7 +431,7 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "reject a form when the first name is empty" in {
-      val formData = VALID_FORM + ("firstname" -> "")
+      val formData = validFormData + ("firstname" -> "")
       val boundForm = ProfileForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "firstname"
@@ -438,7 +439,7 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "reject a form when the last name is too long" in {
-      val formData = VALID_FORM + ("lastname" -> "a" * 31)
+      val formData = validFormData + ("lastname" -> "a" * 31)
       val boundForm = ProfileForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "lastname"
@@ -446,12 +447,51 @@ class FormValidationSpec extends AsyncHmrcSpec with Matchers {
     }
 
     "reject a form when the last name is empty" in {
-      val formData = VALID_FORM + ("lastname" -> "")
+      val formData = validFormData + ("lastname" -> "")
       val boundForm = ProfileForm.form.bind(formData)
       val err = boundForm.errors.head
       err.key shouldBe "lastname"
       err.messages shouldBe List("lastname.error.required.field")
     }
+  }
 
+  "SelectApisFromSubscriptionsForm" should {
+    def validateNoErrors(formData: Map[String, String]): Unit = {
+      val boundForm = SelectApisFromSubscriptionsForm.form.bind(formData)
+      boundForm.errors shouldBe List()
+      boundForm.globalErrors shouldBe List()
+    }
+
+    val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.value)
+
+    "accept valid form" in {
+      validateNoErrors(validFormData)
+    }
+
+    "accept valid form without any selected apis" in {
+      validateNoErrors(validFormData + ("selectedApis[0]" -> ""))
+    }
+  }
+
+  "SelectTopicsFromSubscriptionsForm" should {
+    def validateNoErrors(formData: Map[String, String]): Unit = {
+      val boundForm = SelectTopicsFromSubscriptionsForm.form.bind(formData)
+      boundForm.errors shouldBe List()
+      boundForm.globalErrors shouldBe List()
+    }
+
+    val validFormData = Map("topic[0]" -> "TopicOne", "applicationId" -> ApplicationId.random.value)
+
+    "accept valid form" in {
+      validateNoErrors(validFormData)
+    }
+
+    "reject a form when now topic is supplied" in {
+      val formDataWithoutTopic = Map("applicationId" -> ApplicationId.random.value)
+      val boundForm = SelectTopicsFromSubscriptionsForm.form.bind(formDataWithoutTopic)
+      val err = boundForm.errors.head
+      err.key shouldBe "topic"
+      err.messages shouldBe List("error.selectedtopics.nonselected.field")
+    }
   }
 }

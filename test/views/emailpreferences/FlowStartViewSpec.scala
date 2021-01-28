@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,9 @@ class FlowStartViewSpec extends CommonViewSpec with WithCSRFAddToken {
 
       document.getElementById("pageHeading").text() should be("Email preferences")
       document.getElementById("firstSentence").text() should be("Manage your email preferences and choose the types of emails you want to receive from us.")
+
+      document.select("p#info-heading").text() should be ("Having a Developer Hub account means you will receive mandatory emails about:")
+      document.select("p#info-footer").text() should be ("Emails from the Developer Hub and the Software Developer Support Team may include links and attachments")
 
       val elements = document.select("ul#info > li")
       elements.get(0).text() shouldBe "important notices and service updates"

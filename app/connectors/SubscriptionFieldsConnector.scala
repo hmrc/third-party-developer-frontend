@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,16 @@ import domain.models.subscriptions.ApiSubscriptionFields._
 import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK}
+import play.api.http.Status.{BAD_REQUEST, CREATED, NO_CONTENT, OK, NOT_FOUND}
 import play.api.libs.json.{JsSuccess, Json}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.subscriptions._
 import SubscriptionFieldsConnectorDomain._
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries {
   protected val httpClient: HttpClient
@@ -101,32 +102,33 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     } yield joinFieldValuesToDefinitions(definitions, fieldValues)
   }
 
+  import uk.gov.hmrc.http.HttpReads.Implicits._
+
   def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion)(
       implicit hc: HeaderCarrier
   ): Future[Seq[SubscriptionFieldDefinition]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
     Logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
-    retry {
-      http.GET[ApiFieldDefinitions](url).map(response => response.fieldDefinitions.map(toDomain))
-    } recover recovery(Seq.empty)
+    http.GET[Option[ApiFieldDefinitions]](url)
+    .map {
+      case Some(x) => x.fieldDefinitions.map(toDomain)
+      case None => Seq.empty
+    }
   }
 
   def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
     val url = s"$serviceBaseUrl/definition"
-    retry {
-      for {
-        response <- http.GET[AllApiFieldDefinitions](url)
-      } yield toDomain(response)
-
-    } recover recovery(DefinitionsByApiVersion.empty)
+    http.GET[Option[AllApiFieldDefinitions]](url)
+    .map {
+      case Some(x) => toDomain(x)
+      case None => DefinitionsByApiVersion.empty
+    }
   }
 
   def saveFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields.Alias)(
       implicit hc: HeaderCarrier
   ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-
-    import CustomResponseHandlers.permissiveBadRequestResponseHandler
 
     http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)).map { response =>
       response.status match {
@@ -136,6 +138,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
             case _                                 => SaveSubscriptionFieldsFailureResponse(Map.empty)
           }
         case OK | CREATED => SaveSubscriptionFieldsSuccessResponse
+        case statusCode => throw UpstreamErrorResponse("Failed to put subscription fields",statusCode)
       }
     }
   }
@@ -147,21 +150,17 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     http.DELETE[HttpResponse](url).map { response =>
       response.status match {
         case NO_CONTENT => FieldsDeleteSuccessResult
+        case NOT_FOUND  => FieldsDeleteSuccessResult
         case _          => FieldsDeleteFailureResult
       }
-    } recover {
-      case _: NotFoundException => FieldsDeleteSuccessResult
-      case _                    => FieldsDeleteFailureResult
     }
   }
-
+  
   private def fetchApplicationApiValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)(
       implicit hc: HeaderCarrier
   ): Future[Option[ApplicationApiFieldValues]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    retry {
-      http.GET[ApplicationApiFieldValues](url).map(Some(_))
-    } recover recovery(None)
+    http.GET[Option[ApplicationApiFieldValues]](url)
   }
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
@@ -171,10 +170,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
   private def urlSubscriptionFieldDefinition(apiContext: ApiContext, apiVersion: ApiVersion) =
     s"$serviceBaseUrl/definition/context/${urlEncode(apiContext.value)}/version/${urlEncode(apiVersion.value)}"
-
-  private def recovery[T](value: T): PartialFunction[Throwable, T] = {
-    case _: NotFoundException => value
-  }
 }
 
 private[connectors] object SubscriptionFieldsConnectorDomain {

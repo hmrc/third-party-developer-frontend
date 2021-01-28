@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package views
 
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import builder.DeveloperBuilder
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import model.MfaMandateDetails
 import org.joda.time.LocalDate
 import play.api.test.FakeRequest
@@ -25,14 +26,14 @@ import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.Add2SVView
 
-class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken {
+class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder {
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
 
   implicit val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   implicit val request = FakeRequest().withCSRFToken
 
-  val developer = Developer("email", "firstName", "lastName")
+  val developer = buildDeveloper()
   val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
   implicit val developerSession = DeveloperSession(session)
 

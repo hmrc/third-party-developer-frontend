@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package connectors
+package mocks.service
 
-import play.api.http.Status.BAD_REQUEST
-import uk.gov.hmrc.http.{HttpErrorFunctions, HttpReads, HttpResponse}
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+import service.EmailPreferencesService
 
-object CustomResponseHandlers extends HttpErrorFunctions {
-  implicit val permissiveBadRequestResponseHandler: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
-    override def read(method: String, url: String, response: HttpResponse): HttpResponse = {
-      response.status match {
-        case BAD_REQUEST => response
-        case _ => handleResponse(method, url)(response)
-      }
-    }
+import scala.concurrent.Future.successful
+import domain.models.connectors.ExtendedApiDefinition
+
+trait EmailPreferencesServiceMock extends MockitoSugar with ArgumentMatchersSugar {
+  val emailPreferencesServiceMock = mock[EmailPreferencesService]
+
+  def fetchAPIDetailsReturns(apis: Seq[ExtendedApiDefinition]) = {
+    when(emailPreferencesServiceMock.fetchAPIDetails(*)(*)).thenReturn(successful(apis))
   }
 }

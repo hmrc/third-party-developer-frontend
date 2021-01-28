@@ -31,16 +31,16 @@ val testScope = "test, it, component"
 lazy val compile = Seq(
   ws,
   "uk.gov.hmrc" %% "bootstrap-play-26" % "1.16.0",
-  "uk.gov.hmrc" %% "time" % "3.9.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.30.0-play-26",
-  "uk.gov.hmrc" %% "govuk-template" % "5.55.0-play-26",
-  "uk.gov.hmrc" %% "play-ui" % "8.17.0-play-26",
+  "uk.gov.hmrc" %% "time" % "3.11.0",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.31.0-play-26",
+  "uk.gov.hmrc" %% "govuk-template" % "5.60.0-play-26",
+  "uk.gov.hmrc" %% "play-ui" % "8.18.0-play-26",
   "uk.gov.hmrc" %% "url-builder" % "3.4.0-play-26",
   "uk.gov.hmrc" %% "play-json-union-formatter" % "1.11.0",
   "uk.gov.hmrc" %% "http-metrics" % "1.10.0",
   "uk.gov.hmrc" %% "json-encryption" % "4.8.0-play-26",
   "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
-  "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.2.0-play-26",
+  "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.4.0-play-26",
   "commons-net" % "commons-net" % "3.6",
   "com.beachape" %% "enumeratum" % enumeratumVersion,
   "com.beachape" %% "enumeratum-play" % enumeratumVersion,
@@ -119,6 +119,7 @@ lazy val microservice = Project(appName, file("."))
       Resolver.jcenterRepo
     )
   )
+  .settings(SilencerSettings())
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
   .settings(
@@ -173,4 +174,12 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
 // Coverage configuration
 coverageMinimum := 85
 coverageFailOnMinimum := true
-coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;app.*;uk.gov.hmrc.BuildInfo;.*javascript"
+coverageExcludedPackages := Seq(
+  "<empty>",
+  ".*Reverse.*",
+  ".*Routes.*",
+  "com.kenshoo.play.metrics.*",
+  ".*definition.*",
+  ".*BuildInfo.*",
+  ".*javascript"
+).mkString(";")

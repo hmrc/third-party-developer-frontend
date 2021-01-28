@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package controllers
 
 import java.util.UUID.randomUUID
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
@@ -34,12 +35,13 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionServiceMock with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionServiceMock with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
 
-  val developer: Developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer: Developer = buildDeveloper()
   val sessionId = "sessionId"
   val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
@@ -57,14 +59,14 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   val tokens: ApplicationToken = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -80,6 +82,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
       mock[ErrorHandler],
       applicationServiceMock,
       applicationActionServiceMock,
+      emailPreferencesServiceMock,
       sessionServiceMock,
       mock[AuditService],
       mcc,

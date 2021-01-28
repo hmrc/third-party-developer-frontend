@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import domain.models.applications._
 import domain.models.connectors.TicketCreated
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import org.joda.time.DateTime
 import play.api.test.FakeRequest
@@ -28,13 +29,13 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
 import views.html._
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken with TestApplications with ErrorHandlerMock {
-
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with DeveloperBuilder {
     val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
     val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
     val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
@@ -59,7 +60,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
     val clientId = ClientId("clientIdzzz")
     val appName: String = "Application Name"
 
-    val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val developer = buildDeveloper()
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
@@ -76,7 +77,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       None,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )

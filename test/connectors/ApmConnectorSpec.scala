@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package connectors
 
-import domain.models.connectors.ExtendedApiDefinition
 import domain.models.emailpreferences.APICategoryDetails
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -24,21 +23,20 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.AsyncHmrcSpec
 import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status._
+import play.api.http.HeaderNames.CONTENT_TYPE
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.{failed,successful}
+import scala.concurrent.Future.successful
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.apidefinitions.ApiContext
 import domain.models.apidefinitions.ApiVersion
-import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.http.NotFoundException
 import domain.ApplicationNotFound
 import domain.models.applications.ApplicationId
 import domain.ApplicationUpdateSuccessful
+import domain.models.connectors.ApiDefinition
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
-class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite {
+class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite with CommonResponseHandlers {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -72,8 +70,8 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
     "return APIs" in new Setup {
       val userEmail = "foo@bar.com"
 
-      val mockExpectedApi = mock[ExtendedApiDefinition]
-        when(mockHttpClient.GET[Seq[ExtendedApiDefinition]](eqTo(s"$serviceBaseUrl/combined-api-definitions"), eqTo(Seq("collaboratorEmail" -> userEmail)))(*, *, *))
+      val mockExpectedApi = mock[ApiDefinition]
+        when(mockHttpClient.GET[Seq[ApiDefinition]](eqTo(s"$serviceBaseUrl/combined-api-definitions"), eqTo(Seq("collaboratorEmail" -> userEmail)))(*, *, *))
         .thenReturn(successful(Seq(mockExpectedApi)))
 
       val result = await(connectorUnderTest.fetchApiDefinitionsVisibleToUser(userEmail))
@@ -92,8 +90,8 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
 
       when(
         mockHttpClient
-          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+          .POST[ApiIdentifier, ErrorOrUnit](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(successful(Right(())))
 
       val result = await(connectorUnderTest.subscribeToApi(applicationId, apiIdentifier))
 
@@ -105,14 +103,12 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
 
       when(
         mockHttpClient
-          .POST[ApiIdentifier, HttpResponse](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+          .POST[ApiIdentifier, ErrorOrUnit](eqTo(url), eqTo(apiIdentifier), eqTo(Seq(CONTENT_TYPE -> JSON)))(*, *, *, *)
+      ).thenReturn(successful(Left(UpstreamErrorResponse("",NOT_FOUND))))
 
       intercept[ApplicationNotFound](
         await(connectorUnderTest.subscribeToApi(applicationId, apiIdentifier))
       )
     }
   }
-
-  
 }

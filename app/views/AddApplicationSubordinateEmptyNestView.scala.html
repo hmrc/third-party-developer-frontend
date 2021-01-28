@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-account", environmentNameService: EnvironmentNameService)
 
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
+@pageHeading = @{"Start using our APIs"}
 
-@devMain(
-    title = "View all applications",
+
+    @devMain(
+    title = pageHeading,
     userFullName = loggedIn.loggedInName,
     breadcrumbs = Seq(
         Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
@@ -37,20 +39,20 @@
     developerSession = Some(loggedIn)
 ) {
 
-    <h1 class="heading-xlarge">Add an application to @environmentNameService.subordinateWording</h1>
-    <p>To start using our RESTful APIs with your application, you'll need to:</p>
+    <h1 class="heading-xlarge">@pageHeading</h1>
+    <p>To use APIs for accessing secure data you need to:</p>
     <ol class="list list-number">
         <li>
-            add it to our test environment (@subordinateEnvName)
+            create an application in our test environment called (@subordinateEnvName)
         </li>
         <li>
-            choose which @subordinateEnvName APIs you want to use
+            choose which APIs you want to use
         </li>
         <li>
-            get credentials your application needs to interact with our APIs
+            get credentials to use our APIs
         </li>
         <li>
-            test how your application integrates with our APIs
+            test your software integrates with our APIs
         </li>
     </ol>
     <div class="notice">
@@ -58,24 +60,15 @@
             <span class="visually-hidden">Warning</span>
         </i>
         <strong class="bold-small">
-            Make sure your application complies with our <a href="/api-documentation/docs/terms-of-use">terms of use</a>
+            You must comply with our <a href="/api-documentation/docs/terms-of-use">terms of use</a>
         </strong>
     </div>
     <br>
     <p>
-        If you have not already done so:
+        You do not need a sandbox application to use APIs with only <a href="/api-documentation/docs/authorisation/open-access-endpoints">open access endpoints</a>, for example, EORI Checker API.
     </p>
-    <ul class="list list-bullet">
-        <li>
-            find out which <a href="/api-documentation/docs/api">RESTful and XML APIs</a> are offered by HMRC
-        </li>
-        <li>
-            read up on <a href="/api-documentation/docs/authorisation">authorisation</a>
-        </li>
-        <li>
-            familiarise yourself with the <a href="https://oauth.net/2/" target="_blank">OAuth 2.0 specification (opens in a new tab)</a>
-        </li>
-    </ul>
+
+    <p><a href="/api-documentation/docs/api">See the full list of HMRC APIs</a></p>
 
     <p>
         <a id="add" href="@controllers.routes.AddApplication.addApplicationName(Environment.SANDBOX)" class="button">Continue</a>

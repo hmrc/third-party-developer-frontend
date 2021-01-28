@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 import service.ApplicationService
+import domain.models.subscriptions.ApiData
 
 trait HeaderEnricher {
   def enrichHeaders(hc: HeaderCarrier, user: Option[DeveloperSession]): HeaderCarrier =
@@ -55,6 +56,7 @@ case class ApplicationRequest[A](
     application: Application,
     deployedTo: Environment,
     subscriptions: Seq[APISubscriptionStatus],
+    openAccessApis: Map[ApiContext,ApiData],
     role: Role,
     user: DeveloperSession,
     request: MessagesRequest[A]

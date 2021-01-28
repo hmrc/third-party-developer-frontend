@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 package controllers.profile
 
 import config.{ApplicationConfig, ErrorHandler}
+import controllers._
+import domain.models.applications.ApplicationId
 import domain.models.connectors.ExtendedApiDefinition
 import domain.models.emailpreferences.APICategoryDetails
+import domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlow}
 import javax.inject.Inject
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -30,11 +33,6 @@ import views.html.emailpreferences._
 
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-import controllers.LoggedInController
-import controllers.TaxRegimeEmailPreferencesForm
-import controllers.SelectedApisEmailPreferencesForm
-import controllers.SelectedTopicsEmailPreferencesForm
-import controllers.UserRequest
 
 class EmailPreferences @Inject()(val sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
@@ -46,7 +44,9 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
                                  flowStartView: FlowStartView,
                                  flowSelectCategoriesView: FlowSelectCategoriesView,
                                  flowSelectApiView: FlowSelectApiView,
-                                 flowSelectTopicsView: FlowSelectTopicsView)
+                                 flowSelectTopicsView: FlowSelectTopicsView,
+                                 selectApisFromSubscriptionsView: SelectApisFromSubscriptionsView,
+                                 selectTopicsFromSubscriptionsView: SelectTopicsFromSubscriptionsView)
                                 (implicit val ec: ExecutionContext, val appConfig: ApplicationConfig) extends LoggedInController(mcc) {
 
 
@@ -60,7 +60,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
 
   private def flowShowSelectCategoriesView(form: Form[TaxRegimeEmailPreferencesForm])(implicit request: UserRequest[AnyContent]) = {
     for {
-      flow <- emailPreferencesService.fetchFlow(request.developerSession)
+      flow <- emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
       visibleCategories <- emailPreferencesService.fetchCategoriesVisibleToUser(request.developerSession)
       selectedCategories = if (form.hasErrors) Set.empty[String] else flow.selectedCategories
     } yield flowSelectCategoriesView(form, visibleCategories.toList, selectedCategories)
@@ -96,7 +96,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   private def flowSelectApisView(form: Form[SelectedApisEmailPreferencesForm], category: String)(implicit request: UserRequest[AnyContent]): Future[Html] = {
     for {
       categoryDetails <- emailPreferencesService.apiCategoryDetails(category)
-      flow <- emailPreferencesService.fetchFlow(request.developerSession)
+      flow <- emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
     } yield flowSelectApiView(form, categoryDetails.getOrElse(APICategoryDetails(category, category)), flow.visibleApisByCategory(category), flow.selectedApisByCategory(category))
   }
 
@@ -124,21 +124,19 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         }
       }
     )
-
-
   }
 
   private def getListFromApiForm(form: SelectedApisEmailPreferencesForm): List[String] = {
     if(form.apiRadio.contains("ALL_APIS")){
       List("ALL_APIS")
-    }else {
+    } else {
       form.selectedApi.toList
     }
   }
 
   def flowSelectTopicsPage(): Action[AnyContent] = loggedInAction {
     implicit request =>
-      emailPreferencesService.fetchFlow(request.developerSession)
+      emailPreferencesService.fetchEmailPreferencesFlow(request.developerSession)
         .flatMap(flow => renderFlowSelectTopicsView(selectedTopics = flow.selectedTopics))
         .map(Ok(_))
   }
@@ -159,10 +157,10 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
         selectedTopicsForm =>
           val developerSession = request.developerSession
           for {
-            flow <- emailPreferencesService.fetchFlow(developerSession)
+            flow <- emailPreferencesService.fetchEmailPreferencesFlow(developerSession)
             updateResult <- emailPreferencesService
-              .updateEmailPreferences(developerSession.developer.email, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
-            _ = if (updateResult) emailPreferencesService.deleteFlow(developerSession.session.sessionId)
+              .updateEmailPreferences(developerSession.developer.userId, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
+            _ = if (updateResult) emailPreferencesService.deleteFlow(developerSession.session.sessionId, FlowType.EMAIL_PREFERENCES)
           } yield if (updateResult) Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage())
           else Redirect(controllers.profile.routes.EmailPreferences.flowSelectTopicsPage())
       }
@@ -188,7 +186,7 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
   }
 
   def unsubscribeAllAction: Action[AnyContent] = loggedInAction { implicit request =>
-    emailPreferencesService.removeEmailPreferences(request.developerSession.developer.email).map {
+    emailPreferencesService.removeEmailPreferences(request.developerSession.developer.userId).map {
       case true => Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage()).flashing("unsubscribed" -> "true")
       case false => Redirect(controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage())
     }
@@ -209,4 +207,83 @@ class EmailPreferences @Inject()(val sessionService: SessionService,
       .toMap
   }
 
+  /*
+   * Page displayed as part of 'Add new Sandbox Application' flow. Allows users to add newly-subscribed APIs to their Email Preferences. Any APIs they already
+   * have within their Email Preferences will not be shown.
+   */
+  def selectApisFromSubscriptionsPage(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+    def missingAPIsFromFlash: Future[Seq[ExtendedApiDefinition]] = {
+      request.flash.data.get("missingSubscriptions").fold[Future[Seq[ExtendedApiDefinition]]](
+        successful(Seq.empty)
+      )(missingSubscriptionsCSV =>
+        emailPreferencesService.fetchAPIDetails(missingSubscriptionsCSV.split(",").toSet)
+      )
+    }
+
+    emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId).flatMap(f => {
+      if(f.missingSubscriptions.isEmpty) {
+          for {
+            missingAPIs <- missingAPIsFromFlash
+            updatedFlow <- emailPreferencesService.updateMissingSubscriptions(request.developerSession, applicationId, missingAPIs.toSet)
+          } yield updatedFlow
+      }
+      else {
+        successful(f)
+      }
+    }).map(b => Ok(renderSelectApisFromSubscriptionsPage(flow = b)))
+  }
+
+  def renderSelectApisFromSubscriptionsPage(form: Form[SelectApisFromSubscriptionsForm] = SelectApisFromSubscriptionsForm.form,
+                                            flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
+    selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
+
+  def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+    val form = SelectApisFromSubscriptionsForm.form.bindFromRequest
+    
+    form.fold(
+      formWithErrors => {
+        emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId).map(
+          f => BadRequest(renderSelectApisFromSubscriptionsPage(formWithErrors, f))
+        )
+      },
+      {
+        selectedApisForm =>
+          emailPreferencesService.updateNewApplicationSelectedApis(request.developerSession, applicationId, selectedApisForm.selectedApi.toSet)
+          .map(_ => Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
+      }
+    )
+  }
+
+  def selectNoApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { _ =>
+    successful(Redirect(controllers.profile.routes.EmailPreferences.selectTopicsFromSubscriptionsPage(applicationId)))
+  }
+
+  def selectTopicsFromSubscriptionsPage(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+    emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
+      .map(f => Ok(renderSelectTopicsFromSubscriptionsView(flow = f)))
+  }
+
+  private def renderSelectTopicsFromSubscriptionsView(form: Form[SelectTopicsFromSubscriptionsForm] = SelectTopicsFromSubscriptionsForm.form,
+                                                      flow: NewApplicationEmailPreferencesFlow)(implicit request: UserRequest[AnyContent]): Html =
+    selectTopicsFromSubscriptionsView.apply(form, flow.selectedTopics, flow.applicationId)
+
+  def selectTopicsFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+    val form = SelectTopicsFromSubscriptionsForm.form.bindFromRequest
+
+    form.fold(
+      formWithErrors => {
+        emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId).map(
+          f => BadRequest(renderSelectTopicsFromSubscriptionsView(formWithErrors, f))
+        )
+      },
+      {
+        selectedTopicsForm =>
+          for {
+            flow <- emailPreferencesService.fetchNewApplicationEmailPreferencesFlow(request.developerSession, applicationId)
+            _ <- emailPreferencesService.updateEmailPreferences(request.developerSession.developer.userId, flow.copy(selectedTopics = selectedTopicsForm.topic.toSet))
+            _ <- emailPreferencesService.deleteFlow(request.developerSession.session.sessionId, FlowType.NEW_APPLICATION_EMAIL_PREFERENCES)
+          } yield Redirect(controllers.routes.AddApplication.addApplicationSuccess(applicationId)).flashing("emailPreferencesSelected" -> "true")
+      }
+    )
+  }
 }

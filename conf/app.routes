@@ -34,8 +34,6 @@ GET         /locked                                                             
 GET         /forgot-password                                                                             controllers.Password.showForgotPassword
 POST        /forgot-password                                                                             controllers.Password.requestReset
 
-#TODO - Delete this first reset-password route when we have released the new version of TPD              - APSR-1144
-GET         /:email/reset-password                                                                       controllers.Password.validateReset(email: String, code: String)
 GET         /reset-password-link                                                                         controllers.Password.validateReset(email: String, code: String)
 
 GET         /reset-password                                                                              controllers.Password.resetPasswordChange

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import domain.models.applications.{Application, ApplicationId, Standard}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
+import play.api.data.format.Formatter
+import play.api.data.FormError
 
 trait ConfirmPassword {
   val password: String
@@ -468,4 +470,52 @@ object SelectedTopicsEmailPreferencesForm {
   def form: Form[SelectedTopicsEmailPreferencesForm] = Form(mapping(
     "topic" -> seq(text).verifying(nonEmptyList))
   (SelectedTopicsEmailPreferencesForm.apply)(SelectedTopicsEmailPreferencesForm.unapply))
+}
+
+final case class SelectApisFromSubscriptionsForm(selectedApi: Seq[String], applicationId: ApplicationId)
+
+object SelectApisFromSubscriptionsForm {
+
+  implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
+    override val format = Some(("format.uuid", Nil))
+    override def bind(key: String, data: Map[String, String]) = data.get(key).map(ApplicationId(_)).toRight(Seq(FormError(key, "error.required", Nil)))
+    override def unbind(key: String, value: ApplicationId) = Map(key -> value.toString)
+  }
+
+  def nonEmpty(message: String): Constraint[String] = Constraint[String] { s: String =>
+    if (Option(s).isDefined) Invalid(message) else Valid
+  }
+
+  def form: Form[SelectApisFromSubscriptionsForm] = Form(mapping("selectedApi" -> seq(text), "applicationId" -> of[ApplicationId])
+  (SelectApisFromSubscriptionsForm.apply)(SelectApisFromSubscriptionsForm.unapply)
+    .verifying(
+      FormKeys.selectedApisNonSelectedGlobalKey,
+      fields =>
+        fields match {
+          case data: SelectApisFromSubscriptionsForm =>
+            if(data.selectedApi.isEmpty) false else true
+        }
+    )
+  )
+}
+
+final case class SelectTopicsFromSubscriptionsForm(topic: Seq[String], applicationId: ApplicationId)
+
+object SelectTopicsFromSubscriptionsForm {
+  implicit def applicationIdFormat: Formatter[ApplicationId] = new Formatter[ApplicationId] {
+    override val format = Some(("format.uuid", Nil))
+    override def bind(key: String, data: Map[String, String]) = data.get(key).map(ApplicationId(_)).toRight(Seq(FormError(key, "error.required", Nil)))
+    override def unbind(key: String, value: ApplicationId) = Map(key -> value.toString)
+  }
+
+  def nonEmptyList: Constraint[Seq[String]] = Constraint[Seq[String]]("constraint.required") { o =>
+    if (o.nonEmpty) Valid else Invalid(ValidationError(FormKeys.selectedTopicsNonSelectedKey))
+  }
+
+  def form: Form[SelectTopicsFromSubscriptionsForm] = Form(
+    mapping(
+      "topic" -> seq(text).verifying(nonEmptyList),
+      "applicationId" -> of[ApplicationId]
+    )(SelectTopicsFromSubscriptionsForm.apply)(SelectTopicsFromSubscriptionsForm.unapply)
+  )
 }

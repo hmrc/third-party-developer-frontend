@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTic
 import domain.models.apidefinitions._
 import domain.models.applications._
 import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import helpers.string._
 import mocks.service._
 import org.joda.time.DateTimeZone
@@ -43,11 +43,12 @@ import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
-class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder {
+class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder with DeveloperBuilder {
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
@@ -55,7 +56,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
   val sessionId = "sessionId"
   val apiVersion = ApiVersion("version")
 
-  val developerDto = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developerDto = buildDeveloper()
   val session = Session(sessionId, developerDto, LoggedInState.LOGGED_IN)
 
   val loggedInUser = DeveloperSession(session)
@@ -75,7 +76,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR)),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -221,8 +222,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     ): Application = {
 
       val collaborators = Set(
-        Collaborator(loggedInUser.email, userRole),
-        Collaborator(anotherCollaboratorEmail, Role.DEVELOPER)
+        Collaborator(loggedInUser.email, userRole, Some(UserId.random)),
+        Collaborator(anotherCollaboratorEmail, Role.DEVELOPER, Some(UserId.random))
       )
 
       val application = Application(

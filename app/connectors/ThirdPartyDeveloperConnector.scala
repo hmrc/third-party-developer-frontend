@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,33 +17,73 @@
 package connectors
 
 import config.ApplicationConfig
-import connectors.ThirdPartyDeveloperConnector.JsonFormatters._
 import connectors.ThirdPartyDeveloperConnector.UnregisteredUserCreationRequest
 import domain._
 import domain.models.connectors._
 import domain.models.developers._
 import javax.inject.{Inject, Singleton}
-import play.api.http.ContentTypes.JSON
-import play.api.http.HeaderNames.{CONTENT_TYPE, CONTENT_LENGTH}
+import play.api.http.HeaderNames.CONTENT_LENGTH
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.{UserId => _, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
-
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.emailpreferences.EmailPreferences
+import connectors.ThirdPartyDeveloperConnector.RemoveMfaRequest
+
+import uk.gov.hmrc.http.HttpReads.Implicits._
+
+
+object ThirdPartyDeveloperConnector {
+  private[connectors] case class UnregisteredUserCreationRequest(email: String)
+
+  case class RemoveMfaRequest(removedBy: String)
+  case class CreateMfaResponse(secret: String)
+  case class EmailForResetResponse(email: String)
+
+  case class FindUserIdRequest(email: String)
+  case class FindUserIdResponse(userId: UserId)
+
+  case class CoreUserDetails(email: String, id: UserId)
+  
+  object JsonFormatters {
+    implicit val formatUnregisteredUserCreationRequest: Format[UnregisteredUserCreationRequest] = Json.format[UnregisteredUserCreationRequest]
+    implicit val FindUserIdRequestWrites = Json.writes[FindUserIdRequest]
+    implicit val FindUserIdResponseReads = Json.reads[FindUserIdResponse]
+  }
+}
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: EncryptedJson, config: ApplicationConfig, metrics: ConnectorMetrics
-                                            )(implicit val ec: ExecutionContext) {
+                                            )(implicit val ec: ExecutionContext) extends CommonResponseHandlers {
 
-  def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+  import ThirdPartyDeveloperConnector._
+  import ThirdPartyDeveloperConnector.JsonFormatters._
 
-    http.PUT(s"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState}", "")
-      .map(_.json.as[Session])
-      .recover {
-        case _: NotFoundException => throw new SessionInvalid
+  def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
+    encryptedJson.secretRequest(
+      loginRequest,
+      http.POST[SecretRequest, ErrorOr[UserAuthenticationResponse]](s"$serviceBaseUrl/authenticate", _))
+      .map {
+        case Right(response) => response
+        case Left(UpstreamErrorResponse(_, UNAUTHORIZED, _, _)) => throw new InvalidCredentials
+        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new UnverifiedAccount
+        case Left(UpstreamErrorResponse(_, LOCKED, _, _)) => throw new LockedAccount
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new InvalidEmail
+        case Left(err) => throw err
+      }
+  }
+
+  def authenticateTotp(totpAuthenticationRequest: TotpAuthenticationRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+    encryptedJson.secretRequest(
+      totpAuthenticationRequest,
+      http.POST[SecretRequest, ErrorOr[Session]](s"$serviceBaseUrl/authenticate-totp", _))
+      .map {
+        case Right(response) => response
+        case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => throw new InvalidCredentials
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new InvalidEmail
+        case Left(err) => throw err
       }
   }
 
@@ -51,211 +91,222 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   val api = API("third-party-developer")
 
   def register(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationDownstreamResponse] = metrics.record(api) {
-    encryptedJson.secretRequestJson[RegistrationDownstreamResponse](
-      Json.toJson(registration), { secretRequestJson =>
-        http.POST(s"$serviceBaseUrl/developer", secretRequestJson, Seq(CONTENT_TYPE -> JSON)) map {
-          r =>
-            r.status match {
-              case CREATED => RegistrationSuccessful
-              case _ => throw new InternalServerException("Unexpected 2xx code")
-            }
-        } recover {
-          case Upstream4xxResponse(_, CONFLICT, _, _) => EmailAlreadyInUse
-        }
-      })
+    encryptedJson.secretRequest(
+      registration,
+      http.POST[SecretRequest,ErrorOr[HttpResponse]](s"$serviceBaseUrl/developer", _)
+      .map {
+        case Right(response) if(response.status == CREATED) => RegistrationSuccessful
+        case Right(response) => throw new InternalServerException("Unexpected 2xx code")
+        case Left(UpstreamErrorResponse(_, CONFLICT, _, _)) => EmailAlreadyInUse
+        case Left(err) => throw err
+      }
+    )
   }
 
   def createUnregisteredUser(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    encryptedJson.secretRequestJson[Int](
-      Json.toJson(UnregisteredUserCreationRequest(email)), { secretRequestJson =>
-        http.POST(s"$serviceBaseUrl/unregistered-developer", secretRequestJson, Seq(CONTENT_TYPE -> JSON)) map status
-      })
-  }
-
-  def updateProfile(email: String, profile: UpdateProfileRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POST(s"$serviceBaseUrl/developer/$email", profile) map status
-  }
-
-  def resendVerificationEmail(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/$email/resend-verification", Seq(CONTENT_LENGTH -> "0")) map status
-  }
-
-  def verify(code: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.GET(s"$serviceBaseUrl/verification?code=$code") map status
-  }
-
-  private def status: HttpResponse => Int = _.status
-
-  def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[String] = metrics.record(api) {
-    http.GET(s"$serviceBaseUrl/reset-password?code=$code")
-      .map(r => (r.json \ "email").as[String])
-      .recover {
-        case _: BadRequestException => throw new InvalidResetCode
-        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
+    encryptedJson.secretRequest(
+      UnregisteredUserCreationRequest(email),
+      http.POST[SecretRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/unregistered-developer", _)
+      .map {
+        case Right(response) => response.status
+        case Left(err) => throw err
       }
-  }
-
-  def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POSTEmpty[HttpResponse](s"$serviceBaseUrl/$email/password-reset-request", Seq((CONTENT_LENGTH -> "0"))).map(status).recover {
-      case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-    }
+    )
   }
 
   def reset(reset: PasswordReset)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    encryptedJson.secretRequestJson[Int](
-      Json.toJson(reset), { secretRequestJson =>
-        http.POST(s"$serviceBaseUrl/reset-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
-          .map(status).recover {
-          case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-        }
-      })
+    encryptedJson.secretRequest(
+      reset,
+      http.POST[SecretRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/reset-password", _)
+      .map {
+        case Right(response) => response.status
+        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new UnverifiedAccount
+        case Left(err) => throw err
+      }
+    )
   }
 
   def changePassword(change: ChangePassword)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    encryptedJson.secretRequestJson[Int](
-      Json.toJson(change), { secretRequestJson =>
-        http.POST(s"$serviceBaseUrl/change-password", secretRequestJson, Seq(CONTENT_TYPE -> JSON))
-          .map(status).recover {
-          case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
-          case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-          case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
+    encryptedJson.secretRequest(
+      change,
+      http.POST[SecretRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/change-password", _)
+      .map {
+        case Right(response) => response.status
+        case Left(UpstreamErrorResponse(_, UNAUTHORIZED, _, _)) => throw new InvalidCredentials
+        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new UnverifiedAccount
+        case Left(UpstreamErrorResponse(_, LOCKED, _, _)) => throw new LockedAccount
+        case Left(err) => throw err
+      }
+    )
+  }
+
+  def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+    http.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/password-reset-request", PasswordResetRequest(email), Seq((CONTENT_LENGTH -> "0")))
+    .map {
+      case Right(response) => response.status
+      case Left(UpstreamErrorResponse(_,FORBIDDEN,_,_)) => throw new UnverifiedAccount
+      case Left(err) => throw err
+    }
+  }
+
+  def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+    http.PUT[String, Option[Session]](s"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState}", "")
+      .map {
+        case Some(session) => session
+        case None => throw new SessionInvalid
+      }
+  }
+
+  def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[String] = {
+    implicit val EmailForResetResponseReads = Json.reads[EmailForResetResponse]
+    
+    metrics.record(api) {
+      http.GET[ErrorOr[EmailForResetResponse]](s"$serviceBaseUrl/reset-password?code=$code")
+      .map {
+        case Right(e) => e.email
+        case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => throw new InvalidResetCode
+        case Left(UpstreamErrorResponse(_,FORBIDDEN,_,_)) => throw new UnverifiedAccount
+        case Left(err) =>throw err
+      }
+    }
+  }
+
+  def updateProfile(userId: UserId, profile: UpdateProfileRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+    http.POST[UpdateProfileRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/developer/${userId.value}", profile)
+      .map {
+        case Right(response) => response.status
+        case Left(err) => throw err
+      }
+  }
+
+  def fetchUserId(email: String)(implicit hc: HeaderCarrier): Future[CoreUserDetails] = {
+    http.POST[FindUserIdRequest, FindUserIdResponse](s"$serviceBaseUrl/developers/find-user-id", FindUserIdRequest(email))
+    .map(response => CoreUserDetails(email, response.userId))
+  }
+
+  def resendVerificationEmail(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+    for {
+      coreUserDetails <- fetchUserId(email)
+      userId = coreUserDetails.id.value
+      response <- http.POSTEmpty[ErrorOr[HttpResponse]](s"$serviceBaseUrl/$userId/resend-verification", Seq(CONTENT_LENGTH -> "0"))
+        .map {
+          case Right(response) => response.status
+          case Left(err) => throw err
         }
-      })
+    } yield response
+  }
+
+  def verify(code: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+    http.GET[ErrorOr[HttpResponse]](s"$serviceBaseUrl/verification", Seq("code" -> code))
+      .map {
+        case Right(response) => response.status
+        case Left(err) => throw err
+      }
   }
 
   def fetchSession(sessionId: String)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
-    http.GET(s"$serviceBaseUrl/session/$sessionId")
-      .map(_.json.as[Session])
-      .recover {
-        case _: NotFoundException => throw new SessionInvalid
-      }
+    http.GET[Option[Session]](s"$serviceBaseUrl/session/$sessionId")
+    .map {
+      case Some(session) => session
+      case None => throw new SessionInvalid
+    }
   }
 
   def deleteSession(sessionId: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.DELETE(s"$serviceBaseUrl/session/$sessionId")
-      .map(status)
-      .recover {
+    http.DELETE[ErrorOr[HttpResponse]](s"$serviceBaseUrl/session/$sessionId")
+      .map {
+        case Right(response) => response.status
         // treat session not found as successfully destroyed
-        case _: NotFoundException => NO_CONTENT
+        case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_)) => NO_CONTENT
+        case Left(err) => throw err
       }
   }
 
-  def updateRoles(email: String, roles: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
+  def updateRoles(userId: UserId, roles: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.PUT(s"$serviceBaseUrl/developer/account-setup/$email/roles", roles)
-        .map(_.json.as[Developer])
+      http.PUT[AccountSetupRequest,Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/roles", roles)
     }
 
 
-  def updateServices(email: String, services: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
+  def updateServices(userId: UserId, services: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.PUT(s"$serviceBaseUrl/developer/account-setup/$email/services", services)
-        .map(_.json.as[Developer])
+      http.PUT[AccountSetupRequest,Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/services", services)
     }
 
-  def updateTargets(email: String, targets: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
+  def updateTargets(userId: UserId, targets: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.PUT(s"$serviceBaseUrl/developer/account-setup/$email/targets", targets)
-        .map(_.json.as[Developer])
+      http.PUT[AccountSetupRequest,Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/targets", targets)
     }
 
-  def completeAccountSetup(email: String)(implicit hc: HeaderCarrier): Future[Developer] =
+  def completeAccountSetup(userId: UserId)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.POSTEmpty(s"$serviceBaseUrl/developer/account-setup/$email/complete", Seq((CONTENT_LENGTH -> "0")))
-        .map(_.json.as[Developer])
+      http.POSTEmpty[Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/complete", Seq((CONTENT_LENGTH -> "0")))
     }
 
-
-  def fetchDeveloper(email: String)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
+  def fetchDeveloper(id: UserId)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
     metrics.record(api) {
-      http.GET[Developer](s"$serviceBaseUrl/developer", Seq("email" -> email)) map { result =>
-        Option(result)
-      } recover {
-        case _: NotFoundException => None
-      }
+      http.GET[Option[Developer]](s"$serviceBaseUrl/developer", Seq("developerId" -> id.asText))
     }
   }
 
   def fetchByEmails(emails: Set[String])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
-    http.GET[Seq[User]](s"$serviceBaseUrl/developers", Seq("emails" -> emails.mkString(",")))
+    http.POST[Set[String], Seq[User]](s"$serviceBaseUrl/developers/get-by-emails", emails)
   }
 
-  def createMfaSecret(email: String)(implicit hc: HeaderCarrier): Future[String] =
-    metrics.record(api) {
-      http.POSTEmpty(s"$serviceBaseUrl/developer/$email/mfa", Seq((CONTENT_LENGTH -> "0")))
-        .map(r => (r.json \ "secret").as[String])
-    }
+  def createMfaSecret(userId: UserId)(implicit hc: HeaderCarrier): Future[String] = {
+    implicit val CreateMfaResponseReads = Json.reads[CreateMfaResponse]
 
-  def verifyMfa(email: String, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
-      http.POST(s"$serviceBaseUrl/developer/$email/mfa/verification", VerifyMfaRequest(code), Seq(CONTENT_TYPE -> JSON)).
-        map(r => r.status == NO_CONTENT)
-        .recover {
-          case _: BadRequestException => false
-        }
+      http.POSTEmpty[CreateMfaResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa", Seq((CONTENT_LENGTH -> "0")))
+      .map(_.secret)
     }
   }
 
-  def enableMfa(email: String)(implicit hc: HeaderCarrier): Future[Int] = {
+  def verifyMfa(userId: UserId, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
-      http.PUT(s"$serviceBaseUrl/developer/$email/mfa/enable", "").map(status)
+      http.POST[VerifyMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/verification", VerifyMfaRequest(code))
+      .map {
+        case Right(()) => true
+        case Left(UpstreamErrorResponse(_,BAD_REQUEST,_,_)) => false
+        case Left(err) => throw err
+      }
     }
   }
 
-  def removeMfa(email: String)(implicit hc: HeaderCarrier): Future[Int] =
+  def enableMfa(userId: UserId)(implicit hc: HeaderCarrier): Future[Unit] = {
     metrics.record(api) {
-      http.POST(s"$serviceBaseUrl/developer/$email/mfa/remove", Json.obj("removedBy" -> email)).map(status)
+      http.PUT[String, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/enable", "")
+      .map(throwOrUnit)
     }
+  }
 
-  def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
-    encryptedJson.secretRequestJson(
-      Json.toJson(loginRequest),
-      http.POST(s"$serviceBaseUrl/authenticate", _, Seq(CONTENT_TYPE -> JSON)))
-      .map(_.json.as[UserAuthenticationResponse])
-      .recover {
-        case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
-        case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount
-        case Upstream4xxResponse(_, LOCKED, _, _) => throw new LockedAccount
-        case _: NotFoundException => throw new InvalidEmail
+  def removeMfa(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+    implicit val RemoveMfaRequestFormat = Json.format[RemoveMfaRequest]
+    metrics.record(api) {
+      http.POST[RemoveMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/mfa/remove", RemoveMfaRequest(email))
+      .map(throwOrUnit)
+    }
+  }
+
+  def removeEmailPreferences(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
+      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/developer/${userId.value}/email-preferences")
+      .map(throwOrOptionOf)
+      .map {
+        case Some(_) => true
+        case None => throw new InvalidEmail
       }
   }
 
-  def authenticateTotp(totpAuthenticationRequest: TotpAuthenticationRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
-    encryptedJson.secretRequestJson(
-      Json.toJson(totpAuthenticationRequest),
-      http.POST(s"$serviceBaseUrl/authenticate-totp", _, Seq(CONTENT_TYPE -> JSON)))
-      .map(_.json.as[Session])
-      .recover {
-        case _: BadRequestException => throw new InvalidCredentials
-        case _: NotFoundException => throw new InvalidEmail
+  def updateEmailPreferences(userId: UserId, emailPreferences: EmailPreferences)
+      (implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
+    val url = s"$serviceBaseUrl/developer/${userId.value}/email-preferences"
+
+    http.PUT[EmailPreferences, ErrorOrUnit](url, emailPreferences)
+      .map {
+        case Right(_) => true
+        case Left(UpstreamErrorResponse(_,NOT_FOUND,_,_)) => throw new InvalidEmail
+        case Left(err) => throw err
       }
   }
-
-
-  def removeEmailPreferences(emailAddress: String)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
-      http.DELETE(s"$serviceBaseUrl/developer/$emailAddress/email-preferences")
-      .map(_.status == NO_CONTENT)
-      .recover {
-        case _: NotFoundException => throw new InvalidEmail
-      }
-  }
-
-  def updateEmailPreferences(emailAddress: String, emailPreferences: EmailPreferences)
-  (implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
-    http.PUT(s"$serviceBaseUrl/developer/$emailAddress/email-preferences", Json.toJson(emailPreferences))
-      .map(_.status == NO_CONTENT)
-      .recover {
-        case _: NotFoundException => throw new InvalidEmail
-      }
-  }
-
-
 }
 
-object ThirdPartyDeveloperConnector {
-  private[connectors] case class UnregisteredUserCreationRequest(email: String)
-
-  object JsonFormatters {
-    implicit val formatUnregisteredUserCreationRequest: Format[UnregisteredUserCreationRequest] = Json.format[UnregisteredUserCreationRequest]
-  }
-}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,17 @@ import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.VersionSubscription
 import service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder{
 
@@ -198,7 +200,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
       when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
         .thenReturn(successful(productionApps))
       when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-        .thenReturn(failed(Upstream5xxResponse("Expected exception", 504, 504)))
+        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
 
       private val result = await(applicationService.fetchByTeamMemberEmail(emailAddress))
       result shouldBe Seq(app3, app1)
@@ -206,11 +208,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
 
     "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
       when(mockProductionApplicationConnector.fetchByTeamMemberEmail(emailAddress))
-        .thenReturn(failed(Upstream5xxResponse("Expected exception", 504, 504)))
+        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
       when(mockSandboxApplicationConnector.fetchByTeamMemberEmail(emailAddress))
         .thenReturn(successful(sandboxApps))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(applicationService.fetchByTeamMemberEmail(emailAddress))
       }
     }
@@ -427,11 +429,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
 
     "include correct set of admins to email" in new Setup {
 
-      private val verifiedAdmin = Collaborator("verified@example.com", Role.ADMINISTRATOR)
-      private val unverifiedAdmin = Collaborator("unverified@example.com", Role.ADMINISTRATOR)
-      private val removerAdmin = Collaborator("admin.email@example.com", Role.ADMINISTRATOR)
-      private val verifiedDeveloper = Collaborator("developer@example.com", Role.DEVELOPER)
-      private val teamMemberToRemove = Collaborator("to.remove@example.com", Role.ADMINISTRATOR)
+      private val verifiedAdmin = Collaborator("verified@example.com", Role.ADMINISTRATOR, Some(UserId.random))
+      private val unverifiedAdmin = Collaborator("unverified@example.com", Role.ADMINISTRATOR, Some(UserId.random))
+      private val removerAdmin = Collaborator("admin.email@example.com", Role.ADMINISTRATOR, Some(UserId.random))
+      private val verifiedDeveloper = Collaborator("developer@example.com", Role.DEVELOPER, Some(UserId.random))
+      private val teamMemberToRemove = Collaborator("to.remove@example.com", Role.ADMINISTRATOR, Some(UserId.random))
 
       val nonRemoverAdmins = Seq(
         User("verified@example.com", Some(true)),
@@ -463,7 +465,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     val adminRequester = utils.DeveloperSession(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
     val developerEmail = "developer@example.com"
     val developerRequester = utils.DeveloperSession(developerEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
-    val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER))
+    val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR, Some(UserId.random)), Collaborator(developerEmail, Role.DEVELOPER, Some(UserId.random)))
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val productionApp = productionApplication.copy(collaborators = teamMembers)
     val subject = "Request to delete an application"
@@ -521,7 +523,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     val adminRequester = utils.DeveloperSession(adminEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
     val developerEmail = "developer@example.com"
     val developerRequester = utils.DeveloperSession(developerEmail, "firstname", "lastname", loggedInState = LoggedInState.LOGGED_IN)
-    val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR), Collaborator(developerEmail, Role.DEVELOPER))
+    val teamMembers = Set(Collaborator(adminEmail, Role.ADMINISTRATOR, Some(UserId.random)), Collaborator(developerEmail, Role.DEVELOPER, Some(UserId.random)))
     val sandboxApp = sandboxApplication.copy(collaborators = teamMembers)
     val invalidROPCApp = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
     val productionApp = productionApplication.copy(collaborators = teamMembers)

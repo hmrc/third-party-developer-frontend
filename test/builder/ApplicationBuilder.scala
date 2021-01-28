@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import domain.models.applications._
 import uk.gov.hmrc.time.DateTimeUtils
 import domain.models.apidefinitions._
 import domain.models.subscriptions.{Fields,FieldValue,FieldName}
-
+import domain.models.developers.UserId
 trait ApplicationBuilder {
 
   def buildApplication(appOwnerEmail: String): Application = {
@@ -49,7 +49,7 @@ trait ApplicationBuilder {
   }
 
   def buildCollaborators(emails: Seq[String]): Set[Collaborator] = {
-    emails.map(email => Collaborator(email, Role.ADMINISTRATOR)).toSet
+    emails.map(email => Collaborator(email, Role.ADMINISTRATOR, Some(UserId.random))).toSet
   }
 
   def buildApplicationWithSubscriptionData(appOwnerEmail: String): ApplicationWithSubscriptionData = {

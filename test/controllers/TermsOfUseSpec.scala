@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import domain.ApplicationUpdateSuccessful
 import domain.models.applications
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.applications.Role.ADMINISTRATOR
-import domain.models.developers.{Developer, LoggedInState, Session}
+import domain.models.developers.{LoggedInState, Session}
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -39,10 +40,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import domain.models.developers.DeveloperSession
+import domain.models.developers.UserId
 
 class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
     val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
     val underTest = new TermsOfUse(
@@ -55,7 +57,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       termsOfUseView
     )
 
-    val loggedInUser = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val loggedInUser = buildDeveloper()
     val sessionId = "sessionId"
     val session = Session(sessionId, loggedInUser, LoggedInState.LOGGED_IN)
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -82,7 +84,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
         DateTimeUtils.now,
         None,
         environment,
-        collaborators = Set(Collaborator(loggedInUser.email, userRole)),
+        collaborators = Set(Collaborator(loggedInUser.email, userRole, Some(UserId.random))),
         access = access,
         state = ApplicationState.production("dont-care", "dont-care"),
         checkInformation = checkInformation

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import domain.ApplicationUpdateSuccessful
 import domain.models.applications.Application
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
@@ -37,7 +38,7 @@ import scala.concurrent.Future.{failed, successful}
 
 class IpAllowlistSpec extends BaseControllerSpec with ApplicationActionServiceMock with TestApplications with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with DeveloperBuilder {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val mockIpAllowlistService: IpAllowlistService = mock[IpAllowlistService]
 
@@ -65,8 +66,8 @@ class IpAllowlistSpec extends BaseControllerSpec with ApplicationActionServiceMo
     val sessionId = "sessionId"
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-    val admin: Developer = Developer("admin@example.com", "Joe", "Bloggs")
-    val developer: Developer = Developer("developer@example.com", "John", "Doe")
+    val admin: Developer = buildDeveloper(emailAddress = "admin@example.com")
+    val developer: Developer = buildDeveloper(emailAddress = "developer@example.com")
 
     val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
     val anApplicationWithIpAllowlist: Application = anApplicationWithoutIpAllowlist.copy(ipAllowlist = domain.models.applications.IpAllowlist(allowlist = Set("1.1.1.0/24")))

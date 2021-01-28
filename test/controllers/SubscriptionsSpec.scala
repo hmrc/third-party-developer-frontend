@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package controllers
 
 import java.util.UUID.randomUUID
 
+import builder.DeveloperBuilder
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.apidefinitions.{ApiContext, ApiVersion,ApiIdentifier}
 import domain.models.applications._
@@ -37,12 +38,13 @@ import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
 import views.html.include.ChangeSubscriptionConfirmationView
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
 
   val apiName = "api-1"
   val apiVersion = ApiVersion("1.0")
@@ -50,7 +52,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   val displayStatus = "Status"
 
-  val developer: Developer = Developer("third.party.developer@example.com", "John", "Doe")
+  val developer: Developer = buildDeveloper()
   val sessionId = "sessionId"
   val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
@@ -65,14 +67,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR)),
+    Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   val activeApplication: Application = anApplication
 
-  val activeDeveloperApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER)))
+  val activeDeveloperApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER, Some(UserId.random))))
 
   val ropcApplication: Application = anApplication.copy(access = ROPC())
 
@@ -82,8 +84,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
   val newSandboxApplication: Application = anApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
 
-  val adminApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR)))
-  val developerApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER)))
+  val adminApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR, Some(UserId.random))))
+  val developerApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER, Some(UserId.random))))
 
   val adminSubmittedProductionApplication: Application =
     adminApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production(loggedInDeveloper.email, ""))
@@ -197,7 +199,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include("Subscribe to APIs so your application can access them in the sandbox")
+      contentAsString(result) should include("Subscribe to the APIs you want to use in the sandbox")
     }
 
     "return the subscriptions page for a developer on a standard app in the Development environment" in new Setup {
@@ -209,7 +211,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include("Subscribe to APIs so your application can access them in development")
+      contentAsString(result) should include("Subscribe to the APIs you want to use in development")
     }
   }
 
@@ -602,7 +604,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     val apiAccessType = "PUBLIC"
 
     "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
-      val alteredActiveApplication = activeApplication.copy(collaborators = Set(Collaborator("randomEmail", Role.ADMINISTRATOR)))
+      val alteredActiveApplication = activeApplication.copy(collaborators = Set(Collaborator("randomEmail", Role.ADMINISTRATOR, Some(UserId.random))))
 
       when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(Some(session)))
       fetchByApplicationIdReturns(appId, alteredActiveApplication)

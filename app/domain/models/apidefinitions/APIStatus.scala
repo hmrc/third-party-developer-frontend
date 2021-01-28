@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,16 @@ package domain.models.apidefinitions
 
 import enumeratum.{EnumEntry, PlayEnum}
 
-sealed trait APIStatus extends EnumEntry
+sealed trait APIStatus extends EnumEntry {
+  def displayedStatus: String
+}
 
 object APIStatus extends PlayEnum[APIStatus] {
   val values = findValues
 
-  final case object ALPHA       extends APIStatus
-  final case object BETA        extends APIStatus
-  final case object STABLE      extends APIStatus
-  final case object DEPRECATED  extends APIStatus
-  final case object RETIRED     extends APIStatus
+  final case object ALPHA       extends APIStatus { val displayedStatus = "Alpha"}
+  final case object BETA        extends APIStatus { val displayedStatus = "Beta"}
+  final case object STABLE      extends APIStatus { val displayedStatus = "Stable"}
+  final case object DEPRECATED  extends APIStatus { val displayedStatus = "Deprecated"}
+  final case object RETIRED     extends APIStatus { val displayedStatus = "Retired"}
 }

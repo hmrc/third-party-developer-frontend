@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.views.NavLink
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import play.api.http.Status.OK
@@ -28,15 +29,7 @@ import utils.WithLoggedInSession._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class NavigationSpec extends BaseControllerSpec {
-
-  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
-  val sessionId = "sessionId"
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-  val loggedInUser = DeveloperSession(session)
-
-  var userPassword = "Password1!"
-
-  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
+  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
     val underTest = new Navigation(
       sessionServiceMock,
       mock[ErrorHandler],
@@ -45,6 +38,13 @@ class NavigationSpec extends BaseControllerSpec {
       mcc,
       cookieSigner
     )
+
+    val developer = buildDeveloper()
+    val sessionId = "sessionId"
+    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val loggedInUser = DeveloperSession(session)
+
+    var userPassword = "Password1!"
 
     loggedInState.map(loggedInState => {
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, loggedInState))

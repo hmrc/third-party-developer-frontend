@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import play.twirl.api.Html
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.CredentialsView
+import domain.models.developers.UserId
 
 import scala.collection.JavaConverters._
 
@@ -51,7 +52,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken {
       None,
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR)),
+      collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR, Some(UserId.random))),
       access = Standard(),
       state = ApplicationState.production("", ""),
       checkInformation = None
@@ -69,7 +70,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken {
     }
 
     "display the credentials page for non admins if the app is in sandbox" in new Setup {
-      val developerApp: Application = sandboxApplication.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER)))
+      val developerApp: Application = sandboxApplication.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER, Some(UserId.random))))
       val page: Html = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
@@ -79,7 +80,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken {
     }
 
     "tell the user they don't have access to credentials when the logged in user is not an admin and the app is not in sandbox" in new Setup {
-      val developerApp: Application = application.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER)))
+      val developerApp: Application = application.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER, Some(UserId.random))))
       val page: Html = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")

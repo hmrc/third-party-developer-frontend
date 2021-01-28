@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import domain.models.applications._
 import org.joda.time.{DateTime, Duration, Instant, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -54,7 +55,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
           new DateTime(),
           None,
           Environment.PRODUCTION,
-          collaborators = Set(Collaborator(email, Role.ADMINISTRATOR))
+          collaborators = Set(Collaborator(email, Role.ADMINISTRATOR, Some(UserId.random)))
         )
       )
     )
@@ -69,7 +70,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
           new DateTime(),
           None,
           Environment.PRODUCTION,
-          collaborators = Set(Collaborator(email, Role.DEVELOPER))
+          collaborators = Set(Collaborator(email, Role.DEVELOPER, Some(UserId.random)))
         )
       )
     )
@@ -98,7 +99,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
           new DateTime(),
           None,
           Environment.SANDBOX,
-          collaborators = Set(Collaborator(email, Role.ADMINISTRATOR))
+          collaborators = Set(Collaborator(email, Role.ADMINISTRATOR, Some(UserId.random)))
         )
       )
     )

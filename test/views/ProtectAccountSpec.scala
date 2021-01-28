@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package views
 
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import builder.DeveloperBuilder
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.protectaccount.ProtectAccountView
 
-class ProtectAccountSpec extends CommonViewSpec with WithCSRFAddToken {
+class ProtectAccountSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder {
   implicit val request = FakeRequest()
   val protectAccountView = app.injector.instanceOf[ProtectAccountView]
 
   "Protect Account view" should {
-    val developer = Developer("email", "firstName", "lastName")
+    val developer = buildDeveloper()
     "show the sensitive account warning if doing the mandated MFA enablement journey" in {
 
       val session = Session("sessionId", developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)

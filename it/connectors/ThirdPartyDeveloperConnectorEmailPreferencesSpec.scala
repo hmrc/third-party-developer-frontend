@@ -31,6 +31,8 @@ import domain.models.emailpreferences.EmailTopic._
 import domain.models.connectors.LoginRequest
 import domain.models.connectors.TotpAuthenticationRequest
 import play.api.http.HeaderNames
+import domain.models.developers.UserId
+import connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -65,9 +67,22 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   "resendVerificationEmail" should {
     "return" in new Setup {
       val email = "foo@bar.com"
+      val userId = UserId.random
+
+      implicit val writes = Json.writes[FindUserIdResponse]
+
+      stubFor(
+        post(urlEqualTo("/developers/find-user-id"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(Json.toJson(FindUserIdResponse(userId)).toString)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
       
       stubFor(
-        post(urlEqualTo(s"/$email/resend-verification"))
+        post(urlEqualTo(s"/${userId.value}/resend-verification"))
           .willReturn(
             aResponse()
               .withStatus(NO_CONTENT)
@@ -79,18 +94,18 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
       verify(
         1,
-        postRequestedFor(urlMatching(s"/$email/resend-verification"))
+        postRequestedFor(urlMatching(s"/${userId.value}/resend-verification"))
           .withHeader(HeaderNames.CONTENT_LENGTH, equalTo("0"))
       )
     }
   }
 
   "removeEmailPreferences" should {
+    val userId = UserId.random
+
     "return true when NO_CONTENT is returned" in new Setup {
-      val email = "foo@bar.com"
-      
       stubFor(
-        delete(urlEqualTo(s"/developer/$email/email-preferences"))
+        delete(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
           .willReturn(
             aResponse()
               .withStatus(NO_CONTENT)
@@ -98,14 +113,12 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
           )
       )
 
-      await(underTest.removeEmailPreferences(email)) shouldBe true
+      await(underTest.removeEmailPreferences(userId)) shouldBe true
     }
 
     "throw InvalidEmail when the email is not found" in new Setup {
-      val email = "foo@bar.com"
-      
       stubFor(
-        delete(urlEqualTo(s"/developer/$email/email-preferences"))
+        delete(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
           .willReturn(
             aResponse()
               .withStatus(NOT_FOUND)
@@ -113,7 +126,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
           )
       )
 
-      intercept[InvalidEmail](await(underTest.removeEmailPreferences(email)))
+      intercept[InvalidEmail](await(underTest.removeEmailPreferences(userId)))
     }
   
   }
@@ -122,10 +135,10 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
       val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
   
   "return true when NO_CONTENT is returned" in new Setup {
-      val email = "foo@bar.com"
+      val userId = UserId.random
       
       stubFor(
-        put(urlEqualTo(s"/developer/$email/email-preferences"))
+        put(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
           .withRequestBody(equalToJson(Json.toJson(emailPreferences).toString()))
           .willReturn(
             aResponse()
@@ -134,14 +147,14 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
           )
       )
 
-      await(underTest.updateEmailPreferences(email, emailPreferences)) shouldBe true
+      await(underTest.updateEmailPreferences(userId, emailPreferences)) shouldBe true
     }
 
     "throw InvalidEmail when the email is not found" in new Setup {
-      val email = "foo@bar.com"
+      val userId = UserId.random
 
       stubFor(
-        put(urlEqualTo(s"/developer/$email/email-preferences"))
+        put(urlEqualTo(s"/developer/${userId.value}/email-preferences"))
           .withRequestBody(equalToJson(Json.toJson(emailPreferences).toString()))
           .willReturn(
             aResponse()
@@ -150,7 +163,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
           )
       )
 
-      intercept[InvalidEmail](await(underTest.updateEmailPreferences(email, emailPreferences)))
+      intercept[InvalidEmail](await(underTest.updateEmailPreferences(userId, emailPreferences)))
     }
   
   }

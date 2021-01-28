@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ import domain.models.subscriptions.ApiSubscriptionFields._
 @Singleton
 class ApplicationActionService @Inject()(
   applicationService: ApplicationService,
-  subscriptionFieldsService: SubscriptionFieldsService
+  subscriptionFieldsService: SubscriptionFieldsService,
+  openAccessApisService: OpenAccessApiService
 )(implicit ec: ExecutionContext)  {
 
   def process[A](applicationId: ApplicationId, developerSession: DeveloperSession)(implicit request: MessagesRequest[A], hc: HeaderCarrier): OptionT[Future, ApplicationRequest[A]] = {
@@ -42,12 +43,14 @@ class ApplicationActionService @Inject()(
     for {
         applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
         application = applicationWithSubs.application
-        fieldDefinitions <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(application.deployedTo))
+        environment = application.deployedTo
+        fieldDefinitions <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(environment))
+        openAccessApis <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
         subscriptionData <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
         subs = toApiSubscriptionStatusSeq(applicationWithSubs, fieldDefinitions, subscriptionData)
         role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
       } yield {
-        ApplicationRequest(application, application.deployedTo, subs, role, developerSession, request)
+        ApplicationRequest(application, environment, subs, openAccessApis, role, developerSession, request)
       }
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.failed
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Random
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
 
-class RetriesSpec extends AsyncHmrcSpec {
+class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 
   trait Setup {
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]

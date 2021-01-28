@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package helpers
 
+import builder.DeveloperBuilder
 import controllers.BaseControllerSpec
-import domain.models.developers.{Developer, LoggedInState, Session}
+import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -26,11 +27,11 @@ import security.CookieEncoding
 import service.SessionService
 import utils.WithLoggedInSession._
 
-trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding {
+trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding with DeveloperBuilder {
   this: BaseControllerSpec =>
     val sessionService = mock[SessionService]
 
-    val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+    val developer = buildDeveloper()
     val sessionId = "sessionId"
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 

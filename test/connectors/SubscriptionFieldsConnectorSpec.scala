@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package connectors
 
 import java.util.UUID
 
-import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import builder.SubscriptionsBuilder
 import config.ApplicationConfig
@@ -36,8 +35,10 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.{failed, successful}
+import akka.actor.ActorSystem
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
+class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SubscriptionsBuilder {
   def fields(tpl: (FieldName, FieldValue)*): Fields.Alias =
     Map(tpl: _*)
 
@@ -52,9 +53,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
   private val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   private val fieldsId = UUID.randomUUID()
   private val urlPrefix = "/field"
-  private val upstream500Response = Upstream5xxResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
+  private val upstream500Response = UpstreamErrorResponse("", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
   private val futureTimeoutSupport = new FutureTimeoutSupportImpl
-  private val actorSystem = ActorSystem("test-actor-system")
 
   trait Setup {
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -74,7 +74,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       mockHttpClient,
       mockProxiedHttpClient,
       mockAppConfig,
-      actorSystem,
+      app.actorSystem,
       futureTimeoutSupport
     )
   }
@@ -93,7 +93,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
         mockHttpClient,
         mockProxiedHttpClient,
         mockAppConfig,
-        actorSystem,
+        app.actorSystem,
         futureTimeoutSupport
       )
   }
@@ -111,15 +111,6 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       extends AbstractSubscriptionFieldsConnector {
     val serviceBaseUrl = ""
     val environment: Environment = Environment.SANDBOX
-  }
-
-  private def squidProxyRelatedBadRequest = {
-    new BadRequestException(
-      "GET of 'https://api.development.tax.service.gov.uk:443/testing/api-subscription-fields/field/application/" +
-        "xxxyyyzzz/context/api-platform-test/version/7.0' returned 400 (Bad Request). Response body " +
-        "'<html>\n<head><title>400 Bad Request</title></head>\n<body bgcolor=\"white\">\n" +
-        "<center><h1>400 Bad Request</h1></center>\n<hr><center>nginx</center>\n</body>\n</html>\n'"
-    )
   }
 
   "fetchFieldsValuesWithPrefetchedDefinitions" should {
@@ -147,8 +138,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     "return subscription fields for an API" in new Setup {
       when(
         mockHttpClient
-          .GET[ApplicationApiFieldValues](eqTo(getUrl))(*, *, *)
-      ).thenReturn(successful(subscriptionFields))
+          .GET[Option[ApplicationApiFieldValues]](eqTo(getUrl))(*, *, *)
+      ).thenReturn(successful(Some(subscriptionFields)))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -162,21 +153,21 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
       when(
         mockHttpClient
-          .GET[ApplicationApiFieldValues](eqTo(getUrl))(*, *, *)
+          .GET[Option[ApplicationApiFieldValues]](eqTo(getUrl))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .fetchFieldsValuesWithPrefetchedDefinitions(clientId, apiIdentifier, prefetchedDefinitions)
         )
-      }
+      }.statusCode shouldBe 500
     }
 
     "return empty when api-subscription-fields returns a 404" in new Setup {
 
-      when(mockHttpClient.GET[ApplicationApiFieldValues](eqTo(getUrl))(*, *, *))
-        .thenReturn(failed(new NotFoundException("")))
+      when(mockHttpClient.GET[Option[ApplicationApiFieldValues]](eqTo(getUrl))(*, *, *))
+        .thenReturn(successful(None))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -189,8 +180,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
       when(
         mockProxiedHttpClient
-          .GET[ApplicationApiFieldValues](*)(*, *, *)
-      ).thenReturn(successful(subscriptionFields))
+          .GET[Option[ApplicationApiFieldValues]](*)(*, *, *)
+      ).thenReturn(successful(Some(subscriptionFields)))
 
       await(
         subscriptionFieldsConnector
@@ -198,26 +189,6 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
       )
 
       verify(mockProxiedHttpClient).withHeaders(eqTo(apiKey))
-    }
-
-    "when retry logic is enabled should retry on failure" in new Setup {
-
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(mockHttpClient.GET[ApplicationApiFieldValues](eqTo(getUrl))(*, *, *))
-        .thenReturn(
-          failed(squidProxyRelatedBadRequest),
-          successful(subscriptionFields)
-        )
-
-      private val result = await(
-        subscriptionFieldsConnector.fetchFieldsValuesWithPrefetchedDefinitions(
-          clientId,
-          apiIdentifier,
-          prefetchedDefinitions
-        )
-      )
-
-      result shouldBe Seq(subscriptionFieldValue)
     }
   }
 
@@ -237,8 +208,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
       when(
         mockHttpClient
-          .GET[AllApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(successful(validResponse))
+          .GET[Option[AllApiFieldDefinitions]](eqTo(url))(*, *, *)
+      ).thenReturn(successful(Some(validResponse)))
 
       private val result =
         await(subscriptionFieldsConnector.fetchAllFieldDefinitions())
@@ -252,52 +223,25 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
       when(
         mockHttpClient
-          .GET[AllApiFieldDefinitions](eqTo(url))(*, *, *)
+          .GET[Option[AllApiFieldDefinitions]](eqTo(url))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(subscriptionFieldsConnector.fetchAllFieldDefinitions())
-      }
+      }.statusCode shouldBe 500
     }
 
     "fail when api-subscription-fields returns unexpected response" in new Setup {
 
       when(
         mockHttpClient
-          .GET[AllApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+          .GET[Option[AllApiFieldDefinitions]](eqTo(url))(*, *, *)
+      ).thenReturn(successful(None))
 
       private val result =
         await(subscriptionFieldsConnector.fetchAllFieldDefinitions())
 
       result shouldBe Map.empty[String, String]
-    }
-
-    "when retry logic is enabled should retry on failure" in new Setup {
-
-      val definitions = List(
-        FieldDefinition(FieldName("field1"), "desc1", "sdesc1", "hint1", "some type", AccessRequirements.Default),
-        FieldDefinition(FieldName("field2"), "desc2", "sdesc2", "hint2", "some other type", AccessRequirements.Default)
-      )
-
-      private val validResponse =
-        AllApiFieldDefinitions(apis = Seq(ApiFieldDefinitions(apiContext, apiVersion, definitions)))
-
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(
-        mockHttpClient
-          .GET[AllApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(
-        failed(new BadRequestException("")),
-        successful(validResponse)
-      )
-
-      private val result =
-        await(subscriptionFieldsConnector.fetchAllFieldDefinitions())
-
-      val expectedResult = Map(apiIdentifier -> definitions.map(toDomain))
-
-      result shouldBe expectedResult
     }
   }
 
@@ -316,8 +260,8 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
     "return definitions" in new Setup {
       when(
-        mockHttpClient.GET[ApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(successful(validResponse))
+        mockHttpClient.GET[Option[ApiFieldDefinitions]](eqTo(url))(*, *, *)
+      ).thenReturn(successful(Some(validResponse)))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -330,33 +274,12 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     "fail when api-subscription-fields returns a 500" in new Setup {
 
       when(
-        mockHttpClient.GET[ApiFieldDefinitions](eqTo(url))(*, *, *)
+        mockHttpClient.GET[Option[ApiFieldDefinitions]](eqTo(url))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
-        await(
-          subscriptionFieldsConnector
-            .fetchFieldDefinitions(apiContext, apiVersion)
-        )
+      intercept[UpstreamErrorResponse] {
+        await(subscriptionFieldsConnector.fetchFieldDefinitions(apiContext, apiVersion))
       }
-    }
-
-    "when retry logic is enabled should retry on failure" in new Setup {
-
-      when(mockAppConfig.retryCount).thenReturn(1)
-      when(
-        mockHttpClient.GET[ApiFieldDefinitions](eqTo(url))(*, *, *)
-      ).thenReturn(
-        failed(new BadRequestException("")),
-        successful(validResponse)
-      )
-
-      private val result = await(
-        subscriptionFieldsConnector
-          .fetchFieldDefinitions(apiContext, apiVersion)
-      )
-
-      result shouldBe expectedDefinitions
     }
   }
 
@@ -392,13 +315,13 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
       when(
         mockHttpClient
-          .GET[ApiFieldDefinitions](eqTo(definitionsUrl))(*, *, *)
-      ).thenReturn(successful(validDefinitionsResponse))
+          .GET[Option[ApiFieldDefinitions]](eqTo(definitionsUrl))(*, *, *)
+      ).thenReturn(successful(Some(validDefinitionsResponse)))
 
       when(
         mockHttpClient
-          .GET[ApplicationApiFieldValues](eqTo(valuesUrl))(*, *, *)
-      ).thenReturn(successful(validValuesResponse))
+          .GET[Option[ApplicationApiFieldValues]](eqTo(valuesUrl))(*, *, *)
+      ).thenReturn(successful(Some(validValuesResponse)))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -411,10 +334,10 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     "fail when fetching field definitions returns a 500" in new Setup {
       when(
         mockHttpClient
-          .GET[ApiFieldDefinitions](eqTo(definitionsUrl))(*, *, *)
+          .GET[Option[ApiFieldDefinitions]](eqTo(definitionsUrl))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .fetchFieldValues(clientId, apiContext, apiVersion)
@@ -425,15 +348,15 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     "fail when fetching field definition values returns a 500" in new Setup {
       when(
         mockHttpClient
-          .GET[ApiFieldDefinitions](eqTo(definitionsUrl))(*, *, *)
-      ).thenReturn(successful(validDefinitionsResponse))
+          .GET[Option[ApiFieldDefinitions]](eqTo(definitionsUrl))(*, *, *)
+      ).thenReturn(successful(Some(validDefinitionsResponse)))
 
       when(
         mockHttpClient
-          .GET[ApiFieldDefinitions](eqTo(valuesUrl))(*, *, *)
+          .GET[Option[ApiFieldDefinitions]](eqTo(valuesUrl))(*, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .fetchFieldValues(clientId, apiContext, apiVersion)
@@ -454,7 +377,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     val putUrl = s"$urlPrefix/application/${clientId.value}/context/${apiContext.value}/version/${apiVersion.value}"
 
     "save the fields" in new Setup {
-      val response = HttpResponse(OK)
+      val response = HttpResponse(OK,"")
 
       when(
         mockHttpClient.PUT[SubscriptionFieldsPutRequest, HttpResponse](
@@ -487,7 +410,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
         )(*, *, *, *)
       ).thenReturn(failed(upstream500Response))
 
-      intercept[Upstream5xxResponse] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
@@ -502,14 +425,14 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
           eqTo(subFieldsPutRequest),
           any[Seq[(String, String)]]
         )(*, *, *, *)
-      ).thenReturn(failed(new NotFoundException("")))
+      ).thenReturn(successful(HttpResponse(NOT_FOUND,"")))
 
-      intercept[NotFoundException] {
+      intercept[UpstreamErrorResponse] {
         await(
           subscriptionFieldsConnector
             .saveFieldValues(clientId, apiContext, apiVersion, fieldsValues)
         )
-      }
+      }.statusCode shouldBe NOT_FOUND
     }
 
     "fail when api-subscription-fields returns a 400 with validation error messages" in new Setup {
@@ -519,8 +442,9 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
           |}""".stripMargin
 
       val response = HttpResponse(
-        responseStatus = BAD_REQUEST,
-        responseJson = Some(Json.parse(errorJson))
+        BAD_REQUEST,
+        Json.parse(errorJson),
+        Map.empty[String, Seq[String]]
       )
 
       when(
@@ -546,7 +470,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
     "return success after delete call has returned 204 NO CONTENT" in new Setup {
       when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(successful(HttpResponse(NO_CONTENT)))
+        .thenReturn(successful(HttpResponse(NO_CONTENT,"")))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -558,7 +482,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
     "return failure if api-subscription-fields returns unexpected status" in new Setup {
       when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(successful(HttpResponse(ACCEPTED)))
+        .thenReturn(successful(HttpResponse(ACCEPTED,"")))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -571,7 +495,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
     "return failure when api-subscription-fields returns a 500" in new Setup {
 
       when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(failed(upstream500Response))
+        .thenReturn(successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
       private val result = await(
         subscriptionFieldsConnector
@@ -583,7 +507,7 @@ class SubscriptionFieldsConnectorSpec extends AsyncHmrcSpec with SubscriptionsBu
 
     "return success when api-subscription-fields returns a 404" in new Setup {
       when(mockHttpClient.DELETE[HttpResponse](eqTo(url), *)(*, *, *))
-        .thenReturn(failed(new NotFoundException("")))
+        .thenReturn(successful(HttpResponse(NOT_FOUND,"")))
 
       private val result = await(
         subscriptionFieldsConnector

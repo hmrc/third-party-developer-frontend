@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,27 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.State
+@import domain.models.apidefinitions.ApiContext
+@import domain.models.subscriptions.ApiData
 @import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
-@(role: Role, data: PageData, form: Form[controllers.EditApplicationForm], app: Application, environment: Environment, subscriptions: Option[GroupedSubscriptions])(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: config.ApplicationConfig, environmentNameService: EnvironmentNameService)
+@(
+    role: Role, 
+    data: PageData, 
+    form: Form[controllers.EditApplicationForm], 
+    app: Application, 
+    environment: Environment, 
+    subscriptions: Option[GroupedSubscriptions],
+    openAccessApis: Map[ApiContext, ApiData]
+)(
+    implicit request: play.api.mvc.Request[Any],
+    loggedIn: DeveloperSession, 
+    messages: Messages, 
+    applicationConfig: config.ApplicationConfig, 
+    environmentNameService: EnvironmentNameService
+)
 
 @isPendingOrActiveProductionApplication(application: Application) = @{
     application.deployedTo.isProduction && (
@@ -56,11 +71,11 @@
 
     @subscriptions match {
         case Some(groupedSubscriptions) => {
-            <p>Subscribe to APIs so your application can access them in @environmentNameService.subordinateWording. You can change them at any time.</p>
+            <p>Subscribe to the APIs you want to use in @environmentNameService.subordinateWording.</p>
 
-            <p>Once you subscribe, we'll send you email updates such as new API versions, new endpoints or version retirements.</p>
+            <p>You can change the APIs you subscribe to in @environmentNameService.subordinateWording at any time.</p>
 
-            <p>Learn more about our APIs in @Link.toExternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation (opens in a new tab)")).toHtml.</p>
+            <p>Check the @Link.toExternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api", value = Some("API documentation (opens in a new tab)")).toHtml for information about specific APIs.</p>
 
             @if(role.isAdministrator && isPendingOrActiveProductionApplication(app)) {
                 <p class="panel panel-border-wide">For security reasons we must review any API subscription changes. This takes up to 2 working days.</p>
@@ -70,7 +85,7 @@
                 <p class="panel panel-border-wide">You need admin rights to make API subscription changes.</p>
             }
 
-            @subscriptionGroups(role, groupedSubscriptions, app, API_SUBSCRIPTIONS_PAGE, app.deployedTo == PRODUCTION)
+            @subscriptionGroups(role, groupedSubscriptions, openAccessApis, app, API_SUBSCRIPTIONS_PAGE, app.deployedTo == PRODUCTION)
         }
 
         case _ => {

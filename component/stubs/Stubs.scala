@@ -24,7 +24,6 @@ import domain.models.applications.ApplicationNameValidationJson.ApplicationNameV
 import domain.models.applications.{Application, ApplicationToken, Environment}
 import domain.models.developers.{Registration, UpdateProfileRequest}
 import domain.services.ApiDefinitionsJsonFormatters._
-import domain.services.SubscriptionsJsonFormatters._
 import org.scalatest.Matchers
 import play.api.Logger
 import play.api.libs.json.{Json, Writes}
@@ -33,6 +32,9 @@ import domain.models.apidefinitions.ApiIdentifier
 import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications.ClientId
 import domain.models.applications.ApplicationId
+import domain.models.developers.UserId
+import domain.models.connectors.PasswordResetRequest
+import connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 
 object Stubs {
 
@@ -83,22 +85,36 @@ object DeveloperStub {
         .willReturn(aResponse().withStatus(status))
     )
 
-  def update(email: String, profile: UpdateProfileRequest, status: Int) =
+  def update(userId: UserId, profile: UpdateProfileRequest, status: Int) =
     stubFor(
-      post(urlMatching(s"/developer/$email"))
+      post(urlMatching(s"/developer/${userId.value}"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))
         .willReturn(aResponse().withStatus(status))
     )
 
   def setupResend(email: String, status: Int) = {
+    val userId = UserId.random
+
+    implicit val writes = Json.writes[FindUserIdResponse]
+    
     stubFor(
-      post(urlPathEqualTo(s"/$email/resend-verification"))
+      post(urlEqualTo("/developers/find-user-id"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(Json.toJson(FindUserIdResponse(userId)).toString)
+            .withHeader("Content-Type", "application/json")
+        )
+    )
+    
+    stubFor(
+      post(urlPathEqualTo(s"/${userId.value}/resend-verification"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def verifyResetPassword(email: String) = {
-    verify(1, postRequestedFor(urlPathEqualTo(s"/$email/password-reset-request")))
+  def verifyResetPassword(request: PasswordResetRequest) = {
+    verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(equalToJson(Json.toJson(request).toString())))
   }
 }
 

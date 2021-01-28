@@ -16,8 +16,7 @@
 
 package steps
 
-import java.net.URLEncoder
-
+import builder.DeveloperBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import domain.models.connectors.{LoginRequest, UserAuthenticationResponse, VerifyMfaRequest}
 import domain.models.developers.{Developer, LoggedInState, Session}
@@ -31,6 +30,7 @@ import pages._
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, Stubs}
+import domain.models.connectors.PasswordResetRequest
 
 case class MfaSecret(secret: String)
 
@@ -45,7 +45,7 @@ object TestContext {
   var sessionIdForMfaMandatingUser: String = ""
 }
 
-class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers {
+class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with DeveloperBuilder {
   implicit val webDriver: WebDriver = Env.driver
 
   private val accessCode = "123456"
@@ -70,7 +70,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
     Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
 
-    val developer = Developer(result("Email address"), result("First name"), result("Last name"), None)
+    val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
 
     TestContext.developer = developer
 
@@ -88,7 +88,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   private def setupVerificationOfAccessCode(developer: Developer): Unit = {
     stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.email}/mfa/verification"))
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/verification"))
         .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT)
@@ -97,7 +97,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   private def setupEnablingMfa(developer: Developer): Unit = {
     stubFor(
-      put(urlPathEqualTo(s"/developer/${developer.email}/mfa/enable"))
+      put(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/enable"))
         .willReturn(aResponse()
           .withStatus(OK)
         ))
@@ -105,17 +105,15 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
   private def setupGettingMfaSecret(developer: Developer): Unit = {
     stubFor(
-      post(urlPathEqualTo(s"/developer/${developer.email}/mfa"))
+      post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa"))
         .willReturn(aResponse()
           .withStatus(OK)
           .withBody(Json.toJson(MfaSecret("mySecret")).toString())))
   }
 
   private def setupGettingDeveloperByEmail(developer: Developer): Unit = {
-    val encodedEmail = URLEncoder.encode(developer.email, "UTF-8")
-
     stubFor(get(urlPathEqualTo("/developer"))
-      .withQueryParam("email", equalTo(encodedEmail))
+      .withQueryParam("developerId", equalTo(developer.userId.asText))
       .willReturn(aResponse()
         .withStatus(OK)
         .withBody(Json.toJson(developer).toString())))
@@ -170,7 +168,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email : String =>
-    DeveloperStub.verifyResetPassword(email)
+    DeveloperStub.verifyResetPassword(PasswordResetRequest(email))
   }
 
 

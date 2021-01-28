@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain.models.applications._
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -30,12 +31,13 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
+import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
+class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
 
-  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
+  val developer = buildDeveloper()
   val sessionId = "sessionId"
   val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
@@ -44,7 +46,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val collaborator: Collaborator = Collaborator(loggedInUser.email, Role.ADMINISTRATOR)
+  val collaborator: Collaborator = Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))
 
   val application = Application(
     appId,
@@ -60,7 +62,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
     access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
     val accessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
@@ -76,6 +78,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
       mock[ErrorHandler],
       applicationServiceMock,
       applicationActionServiceMock,
+      emailPreferencesServiceMock,
       sessionServiceMock,
       mock[AuditService],
       mcc,
@@ -117,10 +120,6 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
       contentAsString(result) should include("Add an application to the sandbox")
       contentAsString(result) should include(loggedInUser.displayedName)
       contentAsString(result) should include("Sign out")
-      contentAsString(result) should include("get its sandbox credentials")
-      contentAsString(result) should include("use its credentials for integration testing")
-      contentAsString(result) should include("In production, your application will need to comply with the expectations set out in our")
-      contentAsString(result) should include("Once you add your application and subscribe it to the sandbox APIs you want to integrate with you can:")
       contentAsString(result) should not include "Sign in"
     }
 
@@ -132,11 +131,6 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
         status(result) shouldBe OK
         contentAsString(result) should include("Add an application to development")
         contentAsString(result) should include(loggedInUser.displayedName)
-        contentAsString(result) should include("Sign out")
-        contentAsString(result) should include("get its development credentials")
-        contentAsString(result) should include("use its credentials for integration testing")
-        contentAsString(result) should include("In production, your application will need to comply with the expectations set out in our")
-        contentAsString(result) should include("Once you add your application and subscribe it to the development APIs you want to integrate with you can:")
         contentAsString(result) should not include "Sign in"
       }
 

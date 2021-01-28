@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ package controllers
 
 import java.net.URI
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.connectors.UpdateLoggedInStateRequest
-import domain.models.developers.{Developer, LoggedInState, Session}
+import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import org.jsoup.Jsoup
 import org.scalatest.Assertion
@@ -42,14 +43,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import controllers.profile.ProtectAccount
+import domain.models.developers.UserId
 
 class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends SessionServiceMock {
+  trait Setup extends SessionServiceMock with DeveloperBuilder {
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"
-    val loggedInUser = Developer("johnsmith@example.com", "John", "Doe")
+    val loggedInUser = buildDeveloper()
     val qrImage = "qrImage"
     val otpUri = new URI("OTPURI")
     val correctCode = "123123"
@@ -98,19 +100,19 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait SetupUnprotectedAccount extends Setup {
-    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier]))
-      .thenReturn(successful(Some(Developer(loggedInUser.email, "Bob", "Smith", None))))
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.userId))(any[HeaderCarrier]))
+      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInUser.email, organisation = None))))
   }
 
   trait SetupProtectedAccount extends Setup {
-    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.email))(any[HeaderCarrier]))
-      .thenReturn(successful(Some(Developer(loggedInUser.email, "Bob", "Smith", None, Some(true)))))
+    when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInUser.userId))(any[HeaderCarrier]))
+      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInUser.email, organisation = None, mfaEnabled = Some(true)))))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
     when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInUser.email)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)
-    when(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInUser.email))(any[HeaderCarrier]))
+    when(underTest.thirdPartyDeveloperConnector.createMfaSecret(eqTo(loggedInUser.userId))(any[HeaderCarrier]))
       .thenReturn(successful(secret))
   }
 
@@ -123,19 +125,19 @@ class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   }
 
   trait SetupFailedVerification extends Setup {
-    when(underTest.mfaService.enableMfa(any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.enableMfa(any[UserId], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulVerification extends Setup {
-    when(underTest.mfaService.enableMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.enableMfa(eqTo(loggedInUser.userId), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   trait SetupFailedRemoval extends Setup {
-    when(underTest.mfaService.removeMfa(any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
+    when(underTest.mfaService.removeMfa(any[UserId], any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(false)))
   }
 
   trait SetupSuccessfulRemoval extends Setup {
-    when(underTest.mfaService.removeMfa(eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
+    when(underTest.mfaService.removeMfa(eqTo(loggedInUser.userId), eqTo(loggedInUser.email), eqTo(correctCode))(any[HeaderCarrier])).thenReturn(Future.successful(MFAResponse(true)))
   }
 
   "Given a user is not logged in" when {

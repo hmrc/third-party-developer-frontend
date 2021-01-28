@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,13 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{Json, Reads}
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
 import scala.concurrent.{ExecutionContext, Future}
+import cats.data.OptionT
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionContext) extends PushPullNotificationsConnector with Retries {
   protected val httpClient: HttpClient
@@ -46,9 +48,10 @@ abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionCont
     if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
 
   def fetchPushSecrets(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
-    getWithAuthorization[Seq[PushSecret]](s"$serviceBaseUrl/client/${clientId.value}/secrets", hc).map(_.map(_.value)) recover {
-      case _: NotFoundException => Seq.empty
-    }
+    import cats.implicits._
+    OptionT(getWithAuthorization[Option[Seq[PushSecret]]](s"$serviceBaseUrl/client/${clientId.value}/secrets", hc))
+    .map(ps => ps.map(_.value))
+    .getOrElse(Seq.empty)
   }
 
   private def getWithAuthorization[A](url:String, hc: HeaderCarrier)(implicit rd: HttpReads[A]): Future[A] = {

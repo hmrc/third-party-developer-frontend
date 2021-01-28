@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package controllers
 
+import builder.DeveloperBuilder
 import domain.models.applications._
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentCaptor
@@ -36,19 +37,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
+    val applicationId = "1234"
+    val clientId = ClientId("clientId123")
 
-  val applicationId = "1234"
-  val clientId = ClientId("clientId123")
+    val developer = buildDeveloper()
+    val sessionId = "sessionId"
+    val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-  val developer = Developer("third.party.developer@example.com", "John", "Doe")
-  val sessionId = "sessionId"
-  val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val loggedInDeveloper = DeveloperSession(session)
 
-  val loggedInDeveloper = DeveloperSession(session)
+    val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
 
-  val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
-
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val redirectsView = app.injector.instanceOf[RedirectsView]
     val addRedirectView = app.injector.instanceOf[AddRedirectView]
     val deleteRedirectConfirmationView = app.injector.instanceOf[DeleteRedirectConfirmationView]
@@ -319,8 +319,6 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   "addRedirectAction" should {
     "redirect to the redirects page after adding a new redirect uri" in new Setup {
-      val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
-
       addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(
         anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris),
@@ -333,8 +331,6 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "re-render the add redirect page with an error message when trying to add a duplicate redirect uri" in new Setup {
-      val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
-
       addRedirectActionShouldRenderAddRedirectPageWithDuplicateUriError(
         anApplication(adminEmail = loggedInDeveloper.email)
           .withRedirectUris(redirectUris),

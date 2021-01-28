@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   val qrCode = QRCode(scale)
 
   def getQrCode: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperConnector.createMfaSecret(loggedIn.email).map(secret => {
+    thirdPartyDeveloperConnector.createMfaSecret(loggedIn.developer.userId).map(secret => {
       val uri = otpAuthUri(secret.toLowerCase, "HMRC Developer Hub", loggedIn.email)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(protectAccountSetupView(secret.toLowerCase().grouped(4).mkString(" "), qrImg))
@@ -67,7 +67,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   }
 
   def getProtectAccount: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-    thirdPartyDeveloperConnector.fetchDeveloper(loggedIn.email).map(dev => {
+    thirdPartyDeveloperConnector.fetchDeveloper(loggedIn.developer.userId).map(dev => {
       dev.getOrElse(throw new RuntimeException).mfaEnabled.getOrElse(false) match {
         case true => Ok(protectedAccountView())
         case false => Ok(protectAccountView())
@@ -104,7 +104,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
   },
       (form: ProtectAccountForm) => {
         for {
-          mfaResponse <- mfaService.enableMfa(loggedIn.email, form.accessCode)
+          mfaResponse <- mfaService.enableMfa(loggedIn.developer.userId, form.accessCode)
           result = {
             if (mfaResponse.totpVerified) logonAndComplete()
             else invalidCode(form)
@@ -138,7 +138,7 @@ class ProtectAccount @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
       Future.successful(BadRequest(protectAccountRemovalAccessCodeView(form)))
     },
       form => {
-        mfaService.removeMfa(loggedIn.email, form.accessCode).map(r =>
+        mfaService.removeMfa(loggedIn.developer.userId, loggedIn.email, form.accessCode).map(r =>
           r.totpVerified match {
             case true => Redirect(controllers.profile.routes.ProtectAccount.get2SVRemovalCompletePage())
             case _ =>

@@ -1,0 +1,79 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import domain.models.views.SubscriptionRedirect
+@import views.helper.IdFormatter
+@import domain.models.apidefinitions.APIAccessType
+@import domain.models.applications.Role
+@import domain.models.applications.Application
+@import domain.models.apidefinitions.ApiContext
+@import domain.models.subscriptions.ApiData
+
+@this()
+
+@(role: Role,
+    app: Application,
+    openAccessApis: Map[ApiContext, ApiData]
+)(
+    implicit messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, request: play.api.mvc.Request[Any])
+
+<ul class="subscriptions-group">
+    @openAccessApis.toList.map { case (apiContext, apiData) =>
+        <li class="accordion accordion--stacked"
+            data-accordion
+            data-accordion-animate
+            aria-expanded="false">
+            <div class="accordion__row">
+                <div class="accordion__row__left">
+                    <a id="@apiData.serviceName" href=""
+                    class="accordion__button link--no-underline bold-small" data-accordion-button role="button"
+                    aria-expanded="false">
+                        <i class="arrow arrow--right accordion__indicator {arrow--expand}" data-accordion-arrow aria-hidden="true"></i>
+                        <span>@apiData.name</span>
+                    </a>
+                </div>
+                <div class="accordion__row__right">
+                </div>
+            </div>
+
+            <div class="accordion__body conditionallyHide" data-accordion-body aria-hidden="true">
+                <ul>
+                    @apiData.versions.toList.map { case (apiVersion, versionData) =>
+                        @defining(s"${apiData.name} ${apiVersion.value} (${versionData.status.displayedStatus})") { apiVersionFullName =>
+                            <li class="accordion__body__row api-subscriber">
+                                <div class="accordion__body__row accordion__body__row--no-border ">
+                                    <div class="accordion__body__row__left">
+                                        <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@apiData.serviceName/@apiVersion.value" aria-label="@apiVersionFullName." data-api-link>
+                                            <span>
+                                                <span>@{apiVersion.value}</span><span style="width: 60%;display: inline-block;">(@versionData.status.displayedStatus)</span>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div id="@IdFormatter.identifier(apiContext, apiVersion)-state" class="accordion__body__row__right api-subscriber__state-container subscription-error"></div>
+                                    <div class="accordion__body__row__right">
+                                      <div class="toggle float--right">
+                                      </div>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        </li>
+    }
+</ul>

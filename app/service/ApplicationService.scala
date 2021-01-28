@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import domain._
 import domain.models.apidefinitions._
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.connectors.{AddTeamMemberRequest, DeskproTicket, TicketResult}
+import domain.models.connectors.{DeskproTicket, TicketResult}
 import domain.models.developers.DeveloperSession
 import domain.models.subscriptions._
 import javax.inject.{Inject, Singleton}
@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.models.connectors.AddTeamMemberRequest
 
 @Singleton
 class ApplicationService @Inject() (
@@ -150,7 +151,7 @@ class ApplicationService @Inject() (
   }
 
   def addTeamMember(app: Application, requestingEmail: String, teamMember: Collaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val request = domain.models.connectors.AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
+    val request = AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
     apmConnector.addTeamMember(app.id, request)
   }
 

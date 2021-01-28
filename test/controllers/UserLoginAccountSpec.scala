@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ package controllers
 
 import java.util.UUID
 
+import builder.DeveloperBuilder
 import config.ErrorHandler
 import domain._
 import domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import mocks.service.SessionServiceMock
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -42,34 +43,20 @@ import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
+  trait Setup extends SessionServiceMock with DeveloperBuilder {
+    val developer = buildDeveloper()
+    val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
+    val user = DeveloperSession(session)
+    val emailFieldName: String = "emailaddress"
+    val passwordFieldName: String = "password"
+    val userPassword = "Password1!"
+    val totp = "123456"
+    val nonce = "ABC-123"
 
-  val developer = Developer("thirdpartydeveloper@example.com", "John", "Doe")
-  val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
-  val user = DeveloperSession(session)
-  val sessionPartLoggedInEnablingMfa = Session(UUID.randomUUID().toString, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
-  val emailFieldName: String = "emailaddress"
-  val passwordFieldName: String = "password"
-  val userPassword = "Password1!"
-  val totp = "123456"
-  val nonce = "ABC-123"
-
-  val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
-
-  val userAuthenticationResponseWithMfaEnablementRequired = UserAuthenticationResponse(
-    accessCodeRequired = false,
-    nonce = None,
-    session = Some(sessionPartLoggedInEnablingMfa))
-
-  val userAuthenticationWith2SVResponse = UserAuthenticationResponse(
-    accessCodeRequired = true,
-    nonce = Some(nonce),
-    session = None)
-
-  trait Setup extends SessionServiceMock {
     private val daysRemaining = 10
 
     val sessionId = "sessionId"
-    val loggedInUser = Developer("johnsmith@example.com", "John", "Doe")
+    val loggedInUser = buildDeveloper()
 
     val mfaMandateService: MfaMandateService = mock[MfaMandateService]
 
@@ -131,6 +118,26 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       when(underTest.auditService.audit(eqTo(auditAction), eqTo(Map.empty))(any[HeaderCarrier])).thenReturn(result)
   }
 
+  trait SetupWithUserAuthenticationResponse extends Setup {
+    val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, session = Some(session))
+  }
+
+  trait SetupWithuserAuthenticationResponseWithMfaEnablementRequired extends Setup {
+    val sessionPartLoggedInEnablingMfa = Session(UUID.randomUUID().toString, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+
+    val userAuthenticationResponseWithMfaEnablementRequired = UserAuthenticationResponse(
+        accessCodeRequired = false,
+        nonce = None,
+        session = Some(sessionPartLoggedInEnablingMfa))
+  }
+
+  trait SetupWithuserAuthenticationWith2SVResponse extends Setup {
+    val userAuthenticationWith2SVResponse = UserAuthenticationResponse(
+      accessCodeRequired = true,
+      nonce = Some(nonce),
+      session = None)
+  }
+
   trait PartLogged extends Setup {
     def loggedInState: LoggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
     fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInUser, loggedInState))
@@ -143,7 +150,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
   
   "authenticate" should {
 
-    "display the 2-step verification code page when logging in with 2SV configured" in new Setup {
+    "display the 2-step verification code page when logging in with 2SV configured" in new SetupWithuserAuthenticationWith2SVResponse {
       mockAuthenticate(user.email, userPassword, successful(userAuthenticationWith2SVResponse), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
@@ -156,8 +163,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp().url)
     }
 
-    "display the enter access code page" in new Setup {
-
+    "display the enter access code page" in new SetupWithuserAuthenticationWith2SVResponse {
       mockAuthenticate(user.email, userPassword, successful(userAuthenticationWith2SVResponse), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
@@ -171,7 +177,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
       contentAsString(result) should include("Enter your access code")
     }
 
-    "Redirect to the display the Add 2-step Verification suggestion page when successfully logging in without having 2SV configured" in new Setup {
+    "Redirect to the display the Add 2-step Verification suggestion page when successfully logging in without having 2SV configured" in new SetupWithUserAuthenticationResponse {
       mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse), successful(true))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
@@ -189,7 +195,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
     }
 
-    "display the Add 2-step Verification suggestion page when successfully logging in with not 2SV enabled and not 2SV configured" in new Setup {
+    "display the Add 2-step Verification suggestion page when successfully logging in with not 2SV enabled and not 2SV configured" in new SetupWithUserAuthenticationResponse {
       mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponse), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
@@ -207,7 +213,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         eqTo(LoginSucceeded), eqTo(Map("developerEmail" -> user.email, "developerFullName" -> user.displayedName)))(any[HeaderCarrier])
     }
 
-    "display the 2-step protect account page when successfully logging in without having 2SV configured and is 2SV mandated" in new Setup {
+    "display the 2-step protect account page when successfully logging in without having 2SV configured and is 2SV mandated" in new SetupWithuserAuthenticationResponseWithMfaEnablementRequired {
       mockAuthenticate(user.email, userPassword, successful(userAuthenticationResponseWithMfaEnablementRequired), successful(true))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
@@ -378,7 +384,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
         contentAsString(result) should include("Sign in")
       }
 
-      "Part logged in" in new Setup {
+      "Part logged in" in new SetupWithuserAuthenticationResponseWithMfaEnablementRequired {
         when(underTest.sessionService.fetch(eqTo(sessionPartLoggedInEnablingMfa.sessionId))(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(sessionPartLoggedInEnablingMfa)))
 

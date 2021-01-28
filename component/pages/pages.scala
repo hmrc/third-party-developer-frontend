@@ -68,7 +68,6 @@ object ResendConfirmationPage extends FormPage {
 object EmailConfirmationPage extends FormPage {
   override val url: String = s"${Env.host}/developer/confirmation"
   override val pageHeading = "Confirm your email address"
-
 }
 
 object ManageProfilePage extends FormPage {
@@ -92,7 +91,7 @@ object ManageApplicationPage extends FormPage {
 }
 
 object AddApplicationEmptyPage extends FormPage {
-  override val pageHeading = "Add an application to the sandbox"
+  override val pageHeading = "Start using our APIs"
   override val url: String = s"${Env.host}/developer/applications/"
 }
 

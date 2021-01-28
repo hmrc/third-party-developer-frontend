@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,4 +64,11 @@ class EncryptedJson @Inject() (payloadEncryption: PayloadEncryption) {
     Json.toJson(SecretRequest(payloadEncryption.encrypt(payload).as[String]))
   }
 
+  def secretRequest[I,R](input: I, block: SecretRequest => Future[R])(implicit w: Writes[I]) = {
+    block(toSecretRequest(w.writes(input)))
+  }
+
+  def toSecretRequest[T](payload: T)(implicit writes: Writes[T]): SecretRequest = {
+    SecretRequest(payloadEncryption.encrypt(payload).as[String])
+  }
 }

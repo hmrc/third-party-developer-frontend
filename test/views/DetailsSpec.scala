@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
+import domain.models.developers.UserId
 
 class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddToken {
 
@@ -198,7 +199,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
           "the user is an administrator" should {
 
-            val collaborators = Set(Collaborator(loggedIn.developer.email, Role.ADMINISTRATOR))
+            val collaborators = Set(Collaborator(loggedIn.developer.email, Role.ADMINISTRATOR, Some(UserId.random)))
 
             "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)

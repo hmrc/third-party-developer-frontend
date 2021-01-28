@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package domain.models.developers
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-import domain.models.emailpreferences.EmailPreferences
 import play.api.libs.json.{Format, Json}
 
 case class DeveloperSession(session: Session) {
@@ -51,19 +50,6 @@ object DeveloperSession {
       Session(sessionId = sessionId, developer = developer, loggedInState = loggedInState)
     )
   }
-}
-
-case class Developer(
-    email: String,
-    firstName: String,
-    lastName: String,
-    organisation: Option[String] = None,
-    mfaEnabled: Option[Boolean] = None,
-    emailPreferences: EmailPreferences = EmailPreferences.noPreferences
-)
-
-object Developer {
-  implicit val format: Format[Developer] = Json.format[Developer]
 }
 
 sealed trait UserStatus

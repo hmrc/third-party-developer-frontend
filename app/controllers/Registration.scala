@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
-import domain.models.developers.{EmailAlreadyInUse, RegistrationSuccessful}
+import domain.models.developers.{EmailAlreadyInUse, Registration => RegistrationModel, RegistrationSuccessful}
 import javax.inject.{Inject, Singleton}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
 import service.SessionService
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import views.html._
-
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 @Singleton
 class Registration @Inject()(override val sessionService: SessionService,
@@ -64,7 +64,7 @@ class Registration @Inject()(override val sessionService: SessionService,
         },
         userData => {
           val registration =
-            domain.models.developers.Registration(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
+            RegistrationModel(userData.firstName.trim, userData.lastName.trim, userData.emailaddress, userData.password, userData.organisation)
           connector.register(registration).map {
             case RegistrationSuccessful => Redirect(controllers.routes.Registration.confirmation()).addingToSession("email" -> userData.emailaddress)
             case EmailAlreadyInUse => BadRequest(registrationView(requestForm.emailAddressAlreadyInUse))
@@ -76,11 +76,10 @@ class Registration @Inject()(override val sessionService: SessionService,
   def resendVerification = Action.async {
     implicit request =>
       request.session.get("email").fold(Future.successful(BadRequest(signInView("Sign in", LoginForm.form)))) { email =>
-        connector.resendVerificationEmail(email) map {
-          case status if status >= 200 && status < 300 => Redirect(controllers.routes.Registration.confirmation())
-          case _ => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
-        } recover {
-          case _: NotFoundException => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
+        connector.resendVerificationEmail(email)
+        .map(_ => Redirect(controllers.routes.Registration.confirmation()))
+        .recover {
+          case NonFatal(e) => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
         }
       }
   }

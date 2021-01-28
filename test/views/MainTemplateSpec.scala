@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package views
 
-import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import builder.DeveloperBuilder
+import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.models.views.NoBackButton
 import play.twirl.api.{Html, HtmlFormat}
 import play.api.test.FakeRequest
 import views.helper.CommonViewSpec
 import views.html.include.Main
 
-class MainTemplateSpec extends CommonViewSpec {
+class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder {
 
   "MainTemplateSpec" should {
     val mainView = app.injector.instanceOf[Main]
-    val developer = Developer("email", "firstName", "lastName")
+    val developer = buildDeveloper()
     val session = Session("sessionId", developer, LoggedInState.LOGGED_IN)
     implicit val developerSession = DeveloperSession(session)
     implicit val request = FakeRequest()
