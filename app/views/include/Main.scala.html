@@ -19,7 +19,7 @@
 @import play.twirl.api.HtmlFormat
 @import views.html.include.FeedbackBannerView
 @import views.html.layouts.GovUkTemplate
-@import uk.gov.hmrc.play.views.html.layouts.{BetaBanner, Footer, Head, HeaderNav, MainContentHeader, ServiceInfo}
+@import uk.gov.hmrc.play.views.html.layouts.{BetaBanner, Footer, Head, HeaderNav, MainContentHeader, ServiceInfo, HeadWithTrackingConsent}
 @import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
 @import domain.models.developers.DeveloperSession
 
@@ -29,6 +29,7 @@
         layoutsBetaBanner: BetaBanner,
         layoutsServiceInfo: ServiceInfo,
         layoutsMainContentHeader: MainContentHeader,
+        layoutsHeadWithTrackingConsent: HeadWithTrackingConsent,
         helpersReportAProblemLink: ReportAProblemLink,
         govUkTemplate: GovUkTemplate,
         feedbackBannerView: FeedbackBannerView
@@ -55,9 +56,10 @@
 }
 
 @head = {
-    @layoutsHead(
+    @layoutsHeadWithTrackingConsent(
         linkElem = None,
-        headScripts = Some(headScripts)
+        headScripts = Some(headScripts),
+        nonce = None
     )
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/main.css")'/>
     <meta data-title="@applicationConfig.title"/>
