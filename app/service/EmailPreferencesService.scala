@@ -49,8 +49,8 @@ class EmailPreferencesService @Inject()(val apmConnector: ApmConnector,
   private def getOrUpdateFlowWithVisibleApis(existingFlow: EmailPreferencesFlow, developerSession: DeveloperSession)
                                             (implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] = {
     NonEmptyList.fromList(existingFlow.visibleApis.toList).fold({
-      val visibleApis = apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.email)
-      updateVisibleApis(developerSession, apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.email))
+      val visibleApis = apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.userId)
+      updateVisibleApis(developerSession, apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.userId))
       visibleApis
     }) { x => Future.successful(x.toList) }
   }
