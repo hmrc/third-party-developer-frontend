@@ -35,6 +35,7 @@ import domain.models.applications.ApplicationId
 import domain.ApplicationUpdateSuccessful
 import domain.models.connectors.ApiDefinition
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import domain.models.developers.UserId
 
 class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceOneAppPerSuite with CommonResponseHandlers {
 
@@ -68,13 +69,13 @@ class ApmConnectorSpec extends AsyncHmrcSpec with BeforeAndAfterEach with GuiceO
    "fetchApiDefinitionsVisibleToUser" should {
 
     "return APIs" in new Setup {
-      val userEmail = "foo@bar.com"
+      val userId = UserId.random
 
       val mockExpectedApi = mock[ApiDefinition]
-        when(mockHttpClient.GET[Seq[ApiDefinition]](eqTo(s"$serviceBaseUrl/combined-api-definitions"), eqTo(Seq("collaboratorEmail" -> userEmail)))(*, *, *))
+        when(mockHttpClient.GET[Seq[ApiDefinition]](eqTo(s"$serviceBaseUrl/combined-api-definitions"), eqTo(Seq("developerId" -> userId.asText)))(*, *, *))
         .thenReturn(successful(Seq(mockExpectedApi)))
 
-      val result = await(connectorUnderTest.fetchApiDefinitionsVisibleToUser(userEmail))
+      val result = await(connectorUnderTest.fetchApiDefinitionsVisibleToUser(userId))
 
       result.size should be (1)
       result should contain only (mockExpectedApi)

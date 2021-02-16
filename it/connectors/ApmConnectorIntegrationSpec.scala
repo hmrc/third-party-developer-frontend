@@ -12,6 +12,7 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.connectors.ExtendedApiDefinition
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import domain.models.developers.UserId
 
 class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration(
@@ -39,10 +40,9 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
             .withHeader("content-type", "application/json")))
     }
 
-    def fetchApiDefinitionsVisibleToUser(email: String, body: String) = {
-      val encodedEmail = URLEncoder.encode(email, "UTF-8")
+    def fetchApiDefinitionsVisibleToUser(userId: UserId, body: String) = {
       stubFor(
-        get(urlEqualTo(s"/combined-api-definitions?collaboratorEmail=$encodedEmail"))
+        get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.asText}"))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -93,20 +93,19 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
   "fetchApiDefinitionsVisibleToUser" should {
     "retrieve a list of service a user can see" in new Setup {
-      val userEmail = "bob.user@digital.hmrc.gov.uk"
+      val userId = UserId.random
       val serviceName = "api1"
       val name = "API 1"
-      fetchApiDefinitionsVisibleToUser(userEmail, s"""[{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context", "categories": ["AGENT", "VAT"] }]""")
-      val result: Seq[ApiDefinition] = await(underTest.fetchApiDefinitionsVisibleToUser(userEmail))
+      fetchApiDefinitionsVisibleToUser(userId, s"""[{ "serviceName": "$serviceName", "name": "$name", "description": "", "context": "context", "categories": ["AGENT", "VAT"] }]""")
+      val result: Seq[ApiDefinition] = await(underTest.fetchApiDefinitionsVisibleToUser(userId))
       result.head.serviceName shouldBe serviceName
       result.head.name shouldBe name
     }
 
     "fail on Upstream5xxResponse when the call return a 500" in new Setup {
-      val userEmail = "bob.user@digital.hmrc.gov.uk"
-      val encodedEmail = URLEncoder.encode(userEmail, "UTF-8")
+      val userId = UserId.random
       stubFor(
-        get(urlEqualTo(s"/combined-api-definitions?collaboratorEmail=$encodedEmail"))
+        get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.asText}"))
           .willReturn(
             aResponse()
               .withStatus(INTERNAL_SERVER_ERROR)
@@ -114,7 +113,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       )
 
       intercept[UpstreamErrorResponse] {
-        await(underTest.fetchApiDefinitionsVisibleToUser(userEmail))
+        await(underTest.fetchApiDefinitionsVisibleToUser(userId))
       }
     }
   }
