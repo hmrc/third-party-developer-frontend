@@ -49,7 +49,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
       Some("Description 1"),
       Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
       state = ApplicationState.production(loggedInUser.email, ""),
-      access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+      access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
     "render with no errors" in {

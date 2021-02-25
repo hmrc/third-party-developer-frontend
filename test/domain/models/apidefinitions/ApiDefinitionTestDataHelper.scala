@@ -19,7 +19,7 @@ package domain.models.apidefinitions
 import domain.models.connectors.ApiDefinition
 
 trait ApiDefinitionTestDataHelper {
-  def apiDefinition(name: String): ApiDefinition = apiDefinition(name, Seq("category"))
+  def apiDefinition(name: String): ApiDefinition = apiDefinition(name, List("category"))
 
-  def apiDefinition(name: String, categories: Seq[String]) = ApiDefinition(name, name, name, ApiContext(name), categories)
+  def apiDefinition(name: String, categories: List[String]) = ApiDefinition(name, name, name, ApiContext(name), categories)
 }

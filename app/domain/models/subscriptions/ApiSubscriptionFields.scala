@@ -43,7 +43,7 @@ object ApiSubscriptionFields {
       clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersion,
-      fields: Seq[SubscriptionFieldValue]
+      fields: List[SubscriptionFieldValue]
   )
 
   sealed trait ServiceSaveSubscriptionFieldsResponse

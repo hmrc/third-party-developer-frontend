@@ -67,14 +67,14 @@ with CommonResponseHandlers {
     http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/open", Seq("environment" -> environment.toString))
   }
 
-  def fetchAllAPICategories()(implicit  hc: HeaderCarrier): Future[Seq[APICategoryDetails]] =
-    http.GET[Seq[APICategoryDetails]](s"${config.serviceBaseUrl}/api-categories")
+  def fetchAllAPICategories()(implicit  hc: HeaderCarrier): Future[List[APICategoryDetails]] =
+    http.GET[List[APICategoryDetails]](s"${config.serviceBaseUrl}/api-categories")
 
   def fetchAPIDefinition(serviceName: String)(implicit hc: HeaderCarrier): Future[ExtendedApiDefinition] =
     http.GET[ExtendedApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
 
-  def fetchApiDefinitionsVisibleToUser(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApiDefinition]] =
-    http.GET[Seq[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("developerId" -> userId.asText))
+  def fetchApiDefinitionsVisibleToUser(userId: UserId)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] =
+    http.GET[List[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", Seq("developerId" -> userId.asText))
 
   def subscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)
                     (implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {

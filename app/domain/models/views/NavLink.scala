@@ -30,7 +30,8 @@ case object StaticNavLinks {
       NavLink("Documentation", s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub"),
       NavLink("Applications", s"$thirdPartyDeveloperFrontendUrl/developer/applications"),
       NavLink("Support", s"$thirdPartyDeveloperFrontendUrl/developer/support"),
-      NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true))
+      NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true)
+    )
   }
 }
 
@@ -43,12 +44,12 @@ case object UserNavLinks {
       case (_, _) => loggedOutNavLinks
     }
 
-  private def loggedInNavLinks(userFullName: String) = Seq(
+  private def loggedInNavLinks(userFullName: String) = List(
     NavLink(userFullName,"/developer/profile"),
     NavLink("Sign out","/developer/logout/survey")
   )
 
-  private val loggedOutNavLinks = Seq(
+  private val loggedOutNavLinks = List(
     NavLink("Register", "/developer/registration"),
     NavLink("Sign in", "/developer/login")
   )

@@ -48,7 +48,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
       selectedCategories = Set("category1", "category2"),
       selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
-      visibleApis = Seq(ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), Seq("VAT", "AGENT"))))
+      visibleApis = List(ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), List("VAT", "AGENT"))))
     await(repository.saveFlow(currentFlow))
     await(repository.saveFlow(flowInDifferentSession))
     await(repository.saveFlow(flowOfDifferentType))
@@ -91,7 +91,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
           selectedCategories= Set("category1", "category2"),
           selectedAPIs = Map("category1" -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY",  "EVENT_INVITES"),
-        visibleApis = Seq(ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), Seq("VAT", "AGENT"))))
+        visibleApis = List(ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), List("VAT", "AGENT"))))
 
         await(repository.saveFlow(flow))
 
@@ -100,7 +100,7 @@ class FlowRepositoryISpec extends BaseRepositoryIntegrationSpec with MongoSpecSu
         (result \ "flowType").as[String] shouldBe EMAIL_PREFERENCES.toString()
         (result \ "lastUpdated").asOpt[DateTime] should not be empty
         (result \ "selectedTopics").as[Set[EmailTopic]] should contain only (EmailTopic.BUSINESS_AND_POLICY, EmailTopic.EVENT_INVITES)
-        (result \ "visibleApis").as[Seq[ApiDefinition]] should contain only (ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), Seq("VAT", "AGENT")))
+        (result \ "visibleApis").as[List[ApiDefinition]] should contain only (ApiDefinition("api1ServiceName", "api1Name", "api1Desc", ApiContext("api1Context"), List("VAT", "AGENT")))
       }
 
       "update the flow when it already exists" in new PopulatedSetup {

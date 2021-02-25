@@ -148,9 +148,9 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
 
     def showPushSecretsShouldRenderThePage(application: Application) = {
       val subscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("ppns", 1)
-      val newFields: Seq[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
+      val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
         .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = "PPNSField")))
-      val subsData = Seq(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
+      val subsData = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
       givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 

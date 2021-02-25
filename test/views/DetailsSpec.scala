@@ -167,7 +167,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
           "the user is a developer" should {
             "show 'not agreed' and have no link to read and agree when the terms of use have not been agreed" in {
-              val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
+              val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
@@ -184,7 +184,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
               val timeStamp = DateTimeUtils.now
               val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
               val version = "1.0"
-              val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(emailAddress, timeStamp, version)))
+              val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
@@ -202,7 +202,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
             val collaborators = Set(Collaborator(loggedIn.developer.email, Role.ADMINISTRATOR, Some(UserId.random)))
 
             "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in {
-              val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
+              val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withTeamMembers(collaborators)
@@ -221,7 +221,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
               val timeStamp = DateTimeUtils.now
               val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
               val version = "1.0"
-              val checkInformation = CheckInformation(termsOfUseAgreements = Seq(applications.TermsOfUseAgreement(emailAddress, timeStamp, version)))
+              val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement(emailAddress, timeStamp, version)))
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withTeamMembers(collaborators)

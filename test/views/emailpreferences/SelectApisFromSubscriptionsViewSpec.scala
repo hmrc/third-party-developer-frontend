@@ -89,9 +89,9 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec with WithCSRFAd
   }
 
   "New Application Email Preferences Select Api view page" should {
-    val missingAPIs = List(ExtendedApiDefinition("api1", "Api One", "api1Desc", ApiContext("api1context"), Seq("category1", "category2")),
-      ExtendedApiDefinition("api2", "Api Two", "api2Desc", ApiContext("api2context"), Seq("category2", "category4")),
-      ExtendedApiDefinition("api3", "Api Three", "api3Desc", ApiContext("api3context"), Seq("category3", "category2")))
+    val missingAPIs = List(ExtendedApiDefinition("api1", "Api One", "api1Desc", ApiContext("api1context"), List("category1", "category2")),
+      ExtendedApiDefinition("api2", "Api Two", "api2Desc", ApiContext("api2context"), List("category2", "category4")),
+      ExtendedApiDefinition("api3", "Api Three", "api3Desc", ApiContext("api3context"), List("category3", "category2")))
 
     "render the api selection page with APIs that are missing from user's email preferences" in new Setup {
       // Missing APIs = some, Selected APIs = none

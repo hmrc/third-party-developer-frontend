@@ -46,7 +46,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken {
     Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random)), Collaborator(loggedInDev.email, Role.DEVELOPER, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq.empty, termsAndConditionsUrl = None)
+    access = Standard(redirectUris = List.empty, termsAndConditionsUrl = None)
   )
 
   "redirects page" should {
@@ -55,7 +55,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken {
     def renderPageWithRedirectUris(role: Role, numberOfRedirectUris: Int) = {
       val request = FakeRequest().withCSRFToken
       val redirects = 1 to numberOfRedirectUris map (num => s"http://localhost:$num")
-      val standardAccess = Standard(redirectUris = redirects, termsAndConditionsUrl = None)
+      val standardAccess = Standard(redirectUris = redirects.toList, termsAndConditionsUrl = None)
 
       val applicationWithRedirects = application.copy(access = standardAccess)
       val user = if (role.isAdministrator) {

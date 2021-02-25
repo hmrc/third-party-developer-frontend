@@ -82,7 +82,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
       val appConfigMock = mock[ApplicationConfig]
       val termsOfUseAgreement = TermsOfUseAgreement("email@example.com", DateTimeUtils.now, "1.0")
 
-      val checkInformation = CheckInformation(termsOfUseAgreements = Seq(termsOfUseAgreement))
+      val checkInformation = CheckInformation(termsOfUseAgreements = List(termsOfUseAgreement))
 
       val termsOfUseForm = TermsOfUseForm.fromCheckInformation(checkInformation)
       val developer = utils.DeveloperSession("email@example.com", "First Name", "Last Name", None, loggedInState = LoggedInState.LOGGED_IN)

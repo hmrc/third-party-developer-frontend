@@ -42,7 +42,7 @@ trait ApplicationBuilder {
       buildCollaborators(Seq(appOwnerEmail)),
       state = ApplicationState.production(appOwnerEmail, ""),
       access = Standard(
-        redirectUris = Seq("https://red1", "https://red2"),
+        redirectUris = List("https://red1", "https://red2"),
         termsAndConditionsUrl = Some("http://tnc-url.com")
       )
     )

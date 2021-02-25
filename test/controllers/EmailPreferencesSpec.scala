@@ -113,14 +113,14 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
   "emailPreferencesSummaryPage" should {
     val mockCategory1: APICategoryDetails = APICategoryDetails("CATEGORY_1", "Category 1")
     val mockCategory2: APICategoryDetails = APICategoryDetails("CATEGORY_2", "Category 2")
-    val apiCategoryDetails: Seq[APICategoryDetails] = Seq(mockCategory1, mockCategory2)
-    val api1: ApiDefinition = ApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"), Seq("INCOME_TAX"))
-    val api2: ApiDefinition = ApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"), Seq("VAT"))
+    val apiCategoryDetails: List[APICategoryDetails] = List(mockCategory1, mockCategory2)
+    val api1: ApiDefinition = ApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"), List("INCOME_TAX"))
+    val api2: ApiDefinition = ApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"), List("VAT"))
     val apis: Set[String] = Set(api1.serviceName, api2.serviceName)
 
-    val extendedApiOne: ExtendedApiDefinition = ExtendedApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"), Seq("INCOME_TAX"))
-    val extendedApiTwo: ExtendedApiDefinition = ExtendedApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"), Seq("VAT"))
-    val fetchedAPis: Seq[ExtendedApiDefinition] = Seq(extendedApiOne, extendedApiTwo)
+    val extendedApiOne: ExtendedApiDefinition = ExtendedApiDefinition("api1", "API 1", "desc", ApiContext("CATEGORY_1"), List("INCOME_TAX"))
+    val extendedApiTwo: ExtendedApiDefinition = ExtendedApiDefinition("api2", "API 2", "desc2", ApiContext("CATEGORY_1"), List("VAT"))
+    val fetchedAPis: List[ExtendedApiDefinition] = List(extendedApiOne, extendedApiTwo)
 
     "return emailPreferencesSummaryView page for logged in user" in new Setup {
       val expectedCategoryMap: Map[String, String] = Map("CATEGORY_1" -> "Category 1")
@@ -143,7 +143,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
       fetchSessionByIdReturns(sessionId, sessionNoEMailPrefences)
 
       when(mockEmailPreferencesService.fetchAllAPICategoryDetails()(*)).thenReturn(Future.successful(apiCategoryDetails))
-      when(mockEmailPreferencesService.fetchAPIDetails(eqTo(Set.empty))(*)).thenReturn(Future.successful(Seq.empty))
+      when(mockEmailPreferencesService.fetchAPIDetails(eqTo(Set.empty))(*)).thenReturn(Future.successful(List.empty))
 
       val result: Future[Result] = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest.withFlash("unsubscribed" -> "true"))
 
@@ -346,7 +346,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
 
   "flowSelectApisPage" should {
     val apiCategory = APICategoryDetails("category1", "Category 1")
-    val visibleApis = List(ApiDefinition("serviceNameApi1", "nameApi1", "descriptionApi1", ApiContext("contextApi1"), Seq("category1", "category2")))
+    val visibleApis = List(ApiDefinition("serviceNameApi1", "nameApi1", "descriptionApi1", ApiContext("contextApi1"), List("category1", "category2")))
 
     // category passed to route
     // category is missing from route
@@ -393,7 +393,7 @@ class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with Sessio
   }
 
   "flowSelectApiAction" should {
-    val visibleApis = List(ApiDefinition("serviceNameApi1", "nameApi1", "descriptionApi1", ApiContext("contextApi1"), Seq("category1", "category2")))
+    val visibleApis = List(ApiDefinition("serviceNameApi1", "nameApi1", "descriptionApi1", ApiContext("contextApi1"), List("category1", "category2")))
     val apiCategory = APICategoryDetails("category1", "Category 1")
     val apiCategory2 = APICategoryDetails("category2", "Category 2")
 

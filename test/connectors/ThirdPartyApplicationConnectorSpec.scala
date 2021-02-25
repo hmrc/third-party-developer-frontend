@@ -83,15 +83,15 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
     Environment.PRODUCTION,
     "My Application",
     Some("Description"),
-    Standard(Seq("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
+    Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
   )
 
   private val createApplicationRequest = new CreateApplicationRequest(
     "My Application",
     Environment.PRODUCTION,
     Some("Description"),
-    Seq(Collaborator("admin@example.com", Role.ADMINISTRATOR, Some(UserId.random))),
-    Standard(Seq("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
+    List(Collaborator("admin@example.com", Role.ADMINISTRATOR, Some(UserId.random))),
+    Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
   )
 
   private def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: String = "My Application") = new Application(
@@ -104,7 +104,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
     Environment.PRODUCTION,
     Some("Description"),
     Set(Collaborator("john@example.com", Role.ADMINISTRATOR, Some(UserId.random))),
-    Standard(Seq("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
+    Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
     state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"))
   )
 
@@ -209,7 +209,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
   }
 
   "fetch credentials for application" should {
-    val tokens = ApplicationToken(Seq(aClientSecret()), "pToken")
+    val tokens = ApplicationToken(List(aClientSecret()), "pToken")
     val url = baseUrl + s"/application/${applicationId.value}/credentials"
 
     "return credentials" in new Setup {

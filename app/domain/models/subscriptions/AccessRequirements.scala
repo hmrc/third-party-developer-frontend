@@ -27,9 +27,7 @@ object DevhubAccessRequirement {
   case object Anyone extends DevhubAccessRequirement
 }
 
-case class DevhubAccessRequirements private (
-                                              val read: DevhubAccessRequirement,
-                                              val write: DevhubAccessRequirement) {
+case class DevhubAccessRequirements private (val read: DevhubAccessRequirement, val write: DevhubAccessRequirement) {
   def satisfiesRead(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(read) // ReadWrite will be at least as strict.
   def satisfiesWrite(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(write)
 }

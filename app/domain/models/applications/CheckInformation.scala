@@ -23,7 +23,7 @@ case class CheckInformation(confirmedName: Boolean = false,
                             providedPrivacyPolicyURL: Boolean = false,
                             providedTermsAndConditionsURL: Boolean = false,
                             teamConfirmed: Boolean = false,
-                            termsOfUseAgreements: Seq[TermsOfUseAgreement] = Seq.empty)
+                            termsOfUseAgreements: List[TermsOfUseAgreement] = List.empty)
 
 object CheckInformation {
   import play.api.libs.json.Json

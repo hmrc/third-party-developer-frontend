@@ -1,7 +1,5 @@
 package connectors
 
-import java.net.URLEncoder
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import domain.models.connectors.ApiDefinition
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite

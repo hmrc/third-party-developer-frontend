@@ -53,7 +53,7 @@ case class EmailPreferencesFlow(override val sessionId: String,
                                 selectedCategories: Set[String],
                                 selectedAPIs: Map[String, Set[String]],
                                 selectedTopics: Set[String],
-                                visibleApis: Seq[ApiDefinition]) extends Flow with EmailPreferencesProducer {
+                                visibleApis: List[ApiDefinition]) extends Flow with EmailPreferencesProducer {
   override val flowType: FlowType = FlowType.EMAIL_PREFERENCES
 
   def categoriesInOrder: List[String] = selectedCategories.toList.sorted
@@ -80,13 +80,13 @@ object EmailPreferencesFlow {
 
     existingEmailPreferences match {
       case EmailPreferences(i: List[TaxRegimeInterests], t: Set[EmailTopic]) if i.isEmpty && t.isEmpty =>
-        new EmailPreferencesFlow(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty, Seq.empty)
+        new EmailPreferencesFlow(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty, List.empty)
       case emailPreferences => new EmailPreferencesFlow(
         developerSession.session.sessionId,
         emailPreferences.interests.map(_.regime).toSet,
         taxRegimeInterestsToCategoryServicesMap(emailPreferences.interests),
         emailPreferences.topics.map(_.value),
-        Seq.empty)
+        List.empty)
     }
   }
 

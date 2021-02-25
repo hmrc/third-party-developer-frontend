@@ -63,7 +63,7 @@ case class Application(
 
   def adminEmails: Set[String] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
 
-  def termsOfUseAgreements: Seq[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(Seq.empty)
+  def termsOfUseAgreements: List[TermsOfUseAgreement] = checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty)
 
   def hasCapability(capability: Capability): Boolean = capability.hasCapability(this)
 

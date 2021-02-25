@@ -18,11 +18,11 @@ package domain.models.connectors
 
 import play.api.libs.json.Json
 
-case class AccountSetupRequest(roles: Option[Seq[String]] = None,
+case class AccountSetupRequest(roles: Option[List[String]] = None,
                                rolesOther: Option[String] = None,
-                               services: Option[Seq[String]] = None,
+                               services: Option[List[String]] = None,
                                servicesOther: Option[String] = None,
-                               targets: Option[Seq[String]] = None,
+                               targets: Option[List[String]] = None,
                                targetsOther: Option[String] = None)
 
 object AccountSetupRequest {

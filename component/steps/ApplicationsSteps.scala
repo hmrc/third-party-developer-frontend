@@ -91,7 +91,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     ApplicationStub.configureApplicationCredentials(AppWorld.tokens)
   }
 
-  def splitToSecrets(input: String): Seq[ClientSecret] = input.split(",").map(_.trim).map(s => ClientSecret(randomUUID.toString, s, DateTimeUtils.now))
+  def splitToSecrets(input: String): List[ClientSecret] = input.split(",").map(_.trim).toList.map(s => ClientSecret(randomUUID.toString, s, DateTimeUtils.now))
 
   Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: String, data: DataTable) =>
     val applications = data.asScalaRawMaps[String, String].toList
@@ -107,7 +107,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         case unknownState: String             => fail(s"Unknown state '$unknownState'")
       }
       val access = app.getOrElse("accessType", "STANDARD") match {
-        case "STANDARD"   => Standard(redirectUris = app.getOrElse("redirectUris", "").split(",").toSeq.map(_.trim).filter(_.nonEmpty))
+        case "STANDARD"   => Standard(redirectUris = app.getOrElse("redirectUris", "").split(",").toList.map(_.trim).filter(_.nonEmpty))
         case "PRIVILEGED" => Privileged()
         case "ROPC"       => ROPC()
       }

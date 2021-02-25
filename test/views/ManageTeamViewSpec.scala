@@ -49,7 +49,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
     Some("Description 1"),
     collaborators,
     state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   "manageTeam view" should {

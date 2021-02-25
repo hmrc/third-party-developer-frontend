@@ -52,7 +52,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   val loggedInUser = DeveloperSession(session)
 
   val applicationId = ApplicationId(UUID.randomUUID().toString())
-  val tokens = ApplicationToken(Seq(aClientSecret("secret1"), aClientSecret("secret2")), "token")
+  val tokens = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
   trait ApplicationProvider {
     def createApplication(): Application
@@ -72,7 +72,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
         Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
-          redirectUris = Seq("https://red1", "https://red2"),
+          redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
         )
       )
