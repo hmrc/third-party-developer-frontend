@@ -78,10 +78,10 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  val tokens = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, ApiContext("context"), apiVersion)
 
@@ -269,7 +269,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
           teamConfirmed = true,
-          Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+          List(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
         )
       )
     )

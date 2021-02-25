@@ -47,21 +47,21 @@ class ApplicationActionService @Inject()(
         fieldDefinitions <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(environment))
         openAccessApis <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
         subscriptionData <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
-        subs = toApiSubscriptionStatusSeq(applicationWithSubs, fieldDefinitions, subscriptionData)
+        subs = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
         role <- OptionT.fromOption[Future](application.role(developerSession.developer.email))
       } yield {
         ApplicationRequest(application, environment, subs, openAccessApis, role, developerSession, request)
       }
   }
 
-  def toApiSubscriptionStatusSeq(
+  def toApiSubscriptionStatusList(
     application: ApplicationWithSubscriptionData,
     subscriptionFieldDefinitions: Map[ApiContext, Map[ApiVersion, Map[FieldName, SubscriptionFieldDefinition]]],
-    summaryApiDefinitions: Map[ApiContext, ApiData] ): Seq[APISubscriptionStatus] = {
+    summaryApiDefinitions: Map[ApiContext, ApiData] ): List[APISubscriptionStatus] = {
 
-    def handleContext(context: ApiContext, cdata: ApiData): Seq[APISubscriptionStatus] = {
+    def handleContext(context: ApiContext, cdata: ApiData): List[APISubscriptionStatus] = {
       def handleVersion(version: ApiVersion, vdata: VersionData): APISubscriptionStatus = {
-        def zipDefinitionsAndValues(): Seq[SubscriptionFieldValue] = {
+        def zipDefinitionsAndValues(): List[SubscriptionFieldValue] = {
           val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
           val fieldNameToValue = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(version, Map.empty)
 
@@ -94,7 +94,7 @@ class ApplicationActionService @Inject()(
 
       val orderDescending: Ordering[ApiVersion] = (x: ApiVersion, y: ApiVersion) => y.value.compareTo(x.value)
 
-      cdata.versions.toSeq.sortBy(_._1)(orderDescending).map {
+      cdata.versions.toList.sortBy(_._1)(orderDescending).map {
         case (k,v) => handleVersion(k,v)
       }.toList
     }

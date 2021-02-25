@@ -77,7 +77,7 @@ trait TestApplications {
     anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test", "test"))
 
   def standardAccess(
-      redirectUris: Seq[String] = Seq("https://redirect1", "https://redirect2"),
+      redirectUris: List[String] = List("https://redirect1", "https://redirect2"),
       termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),
       privacyPolicyUrl: Option[String] = Some("http://example.com/privacy")
   ): Standard = {
@@ -95,7 +95,7 @@ trait TestApplications {
 
   def tokens(clientId: ClientId = ClientId(randomString(28)), clientSecret: String = randomString(28), accessToken: String = randomString(28)): ApplicationToken = {
 
-    ApplicationToken(Seq(aClientSecret()), accessToken)
+    ApplicationToken(List(aClientSecret()), accessToken)
   }
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
@@ -121,7 +121,7 @@ trait TestApplications {
       }
     }
 
-    final def withRedirectUris(redirectUris: Seq[String]): Application = app.copy(access = standardAccess.copy(redirectUris = redirectUris))
+    final def withRedirectUris(redirectUris: List[String]): Application = app.copy(access = standardAccess.copy(redirectUris = redirectUris))
 
     final def withTermsAndConditionsUrl(url: Option[String]): Application = app.copy(access = standardAccess.copy(termsAndConditionsUrl = url))
 

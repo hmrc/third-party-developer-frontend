@@ -59,7 +59,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
         val timeStamp = DateTimeUtils.now
         val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
         val version = "1.0"
-        val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(emailAddress, timeStamp, version)))
+        val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
         val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
         val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form))
       }
@@ -84,7 +84,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
 
     "viewing an unagreed application" should {
       trait Setup {
-        val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
+        val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
         val application = Application(id, clientId, appName, createdOn, lastAccess, None, deployedTo, checkInformation = Some(checkInformation))
         val page: Page = Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form))
       }

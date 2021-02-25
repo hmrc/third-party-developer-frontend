@@ -60,7 +60,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   val subordinateApp = Application(
@@ -74,7 +74,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     Some("Description 2"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with EmailPreferencesServiceMock with ExtendedApiDefinitionTestDataHelper {
@@ -133,9 +133,9 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
-      // Have the lookup for subscribed apis not already in email preferences return an seq containing some api definitions
+      // Have the lookup for subscribed apis not already in email preferences return an List containing some api definitions
       // so that we follow the new email preferences route through this journey.
-      fetchAPIDetailsReturns(Seq(extendedApiDefinition("Test Api Definition")))
+      fetchAPIDetailsReturns(List(extendedApiDefinition("Test Api Definition")))
       givenApplicationAction(subordinateApp, loggedInUser)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
@@ -147,9 +147,9 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
-      // Have the lookup for subscribed apis not already in email preferences return an empty seq so that we follow
+      // Have the lookup for subscribed apis not already in email preferences return an empty List so that we follow
       // the original route through this journey.
-      fetchAPIDetailsReturns(Seq.empty)
+      fetchAPIDetailsReturns(List.empty)
       givenApplicationAction(subordinateApp, loggedInUser)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
@@ -167,9 +167,9 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
       
-      // Have the lookup for subscribed apis not already in email preferences return an empty seq so that we follow
+      // Have the lookup for subscribed apis not already in email preferences return an empty List so that we follow
       // the original route through this journey.
-      fetchAPIDetailsReturns(Seq.empty)
+      fetchAPIDetailsReturns(List.empty)
       givenApplicationAction(subordinateApp, loggedInUser)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)

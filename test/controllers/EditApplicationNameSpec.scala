@@ -61,10 +61,10 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
     Some("Description 1"),
     Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  val tokens: ApplicationToken = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with EmailPreferencesServiceMock {
     val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[AddApplicationSubordinateEmptyNestView]

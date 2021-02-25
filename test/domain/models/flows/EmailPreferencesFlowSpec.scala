@@ -38,7 +38,7 @@ class EmailPreferencesFlowSpec extends WordSpec with Matchers with DeveloperBuil
     }
 
     def emailPreferencesFlow(selectedCategories: Set[String], selectedAPIs: Map[String, Set[String]], selectedTopics: Set[String]): EmailPreferencesFlow = {
-        EmailPreferencesFlow(sessionId, selectedCategories, selectedAPIs, selectedTopics, Seq.empty)
+        EmailPreferencesFlow(sessionId, selectedCategories, selectedAPIs, selectedTopics, List.empty)
     }
 
     "EmailPreferencesFlow" when {

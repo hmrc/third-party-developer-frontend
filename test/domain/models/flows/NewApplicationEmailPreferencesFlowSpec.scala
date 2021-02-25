@@ -48,8 +48,8 @@ class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with
     "NewApplicationEmailPreferencesFlow" when {
         "toEmailPreferences" should {
             "map to email preferences correctly" in {
-                val newApiInExistingCategory = extendedApiDefinition("new-api", Seq(category1))
-                val newApiInNewCategory = extendedApiDefinition("new-api-2", Seq("CATEGORY_3"))
+                val newApiInExistingCategory = extendedApiDefinition("new-api", List(category1))
+                val newApiInNewCategory = extendedApiDefinition("new-api-2", List("CATEGORY_3"))
 
                 val selectedTopics = Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY)
 

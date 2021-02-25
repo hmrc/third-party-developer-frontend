@@ -34,7 +34,7 @@ import uk.gov.hmrc.play.http.metrics.API
 import utils.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.{failed, successful}
+import scala.concurrent.Future.successful
 import connectors.ThirdPartyDeveloperConnector.CreateMfaResponse
 import connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
 import connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
@@ -274,7 +274,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     "successfully update roles" in new Setup {
       val developer = buildDeveloper(userId = userId)
 
-      private val request = AccountSetupRequest(roles = Some(Seq("aRole")), rolesOther = Some("otherRole"))
+      private val request = AccountSetupRequest(roles = Some(List("aRole")), rolesOther = Some("otherRole"))
       when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${userId.value}/roles")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 
       await(connector.updateRoles(userId, request)) shouldBe developer
@@ -283,7 +283,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     "successfully update services" in new Setup {
       val developer = buildDeveloper(userId = userId)
 
-      private val request = AccountSetupRequest(services = Some(Seq("aService")), servicesOther = Some("otherService"))
+      private val request = AccountSetupRequest(services = Some(List("aService")), servicesOther = Some("otherService"))
       when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${userId.value}/services")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 
       await(connector.updateServices(userId, request)) shouldBe developer
@@ -292,7 +292,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
     "successfully update targets" in new Setup {
       val developer = buildDeveloper(userId = userId)
       
-      private val request = AccountSetupRequest(targets = Some(Seq("aTarget")), targetsOther = Some("otherTargets"))
+      private val request = AccountSetupRequest(targets = Some(List("aTarget")), targetsOther = Some("otherTargets"))
       when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${userId.value}/targets")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 
       await(connector.updateTargets(userId, request)) shouldBe developer

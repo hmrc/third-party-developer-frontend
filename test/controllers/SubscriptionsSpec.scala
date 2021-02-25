@@ -69,7 +69,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     Some("Description 1"),
     Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR, Some(UserId.random))),
     state = ApplicationState.production(loggedInDeveloper.email, ""),
-    access = Standard(redirectUris = Seq("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   val activeApplication: Application = anApplication
@@ -99,7 +99,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production(loggedInDeveloper.email, ""))
   val devloperCreatedSandboxApplication: Application = developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
 
-  val tokens: ApplicationToken = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val manageSubscriptionsView = app.injector.instanceOf[ManageSubscriptionsView]
@@ -133,7 +133,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     givenApplicationUpdateSucceeds()
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
 
-    val subsData = Seq(
+    val subsData = List(
       exampleSubscriptionWithFields("api1", 1),
       exampleSubscriptionWithFields("api2", 1)
     )
@@ -146,21 +146,21 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   "subscriptions" should {
     "return the ROPC page for a ROPC app" in new Setup {
       fetchByApplicationIdReturns(appId, ropcApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
       val result = addToken(underTest.manageSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the privileged page for a privileged app" in new Setup {
       fetchByApplicationIdReturns(appId, privilegedApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
       val result = addToken(underTest.manageSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
       fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
       val result = addToken(underTest.manageSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Manage API subscriptions - HMRC Developer Hub - GOV.UK"
@@ -170,21 +170,21 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
   "subscriptions2" should {
     "return the ROPC page for a ROPC app" in new Setup {
       fetchByApplicationIdReturns(appId, ropcApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the privileged page for a privileged app" in new Setup {
       fetchByApplicationIdReturns(appId, privilegedApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
       fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
@@ -225,7 +225,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
 
         val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
 
@@ -242,7 +242,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenSubscribeToApiSucceeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -263,7 +263,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         ungivenSubscribeToApiSucceeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -284,7 +284,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         ungivenSubscribeToApiSucceeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -306,7 +306,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenSubscribeToApiSucceeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -328,7 +328,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         ungivenSubscribeToApiSucceeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -350,7 +350,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         ungivenSubscribeToApiSucceeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -384,7 +384,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsSubscribedToApi(appId, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -413,7 +413,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsNotSubscribedToApi(appId, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -433,7 +433,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsSubscribedToApi(appId, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -470,7 +470,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsSubscribedToApi(appId, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -491,7 +491,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsSubscribedToApi(appId, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -512,7 +512,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsNotSubscribedToApi(appId, apiIdentifier)
         when(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier]))
           .thenReturn(successful(mock[TicketResult]))
@@ -540,7 +540,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsSubscribedToApi(appId, apiIdentifier)
         when(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier]))
           .thenReturn(successful(mock[TicketResult]))
@@ -567,7 +567,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsSubscribedToApi(appId, apiIdentifier)
         when(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier]))
           .thenReturn(successful(mock[TicketResult]))
@@ -608,7 +608,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
       when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(Some(session)))
       fetchByApplicationIdReturns(appId, alteredActiveApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(alteredActiveApplication, asSubscriptions(Seq.empty), asFields(Seq.empty)), loggedInDeveloper, Seq.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(alteredActiveApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
 
       val request: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest("GET", s"developer/applications/$appId/subscribe?context=${apiContext.value}&version=${apiVersion.value}&accessType=$apiAccessType&tab=subscriptions")

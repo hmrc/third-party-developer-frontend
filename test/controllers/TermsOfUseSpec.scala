@@ -121,7 +121,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
   "termsOfUse" should {
 
     "render the page for an administrator on a standard production app when the ToU have not been agreed" in new Setup {
-      val checkInformation = CheckInformation(termsOfUseAgreements = Seq.empty)
+      val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
       givenApplicationExists(checkInformation = Some(checkInformation))
       val result = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -135,7 +135,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       val expectedTimeStamp = DateTimeFormat.forPattern("dd MMMM yyyy").print(timeStamp)
       val version = "1.0"
 
-      val checkInformation = CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement(email, timeStamp, version)))
+      val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(email, timeStamp, version)))
       givenApplicationExists(checkInformation = Some(checkInformation))
       val result = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -192,7 +192,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "return a bad request if the app already has terms of use agreed" in new Setup {
-      val checkInformation = CheckInformation(termsOfUseAgreements = Seq(applications.TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))
+      val checkInformation = CheckInformation(termsOfUseAgreements = List(applications.TermsOfUseAgreement("bob@example.com", DateTimeUtils.now, "1.0")))
       givenApplicationExists(checkInformation = Some(checkInformation))
 
       val request = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")

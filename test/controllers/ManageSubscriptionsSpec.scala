@@ -80,7 +80,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
     Set(Collaborator(loggedInUser.email, role, Some(UserId.random))),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(
-      redirectUris = Seq("https://red1", "https://red2"),
+      redirectUris = List("https://red1", "https://red2"),
       termsAndConditionsUrl = Some("http://tnc-url.com")
     )
   )
@@ -90,7 +90,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
   val privilegedApplication: Application = application.copy(id = ApplicationId("456"), access = Privileged())
 
   val tokens: ApplicationToken =
-    ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
+    ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   private val sessionParams = Seq(
     "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
@@ -186,7 +186,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         val pageNumber = 1
 
         val apiVersion = exampleSubscriptionWithFields("api1", 1)
-        val subsData = Seq(
+        val subsData = List(
           apiVersion
         )
 
@@ -246,7 +246,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
         "return the list subscription configuration page with several subscriptions without subscription configuration" in new ManageSubscriptionsSetup {
 
-          val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+          val subsData = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
 
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
@@ -257,7 +257,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
         "return the list subscription configuration page with several subscriptions, some with subscription configuration" in new ManageSubscriptionsSetup {
 
-          val subsData = Seq(
+          val subsData = List(
             exampleSubscriptionWithFields("api1", 3),
             exampleSubscriptionWithFields("api2", 1),
             exampleSubscriptionWithoutFields("api3"),
@@ -298,7 +298,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         }
 
         "It renders the subscription configuration list page for a privileged application" in new ManageSubscriptionsSetup {
-          val subsData = Seq(
+          val subsData = List(
             exampleSubscriptionWithFields("api1", 1)
           )
 
@@ -315,10 +315,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
           val whoCanWrite = NoOne
           val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
 
-          val wrapper = buildSubscriptionFieldsWrapper(application, Seq(buildSubscriptionFieldValue("field-name", Some("old-value"), accessDenied)))
+          val wrapper = buildSubscriptionFieldsWrapper(application, List(buildSubscriptionFieldValue("field-name", Some("old-value"), accessDenied)))
 
           val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
-          val subsData = Seq(apiSubscriptionStatus)
+          val subsData = List(apiSubscriptionStatus)
 
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
@@ -341,10 +341,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
           val fieldName = "my-field-name"
           val field = buildSubscriptionFieldValue(fieldName, Some("old-value"), accessDenied)
-          val wrapper = buildSubscriptionFieldsWrapper(application, Seq(field))
+          val wrapper = buildSubscriptionFieldsWrapper(application, List(field))
 
           val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
-          val subsData = Seq(apiSubscriptionStatus)
+          val subsData = List(apiSubscriptionStatus)
 
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
@@ -368,10 +368,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
           val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
 
           val field = buildSubscriptionFieldValue("fieldName", Some("value"), accessDenied)
-          val wrapper = buildSubscriptionFieldsWrapper(application, Seq(field))
+          val wrapper = buildSubscriptionFieldsWrapper(application, List(field))
 
           val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
-          val subsData = Seq(apiSubscriptionStatus)
+          val subsData = List(apiSubscriptionStatus)
 
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
@@ -389,10 +389,10 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
           val fieldName = "my-field-name"
           val field = buildSubscriptionFieldValue(fieldName, Some("old-value"), accessDenied)
-          val wrapper = buildSubscriptionFieldsWrapper(application, Seq(field))
+          val wrapper = buildSubscriptionFieldsWrapper(application, List(field))
 
           val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
-          val subsData = Seq(apiSubscriptionStatus)
+          val subsData = List(apiSubscriptionStatus)
 
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
@@ -420,7 +420,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             val newSubscriptionValue = "new value"
             private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
 
-            val subsData = Seq(apiSubscriptionStatus)
+            val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
             when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(any[HeaderCarrier]))
@@ -454,7 +454,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
             private val writableSubSubscriptionValue = apiSubscriptionStatus.fields.fields(1)
 
-            val subsData = Seq(apiSubscriptionStatus)
+            val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
             when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(any[HeaderCarrier]))
@@ -491,13 +491,13 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             val whoCanWrite = NoOne
             val accessDenied = AccessRequirements(devhub = DevhubAccessRequirements(Anyone, whoCanWrite))
 
-            val wrapper = buildSubscriptionFieldsWrapper(application, Seq(buildSubscriptionFieldValue("field-name", Some("old-value"), accessDenied)))
+            val wrapper = buildSubscriptionFieldsWrapper(application, List(buildSubscriptionFieldValue("field-name", Some("old-value"), accessDenied)))
 
             val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1).copy(fields = wrapper)
 
             private val readonlySubSubscriptionValue = apiSubscriptionStatus.fields.fields(0)
 
-            val subsData = Seq(apiSubscriptionStatus)
+            val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
             when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(any[HeaderCarrier]))
@@ -522,7 +522,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             val newSubscriptionValue = "my invalid value"
             val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
-            val subsData = Seq(apiSubscriptionStatus)
+            val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
             when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(any[HeaderCarrier]))
@@ -548,7 +548,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
             val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
             val newSubscriptionValue = "my invalid value"
 
-            val subsData = Seq(apiSubscriptionStatus)
+            val subsData = List(apiSubscriptionStatus)
             givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
             when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(any[HeaderCarrier]))
@@ -582,7 +582,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
           s"return not found when trying to edit api subscription configuration for an api the application is not subscribed to in mode [$mode]" in new ManageSubscriptionsSetup {
             val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
-            val subsData = Seq(apiSubscriptionStatus)
+            val subsData = List(apiSubscriptionStatus)
 
             givenApplicationAction(ApplicationWithSubscriptionData(application, Set.empty, Map.empty), loggedInUser, subsData)
 
@@ -601,7 +601,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
           val fieldErrors = Map("apiName" -> "apiName is invalid error message")
 
-          val subsData = Seq(apiSubscriptionStatus)
+          val subsData = List(apiSubscriptionStatus)
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
           when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(any[HeaderCarrier]))
@@ -625,7 +625,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
           val newSubscriptionValue = "my invalid value"
           val pageNumber = 1
 
-          val subsData = Seq(apiSubscriptionStatus)
+          val subsData = List(apiSubscriptionStatus)
           givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
           when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersion], *, *)(any[HeaderCarrier]))
@@ -644,7 +644,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
     "a user is doing the add new sandbox app journey they" should {
       "be able to view the subscription fields start page if they have subscribed to APIs with subscription fields" in new ManageSubscriptionsSetup {
-        val subsData = Seq(
+        val subsData = List(
           exampleSubscriptionWithFields("api1", 1),
           exampleSubscriptionWithFields("api2", 1)
         )
@@ -662,7 +662,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
       "edit page" in new ManageSubscriptionsSetup {
         val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithFields("api1", 1)
-        val subsData = Seq(apiSubscriptionStatus)
+        val subsData = List(apiSubscriptionStatus)
 
         givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
@@ -673,7 +673,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
       "return NOT_FOUND if page has no field definitions" in new ManageSubscriptionsSetup {
         val apiSubscriptionStatus: APISubscriptionStatus = exampleSubscriptionWithoutFields("api1")
-        val subsData = Seq(apiSubscriptionStatus)
+        val subsData = List(apiSubscriptionStatus)
 
         givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
@@ -686,7 +686,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         def testEditPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
           import manageSubscriptionsSetup._
 
-          val subsData = Seq(
+          val subsData = List(
             exampleSubscriptionWithFields("api1", count)
           )
 
@@ -709,7 +709,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       }
 
       "step page" in new ManageSubscriptionsSetup {
-        val subsData = Seq(
+        val subsData = List(
           exampleSubscriptionWithFields("api1", 1),
           exampleSubscriptionWithFields("api2", 1)
         )
@@ -723,7 +723,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       }
 
       "step page for the last page as a redirect for sandbox" in new ManageSubscriptionsSetup {
-        val subsData = Seq(
+        val subsData = List(
           exampleSubscriptionWithFields("api1", 1),
           exampleSubscriptionWithFields("api2", 1)
         )
@@ -737,7 +737,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       }
 
       "step page for the last page as a redirect for production" in new ManageSubscriptionsSetup {
-        val subsData = Seq(
+        val subsData = List(
           exampleSubscriptionWithFields("api1", 1),
           exampleSubscriptionWithFields("api2", 1)
         )
@@ -760,7 +760,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
         def testStepPageNumbers(count: Int, manageSubscriptionsSetup: ManageSubscriptionsSetup) = {
           import manageSubscriptionsSetup._
 
-          val subsData = Seq(
+          val subsData = List(
             exampleSubscriptionWithFields("api1", count)
           )
 
@@ -783,7 +783,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
       }
 
       "be redirected to the end of the journey of they haven't subscribed to any APIs with subscription fields" in new ManageSubscriptionsSetup {
-        val subsData = Seq(exampleSubscriptionWithoutFields("api1"))
+        val subsData = List(exampleSubscriptionWithoutFields("api1"))
 
         givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), Map.empty), loggedInUser, subsData)
 

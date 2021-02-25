@@ -67,7 +67,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       "return true when connector is called correctly and true" in new SetUp {
         when(mockThirdPartyDeveloperConnector.updateEmailPreferences(*[UserId], *)(*)).thenReturn(Future.successful(true))
         val userId = UserId.random
-        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
+        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
 
         val result = await(underTest.updateEmailPreferences(userId, expectedFlowObject))
 
@@ -78,7 +78,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
     "fetchEmailPreferencesFlow" should {
       "call the flow repository correctly and return flow when repository returns data" in new SetUp {
-        val flowObject = EmailPreferencesFlow(sessionId, Set("category1", "category1"), Map("category1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
+        val flowObject = EmailPreferencesFlow(sessionId, Set("category1", "category1"), Map("category1" -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
         when(mockFlowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlow](eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(Some(flowObject)))
         val result = await(underTest.fetchEmailPreferencesFlow(loggedInDeveloper))
         result shouldBe flowObject
@@ -86,7 +86,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       }
 
       "call the flow repository correctly and create a new flow object when nothing returned" in new SetUp {
-        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set.empty, Map.empty, Set.empty, Seq.empty)
+        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set.empty, Map.empty, Set.empty, List.empty)
         when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(None))
         val result = await(underTest.fetchEmailPreferencesFlow(loggedInDeveloper.copy(sessionNoEMailPrefences)))
 
@@ -95,7 +95,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       }
 
       "call the flow repository correctly and copy existing email preferences to flow object when nothing in cache" in new SetUp {
-        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), Seq.empty)
+        val expectedFlowObject = EmailPreferencesFlow(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
         when(mockFlowRepository.fetchBySessionIdAndFlowType(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES))(*)).thenReturn(Future.successful(None))
         val result = await(underTest.fetchEmailPreferencesFlow(loggedInDeveloper))
 
@@ -140,7 +140,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       val category2 = mock[APICategoryDetails]
 
       "return all APICategoryDetails objects from connector" in new SetUp {
-        when(mockApmConnector.fetchAllAPICategories()(*)).thenReturn(Future.successful(Seq(category1, category2)))
+        when(mockApmConnector.fetchAllAPICategories()(*)).thenReturn(Future.successful(List(category1, category2)))
 
         val result = await(underTest.fetchAllAPICategoryDetails())
 

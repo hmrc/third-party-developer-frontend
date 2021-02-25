@@ -29,7 +29,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     "split Private Beta APIs from public APIs " in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
-          Seq(
+          List(
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = true),
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA, access = publicAccess),
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionThree, BETA, access = privateAccess),
@@ -46,20 +46,20 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        Seq(
+        List(
           ApiVersionDefinition(versionOne, STABLE),
           ApiVersionDefinition(versionTwo, BETA, publicAccess),
           ApiVersionDefinition(versionThree, BETA, privateAccess),
           ApiVersionDefinition(ApiVersion("4.0"), BETA, privateAccess)
         )
       )
-      verifyApplicationSubscription(groupedSubscriptions.testApis.head, "Individual Tax", "individual-tax", Seq(ApiVersionDefinition(versionOne, STABLE)))
+      verifyApplicationSubscription(groupedSubscriptions.testApis.head, "Individual Tax", "individual-tax", List(ApiVersionDefinition(versionOne, STABLE)))
     }
 
     "group subscriptions based on api service-name" in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
-          Seq(
+          List(
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = true),
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA),
             subscriptionStatus("Individual Tax", "individual-tax", taxContext, versionOne, STABLE)
@@ -74,15 +74,15 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        Seq(ApiVersionDefinition(versionOne, STABLE), ApiVersionDefinition(versionTwo, BETA))
+        List(ApiVersionDefinition(versionOne, STABLE), ApiVersionDefinition(versionTwo, BETA))
       )
-      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", Seq(ApiVersionDefinition(versionOne, STABLE)))
+      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", List(ApiVersionDefinition(versionOne, STABLE)))
     }
 
     "take first app name if it is different" in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
-          Seq(
+          List(
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = true),
             subscriptionStatus("Individual Employment Different for some reason", "individual-employment", employmentContext, versionTwo, BETA)
           )
@@ -96,12 +96,12 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        Seq(ApiVersionDefinition(versionOne, STABLE), ApiVersionDefinition(versionTwo, BETA))
+        List(ApiVersionDefinition(versionOne, STABLE), ApiVersionDefinition(versionTwo, BETA))
       )
     }
 
     "return None if no subscriptions" in {
-      val groupedSubscriptions = APISubscriptions.groupSubscriptions(Seq.empty)
+      val groupedSubscriptions = APISubscriptions.groupSubscriptions(List.empty)
 
       groupedSubscriptions shouldBe None
     }
@@ -109,7 +109,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     "identifies the example api" in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
-          Seq(
+          List(
             subscriptionStatus("Hello World", "api-example-microservice", ApiContext("api-example-microservice-context"), versionOne, STABLE, subscribed = true)
           )
         )
@@ -118,7 +118,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
       groupedSubscriptions.testApis.size shouldBe 0
       groupedSubscriptions.apis.size shouldBe 0
       groupedSubscriptions.exampleApi.isDefined shouldBe true
-      verifyApplicationSubscription(groupedSubscriptions.exampleApi.get, "Hello World", "api-example-microservice", Seq(ApiVersionDefinition(versionOne, STABLE)))
+      verifyApplicationSubscription(groupedSubscriptions.exampleApi.get, "Hello World", "api-example-microservice", List(ApiVersionDefinition(versionOne, STABLE)))
     }
   }
 
@@ -132,7 +132,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
         apiName,
         serviceName,
         context,
-        Seq(
+        List(
           subscriptionStatus(apiName, serviceName, context, versionOne, STABLE, subscribed = false),
           subscriptionStatus(apiName, serviceName, context, versionTwo, BETA, subscribed = false)
         )
@@ -146,7 +146,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
         apiName,
         serviceName,
         context,
-        Seq(
+        List(
           subscriptionStatus(apiName, serviceName, context, versionOne, STABLE, subscribed = true),
           subscriptionStatus(apiName, serviceName, context, versionTwo, BETA)
         )
@@ -160,7 +160,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
         apiName,
         serviceName,
         context,
-        Seq(
+        List(
           subscriptionStatus(apiName, serviceName, context, versionOne, STABLE, subscribed = true),
           subscriptionStatus(apiName, serviceName, context, versionTwo, BETA, subscribed = true)
         )
@@ -179,7 +179,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     val api2Service = "individual-tax"
 
     "return with api context name and subscriptions count for the specific api for a PUBLIC API" in {
-      val subscriptions = Seq(
+      val subscriptions = List(
         subscriptionStatus(api1Name, api1Service, api1Context, versionOne, STABLE, subscribed = true),
         subscriptionStatus(api1Name, api1Service, api1Context, versionTwo, BETA, subscribed = true, access = Some(APIAccess(APIAccessType.PUBLIC))),
         subscriptionStatus(api1Name, api1Service, api1Context, versionThree, STABLE, subscribed = true, access = Some(APIAccess(APIAccessType.PRIVATE))),
@@ -194,7 +194,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     }
 
     "return with api context name and subscriptions count for the specific api for a PRIVATE API" in {
-      val subscriptions = Seq(
+      val subscriptions = List(
         subscriptionStatus(api1Name, api1Service, api1Context, versionOne, STABLE, subscribed = true),
         subscriptionStatus(api1Name, api1Service, api1Context, versionTwo, BETA, subscribed = true, access = Some(APIAccess(APIAccessType.PUBLIC))),
         subscriptionStatus(api1Name, api1Service, api1Context, versionThree, STABLE, subscribed = true, access = Some(APIAccess(APIAccessType.PRIVATE))),
@@ -213,7 +213,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     "return false if there is no subscription" in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
-          Seq(
+          List(
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = false),
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA, subscribed = false)
           )
@@ -226,7 +226,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     "return true if there is one subscription" in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
-          Seq(
+          List(
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = true),
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA, subscribed = false)
           )
@@ -239,7 +239,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     "return true if there is more than one subscription" in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
-          Seq(
+          List(
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = true),
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA, subscribed = true)
           )
@@ -255,7 +255,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     "return false if there is no subscription" in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
-          Seq(
+          List(
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = false),
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA, subscribed = false)
           )
@@ -268,7 +268,7 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     "return true if there is 1 subscription" in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
-          Seq(
+          List(
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = true),
             subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA, subscribed = false)
           )
@@ -279,6 +279,6 @@ class APISubscriptionsSpec extends AsyncHmrcSpec with SubscriptionTestHelperSuga
     }
   }
 
-  def apiSubscription(apiName: String, serviceName: String, context: ApiContext, subscriptions: Seq[APISubscriptionStatus]) =
+  def apiSubscription(apiName: String, serviceName: String, context: ApiContext, subscriptions: List[APISubscriptionStatus]) =
     APISubscriptions(apiName, serviceName, context, subscriptions)
 }

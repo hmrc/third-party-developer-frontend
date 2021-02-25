@@ -43,7 +43,7 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
     val form = mock[Form[SelectedApisEmailPreferencesForm]]
     val currentCategory = APICategoryDetails("CATEGORY1", "Category 1")
     val apis = Set("api1", "api2")
-    val emailpreferencesFlow: EmailPreferencesFlow = EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, Seq.empty)
+    val emailpreferencesFlow: EmailPreferencesFlow = EmailPreferencesFlow(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectApiView: FlowSelectApiView = app.injector.instanceOf[FlowSelectApiView]
@@ -94,9 +94,9 @@ class FlowSelectApiViewSpec extends CommonViewSpec with WithCSRFAddToken {
   }
 
   "Email Preferences Select Api view page" should {
-    val apiList = List(ApiDefinition("api1", "Api One", "api1Desc", ApiContext("api1context"), Seq("category1", "category2")),
-      ApiDefinition("api2", "Api Two", "api2Desc", ApiContext("api2context"), Seq("category2", "category4")),
-      ApiDefinition("api3", "Api Three", "api3Desc", ApiContext("api3context"), Seq("category3", "category2")))
+    val apiList = List(ApiDefinition("api1", "Api One", "api1Desc", ApiContext("api1context"), List("category1", "category2")),
+      ApiDefinition("api2", "Api Two", "api2Desc", ApiContext("api2context"), List("category2", "category4")),
+      ApiDefinition("api3", "Api Three", "api3Desc", ApiContext("api3context"), List("category3", "category2")))
     val userApis = Set("api1", "api2")
 
     "render the api categories selection Page with no check boxes selected when no user selected categories passed into the view" in new Setup {

@@ -107,7 +107,7 @@ case class APISubscriptionStatusWithSubscriptionFields(name: String, context: Ap
 case class APISubscriptionStatusWithWritableSubscriptionField(name: String, context: ApiContext, apiVersion: ApiVersionDefinition, subscriptionFieldValue: SubscriptionFieldValue, oldValues: SubscriptionFieldsWrapper)
 
 object APISubscriptionStatusWithSubscriptionFields {
-  def apply(fields: Seq[APISubscriptionStatus]): Seq[APISubscriptionStatusWithSubscriptionFields] = {
+  def apply(fields: List[APISubscriptionStatus]): List[APISubscriptionStatusWithSubscriptionFields] = {
 
     def toAPISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatus: APISubscriptionStatus): Option[APISubscriptionStatusWithSubscriptionFields] = {
       if (apiSubscriptionStatus.fields.fields.isEmpty) {

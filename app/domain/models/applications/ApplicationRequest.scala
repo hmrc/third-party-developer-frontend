@@ -28,8 +28,8 @@ case class CreateApplicationRequest(
     name: String,
     environment: Environment,
     description: Option[String],
-    collaborators: Seq[Collaborator],
-    access: Access = Standard(Seq.empty, None, None, Set.empty)
+    collaborators: List[Collaborator],
+    access: Access = Standard(List.empty, None, None, Set.empty)
 )
 
 object CreateApplicationRequest extends ApplicationRequest {
@@ -39,7 +39,7 @@ object CreateApplicationRequest extends ApplicationRequest {
     form.applicationName.trim,
     environment,
     None,
-    Seq(Collaborator(user.email, Role.ADMINISTRATOR, Some(user.developer.userId)))
+    List(Collaborator(user.email, Role.ADMINISTRATOR, Some(user.developer.userId)))
   )
 }
 
@@ -48,7 +48,7 @@ case class UpdateApplicationRequest(
     environment: Environment,
     name: String,
     description: Option[String] = None,
-    access: Access = Standard(Seq.empty, None, None, Set.empty)
+    access: Access = Standard(List.empty, None, None, Set.empty)
 )
 
 object UpdateApplicationRequest extends ApplicationRequest {
@@ -85,7 +85,7 @@ object UpdateApplicationRequest extends ApplicationRequest {
       application.deployedTo,
       application.name,
       normalizeDescription(application.description),
-      access.copy(redirectUris = (access.redirectUris ++ Seq(form.redirectUri)).distinct)
+      access.copy(redirectUris = (access.redirectUris ++ List(form.redirectUri)).distinct)
     )
   }
 

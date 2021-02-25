@@ -55,7 +55,7 @@ case class MaybeUserRequest[A](developerSession: Option[DeveloperSession], reque
 case class ApplicationRequest[A](
     application: Application,
     deployedTo: Environment,
-    subscriptions: Seq[APISubscriptionStatus],
+    subscriptions: List[APISubscriptionStatus],
     openAccessApis: Map[ApiContext,ApiData],
     role: Role,
     user: DeveloperSession,

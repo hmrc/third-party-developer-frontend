@@ -28,16 +28,16 @@ trait SubscriptionsBuilder {
     val contextName = context.getOrElse(ApiContext(s"context-$name"))
     val version = ApiVersionDefinition(ApiVersion("version"), APIStatus.STABLE)
 
-    val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId("fake-appId"), ClientId("fake-clientId"), contextName, version.version, Seq.empty))
+    val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId("fake-appId"), ClientId("fake-clientId"), contextName, version.version, List.empty))
 
     APISubscriptionStatus(name, s"serviceName-$name", contextName, version, subscribed = true, requiresTrust = false, fields = f, isTestSupport = false)
   }
 
   def emptySubscriptionFieldsWrapper(applicationId: ApplicationId, clientId: ClientId, context: ApiContext, version: ApiVersion) = {
-    SubscriptionFieldsWrapper(applicationId, clientId, context, version, Seq.empty)
+    SubscriptionFieldsWrapper(applicationId, clientId, context, version, List.empty)
   }
 
-  def buildSubscriptionFieldsWrapper(application: Application, fields: Seq[SubscriptionFieldValue]) = {
+  def buildSubscriptionFieldsWrapper(application: Application, fields: List[SubscriptionFieldValue]) = {
 
     val applicationId = application.id
 

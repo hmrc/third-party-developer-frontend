@@ -70,13 +70,13 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersion("api-example-microservice"))
 
-  val tokens: ApplicationToken = ApplicationToken(Seq(aClientSecret(), aClientSecret()), "token")
+  val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
   val exampleApiSubscription: Some[APISubscriptions] = Some(
     APISubscriptions(
       "Example API",
       "api-example-microservice",
       exampleContext,
-      Seq(
+      List(
         APISubscriptionStatus(
           "API1",
           "api-example-microservice",
@@ -92,9 +92,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   val defaultCheckInformation: CheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com", "12345678")))
 
-  val groupedSubsSubscribedToExampleOnly: GroupedSubscriptions = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = exampleApiSubscription)
+  val groupedSubsSubscribedToExampleOnly: GroupedSubscriptions = GroupedSubscriptions(testApis = List.empty, apis = List.empty, exampleApi = exampleApiSubscription)
 
-  val groupedSubsSubscribedToNothing: GroupedSubscriptions = GroupedSubscriptions(testApis = Seq.empty, apis = Seq.empty, exampleApi = None)
+  val groupedSubsSubscribedToNothing: GroupedSubscriptions = GroupedSubscriptions(testApis = List.empty, apis = List.empty, exampleApi = None)
 
   trait ApplicationProvider {
     // N.B. All fixtures in any Setup that are to be used to supply this method MUST be global scope or lazy to avoid NPE
@@ -115,7 +115,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
-          redirectUris = Seq("https://red1", "https://red2"),
+          redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
         )
       )
@@ -233,7 +233,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   }
 
   trait SetupWithSubs extends BaseSetup {
-    def setupApplicationWithSubs(a: Application, s: Seq[APISubscriptionStatus]): Unit = {
+    def setupApplicationWithSubs(a: Application, s: List[APISubscriptionStatus]): Unit = {
       givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(s), asFields((s))), loggedInUser, s)
     }
   }
@@ -391,7 +391,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     "show agree to terms of use step as complete when it has been done" in new Setup {
       def createApplication() =
         createPartiallyConfigurableApplication(
-          checkInformation = Some(CheckInformation(termsOfUseAgreements = Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))))
+          checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))))
         )
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
@@ -432,7 +432,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+              List(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
             )
           )
         )
@@ -458,7 +458,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              Seq(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
+              List(TermsOfUseAgreement("test@example.com", DateTimeUtils.now, "1.0"))
             )
           )
         )
@@ -524,7 +524,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   "api subscriptions review" should {
     "return page" in new SetupWithSubs {
       def createApplication() = createPartiallyConfigurableApplication()
-      val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      val subsData = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsPage(application.id))(loggedInRequest)
@@ -536,7 +536,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     "success action" in new SetupWithSubs {
       def createApplication() = createPartiallyConfigurableApplication()
-      val subsData = Seq(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      val subsData = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
@@ -586,7 +586,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return 404 NOT FOUND when no API subscriptions are retrieved" in new SetupWithSubs with BasicApplicationProvider {
-      setupApplicationWithSubs(application, Seq())
+      setupApplicationWithSubs(application, List())
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -594,7 +594,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     }
 
     "return 404 NOT FOUND when only API-EXAMPLE-MICROSERVICE API is subscribed to" in new SetupWithSubs with BasicApplicationProvider {
-      setupApplicationWithSubs(application, Seq(onlyApiExampleMicroserviceSubscribedTo))
+      setupApplicationWithSubs(application, List(onlyApiExampleMicroserviceSubscribedTo))
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 

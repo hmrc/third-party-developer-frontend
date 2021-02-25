@@ -47,7 +47,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     val loggedInDeveloper = DeveloperSession(session)
 
-    val redirectUris = Seq("https://www.example.com", "https://localhost:8080")
+    val redirectUris = List("https://www.example.com", "https://localhost:8080")
 
     val redirectsView = app.injector.instanceOf[RedirectsView]
     val addRedirectView = app.injector.instanceOf[AddRedirectView]
@@ -285,7 +285,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "return the redirects page with no redirect URIs for an application with no redirect URIs" in new Setup {
       redirectsShouldRenderThePage(
         anApplication(adminEmail = loggedInDeveloper.email)
-          .withRedirectUris(Seq()),
+          .withRedirectUris(List.empty),
         shouldShowDeleteButton = false
       )
     }
@@ -293,7 +293,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "return the redirects page with some redirect URIs for an admin and an application with some redirect URIs" in new Setup {
       redirectsShouldRenderThePage(
         anApplication(adminEmail = loggedInDeveloper.email)
-          .withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")),
+          .withRedirectUris(List("https://www.example.com", "https://localhost:8080")),
         shouldShowDeleteButton = true
       )
     }
@@ -301,7 +301,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
     "return the redirects page with some redirect URIs for a developer and an application with some redirect URIs" in new Setup {
       redirectsShouldRenderThePage(
         anApplication(developerEmail = loggedInDeveloper.email)
-          .withRedirectUris(Seq("https://www.example.com", "https://localhost:8080")),
+          .withRedirectUris(List("https://www.example.com", "https://localhost:8080")),
         shouldShowDeleteButton = false
       )
     }

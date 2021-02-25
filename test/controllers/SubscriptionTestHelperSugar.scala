@@ -64,8 +64,8 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     )
   }
 
-  val sampleSubscriptions: Seq[APISubscriptionStatus] = {
-    Seq(
+  val sampleSubscriptions: List[APISubscriptionStatus] = {
+    List(
       subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionOne, STABLE, subscribed = true),
       subscriptionStatus("Individual Employment", "individual-employment", employmentContext, versionTwo, BETA),
       subscriptionStatus("Individual Tax", "individual-tax", taxContext, versionOne, STABLE),
@@ -73,12 +73,12 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     )
   }
 
-  def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): Seq[APISubscriptionStatus] = {
+  def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): List[APISubscriptionStatus] = {
     val sfv = buildSubscriptionFieldValue("the value")
 
-    val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, employmentContext, versionOne, Seq(sfv))
+    val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, employmentContext, versionOne, List(sfv))
 
-    Seq(
+    List(
       subscriptionStatus("Individual Employment 2", "individual-employment-2", employmentContext, versionOne, STABLE, subscribed = true, fields = Some(subscriptionFieldsWrapper))
     )
   }
@@ -87,7 +87,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
       applicationSubscription: APISubscriptions,
       expectedApiHumanReadableAppName: String,
       expectedApiServiceName: String,
-      expectedVersions: Seq[ApiVersionDefinition]
+      expectedVersions: List[ApiVersionDefinition]
   ) {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
     applicationSubscription.apiServiceName shouldBe expectedApiServiceName
@@ -112,7 +112,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   val WHO_CARES = "who cares"
 
   def generateWrapper(prefix: String, count: Int): SubscriptionFieldsWrapper = {
-    val fields = (1 to count).map(i => generateFieldValue(prefix, i))
+    val fields = (1 to count).map(i => generateFieldValue(prefix, i)).toList
 
     SubscriptionFieldsWrapper(
       applicationId = ApplicationId(WHO_CARES),

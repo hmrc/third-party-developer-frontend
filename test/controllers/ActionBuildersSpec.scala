@@ -55,7 +55,7 @@ package controllers
      val applicationWithSubscriptionData = buildApplicationWithSubscriptionData(developer.email)
      val subscriptionWithoutSubFields = buildAPISubscriptionStatus("api name")
      val subscriptionWithSubFields =
-       buildAPISubscriptionStatus("api name", fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionData.application, Seq(buildSubscriptionFieldValue("field1")))))
+       buildAPISubscriptionStatus("api name", fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionData.application, List(buildSubscriptionFieldValue("field1")))))
 
      val underTest = new TestController(cookieSigner, mcc, sessionServiceMock, errorHandler, applicationServiceMock, applicationActionServiceMock)
 
@@ -78,25 +78,25 @@ package controllers
 
    "subFieldsDefinitionsExistActionByApi" should {
      "Found one" in new Setup {
-       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, Seq(subscriptionWithSubFields))
+       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, List(subscriptionWithSubFields))
 
        runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, OK)
      }
 
      "Wrong context" in new Setup {
-       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, Seq(subscriptionWithSubFields))
+       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, List(subscriptionWithSubFields))
 
        runTestAction(ApiContext("wrong-context"), subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
      }
 
      "Wrong version" in new Setup {
-       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, Seq(subscriptionWithSubFields))
+       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, List(subscriptionWithSubFields))
 
        runTestAction(subscriptionWithSubFields.context, ApiVersion("wrong-version"), NOT_FOUND)
      }
 
      "Subscription with no fields" in new Setup {
-       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, Seq(subscriptionWithoutSubFields))
+       givenApplicationAction(applicationWithSubscriptionData, loggedInUser, List(subscriptionWithoutSubFields))
 
        runTestAction(subscriptionWithSubFields.context, subscriptionWithSubFields.apiVersion.version, NOT_FOUND)
      }

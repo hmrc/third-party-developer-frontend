@@ -19,7 +19,7 @@ package domain.models.apidefinitions
 import domain.models.connectors.ExtendedApiDefinition
 
 trait ExtendedApiDefinitionTestDataHelper {
-  def extendedApiDefinition(name: String): ExtendedApiDefinition = extendedApiDefinition(name, Seq("category"))
+  def extendedApiDefinition(name: String): ExtendedApiDefinition = extendedApiDefinition(name, List("category"))
 
-  def extendedApiDefinition(name: String, categories: Seq[String]) = ExtendedApiDefinition(name, name, name, ApiContext(name), categories)
+  def extendedApiDefinition(name: String, categories: List[String]) = ExtendedApiDefinition(name, name, name, ApiContext(name), categories)
 }

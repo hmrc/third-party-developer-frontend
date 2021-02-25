@@ -25,7 +25,7 @@ import domain.models.connectors.ExtendedApiDefinition
 trait EmailPreferencesServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val emailPreferencesServiceMock = mock[EmailPreferencesService]
 
-  def fetchAPIDetailsReturns(apis: Seq[ExtendedApiDefinition]) = {
+  def fetchAPIDetailsReturns(apis: List[ExtendedApiDefinition]) = {
     when(emailPreferencesServiceMock.fetchAPIDetails(*)(*)).thenReturn(successful(apis))
   }
 }

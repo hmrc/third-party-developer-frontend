@@ -163,7 +163,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
       status: APIStatus = STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
-      subscriptionFieldWithValues: Seq[SubscriptionFieldValue] = Seq.empty
+      subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty
   ): APISubscriptionStatus = {
     APISubscriptionStatus(
       name = name,
