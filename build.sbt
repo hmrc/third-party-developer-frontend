@@ -94,6 +94,13 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
+  .settings(
+    TwirlKeys.templateImports ++= Seq(
+      "play.twirl.api.HtmlFormat",
+      "uk.gov.hmrc.govukfrontend.views.html.components._",
+      "uk.gov.hmrc.govukfrontend.views.html.helpers._"
+    )
+  )
 
 lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
 lazy val IntegrationTest = config("it") extend Test
