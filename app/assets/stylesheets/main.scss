@@ -6,6 +6,11 @@
 @import "partials/banner.scss";
 @import "partials/subscriptions";
 
+$govuk-assets-path: "/developer/assets/lib/govuk-frontend/govuk/assets/";
+
+// Import FE Styles
+@import "lib/govuk-frontend/govuk/all";
+
 // Ad-hoc fixes
 @import "ad-hoc";
 @import "character-count";
