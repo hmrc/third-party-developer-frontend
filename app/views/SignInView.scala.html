@@ -23,49 +23,57 @@
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = titleError + heading,
-    isRegistering = true,
-    developerSession = None
+  title = titleError + heading,
+  isRegistering = true,
+  developerSession = None
 ) {
+  @errorSummary(form)
 
-    @errorSummary(form)
+  <h1 class="govuk-heading-l">@heading</h1>
 
-    <h1 class="heading-xlarge">@heading</h1>
-
-    @helper.form(action = controllers.routes.UserLoginAccount.authenticate) {
-        @helper.CSRF.formField
-        <div @if(form.errors("invalidCredentials").nonEmpty){class="form-group-error"}>
-
-            @fieldError(form.errors, "invalidCredentials", form.error("submissionError").isEmpty)
-
-            <div class="form-group @if(form.errors("emailaddress").nonEmpty){form-group-error}">
-                <label class="form-label-bold" for="emailaddress" id="emailaddress-label">Email address</label>
-
-                @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
-                <input type="text" autocomplete="off" id="emailaddress"
-                       name="emailaddress"
-                       value="@form.data.getOrElse("emailaddress", "")"
-                       class="form-control @if(form.errors("invalidCredentials").nonEmpty || form.errors("emailaddress").nonEmpty){form-control-error}"
-                       aria-required="true"/>
-            </div>
-            <div class="form-group @if(form.errors("password").nonEmpty){form-group-error}">
-                <label class="form-label-bold" for="password">Password</label>
-
-                @fieldError(form.errors, "password", form.error("submissionError").isEmpty)
-                <input type="password" autocomplete="off" id="password"
-                       name="password"
-                       class="form-control @if(form.errors("invalidCredentials").nonEmpty || form.errors("password").nonEmpty){form-control-error}"
-                       aria-required="true"/>
-                <p><a id="forgottenPassword" href="@controllers.routes.Password.showForgotPassword">I've forgotten my password</a></p>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Sign in</button>
-        </div>
-    }
-
-    @if(!endOfJourney) {
-        <p>Not registered yet? <a href="@controllers.routes.Registration.registration">Register for an account</a></p>
-    }
+  @helper.form(action = controllers.routes.UserLoginAccount.authenticate) {
+    @helper.CSRF.formField
+    <div @if(form.errors("invalidCredentials").nonEmpty){class="form-group-error"}>
+      @fieldError(form.errors, "invalidCredentials", form.error("submissionError").isEmpty)
+      <div class="govuk-form-group @if(form.errors("emailaddress").nonEmpty){form-group-error}">
+        <label class="govuk-label" for="emailaddress" id="emailaddress-label">Email address</label>
+          @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
+          <input 
+            type="text" 
+            autocomplete="off" 
+            id="emailaddress"
+            name="emailaddress"
+            value="@form.data.getOrElse("emailaddress", "")"
+            class="govuk-input govuk-!-width-one-half @if(form.errors("invalidCredentials").nonEmpty || form.errors("emailaddress").nonEmpty){form-control-error}"
+            aria-required="true"
+          />
+      </div>
+      <div class="govuk-form-group @if(form.errors("password").nonEmpty){form-group-error}">
+        <label class="govuk-label" for="password">Password</label>
+        @fieldError(form.errors, "password", form.error("submissionError").isEmpty)
+        <input 
+          type="password" 
+          autocomplete="off" 
+          id="password"
+          name="password"
+          class="govuk-input govuk-!-width-one-half @if(form.errors("invalidCredentials").nonEmpty || form.errors("password").nonEmpty){form-control-error}"
+          aria-required="true"
+        />
+        <p class="govuk-body">
+          <a id="forgottenPassword" class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.Password.showForgotPassword">
+            I've forgotten my password
+          </a>
+        </p>
+      </div>
+    </div>
+    <button id="submit" class="govuk-button" type="submit">Sign in</button>
+  }
+  @if(!endOfJourney) {
+    <p class="govuk-body">
+      Not registered yet? 
+      <a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.Registration.registration">
+        Register for an account
+      </a>
+    </p>
+  }
 }
