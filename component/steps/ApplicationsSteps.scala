@@ -86,7 +86,6 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     val userId = idOf(email)
 
     ApplicationStub.configureUserApplications(userId)
-    ApplicationStub.configureUserApplications(userId)
     AppWorld.userApplicationsOnBackend = Nil
   }
 
