@@ -67,14 +67,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR, UserId.random)),
+    Set(Collaborator(loggedInDeveloper.email, CollaboratorRole.ADMINISTRATOR, UserId.random)),
     state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   val activeApplication: Application = anApplication
 
-  val activeDeveloperApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER, UserId.random)))
+  val activeDeveloperApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, CollaboratorRole.DEVELOPER, UserId.random)))
 
   val ropcApplication: Application = anApplication.copy(access = ROPC())
 
@@ -84,8 +84,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
   val newSandboxApplication: Application = anApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
 
-  val adminApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR, UserId.random)))
-  val developerApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER, UserId.random)))
+  val adminApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, CollaboratorRole.ADMINISTRATOR, UserId.random)))
+  val developerApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, CollaboratorRole.DEVELOPER, UserId.random)))
 
   val adminSubmittedProductionApplication: Application =
     adminApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production(loggedInDeveloper.email, ""))
@@ -604,7 +604,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     val apiAccessType = "PUBLIC"
 
     "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
-      val alteredActiveApplication = activeApplication.copy(collaborators = Set(Collaborator("randomEmail", Role.ADMINISTRATOR, UserId.random)))
+      val alteredActiveApplication = activeApplication.copy(collaborators = Set(Collaborator("randomEmail", CollaboratorRole.ADMINISTRATOR, UserId.random)))
 
       when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(session)))
       fetchByApplicationIdReturns(appId, alteredActiveApplication)

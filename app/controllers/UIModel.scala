@@ -33,7 +33,7 @@ case class ApplicationSummary(
     id: ApplicationId,
     name: String,
     environment: String,
-    role: Role,
+    role: CollaboratorRole,
     termsOfUseStatus: TermsOfUseStatus,
     state: State,
     lastAccess: DateTime,

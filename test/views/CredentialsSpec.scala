@@ -52,7 +52,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken {
       None,
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR, UserId.random)),
+      collaborators = Set(Collaborator(developer.email, CollaboratorRole.ADMINISTRATOR, UserId.random)),
       access = Standard(),
       state = ApplicationState.production("", ""),
       checkInformation = None
@@ -70,7 +70,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken {
     }
 
     "display the credentials page for non admins if the app is in sandbox" in new Setup {
-      val developerApp: Application = sandboxApplication.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER, UserId.random)))
+      val developerApp: Application = sandboxApplication.copy(collaborators = Set(Collaborator(developer.email, CollaboratorRole.DEVELOPER, UserId.random)))
       val page: Html = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
@@ -80,7 +80,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken {
     }
 
     "tell the user they don't have access to credentials when the logged in user is not an admin and the app is not in sandbox" in new Setup {
-      val developerApp: Application = application.copy(collaborators = Set(Collaborator(developer.email, Role.DEVELOPER, UserId.random)))
+      val developerApp: Application = application.copy(collaborators = Set(Collaborator(developer.email, CollaboratorRole.DEVELOPER, UserId.random)))
       val page: Html = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")

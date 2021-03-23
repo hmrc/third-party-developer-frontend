@@ -28,6 +28,8 @@ import scala.util.Random
 
 trait TestApplications {
 
+  import utils.UserIdTracker._
+
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
   def aSandboxApplication(
@@ -59,7 +61,7 @@ trait TestApplications {
       lastAccess = DateTimeUtils.now,
       deployedTo = environment,
       description = Some("Description 1"),
-      collaborators = Set(Collaborator(adminEmail, Role.ADMINISTRATOR, UserId.random), Collaborator(developerEmail, Role.DEVELOPER, UserId.random)),
+      collaborators = Set(Collaborator(adminEmail, CollaboratorRole.ADMINISTRATOR, idOf(adminEmail)), Collaborator(developerEmail, CollaboratorRole.DEVELOPER, idOf(developerEmail))),
       state = state,
       access = access,
       ipAllowlist = ipAllowlist
@@ -105,7 +107,7 @@ trait TestApplications {
 
     final def withDescription(description: Option[String]): Application = app.copy(description = description)
 
-    final def withTeamMember(email: String, userRole: Role): Application = app.copy(collaborators = app.collaborators + Collaborator(email, userRole, UserId.random))
+    final def withTeamMember(email: String, userRole: CollaboratorRole): Application = app.copy(collaborators = app.collaborators + Collaborator(email, userRole, UserId.random))
 
     final def withTeamMembers(teamMembers: Set[Collaborator]): Application = app.copy(collaborators = teamMembers)
 

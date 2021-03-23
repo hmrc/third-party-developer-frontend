@@ -21,7 +21,7 @@ import domain.ApplicationUpdateSuccessful
 import domain.models.applications
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.applications.Role.ADMINISTRATOR
+import domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import domain.models.developers.{LoggedInState, Session}
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
@@ -71,7 +71,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     implicit val hc = HeaderCarrier()
 
     def givenApplicationExists(
-        userRole: Role = ADMINISTRATOR,
+        userRole: CollaboratorRole = ADMINISTRATOR,
         environment: Environment = PRODUCTION,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Standard()

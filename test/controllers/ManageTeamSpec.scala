@@ -18,7 +18,7 @@ package controllers
 
 import builder.DeveloperBuilder
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 import domain.{ApplicationNotFound, ApplicationUpdateSuccessful, TeamMemberAlreadyExists}
 import domain.models.applications._
@@ -84,7 +84,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
     def givenTheApplicationExistWithUserRole(
         appId: ApplicationId,
-        userRole: Role,
+        userRole: CollaboratorRole,
         state: ApplicationState = ApplicationState.production("test", "test"),
         additionalTeamMembers: Seq[Collaborator] = Seq()
     ) = {
@@ -152,7 +152,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
   "addTeamMemberAction" should {
     val email = "user@example.com"
-    val role = Role.ADMINISTRATOR
+    val role = CollaboratorRole.ADMINISTRATOR
 
     "add a team member when logged in as an admin" in new Setup {
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)

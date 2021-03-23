@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import builder._
 import controllers.checkpages.ApplicationCheck
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import domain.ApplicationUpliftSuccessful
 import domain.models.apidefinitions._
@@ -48,6 +48,8 @@ import scala.concurrent.Future.successful
 import domain.models.developers.UserId
 
 class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder with DeveloperBuilder {
+
+  import utils.UserIdTracker.idOf
 
   override val appId = ApplicationId("1234")
 
@@ -85,7 +87,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
           subscribed = true,
           requiresTrust = false,
           fields = emptyFields
-        )
+        ) 
       )
     )
   )
@@ -112,7 +114,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
+        Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
@@ -148,7 +150,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
   def createPartiallyConfigurableApplication(
       appId: ApplicationId = appId,
       clientId: ClientId = clientId,
-      userRole: Role = ADMINISTRATOR,
+      userRole: CollaboratorRole = ADMINISTRATOR,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
       access: Access = Standard()
@@ -158,8 +160,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     val anotherRole = if (userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
 
     val collaborators = Set(
-      Collaborator(loggedInUser.email, userRole, UserId.random),
-      Collaborator(anotherCollaboratorEmail, anotherRole, UserId.random)
+      Collaborator(loggedInUser.email, userRole, loggedInUser.developer.userId),
+      Collaborator(anotherCollaboratorEmail, anotherRole, idOf(anotherCollaboratorEmail))
     )
 
     createFullyConfigurableApplication(collaborators, appId, clientId, state, checkInformation, access)

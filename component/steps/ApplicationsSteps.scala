@@ -19,7 +19,7 @@ package steps
 import java.util.UUID.randomUUID
 
 import domain.models.applications.Environment.PRODUCTION
-import domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, Environment, Privileged, ROPC, Role, Standard}
+import domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, Environment, Privileged, ROPC, CollaboratorRole, Standard}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -60,7 +60,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     lastAccessTokenUsage = None,
     Environment.from(environment).getOrElse(PRODUCTION),
     description = None,
-    collaborators = Set(Collaborator(collaboratorEmail, Role.ADMINISTRATOR, idOf(collaboratorEmail)))
+    collaborators = Set(Collaborator(collaboratorEmail, CollaboratorRole.ADMINISTRATOR, idOf(collaboratorEmail)))
   )
 
   Given("""^application with name '(.*)' can be created$""") { (name: String) =>
@@ -131,7 +131,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         None,
         environment,
         app.get("description"),
-        Set(Collaborator(email, Role.withName(app.getOrElse("role", "ADMINISTRATOR")), UserId.random)),
+        Set(Collaborator(email, CollaboratorRole.withName(app.getOrElse("role", "ADMINISTRATOR")), UserId.random)),
         access,
         state = applicationState
       )

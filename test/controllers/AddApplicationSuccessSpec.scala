@@ -58,7 +58,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
+    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -72,7 +72,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     None,
     Environment.SANDBOX,
     Some("Description 2"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
+    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )

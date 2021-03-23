@@ -22,7 +22,7 @@ import java.util.UUID.randomUUID
 import builder.DeveloperBuilder
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.applications.ApplicationState._
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.ClientSecretLimitExceeded
 import domain.models.applications._
@@ -69,7 +69,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
+        Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
@@ -80,7 +80,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   def createConfiguredApplication(
       applicationId: ApplicationId,
-      userRole: Role,
+      userRole: CollaboratorRole,
       state: ApplicationState = ApplicationState.production("", ""),
       access: Access = Standard(),
       environment: Environment = Environment.PRODUCTION,

@@ -45,7 +45,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
         None,
         Environment.PRODUCTION,
         Some("APPLICATION DESCRIPTION"),
-        Set(Collaborator("sample@example.com", Role.ADMINISTRATOR, UserId.random), Collaborator("someone@example.com", Role.DEVELOPER, UserId.random)),
+        Set(Collaborator("sample@example.com", CollaboratorRole.ADMINISTRATOR, UserId.random), Collaborator("someone@example.com", CollaboratorRole.DEVELOPER, UserId.random)),
         Standard(),
         ApplicationState(State.TESTING, None, None, DateTimeUtils.now)
       )

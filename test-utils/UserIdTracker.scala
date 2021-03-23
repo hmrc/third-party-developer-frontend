@@ -18,8 +18,8 @@ package utils
 
 import scala.collection.mutable
 import domain.models.developers.UserId
-// import model.Collaborator
-// import model.CollaboratorRole._
+import domain.models.applications.{Collaborator, CollaboratorRole}
+import domain.models.applications.CollaboratorRole._
 
 trait UserIdTracker {
   private val idsByEmail = mutable.Map[String, UserId]()
@@ -27,16 +27,16 @@ trait UserIdTracker {
   def idOf(email: String): UserId = idsByEmail.getOrElseUpdate(email, UserId.random)
 }
 
-// trait CollaboratorTracker extends UserIdTracker {
+trait CollaboratorTracker extends UserIdTracker {
   
-//   def collaboratorOf(email: String, role: CollaboratorRole): Collaborator = Collaborator(email, role, idOf(email))
+  def collaboratorOf(email: String, role: CollaboratorRole): Collaborator = Collaborator(email, role, idOf(email))
 
-//   implicit class CollaboratorSyntax(value: String) {
-//     def asAdministratorCollaborator = collaboratorOf(value, ADMINISTRATOR)
-//     def asDeveloperCollaborator = collaboratorOf(value, DEVELOPER)
+  implicit class CollaboratorSyntax(value: String) {
+    def asAdministratorCollaborator = collaboratorOf(value, ADMINISTRATOR)
+    def asDeveloperCollaborator = collaboratorOf(value, DEVELOPER)
 
-//   }
-// }
+  }
+}
 
 // Use this when you want to share the map across files like component tests
 object UserIdTracker extends UserIdTracker

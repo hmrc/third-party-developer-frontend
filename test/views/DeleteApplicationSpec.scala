@@ -17,7 +17,7 @@
 package views
 
 import domain.models.applications._
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
@@ -43,7 +43,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
+    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -96,7 +96,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
       }
 
       "there are multiple administrators" in {
-        val extraAdmin = Collaborator("admin@test.com", Role.ADMINISTRATOR, UserId.random)
+        val extraAdmin = Collaborator("admin@test.com", CollaboratorRole.ADMINISTRATOR, UserId.random)
         Seq(prodApp.copy(collaborators = prodApp.collaborators + extraAdmin), sandboxApp.copy(collaborators = sandboxApp.collaborators + extraAdmin))
           .foreach { application =>
             val request = FakeRequest().withCSRFToken

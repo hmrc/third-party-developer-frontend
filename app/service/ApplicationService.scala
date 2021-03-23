@@ -131,7 +131,7 @@ class ApplicationService @Inject() (
     val environment = application.deployedTo
     val requesterRole = roleForApplication(application, requesterEmail)
 
-    if (environment == Environment.SANDBOX && requesterRole == Role.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
+    if (environment == Environment.SANDBOX && requesterRole == CollaboratorRole.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
       applicationConnectorFor(application).deleteApplication(application.id)
 

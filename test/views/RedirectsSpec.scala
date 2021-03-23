@@ -17,7 +17,7 @@
 package views
 
 import domain.models.applications._
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.LoggedInState
 import model.ApplicationViewModel
 import org.jsoup.Jsoup
@@ -44,7 +44,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken {
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random), Collaborator(loggedInDev.email, Role.DEVELOPER, UserId.random)),
+    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, UserId.random), Collaborator(loggedInDev.email, CollaboratorRole.DEVELOPER, UserId.random)),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List.empty, termsAndConditionsUrl = None)
   )
@@ -52,7 +52,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken {
   "redirects page" should {
     val redirectLimit = 5
 
-    def renderPageWithRedirectUris(role: Role, numberOfRedirectUris: Int) = {
+    def renderPageWithRedirectUris(role: CollaboratorRole, numberOfRedirectUris: Int) = {
       val request = FakeRequest().withCSRFToken
       val redirects = 1 to numberOfRedirectUris map (num => s"http://localhost:$num")
       val standardAccess = Standard(redirectUris = redirects.toList, termsAndConditionsUrl = None)

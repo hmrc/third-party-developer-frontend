@@ -29,7 +29,7 @@ import domain.models.developers.UserId
 class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder {
 
   val developer = buildDeveloper(emailAddress = "developerEmail", firstName = "DEVELOPER    ", lastName = "developerLast")
-  val developerCollaborator = Collaborator(developer.email, Role.DEVELOPER, UserId.random)
+  val developerCollaborator = Collaborator(developer.email, CollaboratorRole.DEVELOPER, UserId.random)
 
   val administrator = buildDeveloper(emailAddress = "administratorEmail", firstName = "ADMINISTRATOR", lastName = "administratorLast")
 
@@ -146,7 +146,7 @@ class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder {
   private def createApp(environment: Environment, access: Access, defaultApplicationState: ApplicationState): Application = {
     val collaborators = Set(
       developerCollaborator,
-      Collaborator(administrator.email, Role.ADMINISTRATOR, UserId.random)
+      Collaborator(administrator.email, CollaboratorRole.ADMINISTRATOR, UserId.random)
     )
 
     val app = Application(

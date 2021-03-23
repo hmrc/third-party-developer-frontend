@@ -19,7 +19,7 @@
 @import include._
 @import uk.gov.hmrc.urls.Link
 @import domain.models.applications.Environment.PRODUCTION
-@import domain.models.applications.Role
+@import domain.models.applications.CollaboratorRole
 @import domain.models.applications.Environment
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
@@ -31,7 +31,7 @@
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
 @(
-    role: Role, 
+    role: CollaboratorRole, 
     data: PageData, 
     form: Form[controllers.EditApplicationForm], 
     app: Application, 

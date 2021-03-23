@@ -46,7 +46,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val collaborator: Collaborator = Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)
+  val collaborator: Collaborator = Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)
 
   val application = Application(
     appId,

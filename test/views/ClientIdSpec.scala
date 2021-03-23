@@ -52,7 +52,7 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken {
       None,
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR, UserId.random)),
+      collaborators = Set(Collaborator(developer.email, CollaboratorRole.ADMINISTRATOR, UserId.random)),
       access = Standard(),
       state = ApplicationState.testing,
       checkInformation = None

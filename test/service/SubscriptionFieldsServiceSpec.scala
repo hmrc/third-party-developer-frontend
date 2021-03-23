@@ -123,7 +123,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
   "saveFieldsValues" should {
     "save the fields" in new Setup {
-      val developerRole = Role.DEVELOPER
+      val developerRole = CollaboratorRole.DEVELOPER
 
       val access = AccessRequirements.Default
 
@@ -158,7 +158,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     "save the fields fails with write access denied" in new Setup {
 
-      val developerRole = Role.DEVELOPER
+      val developerRole = CollaboratorRole.DEVELOPER
 
       val access = AccessRequirements(devhub = DevhubAccessRequirements(NoOne, NoOne))
 

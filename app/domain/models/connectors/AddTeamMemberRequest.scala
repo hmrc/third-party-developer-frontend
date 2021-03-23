@@ -16,9 +16,9 @@
 
 package domain.models.connectors
 
-import domain.models.applications.Role
+import domain.models.applications.CollaboratorRole
 
-case class AddTeamMemberRequest(email: String, role: Role, requestingEmail: Option[String])
+case class AddTeamMemberRequest(email: String, role: CollaboratorRole, requestingEmail: Option[String])
 
 object AddTeamMemberRequest {
   import play.api.libs.json._

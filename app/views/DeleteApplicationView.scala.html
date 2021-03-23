@@ -17,14 +17,14 @@
 @import config.ApplicationConfig
 @import domain.models.views.BackButtonWithJavaScript
 @import include._
-@import domain.models.applications.Role
+@import domain.models.applications.CollaboratorRole
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
 @import domain.models.applications.Environment
 
 @this(devMain: DevMain)
 
-@(app: Application, roleOfLoggedIn: Role)(
+@(app: Application, roleOfLoggedIn: CollaboratorRole)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
 @devMain(
@@ -41,7 +41,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     </header>
 
     <div>
-        @if(roleOfLoggedIn == Role.ADMINISTRATOR) {
+        @if(roleOfLoggedIn == CollaboratorRole.ADMINISTRATOR) {
             @if(app.deployedTo == Environment.SANDBOX) {
             <p>
                 Before deleting this application, check with all your <a href="@routes.ManageTeam.manageTeam(app.id, None)">

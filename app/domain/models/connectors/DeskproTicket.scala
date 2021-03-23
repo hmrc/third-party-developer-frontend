@@ -18,7 +18,7 @@ package domain.models.connectors
 
 import controllers.{routes, SupportEnquiryForm}
 import domain.models.apidefinitions.ApiVersion
-import domain.models.applications.{ApplicationId, Environment, Role}
+import domain.models.applications.{ApplicationId, Environment, CollaboratorRole}
 import play.api.libs.json.Json
 import play.api.mvc.Request
 
@@ -90,14 +90,14 @@ object DeskproTicket extends FieldTransformer {
   def createForPrincipalApplicationDeletion(
       name: String,
       requestedByEmail: String,
-      role: Role,
+      role: CollaboratorRole,
       environment: Environment,
       applicationName: String,
       applicationId: ApplicationId
   ): DeskproTicket = {
 
     val actor = role match {
-      case Role.ADMINISTRATOR => "an administrator"
+      case CollaboratorRole.ADMINISTRATOR => "an administrator"
       case _                  => "a developer"
     }
 

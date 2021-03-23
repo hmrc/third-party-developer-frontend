@@ -66,7 +66,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val role = Role.ADMINISTRATOR
+  val role = CollaboratorRole.ADMINISTRATOR
 
   val application: Application = Application(
     appId,

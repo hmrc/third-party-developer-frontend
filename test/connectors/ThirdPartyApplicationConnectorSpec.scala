@@ -90,7 +90,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
     "My Application",
     Environment.PRODUCTION,
     Some("Description"),
-    List(Collaborator("admin@example.com", Role.ADMINISTRATOR, UserId.random)),
+    List(Collaborator("admin@example.com", CollaboratorRole.ADMINISTRATOR, UserId.random)),
     Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
   )
 
@@ -103,7 +103,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
     None,
     Environment.PRODUCTION,
     Some("Description"),
-    Set(Collaborator("john@example.com", Role.ADMINISTRATOR, UserId.random)),
+    Set(Collaborator("john@example.com", CollaboratorRole.ADMINISTRATOR, UserId.random)),
     Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
     state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"))
   )

@@ -15,7 +15,7 @@
  *@
 
 @import domain.models.views.SubscriptionRedirect
-@import domain.models.applications.Role
+@import domain.models.applications.CollaboratorRole
 @import domain.models.applications.Application
 @import views.html.include.SubscriptionsGroup
 @import views.html.include.OpenAccessApisGroup
@@ -25,7 +25,7 @@
 @this(subscriptionsGroup: SubscriptionsGroup, openAccessApisGroup: OpenAccessApisGroup)
 
 @(
-    role: Role,
+    role: CollaboratorRole,
     subscriptions: GroupedSubscriptions,
     openAccessApis: Map[ApiContext, ApiData],
     app: Application,

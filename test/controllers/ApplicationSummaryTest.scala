@@ -18,7 +18,7 @@ package controllers
 
 import domain.models.apidefinitions.AccessType
 import domain.models.applications._
-import domain.models.applications.Role.DEVELOPER
+import domain.models.applications.CollaboratorRole.DEVELOPER
 import domain.models.applications.State.TESTING
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}

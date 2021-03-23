@@ -50,7 +50,7 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
 
   val subscriptionsGroup = app.injector.instanceOf[SubscriptionsGroup]
 
-  case class Page(role: Role, environment: Environment, state: ApplicationState) {
+  case class Page(role: CollaboratorRole, environment: Environment, state: ApplicationState) {
     lazy val body: Document = {
       val application = Application(
         applicationId,
@@ -89,7 +89,7 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
 
   "subscriptionsGroup" when {
     "logged in as a developer" should {
-      val role = Role.DEVELOPER
+      val role = CollaboratorRole.DEVELOPER
 
       "render enabled toggles for a sandbox app" in {
         val page = Page(role, Environment.SANDBOX, ApplicationState.production(loggedInUser.email, ""))
@@ -128,7 +128,7 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
     }
 
     "logged in as an administrator" should {
-      val role = Role.ADMINISTRATOR
+      val role = CollaboratorRole.ADMINISTRATOR
 
       "render enabled toggles for a sandbox app" in {
         val page = Page(role, Environment.SANDBOX, ApplicationState.production(loggedInUser.email, ""))

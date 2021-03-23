@@ -23,7 +23,7 @@ import controllers.checkpages.{ApplicationCheck, CheckYourAnswers}
 import domain.{ApplicationAlreadyExists, ApplicationUpliftSuccessful, DeskproTicketCreationFailed}
 import domain.models.apidefinitions._
 import domain.models.applications._
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import helpers.string._
 import mocks.service._
@@ -76,7 +76,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
+    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -215,7 +215,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     def givenApplicationExists(
         appId: ApplicationId = appId,
         clientId: ClientId = clientId,
-        userRole: Role = ADMINISTRATOR,
+        userRole: CollaboratorRole = ADMINISTRATOR,
         state: ApplicationState = testing,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Standard()
@@ -223,7 +223,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
       val collaborators = Set(
         Collaborator(loggedInUser.email, userRole, UserId.random),
-        Collaborator(anotherCollaboratorEmail, Role.DEVELOPER, UserId.random)
+        Collaborator(anotherCollaboratorEmail, CollaboratorRole.DEVELOPER, UserId.random)
       )
 
       val application = Application(

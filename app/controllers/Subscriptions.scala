@@ -73,7 +73,7 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     renderSubscriptions(
       request.application,
       request.user,
-      (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
+      (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
         manageSubscriptionsView(role, data, form, applicationViewModelFromApplicationRequest, data.subscriptions, data.openAccessApis ,data.app.id)
       }
     )
@@ -83,13 +83,13 @@ class Subscriptions @Inject()(val developerConnector: ThirdPartyDeveloperConnect
     renderSubscriptions(
       request.application,
       request.user,
-      (role: Role, data: PageData, form: Form[EditApplicationForm]) => {
+      (role: CollaboratorRole, data: PageData, form: Form[EditApplicationForm]) => {
         addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions, data.openAccessApis)
       }
     )
   }
 
-  def renderSubscriptions(application: Application, user: DeveloperSession, renderHtml: (Role, PageData, Form[EditApplicationForm]) => Html)(
+  def renderSubscriptions(application: Application, user: DeveloperSession, renderHtml: (CollaboratorRole, PageData, Form[EditApplicationForm]) => Html)(
     implicit request: ApplicationRequest[AnyContent]
   ): Future[Result] = {
     val subsData = APISubscriptions.groupSubscriptions(request.subscriptions)

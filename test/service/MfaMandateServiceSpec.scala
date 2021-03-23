@@ -56,7 +56,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
           new DateTime(),
           None,
           Environment.PRODUCTION,
-          collaborators = Set(Collaborator(email, Role.ADMINISTRATOR, userId))
+          collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
         )
       )
     )
@@ -71,7 +71,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
           new DateTime(),
           None,
           Environment.PRODUCTION,
-          collaborators = Set(Collaborator(email, Role.DEVELOPER, userId))
+          collaborators = Set(Collaborator(email, CollaboratorRole.DEVELOPER, userId))
         )
       )
     )
@@ -100,7 +100,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
           new DateTime(),
           None,
           Environment.SANDBOX,
-          collaborators = Set(Collaborator(email, Role.ADMINISTRATOR, userId))
+          collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
         )
       )
     )

@@ -39,7 +39,7 @@ object CreateApplicationRequest extends ApplicationRequest {
     form.applicationName.trim,
     environment,
     None,
-    List(Collaborator(user.email, Role.ADMINISTRATOR, user.developer.userId))
+    List(Collaborator(user.email, CollaboratorRole.ADMINISTRATOR, user.developer.userId))
   )
 }
 
