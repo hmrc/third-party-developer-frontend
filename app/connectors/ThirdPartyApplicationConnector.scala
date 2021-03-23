@@ -70,18 +70,18 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
     if (isEnabled) {
       metrics.record(api) {
-          val url = s"$serviceBaseUrl/developer/applications"
+        val url = s"$serviceBaseUrl/developer/applications"
 
-          Logger.debug(s"fetchByTeamMemberUserId() - About to call $url for $userId in ${environment.toString}")
+        Logger.debug(s"fetchByTeamMemberUserId() - About to call $url for $userId in ${environment.toString}")
 
-          http
-            .GET[Seq[Application]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
-            .andThen {
-              case Success(_) =>
-                Logger.debug(s"fetchByTeamMemberUserId() - done call to $url for $userId in ${environment.toString}")
-              case _ =>
-                Logger.debug(s"fetchByTeamMemberUserId() - done errored call to $url for $userId in ${environment.toString}")
-            }
+        http
+          .GET[Seq[Application]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
+          .andThen {
+            case Success(_) =>
+              Logger.debug(s"fetchByTeamMemberUserId() - done call to $url for $userId in ${environment.toString}")
+            case _ =>
+              Logger.debug(s"fetchByTeamMemberUserId() - done errored call to $url for $userId in ${environment.toString}")
+          }
       }
     } else {
       Future.successful(Seq.empty)
@@ -90,18 +90,9 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
     if (isEnabled) {
       metrics.record(api) {
-          val url = s"$serviceBaseUrl/developer/applications"
+        val url = s"$serviceBaseUrl/developer/applications"
 
-          Logger.debug(s"fetchByTeamMemberEmail() - About to call $url for $email in ${environment.toString}")
-
-          http
-            .GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
-            .andThen {
-              case Success(_) =>
-                Logger.debug(s"fetchByTeamMemberEmail() - done call to $url for $email in ${environment.toString}")
-              case _ =>
-                Logger.debug(s"fetchByTeamMemberEmail() - done errored call to $url for $email in ${environment.toString}")
-            }
+        http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
       }
     } else {
       Future.successful(Seq.empty)
