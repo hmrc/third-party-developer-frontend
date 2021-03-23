@@ -112,7 +112,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
+        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
@@ -158,8 +158,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     val anotherRole = if (userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
 
     val collaborators = Set(
-      Collaborator(loggedInUser.email, userRole, Some(UserId.random)),
-      Collaborator(anotherCollaboratorEmail, anotherRole, Some(UserId.random))
+      Collaborator(loggedInUser.email, userRole, UserId.random),
+      Collaborator(anotherCollaboratorEmail, anotherRole, UserId.random)
     )
 
     createFullyConfigurableApplication(collaborators, appId, clientId, state, checkInformation, access)
@@ -437,7 +437,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
           )
         )
 
-      when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
+      when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(*))
         .thenReturn(successful(ApplicationUpliftSuccessful))
 
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
@@ -463,7 +463,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
           )
         )
 
-      when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(any[HeaderCarrier]))
+      when(underTest.applicationService.requestUplift(eqTo(appId), any[String], any[DeveloperSession])(*))
         .thenReturn(successful(ApplicationUpliftSuccessful))
 
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
@@ -703,8 +703,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         UpdateApplicationRequest(application.id, application.deployedTo, "My First Tax App", application.description, application.access)
 
       await(result) // await before verify
-      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
-      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(*)
+      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(*)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -720,9 +720,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       await(result) // await before verify
       verify(underTest.applicationService, never)
-        .update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
+        .update(eqTo(expectedUpdateRequest))(*)
       verify(underTest.applicationService)
-        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(confirmedName = true)))(*)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -739,7 +739,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     "Validation failure name contains HMRC action" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication()
 
-      when(underTest.applicationService.isApplicationNameValid(*, *, *)(any[HeaderCarrier]))
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.invalidName))
 
       private val applicationName = "Blacklisted HMRC"
@@ -753,13 +753,13 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
       verify(underTest.applicationService)
-        .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), eqTo(Some(appId)))(any[HeaderCarrier])
+        .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), eqTo(Some(appId)))(*)
     }
 
     "Validation failure when duplicate name" in new Setup {
       def createApplication() = createPartiallyConfigurableApplication()
 
-      when(underTest.applicationService.isApplicationNameValid(*, *, *)(any[HeaderCarrier]))
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.duplicateName))
 
       private val applicationName = "Duplicate Name"
@@ -773,7 +773,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       contentAsString(result) should include("That application name already exists. Enter a unique name for your application.")
 
       verify(underTest.applicationService)
-        .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), eqTo(Some(appId)))(any[HeaderCarrier])
+        .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), eqTo(Some(appId)))(*)
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
@@ -887,9 +887,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
       await(result) // await before verify
-      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(*)
       verify(underTest.applicationService)
-        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(*)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -905,9 +905,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       await(result) // await before verify
       verify(underTest.applicationService)
-        .update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
+        .update(eqTo(expectedUpdateRequest))(*)
       verify(underTest.applicationService)
-        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedPrivacyPolicyURL = true)))(*)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -1040,9 +1040,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
       await(result) // await before verify
-      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(*)
       verify(underTest.applicationService)
-        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(*)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -1058,9 +1058,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
       await(result) // await before verify
-      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(any[HeaderCarrier])
+      verify(underTest.applicationService).update(eqTo(expectedUpdateRequest))(*)
       verify(underTest.applicationService)
-        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(any[HeaderCarrier])
+        .updateCheckInformation(eqTo(application), eqTo(defaultCheckInformation.copy(providedTermsAndConditionsURL = true)))(*)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/applications/1234/request-check")
     }
@@ -1230,7 +1230,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
-      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
     }
 
     "team post doesn't redirect to the check landing page when not logged in" in new Setup {
@@ -1295,7 +1295,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check/team")
 
-      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+      verify(underTest.applicationService).removeTeamMember(eqTo(application), eqTo(anotherCollaboratorEmail), eqTo(loggedInUser.email))(*)
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
@@ -1307,7 +1307,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId.value}/request-check")
 
       private val expectedCheckInformation = CheckInformation(teamConfirmed = true)
-      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(any[HeaderCarrier])
+      verify(underTest.applicationService).updateCheckInformation(eqTo(application), eqTo(expectedCheckInformation))(*)
     }
   }
 
@@ -1337,9 +1337,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     "return unauthorised App details page with 2 Admins " in new Setup {
       lazy val collaborators = Set(
-        Collaborator(loggedInUser.email, DEVELOPER, Some(UserId.random)),
-        Collaborator(anotherCollaboratorEmail, ADMINISTRATOR, Some(UserId.random)),
-        Collaborator(yetAnotherCollaboratorEmail, ADMINISTRATOR, Some(UserId.random))
+        Collaborator(loggedInUser.email, DEVELOPER, UserId.random),
+        Collaborator(anotherCollaboratorEmail, ADMINISTRATOR, UserId.random),
+        Collaborator(yetAnotherCollaboratorEmail, ADMINISTRATOR, UserId.random)
       )
 
       def createApplication() = createFullyConfigurableApplication(collaborators = collaborators)

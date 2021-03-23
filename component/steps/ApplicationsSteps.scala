@@ -56,7 +56,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     lastAccessTokenUsage = None,
     Environment.from(environment).getOrElse(PRODUCTION),
     description = None,
-    collaborators = Set(Collaborator("john.smith@example.com", Role.ADMINISTRATOR, Some(UserId.random)))
+    collaborators = Set(Collaborator("john.smith@example.com", Role.ADMINISTRATOR, UserId.random))
   )
 
   Given("""^application with name '(.*)' can be created$""") { (name: String) =>
@@ -126,7 +126,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         None,
         environment,
         app.get("description"),
-        Set(Collaborator(email, Role.withName(app.getOrElse("role", "ADMINISTRATOR")), Some(UserId.random))),
+        Set(Collaborator(email, Role.withName(app.getOrElse("role", "ADMINISTRATOR")), UserId.random)),
         access,
         state = applicationState
       )

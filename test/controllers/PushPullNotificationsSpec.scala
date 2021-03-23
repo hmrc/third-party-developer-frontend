@@ -133,7 +133,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
 
     val loggedInUser = DeveloperSession(session)
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(*))
       .thenReturn(successful(Some(session)))
     when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
 
@@ -155,7 +155,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
       givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
       val expectedSecrets = Seq("some secret")
-      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(any[HeaderCarrier])).thenReturn(successful(expectedSecrets))
+      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(*)).thenReturn(successful(expectedSecrets))
 
       val result = underTest.showPushSecrets(application.id)(loggedInRequest)
 

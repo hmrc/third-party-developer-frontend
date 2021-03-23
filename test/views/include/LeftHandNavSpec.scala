@@ -52,7 +52,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
       None,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
+      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )

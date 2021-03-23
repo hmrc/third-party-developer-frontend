@@ -68,7 +68,7 @@ class ApplicationSummaryTest extends WordSpec with Matchers {
   }
 
   "from" should {
-    val user = new Collaborator("foo@bar.com", DEVELOPER, Some(UserId.random))
+    val user = new Collaborator("foo@bar.com", DEVELOPER, UserId.random)
 
     val serverTokenApplication =
       new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), Environment.PRODUCTION, collaborators = Set(user))

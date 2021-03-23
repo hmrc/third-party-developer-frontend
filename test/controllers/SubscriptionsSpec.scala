@@ -67,14 +67,14 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR, Some(UserId.random))),
+    Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR, UserId.random)),
     state = ApplicationState.production(loggedInDeveloper.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   val activeApplication: Application = anApplication
 
-  val activeDeveloperApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER, Some(UserId.random))))
+  val activeDeveloperApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER, UserId.random)))
 
   val ropcApplication: Application = anApplication.copy(access = ROPC())
 
@@ -84,8 +84,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
   val newSandboxApplication: Application = anApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
 
-  val adminApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR, Some(UserId.random))))
-  val developerApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER, Some(UserId.random))))
+  val adminApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.ADMINISTRATOR, UserId.random)))
+  val developerApplication: Application = anApplication.copy(collaborators = Set(Collaborator(loggedInDeveloper.email, Role.DEVELOPER, UserId.random)))
 
   val adminSubmittedProductionApplication: Application =
     adminApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production(loggedInDeveloper.email, ""))
@@ -251,8 +251,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(applicationServiceMock).subscribeToApi(eqTo(app), eqTo(apiIdentifier))(any[HeaderCarrier])
-        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(any[HeaderCarrier])
+        verify(applicationServiceMock).subscribeToApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
 
       "successfully unsubscribe from an API and redirect" in new Setup {
@@ -272,8 +272,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(applicationServiceMock).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(any[HeaderCarrier])
-        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(any[HeaderCarrier])
+        verify(applicationServiceMock).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
 
       "return a Bad Request without changing the subscription when requesting a change to the subscription when the form is invalid" in new Setup {
@@ -292,8 +292,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(applicationServiceMock, never).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(any[HeaderCarrier])
-        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(any[HeaderCarrier])
+        verify(applicationServiceMock, never).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
     }
 
@@ -315,8 +315,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(applicationServiceMock).subscribeToApi(eqTo(app), eqTo(apiIdentifier))(any[HeaderCarrier])
-        verify(applicationServiceMock).updateCheckInformation(eqTo(app), any[CheckInformation])(any[HeaderCarrier])
+        verify(applicationServiceMock).subscribeToApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
 
       "successfully unsubscribe from an API, update the check information and redirect" in new Setup {
@@ -337,8 +337,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
 
-        verify(applicationServiceMock).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(any[HeaderCarrier])
-        verify(applicationServiceMock).updateCheckInformation(eqTo(app), any[CheckInformation])(any[HeaderCarrier])
+        verify(applicationServiceMock).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
 
       "return a Bad Request without changing the subscription or check information when requesting a change to the subscription when the form is invalid" in new Setup {
@@ -358,8 +358,8 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(applicationServiceMock, never).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(any[HeaderCarrier])
-        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(any[HeaderCarrier])
+        verify(applicationServiceMock, never).unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier))(*)
+        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
     }
 
@@ -391,7 +391,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         status(result) shouldBe expectedStatus
 
-        verify(applicationServiceMock, never).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(any[HeaderCarrier])
+        verify(applicationServiceMock, never).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(*)
       }
     }
 
@@ -421,7 +421,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe OK
         contentAsString(result) should include(s"Are you sure you want to request to subscribe to $apiName ${apiVersion.value}?")
 
-        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(any[HeaderCarrier])
+        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(*)
       }
 
       "render the unsubscribe from locked subscription page when changing a subscribed api" in new Setup {
@@ -441,7 +441,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
         status(result) shouldBe OK
         contentAsString(result) should include(s"Are you sure you want to request to unsubscribe from $apiName ${apiVersion.value}?")
 
-        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(any[HeaderCarrier])
+        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(*)
       }
     }
 
@@ -477,7 +477,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         status(result) shouldBe FORBIDDEN
 
-        verify(applicationServiceMock, never).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(any[HeaderCarrier])
+        verify(applicationServiceMock, never).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(*)
       }
     }
 
@@ -498,7 +498,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(applicationServiceMock, never).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(any[HeaderCarrier])
+        verify(applicationServiceMock, never).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(*)
       }
     }
 
@@ -514,9 +514,9 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsNotSubscribedToApi(appId, apiIdentifier)
-        when(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier]))
+        when(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
-        when(underTest.subscriptionsService.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier]))
+        when(underTest.subscriptionsService.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -525,9 +525,9 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         contentAsString(result) should include(s"success-request-subscribe-text")
 
-        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(any[HeaderCarrier])
-        verify(underTest.subscriptionsService).requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])
-        verify(underTest.subscriptionsService, never).requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])
+        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(*)
+        verify(underTest.subscriptionsService).requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*)
+        verify(underTest.subscriptionsService, never).requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*)
 
       }
 
@@ -542,9 +542,9 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsSubscribedToApi(appId, apiIdentifier)
-        when(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier]))
+        when(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
-        when(underTest.subscriptionsService.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier]))
+        when(underTest.subscriptionsService.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -553,9 +553,9 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         contentAsString(result) should include(s"success-request-unsubscribe-text")
 
-        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(any[HeaderCarrier])
-        verify(underTest.subscriptionsService, never).requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])
-        verify(underTest.subscriptionsService).requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])
+        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(*)
+        verify(underTest.subscriptionsService, never).requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*)
+        verify(underTest.subscriptionsService).requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*)
       }
 
       "return a Bad Request without requesting a change to the subscription when the form is invalid" in new Setup {
@@ -569,18 +569,18 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
         givenAppIsSubscribedToApi(appId, apiIdentifier)
-        when(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier]))
+        when(underTest.subscriptionsService.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
-        when(underTest.subscriptionsService.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier]))
+        when(underTest.subscriptionsService.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(any[HeaderCarrier])
-        verify(underTest.subscriptionsService, never).requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])
-        verify(underTest.subscriptionsService, never).requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(any[HeaderCarrier])
+        verify(applicationServiceMock).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(*)
+        verify(underTest.subscriptionsService, never).requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*)
+        verify(underTest.subscriptionsService, never).requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*)
       }
     }
 
@@ -604,9 +604,9 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
     val apiAccessType = "PUBLIC"
 
     "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
-      val alteredActiveApplication = activeApplication.copy(collaborators = Set(Collaborator("randomEmail", Role.ADMINISTRATOR, Some(UserId.random))))
+      val alteredActiveApplication = activeApplication.copy(collaborators = Set(Collaborator("randomEmail", Role.ADMINISTRATOR, UserId.random)))
 
-      when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(Some(session)))
+      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(session)))
       fetchByApplicationIdReturns(appId, alteredActiveApplication)
       givenApplicationAction(ApplicationWithSubscriptionData(alteredActiveApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
 
@@ -616,7 +616,7 @@ class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSu
 
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, apiAccessType)(request)
       status(result) shouldBe NOT_FOUND
-      verify(applicationServiceMock, never).updateCheckInformation(eqTo(alteredActiveApplication), eqTo(CheckInformation()))(any[HeaderCarrier])
+      verify(applicationServiceMock, never).updateCheckInformation(eqTo(alteredActiveApplication), eqTo(CheckInformation()))(*)
     }
   }
 

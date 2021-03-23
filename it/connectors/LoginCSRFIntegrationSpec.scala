@@ -130,7 +130,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
             )
         )
 
-        setupThirdPartyApplicationSearchApplicationByEmailStub()
+        setupThirdPartyApplicationSearchApplicationByUserIdStub(userId)
 
         private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
@@ -158,7 +158,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
             )
         )
 
-        setupThirdPartyApplicationSearchApplicationByEmailStub()
+        setupThirdPartyApplicationSearchApplicationByUserIdStub(userId)
 
         private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
@@ -173,6 +173,18 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   private def setupThirdPartyApplicationSearchApplicationByEmailStub(): Unit = {
     stubFor(
       get(urlEqualTo("/developer/applications?emailAddress=thirdpartydeveloper%40example.com&environment=PRODUCTION"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withHeader(contentType, contentTypeApplicationJson)
+            .withBody("[]")
+        )
+    )
+  }
+
+  private def setupThirdPartyApplicationSearchApplicationByUserIdStub(userId: UserId): Unit = {
+    stubFor(
+      get(urlEqualTo(s"/developer/applications?userId=$userId&environment=PRODUCTION"))
         .willReturn(
           aResponse()
             .withStatus(OK)

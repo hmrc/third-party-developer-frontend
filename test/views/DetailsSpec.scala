@@ -199,7 +199,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
           "the user is an administrator" should {
 
-            val collaborators = Set(Collaborator(loggedIn.developer.email, Role.ADMINISTRATOR, Some(UserId.random)))
+            val collaborators = Set(Collaborator(loggedIn.developer.email, Role.ADMINISTRATOR, UserId.random))
 
             "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)

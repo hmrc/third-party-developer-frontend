@@ -104,7 +104,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
           "comments" -> "A+++, good seller, would buy again")
 
       val captor: ArgumentCaptor[SupportEnquiryForm] = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])
-      when(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], any[HeaderCarrier])).thenReturn(successful(TicketCreated))
+      when(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
 

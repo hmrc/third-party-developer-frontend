@@ -29,10 +29,11 @@ import play.api.Logger
 import play.api.http.HeaderNames.CONTENT_LENGTH
 import play.api.http.Status._
 import service.ApplicationService.ApplicationConnector
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.{UserId => HttpUserId, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
+import domain.models.developers.UserId
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 import domain.models.apidefinitions.ApiIdentifier
@@ -65,6 +66,26 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
     http.POST[UpdateApplicationRequest,ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId.value}", request).map(throwOr(ApplicationUpdateSuccessful))
   }
+  
+  def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
+    if (isEnabled) {
+      metrics.record(api) {
+          val url = s"$serviceBaseUrl/developer/applications"
+
+          Logger.debug(s"fetchByTeamMemberUserId() - About to call $url for $userId in ${environment.toString}")
+
+          http
+            .GET[Seq[Application]](url, Seq("userId" -> userId.asText, "environment" -> environment.toString))
+            .andThen {
+              case Success(_) =>
+                Logger.debug(s"fetchByTeamMemberUserId() - done call to $url for $userId in ${environment.toString}")
+              case _ =>
+                Logger.debug(s"fetchByTeamMemberUserId() - done errored call to $url for $userId in ${environment.toString}")
+            }
+      }
+    } else {
+      Future.successful(Seq.empty)
+    }
 
   def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
     if (isEnabled) {

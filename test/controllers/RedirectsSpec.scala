@@ -144,7 +144,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
       headers(result)
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
 
-      verify(underTest.applicationService).update(argument.capture())(any[HeaderCarrier])
+      verify(underTest.applicationService).update(argument.capture())(*)
       argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(redirectUriToAdd) shouldBe true
     }
 
@@ -187,7 +187,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
       status(result) shouldBe resultStatus
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
 
-      verify(underTest.applicationService).update(argument.capture())(any[HeaderCarrier])
+      verify(underTest.applicationService).update(argument.capture())(*)
       argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(redirectUriToDelete) shouldBe false
     }
 
@@ -429,7 +429,7 @@ class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
       status(result) shouldBe SEE_OTHER
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
 
-      verify(underTest.applicationService).update(argument.capture())(any[HeaderCarrier])
+      verify(underTest.applicationService).update(argument.capture())(*)
       argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(originalRedirectUri) shouldBe false
       argument.getValue.access.asInstanceOf[Standard].redirectUris.contains(newRedirectUri) shouldBe true
     }

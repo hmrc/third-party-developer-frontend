@@ -37,7 +37,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
   val clientId = ClientId("clientId123")
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val collaborator = utils.DeveloperSession("developer@example.com", "firstName2", "lastName2", loggedInState = LoggedInState.LOGGED_IN)
-  val collaborators = Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random)), Collaborator(collaborator.email, Role.DEVELOPER, Some(UserId.random)))
+  val collaborators = Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random), Collaborator(collaborator.email, Role.DEVELOPER, UserId.random))
   val application = Application(
     appId,
     clientId,

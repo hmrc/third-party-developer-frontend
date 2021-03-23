@@ -18,10 +18,18 @@ package domain.models.applications
 
 import domain.models.developers.UserId
 
-case class Collaborator(emailAddress: String, role: Role, userId: Option[UserId])
+case class Collaborator(emailAddress: String, role: Role, userId: UserId)
 
 object Collaborator {
   import play.api.libs.json.Json
 
   implicit val format = Json.format[Collaborator]
+}
+
+case class AddCollaborator(emailAddress: String, role: Role)
+
+object AddCollaborator {
+  import play.api.libs.json.Json
+
+  implicit val format = Json.format[AddCollaborator]
 }

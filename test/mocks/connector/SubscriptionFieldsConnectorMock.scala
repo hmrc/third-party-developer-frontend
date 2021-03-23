@@ -21,7 +21,6 @@ import domain.models.apidefinitions.{ApiContext, ApiVersion}
 import domain.models.applications.ClientId
 import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -29,6 +28,6 @@ trait SubscriptionFieldsConnectorMock extends MockitoSugar with ArgumentMatchers
   val mockSubscriptionFieldsConnector = mock[AbstractSubscriptionFieldsConnector]
 
   def fetchFieldValuesReturns(clientId: ClientId, context: ApiContext, version: ApiVersion)(toReturn: Seq[SubscriptionFieldValue]): Unit =
-    when(mockSubscriptionFieldsConnector.fetchFieldValues(eqTo(clientId), eqTo(context), eqTo(version))(any[HeaderCarrier]))
+    when(mockSubscriptionFieldsConnector.fetchFieldValues(eqTo(clientId), eqTo(context), eqTo(version))(*))
       .thenReturn(Future.successful(toReturn))
 }

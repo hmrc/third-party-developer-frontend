@@ -127,16 +127,16 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
       theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
-      when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(any[HeaderCarrier]))
+      when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(*))
         .thenReturn(successful(fieldDefinitions))
 
-      when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier]))
+      when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
       await(subscriptionsService.subscribeToApi(productionApplication, subscription)) shouldBe ApplicationUpdateSuccessful
 
-      verify(mockApmConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier])
-      verify(mockSubscriptionFieldsService, never).saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier])
+      verify(mockApmConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*)
+      verify(mockSubscriptionFieldsService, never).saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(*)
     }
 
     "with subscription fields definitions" should {
@@ -152,23 +152,23 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
         theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
-        when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(any[HeaderCarrier]))
+        when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(*))
           .thenReturn(successful(fieldDefinitions))
-        when(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(any[HeaderCarrier]))
+        when(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(*))
           .thenReturn(successful(fieldDefinitionsWithoutValues))
 
-        when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(any[HeaderCarrier]))
+        when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(*))
           .thenReturn(successful(ApplicationUpdateSuccessful))
-        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
+        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(*))
           .thenReturn(successful(SaveSubscriptionFieldsSuccessResponse))
 
         await(subscriptionsService.subscribeToApi(productionApplication, subscription)) shouldBe ApplicationUpdateSuccessful
 
         verify(mockApmConnector).subscribeToApi(eqTo(productionApplicationId), eqTo(subscription))(
-          any[HeaderCarrier]
+          *
         )
         verify(mockSubscriptionFieldsService)
-          .saveBlankFieldValues(eqTo(productionApplication), eqTo(context), eqTo(version), eqTo(fieldDefinitionsWithoutValues))(any[HeaderCarrier])
+          .saveBlankFieldValues(eqTo(productionApplication), eqTo(context), eqTo(version), eqTo(fieldDefinitionsWithoutValues))(*)
       }
 
       "but fails to save subscription fields" in new Setup {
@@ -183,17 +183,17 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
         theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
 
-        when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(any[HeaderCarrier]))
+        when(mockSubscriptionFieldsService.getFieldDefinitions(eqTo(productionApplication), eqTo(subscription))(*))
           .thenReturn(successful(fieldDefinitions))
-        when(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(any[HeaderCarrier]))
+        when(mockSubscriptionFieldsService.fetchFieldsValues(eqTo(productionApplication), eqTo(fieldDefinitions), eqTo(subscription))(*))
           .thenReturn(successful(fieldDefinitionsWithoutValues))
 
-        when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), *)(any[HeaderCarrier]))
+        when(mockApmConnector.subscribeToApi(eqTo(productionApplicationId), *)(*))
           .thenReturn(successful(ApplicationUpdateSuccessful))
 
         val errors = Map("fieldName" -> "failure reason")
 
-        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
+        when(mockSubscriptionFieldsService.saveBlankFieldValues(*, *[ApiContext], *[ApiVersion], *)(*))
           .thenReturn(successful(SaveSubscriptionFieldsFailureResponse(errors)))
 
         private val exception = intercept[RuntimeException](

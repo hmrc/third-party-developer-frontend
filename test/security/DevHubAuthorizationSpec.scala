@@ -27,7 +27,6 @@ import play.api.mvc.Results.{EmptyContent, _}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import service.SessionService
-import uk.gov.hmrc.http.HeaderCarrier
 import utils.{DeveloperSession => DeveloperSessionBuilder}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -58,7 +57,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
     val requestWithInvalidCookie = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID", "InvalidCookieValue"))
     val requestWithNoRealSession = FakeRequest().withCookies(underTest.createCookie(sessionId))
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(developerSession.map(ds => ds.session)))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(developerSession.map(ds => ds.session)))
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
   }
 
@@ -125,7 +124,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers {
       }
 
       "they have a valid cookie but it does not exist in the session service" in new Setup(None) {
-        when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
+        when(underTest.sessionService.fetch(eqTo(sessionId))(*))
           .thenReturn(successful(None))
 
         val result = atLeastPartLoggedInAction()(requestWithNoRealSession)

@@ -77,7 +77,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       None,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
+      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
@@ -122,7 +122,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
-      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(loggedInUser), eqTo(application))(any[HeaderCarrier]))
+      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(loggedInUser), eqTo(application))(*))
         .thenReturn(Future.successful(TicketCreated))
 
       val result = addToken(underTest.deletePrincipalApplicationAction(application.id))(requestWithFormBody)
@@ -132,7 +132,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
 
       body should include("Delete application")
       body should include("Request submitted")
-      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(loggedInUser), eqTo(application))(any[HeaderCarrier])
+      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(loggedInUser), eqTo(application))(*)
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
@@ -153,7 +153,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
 
       givenApplicationAction(nonApprovedApplication, loggedInUser)
 
-      when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(any[HeaderCarrier]))
+      when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(*))
         .thenReturn(Future.successful(TicketCreated))
     }
 

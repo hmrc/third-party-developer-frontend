@@ -73,9 +73,9 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
-    when(applicationServiceMock.addTeamMember(any[Application], any[String], any[Collaborator])(any[HeaderCarrier]))
+    when(applicationServiceMock.addTeamMember(*,*,*)(*))
       .thenReturn(successful(()))
-    when(applicationServiceMock.removeTeamMember(any[Application], any[String], eqTo(loggedInUser.email))(any[HeaderCarrier]))
+    when(applicationServiceMock.removeTeamMember(*,*, eqTo(loggedInUser.email))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -91,7 +91,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
       val developerSession = DeveloperSession(session)
 
-      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(Collaborator(developerSession.email, userRole, Some(UserId.random)))
+      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(Collaborator(developerSession.email, userRole, UserId.random))
       val application = aStandardApplication.copy(id = appId, collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = DateTime.parse("2018-04-06T09:00"))
 
       givenApplicationAction(application, developerSession)
@@ -160,40 +160,40 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), any[Collaborator])(any[HeaderCarrier])
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), *)(*)
     }
 
     "check if team member already exists on the application" in new Setup {
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      when(applicationServiceMock.addTeamMember(eqTo(application), *, any[Collaborator])(any[HeaderCarrier]))
+      when(applicationServiceMock.addTeamMember(eqTo(application), *, *)(*))
         .thenReturn(failed(new TeamMemberAlreadyExists))
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
-      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), any[Collaborator])(any[HeaderCarrier])
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), *)(*)
 
     }
 
     "check if application exists" in new Setup {
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      when(applicationServiceMock.addTeamMember(eqTo(application), *, any[Collaborator])(any[HeaderCarrier]))
+      when(applicationServiceMock.addTeamMember(eqTo(application), *, *)(*))
         .thenReturn(failed(new ApplicationNotFound))
       val result = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email, "role" -> role.toString))
 
       status(result) shouldBe NOT_FOUND
-      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), any[Collaborator])(any[HeaderCarrier])
+      verify(applicationServiceMock).addTeamMember(eqTo(application), eqTo(loggedInUser.email), *)(*)
 
     }
 
     "reject invalid email address" in new Setup {
       val application = givenTheApplicationExistWithUserRole(appId, ADMINISTRATOR)
-      when(applicationServiceMock.addTeamMember(eqTo(application), *, any[Collaborator])(any[HeaderCarrier]))
+      when(applicationServiceMock.addTeamMember(eqTo(application), *, *)(*))
         .thenReturn(failed(new ApplicationNotFound))
       val result =
         underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
-      verify(applicationServiceMock, never).addTeamMember(eqTo(application), eqTo(loggedInUser.email), any[Collaborator])(any[HeaderCarrier])
+      verify(applicationServiceMock, never).addTeamMember(eqTo(application), eqTo(loggedInUser.email), *)(*)
 
     }
 
@@ -219,10 +219,10 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
     val teamMemberEmail = "teamMemberToDelete@example.com"
     val teamMemberEmailHash = teamMemberEmail.toSha256
     val additionalTeamMembers = Seq(
-      Collaborator("email1@example.com", DEVELOPER, Some(UserId.random)),
-      Collaborator("email2@example.com", DEVELOPER, Some(UserId.random)),
-      Collaborator("email3@example.com", DEVELOPER, Some(UserId.random)),
-      Collaborator(teamMemberEmail, DEVELOPER, Some(UserId.random))
+      Collaborator("email1@example.com", DEVELOPER, UserId.random),
+      Collaborator("email2@example.com", DEVELOPER, UserId.random),
+      Collaborator("email3@example.com", DEVELOPER, UserId.random),
+      Collaborator(teamMemberEmail, DEVELOPER, UserId.random)
     )
 
     "show the remove team member page when logged in as an admin" in new Setup {
@@ -273,7 +273,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-        verify(applicationServiceMock).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+        verify(applicationServiceMock).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(*)
       }
 
       "redirect to the team members page without removing a team member when the confirmation in 'No'" in new Setup {
@@ -283,7 +283,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
-        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(*)
       }
 
       "return 400 Bad Request when no confirmation is given" in new Setup {
@@ -291,7 +291,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
 
         status(result) shouldBe BAD_REQUEST
-        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(*)
       }
 
       "show 400 Bad Request when no email is given" in new Setup {
@@ -299,7 +299,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> "Yes"))
 
         status(result) shouldBe BAD_REQUEST
-        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(any[HeaderCarrier])
+        verify(applicationServiceMock, never).removeTeamMember(eqTo(application), eqTo(teamMemberEmail), eqTo(loggedInUser.email))(*)
       }
     }
 
@@ -310,7 +310,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
         val result = underTest.removeTeamMemberAction(appId)(loggedInRequest.withFormUrlEncodedBody("email" -> teamMemberEmail, "confirm" -> "Yes"))
 
         status(result) shouldBe FORBIDDEN
-        verify(applicationServiceMock, never).removeTeamMember(any[Application], *, *)(any[HeaderCarrier])
+        verify(applicationServiceMock, never).removeTeamMember(any[Application], *, *)(*)
       }
     }
 
@@ -323,7 +323,7 @@ class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
-        verify(applicationServiceMock, never).removeTeamMember(any[Application], *, *)(any[HeaderCarrier])
+        verify(applicationServiceMock, never).removeTeamMember(any[Application], *, *)(*)
       }
     }
   }

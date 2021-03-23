@@ -69,7 +69,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
+        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random)),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
@@ -94,7 +94,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       DateTimeUtils.now,
       None,
       environment,
-      collaborators = Set(Collaborator(loggedInUser.email, userRole, Some(UserId.random))),
+      collaborators = Set(Collaborator(loggedInUser.email, userRole, UserId.random)),
       state = state,
       access = access
     )
@@ -260,7 +260,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.value}/client-secrets")
-      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInUser.email))(any[HeaderCarrier])
+      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInUser.email))(*)
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
@@ -295,7 +295,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(*)
     }
 
     "display the error page when the application has not reached production state" in new Setup {
@@ -304,7 +304,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(*)
     }
 
     "return to the login page when the user is not logged in" in new Setup {
@@ -314,7 +314,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(*)
     }
   }
 

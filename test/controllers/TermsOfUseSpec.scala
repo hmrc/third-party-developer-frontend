@@ -84,7 +84,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
         DateTimeUtils.now,
         None,
         environment,
-        collaborators = Set(Collaborator(loggedInUser.email, userRole, Some(UserId.random))),
+        collaborators = Set(Collaborator(loggedInUser.email, userRole, UserId.random)),
         access = access,
         state = ApplicationState.production("dont-care", "dont-care"),
         checkInformation = checkInformation
@@ -95,7 +95,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       application
     }
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(Some(session)))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(session)))
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
 

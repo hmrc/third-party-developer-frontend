@@ -61,7 +61,7 @@ class SubscriptionsGroupSpec extends CommonViewSpec with WithCSRFAddToken with S
         None,
         environment,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, role, Some(UserId.random))),
+        Set(Collaborator(loggedInUser.email, role, UserId.random)),
         state = state,
         access = Standard(redirectUris = List("https://red1.example.com", "https://red2.example.con"), termsAndConditionsUrl = Some("http://tnc-url.example.com"))
       )

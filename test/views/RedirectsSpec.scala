@@ -44,7 +44,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken {
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random)), Collaborator(loggedInDev.email, Role.DEVELOPER, Some(UserId.random))),
+    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, UserId.random), Collaborator(loggedInDev.email, Role.DEVELOPER, UserId.random)),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List.empty, termsAndConditionsUrl = None)
   )
