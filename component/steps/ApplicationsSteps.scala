@@ -49,6 +49,8 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   val applicationId = ApplicationId("applicationId")
   val clientId = ClientId("clientId")
 
+  val collaboratorEmail = "john.smith@example.com"
+  
   private def defaultApp(name: String, environment: String) = Application(
     id = applicationId,
     clientId = clientId,
@@ -58,7 +60,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     lastAccessTokenUsage = None,
     Environment.from(environment).getOrElse(PRODUCTION),
     description = None,
-    collaborators = Set(Collaborator("john.smith@example.com", Role.ADMINISTRATOR, UserId.random))
+    collaborators = Set(Collaborator(collaboratorEmail, Role.ADMINISTRATOR, idOf(collaboratorEmail)))
   )
 
   Given("""^application with name '(.*)' can be created$""") { (name: String) =>
