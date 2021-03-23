@@ -40,11 +40,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import domain.models.developers.DeveloperSession
-import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
+class TermsOfUseSpec 
+    extends BaseControllerSpec 
+    with WithCSRFAddToken
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
+
     val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
     val underTest = new TermsOfUse(
@@ -84,7 +89,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
         DateTimeUtils.now,
         None,
         environment,
-        collaborators = Set(Collaborator(loggedInUser.email, userRole, UserId.random)),
+        collaborators = Set(loggedInUser.email.asRole(userRole)),
         access = access,
         state = ApplicationState.production("dont-care", "dont-care"),
         checkInformation = checkInformation

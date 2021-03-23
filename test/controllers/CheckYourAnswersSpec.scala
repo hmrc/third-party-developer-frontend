@@ -43,12 +43,18 @@ import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
+import utils.LocalUserIdTracker
 
-class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with SubscriptionsBuilder with DeveloperBuilder {
+class CheckYourAnswersSpec 
+    extends BaseControllerSpec 
+    with SubscriptionTestHelperSugar 
+    with WithCSRFAddToken 
+    with SubscriptionsBuilder 
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
 
@@ -76,12 +82,12 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
+    Set(loggedInUser.email.asAdministratorCollaborator),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  val tokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
+  val appTokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, ApiContext("context"), apiVersion)
 
@@ -171,7 +177,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
 
     fetchByApplicationIdReturns(application.id, application)
 
-    fetchCredentialsReturns(application, tokens)
+    fetchCredentialsReturns(application, appTokens)
 
     givenRemoveTeamMemberSucceeds(loggedInUser)
 
@@ -222,8 +228,8 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
     ): Application = {
 
       val collaborators = Set(
-        Collaborator(loggedInUser.email, userRole, UserId.random),
-        Collaborator(anotherCollaboratorEmail, CollaboratorRole.DEVELOPER, UserId.random)
+        loggedInUser.email.asRole(userRole),
+        anotherCollaboratorEmail.asDeveloperCollaborator
       )
 
       val application = Application(
@@ -241,7 +247,7 @@ class CheckYourAnswersSpec extends BaseControllerSpec with SubscriptionTestHelpe
       )
 
       givenApplicationAction(application, loggedInUser)
-      fetchCredentialsReturns(application, tokens)
+      fetchCredentialsReturns(application, appTokens)
       givenUpdateCheckInformationSucceeds(application)
 
       application

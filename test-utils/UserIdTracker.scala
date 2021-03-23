@@ -22,22 +22,25 @@ import domain.models.applications.{Collaborator, CollaboratorRole}
 import domain.models.applications.CollaboratorRole._
 
 trait UserIdTracker {
-  private val idsByEmail = mutable.Map[String, UserId]()
-  
+  def idOf(email: String): UserId
+}
+trait LocalUserIdTracker extends UserIdTracker {
+  private lazy val idsByEmail = mutable.Map[String, UserId]()
+
   def idOf(email: String): UserId = idsByEmail.getOrElseUpdate(email, UserId.random)
 }
 
-trait CollaboratorTracker extends UserIdTracker {
+trait CollaboratorTracker { 
+  self : UserIdTracker =>
   
   def collaboratorOf(email: String, role: CollaboratorRole): Collaborator = Collaborator(email, role, idOf(email))
 
   implicit class CollaboratorSyntax(value: String) {
     def asAdministratorCollaborator = collaboratorOf(value, ADMINISTRATOR)
     def asDeveloperCollaborator = collaboratorOf(value, DEVELOPER)
-
+    def asRole(role:CollaboratorRole) = collaboratorOf(value, role)
   }
 }
 
 // Use this when you want to share the map across files like component tests
-object UserIdTracker extends UserIdTracker
-
+object GlobalUserIdTracker extends LocalUserIdTracker

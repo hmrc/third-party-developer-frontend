@@ -27,9 +27,10 @@ import play.api.test.Helpers._
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import utils.LocalUserIdTracker
 
-class NavigationSpec extends BaseControllerSpec {
-  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
+class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with LocalUserIdTracker {
+  class Setup(loggedInState: Option[LoggedInState]) extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val underTest = new Navigation(
       sessionServiceMock,
       mock[ErrorHandler],

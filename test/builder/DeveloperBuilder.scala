@@ -18,9 +18,11 @@ package builder
 
 import domain.models.developers.Developer
 import domain.models.emailpreferences.EmailPreferences
+import utils.CollaboratorTracker
+import utils.UserIdTracker
 
-trait DeveloperBuilder {
-  import utils.UserIdTracker.idOf
+trait DeveloperBuilder extends CollaboratorTracker {
+  self: UserIdTracker =>
 
   def buildDeveloper(
     emailAddress: String = "something@example.com",

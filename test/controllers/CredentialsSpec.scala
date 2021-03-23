@@ -39,11 +39,15 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithLoggedInSession._
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import utils.LocalUserIdTracker
 
-class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with DeveloperBuilder {
+class CredentialsSpec 
+    extends BaseControllerSpec 
+    with SubscriptionTestHelperSugar 
+    with DeveloperBuilder 
+    with LocalUserIdTracker {
 
   val developer = buildDeveloper()
   val sessionId = "sessionId"
@@ -52,7 +56,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   val loggedInUser = DeveloperSession(session)
 
   val applicationId = ApplicationId(UUID.randomUUID().toString())
-  val tokens = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
+  val appTokens = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
   trait ApplicationProvider {
     def createApplication(): Application
@@ -69,7 +73,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
+        Set(loggedInUser.email.asAdministratorCollaborator),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
@@ -94,7 +98,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       DateTimeUtils.now,
       None,
       environment,
-      collaborators = Set(Collaborator(loggedInUser.email, userRole, UserId.random)),
+      collaborators = Set(loggedInUser.email.asRole(userRole)),
       state = state,
       access = access
     )
@@ -128,7 +132,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     implicit val hc = HeaderCarrier()
 
     givenApplicationAction(applicationWithSubscriptionData, loggedInUser)
-    fetchCredentialsReturns(application, tokens)
+    fetchCredentialsReturns(application, appTokens)
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     givenApplicationUpdateSucceeds()
@@ -319,7 +323,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   }
 
   "deleteClientSecret" should {
-    val clientSecretToDelete: ClientSecret = tokens.clientSecrets.last
+    val clientSecretToDelete: ClientSecret = appTokens.clientSecrets.last
     "return the confirmation page when the selected client secret exists" in new Setup with BasicApplicationProvider {
       val result = underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken)
 

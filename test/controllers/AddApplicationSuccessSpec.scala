@@ -36,9 +36,14 @@ import views.html._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
-import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
+class AddApplicationSuccessSpec 
+    extends BaseControllerSpec 
+    with SubscriptionTestHelperSugar 
+    with WithCSRFAddToken 
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
   val developer = buildDeveloper()
   val sessionId = "sessionId"
@@ -58,7 +63,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
+    Set(loggedInUser.email.asAdministratorCollaborator),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -72,7 +77,7 @@ class AddApplicationSuccessSpec extends BaseControllerSpec with SubscriptionTest
     None,
     Environment.SANDBOX,
     Some("Description 2"),
-    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
+    Set(loggedInUser.email.asAdministratorCollaborator),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )

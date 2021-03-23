@@ -26,9 +26,10 @@ import utils.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class SessionServiceSpec extends AsyncHmrcSpec {
-  trait Setup extends DeveloperBuilder {
+class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker {
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], mock[MfaMandateService], mock[FlowRepository])

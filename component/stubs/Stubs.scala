@@ -77,7 +77,7 @@ object Stubs {
 }
 
 object DeveloperStub {
-  import utils.UserIdTracker.idOf
+  import utils.GlobalUserIdTracker.idOf
 
   def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
     stubFor(

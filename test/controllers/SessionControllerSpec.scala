@@ -23,17 +23,18 @@ import config.ErrorHandler
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.developers.{LoggedInState, Session}
 import mocks.service.SessionServiceMock
-import play.api.test.{DefaultAwaitTimeout, FakeRequest}
+import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import service.AuditService
 import utils.WithLoggedInSession._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import utils.LocalUserIdTracker
 
-class SessionControllerSpec extends BaseControllerSpec with DefaultAwaitTimeout {
+class SessionControllerSpec extends BaseControllerSpec with DeveloperBuilder with LocalUserIdTracker {
 
-  trait Setup extends SessionServiceMock with DeveloperBuilder {
+  trait Setup extends SessionServiceMock {
     val sessionController = new SessionController(
       mock[AuditService],
       sessionServiceMock,

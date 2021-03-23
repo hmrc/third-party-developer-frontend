@@ -25,8 +25,9 @@ import helpers.string._
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
 import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder {
+class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
 
   val developer = buildDeveloper(emailAddress = "developerEmail", firstName = "DEVELOPER    ", lastName = "developerLast")
   val developerCollaborator = Collaborator(developer.email, CollaboratorRole.DEVELOPER, UserId.random)

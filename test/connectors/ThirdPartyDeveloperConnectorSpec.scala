@@ -38,10 +38,15 @@ import scala.concurrent.Future.successful
 import connectors.ThirdPartyDeveloperConnector.CreateMfaResponse
 import connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
 import connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
+import utils.LocalUserIdTracker
 
-class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponseHandlers { 
+class ThirdPartyDeveloperConnectorSpec 
+    extends AsyncHmrcSpec 
+    with CommonResponseHandlers 
+    with DeveloperBuilder 
+    with LocalUserIdTracker { 
 
-  trait Setup extends DeveloperBuilder {
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockHttp: HttpClient = mock[HttpClient]

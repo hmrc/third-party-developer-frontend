@@ -35,10 +35,11 @@ import views.html.{SupportEnquiryView, SupportThankyouView}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import utils.LocalUserIdTracker
 
-class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
+class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
-  trait Setup extends SessionServiceMock with DeveloperBuilder {
+  trait Setup extends SessionServiceMock {
     val supportEnquiryView = app.injector.instanceOf[SupportEnquiryView]
     val supportThankYouView = app.injector.instanceOf[SupportThankyouView]
 

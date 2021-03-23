@@ -30,7 +30,6 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
@@ -41,8 +40,17 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
+import utils.LocalUserIdTracker
+import utils.TestApplications
+import utils.CollaboratorTracker
 
-class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
+class DetailsSpec 
+    extends BaseControllerSpec 
+    with WithCSRFAddToken 
+    with TestApplications 
+    with DeveloperBuilder 
+    with CollaboratorTracker 
+    with LocalUserIdTracker {
 
   Helpers.running(app) {
     "details" when {
@@ -321,7 +329,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]

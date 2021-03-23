@@ -27,17 +27,23 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.TestApplications._
 import utils.ViewHelpers._
-import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmationView, RedirectsView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import utils._
 
-class RedirectsSpec extends BaseControllerSpec with WithCSRFAddToken {
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
+class RedirectsSpec 
+    extends BaseControllerSpec
+    with WithCSRFAddToken 
+    with TestApplications
+    with CollaboratorTracker
+    with DeveloperBuilder 
+    with LocalUserIdTracker {
+  
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val applicationId = "1234"
     val clientId = ClientId("clientId123")
 

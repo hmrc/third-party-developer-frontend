@@ -41,9 +41,16 @@ import domain.models.developers.UserId
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
+import utils.LocalUserIdTracker
 
-class ManageTeamSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken {
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TestApplications with DeveloperBuilder {
+class ManageTeamSpec 
+    extends BaseControllerSpec 
+    with SubscriptionTestHelperSugar 
+    with WithCSRFAddToken
+    with TestApplications 
+    with DeveloperBuilder
+    with LocalUserIdTracker {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
     val addTeamMemberView = app.injector.instanceOf[AddTeamMemberView]
     val teamMemberAddView = app.injector.instanceOf[TeamMemberAddView]

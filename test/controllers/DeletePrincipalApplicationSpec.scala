@@ -29,13 +29,20 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
 import views.html._
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import utils.LocalUserIdTracker
 
-class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAddToken with TestApplications with ErrorHandlerMock {
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with DeveloperBuilder {
+class DeletePrincipalApplicationSpec 
+    extends BaseControllerSpec 
+    with WithCSRFAddToken 
+    with TestApplications 
+    with ErrorHandlerMock 
+    with DeveloperBuilder
+    with LocalUserIdTracker {
+      
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
     val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
     val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
     val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
@@ -77,7 +84,7 @@ class DeletePrincipalApplicationSpec extends BaseControllerSpec with WithCSRFAdd
       None,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
+      Set(loggedInUser.email.asAdministratorCollaborator),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )

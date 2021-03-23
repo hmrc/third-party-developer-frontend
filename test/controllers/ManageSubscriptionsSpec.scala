@@ -47,8 +47,16 @@ import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.FieldValue
 import domain.models.subscriptions.FieldName
+import utils.LocalUserIdTracker
 
-class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with DeveloperBuilder {
+class ManageSubscriptionsSpec 
+    extends BaseControllerSpec 
+    with WithCSRFAddToken 
+    with SubscriptionTestHelperSugar     
+    with TestApplications
+    with DeveloperBuilder
+    with LocalUserIdTracker {
+
   val failedNoApp: Future[Nothing] = failed(new ApplicationNotFound)
 
   val developer: Developer = buildDeveloper()
@@ -180,7 +188,7 @@ class ManageSubscriptionsSpec extends BaseControllerSpec with WithCSRFAddToken w
   "ManageSubscriptions" when {
     "using an application pending approval" should {
 
-      trait PendingApprovalReturnsBadRequest extends ManageSubscriptionsSetup with TestApplications {
+      trait PendingApprovalReturnsBadRequest extends ManageSubscriptionsSetup {
         def executeAction: () => Future[Result]
 
         val pageNumber = 1

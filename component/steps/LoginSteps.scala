@@ -31,6 +31,9 @@ import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, Stubs}
 import domain.models.connectors.PasswordResetRequest
+import utils.LocalUserIdTracker
+import utils.GlobalUserIdTracker
+import utils.UserIdTracker
 
 case class MfaSecret(secret: String)
 
@@ -45,7 +48,9 @@ object TestContext {
   var sessionIdForMfaMandatingUser: String = ""
 }
 
-class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with DeveloperBuilder {
+class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with DeveloperBuilder with UserIdTracker {
+  def idOf(email: String) = GlobalUserIdTracker.idOf(email)
+
   implicit val webDriver: WebDriver = Env.driver
 
   private val accessCode = "123456"

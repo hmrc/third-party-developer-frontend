@@ -34,12 +34,18 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import service.EmailPreferencesService
+import utils.LocalUserIdTracker
 
-class ManageApplicationsSpec extends BaseControllerSpec with ApplicationActionServiceMock with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
+class ManageApplicationsSpec 
+    extends BaseControllerSpec 
+    with ApplicationActionServiceMock 
+    with SubscriptionTestHelperSugar 
+    with WithCSRFAddToken 
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
   val developer = buildDeveloper()
   val sessionId = "sessionId"
@@ -59,7 +65,7 @@ class ManageApplicationsSpec extends BaseControllerSpec with ApplicationActionSe
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
+    Set(loggedInUser.email.asAdministratorCollaborator),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )

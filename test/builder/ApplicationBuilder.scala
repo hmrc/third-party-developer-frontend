@@ -22,9 +22,11 @@ import domain.models.applications._
 import uk.gov.hmrc.time.DateTimeUtils
 import domain.models.apidefinitions._
 import domain.models.subscriptions.{Fields,FieldValue,FieldName}
-trait ApplicationBuilder {
+import utils.CollaboratorTracker
+import utils.UserIdTracker
 
-  import utils.UserIdTracker._
+trait ApplicationBuilder extends CollaboratorTracker {
+  self: UserIdTracker =>
 
   def buildApplication(appOwnerEmail: String): Application = {
 
@@ -50,7 +52,7 @@ trait ApplicationBuilder {
   }
 
   def buildCollaborators(emails: Seq[String]): Set[Collaborator] = {
-    emails.map(email => Collaborator(email, CollaboratorRole.ADMINISTRATOR, idOf(email))).toSet
+    emails.map(email => email.asAdministratorCollaborator).toSet
   }
 
   def buildApplicationWithSubscriptionData(appOwnerEmail: String): ApplicationWithSubscriptionData = {

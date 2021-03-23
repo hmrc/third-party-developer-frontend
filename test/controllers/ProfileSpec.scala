@@ -39,10 +39,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
 import controllers.profile.Profile
+import utils.LocalUserIdTracker
 
-class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
+class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with DeveloperBuilder {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     val changeProfileView = app.injector.instanceOf[ChangeProfileView]
     val profileView = app.injector.instanceOf[ProfileView]
     val profileUpdatedView = app.injector.instanceOf[ProfileUpdatedView]

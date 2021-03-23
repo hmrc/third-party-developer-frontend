@@ -23,8 +23,9 @@ import play.twirl.api.{Html, HtmlFormat}
 import play.api.test.FakeRequest
 import views.helper.CommonViewSpec
 import views.html.include.Main
+import utils.LocalUserIdTracker
 
-class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder {
+class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUserIdTracker {
 
   "MainTemplateSpec" should {
     val mainView = app.injector.instanceOf[Main]

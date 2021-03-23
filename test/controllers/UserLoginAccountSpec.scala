@@ -41,9 +41,10 @@ import scala.concurrent.Future._
 import views.html.UserDidNotAdd2SVView
 import views.html.Add2SVView
 import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
-  trait Setup extends SessionServiceMock with DeveloperBuilder {
+class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+  trait Setup extends SessionServiceMock {
     val developer = buildDeveloper()
     val session = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
     val user = DeveloperSession(session)

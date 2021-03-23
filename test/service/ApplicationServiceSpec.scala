@@ -46,8 +46,9 @@ import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.VersionSubscription
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import utils.LocalUserIdTracker
 
-class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder{
+class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")

@@ -45,11 +45,15 @@ import views.html.editapplication.NameSubmittedView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
-import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar with SubscriptionsBuilder with DeveloperBuilder {
-
-  import utils.UserIdTracker.idOf
+class ApplicationCheckSpec 
+    extends BaseControllerSpec 
+    with WithCSRFAddToken 
+    with SubscriptionTestHelperSugar 
+    with SubscriptionsBuilder
+    with DeveloperBuilder 
+    with LocalUserIdTracker {
 
   override val appId = ApplicationId("1234")
 
@@ -72,7 +76,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
   val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersion("api-example-microservice"))
 
-  val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
+  val appTokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
   val exampleApiSubscription: Some[APISubscriptions] = Some(
     APISubscriptions(
       "Example API",
@@ -114,7 +118,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, loggedInUser.developer.userId)),
+        Set(loggedInUser.email.asAdministratorCollaborator),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
@@ -160,8 +164,8 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
     val anotherRole = if (userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
 
     val collaborators = Set(
-      Collaborator(loggedInUser.email, userRole, loggedInUser.developer.userId),
-      Collaborator(anotherCollaboratorEmail, anotherRole, idOf(anotherCollaboratorEmail))
+      loggedInUser.email.asRole(userRole),
+      anotherCollaboratorEmail.asRole(anotherRole)
     )
 
     createFullyConfigurableApplication(collaborators, appId, clientId, state, checkInformation, access)
@@ -213,7 +217,7 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     givenApplicationUpdateSucceeds()
 
-    fetchCredentialsReturns(application, tokens)
+    fetchCredentialsReturns(application, appTokens)
 
     givenRemoveTeamMemberSucceeds(loggedInUser)
 
@@ -1339,9 +1343,9 @@ class ApplicationCheckSpec extends BaseControllerSpec with WithCSRFAddToken with
 
     "return unauthorised App details page with 2 Admins " in new Setup {
       lazy val collaborators = Set(
-        Collaborator(loggedInUser.email, DEVELOPER, UserId.random),
-        Collaborator(anotherCollaboratorEmail, ADMINISTRATOR, UserId.random),
-        Collaborator(yetAnotherCollaboratorEmail, ADMINISTRATOR, UserId.random)
+        loggedInUser.email.asDeveloperCollaborator,
+        anotherCollaboratorEmail.asAdministratorCollaborator,
+        yetAnotherCollaboratorEmail.asAdministratorCollaborator
       )
 
       def createApplication() = createFullyConfigurableApplication(collaborators = collaborators)

@@ -29,9 +29,9 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import utils.UserIdTracker
+import utils.LocalUserIdTracker
 
-class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
+class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker {
   private val stubConfig = Configuration(
     "Test.microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
@@ -44,8 +44,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       .in(Mode.Test)
       .build()
 
-  trait Setup extends DeveloperBuilder {
-    import utils.UserIdTracker._
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val userEmail = "thirdpartydeveloper@example.com"

@@ -29,6 +29,7 @@ package controllers
 
  import scala.concurrent.{ExecutionContext, Future}
  import scala.concurrent.ExecutionContext.Implicits.global
+import utils.LocalUserIdTracker
 
  class TestController(
      val cookieSigner: CookieSigner,
@@ -44,6 +45,7 @@ package controllers
    with ApplicationServiceMock
    with ApplicationActionServiceMock
    with builder.ApplicationBuilder
+   with LocalUserIdTracker
    with builder.SubscriptionsBuilder
    with LoggedInRequestTestHelper {
 

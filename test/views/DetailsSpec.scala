@@ -32,8 +32,15 @@ import utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
 import domain.models.developers.UserId
+import utils.LocalUserIdTracker
+import utils.CollaboratorTracker
 
-class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddToken {
+class DetailsSpec 
+    extends CommonViewSpec 
+    with TestApplications 
+    with CollaboratorTracker 
+    with LocalUserIdTracker 
+    with WithCSRFAddToken {
 
   val detailsView = app.injector.instanceOf[DetailsView]
 

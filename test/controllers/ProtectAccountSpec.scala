@@ -43,10 +43,11 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import controllers.profile.ProtectAccount
 import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
+class ProtectAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
-  trait Setup extends SessionServiceMock with DeveloperBuilder {
+  trait Setup extends SessionServiceMock {
     val secret = "ABCDEFGH"
     val issuer = "HMRC Developer Hub"
     val sessionId = "sessionId"

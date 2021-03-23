@@ -27,8 +27,9 @@ import service.ApplicationService
 import scala.concurrent.Future.{failed, successful}
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.developers.UserId
+import utils._
 
-trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
+trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
   val applicationServiceMock = mock[ApplicationService]
 
   def fetchByApplicationIdReturns(id: ApplicationId, returns: Application): Unit =
@@ -121,8 +122,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   def givenApplicationExists(application: Application): Unit = givenApplicationExists(ApplicationWithSubscriptionData(application, Set.empty, Map.empty))
 
   def givenApplicationExists(appData: ApplicationWithSubscriptionData): Unit = {
-    import utils.TestApplications.tokens
-
     fetchByApplicationIdReturns(appData.application.id, appData)
 
     when(applicationServiceMock.fetchCredentials(eqTo(appData.application))(*)).thenReturn(successful(tokens()))

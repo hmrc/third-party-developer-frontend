@@ -43,8 +43,9 @@ import domain.models.developers.UserId
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import utils.LocalUserIdTracker
 
-class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
+class SubscriptionsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   val apiName = "api-1"
   val apiVersion = ApiVersion("1.0")

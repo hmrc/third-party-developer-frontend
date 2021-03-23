@@ -27,8 +27,7 @@ import domain.models.developers.UserId
 import scala.util.Random
 
 trait TestApplications {
-
-  import utils.UserIdTracker._
+  self : CollaboratorTracker =>
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
@@ -61,7 +60,7 @@ trait TestApplications {
       lastAccess = DateTimeUtils.now,
       deployedTo = environment,
       description = Some("Description 1"),
-      collaborators = Set(Collaborator(adminEmail, CollaboratorRole.ADMINISTRATOR, idOf(adminEmail)), Collaborator(developerEmail, CollaboratorRole.DEVELOPER, idOf(developerEmail))),
+      collaborators = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator),
       state = state,
       access = access,
       ipAllowlist = ipAllowlist
@@ -131,4 +130,4 @@ trait TestApplications {
   }
 }
 
-object TestApplications extends TestApplications
+// object TestApplications extends TestApplications with CollaboratorTracker with LocalUserIdTracker

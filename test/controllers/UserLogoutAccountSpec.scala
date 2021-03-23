@@ -34,10 +34,11 @@ import views.html.{LogoutConfirmationView, SignoutSurveyView}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import utils.LocalUserIdTracker
 
-class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken {
+class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
-  trait Setup extends SessionServiceMock with DeveloperBuilder {
+  trait Setup extends SessionServiceMock {
     val developer = buildDeveloper()
     val sessionId = UUID.randomUUID().toString
     val session = Session(sessionId, developer, LoggedInState.LOGGED_IN)

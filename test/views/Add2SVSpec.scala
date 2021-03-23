@@ -25,8 +25,9 @@ import play.twirl.api.Html
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.Add2SVView
+import utils.LocalUserIdTracker
 
-class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder {
+class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
 

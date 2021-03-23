@@ -34,8 +34,9 @@ import domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldValue
 import domain.models.subscriptions.FieldValue
 import domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsFailureResponse
 import domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
+import utils.LocalUserIdTracker
 
-class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder {
+class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
   val versionOne = ApiVersion("1.0")
   val versionTwo = ApiVersion("2.0")
