@@ -42,6 +42,8 @@ object AppWorld {
 }
 
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar {
+  import utils.UserIdTracker.idOf
+
   implicit val webDriver = Env.driver
 
   val applicationId = ApplicationId("applicationId")
@@ -68,7 +70,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
     ApplicationStub.setUpFetchApplication(applicationId, OK, Json.toJson(app).toString())
 
-    configureUserApplications(app.collaborators.head.emailAddress, List(app))
+    configureUserApplications(app.collaborators.head.userId, List(app))
   }
 
   Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => DeskproStub.verifyTicketCreationWithSubject(subject) }
@@ -79,8 +81,10 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   Given("""^I have no application assigned to my email '(.*)'$""") { (email: String) =>
-    ApplicationStub.configureUserApplications(email)
-    ApplicationStub.configureUserApplications(email)
+    val userId = idOf(email)
+
+    ApplicationStub.configureUserApplications(userId)
+    ApplicationStub.configureUserApplications(userId)
     AppWorld.userApplicationsOnBackend = Nil
   }
 
@@ -136,7 +140,8 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   def configureStubsForApplications(email: String, applications: List[Application]) = {
-    ApplicationStub.configureUserApplications(email, applications)
+    val userId = idOf(email)
+    ApplicationStub.configureUserApplications(userId, applications)
     for (app <- applications) {
       // configure to be able to fetch apps and Subscriptions
       ApplicationStub.setUpFetchApplication(app.id, OK, Json.toJson(app).toString())

@@ -66,12 +66,12 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val result: Map[String,String] = data.asScalaRawMaps[String, String].head
 
     val password = result("Password")
-
-    Stubs.setupPostRequest("/check-password", NO_CONTENT)
-    Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
-
     val developer = buildDeveloper(emailAddress = result("Email address"), firstName = result("First name"), lastName = result("Last name"))
 
+    DeveloperStub.findUserIdByEmailAddress(developer.email)
+    Stubs.setupPostRequest("/check-password", NO_CONTENT)
+    Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
+    
     TestContext.developer = developer
 
     TestContext.sessionIdForLoggedInUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)

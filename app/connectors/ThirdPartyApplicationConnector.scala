@@ -29,7 +29,7 @@ import play.api.Logger
 import play.api.http.HeaderNames.CONTENT_LENGTH
 import play.api.http.Status._
 import service.ApplicationService.ApplicationConnector
-import uk.gov.hmrc.http.{UserId => HttpUserId, _}
+import uk.gov.hmrc.http.{UserId => _, _}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 

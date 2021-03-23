@@ -33,8 +33,8 @@ import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
 import play.filters.csrf.CSRF
 import domain.models.developers.UserId
-import ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
-import ThirdPartyDeveloperConnector.JsonFormatters.{FindUserIdRequestWrites, FindUserIdResponseReads}
+import connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
+import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import play.api.libs.json.Json
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
@@ -173,18 +173,6 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.enterTotp().url)
       }
     }
-  }
-
-  private def setupThirdPartyApplicationSearchApplicationByEmailStub(): Unit = {
-    stubFor(
-      get(urlEqualTo("/developer/applications?emailAddress=thirdpartydeveloper%40example.com&environment=PRODUCTION"))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader(contentType, contentTypeApplicationJson)
-            .withBody("[]")
-        )
-    )
   }
 
   private def setupThirdPartyDeveloperFindUserIdByEmailAddress(emailAddress: String, userId: UserId) = {
