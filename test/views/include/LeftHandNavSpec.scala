@@ -25,12 +25,11 @@ import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.elementExistsByText
-import utils.WithCSRFAddToken
+import utils._
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
-import domain.models.developers.UserId
 
-class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
+class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
 
   trait Setup {
     val leftHandNavView = app.injector.instanceOf[LeftHandNav]
@@ -52,7 +51,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken {
       None,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, UserId.random)),
+      Set(loggedInUser.email.asAdministratorCollaborator),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )

@@ -228,7 +228,7 @@ class CheckYourAnswersSpec
     ): Application = {
 
       val collaborators = Set(
-        loggedInUser.email.asRole(userRole),
+        loggedInUser.email.asCollaborator(userRole),
         anotherCollaboratorEmail.asDeveloperCollaborator
       )
 

@@ -31,7 +31,6 @@ import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import stubs.{DeveloperStub, Stubs}
 import domain.models.connectors.PasswordResetRequest
-import utils.LocalUserIdTracker
 import utils.GlobalUserIdTracker
 import utils.UserIdTracker
 

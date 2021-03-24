@@ -26,14 +26,13 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import utils.WithCSRFAddToken
+import utils._
 import views.helper.CommonViewSpec
 import views.html.ServerTokenView
-import domain.models.developers.UserId
 
 import scala.collection.JavaConverters._
 
-class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken {
+class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   trait Setup {
     val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
@@ -55,7 +54,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken {
       None,
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(Collaborator(developer.email, CollaboratorRole.ADMINISTRATOR, UserId.random)),
+      collaborators = Set(developer.email.asAdministratorCollaborator),
       access = Standard(),
       state = ApplicationState.testing,
       checkInformation = None

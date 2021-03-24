@@ -164,8 +164,8 @@ class ApplicationCheckSpec
     val anotherRole = if (userRole.isAdministrator) DEVELOPER else ADMINISTRATOR
 
     val collaborators = Set(
-      loggedInUser.email.asRole(userRole),
-      anotherCollaboratorEmail.asRole(anotherRole)
+      loggedInUser.email.asCollaborator(userRole),
+      anotherCollaboratorEmail.asCollaborator(anotherRole)
     )
 
     createFullyConfigurableApplication(collaborators, appId, clientId, state, checkInformation, access)

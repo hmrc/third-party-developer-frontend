@@ -21,14 +21,21 @@ import domain.models.developers.UserId
 import domain.models.applications.{Collaborator, CollaboratorRole}
 import domain.models.applications.CollaboratorRole._
 
+// Trait allows for mix in of either local or global userIdTracker into things like CollaboratorTracker
 trait UserIdTracker {
   def idOf(email: String): UserId
 }
+
+// Use this tracker for unit tests and those where there is no need for a shared map across many specs/features
 trait LocalUserIdTracker extends UserIdTracker {
   private lazy val idsByEmail = mutable.Map[String, UserId]()
 
   def idOf(email: String): UserId = idsByEmail.getOrElseUpdate(email, UserId.random)
 }
+
+// Use this when you want to share the map across files like component tests where
+// fixture setup is spread over different classes/objects
+object GlobalUserIdTracker extends LocalUserIdTracker
 
 trait CollaboratorTracker { 
   self : UserIdTracker =>
@@ -38,9 +45,6 @@ trait CollaboratorTracker {
   implicit class CollaboratorSyntax(value: String) {
     def asAdministratorCollaborator = collaboratorOf(value, ADMINISTRATOR)
     def asDeveloperCollaborator = collaboratorOf(value, DEVELOPER)
-    def asRole(role:CollaboratorRole) = collaboratorOf(value, role)
+    def asCollaborator(role:CollaboratorRole) = collaboratorOf(value, role)
   }
 }
-
-// Use this when you want to share the map across files like component tests
-object GlobalUserIdTracker extends LocalUserIdTracker

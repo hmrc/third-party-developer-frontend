@@ -16,10 +16,9 @@
 
 package views.helper
 
-import org.scalatest.Matchers
 import utils.AsyncHmrcSpec
 
-class GlobalSectionSpec extends AsyncHmrcSpec with Matchers {
+class GlobalSectionSpec extends AsyncHmrcSpec {
 
   "dataAttribute" should {
     Seq(

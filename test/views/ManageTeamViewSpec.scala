@@ -29,7 +29,6 @@ import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
-import domain.models.developers.UserId
 import builder.DeveloperBuilder
 import utils.LocalUserIdTracker
 
@@ -39,7 +38,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
   val clientId = ClientId("clientId123")
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val collaborator = utils.DeveloperSession("developer@example.com", "firstName2", "lastName2", loggedInState = LoggedInState.LOGGED_IN)
-  val collaborators = Set(loggedInUser.email.asAdministratorCollaborator, Collaborator(collaborator.email, CollaboratorRole.DEVELOPER, UserId.random))
+  val collaborators = Set(loggedInUser.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
   val application = Application(
     appId,
     clientId,

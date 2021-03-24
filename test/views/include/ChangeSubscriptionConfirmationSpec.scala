@@ -27,13 +27,12 @@ import play.api.data.Form
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers.elementExistsByText
-import utils.WithCSRFAddToken
+import utils._
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
 import play.api.mvc.Call
-import domain.models.developers.UserId
 
-class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken {
+class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   val request = FakeRequest().withCSRFToken
 
   val applicationId = ApplicationId("1234")
@@ -55,7 +54,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec with WithCSRFAdd
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, CollaboratorRole.ADMINISTRATOR, UserId.random)),
+    Set(loggedInUser.email.asAdministratorCollaborator),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )

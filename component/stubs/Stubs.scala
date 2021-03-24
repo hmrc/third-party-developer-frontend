@@ -34,7 +34,7 @@ import domain.models.developers.UserId
 import domain.models.connectors.PasswordResetRequest
 
 import connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
-import connectors.ThirdPartyDeveloperConnector.JsonFormatters.{FindUserIdRequestWrites, FindUserIdResponseReads}
+import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 
 object Stubs {
 

@@ -16,12 +16,11 @@
 
 package controllers
 
-import org.scalatest.Matchers
 import play.api.data.FormError
 import utils.AsyncHmrcSpec
 import domain.models.applications.ApplicationId
 
-class FormValidationSpec extends AsyncHmrcSpec with Matchers {
+class FormValidationSpec extends AsyncHmrcSpec {
   "ForgotPasswordForm " should {
     val validForgotPasswordForm = Map("emailaddress" -> "john.smith@example.com")
 

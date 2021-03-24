@@ -89,7 +89,7 @@ class TermsOfUseSpec
         DateTimeUtils.now,
         None,
         environment,
-        collaborators = Set(loggedInUser.email.asRole(userRole)),
+        collaborators = Set(loggedInUser.email.asCollaborator(userRole)),
         access = access,
         state = ApplicationState.production("dont-care", "dont-care"),
         checkInformation = checkInformation

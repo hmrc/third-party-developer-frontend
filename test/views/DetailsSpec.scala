@@ -31,7 +31,6 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
-import domain.models.developers.UserId
 import utils.LocalUserIdTracker
 import utils.CollaboratorTracker
 
@@ -206,7 +205,7 @@ class DetailsSpec
 
           "the user is an administrator" should {
 
-            val collaborators = Set(Collaborator(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR, UserId.random))
+            val collaborators = Set(loggedIn.developer.email.asAdministratorCollaborator)
 
             "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)

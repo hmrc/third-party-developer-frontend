@@ -25,12 +25,11 @@ import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import utils._
 import views.helper.CommonViewSpec
 import views.html.SubscribeRequestSubmittedView
-import domain.models.developers.UserId
 
-class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
+class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   "Subscribe request submitted page" should {
     "render with no errors" in {
       val appConfig = mock[ApplicationConfig]
@@ -50,7 +49,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
         None,
         Environment.PRODUCTION,
         Some("Test Application Description"),
-        Set(Collaborator(developer.email, CollaboratorRole.ADMINISTRATOR, UserId.random)),
+        Set(developer.email.asAdministratorCollaborator),
         state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )

@@ -20,13 +20,13 @@ import config.ApplicationConfig
 import domain.models.applications._
 import org.joda.time.{DateTime, Duration, Instant, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.AsyncHmrcSpec
 import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import utils._
 
-class MfaMandateServiceSpec extends AsyncHmrcSpec {
+class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with LocalUserIdTracker {
 
   trait Setup {
     val dateAFewDaysAgo: LocalDate = Instant.now().minus(Duration.standardDays((2L))).toDateTime().toLocalDate
@@ -34,7 +34,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
     val dateInTheFuture: LocalDate = Instant.now().plus(Duration.standardDays(1L)).toDateTime().toLocalDate
 
     val email = "test@example.com"
-    val userId = UserId.random
+    val userId = idOf(email)
 
     implicit val mockHeaderCarrier = mock[HeaderCarrier]
 
@@ -56,7 +56,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
           new DateTime(),
           None,
           Environment.PRODUCTION,
-          collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
+          collaborators = Set(email.asAdministratorCollaborator)
         )
       )
     )
@@ -71,7 +71,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec {
           new DateTime(),
           None,
           Environment.PRODUCTION,
-          collaborators = Set(Collaborator(email, CollaboratorRole.DEVELOPER, userId))
+          collaborators = Set(email.asDeveloperCollaborator)
         )
       )
     )

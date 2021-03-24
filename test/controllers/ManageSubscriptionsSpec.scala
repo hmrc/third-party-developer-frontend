@@ -85,7 +85,7 @@ class ManageSubscriptionsSpec
     None,
     Environment.SANDBOX,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, role, UserId.random)),
+    Set(loggedInUser.email.asCollaborator(role)),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(
       redirectUris = List("https://red1", "https://red2"),

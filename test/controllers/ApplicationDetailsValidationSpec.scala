@@ -16,11 +16,10 @@
 
 package controllers
 
-import org.scalatest.Matchers
 import play.api.data.{Form, FormError}
 import utils.AsyncHmrcSpec
 
-class ApplicationDetailsValidationSpec extends AsyncHmrcSpec with Matchers {
+class ApplicationDetailsValidationSpec extends AsyncHmrcSpec {
 
   "applicationNameValidator" should {
     val testForm = Form("name" -> applicationNameValidator)

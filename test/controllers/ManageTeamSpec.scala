@@ -36,7 +36,6 @@ import utils.{TestApplications, WithCSRFAddToken}
 import utils.WithLoggedInSession._
 import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -98,7 +97,7 @@ class ManageTeamSpec
 
       val developerSession = DeveloperSession(session)
 
-      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(Collaborator(developerSession.email, userRole, UserId.random))
+      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(developerSession.email.asCollaborator(userRole))
       val application = aStandardApplication.copy(id = appId, collaborators = collaborators, createdOn = DateTime.parse("2018-04-06T09:00"), lastAccess = DateTime.parse("2018-04-06T09:00"))
 
       givenApplicationAction(application, developerSession)
@@ -226,10 +225,10 @@ class ManageTeamSpec
     val teamMemberEmail = "teamMemberToDelete@example.com"
     val teamMemberEmailHash = teamMemberEmail.toSha256
     val additionalTeamMembers = Seq(
-      Collaborator("email1@example.com", DEVELOPER, UserId.random),
-      Collaborator("email2@example.com", DEVELOPER, UserId.random),
-      Collaborator("email3@example.com", DEVELOPER, UserId.random),
-      Collaborator(teamMemberEmail, DEVELOPER, UserId.random)
+      "email1@example.com".asDeveloperCollaborator,
+      "email2@example.com".asDeveloperCollaborator,
+      "email3@example.com".asDeveloperCollaborator,
+      teamMemberEmail.asDeveloperCollaborator
     )
 
     "show the remove team member page when logged in as an admin" in new Setup {

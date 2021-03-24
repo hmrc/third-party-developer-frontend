@@ -17,7 +17,6 @@
 package service
 
 import connectors.ThirdPartyDeveloperConnector
-import org.scalatest.Matchers
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import utils.AsyncHmrcSpec
@@ -26,7 +25,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import domain.models.developers.UserId
 
-class MFAServiceSpec extends AsyncHmrcSpec with Matchers {
+class MFAServiceSpec extends AsyncHmrcSpec {
 
   trait Setup {
     val userId = UserId.random

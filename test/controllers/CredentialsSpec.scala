@@ -98,7 +98,7 @@ class CredentialsSpec
       DateTimeUtils.now,
       None,
       environment,
-      collaborators = Set(loggedInUser.email.asRole(userRole)),
+      collaborators = Set(loggedInUser.email.asCollaborator(userRole)),
       state = state,
       access = access
     )

@@ -26,7 +26,6 @@ import utils.ViewHelpers._
 import utils._
 import views.helper.CommonViewSpec
 import views.html.DeleteApplicationView
-import domain.models.developers.UserId
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
 
@@ -96,7 +95,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
       }
 
       "there are multiple administrators" in {
-        val extraAdmin = Collaborator("admin@test.com", CollaboratorRole.ADMINISTRATOR, UserId.random)
+        val extraAdmin = "admin@test.com".asAdministratorCollaborator
         Seq(prodApp.copy(collaborators = prodApp.collaborators + extraAdmin), sandboxApp.copy(collaborators = sandboxApp.collaborators + extraAdmin))
           .foreach { application =>
             val request = FakeRequest().withCSRFToken
