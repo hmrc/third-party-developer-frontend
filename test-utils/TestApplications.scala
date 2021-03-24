@@ -130,4 +130,3 @@ trait TestApplications {
   }
 }
 
-// object TestApplications extends TestApplications with CollaboratorTracker with LocalUserIdTracker
