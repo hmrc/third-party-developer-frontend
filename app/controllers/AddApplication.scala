@@ -58,7 +58,7 @@ class AddApplication @Inject() (
     extends ApplicationController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
-    applicationService.fetchByTeamMemberEmail(loggedIn.email) flatMap { apps =>
+    applicationService.fetchByTeamMemberUserId(loggedIn.developer.userId) flatMap { apps =>
       if (apps.isEmpty) {
         successful(Ok(addApplicationSubordinateEmptyNestView()))
       } else {

@@ -29,15 +29,16 @@ import utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
-import domain.models.developers.UserId
+import builder.DeveloperBuilder
+import utils.LocalUserIdTracker
 
-class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
+class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   val appId = ApplicationId("1234")
   val clientId = ClientId("clientId123")
   val loggedInUser = utils.DeveloperSession("admin@example.com", "firstName1", "lastName1", loggedInState = LoggedInState.LOGGED_IN)
   val collaborator = utils.DeveloperSession("developer@example.com", "firstName2", "lastName2", loggedInState = LoggedInState.LOGGED_IN)
-  val collaborators = Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random)), Collaborator(collaborator.email, Role.DEVELOPER, Some(UserId.random)))
+  val collaborators = Set(loggedInUser.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
   val application = Application(
     appId,
     clientId,
@@ -55,14 +56,14 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
   "manageTeam view" should {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
 
-    def renderPage(role: Role, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
+    def renderPage(role: CollaboratorRole, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
       val request = FakeRequest().withCSRFToken
 
       manageTeamView.render(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), role, form, request, messagesProvider, appConfig, "nav-section", loggedInUser)
     }
 
     "show Add and Remove buttons for Admin" in {
-      val document = Jsoup.parse(renderPage(role = Role.ADMINISTRATOR).body)
+      val document = Jsoup.parse(renderPage(role = CollaboratorRole.ADMINISTRATOR).body)
 
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe true
@@ -73,7 +74,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken {
     }
 
     "not show Add and Remove buttons for Developer" in {
-      val document = Jsoup.parse(renderPage(role = Role.DEVELOPER).body)
+      val document = Jsoup.parse(renderPage(role = CollaboratorRole.DEVELOPER).body)
 
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe false

@@ -17,18 +17,17 @@
 package views
 
 import domain.models.applications._
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import utils._
 import views.helper.CommonViewSpec
 import views.html.DeleteApplicationView
-import domain.models.developers.UserId
 
-class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
+class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
   val appId = ApplicationId("1234")
@@ -43,7 +42,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
+    Set(loggedInUser.email.asAdministratorCollaborator),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -96,7 +95,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken {
       }
 
       "there are multiple administrators" in {
-        val extraAdmin = Collaborator("admin@test.com", Role.ADMINISTRATOR, Some(UserId.random))
+        val extraAdmin = "admin@test.com".asAdministratorCollaborator
         Seq(prodApp.copy(collaborators = prodApp.collaborators + extraAdmin), sandboxApp.copy(collaborators = sandboxApp.collaborators + extraAdmin))
           .foreach { application =>
             val request = FakeRequest().withCSRFToken

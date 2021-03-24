@@ -24,6 +24,7 @@ import repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import domain.InvalidEmail
 
 @Singleton
 class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
@@ -31,7 +32,8 @@ class SessionService @Inject()(val thirdPartyDeveloperConnector: ThirdPartyDevel
                                val flowRepository: FlowRepository)(implicit val ec: ExecutionContext) {
   def authenticate(emailAddress: String, password: String)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = {
     for {
-      mfaMandatedForUser <- mfaMandateService.isMfaMandatedForUser(emailAddress)
+      coreUser <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
+      mfaMandatedForUser <- mfaMandateService.isMfaMandatedForUser(coreUser.id)
       response <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser))
     } yield response
   }

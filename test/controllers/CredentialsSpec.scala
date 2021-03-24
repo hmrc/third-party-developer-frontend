@@ -22,7 +22,7 @@ import java.util.UUID.randomUUID
 import builder.DeveloperBuilder
 import connectors.ThirdPartyDeveloperConnector
 import domain.models.applications.ApplicationState._
-import domain.models.applications.Role.{ADMINISTRATOR, DEVELOPER}
+import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import domain.ClientSecretLimitExceeded
 import domain.models.applications._
@@ -39,11 +39,15 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.WithLoggedInSession._
 import views.html.{ClientIdView, ClientSecretsView, CredentialsView, ServerTokenView}
 import views.html.editapplication.DeleteClientSecretView
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import utils.LocalUserIdTracker
 
-class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with DeveloperBuilder {
+class CredentialsSpec 
+    extends BaseControllerSpec 
+    with SubscriptionTestHelperSugar 
+    with DeveloperBuilder 
+    with LocalUserIdTracker {
 
   val developer = buildDeveloper()
   val sessionId = "sessionId"
@@ -52,7 +56,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
   val loggedInUser = DeveloperSession(session)
 
   val applicationId = ApplicationId(UUID.randomUUID().toString())
-  val tokens = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
+  val appTokens = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
   trait ApplicationProvider {
     def createApplication(): Application
@@ -69,7 +73,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
         None,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
+        Set(loggedInUser.email.asAdministratorCollaborator),
         state = ApplicationState.production(loggedInUser.email, ""),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
@@ -80,7 +84,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
   def createConfiguredApplication(
       applicationId: ApplicationId,
-      userRole: Role,
+      userRole: CollaboratorRole,
       state: ApplicationState = ApplicationState.production("", ""),
       access: Access = Standard(),
       environment: Environment = Environment.PRODUCTION,
@@ -94,7 +98,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       DateTimeUtils.now,
       None,
       environment,
-      collaborators = Set(Collaborator(loggedInUser.email, userRole, Some(UserId.random))),
+      collaborators = Set(loggedInUser.email.asCollaborator(userRole)),
       state = state,
       access = access
     )
@@ -128,7 +132,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
     implicit val hc = HeaderCarrier()
 
     givenApplicationAction(applicationWithSubscriptionData, loggedInUser)
-    fetchCredentialsReturns(application, tokens)
+    fetchCredentialsReturns(application, appTokens)
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     givenApplicationUpdateSucceeds()
@@ -260,7 +264,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${applicationId.value}/client-secrets")
-      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInUser.email))(any[HeaderCarrier])
+      verify(underTest.applicationService).addClientSecret(eqTo(application), eqTo(loggedInUser.email))(*)
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
@@ -295,7 +299,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(*)
     }
 
     "display the error page when the application has not reached production state" in new Setup {
@@ -304,7 +308,7 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
       val result = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(*)
     }
 
     "return to the login page when the user is not logged in" in new Setup {
@@ -314,12 +318,12 @@ class CredentialsSpec extends BaseControllerSpec with SubscriptionTestHelperSuga
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(any[HeaderCarrier])
+      verify(underTest.applicationService, never).addClientSecret(any[Application], any[String])(*)
     }
   }
 
   "deleteClientSecret" should {
-    val clientSecretToDelete: ClientSecret = tokens.clientSecrets.last
+    val clientSecretToDelete: ClientSecret = appTokens.clientSecrets.last
     "return the confirmation page when the selected client secret exists" in new Setup with BasicApplicationProvider {
       val result = underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken)
 

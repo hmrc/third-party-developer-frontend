@@ -38,10 +38,15 @@ import scala.concurrent.Future.successful
 import connectors.ThirdPartyDeveloperConnector.CreateMfaResponse
 import connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
 import connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
+import utils.LocalUserIdTracker
 
-class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponseHandlers { 
+class ThirdPartyDeveloperConnectorSpec 
+    extends AsyncHmrcSpec 
+    with CommonResponseHandlers 
+    with DeveloperBuilder 
+    with LocalUserIdTracker { 
 
-  trait Setup extends DeveloperBuilder {
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockHttp: HttpClient = mock[HttpClient]
@@ -263,39 +268,39 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   // TODO - remove this to integration testing
   "accountSetupQuestions" should {
     "successfully complete a developer account setup" in new Setup {
-      val developer = buildDeveloper(userId = userId)
+      val developer = buildDeveloper()
   
-      when(mockHttp.POSTEmpty[Developer](eqTo(endpoint(s"developer/account-setup/${userId.value}/complete")), *)(*, *, *))
+      when(mockHttp.POSTEmpty[Developer](eqTo(endpoint(s"developer/account-setup/${developer.userId.value}/complete")), *)(*, *, *))
       .thenReturn(successful(developer))
 
-      await(connector.completeAccountSetup(userId)) shouldBe developer
+      await(connector.completeAccountSetup(developer.userId)) shouldBe developer
     }
 
     "successfully update roles" in new Setup {
-      val developer = buildDeveloper(userId = userId)
+      val developer = buildDeveloper()
 
       private val request = AccountSetupRequest(roles = Some(List("aRole")), rolesOther = Some("otherRole"))
-      when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${userId.value}/roles")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
+      when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${developer.userId.value}/roles")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 
-      await(connector.updateRoles(userId, request)) shouldBe developer
+      await(connector.updateRoles(developer.userId, request)) shouldBe developer
     }
 
     "successfully update services" in new Setup {
-      val developer = buildDeveloper(userId = userId)
+      val developer = buildDeveloper()
 
       private val request = AccountSetupRequest(services = Some(List("aService")), servicesOther = Some("otherService"))
-      when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${userId.value}/services")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
+      when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${developer.userId.value}/services")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 
-      await(connector.updateServices(userId, request)) shouldBe developer
+      await(connector.updateServices(developer.userId, request)) shouldBe developer
     }
 
     "successfully update targets" in new Setup {
-      val developer = buildDeveloper(userId = userId)
+      val developer = buildDeveloper()
       
       private val request = AccountSetupRequest(targets = Some(List("aTarget")), targetsOther = Some("otherTargets"))
-      when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${userId.value}/targets")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
+      when(mockHttp.PUT[AccountSetupRequest,Developer](eqTo(endpoint(s"developer/account-setup/${developer.userId.value}/targets")), eqTo(request),*)(*,*,*,*)).thenReturn(successful(developer))
 
-      await(connector.updateTargets(userId, request)) shouldBe developer
+      await(connector.updateTargets(developer.userId, request)) shouldBe developer
     }
   }
 
@@ -331,6 +336,7 @@ class ThirdPartyDeveloperConnectorSpec extends AsyncHmrcSpec with CommonResponse
   }
 
   "create MFA" should {
+
     "return the created secret" in new Setup {
       val expectedSecret = "ABCDEF"
 

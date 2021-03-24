@@ -61,7 +61,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     when(
       mockThirdPartyApplicationConnector
-        .fetchApplicationById(eqTo(applicationId))(any[HeaderCarrier])
+        .fetchApplicationById(eqTo(applicationId))(*)
     ).thenReturn(
       Future.successful(
         Some(
@@ -123,7 +123,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
   "saveFieldsValues" should {
     "save the fields" in new Setup {
-      val developerRole = Role.DEVELOPER
+      val developerRole = CollaboratorRole.DEVELOPER
 
       val access = AccessRequirements.Default
 
@@ -140,7 +140,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       val newValue1 = FieldValue("newValue")
       val newValuesMap: Fields.Alias = Map(definition1.name -> newValue1)
 
-      when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
+      when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       val result = await(underTest.saveFieldValues(developerRole, application, apiContext, apiVersion, oldValues, newValuesMap))
@@ -153,12 +153,12 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       )
 
       verify(mockSubscriptionFieldsConnector)
-        .saveFieldValues(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(newFields1))(any[HeaderCarrier])
+        .saveFieldValues(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(newFields1))(*)
     }
 
     "save the fields fails with write access denied" in new Setup {
 
-      val developerRole = Role.DEVELOPER
+      val developerRole = CollaboratorRole.DEVELOPER
 
       val access = AccessRequirements(devhub = DevhubAccessRequirements(NoOne, NoOne))
 
@@ -173,7 +173,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       result shouldBe SaveSubscriptionFieldsAccessDeniedResponse
 
       verify(mockSubscriptionFieldsConnector, never)
-        .saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier])
+        .saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*)
     }
   }
 
@@ -181,7 +181,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     "save when old values are empty" in new Setup {
       val emptyOldValue = SubscriptionFieldValue(buildSubscriptionFieldValue("field-name").definition, FieldValue.empty)
 
-      when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
+      when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       val result = await(underTest.saveBlankFieldValues(application, apiContext, apiVersion, Seq(emptyOldValue)))
@@ -192,20 +192,20 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       )
 
       verify(mockSubscriptionFieldsConnector)
-        .saveFieldValues(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(expectedSavedFields))(any[HeaderCarrier])
+        .saveFieldValues(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(expectedSavedFields))(*)
     }
 
     "dont save when old values are populated" in new Setup {
       val populatedValue = buildSubscriptionFieldValue("field-name")
 
-      when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier]))
+      when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       val result = await(underTest.saveBlankFieldValues(application, apiContext, apiVersion, Seq(populatedValue)))
       result shouldBe SaveSubscriptionFieldsSuccessResponse
 
       verify(mockSubscriptionFieldsConnector, never)
-        .saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(any[HeaderCarrier])
+        .saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersion], *)(*)
     }
   }
 }

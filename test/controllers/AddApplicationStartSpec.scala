@@ -31,11 +31,16 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import utils.LocalUserIdTracker
 
-class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
+class AddApplicationStartSpec 
+    extends BaseControllerSpec 
+    with SubscriptionTestHelperSugar 
+    with WithCSRFAddToken 
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
   val developer = buildDeveloper()
   val sessionId = "sessionId"
@@ -46,7 +51,7 @@ class AddApplicationStartSpec extends BaseControllerSpec with SubscriptionTestHe
   val partLoggedInSessionId = "partLoggedInSessionId"
   val partLoggedInSession = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
-  val collaborator: Collaborator = Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))
+  val collaborator: Collaborator = loggedInUser.email.asAdministratorCollaborator
 
   val application = Application(
     appId,

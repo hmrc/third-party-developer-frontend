@@ -179,6 +179,14 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       }
   }
 
+  def findUserId(email: String)(implicit hc: HeaderCarrier): Future[Option[CoreUserDetails]] = {
+    http.POST[FindUserIdRequest, Option[FindUserIdResponse]](s"$serviceBaseUrl/developers/find-user-id", FindUserIdRequest(email))
+    .map {
+      case Some(response) => Some(CoreUserDetails(email, response.userId))
+      case None => None
+    }
+  }
+
   def fetchUserId(email: String)(implicit hc: HeaderCarrier): Future[CoreUserDetails] = {
     http.POST[FindUserIdRequest, FindUserIdResponse](s"$serviceBaseUrl/developers/find-user-id", FindUserIdRequest(email))
     .map(response => CoreUserDetails(email, response.userId))

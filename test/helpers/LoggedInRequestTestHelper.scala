@@ -26,8 +26,9 @@ import play.filters.csrf.CSRF.TokenProvider
 import security.CookieEncoding
 import service.SessionService
 import utils.WithLoggedInSession._
+import utils.LocalUserIdTracker
 
-trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding with DeveloperBuilder {
+trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding with DeveloperBuilder with LocalUserIdTracker {
   this: BaseControllerSpec =>
     val sessionService = mock[SessionService]
 

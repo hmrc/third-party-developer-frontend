@@ -20,34 +20,35 @@ import config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
 import org.joda.time.{Days, LocalDate}
 import uk.gov.hmrc.http.HeaderCarrier
+import domain.models.developers.UserId
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicationService: ApplicationService)(implicit val ec: ExecutionContext) {
 
-  def showAdminMfaMandatedMessage(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    mfaMandateCheck(email, mandatedDate => mandatedDate.isAfter(new LocalDate()))
+  def showAdminMfaMandatedMessage(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    mfaMandateCheck(userId, mandatedDate => mandatedDate.isAfter(new LocalDate()))
   }
 
-  def isMfaMandatedForUser(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    mfaMandateCheck(email, mandatedDate => !(mandatedDate.isAfter(new LocalDate())))
+  def isMfaMandatedForUser(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    mfaMandateCheck(userId, mandatedDate => !(mandatedDate.isAfter(new LocalDate())))
   }
 
-  private def mfaMandateCheck(email: String, dateCheck : LocalDate => Boolean)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    isAdminOnProductionApplication(email).map(isAdminOnProductionApplication =>
+  private def mfaMandateCheck(userId: UserId, dateCheck : LocalDate => Boolean)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    isAdminOnProductionApplication(userId).map(isAdminOnProductionApplication =>
       if (isAdminOnProductionApplication) {
         appConfig.dateOfAdminMfaMandate.fold(false)((mandatedDate: LocalDate) => dateCheck(mandatedDate))
       } else false
     )
   }
 
-  private def isAdminOnProductionApplication(email: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    applicationService.fetchByTeamMemberEmail(email).map(applications => {
+  private def isAdminOnProductionApplication(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    applicationService.fetchByTeamMemberUserId(userId).map(applications => {
       applications
         .filter(app => app.deployedTo.isProduction())
         .flatMap(app => app.collaborators)
-        .filter(collaborators => collaborators.emailAddress == email)
+        .filter(collaborators => collaborators.userId == userId)
         .exists(collaborator => collaborator.role.isAdministrator)
     }
     )

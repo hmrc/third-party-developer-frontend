@@ -23,17 +23,19 @@ import domain.models.developers.{LoggedInState, Session, SessionInvalid}
 import repositories.FlowRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.AsyncHmrcSpec
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
+import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class SessionServiceSpec extends AsyncHmrcSpec {
-  trait Setup extends DeveloperBuilder {
+class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker {
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], mock[MfaMandateService], mock[FlowRepository])
 
     val email = "thirdpartydeveloper@example.com"
+    val userId = UserId.random
     val encodedEmail = "thirdpartydeveloper%40example.com"
     val password = "Password1!"
     val totp = "123456"
@@ -46,33 +48,36 @@ class SessionServiceSpec extends AsyncHmrcSpec {
 
   "authenticate" should {
     "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is false" in new Setup {
-
-      when(underTest.mfaMandateService.isMfaMandatedForUser(*)(*)).thenReturn(successful(false))
+      when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
+      when(underTest.mfaMandateService.isMfaMandatedForUser(*[UserId])(*)).thenReturn(successful(false))
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 
       await(underTest.authenticate(email, password)) shouldBe userAuthenticationResponse
 
-      verify(underTest.mfaMandateService).isMfaMandatedForUser(email)
+      verify(underTest.mfaMandateService).isMfaMandatedForUser(userId)
       verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = false))
     }
 
     "return the user authentication response from the connector when the authentication succeeds and mfaMandatedForUser is true" in new Setup {
-      when(underTest.mfaMandateService.isMfaMandatedForUser(*)(*)).thenReturn(successful(true))
+      when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
+      when(underTest.mfaMandateService.isMfaMandatedForUser(*[UserId])(*)).thenReturn(successful(true))
       when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 
       await(underTest.authenticate(email, password)) shouldBe userAuthenticationResponse
 
-      verify(underTest.mfaMandateService).isMfaMandatedForUser(email)
+      verify(underTest.mfaMandateService).isMfaMandatedForUser(userId)
       verify(underTest.thirdPartyDeveloperConnector).authenticate(LoginRequest(email, password, mfaMandatedForUser = true))
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.authenticate(LoginRequest(email, password, mfaMandatedForUser = false)))
-        .thenThrow(new RuntimeException)
+      when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
+      when(underTest.mfaMandateService.isMfaMandatedForUser(*[UserId])(*)).thenReturn(successful(true))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
+        .thenThrow(new RuntimeException("this one"))
 
-      intercept[RuntimeException](await(underTest.authenticate(email, password)))
+      intercept[RuntimeException](await(underTest.authenticate(email, password))).getMessage() shouldBe "this one"
     }
   }
 

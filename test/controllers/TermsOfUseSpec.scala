@@ -21,7 +21,7 @@ import domain.ApplicationUpdateSuccessful
 import domain.models.applications
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
-import domain.models.applications.Role.ADMINISTRATOR
+import domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import domain.models.developers.{LoggedInState, Session}
 import mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import org.joda.time.DateTime
@@ -40,11 +40,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import domain.models.developers.DeveloperSession
-import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
+class TermsOfUseSpec 
+    extends BaseControllerSpec 
+    with WithCSRFAddToken
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock {
+
     val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
     val underTest = new TermsOfUse(
@@ -71,7 +76,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
     implicit val hc = HeaderCarrier()
 
     def givenApplicationExists(
-        userRole: Role = ADMINISTRATOR,
+        userRole: CollaboratorRole = ADMINISTRATOR,
         environment: Environment = PRODUCTION,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Standard()
@@ -84,7 +89,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
         DateTimeUtils.now,
         None,
         environment,
-        collaborators = Set(Collaborator(loggedInUser.email, userRole, Some(UserId.random))),
+        collaborators = Set(loggedInUser.email.asCollaborator(userRole)),
         access = access,
         state = ApplicationState.production("dont-care", "dont-care"),
         checkInformation = checkInformation
@@ -95,7 +100,7 @@ class TermsOfUseSpec extends BaseControllerSpec with WithCSRFAddToken {
       application
     }
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(Some(session)))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(session)))
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
 

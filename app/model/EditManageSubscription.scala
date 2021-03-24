@@ -17,7 +17,7 @@
 package model
 
 import domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiContext, ApiVersion}
-import domain.models.applications.Role
+import domain.models.applications.CollaboratorRole
 import domain.models.subscriptions.{FieldName, FieldValue}
 import domain.models.subscriptions.DevhubAccessLevel
 import play.api.data.FormError
@@ -53,7 +53,7 @@ object EditManageSubscription {
   object EditApiConfigurationViewModel {
     def toViewModel(
         apiSubscription: APISubscriptionStatusWithSubscriptionFields,
-        role: Role,
+        role: CollaboratorRole,
         formErrors: Seq[FormError],
         postedFormValues: Map[FieldName, FieldValue]
     ): EditApiConfigurationViewModel = {
@@ -87,7 +87,7 @@ object EditManageSubscription {
   object EditApiConfigurationFieldViewModel {
     def toViewModel(
         apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
-        role: Role,
+        role: CollaboratorRole,
         formErrors: Seq[FormError],
         postedFormValues: Map[FieldName, FieldValue]
     ): EditApiConfigurationFieldViewModel = {

@@ -24,14 +24,13 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import utils.WithCSRFAddToken
+import utils._
 import views.helper.CommonViewSpec
 import views.html.ppns.PushSecretsView
-import domain.models.developers.UserId
 
 import scala.collection.JavaConverters._
 
-class PushSecretsViewSpec extends CommonViewSpec with WithCSRFAddToken {
+class PushSecretsViewSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   trait Setup {
     val pushSecretsView: PushSecretsView = app.injector.instanceOf[PushSecretsView]
 
@@ -53,7 +52,7 @@ class PushSecretsViewSpec extends CommonViewSpec with WithCSRFAddToken {
       None,
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR, Some(UserId.random))),
+      collaborators = Set(developer.email.asAdministratorCollaborator),
       access = Standard(),
       state = ApplicationState.testing,
       checkInformation = None

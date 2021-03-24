@@ -29,7 +29,6 @@ import play.api.test.{FakeRequest, Helpers}
 import play.filters.csrf.CSRF.TokenProvider
 import service.{PushPullNotificationsService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
@@ -38,8 +37,18 @@ import views.html.ppns.PushSecretsView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
+import utils.LocalUserIdTracker
+import utils.TestApplications
+import utils.CollaboratorTracker
 
-class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken with SubscriptionTestHelperSugar {
+class PushPullNotificationsSpec 
+    extends BaseControllerSpec 
+    with WithCSRFAddToken 
+    with SubscriptionTestHelperSugar 
+    with TestApplications
+    with CollaboratorTracker
+    with DeveloperBuilder 
+    with LocalUserIdTracker {
 
   Helpers.running(app) {
     "showPushSecrets" when {
@@ -110,7 +119,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
     private val pushSecretsView = app.injector.instanceOf[PushSecretsView]
     private val pushPullNotificationsServiceMock = mock[PushPullNotificationsService]
 
@@ -133,7 +142,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
 
     val loggedInUser = DeveloperSession(session)
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(*))
       .thenReturn(successful(Some(session)))
     when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
 
@@ -155,7 +164,7 @@ class PushPullNotificationsSpec extends BaseControllerSpec with WithCSRFAddToken
       givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), loggedInUser, subsData)
 
       val expectedSecrets = Seq("some secret")
-      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(any[HeaderCarrier])).thenReturn(successful(expectedSecrets))
+      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(*)).thenReturn(successful(expectedSecrets))
 
       val result = underTest.showPushSecrets(application.id)(loggedInRequest)
 

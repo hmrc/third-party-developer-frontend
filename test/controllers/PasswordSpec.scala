@@ -65,27 +65,27 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
 
     def mockRequestResetFor(email: String) =
-      when(mockConnector.requestReset(eqTo(email))(any[HeaderCarrier]))
+      when(mockConnector.requestReset(eqTo(email))(*))
         .thenReturn(Future.successful(OK))
 
     def mockConnectorUnverifiedForReset(email: String, password: String) =
-      when(mockConnector.reset(eqTo(PasswordReset(email, password)))(any[HeaderCarrier]))
+      when(mockConnector.reset(eqTo(PasswordReset(email, password)))(*))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForRequestReset(email: String) =
-      when(mockConnector.requestReset(eqTo(email))(any[HeaderCarrier]))
+      when(mockConnector.requestReset(eqTo(email))(*))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForChangePassword(email: String, oldPassword: String, newPassword: String) =
-      when(mockConnector.changePassword(eqTo(ChangePassword(email, oldPassword, newPassword)))(any[HeaderCarrier]))
+      when(mockConnector.changePassword(eqTo(ChangePassword(email, oldPassword, newPassword)))(*))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForValidateReset(code: String) =
-      when(mockConnector.fetchEmailForResetCode(eqTo(code))(any[HeaderCarrier]))
+      when(mockConnector.fetchEmailForResetCode(eqTo(code))(*))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorInvalidResetCodeForValidateReset(code: String) =
-      when(mockConnector.fetchEmailForResetCode(eqTo(code))(any[HeaderCarrier]))
+      when(mockConnector.fetchEmailForResetCode(eqTo(code))(*))
         .thenReturn(failed(new InvalidResetCode))
 
     val emailFieldName = "emailaddress"

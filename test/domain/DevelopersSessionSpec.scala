@@ -21,8 +21,9 @@ import java.util.UUID
 import builder.DeveloperBuilder
 import domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import utils.AsyncHmrcSpec
+import utils.LocalUserIdTracker
 
-class DevelopersSessionSpec extends AsyncHmrcSpec with DeveloperBuilder {
+class DevelopersSessionSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker {
   val email = "thirdpartydeveloper@example.com"
   val firstName = "John"
   val lastName = "Doe"

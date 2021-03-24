@@ -24,13 +24,12 @@ import domain.models.developers.Developer
 import helpers.string._
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
-import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder {
+class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
 
   val developer = buildDeveloper(emailAddress = "developerEmail", firstName = "DEVELOPER    ", lastName = "developerLast")
-  val developerCollaborator = Collaborator(developer.email, Role.DEVELOPER, Some(UserId.random))
-
+  val developerCollaborator = developer.email.asDeveloperCollaborator
   val administrator = buildDeveloper(emailAddress = "administratorEmail", firstName = "ADMINISTRATOR", lastName = "administratorLast")
 
   val productionApplicationState: ApplicationState = ApplicationState.production(requestedBy = "other email", verificationCode = "123")
@@ -146,7 +145,7 @@ class ApplicationSpec extends FunSpec with Matchers with DeveloperBuilder {
   private def createApp(environment: Environment, access: Access, defaultApplicationState: ApplicationState): Application = {
     val collaborators = Set(
       developerCollaborator,
-      Collaborator(administrator.email, Role.ADMINISTRATOR, Some(UserId.random))
+      administrator.email.asAdministratorCollaborator
     )
 
     val app = Application(

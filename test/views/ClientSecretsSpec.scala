@@ -27,14 +27,13 @@ import org.jsoup.nodes.Document
 import play.api.mvc.Flash
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
-import utils.WithCSRFAddToken
+import utils._
 import views.helper.CommonViewSpec
 import views.html.ClientSecretsView
-import domain.models.developers.UserId
 
 import scala.collection.JavaConverters._
 
-class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken {
+class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   trait Setup {
     val clientSecretsView = app.injector.instanceOf[ClientSecretsView]
 
@@ -68,7 +67,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken {
       None,
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(Collaborator(developer.email, Role.ADMINISTRATOR, Some(UserId.random))),
+      collaborators = Set(developer.email.asAdministratorCollaborator),
       access = Standard(),
       state = ApplicationState.production("requester", "verificationCode"),
       checkInformation = None
