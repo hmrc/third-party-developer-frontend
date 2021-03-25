@@ -55,7 +55,7 @@ lazy val microservice = Project(appName, file("."))
     fork in Test := false,
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
-    scalaVersion := "2.12.11",
+    scalaVersion := "2.12.12",
     routesImport += "controllers.binders._"
   )
   .settings(
@@ -68,12 +68,14 @@ lazy val microservice = Project(appName, file("."))
   .settings(SilencerSettings())
   .settings(playPublishingSettings: _*)
   .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
+  .settings(inConfig(TemplateTest)(BloopDefaults.configSettings))
   .settings(
     Test / unmanagedSourceDirectories := (baseDirectory in Test)(base => Seq(base / "test", base / "test-utils")).value,
     Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
+  .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
   .settings(
     IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     IntegrationTest / unmanagedSourceDirectories := (baseDirectory in IntegrationTest)(base => Seq(base / "it", base / "test-utils")).value,

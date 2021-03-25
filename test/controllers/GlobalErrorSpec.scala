@@ -17,11 +17,10 @@
 package controllers
 
 import controllers.ErrorFormBuilder.GlobalError
-import org.scalatest.Matchers
 import play.api.data.{Form, FormError, Forms}
 import utils.AsyncHmrcSpec
 
-class GlobalErrorSpec extends AsyncHmrcSpec with Matchers {
+class GlobalErrorSpec extends AsyncHmrcSpec {
 
   "firstnameGlobal" should {
 

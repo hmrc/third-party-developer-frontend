@@ -23,8 +23,9 @@ import org.scalatest.{Matchers, WordSpec}
 import domain.models.applications.ApplicationId
 import domain.models.apidefinitions.ExtendedApiDefinitionTestDataHelper
 import domain.models.connectors.ExtendedApiDefinition
+import utils.LocalUserIdTracker
 
-class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with ExtendedApiDefinitionTestDataHelper with DeveloperBuilder {
+class NewApplicationEmailPreferencesFlowSpec extends WordSpec with Matchers with ExtendedApiDefinitionTestDataHelper with DeveloperBuilder with LocalUserIdTracker {
 
     val category1 = "CATEGORY_1"
     val category2 = "CATEGORY_2"

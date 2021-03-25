@@ -57,7 +57,7 @@ case class ApplicationRequest[A](
     deployedTo: Environment,
     subscriptions: List[APISubscriptionStatus],
     openAccessApis: Map[ApiContext,ApiData],
-    role: Role,
+    role: CollaboratorRole,
     user: DeveloperSession,
     request: MessagesRequest[A]
 ) extends MessagesRequest[A](request, request.messagesApi) {

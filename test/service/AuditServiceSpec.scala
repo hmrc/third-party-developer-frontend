@@ -55,7 +55,7 @@ class AuditServiceSpec extends AsyncHmrcSpec {
 
       underTest.audit(PasswordChangeFailedDueToInvalidCredentials(developer.email))
 
-      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(*, any[ExecutionContext])
     }
   }
 
@@ -80,7 +80,7 @@ class AuditServiceSpec extends AsyncHmrcSpec {
 
       underTest.audit(event)
 
-      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(*, any[ExecutionContext])
     }
 
     "send an event when the password change fails due to invalid credentials for a user who is logged in" in new Setup {

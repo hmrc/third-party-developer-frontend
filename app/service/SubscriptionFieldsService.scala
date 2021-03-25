@@ -18,7 +18,7 @@ package service
 
 import cats.implicits._
 import domain.models.apidefinitions.{ApiContext, ApiIdentifier, ApiVersion}
-import domain.models.applications.{Application, ClientId, Environment, Role}
+import domain.models.applications.{Application, ClientId, Environment, CollaboratorRole}
 import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.subscriptions.{DevhubAccessLevel, FieldValue, Fields}
 import javax.inject.{Inject, Singleton}
@@ -46,7 +46,7 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     }
   }
 
-  def saveFieldValues(role: Role, application: Application, apiContext: ApiContext, apiVersion: ApiVersion, oldValues: Seq[SubscriptionFieldValue], newValues: Fields.Alias)(
+  def saveFieldValues(role: CollaboratorRole, application: Application, apiContext: ApiContext, apiVersion: ApiVersion, oldValues: Seq[SubscriptionFieldValue], newValues: Fields.Alias)(
       implicit hc: HeaderCarrier
   ): Future[ServiceSaveSubscriptionFieldsResponse] = {
     case object AccessDenied
@@ -152,6 +152,6 @@ object SubscriptionFieldsService {
   }
 
   sealed trait AccessValidation
-  case class ValidateAgainstRole(role: Role) extends AccessValidation
+  case class ValidateAgainstRole(role: CollaboratorRole) extends AccessValidation
   case object SkipRoleValidation extends AccessValidation
 }

@@ -35,10 +35,17 @@ import views.html.ipAllowlist._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
+import utils.LocalUserIdTracker
 
-class IpAllowlistSpec extends BaseControllerSpec with ApplicationActionServiceMock with TestApplications with WithCSRFAddToken {
+class IpAllowlistSpec 
+    extends BaseControllerSpec 
+    with ApplicationActionServiceMock 
+    with TestApplications 
+    with WithCSRFAddToken 
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with DeveloperBuilder {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val mockIpAllowlistService: IpAllowlistService = mock[IpAllowlistService]
 

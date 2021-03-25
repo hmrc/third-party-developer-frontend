@@ -18,7 +18,7 @@ package views
 
 import controllers.ApplicationSummary
 import domain.models.apidefinitions.AccessType
-import domain.models.applications.{ApplicationId, Role, State, TermsOfUseStatus}
+import domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
 import domain.models.developers.LoggedInState
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -62,7 +62,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val appName = "App name 1"
       val appEnvironment = "Sandbox"
-      val appUserRole = Role.ADMINISTRATOR
+      val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
@@ -101,7 +101,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val appName = "App name 1"
       val appEnvironment = "Sandbox"
-      val appUserRole = Role.ADMINISTRATOR
+      val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
@@ -126,7 +126,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val appName = "App name 1"
       val appEnvironment = "Production"
-      val appUserRole = Role.ADMINISTRATOR
+      val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
@@ -162,7 +162,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val appName = "App name 1"
       val appEnvironment = "Production"
-      val appUserRole = Role.ADMINISTRATOR
+      val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
@@ -196,7 +196,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val appName = "App name 1"
       val appEnvironment = "Production"
-      val appUserRole = Role.ADMINISTRATOR
+      val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 

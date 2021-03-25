@@ -22,8 +22,9 @@ import play.api.test.FakeRequest
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.protectaccount.ProtectAccountView
+import utils.LocalUserIdTracker
 
-class ProtectAccountSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder {
+class ProtectAccountSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
   implicit val request = FakeRequest()
   val protectAccountView = app.injector.instanceOf[ProtectAccountView]
 

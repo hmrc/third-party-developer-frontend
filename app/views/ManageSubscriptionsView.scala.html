@@ -19,19 +19,19 @@
 @import include._
 @import uk.gov.hmrc.urls.Link
 @import model.ApplicationViewModel
-@import domain.models.applications.Role
+@import domain.models.applications.CollaboratorRole
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
 @import domain.models.applications.State
 @import domain.models.applications.ApplicationId
-@import domain.models.applications.Role
+@import domain.models.applications.CollaboratorRole
 @import domain.models.apidefinitions.ApiContext
 @import domain.models.subscriptions.ApiData
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
 
 @(
-    role: Role, 
+    role: CollaboratorRole, 
     data: PageData, 
     form: Form[controllers.EditApplicationForm], 
     applicationView: ApplicationViewModel, 

@@ -24,12 +24,11 @@ import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.ViewHelpers._
-import utils.WithCSRFAddToken
+import utils._
 import views.helper.CommonViewSpec
 import views.html.UnsubscribeRequestSubmittedView
-import domain.models.developers.UserId
 
-class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken {
+class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
   "Unsubscribe request submitted page" should {
     "render with no errors" in {
 
@@ -49,7 +48,7 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
         None,
         Environment.PRODUCTION,
         Some("Test Application Description"),
-        Set(Collaborator(developer.email, Role.ADMINISTRATOR, Some(UserId.random))),
+        Set(developer.email.asAdministratorCollaborator),
         state = ApplicationState.production(developer.email, ""),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )

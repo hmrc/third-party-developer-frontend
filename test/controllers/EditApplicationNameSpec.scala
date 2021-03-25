@@ -35,11 +35,17 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import utils.LocalUserIdTracker
 
-class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionServiceMock with SubscriptionTestHelperSugar with WithCSRFAddToken with DeveloperBuilder {
+class EditApplicationNameSpec 
+    extends BaseControllerSpec 
+    with ApplicationActionServiceMock 
+    with SubscriptionTestHelperSugar 
+    with WithCSRFAddToken
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
   val developer: Developer = buildDeveloper()
   val sessionId = "sessionId"
@@ -59,7 +65,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
     None,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
+    Set(loggedInUser.email.asAdministratorCollaborator),
     state = ApplicationState.production(loggedInUser.email, ""),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -122,7 +128,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
     "return the Edit Applications Name Page with user logged in" in new Setup {
       givenApplicationAction(application, loggedInUser)
 
-      fetchByTeamMemberEmailReturns(loggedInUser.email, List(application))
+      fetchByTeamMemberUserIdReturns(loggedInUser.developer.userId, List(application))
 
       private val result = underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken)
 
@@ -167,10 +173,10 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
         verify(applicationServiceMock, times(0))
-          .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
+          .createForUser(any[CreateApplicationRequest])(*)
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.SANDBOX), eqTo(None))(any[HeaderCarrier])
+          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.SANDBOX), eqTo(None))(*)
       }
     }
   }
@@ -179,7 +185,7 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
 
-      fetchByTeamMemberEmailReturns(loggedInUser.email, List(application))
+      fetchByTeamMemberUserIdReturns(loggedInUser.developer.userId, List(application))
 
       private val result = underTest.addApplicationName(Environment.PRODUCTION)(loggedInRequest.withCSRFToken)
 
@@ -225,10 +231,10 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
         verify(applicationServiceMock, Mockito.times(0))
-          .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
+          .createForUser(any[CreateApplicationRequest])(*)
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.PRODUCTION), *)(any[HeaderCarrier])
+          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.PRODUCTION), *)(*)
       }
 
       "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
@@ -245,10 +251,10 @@ class EditApplicationNameSpec extends BaseControllerSpec with ApplicationActionS
         contentAsString(result) should include("That application name already exists. Enter a unique name for your application")
 
         verify(applicationServiceMock, Mockito.times(0))
-          .createForUser(any[CreateApplicationRequest])(any[HeaderCarrier])
+          .createForUser(any[CreateApplicationRequest])(*)
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), *)(any[HeaderCarrier])
+          .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), *)(*)
       }
 
     }

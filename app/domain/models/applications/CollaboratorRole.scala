@@ -18,18 +18,18 @@ package domain.models.applications
 
 import enumeratum.{EnumEntry, PlayEnum}
 
-sealed trait Role extends EnumEntry {
-  def isDeveloper: Boolean = this == Role.DEVELOPER
-  def isAdministrator: Boolean = this == Role.ADMINISTRATOR
+sealed trait CollaboratorRole extends EnumEntry {
+  def isDeveloper: Boolean = this == CollaboratorRole.DEVELOPER
+  def isAdministrator: Boolean = this == CollaboratorRole.ADMINISTRATOR
 }
 
-object Role extends PlayEnum[Role] {
+object CollaboratorRole extends PlayEnum[CollaboratorRole] {
   val values = findValues
 
-  final case object DEVELOPER       extends Role
-  final case object ADMINISTRATOR   extends Role
+  final case object DEVELOPER       extends CollaboratorRole
+  final case object ADMINISTRATOR   extends CollaboratorRole
 
   def from(role: Option[String]) = role match {
     case Some(r) => values.find(e => e.toString == r.toUpperCase)
-    case _ => Some(Role.DEVELOPER)}
+    case _ => Some(CollaboratorRole.DEVELOPER)}
 }

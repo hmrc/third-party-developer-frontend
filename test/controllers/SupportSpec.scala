@@ -28,7 +28,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.DeskproService
-import uk.gov.hmrc.http.HeaderCarrier
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.html.{SupportEnquiryView, SupportThankyouView}
@@ -36,10 +35,11 @@ import views.html.{SupportEnquiryView, SupportThankyouView}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import utils.LocalUserIdTracker
 
-class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
+class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
-  trait Setup extends SessionServiceMock with DeveloperBuilder {
+  trait Setup extends SessionServiceMock {
     val supportEnquiryView = app.injector.instanceOf[SupportEnquiryView]
     val supportThankYouView = app.injector.instanceOf[SupportThankyouView]
 
@@ -104,7 +104,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken {
           "comments" -> "A+++, good seller, would buy again")
 
       val captor: ArgumentCaptor[SupportEnquiryForm] = ArgumentCaptor.forClass(classOf[SupportEnquiryForm])
-      when(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], any[HeaderCarrier])).thenReturn(successful(TicketCreated))
+      when(underTest.deskproService.submitSupportEnquiry(captor.capture())(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
 

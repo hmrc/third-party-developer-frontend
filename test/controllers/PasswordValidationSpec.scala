@@ -16,11 +16,10 @@
 
 package controllers
 
-import org.scalatest.Matchers
 import play.api.data.{Form, FormError}
 import utils.AsyncHmrcSpec
 
-class PasswordValidationSpec extends AsyncHmrcSpec with Matchers {
+class PasswordValidationSpec extends AsyncHmrcSpec {
   "passwordValidator for the field password" should {
     val testForm = Form("password" -> passwordValidator)
 

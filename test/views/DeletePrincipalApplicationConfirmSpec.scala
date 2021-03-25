@@ -26,9 +26,10 @@ import utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueC
 import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.DeletePrincipalApplicationConfirmView
-import domain.models.developers.UserId
+import builder.DeveloperBuilder
+import utils.LocalUserIdTracker
 
-class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken {
+class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   val deletePrincipalApplicationConfirmView = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
 
@@ -47,7 +48,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
       None,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(Collaborator(loggedInUser.email, Role.ADMINISTRATOR, Some(UserId.random))),
+      Set(loggedInUser.email.asAdministratorCollaborator),
       state = ApplicationState.production(loggedInUser.email, ""),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )

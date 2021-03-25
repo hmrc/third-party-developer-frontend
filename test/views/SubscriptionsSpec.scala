@@ -69,7 +69,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
     val sandboxApplicationTesting = buildApplication(ApplicationState.testing, Environment.SANDBOX)
 
-    def renderPageForApplicationAndRole(application: Application, role: Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
+    def renderPageForApplicationAndRole(application: Application, role: CollaboratorRole, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
       manageSubscriptions.render(
         role,
         pageData,
@@ -91,7 +91,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val pageData: PageData = PageData(productionApplication, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplication, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplication, CollaboratorRole.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("For security reasons we must review any API subscription changes.")
@@ -106,7 +106,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val pageData: PageData = PageData(productionApplication, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplication, Role.DEVELOPER, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplication, CollaboratorRole.DEVELOPER, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("You need admin rights to make API subscription changes.")
@@ -121,7 +121,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val pageData: PageData = PageData(productionApplicationTesting, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, CollaboratorRole.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
@@ -136,7 +136,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val pageData: PageData = PageData(productionApplicationTesting, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, Role.DEVELOPER, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationTesting, CollaboratorRole.DEVELOPER, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
@@ -151,7 +151,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val pageData: PageData = PageData(productionApplicationPendingGatekeeperApproval, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingGatekeeperApproval, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingGatekeeperApproval, CollaboratorRole.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("For security reasons we must review any API subscription changes.")
@@ -166,7 +166,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val pageData: PageData = PageData(productionApplicationPendingRequesterVerification, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingRequesterVerification, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(productionApplicationPendingRequesterVerification, CollaboratorRole.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body should include("For security reasons we must review any API subscription changes.")
@@ -181,7 +181,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val pageData: PageData = PageData(sandboxApplicationTesting, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, Role.ADMINISTRATOR, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, CollaboratorRole.ADMINISTRATOR, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")
@@ -196,7 +196,7 @@ class SubscriptionsSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val pageData: PageData = PageData(sandboxApplicationTesting, None, Map.empty)
 
-      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, Role.DEVELOPER, pageData, request)
+      val page: Html = renderPageForApplicationAndRole(sandboxApplicationTesting, CollaboratorRole.DEVELOPER, pageData, request)
 
       page.contentType should include("text/html")
       page.body shouldNot include("For security reasons we must review any API subscription changes.")

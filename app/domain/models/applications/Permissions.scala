@@ -27,14 +27,14 @@ object Permissions {
     override def hasPermissions(app: Application, developer: Developer): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
         case (Environment.SANDBOX, _) => true
-        case (_, Some(Role.ADMINISTRATOR)) => true
+        case (_, Some(CollaboratorRole.ADMINISTRATOR)) => true
         case _ => false
       }
   }
 
   case object AdministratorOnly extends Permission {
     override def hasPermissions(app: Application, developer: Developer): Boolean =
-      app.role(developer.email).contains(Role.ADMINISTRATOR)
+      app.role(developer.email).contains(CollaboratorRole.ADMINISTRATOR)
   }
 
   case object TeamMembersOnly extends Permission {

@@ -28,7 +28,12 @@ import play.api.mvc.MessagesControllerComponents
 import utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 import mocks.service.SessionServiceMock
 
-class BaseControllerSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with ErrorHandlerMock with SessionServiceMock {
+class BaseControllerSpec 
+    extends AsyncHmrcSpec 
+    with GuiceOneAppPerSuite 
+    with SharedMetricsClearDown 
+    with ErrorHandlerMock 
+    with SessionServiceMock {
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")

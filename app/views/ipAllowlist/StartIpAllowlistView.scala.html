@@ -18,13 +18,13 @@
 @import domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
 @import include._
 @import views.html.include.DevMain
-@import domain.models.applications.Role
+@import domain.models.applications.CollaboratorRole
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
 
 @this(devMain: DevMain)
 
-@(app: Application, roleOfLoggedIn: Role)(
+@(app: Application, roleOfLoggedIn: CollaboratorRole)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 @sandboxOrAdmin = @{app.deployedTo.isSandbox || roleOfLoggedIn.isAdministrator}
 

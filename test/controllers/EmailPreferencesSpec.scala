@@ -46,10 +46,17 @@ import domain.models.applications.ApplicationId
 import domain.models.flows.NewApplicationEmailPreferencesFlow
 import domain.models.connectors.ExtendedApiDefinition
 import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class EmailPreferencesSpec extends PlaySpec with GuiceOneAppPerSuite with SessionServiceMock with ErrorHandlerMock {
+class EmailPreferencesSpec 
+    extends PlaySpec 
+    with GuiceOneAppPerSuite 
+    with SessionServiceMock 
+    with ErrorHandlerMock
+    with DeveloperBuilder
+    with LocalUserIdTracker {
 
-  trait Setup extends DeveloperBuilder {
+  trait Setup {
     val mockEmailPreferencesService: EmailPreferencesService = mock[EmailPreferencesService]
 
     implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]

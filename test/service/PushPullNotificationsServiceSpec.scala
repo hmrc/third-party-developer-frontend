@@ -21,7 +21,6 @@ import java.util.UUID
 import connectors.ThirdPartyApplicationConnector
 import domain.models.applications.Environment.PRODUCTION
 import domain.models.applications.{Application, ApplicationId, ClientId}
-import org.scalatest.Matchers
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
@@ -31,7 +30,7 @@ import utils.AsyncHmrcSpec
 
 import scala.concurrent.Future.{failed, successful}
 
-class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with Matchers {
+class PushPullNotificationsServiceSpec extends AsyncHmrcSpec {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
