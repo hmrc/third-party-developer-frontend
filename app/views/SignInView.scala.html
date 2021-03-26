@@ -33,30 +33,34 @@
 
   @helper.form(action = controllers.routes.UserLoginAccount.authenticate) {
     @helper.CSRF.formField
-    <div @if(form.errors("invalidCredentials").nonEmpty){class="form-group-error"}>
+    <div @if(form.errors("invalidCredentials").nonEmpty){class="govuk-form-group--error"}>
       @fieldError(form.errors, "invalidCredentials", form.error("submissionError").isEmpty)
-      <div class="govuk-form-group @if(form.errors("emailaddress").nonEmpty){form-group-error}">
-        <label class="govuk-label" for="emailaddress" id="emailaddress-label">Email address</label>
-          @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
+      <div class="govuk-form-group @if(form.errors("emailaddress").nonEmpty){govuk-form-group--error}">
+        <label class="govuk-label govuk-!-font-weight-bold" for="emailaddress" id="emailaddress-label">Email address</label>
+          <span id="event-name-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
+          </span>
           <input 
             type="text" 
             autocomplete="off" 
             id="emailaddress"
             name="emailaddress"
             value="@form.data.getOrElse("emailaddress", "")"
-            class="govuk-input govuk-!-width-one-half @if(form.errors("invalidCredentials").nonEmpty || form.errors("emailaddress").nonEmpty){form-control-error}"
+            class="govuk-input @if(form.errors("invalidCredentials").nonEmpty || form.errors("emailaddress").nonEmpty){govuk-input--error}"
             aria-required="true"
           />
       </div>
-      <div class="govuk-form-group @if(form.errors("password").nonEmpty){form-group-error}">
-        <label class="govuk-label" for="password">Password</label>
-        @fieldError(form.errors, "password", form.error("submissionError").isEmpty)
+      <div class="govuk-form-group @if(form.errors("password").nonEmpty){govuk-form-group--error}">
+        <label class="govuk-label govuk-!-font-weight-bold" for="password">Password</label>
+        <span id="event-name-error" class="govuk-error-message">
+          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "password", form.error("submissionError").isEmpty)
+        </span>
         <input 
           type="password" 
           autocomplete="off" 
           id="password"
           name="password"
-          class="govuk-input govuk-!-width-one-half @if(form.errors("invalidCredentials").nonEmpty || form.errors("password").nonEmpty){form-control-error}"
+          class="govuk-input @if(form.errors("invalidCredentials").nonEmpty || form.errors("password").nonEmpty){govuk-input--error}"
           aria-required="true"
         />
         <p class="govuk-body">
