@@ -34,7 +34,7 @@
   @helper.form(action = controllers.routes.UserLoginAccount.authenticate) {
     @helper.CSRF.formField
     <div @if(form.errors("invalidCredentials").nonEmpty){class="govuk-form-group--error"}>
-      @fieldError(form.errors, "invalidCredentials", form.error("submissionError").isEmpty)
+      <span class="govuk-visually-hidden">Error:</span>@fieldError(form.errors, "invalidCredentials", form.error("submissionError").isEmpty)
       <div class="govuk-form-group @if(form.errors("emailaddress").nonEmpty){govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="emailaddress" id="emailaddress-label">Email address</label>
           <span id="event-name-error" class="govuk-error-message">
