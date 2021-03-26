@@ -48,3 +48,12 @@ Feature: Sign in
     When I click on the button with id 'submit'
     Then I am on the 'Password reset confirmation' page
     Then I should be sent an email with a link to reset for 'john.smith@example.com'
+
+  Scenario: I have a password reset link and I want to reset my password
+    Given I click on a valid password reset link for code '1234'
+    Then I am on the 'Reset Password' page with code '1234'
+    When I enter all the fields:
+      | password       | confirmPassword |
+      | StrongNewPwd!2 | StrongNewPwd!2  |
+    And I click on submit
+    Then I am on the 'You have reset your password' page

@@ -116,6 +116,34 @@ object DeveloperStub {
   def verifyResetPassword(request: PasswordResetRequest) = {
     verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(equalToJson(Json.toJson(request).toString())))
   }
+
+  def stubResetPasswordJourney(email: String,code: String) {
+    fetchEmailForResetCode(email, code)
+    resetPassword()
+  }
+
+  def fetchEmailForResetCode(email: String,code: String) = {
+    stubFor(
+      get(urlPathEqualTo("/reset-password"))
+      // .withQueryParam("code", equalTo(code))
+      .willReturn(
+        aResponse()
+        .withStatus(OK)
+        .withBody(s"""{ "email": "$email" }"""")
+      )
+    )
+  }
+
+  def resetPassword() = {
+    // TODO - handle checking encrypted password reset payload
+    stubFor(
+      post(urlEqualTo("/reset-password"))
+      .willReturn(
+        aResponse()
+        .withStatus(OK)
+      )
+    )
+  }
 }
 
 object ApplicationStub {

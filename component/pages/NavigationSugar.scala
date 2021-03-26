@@ -22,7 +22,6 @@ import org.openqa.selenium.WebDriver
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.selenium.WebBrowser
-import org.scalatestplus.selenium.WebBrowser.{go => goo}
 import org.scalatest.Assertions
 import org.scalatest.Matchers
 import org.mockito.MockitoSugar
@@ -40,12 +39,12 @@ trait NavigationSugar extends WebBrowser with Eventually with Assertions with Ma
   }
 
   def go(page: WebLink)(implicit webDriver: WebDriver) = {
-    goo to page
+    WebBrowser.go to page
   }
 
   def on(page: WebPage)(implicit webDriver: WebDriver) = {
     eventually {
-      find(tagName("body"))
+      find(tagName("body"))  //.filter(_ => page.isCurrentPage)
     }
     withClue(s"Currently in page: $currentUrl " + find(tagName("h1")).map(_.text).fold(" - ")(h1 => s", with title '$h1' - ")) {
       assert(page.isCurrentPage, s"Page was not loaded: ${page.url}")
