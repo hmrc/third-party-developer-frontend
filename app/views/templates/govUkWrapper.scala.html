@@ -63,12 +63,18 @@
     @contentBlock
 }
 
+@mainContentDefault = {
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            @contentBlock
+        </div>
+    </div>
+}
+
 @scripts = {
     <script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
     <script>window.GOVUKFrontend.initAll();</script>
 }
-
-
 
 @govukTemplate(
     pageTitle = Some(title),
@@ -76,5 +82,4 @@
     beforeContentBlock = None,
     headerBlock = siteHeader(),
     footerBlock = footerBlock
-)(content)
-
+)(mainContentDefault)
