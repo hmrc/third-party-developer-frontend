@@ -23,18 +23,19 @@
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, session: play.api.mvc.Session)
 
 @devMain(
-    title = "Confirm your email address",
-    isRegistering = true,
-    breadcrumbs = Seq(
-        Crumb("Confirm your email address"),
-        Crumb.home
-    ),
-    developerSession = None
+  title = "Confirm your email address",
+  isRegistering = true,
+  breadcrumbs = Seq(
+    Crumb("Confirm your email address"),
+    Crumb.home
+  ),
+  developerSession = None
 ) {
+  <h1 class="govuk-heading-l">Confirm your email address</h1>
+  <p class="govuk-body">We have sent a confirmation email to @session.get("email").getOrElse("the address you registered").</p>
 
-    <h1 class="heading-xlarge">Confirm your email address</h1>
-    <p>We have sent a confirmation email to @session.get("email").getOrElse("the address you registered").</p>
-
-    <p>Click on the link in the email to verify your account.</p>
-    <p><a href="@routes.Registration.resendConfirmation">I have not received the email</a></p>
+  <p class="govuk-body">Click on the link in the email to verify your account.</p>
+  <p class="govuk-body">
+    <a class="govuk-link" href="@routes.Registration.resendConfirmation">I have not received the email</a>
+  </p>
 }
