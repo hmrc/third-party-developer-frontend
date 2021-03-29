@@ -22,18 +22,17 @@
 @()(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
 @devMain(
-    title = "Email address verified",
-    breadcrumbs = Seq(
-        Crumb("Email address verified"),
-        Crumb.home
-    ),
-    developerSession = None
+  title = "Email address verified",
+  breadcrumbs = Seq(
+    Crumb("Email address verified"),
+    Crumb.home
+  ),
+  developerSession = None
 ) {
+  <div class="govuk-box-highlight" role="alert" data-journey="user:registered">
+    <h1 class="govuk-heading-l">Email address verified</h1>
+  </div>
 
-    <div class="govuk-box-highlight" role="alert" data-journey="user:registered">
-        <h1>Email address verified</h1>
-    </div>
-
-    <h2 class="heading-large">What happens next?</h2>
-        <p>You can now <a id="sign-in" href="@controllers.routes.UserLoginAccount.login">sign in</a>.</p>
+  <h2 class="govuk-heading-m">What happens next?</h2>
+  <p class="govuk-body">You can now <a class="govuk-link" id="sign-in" href="@controllers.routes.UserLoginAccount.login">sign in</a>.</p>
 }
