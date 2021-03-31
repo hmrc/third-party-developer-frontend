@@ -20,7 +20,7 @@ import domain.models.apidefinitions.AccessType.STANDARD
 import domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import domain.models.applications.Environment._
 import domain.models.applications.Permissions.SandboxOrAdmin
-import domain.models.applications.Role.ADMINISTRATOR
+import domain.models.applications.CollaboratorRole.ADMINISTRATOR
 import domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import domain.models.developers.Developer
 import helpers.string.Digest
@@ -59,7 +59,7 @@ case class Application(
     ipAllowlist: IpAllowlist = IpAllowlist()
 ) {
 
-  def role(email: String): Option[Role] = collaborators.find(_.emailAddress == email).map(_.role)
+  def role(email: String): Option[CollaboratorRole] = collaborators.find(_.emailAddress == email).map(_.role)
 
   def adminEmails: Set[String] = collaborators.filter(_.role.isAdministrator).map(_.emailAddress)
 

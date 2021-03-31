@@ -19,7 +19,7 @@ package steps
 import java.util.UUID.randomUUID
 
 import domain.models.applications.Environment.PRODUCTION
-import domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, Environment, Privileged, ROPC, Role, Standard}
+import domain.models.applications.{Application, ApplicationState, ApplicationToken, ClientSecret, Collaborator, Environment, Privileged, ROPC, CollaboratorRole, Standard}
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.{EN, ScalaDsl}
 import io.cucumber.scala.Implicits._
@@ -42,11 +42,15 @@ object AppWorld {
 }
 
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar {
+  import utils.GlobalUserIdTracker.idOf
+
   implicit val webDriver = Env.driver
 
   val applicationId = ApplicationId("applicationId")
   val clientId = ClientId("clientId")
 
+  val collaboratorEmail = "john.smith@example.com"
+  
   private def defaultApp(name: String, environment: String) = Application(
     id = applicationId,
     clientId = clientId,
@@ -56,7 +60,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     lastAccessTokenUsage = None,
     Environment.from(environment).getOrElse(PRODUCTION),
     description = None,
-    collaborators = Set(Collaborator("john.smith@example.com", Role.ADMINISTRATOR, Some(UserId.random)))
+    collaborators = Set(Collaborator(collaboratorEmail, CollaboratorRole.ADMINISTRATOR, idOf(collaboratorEmail)))
   )
 
   Given("""^application with name '(.*)' can be created$""") { (name: String) =>
@@ -68,7 +72,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
     ApplicationStub.setUpFetchApplication(applicationId, OK, Json.toJson(app).toString())
 
-    configureUserApplications(app.collaborators.head.emailAddress, List(app))
+    configureUserApplications(app.collaborators.head.userId, List(app))
   }
 
   Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => DeskproStub.verifyTicketCreationWithSubject(subject) }
@@ -79,8 +83,9 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   Given("""^I have no application assigned to my email '(.*)'$""") { (email: String) =>
-    ApplicationStub.configureUserApplications(email)
-    ApplicationStub.configureUserApplications(email)
+    val userId = idOf(email)
+
+    ApplicationStub.configureUserApplications(userId)
     AppWorld.userApplicationsOnBackend = Nil
   }
 
@@ -126,7 +131,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         None,
         environment,
         app.get("description"),
-        Set(Collaborator(email, Role.withName(app.getOrElse("role", "ADMINISTRATOR")), Some(UserId.random))),
+        Set(Collaborator(email, CollaboratorRole.withName(app.getOrElse("role", "ADMINISTRATOR")), UserId.random)),
         access,
         state = applicationState
       )
@@ -136,7 +141,8 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   def configureStubsForApplications(email: String, applications: List[Application]) = {
-    ApplicationStub.configureUserApplications(email, applications)
+    val userId = idOf(email)
+    ApplicationStub.configureUserApplications(userId, applications)
     for (app <- applications) {
       // configure to be able to fetch apps and Subscriptions
       ApplicationStub.setUpFetchApplication(app.id, OK, Json.toJson(app).toString())

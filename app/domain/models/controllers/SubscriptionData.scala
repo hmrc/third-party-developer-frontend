@@ -17,6 +17,6 @@
 package domain.models.controllers
 
 import controllers.GroupedSubscriptions
-import domain.models.applications.{Application, Role}
+import domain.models.applications.{Application, CollaboratorRole}
 
-case class SubscriptionData(role: Role, application: Application, subscriptions: Option[GroupedSubscriptions])
+case class SubscriptionData(role: CollaboratorRole, application: Application, subscriptions: Option[GroupedSubscriptions])

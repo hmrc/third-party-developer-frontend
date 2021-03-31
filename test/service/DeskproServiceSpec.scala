@@ -39,7 +39,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
       "Convert the SignoutSurveyForm into a Feedback Ticket and sends it to Deskpro" in {
         val title = "Title"
         when(underTest.appConfig.title).thenReturn(title)
-        when(underTest.deskproConnector.createFeedback(any[Feedback])(any[HeaderCarrier])).thenReturn(Future(TicketId(123)))
+        when(underTest.deskproConnector.createFeedback(any[Feedback])(*)).thenReturn(Future(TicketId(123)))
 
         implicit val fakeRequest = FakeRequest()
         implicit val hc = HeaderCarrier()
@@ -55,7 +55,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
       "Convert the SignoutSurveyForm with empty suggested improvements into a Feedback Ticket and sends it to Deskpro" in {
         val title = "Title"
         when(underTest.appConfig.title).thenReturn(title)
-        when(underTest.deskproConnector.createFeedback(any[Feedback])(any[HeaderCarrier])).thenReturn(Future(TicketId(123)))
+        when(underTest.deskproConnector.createFeedback(any[Feedback])(*)).thenReturn(Future(TicketId(123)))
 
         implicit val fakeRequest = FakeRequest()
         implicit val hc = HeaderCarrier()
@@ -74,7 +74,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
       "Convert the SupportEnquiryForm into a DeskproTicket and sends it to Deskpro" in {
         val title = "Title"
         when(underTest.appConfig.title).thenReturn(title)
-        when(underTest.deskproConnector.createTicket(any[DeskproTicket])(any[HeaderCarrier])).thenReturn(Future(TicketCreated))
+        when(underTest.deskproConnector.createTicket(any[DeskproTicket])(*)).thenReturn(Future(TicketCreated))
 
         implicit val fakeRequest = FakeRequest()
         implicit val hc = HeaderCarrier()

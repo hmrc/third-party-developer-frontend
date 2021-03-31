@@ -19,7 +19,6 @@ package mocks.service
 import domain.models.developers.Session
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import service.SessionService
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future.successful
 
@@ -27,7 +26,7 @@ trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val sessionServiceMock = mock[SessionService]
 
   private def fetchSessionById(sessionId: String, returns: Option[Session]) =
-    when(sessionServiceMock.fetch(eqTo(sessionId))(any[HeaderCarrier])).thenReturn(successful(returns))
+    when(sessionServiceMock.fetch(eqTo(sessionId))(*)).thenReturn(successful(returns))
 
   def fetchSessionByIdReturns(sessionId: String, returns: Session) =
     fetchSessionById(sessionId, Some(returns))

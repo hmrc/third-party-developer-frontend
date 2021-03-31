@@ -16,7 +16,7 @@
 
 package domain.models.subscriptions
 
-import domain.models.applications.Role
+import domain.models.applications.CollaboratorRole
 
 sealed trait DevhubAccessRequirement
 object DevhubAccessRequirement {
@@ -60,9 +60,9 @@ sealed trait DevhubAccessLevel {
 
 object DevhubAccessLevel {
 
-  def fromRole(role: Role) : DevhubAccessLevel = role match {
-      case Role.ADMINISTRATOR => DevhubAccessLevel.Admininstator
-      case Role.DEVELOPER => DevhubAccessLevel.Developer
+  def fromRole(role: CollaboratorRole) : DevhubAccessLevel = role match {
+      case CollaboratorRole.ADMINISTRATOR => DevhubAccessLevel.Admininstator
+      case CollaboratorRole.DEVELOPER => DevhubAccessLevel.Developer
   }
 
   case object Developer extends DevhubAccessLevel

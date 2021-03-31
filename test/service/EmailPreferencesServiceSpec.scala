@@ -31,9 +31,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import domain.models.connectors.ExtendedApiDefinition
 import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
-  trait SetUp extends ExtendedApiDefinitionTestDataHelper with DeveloperBuilder {
+  trait SetUp extends ExtendedApiDefinitionTestDataHelper with DeveloperBuilder with LocalUserIdTracker {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val emailPreferences = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))

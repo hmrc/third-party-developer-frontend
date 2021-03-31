@@ -24,7 +24,7 @@ import org.mockito.ArgumentCaptor
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.{BadRequestException}
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -72,7 +72,7 @@ class RegistrationSpec extends BaseControllerSpec {
       )
 
       val requestCaptor: ArgumentCaptor[developers.Registration] = ArgumentCaptor.forClass(classOf[developers.Registration])
-      when(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).thenReturn(successful(RegistrationSuccessful))
+      when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))
 
       val result = underTest.register()(request)
 
@@ -95,7 +95,7 @@ class RegistrationSpec extends BaseControllerSpec {
       )
 
       val requestCaptor: ArgumentCaptor[developers.Registration] = ArgumentCaptor.forClass(classOf[developers.Registration])
-      when(underTest.connector.register(requestCaptor.capture())(any[HeaderCarrier])).thenReturn(successful(RegistrationSuccessful))
+      when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))
 
       await(underTest.register()(request))
 
@@ -107,7 +107,7 @@ class RegistrationSpec extends BaseControllerSpec {
     val code = "verificationCode"
 
     "redirect the user to login if their verification link matches an account" in new Setup {
-      when(underTest.connector.verify(eqTo(code))(any[HeaderCarrier])).thenReturn(successful(OK))
+      when(underTest.connector.verify(eqTo(code))(*)).thenReturn(successful(OK))
       val result = underTest.verify(code)(FakeRequest())
 
       status(result) shouldBe OK
@@ -115,7 +115,7 @@ class RegistrationSpec extends BaseControllerSpec {
     }
 
     "invite user to register again when the verification link has expired" in new Setup {
-      when(underTest.connector.verify(eqTo(code))(any[HeaderCarrier])).thenReturn(failed(new BadRequestException("")))
+      when(underTest.connector.verify(eqTo(code))(*)).thenReturn(failed(new BadRequestException("")))
 
       val result = underTest.verify(code)(FakeRequest())
 
@@ -127,7 +127,7 @@ class RegistrationSpec extends BaseControllerSpec {
       val email = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
       val request = FakeRequest().withSession(newSessionParams: _*)
-      when(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).thenReturn(successful(NO_CONTENT))
+      when(underTest.connector.resendVerificationEmail(eqTo(email))(*)).thenReturn(successful(NO_CONTENT))
       val result = underTest.resendVerification()(request)
 
       status(result) shouldBe SEE_OTHER
@@ -137,7 +137,7 @@ class RegistrationSpec extends BaseControllerSpec {
       val email = "john.smith@example.com"
       val newSessionParams = Seq(("email", email), sessionParams.head)
       val request = FakeRequest().withSession(newSessionParams: _*)
-      when(underTest.connector.resendVerificationEmail(eqTo(email))(any[HeaderCarrier])).thenReturn(failed(UpstreamErrorResponse("Bang", NOT_FOUND)))
+      when(underTest.connector.resendVerificationEmail(eqTo(email))(*)).thenReturn(failed(UpstreamErrorResponse("Bang", NOT_FOUND)))
       val result = underTest.resendVerification()(request)
 
       status(result) shouldBe NOT_FOUND

@@ -33,6 +33,9 @@ import play.api.test.Helpers._
 import play.api.{Application, Configuration, Mode}
 import play.filters.csrf.CSRF
 import domain.models.developers.UserId
+import connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
+import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
+import play.api.libs.json.Json
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
   private val config = Configuration("play.filters.csrf.token.sign" -> false)
@@ -130,7 +133,8 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
             )
         )
 
-        setupThirdPartyApplicationSearchApplicationByEmailStub()
+        setupThirdPartyDeveloperFindUserIdByEmailAddress(userEmail, userId)
+        setupThirdPartyApplicationSearchApplicationByUserIdStub(userId)
 
         private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
@@ -158,7 +162,8 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
             )
         )
 
-        setupThirdPartyApplicationSearchApplicationByEmailStub()
+        setupThirdPartyDeveloperFindUserIdByEmailAddress(userEmail, userId)
+        setupThirdPartyApplicationSearchApplicationByUserIdStub(userId)
 
         private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
@@ -170,9 +175,21 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     }
   }
 
-  private def setupThirdPartyApplicationSearchApplicationByEmailStub(): Unit = {
+  private def setupThirdPartyDeveloperFindUserIdByEmailAddress(emailAddress: String, userId: UserId) = {
     stubFor(
-      get(urlEqualTo("/developer/applications?emailAddress=thirdpartydeveloper%40example.com&environment=PRODUCTION"))
+      post(urlEqualTo("/developers/find-user-id"))
+        .withRequestBody(equalToJson(Json.toJson(FindUserIdRequest(emailAddress)).toString()))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(s"""{"userId":"${userId.asText}"}""")
+        )
+    )
+  }
+
+  private def setupThirdPartyApplicationSearchApplicationByUserIdStub(userId: UserId): Unit = {
+    stubFor(
+      get(urlEqualTo(s"/developer/applications?userId=${userId.asText}&environment=PRODUCTION"))
         .willReturn(
           aResponse()
             .withStatus(OK)

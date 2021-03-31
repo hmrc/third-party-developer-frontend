@@ -18,13 +18,13 @@ package controllers
 
 import domain.models.apidefinitions.AccessType
 import domain.models.applications._
-import domain.models.applications.Role.DEVELOPER
+import domain.models.applications.CollaboratorRole.DEVELOPER
 import domain.models.applications.State.TESTING
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
-import domain.models.developers.UserId
+import utils._
 
-class ApplicationSummaryTest extends WordSpec with Matchers {
+class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
 
   "noProductionApplications" should {
     val sandboxApp =
@@ -68,7 +68,7 @@ class ApplicationSummaryTest extends WordSpec with Matchers {
   }
 
   "from" should {
-    val user = new Collaborator("foo@bar.com", DEVELOPER, Some(UserId.random))
+    val user = "foo@bar.com".asDeveloperCollaborator
 
     val serverTokenApplication =
       new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), Environment.PRODUCTION, collaborators = Set(user))

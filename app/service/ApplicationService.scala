@@ -22,7 +22,7 @@ import domain.models.apidefinitions._
 import domain.models.applications._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 import domain.models.connectors.{DeskproTicket, TicketResult}
-import domain.models.developers.DeveloperSession
+import domain.models.developers.{DeveloperSession, UserId}
 import domain.models.subscriptions._
 import javax.inject.{Inject, Singleton}
 import service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
@@ -131,7 +131,7 @@ class ApplicationService @Inject() (
     val environment = application.deployedTo
     val requesterRole = roleForApplication(application, requesterEmail)
 
-    if (environment == Environment.SANDBOX && requesterRole == Role.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
+    if (environment == Environment.SANDBOX && requesterRole == CollaboratorRole.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
       applicationConnectorFor(application).deleteApplication(application.id)
 
@@ -150,7 +150,7 @@ class ApplicationService @Inject() (
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
   }
 
-  def addTeamMember(app: Application, requestingEmail: String, teamMember: Collaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def addTeamMember(app: Application, requestingEmail: String, teamMember: AddCollaborator)(implicit hc: HeaderCarrier): Future[Unit] = {
     val request = AddTeamMemberRequest(teamMember.emailAddress, teamMember.role, Some(requestingEmail))
     apmConnector.addTeamMember(app.id, request)
   }
@@ -170,11 +170,11 @@ class ApplicationService @Inject() (
     } yield response
   }
 
-  def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
-    def fetchProductionApplications = connectorWrapper.productionApplicationConnector.fetchByTeamMemberEmail(email)
+  def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
+    def fetchProductionApplications = connectorWrapper.productionApplicationConnector.fetchByTeamMemberUserId(userId)
 
     def fetchSandboxApplications: Future[Seq[Application]] = {
-      connectorWrapper.sandboxApplicationConnector.fetchByTeamMemberEmail(email) recover {
+      connectorWrapper.sandboxApplicationConnector.fetchByTeamMemberUserId(userId) recover {
         case _ => Seq.empty
       }
     }
@@ -239,6 +239,7 @@ object ApplicationService {
   trait ApplicationConnector {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
+    def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]]
     def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]]
     def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Seq[String])(
         implicit hc: HeaderCarrier

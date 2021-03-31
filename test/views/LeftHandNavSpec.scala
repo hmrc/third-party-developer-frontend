@@ -26,11 +26,12 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils.now
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
-import domain.models.developers.UserId
 
 import scala.collection.JavaConverters._
+import utils.CollaboratorTracker
+import utils.LocalUserIdTracker
 
-class LeftHandNavSpec extends CommonViewSpec {
+class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker {
 
   val leftHandNavView = app.injector.instanceOf[LeftHandNav]
 
@@ -82,7 +83,7 @@ class LeftHandNavSpec extends CommonViewSpec {
     }
 
     "include links to client ID and client secrets if the user is an admin and the app has reached production state" in new Setup {
-      val application = standardApplication.copy(collaborators = Set(Collaborator(loggedIn.email, Role.ADMINISTRATOR, Some(UserId.random))), state = ApplicationState.production("", ""))
+      val application = standardApplication.copy(collaborators = Set(loggedIn.email.asAdministratorCollaborator), state = ApplicationState.production("", ""))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
@@ -92,7 +93,7 @@ class LeftHandNavSpec extends CommonViewSpec {
 
     "include links to client ID and client secrets if the user is not an admin but the app is in sandbox" in new Setup {
       val application =
-        standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER, Some(UserId.random))), state = ApplicationState.production("", ""))
+        standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator), state = ApplicationState.production("", ""))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
@@ -101,8 +102,8 @@ class LeftHandNavSpec extends CommonViewSpec {
     }
 
     "include link to push secrets when the application has PPNS fields and the user is an admin or the application is sandbox" in new Setup {
-      val prodAppAsAdmin = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(Collaborator(loggedIn.email, Role.ADMINISTRATOR, Some(UserId.random))))
-      val sandboxAppAsDev = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER, Some(UserId.random))))
+      val prodAppAsAdmin = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asAdministratorCollaborator))
+      val sandboxAppAsDev = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
 
       val prodAppAsAdminDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
       val sandboxAppAsDevDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(sandboxAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
@@ -112,9 +113,9 @@ class LeftHandNavSpec extends CommonViewSpec {
     }
 
     "not include link to push secrets when the application does not have PPNS fields, or it does, but the user is only a developer for a production app" in new Setup {
-      val prodAppAsAdmin = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(Collaborator(loggedIn.email, Role.ADMINISTRATOR, Some(UserId.random))))
-      val sandboxAppAsDev = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER, Some(UserId.random))))
-      val prodAppAsDev = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(Collaborator(loggedIn.email, Role.DEVELOPER, Some(UserId.random))))
+      val prodAppAsAdmin = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asAdministratorCollaborator))
+      val sandboxAppAsDev = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
+      val prodAppAsDev = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
 
       val prodAppAsAdminDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
       val sandboxAppAsDevDocument: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(sandboxAppAsDev, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)

@@ -34,7 +34,9 @@ import domain.models.applications.ClientId
 import domain.models.applications.ApplicationId
 import domain.models.developers.UserId
 import domain.models.connectors.PasswordResetRequest
-import connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
+
+import connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
+import connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 
 object Stubs {
 
@@ -77,6 +79,7 @@ object Stubs {
 }
 
 object DeveloperStub {
+  import utils.GlobalUserIdTracker.idOf
 
   def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
     stubFor(
@@ -93,7 +96,7 @@ object DeveloperStub {
     )
 
   def setupResend(email: String, status: Int) = {
-    val userId = UserId.random
+    val userId = idOf(email)
 
     implicit val writes = Json.writes[FindUserIdResponse]
     
@@ -115,6 +118,20 @@ object DeveloperStub {
 
   def verifyResetPassword(request: PasswordResetRequest) = {
     verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(equalToJson(Json.toJson(request).toString())))
+  }
+
+  def findUserIdByEmailAddress(emailAddress: String) = {
+    val userId = idOf(emailAddress)
+
+    stubFor(
+      post(urlEqualTo("/developers/find-user-id"))
+        .withRequestBody(equalToJson(Json.toJson(FindUserIdRequest(emailAddress)).toString()))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(s"""{"userId":"${userId.asText}"}""")
+        )
+    )
   }
 
   def stubResetPasswordJourney(email: String,code: String) {
@@ -197,13 +214,11 @@ object ApplicationStub {
     )
   }
 
-  def configureUserApplications(email: String, applications: List[Application] = Nil, status: Int = OK) = {
-    val encodedEmail = URLEncoder.encode(email, "UTF-8")
-
+  def configureUserApplications(userId: UserId, applications: List[Application] = Nil, status: Int = OK) = {
     def stubResponse(environment: Environment, applications: List[Application]) = {
       stubFor(
         get(urlPathEqualTo("/developer/applications"))
-          .withQueryParam("emailAddress", equalTo(encodedEmail))
+          .withQueryParam("userId", equalTo(userId.asText))
           .withQueryParam("environment", equalTo(environment.toString))
           .willReturn(
             aResponse()

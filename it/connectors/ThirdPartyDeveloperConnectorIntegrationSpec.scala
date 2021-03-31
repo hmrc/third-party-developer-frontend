@@ -29,9 +29,9 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import domain.models.developers.UserId
+import utils.LocalUserIdTracker
 
-class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
+class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker {
   private val stubConfig = Configuration(
     "Test.microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
@@ -44,11 +44,12 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       .in(Mode.Test)
       .build()
 
-  trait Setup extends DeveloperBuilder {
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val userId = UserId.random
     val userEmail = "thirdpartydeveloper@example.com"
+    val userId = idOf(userEmail)
+
     val userPassword = "password1!"
     val sessionId = "sessionId"
     val loginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false)
@@ -86,7 +87,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       private val result = await(underTest.fetchSession(sessionId))
 
-      result shouldBe Session(sessionId, buildDeveloper(userId = userId, emailAddress = userEmail), loggedInState = LoggedInState.LOGGED_IN)
+      result shouldBe Session(sessionId, buildDeveloper(userEmail), loggedInState = LoggedInState.LOGGED_IN)
     }
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
@@ -172,7 +173,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
-      result shouldBe UserAuthenticationResponse(accessCodeRequired = false, session = Some(Session(sessionId, buildDeveloper(userId = userId, emailAddress = userEmail), LoggedInState.LOGGED_IN)))
+      result shouldBe UserAuthenticationResponse(accessCodeRequired = false, session = Some(Session(sessionId, buildDeveloper(userEmail), LoggedInState.LOGGED_IN)))
     }
 
     "return the nonce when the credentials are valid and MFA is enabled" in new Setup {
@@ -288,7 +289,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: Session = await(underTest.authenticateTotp(totpAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-totp")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
-      result shouldBe Session(sessionId, buildDeveloper(userId = userId, emailAddress = userEmail), LoggedInState.LOGGED_IN)
+      result shouldBe Session(sessionId, buildDeveloper(emailAddress = userEmail), LoggedInState.LOGGED_IN)
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {

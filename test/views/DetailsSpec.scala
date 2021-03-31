@@ -31,9 +31,15 @@ import uk.gov.hmrc.time.DateTimeUtils
 import utils.{TestApplications, WithCSRFAddToken}
 import views.helper.CommonViewSpec
 import views.html.DetailsView
-import domain.models.developers.UserId
+import utils.LocalUserIdTracker
+import utils.CollaboratorTracker
 
-class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddToken {
+class DetailsSpec 
+    extends CommonViewSpec 
+    with TestApplications 
+    with CollaboratorTracker 
+    with LocalUserIdTracker 
+    with WithCSRFAddToken {
 
   val detailsView = app.injector.instanceOf[DetailsView]
 
@@ -55,7 +61,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
       "managing a principal application" should {
         val deployedTo = Environment.PRODUCTION
         val application = anApplication(environment = deployedTo)
-          .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+          .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
         "Show Production when environment is Production" in {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
@@ -74,7 +80,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
       "managing a subordinate application" should {
         val deployedTo = Environment.SANDBOX
         val application = anApplication(environment = deployedTo)
-          .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+          .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
         "Show Sandbox when environment is Sandbox" in {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
@@ -97,7 +103,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
         "show nothing when a developer" in {
           val application = anApplication(environment = deployedTo)
-            .withTeamMember(loggedIn.developer.email, Role.DEVELOPER)
+            .withTeamMember(loggedIn.developer.email, CollaboratorRole.DEVELOPER)
 
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
@@ -106,7 +112,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
         "show nothing when an admin" in {
           val application = anApplication(environment = deployedTo)
-            .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+            .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
@@ -123,7 +129,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
           "show nothing when a developer" in {
 
             val application = anApplication(environment = deployedTo, access = access)
-              .withTeamMember(loggedIn.developer.email, Role.DEVELOPER)
+              .withTeamMember(loggedIn.developer.email, CollaboratorRole.DEVELOPER)
 
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
@@ -132,7 +138,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
           "show nothing when an admin" in {
             val application = anApplication(environment = deployedTo, access = access)
-              .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+              .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
@@ -145,7 +151,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
           "show nothing when a developer" in {
             val application = anApplication(environment = deployedTo, access = access)
-              .withTeamMember(loggedIn.developer.email, Role.DEVELOPER)
+              .withTeamMember(loggedIn.developer.email, CollaboratorRole.DEVELOPER)
 
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
@@ -154,7 +160,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
           "show nothing when an admin" in {
             val application = anApplication(environment = deployedTo, access = access)
-              .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+              .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
 
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
 
@@ -170,7 +176,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
               val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
 
               val application = anApplication(environment = deployedTo, access = access)
-                .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+                .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
                 .withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
@@ -187,7 +193,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
               val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
 
               val application = anApplication(environment = deployedTo, access = access)
-                .withTeamMember(loggedIn.developer.email, Role.ADMINISTRATOR)
+                .withTeamMember(loggedIn.developer.email, CollaboratorRole.ADMINISTRATOR)
                 .withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)))
@@ -199,7 +205,7 @@ class DetailsSpec extends CommonViewSpec with TestApplications with WithCSRFAddT
 
           "the user is an administrator" should {
 
-            val collaborators = Set(Collaborator(loggedIn.developer.email, Role.ADMINISTRATOR, Some(UserId.random)))
+            val collaborators = Set(loggedIn.developer.email.asAdministratorCollaborator)
 
             "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in {
               val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)

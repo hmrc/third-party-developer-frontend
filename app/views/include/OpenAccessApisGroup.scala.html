@@ -18,14 +18,14 @@
 @import domain.models.views.SubscriptionRedirect
 @import views.helper.IdFormatter
 @import domain.models.apidefinitions.APIAccessType
-@import domain.models.applications.Role
+@import domain.models.applications.CollaboratorRole
 @import domain.models.applications.Application
 @import domain.models.apidefinitions.ApiContext
 @import domain.models.subscriptions.ApiData
 
 @this()
 
-@(role: Role,
+@(role: CollaboratorRole,
     app: Application,
     openAccessApis: Map[ApiContext, ApiData]
 )(

@@ -17,12 +17,14 @@
 package builder
 
 import domain.models.developers.Developer
-import domain.models.developers.UserId
 import domain.models.emailpreferences.EmailPreferences
+import utils.CollaboratorTracker
+import utils.UserIdTracker
 
-trait DeveloperBuilder {
+trait DeveloperBuilder extends CollaboratorTracker {
+  self: UserIdTracker =>
+
   def buildDeveloper(
-    userId: UserId = UserId.random,
     emailAddress: String = "something@example.com",
     firstName: String = "John",
     lastName: String = "Doe",
@@ -31,7 +33,7 @@ trait DeveloperBuilder {
     emailPreferences: EmailPreferences = EmailPreferences.noPreferences
   ): Developer = {
     Developer(
-      userId,
+      idOf(emailAddress),
       emailAddress,
       firstName,
       lastName,

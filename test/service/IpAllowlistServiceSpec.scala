@@ -29,14 +29,20 @@ import repositories.ReactiveMongoFormatters.formatIpAllowlistFlow
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
-import utils.{AsyncHmrcSpec, TestApplications}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
+import utils._
+import builder.DeveloperBuilder
 
-class IpAllowlistServiceSpec extends AsyncHmrcSpec with Matchers {
+class IpAllowlistServiceSpec
+    extends AsyncHmrcSpec 
+    with Matchers 
+    with TestApplications
+    with CollaboratorTracker
+    with DeveloperBuilder 
+    with LocalUserIdTracker {
 
-  trait Setup extends TestApplications {
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val sessionId: String = randomUUID.toString
 

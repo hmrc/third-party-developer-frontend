@@ -18,7 +18,7 @@
 @import config.ApplicationConfig
 @import domain.models.views.BackButtonWithJavaScript
 @import domain.models.views.Link
-@import domain.models.applications.Role
+@import domain.models.applications.CollaboratorRole
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 @import views.html.include.DevMain
@@ -27,7 +27,7 @@
 
 @this(devMain: DevMain)
 
-@(app: Application, role: Role, loggedIn: DeveloperSession)(
+@(app: Application, role: CollaboratorRole, loggedIn: DeveloperSession)(
         implicit request: play.api.mvc.Request[Any], messages: Messages,applicationConfig: ApplicationConfig)
 
 @pageHeading = @{ "Tell us your team members" }

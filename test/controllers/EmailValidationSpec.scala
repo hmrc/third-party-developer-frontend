@@ -16,11 +16,10 @@
 
 package controllers
 
-import org.scalatest.Matchers
 import play.api.data.{Form, FormError}
 import utils.AsyncHmrcSpec
 
-class EmailValidationSpec extends AsyncHmrcSpec with Matchers {
+class EmailValidationSpec extends AsyncHmrcSpec {
   "emailValidator for the field email" should {
     val testForm = Form("emailaddress" -> emailValidator())
 

@@ -30,7 +30,6 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.TestApplications._
 import utils.ViewHelpers._
 import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
@@ -41,8 +40,17 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
+import utils.LocalUserIdTracker
+import utils.TestApplications
+import utils.CollaboratorTracker
 
-class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
+class DetailsSpec 
+    extends BaseControllerSpec 
+    with WithCSRFAddToken 
+    with TestApplications 
+    with DeveloperBuilder 
+    with CollaboratorTracker 
+    with LocalUserIdTracker {
 
   Helpers.running(app) {
     "details" when {
@@ -215,7 +223,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
       }
 
       "update name which contain HMRC should fail" in new Setup {
-        when(underTest.applicationService.isApplicationNameValid(*, *, *)(any[HeaderCarrier]))
+        when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
           .thenReturn(Future.successful(Invalid.invalidName))
 
         val application = anApplication(adminEmail = loggedInUser.email)
@@ -226,7 +234,7 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
         status(result) shouldBe BAD_REQUEST
 
         verify(underTest.applicationService).isApplicationNameValid(eqTo("my invalid HMRC application name"), eqTo(application.deployedTo), eqTo(Some(application.id)))(
-          any[HeaderCarrier]
+          *
         )
       }
     }
@@ -315,13 +323,13 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
 
         await(application.withName(newName).callChangeDetailsAction)
 
-        verify(underTest.applicationService).update(any[UpdateApplicationRequest])(any[HeaderCarrier])
-        verify(underTest.applicationService, never).updateCheckInformation(eqTo(application), any[CheckInformation])(any[HeaderCarrier])
+        verify(underTest.applicationService).update(any[UpdateApplicationRequest])(*)
+        verify(underTest.applicationService, never).updateCheckInformation(eqTo(application), any[CheckInformation])(*)
       }
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with DeveloperBuilder {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
     val unauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val pendingApprovalView = app.injector.instanceOf[PendingApprovalView]
     val detailsView = app.injector.instanceOf[DetailsView]
@@ -353,18 +361,18 @@ class DetailsSpec extends BaseControllerSpec with WithCSRFAddToken {
     val newTermsUrl = Some("http://example.com/new-terms")
     val newPrivacyUrl = Some("http://example.com/new-privacy")
 
-    when(underTest.applicationService.isApplicationNameValid(*, *, *)(any[HeaderCarrier]))
+    when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
       .thenReturn(Future.successful(Valid))
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(any[HeaderCarrier]))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(*))
       .thenReturn(successful(Some(session)))
 
     when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
 
-    when(underTest.applicationService.update(any[UpdateApplicationRequest])(any[HeaderCarrier]))
+    when(underTest.applicationService.update(any[UpdateApplicationRequest])(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
-    when(underTest.applicationService.updateCheckInformation(any[Application], any[CheckInformation])(any[HeaderCarrier]))
+    when(underTest.applicationService.updateCheckInformation(any[Application], any[CheckInformation])(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
