@@ -16,6 +16,8 @@
 
 package stubs
 
+import java.net.URLEncoder
+
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.EncryptedJson
 import domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
@@ -120,7 +122,7 @@ object DeveloperStub {
 
   def findUserIdByEmailAddress(emailAddress: String) = {
     val userId = idOf(emailAddress)
-    
+
     stubFor(
       post(urlEqualTo("/developers/find-user-id"))
         .withRequestBody(equalToJson(Json.toJson(FindUserIdRequest(emailAddress)).toString()))
@@ -129,6 +131,42 @@ object DeveloperStub {
             .withStatus(OK)
             .withBody(s"""{"userId":"${userId.asText}"}""")
         )
+    )
+  }
+
+  def stubResetPasswordJourney(email: String,code: String) {
+    fetchEmailForResetCode(email, code)
+    resetPassword()
+  }
+
+  def stubResetPasswordJourneyFail() {
+    stubFor(
+      get(urlPathEqualTo("/reset-password"))
+        .willReturn(
+          aResponse()
+            .withStatus(BAD_REQUEST)
+        )
+    )
+  }
+
+  def fetchEmailForResetCode(email: String,code: String) = {
+    stubFor(
+      get(urlPathEqualTo("/reset-password"))
+      .willReturn(
+        aResponse()
+        .withStatus(OK)
+        .withBody(s"""{ "email": "$email" }"""")
+      )
+    )
+  }
+
+  def resetPassword() = {
+    stubFor(
+      post(urlEqualTo("/reset-password"))
+      .willReturn(
+        aResponse()
+        .withStatus(OK)
+      )
     )
   }
 }

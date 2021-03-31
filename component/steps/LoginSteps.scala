@@ -174,8 +174,27 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email : String =>
     DeveloperStub.verifyResetPassword(PasswordResetRequest(email))
   }
+  
+  Given("""^I click on a valid password reset link for code '(.*)'$""") { resetPwdCode: String =>
+    val email = "bob@example.com"
+    DeveloperStub.stubResetPasswordJourney(email, resetPwdCode)
+    
+    webDriver.manage().deleteAllCookies()
+    goTo(s"http://localhost:${Env.port}/developer/reset-password-link?code='$resetPwdCode'")
+  }
 
+  Given("""^I click on an invalid password reset link for code '(.*)'$""") { invalidResetPwdCode: String =>
+    DeveloperStub.stubResetPasswordJourneyFail()
 
+    webDriver.manage().deleteAllCookies()
+    goTo(s"http://localhost:${Env.port}/developer/reset-password-link?code='$invalidResetPwdCode'")
+  }
+  
+  Then( """^I am on the 'Reset Password' page with code '(.*)'$""") { resetPwdCode: String =>
+    eventually {
+      withClue(s"Fail to be on page: 'Reset Password'")(on(ResetPasswordPage(resetPwdCode))) }
+    }
+  
   def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
     val sessionId = "sessionId_" + loggedInState.toString
 

@@ -73,15 +73,14 @@ class Password @Inject()(val auditService: AuditService,
     )
   }
 
-  def validateReset(email: String, code: String) = Action.async { implicit request =>
+  def validateReset(code: String) = Action.async { implicit request =>
     connector.fetchEmailForResetCode(code) map {
       email => Redirect(routes.Password.resetPasswordChange()).addingToSession("email" -> email)
     } recover {
       case _: InvalidResetCode => Redirect(routes.Password.resetPasswordError()).flashing(
         "error" -> "InvalidResetCode")
       case _: UnverifiedAccount => Redirect(routes.Password.resetPasswordError()).flashing(
-        "error" -> "UnverifiedAccount",
-        "email" -> email
+        "error" -> "UnverifiedAccount"
       )
     }
   }

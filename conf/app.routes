@@ -34,7 +34,7 @@ GET         /locked                                                             
 GET         /forgot-password                                                                             controllers.Password.showForgotPassword
 POST        /forgot-password                                                                             controllers.Password.requestReset
 
-GET         /reset-password-link                                                                         controllers.Password.validateReset(email: String, code: String)
+GET         /reset-password-link                                                                         controllers.Password.validateReset(code: String)
 
 GET         /reset-password                                                                              controllers.Password.resetPasswordChange
 POST        /reset-password                                                                              controllers.Password.resetPassword
