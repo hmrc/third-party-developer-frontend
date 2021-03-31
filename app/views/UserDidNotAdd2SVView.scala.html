@@ -17,9 +17,9 @@
 @import config.ApplicationConfig
 @import domain.models.views.BackButtonWithJavaScript
 @import domain.models.developers.DeveloperSession
-@import views.html.include.DevMain
+@import views.html.include._
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
