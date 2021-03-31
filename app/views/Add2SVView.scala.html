@@ -25,34 +25,31 @@
 @(mfaMandateDetails: MfaMandateDetails)(implicit messagesProvider: MessagesProvider, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
-    title = "Add 2-step verification",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = "Add 2-step verification",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">Add 2-step verification</h1>
 
-    <header>
-        <h1 class="heading-xlarge">Add 2-step verification</h1>
-    </header>
-    <section>
+  <p class="govuk-body">Use 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
 
-        <p>Use 2-step verification to protect your Developer Hub account and application details from being compromised.</p>
+  <p class="govuk-body">
+    <a id="submit" class="govuk-button" href="@controllers.profile.routes.ProtectAccount.getProtectAccount()">Continue</a>
+  </p>
 
-        <p><a id="submit" class="button" href="@controllers.profile.routes.ProtectAccount.getProtectAccount()">Continue</a></p>
+  @{if(mfaMandateDetails.showAdminMfaMandatedMessage)
+    <div class="govuk-warning-text">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-warning-text__assistive">Warning</span>
+        If you are the Administrator of an application you have {mfaMandateDetails.daysTillAdminMfaMandate} {helpers.PluralizeHelper.pluralize(mfaMandateDetails.daysTillAdminMfaMandate, "day", "days")} until 2-step verification is mandatory
+      </strong>
+    </div>
+  }
+  <br/>
 
-        @{if(mfaMandateDetails.showAdminMfaMandatedMessage)
-        <div class="notice">
-            <i class="icon icon-important">
-                <span class="visually-hidden">Warning</span>
-            </i>
-            <strong class="bold-small">
-                If you are the Administrator of an application you have {mfaMandateDetails.daysTillAdminMfaMandate} {helpers.PluralizeHelper.pluralize(mfaMandateDetails.daysTillAdminMfaMandate, "day", "days")} until 2-step verification is mandatory
-            </strong>
-        </div>
-        }
-        <br/>
-
-        <p><a id="skip" href="@controllers.routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a></p>
-    </section>
-
+  <p class="govuk-body">
+    <a class="govuk-link" id="skip" href="@controllers.routes.UserLoginAccount.get2SVNotSetPage()">I can't do this right now</a>
+  </p>
 }
