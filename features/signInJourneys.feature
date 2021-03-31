@@ -53,7 +53,11 @@ Feature: Sign in
     Given I click on a valid password reset link for code '1234'
     Then I am on the 'Reset Password' page with code '1234'
     When I enter all the fields:
-      | password       | confirmPassword |
+      | password       | confirmpassword |
       | StrongNewPwd!2 | StrongNewPwd!2  |
     And I click on submit
     Then I am on the 'You have reset your password' page
+
+  Scenario: I have an invalid password reset link and I want to reset my password
+    Given I click on an invalid password reset link for code '9876'
+    Then I am on the 'Reset password link no longer valid' page

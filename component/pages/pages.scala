@@ -175,6 +175,11 @@ object YouHaveResetYourPasswordPage extends FormPage {
   override val url: String = s"${Env.host}/developer/reset-password"
 }
 
+object ResetPasswordLinkNoLongerValidPage extends FormPage {
+  override val pageHeading = "Reset password link no longer valid"
+  override val url: String = s"${Env.host}/developer/reset-password/error"
+}
+
 case object SignOutSurveyPage extends FormPage {
   override val pageHeading = "Are you sure you want to sign out?"
   override val url: String = s"${Env.host}/developer/logout/survey"

@@ -176,8 +176,14 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     DeveloperStub.stubResetPasswordJourney(email, resetPwdCode)
     
     webDriver.manage().deleteAllCookies()
-    goOn(SignInPage.default)
-    goTo(s"localhost:${Env.port}/developer/reset-password-link?code='$resetPwdCode'")
+    goTo(s"http://localhost:${Env.port}/developer/reset-password-link?code='$resetPwdCode'")
+  }
+
+  Given("""^I click on an invalid password reset link for code '(.*)'$""") { invalidResetPwdCode: String =>
+    DeveloperStub.stubResetPasswordJourneyFail()
+
+    webDriver.manage().deleteAllCookies()
+    goTo(s"http://localhost:${Env.port}/developer/reset-password-link?code='$invalidResetPwdCode'")
   }
   
   Then( """^I am on the 'Reset Password' page with code '(.*)'$""") { resetPwdCode: String =>

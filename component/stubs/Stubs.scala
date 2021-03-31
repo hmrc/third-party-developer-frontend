@@ -122,10 +122,19 @@ object DeveloperStub {
     resetPassword()
   }
 
+  def stubResetPasswordJourneyFail() {
+    stubFor(
+      get(urlPathEqualTo("/reset-password"))
+        .willReturn(
+          aResponse()
+            .withStatus(BAD_REQUEST)
+        )
+    )
+  }
+
   def fetchEmailForResetCode(email: String,code: String) = {
     stubFor(
       get(urlPathEqualTo("/reset-password"))
-      // .withQueryParam("code", equalTo(code))
       .willReturn(
         aResponse()
         .withStatus(OK)
@@ -135,7 +144,6 @@ object DeveloperStub {
   }
 
   def resetPassword() = {
-    // TODO - handle checking encrypted password reset payload
     stubFor(
       post(urlEqualTo("/reset-password"))
       .willReturn(
