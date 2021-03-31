@@ -21,11 +21,11 @@
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: config.ApplicationConfig)
 
 @devMain(title = "We have locked your account", developerSession = None) {
-    <h1 class="heading-xlarge">We have locked your account</h1>
+  <h1 class="govuk-heading-l">We have locked your account</h1>
 
-    <p>
+  <p class="govuk-body">
     You've entered details that do not match our records. Reset your password to sign in.
-    </p>
+  </p>
 
-            <p><a id="submit" class="button" href="@controllers.routes.Password.showForgotPassword">Reset password</a></p>
+  <a id="submit" class="govuk-button" href="@controllers.routes.Password.showForgotPassword">Reset password</a>
 }
