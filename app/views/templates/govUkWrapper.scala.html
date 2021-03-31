@@ -103,7 +103,7 @@
 @govukTemplate(
     pageTitle = Some(title),
     headBlock = Some(head),
-    beforeContentBlock = None,
+    beforeContentBlock = Some(beforeContentBlock),
     headerBlock = siteHeader(),
     footerBlock = footerBlock
 )(mainContentDefault)
