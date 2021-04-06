@@ -59,27 +59,27 @@
 }
 
 @backLink = {
-    @back match {
-     case BackButtonToUrl(url) => {
-        <a href="@url" class="link-back">Back</a>
+  @back match {
+    case BackButtonToUrl(url) => {
+      <a href="@url" class="govuk-back-link">Back</a>
     }
-     case  BackButtonWithJavaScript => {
-        <a href="javascript:history.back()" class="link-back">Back</a>
+    case  BackButtonWithJavaScript => {
+      <a href="javascript:history.back()" class="govuk-back-link">Back</a>
     }
-     case  NoBackButton => {}
-    }
+    case  NoBackButton => {}
+  }
 }
 
 @beforeContentBlock = {
 <div class="banner">
-    @include.breadcrumbs(breadcrumbs: _*)
-    @backLink
+  @include.breadcrumbs(breadcrumbs: _*)
+  @backLink
 
-    @if(back == NoBackButton && breadcrumbs.isEmpty){
+  @if(back == NoBackButton && breadcrumbs.isEmpty){
     <p>&nbsp;</p>
-    }
+  }
 
-    @serviceInfoContent
+  @serviceInfoContent
 </div>
 }
 
