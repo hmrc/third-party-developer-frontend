@@ -412,10 +412,13 @@ tr.teamMembers, th {
     &-auth {
       display: flex;
       align-items: center;
-      margin: 0 !important;
       margin-left: auto !important;
-      & > *:first-child {
-        padding-right: 15px;
+      &-links {
+        display: flex;
+        margin: 0 !important;
+        & > *:first-child {
+          padding-right: 15px;
+        }
       }
     }
   }
@@ -429,4 +432,8 @@ tr.teamMembers, th {
   .auth-links {
     display: none !important;
   }
+}
+
+.before-content-banner {
+  display: flex;
 }
