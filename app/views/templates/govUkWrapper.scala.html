@@ -23,6 +23,7 @@
 @import domain.models.developers.DeveloperSession
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import domain.models.views.NavLink
 @import config.ApplicationConfig
 @import templates._
 @import views.templates._
@@ -47,7 +48,8 @@
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
     developerSession: Option[DeveloperSession],
-    bodyEndBlock: Option[Html] = None,
+    navLinks: Seq[NavLink] = Seq.empty,
+    bodyEndBlock: Option[Html] = None,git st
     feedbackBanner: Option[FeedbackBanner] = None
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
@@ -110,7 +112,7 @@
     pageTitle = Some(title),
     headBlock = Some(head),
     beforeContentBlock = Some(beforeContentBlock),
-    headerBlock = siteHeader(),
+    headerBlock = siteHeader(navLinks),
     footerBlock = footerBlock,
     bodyEndBlock = Some(bodyEndDefault)
 )(mainContentDefault)
