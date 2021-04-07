@@ -47,6 +47,7 @@
     back: BackButton = NoBackButton,
     fullWidthContent: Boolean = false,
     developerSession: Option[DeveloperSession],
+    bodyEndBlock: Option[Html] = None,
     feedbackBanner: Option[FeedbackBanner] = None
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
@@ -100,10 +101,16 @@
     <script>window.GOVUKFrontend.initAll();</script>
 }
 
+@bodyEndDefault = {
+  @bodyEndBlock
+  @scripts
+}
+
 @govukTemplate(
     pageTitle = Some(title),
     headBlock = Some(head),
     beforeContentBlock = Some(beforeContentBlock),
     headerBlock = siteHeader(),
-    footerBlock = footerBlock
+    footerBlock = footerBlock,
+    bodyEndBlock = Some(bodyEndDefault)
 )(mainContentDefault)

@@ -22,41 +22,51 @@
 @this(govUkWrapper: govUkWrapper)
 
 @(title: String,
-    userFullName: Option[String] = None,
-    isRegistering: Boolean = false,
-    breadcrumbs: Seq[Crumb] = Seq.empty,
-    leftNav: Option[Html] = None,
-    back: BackButton = NoBackButton,
-    fullWidthContent: Boolean = false,
-    developerSession: Option[DeveloperSession],
-    feedbackBanner: Option[FeedbackBanner] = None
+  userFullName: Option[String] = None,
+  isRegistering: Boolean = false,
+  breadcrumbs: Seq[Crumb] = Seq.empty,
+  leftNav: Option[Html] = None,
+  back: BackButton = NoBackButton,
+  fullWidthContent: Boolean = false,
+  developerSession: Option[DeveloperSession],
+  feedbackBanner: Option[FeedbackBanner] = None
 )(mainContent: Html)(
-    implicit request: Request[_],
-        messages: Messages,
-        applicationConfig: config.ApplicationConfig
+  implicit request: Request[_],
+  messages: Messages,
+  applicationConfig: config.ApplicationConfig
 )
 
+@scripts = {
+  <script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+  <script>window.GOVUKFrontend.initAll();</script>
+}
 
-    @userBanner = {
-    <div id="user-nav-links" class="header__menu__proposition--sub-header" data-ej>
-        <ul class="header__menu__proposition-links">
-            @headerNavLinks(UserNavLinks(userFullName, isRegistering), anchorClass=Some("link-style"))
-        </ul>
+
+@userBanner = {
+  <!-- New -->
+  <div class="govuk-grid-row" data-ej>
+    <div class="govuk-grid-column-full subnav">
+      <ul id="proposition-links" class="govuk-list subnav-auth">
+        @headerNavLinks(UserNavLinks(userFullName, isRegistering), anchorClass=Some("link-style"))
+      </ul>
     </div>
+  </div>
 }
 
 @govUkWrapper(title = s"$title - HMRC Developer Hub - GOV.UK",
-    navTitle = Some(applicationConfig.title),
-    navTitleLink = Some(Call("GET", s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation")),
-    headerNavLinks = headerNavLinks(
-        StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl),
-        UserNavLinks(userFullName, isRegistering)),
-    serviceInfoContent = Some(userBanner),
-    breadcrumbs = breadcrumbs,
-    leftNav = leftNav,
-    back = back,
-    fullWidthContent = fullWidthContent,
-    developerSession = developerSession,
-    feedbackBanner = feedbackBanner) {
-    @mainContent
+  navTitle = Some(applicationConfig.title),
+  navTitleLink = Some(Call("GET", s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation")),
+  headerNavLinks = headerNavLinks(
+    StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl),
+    UserNavLinks(userFullName, isRegistering)
+  ),
+  serviceInfoContent = Some(userBanner),
+  breadcrumbs = breadcrumbs,
+  leftNav = leftNav,
+  back = back,
+  fullWidthContent = fullWidthContent,
+  developerSession = developerSession,
+  feedbackBanner = feedbackBanner
+) {
+  @mainContent
 }
