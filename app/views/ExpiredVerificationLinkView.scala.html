@@ -16,9 +16,10 @@
 
 @import domain.models.views.StaticNavLinks
 @import include._
+@import templates.govUkWrapper
 @import play.twirl.api.HtmlFormat
 
-@this(main: Main)
+@this(main: govUkWrapper)
 
 @()(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig)
 
