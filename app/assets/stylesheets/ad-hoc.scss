@@ -420,3 +420,13 @@ tr.teamMembers, th {
     }
   }
 }
+
+.auth-links {
+  display: block !important;
+}
+
+@media (min-width: 40.0625em) {
+  .auth-links {
+    display: none !important;
+  }
+}
