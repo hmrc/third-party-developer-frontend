@@ -43,13 +43,10 @@
 
 
 @userBanner = {
-  <!-- New -->
-  <div class="govuk-grid-row" data-ej>
-    <div class="govuk-grid-column-full subnav">
-      <ul id="proposition-links" class="govuk-list subnav-auth">
-        @headerNavLinks(UserNavLinks(userFullName, isRegistering), anchorClass=Some("link-style"))
-      </ul>
-    </div>
+  <div class="subnav-auth">
+    <ul id="proposition-links" class="govuk-list subnav-auth-links">
+      @headerNavLinks(UserNavLinks(userFullName, isRegistering), anchorClass=Some("link-style"))
+    </ul>
   </div>
 }
 
