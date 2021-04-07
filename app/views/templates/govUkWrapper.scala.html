@@ -78,29 +78,25 @@
   @include.breadcrumbs(breadcrumbs: _*)
   @backLink
 
-  @if(back == NoBackButton && breadcrumbs.isEmpty){
-    <p>&nbsp;</p>
-  }
-
   @serviceInfoContent
 </div>
 }
 
 @content = {
-    @contentBlock
+  @contentBlock
 }
 
 @mainContentDefault = {
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-            @contentBlock
-        </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      @contentBlock
     </div>
+  </div>
 }
 
 @scripts = {
-    <script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
-    <script>window.GOVUKFrontend.initAll();</script>
+  <script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+  <script>window.GOVUKFrontend.initAll();</script>
 }
 
 @bodyEndDefault = {
@@ -109,10 +105,10 @@
 }
 
 @govukTemplate(
-    pageTitle = Some(title),
-    headBlock = Some(head),
-    beforeContentBlock = Some(beforeContentBlock),
-    headerBlock = siteHeader(navLinks),
-    footerBlock = footerBlock,
-    bodyEndBlock = Some(bodyEndDefault)
+  pageTitle = Some(title),
+  headBlock = Some(head),
+  beforeContentBlock = Some(beforeContentBlock),
+  headerBlock = siteHeader(navLinks),
+  footerBlock = footerBlock,
+  bodyEndBlock = Some(bodyEndDefault)
 )(mainContentDefault)
