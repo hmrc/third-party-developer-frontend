@@ -395,3 +395,28 @@ tr.teamMembers, th {
     }
   }
 }
+
+.subnav {
+  display: flex;
+  &-auth {
+    display: none;
+  }
+  &-margins {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (min-width: 40.0625em) {
+  .subnav {
+    &-auth {
+      display: flex;
+      align-items: center;
+      margin: 0 !important;
+      margin-left: auto !important;
+      & > *:first-child {
+        padding-right: 15px;
+      }
+    }
+  }
+}
