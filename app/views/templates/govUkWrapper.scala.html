@@ -30,35 +30,35 @@
 
 
 @this(govukTemplate: GovukTemplate,
-    siteHeader: siteHeader,
-    siteFooter: siteFooter,
-    footerLinks: FooterLinks
+  siteHeader: siteHeader,
+  siteFooter: siteFooter,
+  footerLinks: FooterLinks
 )
 
 @(title: String,
-    navTitle: Option[String] = None,
-    navTitleLink: Option[play.api.mvc.Call] = None,
-    headerNavLinks: Html = HtmlFormat.empty,
-    contentHeader: Option[Html] = None,
-    sidebar: Option[Html] = None,
-    serviceInfoContent : Option[Html] = None,
-    fullWidthBanner: Option[Html] = None,
-    leftNav: Option[Html] = None,
-    breadcrumbs: Seq[Crumb] = Seq.empty,
-    back: BackButton = NoBackButton,
-    fullWidthContent: Boolean = false,
-    developerSession: Option[DeveloperSession],
-    navLinks: Seq[NavLink] = Seq.empty,
-    bodyEndBlock: Option[Html] = None,
-    feedbackBanner: Option[FeedbackBanner] = None
+  navTitle: Option[String] = None,
+  navTitleLink: Option[play.api.mvc.Call] = None,
+  headerNavLinks: Html = HtmlFormat.empty,
+  contentHeader: Option[Html] = None,
+  sidebar: Option[Html] = None,
+  serviceInfoContent : Option[Html] = None,
+  fullWidthBanner: Option[Html] = None,
+  leftNav: Option[Html] = None,
+  breadcrumbs: Seq[Crumb] = Seq.empty,
+  back: BackButton = NoBackButton,
+  fullWidthContent: Boolean = false,
+  developerSession: Option[DeveloperSession],
+  navLinks: Seq[NavLink] = Seq.empty,
+  bodyEndBlock: Option[Html] = None,
+  feedbackBanner: Option[FeedbackBanner] = None
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
-    <link href='@controllers.routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
+  <link href='@controllers.routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
 }
 
 @footerBlock = {
-    @siteFooter(new Footer(meta = Some(Meta(items = Some(footerLinks.items)))))
+  @siteFooter(new Footer(meta = Some(Meta(items = Some(footerLinks.items)))))
 }
 
 @backLink = {
@@ -77,7 +77,6 @@
 <div class="before-content-banner">
   @include.breadcrumbs(breadcrumbs: _*)
   @backLink
-
   @serviceInfoContent
 </div>
 }
