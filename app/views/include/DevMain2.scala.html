@@ -51,18 +51,19 @@
 }
 
 @govUkWrapper(title = s"$title - HMRC Developer Hub - GOV.UK",
-    navTitle = Some(applicationConfig.title),
-    navTitleLink = Some(Call("GET", s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation")),
-    headerNavLinks = headerNavLinks(
-        StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl),
-        UserNavLinks(userFullName, isRegistering)),
-    serviceInfoContent = Some(userBanner),
-    breadcrumbs = breadcrumbs,
-    leftNav = leftNav,
-    back = back,
-    fullWidthContent = fullWidthContent,
-    developerSession = developerSession,
-    navLinks = UserNavLinks(userFullName, isRegistering),
-    feedbackBanner = feedbackBanner) {
-    @mainContent
+  navTitle = Some(applicationConfig.title),
+  navTitleLink = Some(Call("GET", s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation")),
+  headerNavLinks = headerNavLinks(
+    StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl),
+    UserNavLinks(userFullName, isRegistering)
+  ),
+  serviceInfoContent = Some(userBanner),
+  breadcrumbs = breadcrumbs,
+  leftNav = leftNav,
+  back = back,
+  fullWidthContent = fullWidthContent,
+  developerSession = developerSession,
+  navLinks = UserNavLinks(userFullName, isRegistering),
+  feedbackBanner = feedbackBanner) {
+  @mainContent
 }
