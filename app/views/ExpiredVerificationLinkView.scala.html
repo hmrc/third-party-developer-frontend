@@ -19,11 +19,11 @@
 @import templates.govUkWrapper
 @import play.twirl.api.HtmlFormat
 
-@this(main: govUkWrapper)
+@this(govUkWrapper: govUkWrapper)
 
 @()(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig)
 
-@main(
+@govUkWrapper(
   title = "Your account verification link has expired",
   navTitle = Some(applicationConfig.title),
   headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),

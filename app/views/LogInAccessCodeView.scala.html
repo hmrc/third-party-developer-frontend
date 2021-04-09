@@ -29,7 +29,7 @@
   developerSession = None
 ) {
   <h1 class="govuk-heading-l">Enter your access code</h1>
-  @errorSummary(form)
+  @errorSummary2(form)
 
   @helper.form(action = controllers.routes.UserLoginAccount.authenticateTotp()){
     @helper.CSRF.formField
