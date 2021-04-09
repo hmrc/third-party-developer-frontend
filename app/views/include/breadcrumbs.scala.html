@@ -18,25 +18,25 @@
 @(crumbs: Crumb*)
 
 @if(crumbs.nonEmpty) {
-@*
-Note: The crumbs are in reverse order. The current page is FIRST, the top level link is LAST.
-*@
-<nav class="breadcrumbs" aria-label="Breadcrumbs">
+  @*
+  Note: The crumbs are in reverse order. The current page is FIRST, the top level link is LAST.
+  *@
+  <nav class="breadcrumbs" aria-label="Breadcrumbs">
     <ol itemscope itemtype="http://schema.org/BreadcrumbList">
-        @defining(crumbs.tail) { linkableCrumbs =>
+      @defining(crumbs.tail) { linkableCrumbs =>
         @linkableCrumbs.reverse.map { crumb =>
-        <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" @if(crumb.url.isEmpty){ @crumb.dataAttribute.getOrElse("") }>
-        @if(crumb.url.nonEmpty){
-        <a href="@crumb.url" itemprop="item" @crumb.dataAttribute.getOrElse("")><span itemprop="name">@crumb.name</span></a>
-        }else{
-        @crumb.name
+          <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" @if(crumb.url.isEmpty){ @crumb.dataAttribute.getOrElse("") }>
+            @if(crumb.url.nonEmpty){
+              <a href="@crumb.url" itemprop="item" @crumb.dataAttribute.getOrElse("")><span itemprop="name">@crumb.name</span></a>
+            }else{
+              @crumb.name
+            }
+          </li>
         }
-        </li>
-        }
-        }
-        <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" @if(crumbs.head.dataAttribute.isDefined) {@crumbs.head.dataAttribute}>
-            <span itemprop="name">@crumbs.head.name</span>
-        </li>
+      }
+      <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" @if(crumbs.head.dataAttribute.isDefined) {@crumbs.head.dataAttribute}>
+        <span itemprop="name">@crumbs.head.name</span>
+      </li>
     </ol>
-</nav>
+  </nav>
 }

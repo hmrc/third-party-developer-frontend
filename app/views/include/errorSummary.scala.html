@@ -19,16 +19,16 @@
 @(form: Form[_])(implicit messages: Messages)
 
 @if(form.hasGlobalErrors) {
-<div class="error-summary" id="error-summary-display" role="alert" aria-labelledby="error-summary-heading" tabindex="-1">
+  <div class="error-summary" id="error-summary-display" role="alert" aria-labelledby="error-summary-heading" tabindex="-1">
     <h2 id="error-summary-heading" class="heading-medium error-summary-heading">There is a problem</h2>
     <ul class="error-summary-list">
-        @for(error <- form.globalErrors) {
+      @for(error <- form.globalErrors) {
         <li>
-            <a @dataAttribute(error.message) href="@anchor(error.message)" data-focuses="@errorField(error.message)" data-global-error>@Messages(error.message)</a>
+          <a @dataAttribute(error.message) href="@anchor(error.message)" data-focuses="@errorField(error.message)" data-global-error>@Messages(error.message)</a>
         </li>
-        }
+      }
     </ul>
-</div>
+  </div>
 } else {
-@errorSummaryForFormErrors(form.errors)
+  @errorSummaryForFormErrors(form.errors)
 }
