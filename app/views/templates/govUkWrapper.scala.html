@@ -32,6 +32,7 @@
 @this(govukTemplate: GovukTemplate,
   siteHeader: siteHeader,
   siteFooter: siteFooter,
+  siteHelper: siteHelper,
   footerLinks: FooterLinks
 )
 
@@ -90,6 +91,7 @@
     <div class="govuk-grid-column-two-thirds">
       @contentBlock
     </div>
+      @siteHelper()
   </div>
 }
 
