@@ -23,6 +23,7 @@
 @import domain.models.developers.DeveloperSession
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
 @import domain.models.views.NavLink
 @import config.ApplicationConfig
 @import templates._
@@ -32,8 +33,8 @@
 @this(govukTemplate: GovukTemplate,
   siteHeader: siteHeader,
   siteFooter: siteFooter,
-  siteHelper: siteHelper,
-  footerLinks: FooterLinks
+  footerLinks: FooterLinks,
+  hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
 )
 
 @(title: String,
@@ -91,7 +92,7 @@
     <div class="govuk-grid-column-two-thirds">
       @contentBlock
     </div>
-      @siteHelper()
+      @hmrcReportTechnicalIssueHelper()
   </div>
 }
 
