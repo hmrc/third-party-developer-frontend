@@ -109,21 +109,12 @@
 }
 
 @govukTemplate(
-<<<<<<< HEAD
     pageTitle = Some(title),
     headBlock = Some(head),
     beforeContentBlock = Some(beforeContentBlock),
     headerBlock = siteHeader(),
     footerBlock = footerBlock,
-    bodyEndBlock = Some(bodyEndDefault)
+    bodyEndBlock = Some(bodyEndDefault),
     headerBlock = siteHeader(navLinks),
     footerBlock = footerBlock
-=======
-  pageTitle = Some(title),
-  headBlock = Some(head),
-  beforeContentBlock = Some(beforeContentBlock),
-  headerBlock = siteHeader(navLinks),
-  footerBlock = footerBlock,
-  bodyEndBlock = Some(bodyEndDefault)
->>>>>>> Fixed auth link alignment
 )(mainContentDefault)
