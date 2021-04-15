@@ -164,7 +164,7 @@ class ApplicationService @Inject() (
 
     for {
       otherAdmins <- developerConnector.fetchByEmails(otherAdminEmails)
-      adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email)
+      adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email).toSet
       connectors = connectorWrapper.forEnvironment(app.deployedTo)
       response <- connectors.thirdPartyApplicationConnector.removeTeamMember(app.id, teamMemberToRemove, requestingEmail, adminsToEmail)
     } yield response
@@ -240,8 +240,7 @@ object ApplicationService {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]]
-    def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]]
-    def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Seq[String])(
+    def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Set[String])(
         implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful]
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]]

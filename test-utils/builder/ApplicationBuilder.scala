@@ -18,8 +18,8 @@ package builder
 
 import java.util.UUID.randomUUID
 
-import domain.models.applications._
 import uk.gov.hmrc.time.DateTimeUtils
+import domain.models.applications._
 import domain.models.apidefinitions._
 import domain.models.subscriptions.{Fields,FieldValue,FieldName}
 import utils.CollaboratorTracker

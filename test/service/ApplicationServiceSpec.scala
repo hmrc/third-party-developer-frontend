@@ -378,7 +378,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
   "remove teamMember" should {
     val email = "john.bloggs@example.com"
     val admin = "admin@example.com"
-    val adminsToEmail = Seq.empty[String]
+    val adminsToEmail = Set.empty[String]
 
     "remove teamMember successfully from production" in new Setup {
       when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
@@ -455,7 +455,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
         eqTo(productionApplicationId),
         eqTo(teamMemberToRemove.emailAddress),
         eqTo(removerAdmin.emailAddress),
-        eqTo(Seq(verifiedAdmin.emailAddress))
+        eqTo(Set(verifiedAdmin.emailAddress))
       )(*)
     }
   }

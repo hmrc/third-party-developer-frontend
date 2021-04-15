@@ -24,6 +24,7 @@ import config.ApplicationConfig
 import domain._
 import domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import domain.models.applications._
+import domain.models.connectors.DeleteCollaboratorRequest
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.HeaderNames.CONTENT_LENGTH
@@ -87,30 +88,30 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       Future.successful(Seq.empty)
     }
 
-  def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
-    if (isEnabled) {
-      metrics.record(api) {
-        val url = s"$serviceBaseUrl/developer/applications"
+  // def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
+  //   if (isEnabled) {
+  //     metrics.record(api) {
+  //       val url = s"$serviceBaseUrl/developer/applications"
 
-        http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
-      }
-    } else {
-      Future.successful(Seq.empty)
+  //       http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
+  //     }
+  //   } else {
+  //     Future.successful(Seq.empty)
+  //   }
+
+  def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Set[String])(implicit hc: HeaderCarrier ): Future[ApplicationUpdateSuccessful] =
+    metrics.record(api) { 
+      val url = s"$serviceBaseUrl/application/${applicationId.value}/collaborator/delete"
+      val request = DeleteCollaboratorRequest(teamMemberToDelete, adminsToEmail, true)
+
+      http.POST[DeleteCollaboratorRequest, ErrorOrUnit](url, request)
+      .map(_ match {
+        case Right(_)                                               => ApplicationUpdateSuccessful
+        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _))        => throw new ApplicationNeedsAdmin
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))        => throw new ApplicationNotFound
+        case Left(err)                                              => throw err
+      })
     }
-
-  def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Seq[String])(
-      implicit hc: HeaderCarrier
-  ): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    val url = s"$serviceBaseUrl/application/${applicationId.value}/collaborator/${urlEncode(teamMemberToDelete)}" +
-      s"?admin=${urlEncode(requestingEmail)}&adminsToEmail=${urlEncode(adminsToEmail.mkString(","))}"
-    http.DELETE[ErrorOrUnit](url)
-    .map(_ match {
-      case Right(_)                                               => ApplicationUpdateSuccessful
-      case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _))        => throw new ApplicationNeedsAdmin
-      case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))        => throw new ApplicationNotFound
-      case Left(err)                                              => throw err
-    })
-  }
   
   def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
     if (isEnabled) {
@@ -210,10 +211,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         case Some(_)  => ApplicationUpdateSuccessful
         case None     => throw new ApplicationNotFound
       })
-  }
-
-  private def urlEncode(str: String, encoding: String = "UTF-8") = {
-    encode(str, encoding)
   }
 
   def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit] = {
