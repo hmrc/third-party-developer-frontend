@@ -26,81 +26,77 @@
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
 
 @devMain(
-    title = "View all applications",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(None, Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = "View all applications",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(None, Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">View all applications</h1>
 
-        <header>
-            <h1 class="heading-xlarge">View all applications</h1>
-        </header>
-
-        @applicationList(applications)
-        @if(noProductionApplications(applications)) {
-            </br>
-            <p>After testing in @environmentNameService.subordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
-
-            <div>
-               <a class="button" href="@routes.AddApplication.addApplicationPrincipal">Get @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials</a>
-            </div>
-        }
-        @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
-            <h2 class="heading-medium">Using privileged application credentials</h2>
-            <p>Check <a href="@controllers.routes.AddApplication.usingPrivilegedApplicationCredentialsPage()">
-                how to use privileged application credentials</a>.</p>
-        }
+  @applicationList(applications)
+  @if(noProductionApplications(applications)) {
+    </br>
+    <p class="govuk-body">
+      After testing in @environmentNameService.subordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.
+    </p>
+    <a class="govuk-button" href="@routes.AddApplication.addApplicationPrincipal">
+      Get @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials
+    </a>
+  }
+  @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
+    <h2 class="govuk-heading-m">Using privileged application credentials</h2>
+    <p class="govuk-body">Check <a class="govuk-link"href="@controllers.routes.AddApplication.usingPrivilegedApplicationCredentialsPage()">
+      how to use privileged application credentials</a>.
+    </p>
+  }
 }
 
 @applicationList(applications: Seq[controllers.ApplicationSummary]) = {
-    @defining(applications.partition(_.environment == "Production")) { case (productionApps, sandboxApps) =>
-        @applicationTable(productionApps, appConfig.nameOfPrincipalEnvironment)
-        @applicationTable(sandboxApps, appConfig.nameOfSubordinateEnvironment)
-    }
+  @defining(applications.partition(_.environment == "Production")) { case (productionApps, sandboxApps) =>
+    @applicationTable(productionApps, appConfig.nameOfPrincipalEnvironment)
+    @applicationTable(sandboxApps, appConfig.nameOfSubordinateEnvironment)
+  }
 }
 
 @applicationTable(applications: Seq[controllers.ApplicationSummary], environmentName: String) = {
-    @if(applications.nonEmpty) {
-        <table>
-            <caption class="visually-hidden">Applications</caption>
-            <colgroup>
-                <col/>
-                <col width="20%"/>
-                <col width="30%"/>
-            </colgroup>
-            <thead>
-                <th>@environmentName applications</th>
-                <th>Your role</th>
-                <th>Last API call</th>
-            </thead>
-            <tbody>
-            @for(app <- applications) {
-                <tr>
-                    <td>
-                        <a href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
-                    </td>
-                    <td data-app-user-role>
-                        @if(app.role.isAdministrator) {Admin}
-                        @if(app.role.isDeveloper) {Developer}
-                    </td>
-                    <td data-app-lastAccess>
-                    @{
-                        formatLastAccessDate(app.lastAccess, app.createdOn) match {
-                            case Some(formattedDate) => formattedDate.capitalize
-                            case _ => "No API called"
-                        }
-                    }
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-        <br>
-    }
+  @if(applications.nonEmpty) {
+    <table class="govuk-table">
+      <caption class="visually-hidden">Applications</caption>
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">@environmentName applications</th>
+          <th scope="col" class="govuk-table__header">Your role</th>
+          <th scope="col" class="govuk-table__header">Last API call</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        @for(app <- applications) {
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">
+              <a href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
+            </td>
+            <td class="govuk-table__cell" data-app-user-role>
+              @if(app.role.isAdministrator) {Admin}
+              @if(app.role.isDeveloper) {Developer}
+            </td>
+            <td class="govuk-table__cell" data-app-lastAccess>
+              @{
+                formatLastAccessDate(app.lastAccess, app.createdOn) match {
+                  case Some(formattedDate) => formattedDate.capitalize
+                  case _ => "No API called"
+                }
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <br>
+  }
 }
 
 
