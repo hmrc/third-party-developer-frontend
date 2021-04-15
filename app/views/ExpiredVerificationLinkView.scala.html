@@ -16,21 +16,23 @@
 
 @import domain.models.views.StaticNavLinks
 @import include._
+@import templates.govUkWrapper
 @import play.twirl.api.HtmlFormat
 
-@this(main: Main)
+@this(govUkWrapper: govUkWrapper)
 
 @()(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig)
 
-@main(
-    title = "Your account verification link has expired",
-    navTitle = Some(applicationConfig.title),
-    headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
-    serviceInfoContent = Some(HtmlFormat.empty),
-    developerSession = None
+@govUkWrapper(
+  title = "Your account verification link has expired",
+  navTitle = Some(applicationConfig.title),
+  headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
+  serviceInfoContent = Some(HtmlFormat.empty),
+  developerSession = None
 ) {
-
-    <h1>Your account verification link has expired</h1>
-    <p>You will need to register for a new account on the Developer Hub.</p>
-    <p><a href="@controllers.routes.Registration.registration">Register for a new account</a></p>
+  <h1 class="govuk-heading-l">Your account verification link has expired</h1>
+  <p class="govuk-body">You will need to register for a new account on the Developer Hub.</p>
+  <p class="govuk-body">
+    <a class="govuk-link" href="@controllers.routes.Registration.registration">Register for a new account</a>
+  </p>
 }

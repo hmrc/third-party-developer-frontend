@@ -16,31 +16,30 @@
 
 @import config.ApplicationConfig
 @import domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain
+@import views.html.include._
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Get help accessing your account",
-    isRegistering = true,
-    back = BackButtonWithJavaScript,
-    developerSession = None
+  title = "Get help accessing your account",
+  isRegistering = true,
+  back = BackButtonWithJavaScript,
+  developerSession = None
 ) {
 
-    <h1 class="heading-xlarge">Remove 2-step verification</h1>
+  <h1 class="govuk-heading-l">Remove 2-step verification</h1>
 
-    <p>We will remove 2-step verification so you can sign in to your account.</p>
-    <p>We'll email you within 2 working days.</p>
-    <p>In the meantime, if you can get an access code you can still <a href="@routes.UserLoginAccount.login()">sign in</a> to your account.</p>
+  <p class="govuk-body">We will remove 2-step verification so you can sign in to your account.</p>
+  <p class="govuk-body">We'll email you within 2 working days.</p>
+  <p class="govuk-body">In the meantime, if you can get an access code you can still <a class="govuk-link" href="@routes.UserLoginAccount.login()">sign in</a> to your account.</p>
 
-@helper.form(action = controllers.routes.UserLoginAccount.confirm2SVHelp(), 'class -> "form") {
-        @helper.CSRF.formField
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Continue</button>
-            <a id="cancel" class="secondary-button" href="@routes.UserLoginAccount.login()">Cancel</a>
-        </div>
-    }
-
+  @helper.form(action = controllers.routes.UserLoginAccount.confirm2SVHelp(), 'class -> "form") {
+    @helper.CSRF.formField
+    <div class="form-group">
+      <button id="submit" class="govuk-button" type="submit">Continue</button>
+      <a id="cancel" class="govuk-button govuk-button--secondary" href="@routes.UserLoginAccount.login()">Cancel</a>
+    </div>
+  }
 }

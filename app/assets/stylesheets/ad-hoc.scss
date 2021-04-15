@@ -67,7 +67,7 @@ a.secondary-button, button.secondary-button {
 }
 
 input.secondary-button {
-    border: 0;
+  border: 0;
 }
 
 input.flat-text {
@@ -102,7 +102,7 @@ input[type=submit]:hover {
 }
 
 .button {
-    margin-right: 0 !important;
+  margin-right: 0 !important;
 }
 
 // Remove right arrows on left hand navigation menu
@@ -130,34 +130,35 @@ input[type=submit]:hover {
 }
 
 @media (min-width: 641px) {
-    .column-three-quarters {
-        float: left;
-        width: 75%;
-    }
+  .column-three-quarters {
+    float: left;
+    width: 75%;
+  }
 }
 
 .column-three-quarters {
-    padding: 0 15px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+  padding: 0 15px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 form.subscription-toggle {
-    display: inline-block;
+  display: inline-block;
 }
 
 .toggle__button--active {
-    margin: 0 0 0 0;
+  margin: 0 0 0 0;
 }
 
 form.inline-controls {
-    display: inline-block;
+  display: inline-block;
 }
 
 #proposition-menu {
-       a:hover {
-        color: #FFF; }
+  a:hover {
+    color: #FFF;
+  }
 }
 
 // APIS-3807 - override hover style on left nav so it passes accessibility colour contrast tests
@@ -394,4 +395,46 @@ tr.teamMembers, th {
       box-shadow: 0 2px 0 grey;
     }
   }
+}
+
+.subnav {
+  display: flex;
+  &-auth {
+    display: none;
+  }
+  &-margins {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (min-width: 40.0625em) {
+  .subnav {
+    &-auth {
+      display: flex;
+      align-items: center;
+      margin-left: auto !important;
+      &-links {
+        display: flex;
+        margin: 0 !important;
+        & > *:first-child {
+          padding-right: 15px;
+        }
+      }
+    }
+  }
+}
+
+.auth-links {
+  display: block !important;
+}
+
+@media (min-width: 40.0625em) {
+  .auth-links {
+    display: none !important;
+  }
+}
+
+.before-content-banner {
+  display: flex;
 }

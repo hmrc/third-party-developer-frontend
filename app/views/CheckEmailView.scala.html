@@ -17,18 +17,19 @@
 @import config.ApplicationConfig
 @import include._
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(email: String)(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(title = "Check your emails", developerSession = None) {
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h1 class="govuk-panel__title">
+      Password reset email sent
+    </h1>
+  </div>
 
-    <div class="govuk-box-highlight" role="alert">
-        <h1>Password reset email sent</h1>
-    </div>
+  <p class="govuk-body">We have sent an email to @email.</p>
 
-    <p>We have sent an email to @email.</p>
-
-    <h2 class="heading-large">What happens next?</h2>
-    <p>If this email address is registered with the HMRC @applicationConfig.title, you will get a password reset link.</p>
+  <h2 class="govuk-heading-m">What happens next?</h2>
+  <p class="govuk-body">If this email address is registered with the HMRC @applicationConfig.title, you will get a password reset link.</p>
 }

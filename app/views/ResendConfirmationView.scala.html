@@ -18,21 +18,22 @@
 @import include._
 @import model.Crumb
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @()(implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Resend confirmation email",
-    isRegistering = true,
-    breadcrumbs = Seq(
-        Crumb("Resend confirmation email"),
-        Crumb.home
-    ),
-    developerSession = None
+  title = "Resend confirmation email",
+  isRegistering = true,
+  breadcrumbs = Seq(
+    Crumb("Resend confirmation email"),
+    Crumb.home
+  ),
+  developerSession = None
 ) {
-
-    <h1 class="heading-xlarge">Resend confirmation email</h1>
-    <p>Emails can take a few minutes to arrive. If you have not received it check your spam folder, or we can resend it.</p>
-    <p><a href="@routes.Registration.resendVerification" class="button" role="button">Resend</a></p>
+  <h1 class="govuk-heading-l">Resend confirmation email</h1>
+  <p class="govuk-body">Emails can take a few minutes to arrive. If you have not received it check your spam folder, or we can resend it.</p>
+  <p class="govuk-body">
+    <a class="govuk-link" href="@routes.Registration.resendVerification" class="button" role="button">Resend</a>
+  </p>
 }

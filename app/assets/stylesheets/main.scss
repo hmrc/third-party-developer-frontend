@@ -1,3 +1,6 @@
+$govuk-assets-path: "/developer/assets/lib/govuk-frontend/govuk/assets/";
+$hmrc-assets-path: "/developer/assets/lib/hmrc-frontend/hmrc/";
+
 // Partials
 @import "partials/banner-messages.scss";
 @import "partials/side-nav.scss";
@@ -5,6 +8,10 @@
 @import "partials/forms.scss";
 @import "partials/banner.scss";
 @import "partials/subscriptions";
+
+// Import FE Styles
+@import "lib/govuk-frontend/govuk/all";
+@import "lib/hmrc-frontend/hmrc/all";
 
 // Ad-hoc fixes
 @import "ad-hoc";

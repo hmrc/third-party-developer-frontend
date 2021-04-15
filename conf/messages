@@ -170,3 +170,9 @@ error.selectedapis.nonselected.global =  Select at least 1 specific API
 
 error.selectedtopics.nonselected.field = Select a topic you are interested in
 error.selectedtopics.nonselected.global = Select a topic you are interested in
+
+footer.links.cookies.text = Cookies
+footer.links.privacy_policy.text = Privacy Policy
+footer.links.terms_and_conditions.text = Terms and conditions
+footer.links.help_page.text = Help using GOV.UK
+footer.links.accessibility.text = Accessibility statement
