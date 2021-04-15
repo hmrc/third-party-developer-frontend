@@ -16,8 +16,6 @@
 
 package connectors
 
-import java.net.URLEncoder.encode
-
 import akka.actor.ActorSystem
 import akka.pattern.FutureTimeoutSupport
 import config.ApplicationConfig
@@ -87,17 +85,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     } else {
       Future.successful(Seq.empty)
     }
-
-  // def fetchByTeamMemberEmail(email: String)(implicit hc: HeaderCarrier): Future[Seq[Application]] =
-  //   if (isEnabled) {
-  //     metrics.record(api) {
-  //       val url = s"$serviceBaseUrl/developer/applications"
-
-  //       http.GET[Seq[Application]](url, Seq("emailAddress" -> email, "environment" -> environment.toString))
-  //     }
-  //   } else {
-  //     Future.successful(Seq.empty)
-  //   }
 
   def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Set[String])(implicit hc: HeaderCarrier ): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) { 

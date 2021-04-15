@@ -66,8 +66,6 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(SilencerSettings())
   .settings(playPublishingSettings: _*)
-  // .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
-  // .settings(inConfig(TemplateTest)(BloopDefaults.configSettings))
   .settings(
     Test / parallelExecution := false,
     Test / fork := false,
@@ -106,7 +104,6 @@ lazy val microservice = Project(appName, file("."))
   )
 
 // lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
-// lazy val IntegrationTest = config("it") extend Test
 lazy val ComponentTest = config("component") extend Test
 lazy val TemplateTest = config("tt") extend Test
 lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(

@@ -16,7 +16,6 @@
 
 package connectors
 
-import java.net.URLEncoder.encode
 import java.util.UUID
 import java.util.UUID.randomUUID
 
@@ -147,29 +146,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
       result shouldBe ApplicationUpdateSuccessful
     }
   }
-
-  // "fetch by teamMember email" should {
-  //   val email = "email@email.com"
-  //   val url = baseUrl + "/developer/applications"
-  //   val applicationResponses = List(
-  //     applicationResponse(ApplicationId("app id 1"), ClientId("client id 1"), "app 1"),
-  //     applicationResponse(ApplicationId("app id 2"), ClientId("client id 2"), "app 2")
-  //   )
-
-  //   val response: Seq[String] = Seq("app 1", "app 2")
-
-  //   "return list of applications" in new Setup {
-  //     when(
-  //       mockHttpClient
-  //         .GET[Seq[Application]](eqTo(url), eqTo(Seq("emailAddress" -> email, "environment" -> environmentName)))(*, *, *)
-  //     ).thenReturn(Future.successful(applicationResponses))
-
-  //     val result = await(connector.fetchByTeamMemberEmail(email))
-
-  //     result.size shouldBe 2
-  //     result.map(_.name) shouldBe response
-  //   }
-  // }
 
   "fetch application by id" should {
 
@@ -590,6 +566,4 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
   }
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
-
-  private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
 }
