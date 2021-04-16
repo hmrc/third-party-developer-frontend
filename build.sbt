@@ -51,8 +51,7 @@ lazy val microservice = Project(appName, file("."))
     targetJvm := "jvm-1.8",
     libraryDependencies ++= AppDependencies(),
     dependencyOverrides ++= AppDependencies.overrideDependencies,
-    parallelExecution in Test := false,
-    fork in Test := false,
+
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     scalaVersion := "2.12.12",
@@ -67,10 +66,10 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(SilencerSettings())
   .settings(playPublishingSettings: _*)
-  .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
-  .settings(inConfig(TemplateTest)(BloopDefaults.configSettings))
   .settings(
-    Test / unmanagedSourceDirectories := (baseDirectory in Test)(base => Seq(base / "test", base / "test-utils")).value,
+    Test / parallelExecution := false,
+    Test / fork := false,
+    Test / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "test", baseDirectory.value / "test-utils"),
     Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
   .configs(IntegrationTest)
@@ -78,8 +77,8 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
   .settings(
     IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    IntegrationTest / unmanagedSourceDirectories := (baseDirectory in IntegrationTest)(base => Seq(base / "it", base / "test-utils")).value,
-    IntegrationTest / unmanagedResourceDirectories := (baseDirectory in IntegrationTest)(base => Seq(base / "test")).value,
+    IntegrationTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "it", baseDirectory.value / "test-utils"),
+    IntegrationTest / unmanagedResourceDirectories += baseDirectory.value / "test",
     IntegrationTest / parallelExecution := false
   )
   .configs(ComponentTest)
@@ -87,9 +86,9 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(ComponentTest)(BloopDefaults.configSettings))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    ComponentTest / unmanagedSourceDirectories := (baseDirectory in ComponentTest)(base => Seq(base / "component", base / "test-utils")).value,
-    ComponentTest / unmanagedResourceDirectories := (baseDirectory in ComponentTest)(base => Seq(base / "test")).value,
-    ComponentTest / unmanagedResourceDirectories += baseDirectory(_ / "target/web/public/test").value,
+    ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
+    ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "test",
+    ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "target" / "web" / "public" / "test",
     ComponentTest / testOptions += Tests.Setup(() => System.setProperty("javascript.enabled", "true")),
     ComponentTest / testGrouping := oneForkedJvmPerTest((definedTests in ComponentTest).value),
     ComponentTest / parallelExecution := false
@@ -104,8 +103,7 @@ lazy val microservice = Project(appName, file("."))
     )
   )
 
-lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
-lazy val IntegrationTest = config("it") extend Test
+// lazy val allPhases = "tt->test;test->test;test->compile;compile->compile"
 lazy val ComponentTest = config("component") extend Test
 lazy val TemplateTest = config("tt") extend Test
 lazy val playPublishingSettings: Seq[sbt.Setting[_]] = Seq(
