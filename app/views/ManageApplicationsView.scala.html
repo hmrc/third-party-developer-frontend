@@ -21,7 +21,7 @@
 @import domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
 
