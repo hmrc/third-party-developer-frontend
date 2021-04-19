@@ -24,52 +24,47 @@
 @(form: Form[controllers.AddApplicationNameForm], environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig)
 
-
 @pageHeading = @{ "What's the name of your application?" }
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    developerSession = Some(loggedIn)
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn)
 ) {
+  @errorSummary(form)
 
-    @errorSummary(form)
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-    <Header>
-        <h1 class="heading-xlarge">@pageHeading</h1>
-    </Header>
-
-    @if(environment.isProduction()) {
-    <p>We show this name to your users when they authorise your software to interact with HMRC.</p>
-    <p>It must comply with our
-        <a href="/api-documentation/docs/using-the-hub/name-guidelines">naming guidelines</a>.</p>
+  @if(environment.isProduction()) {
+    <p class="govuk-body">We show this name to your users when they authorise your software to interact with HMRC.</p>
+    <p class="govuk-body">It must comply with our
+      <a class="govuk-link" href="/api-documentation/docs/using-the-hub/name-guidelines">naming guidelines</a>.
+    </p>
     <br>
-    }
+  }
 
-    @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(environment)) {
+  @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(environment)) {
+  @helper.CSRF.formField
 
-    @helper.CSRF.formField
-
-    <div class="form-group @if(form.errors("applicationName").nonEmpty) {form-group-error}">
-        <label class="form-label" for="applicationName" id="applicationName-label">Application name</label>
-        @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
-        <input type="text"
-            id="applicationName"
-            name="applicationName"
-            aria-labelledby="applicationName-label"
-            value="@form.data.get("applicationName")"
-        class="form-control @if(form.errors("applicationName").nonEmpty) {form-control-error}"
-        maxLength="50"/>
+    <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
+      <label class="govuk-label" for="applicationName" id="applicationName-label">Application name</label>
+      @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
+      <input
+        type="text"
+        id="applicationName"
+        name="applicationName"
+        aria-labelledby="applicationName-label"
+        value="@form.data.get("applicationName")"
+        class="govuk-input @if(form.errors("applicationName").nonEmpty) {govuk-input--error}"
+        maxLength="50"
+      />
     </div>
 
-    <div class="form-group">
-        <button id="submit" class="button" type="submit">Continue</button>
-    </div>
-
+    <button id="submit" class="govuk-button" type="submit">Continue</button>
     }
 }

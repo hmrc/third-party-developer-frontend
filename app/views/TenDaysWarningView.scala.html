@@ -26,30 +26,28 @@
 @pageHeading = @{s"We will check your application"}
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn),
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    fullWidthContent = true
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  fullWidthContent = true
 ) {
-
-    <div class="grid-row">
-        <div class="interrupt">
-            <h1 class="heading-xlarge">
-                @pageHeading
-            </h1>
-            <p class="font-medium">
-                This takes up to 10 working days, and we may ask you to demonstrate it.
-            </p>
-            <br>
-            <p>
-                <a href="@controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION)" class="button interrupt-button">Continue</a>
-
-            </p>
-        </div>
+  <div class="grid-row">
+    <div class="interrupt">
+      <h1 class="govuk-heading-l">
+        @pageHeading
+      </h1>
+      <p class="govuk-body">
+        This takes up to 10 working days, and we may ask you to demonstrate it.
+      </p>
+      <br>
+      <p class="govuk-body">
+        <a href="@controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION)" class="govuk-button interrupt-button">Continue</a>
+      </p>
     </div>
+  </div>
 }

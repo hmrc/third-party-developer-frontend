@@ -27,30 +27,27 @@
 @addApplicationToEnv = @{s"to add your application to ${appConfig.nameOfPrincipalEnvironment}"}
 @principalWording = @{ if(environmentNameService.principalIsProduction) {"production credentials to use live data"} else addApplicationToEnv}
 
-
-    @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    developerSession = Some(loggedIn)
+@devMain(
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-    <header>
-        <h1 class="heading-xlarge">@pageHeading</h1>
-    </header>
+  <p class="govuk-body">Now that you've tested your software you can request @principalWording.</p>
 
-    <p>Now that you've tested your software you can request @principalWording.</p>
-    <div class="panel panel-border-wide">
-        <p>To do that you must comply with our
-            <a href="/api-documentation/docs/terms-of-use">terms of use</a>.
-        </p>
-    </div>
-    <br/>
-    <p>
-        <a id="add" href="@controllers.routes.AddApplication.tenDaysWarning" class="button">Continue</a>
-    </p>
+  <div class="govuk-inset-text">
+    To do that you must comply with our <a class="govuk-link" href="/api-documentation/docs/terms-of-use">terms of use</a>.
+  </div>
+
+  <br/>
+
+  <p class="govuk-body">
+    <a id="add" href="@controllers.routes.AddApplication.tenDaysWarning" class="govuk-button">Continue</a>
+  </p>
 }
