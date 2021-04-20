@@ -28,25 +28,29 @@
 @pageHeading = @{s"Application added to ${environmentNameService.subordinateWording}"}
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn),
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.viewAllApplications,
-        Crumb.home
-    )
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.viewAllApplications,
+    Crumb.home
+  )
 ) {
-    <header>
-        <h1 class="heading-xlarge">@pageHeading</h1>
-    </header>
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-    <h2 class="heading-medium">You added @appName</h2>
+  <h2 class="govuk-heading-m">You added @appName</h2>
 
-    <p>You can now use its credentials to test with @subordinateEnvName APIs.</p>
+  <p class="govuk-body">
+    You can now use its credentials to test with @subordinateEnvName APIs.
+  </p>
 
-    <p>Read the guidance on <a href="/api-documentation/docs/testing">testing in the sandbox</a>
-        to find out which endpoints to use, creating a test user and types of test data.</p>
+  <p class="govuk-body">
+    Read the guidance on <a class="govuk-link" href="/api-documentation/docs/testing">testing in the sandbox</a>
+    to find out which endpoints to use, creating a test user and types of test data.
+  </p>
 
-    <p><a id="submit" class="button" href="@controllers.routes.Credentials.credentials(id)">View application credentials</a></p>
+  <p class="govuk-body">
+    <a id="submit" class="govuk-button" href="@controllers.routes.Credentials.credentials(id)">View application credentials</a>
+  </p>
 }
