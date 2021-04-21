@@ -58,11 +58,7 @@ lazy val microservice = Project(appName, file("."))
     routesImport += "controllers.binders._"
   )
   .settings(
-    resolvers := Seq(
-      Resolver.bintrayRepo("hmrc", "releases"),
-      Resolver.typesafeRepo("releases"),
-      Resolver.jcenterRepo
-    )
+    resolvers += Resolver.typesafeRepo("releases")
   )
   .settings(SilencerSettings())
   .settings(playPublishingSettings: _*)
