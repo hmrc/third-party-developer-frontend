@@ -16,7 +16,6 @@
 
 package connectors
 
-import java.net.URLEncoder.encode
 import java.util.UUID
 import java.util.UUID.randomUUID
 
@@ -41,6 +40,7 @@ import scala.concurrent.Future.{failed, successful}
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import utils.CollaboratorTracker
 import utils.LocalUserIdTracker
+import domain.models.connectors.DeleteCollaboratorRequest
 
 class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec 
   with GuiceOneAppPerTest 
@@ -144,29 +144,6 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
       val result = await(connector.update(applicationId, updateApplicationRequest))
 
       result shouldBe ApplicationUpdateSuccessful
-    }
-  }
-
-  "fetch by teamMember email" should {
-    val email = "email@email.com"
-    val url = baseUrl + "/developer/applications"
-    val applicationResponses = List(
-      applicationResponse(ApplicationId("app id 1"), ClientId("client id 1"), "app 1"),
-      applicationResponse(ApplicationId("app id 2"), ClientId("client id 2"), "app 2")
-    )
-
-    val response: Seq[String] = Seq("app 1", "app 2")
-
-    "return list of applications" in new Setup {
-      when(
-        mockHttpClient
-          .GET[Seq[Application]](eqTo(url), eqTo(Seq("emailAddress" -> email, "environment" -> environmentName)))(*, *, *)
-      ).thenReturn(Future.successful(applicationResponses))
-
-      val result = await(connector.fetchByTeamMemberEmail(email))
-
-      result.size shouldBe 2
-      result.map(_.name) shouldBe response
     }
   }
 
@@ -355,14 +332,13 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
   "removeTeamMember" should {
     val email = "john.bloggs@example.com"
     val admin = "admin@example.com"
-    val adminsToEmail = Seq("otheradmin@example.com", "anotheradmin@example.com")
-    val queryParams = s"admin=${urlEncode(admin)}&adminsToEmail=${urlEncode(adminsToEmail.mkString(","))}"
-    val url = s"$baseUrl/application/${applicationId.value}/collaborator/${urlEncode(email)}?$queryParams"
+    val adminsToEmail = Set("otheradmin@example.com", "anotheradmin@example.com")
+    val url = s"$baseUrl/application/${applicationId.value}/collaborator/delete"
 
     "return success" in new Setup {
       when(
         mockHttpClient
-          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
+          .POST[DeleteCollaboratorRequest, ErrorOrUnit](eqTo(url), *, *)(*, *, *, *)
       ).thenReturn(successful(Right(Unit)))
 
       val result = await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail))
@@ -372,7 +348,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
     "return application needs administrator response" in new Setup {
       when(
         mockHttpClient
-          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
+          .POST[DeleteCollaboratorRequest, ErrorOrUnit](eqTo(url), *, *)(*, *, *, *)
       ).thenReturn(successful(Left(UpstreamErrorResponse("403 Forbidden", FORBIDDEN))))
 
       intercept[ApplicationNeedsAdmin](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
@@ -381,7 +357,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
     "return application not found response" in new Setup {
       when(
         mockHttpClient
-          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
+          .POST[DeleteCollaboratorRequest, ErrorOrUnit](eqTo(url), *, *)(*, *, *, *)
       ).thenReturn(successful(Left(UpstreamErrorResponse("404 Not Found", NOT_FOUND))))
 
       intercept[ApplicationNotFound](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
@@ -390,7 +366,7 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
     "other upstream error response should be rethrown" in new Setup {
       when(
         mockHttpClient
-          .DELETE[ErrorOrUnit](eqTo(url), *)(*, *, *)
+          .POST[DeleteCollaboratorRequest, ErrorOrUnit](eqTo(url), *, *)(*, *, *, *)
       ).thenReturn(successful(Left(UpstreamErrorResponse("500 Internal Server Error", INTERNAL_SERVER_ERROR))))
 
       intercept[Exception](await(connector.removeTeamMember(applicationId, email, admin, adminsToEmail)))
@@ -590,6 +566,4 @@ class ThirdPartyApplicationConnectorSpec extends AsyncHmrcSpec
   }
 
   private def aClientSecret() = ClientSecret(randomUUID.toString, randomUUID.toString, DateTimeUtils.now.withZone(DateTimeZone.getDefault))
-
-  private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
 }
