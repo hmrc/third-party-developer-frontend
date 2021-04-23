@@ -27,9 +27,15 @@
   userFullName = loggedIn.loggedInName,
   developerSession = Some(loggedIn)
 ) {
-  <h1 class="govuk-heading-l">You have successfully set up 2-step verification</h1>
-  <h2 class="govuk-heading-m">Keep the app on your smartphone or tablet</h2>
-  <p class="govuk-body">You'll need a new access code every time you sign in.</p>
+  <header>
+    <h1 class="heading-xlarge">You have successfully set up 2-step verification</h1>
+  </header>
 
-  <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps())">Continue</a>
+  <h2 class="heading-medium">Keep the app on your smartphone or tablet</h2>
+
+  <p>You'll need a new access code every time you sign in.</p>
+
+  <div>
+    <a id="submit" class="button" href="@request.session.get("access_uri").getOrElse(routes.AddApplication.manageApps())">Continue</a>
+  </div>
 }
