@@ -53,13 +53,13 @@
 
   @appEnvironment(app)
 
-  <div class="metadata-wrapper"></div>
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 
-  <p class="metadata">
+  <p class="govuk-body">
     Created @{formatDate(app.createdOn)}
   </p>
 
-  <p class="metadata">
+  <p class="govuk-body">
     @{formatLastAccessDate(app.lastAccess, app.createdOn) match {
       case Some(formattedDate) => s"Last API call $formattedDate"
       case _ => "No API called"
