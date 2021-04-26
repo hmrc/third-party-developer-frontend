@@ -40,23 +40,24 @@
       </span>
       <div class="govuk-form-group @if(form.errors("emailaddress").nonEmpty){govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="emailaddress" id="emailaddress-label">Email address</label>
-          <span id="event-name-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span>
-            @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
-          </span>
-          <input 
-            type="text" 
-            autocomplete="off" 
-            id="emailaddress"
-            name="emailaddress"
-            value="@form.data.getOrElse("emailaddress", "")"
-            class="govuk-input @if(form.errors("invalidCredentials").nonEmpty || form.errors("emailaddress").nonEmpty){govuk-input--error}"
-            aria-required="true"
-          />
+        <span id="login-email-error" class="govuk-error-message">
+          <span class="govuk-visually-hidden">Error:</span>
+          @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
+        </span>
+        <input 
+          type="text" 
+          autocomplete="off" 
+          id="emailaddress"
+          name="emailaddress"
+          value="@form.data.getOrElse("emailaddress", "")"
+          class="govuk-input @if(form.errors("invalidCredentials").nonEmpty || form.errors("emailaddress").nonEmpty){govuk-input--error}"
+          aria-required="true"
+          aria-labelledby="login-email-error"
+        />
       </div>
       <div class="govuk-form-group @if(form.errors("password").nonEmpty){govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="password">Password</label>
-        <span id="event-name-error" class="govuk-error-message">
+        <span id="login-password-error" class="govuk-error-message">
           <span class="govuk-visually-hidden">Error:</span>
           @fieldError(form.errors, "password", form.error("submissionError").isEmpty)
         </span>
@@ -67,6 +68,7 @@
           name="password"
           class="govuk-input @if(form.errors("invalidCredentials").nonEmpty || form.errors("password").nonEmpty){govuk-input--error}"
           aria-required="true"
+          aria-labelledby="login-password-error"
         />
         <p class="govuk-body">
           <a id="forgottenPassword" class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.Password.showForgotPassword">
