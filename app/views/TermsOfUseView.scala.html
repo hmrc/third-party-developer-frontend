@@ -24,7 +24,7 @@
 @import domain.models.applications.TermsOfUseStatus.AGREEMENT_REQUIRED
 @import domain.models.applications.TermsOfUseStatus.AGREED
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, form: Form[TermsOfUseForm])(
         implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details")
