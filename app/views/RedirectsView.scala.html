@@ -29,79 +29,80 @@
 @application = @{applicationViewModel.application}
 
 @devMain(
-    title = "Manage redirect URIs",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage redirect URIs"),
-        Crumb.application(application),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = "Manage redirect URIs",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Manage redirect URIs"),
+    Crumb.application(application),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
-    <h1 class="heading-xlarge">Manage redirect URIs</h1>
+  <h1 class="govuk-heading-l">Manage redirect URIs</h1>
 
-    @appEnvironment(application)
-    <br>
+  @appEnvironment(application)
+  <br>
 
-    @if(application.role(loggedIn.developer.email).isDefined) {
-        <p class="panel panel-border-wide">You need admin rights to change redirect URIs.</p>
-    }
+  @if(application.role(loggedIn.developer.email).isDefined) {
+    <div class="govuk-inset-text">You need admin rights to change redirect URIs.</div>
+  }
 
-    <details>
-        <summary role="button" aria-controls="">
-            <span class="summary">What is a redirect URI?</span>
-        </summary>
-        <div class="panel panel-border-narrow" id="">
-            <p>Your application needs your user's permission to interact with HMRC on their behalf when accessing
-                @Link.toInternalPage(
-                    url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/user-restricted-endpoints",
-                    value = Some("user-restricted endpoints")).toHtml. Users must sign in to their Government Gateway account to grant this authority.</p>
-            <p>Afterwards, redirect URIs tell us where to return your users in your application.</p>
-            <p>Learn more about @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/reference-guide#redirect-uris", value = Some("redirect URIs")).toHtml. </p>
-        </div>
-    </details>
-    <br>
-    @if(redirectUris.nonEmpty) {
-        <table class="layout-fixed">
-            <thead>
-                <tr>
-                    <th>Redirect URIs</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @for(uri <- redirectUris) {
-                <tr>
-                    <td class="break-word">@uri</td>
-                    <td class="numeric">
-                        @if(application.permits(loggedIn.developer, SandboxOrAdmin)){
-                            @helper.form(action = controllers.routes.Redirects.changeRedirect(application.id), 'class -> "form inline-controls") {
-                                @helper.CSRF.formField
-                                <input id="originalRedirectUri" name="originalRedirectUri" class="form-control" hidden aria-hidden="true" type="text" value="@uri">
-                                <input id="newRedirectUri" name="newRedirectUri" class="form-control" hidden aria-hidden="true" type="text" value="@uri">
-                                <input id="change" class="secondary-button" type="submit" value="Change"/>
-                            }
-                            @helper.form(action = controllers.routes.Redirects.deleteRedirect(application.id), 'class -> "form inline-controls") {
-                                @helper.CSRF.formField
-                                <input id="redirectUri" name="redirectUri" class="form-control" hidden aria-hidden="true" type="text" value="@uri">
-                                <input id="delete" class="secondary-button" type="submit" value="Delete"/>
-                            }
-                        }
-                    </td>
-                </tr>
+  <details class="govuk-details" data-module="govuk-details">
+    <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">What is a redirect URI?</span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">Your application needs your user's permission to interact with HMRC on their behalf when accessing
+        @Link.toInternalPage(
+            url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/user-restricted-endpoints",
+            value = Some("user-restricted endpoints")).toHtml. Users must sign in to their Government Gateway account to grant this authority.</p>
+      <p class="govuk-body">Afterwards, redirect URIs tell us where to return your users in your application.</p>
+      <p class="govuk-body">Learn more about @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/reference-guide#redirect-uris", value = Some("redirect URIs")).toHtml. </p>
+    </div>
+  </details>
+
+  <br>
+  @if(redirectUris.nonEmpty) {
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Redirect URIs</th>
+          <th scope="col" class="govuk-table__header"></th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        @for(uri <- redirectUris) {
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">@uri</td>
+            <td class="govuk-table__cell">
+              @if(application.permits(loggedIn.developer, SandboxOrAdmin)){
+                @helper.form(action = controllers.routes.Redirects.changeRedirect(application.id), 'class -> "form inline-controls") {
+                  @helper.CSRF.formField
+                  <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
+                  <input id="newRedirectUri" name="newRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
+                  <input id="change" class="govuk-button govuk-button--secondary" type="submit" value="Change"/>
                 }
-            </tbody>
-        </table>
-        <br>
-    }
-
-    @if(application.permits(loggedIn.developer, SandboxOrAdmin)) {
-        @if(application.canAddRedirectUri) {
-            <a href="@routes.Redirects.addRedirect(application.id)" class="button">Add a redirect URI</a>
-        } else {
-            <p class="panel panel-border-wide">This is the maximum number of redirect URIs. To add another, delete one first.</p>
+                @helper.form(action = controllers.routes.Redirects.deleteRedirect(application.id), 'class -> "form inline-controls") {
+                  @helper.CSRF.formField
+                  <input id="redirectUri" name="redirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
+                  <input id="delete" class="govuk-button govuk-button--secondary" type="submit" value="Delete"/>
+                }
+              }
+            </td>
+          </tr>
         }
+      </tbody>
+    </table>
+    <br>
+  }
+
+  @if(application.permits(loggedIn.developer, SandboxOrAdmin)) {
+    @if(application.canAddRedirectUri) {
+      <a href="@routes.Redirects.addRedirect(application.id)" class="govuk-button">Add a redirect URI</a>
+    } else {
+      <p class="govuk-inset-text">This is the maximum number of redirect URIs. To add another, delete one first.</p>
     }
+  }
 }

@@ -23,74 +23,77 @@
 @this(devMain: DevMain2)
 
 @(app: Application, serverToken: String)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
+)
 
 @devMain(
-    title = "Server token",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Server token"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    developerSession = Some(loggedIn),
-    fullWidthContent = true
+  title = "Server token",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Server token"),
+    Crumb.application(app),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn),
+  fullWidthContent = true
 ) {
-    <div class="grid-row">
-        <div class="column-three-quarters">
-            <div class="moj-banner">
-                <svg class="moj-banner__icon" fill="currentColor" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" height="25" width="25">
-                    <path d="M13.7,18.5h-2.4v-2.4h2.4V18.5z M12.5,13.7c-0.7,0-1.2-0.5-1.2-1.2V7.7c0-0.7,0.5-1.2,1.2-1.2s1.2,0.5,1.2,1.2v4.8
-              C13.7,13.2,13.2,13.7,12.5,13.7z M12.5,0.5c-6.6,0-12,5.4-12,12s5.4,12,12,12s12-5.4,12-12S19.1,0.5,12.5,0.5z" /></svg>
-                <div class="moj-banner__message">
-                    <strong class="bold-small">
-                        @if(app.deployedTo.toString.toLowerCase() == "production") {
-                            Server token retires in production on 1 October 2020.
-                        } else {
-                            Server token retires on 1 September 2020 in sandbox and 1 October 2020 in production.
-                        }
-                    </strong>
-                </div>
-            </div>
+  <div class="grid-row">
+    <div class="column-three-quarters">
+      <div class="moj-banner">
+        <svg class="moj-banner__icon" fill="currentColor" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" height="25" width="25">
+          <path d="M13.7,18.5h-2.4v-2.4h2.4V18.5z M12.5,13.7c-0.7,0-1.2-0.5-1.2-1.2V7.7c0-0.7,0.5-1.2,1.2-1.2s1.2,0.5,1.2,1.2v4.8C13.7,13.2,13.2,13.7,12.5,13.7z M12.5,0.5c-6.6,0-12,5.4-12,12s5.4,12,12,12s12-5.4,12-12S19.1,0.5,12.5,0.5z" />
+        </svg>
+        <div class="moj-banner__message">
+          <strong class="bold-small">
+            @if(app.deployedTo.toString.toLowerCase() == "production") {
+              Server token retires in production on 1 October 2020.
+            } else {
+              Server token retires on 1 September 2020 in sandbox and 1 October 2020 in production.
+            }
+          </strong>
         </div>
+      </div>
     </div>
-
-
-
-    <div class="grid-row">
-        <div class="js-mask-container column-one-half" data-mask-timer="20">
-            <h1 class="heading-xlarge">Server token</h1>
-            <div class="float--right">
-                <span><a href="#" role="button" class="js-visible js-mask-control action-name" data-text-show="Show" data-text-hide="Hide" data-accessible-text="server token"><span data-toggle-text="">Show</span> <span class="visuallyhidden">server token</span></a>
-                </span>
-            </div>
-            <p class="js-mask-secret js-visible" aria-label="Server token is masked"><span class="font-medium">•••••••••••••••••••••••••••••••</span></p>
-            <p class="js-mask-revealed js-hidden" aria-label="Server token is revealed">
-                <span class="font-medium">@serverToken</span>
-                <br>
-                <a href="#"
-                class="button copy-to-clip"
-                title="Copies the server token into the system clipboard."
-                data-clip-text="@serverToken"
-                aria-live="polite"
-                aria-label="Copy server token to clipboard">
-                    Copy
-                </a>
-            </p>
-        </div>
+  </div>
+  <div class="grid-row">
+    <div class="js-mask-container column-one-half" data-mask-timer="20">
+      <h1 class="govuk-heading-l">Server token</h1>
+      <div class="float--right">
+        <span>
+          <a href="#" role="button" class="js-visible js-mask-control action-name" data-text-show="Show" data-text-hide="Hide" data-accessible-text="server token"><span data-toggle-text="">Show</span> <span class="visuallyhidden">server token</span></a>
+        </span>
+      </div>
+      <p class="js-mask-secret js-visible" aria-label="Server token is masked">
+        <span class="font-medium">•••••••••••••••••••••••••••••••</span>
+      </p>
+      <p class="js-mask-revealed js-hidden" aria-label="Server token is revealed">
+        <span class="font-medium">@serverToken</span>
+        <br>
+        <a
+          href="#"
+          class="button copy-to-clip"
+          title="Copies the server token into the system clipboard."
+          data-clip-text="@serverToken"
+          aria-live="polite"
+          aria-label="Copy server token to clipboard"
+        >
+          Copy
+        </a>
+      </p>
     </div>
+  </div>
 
-    <br>
-    @appEnvironment(app)
-    <br>
+  <br>
+  @appEnvironment(app)
+  <br>
 
-    <div class="grid-row">
-        <div class="column-three-quarters">
-            <p>Previous application-restricted endpoints used <code class="code--slim">server_token</code>, which is deprecated. You will need an OAuth 2.0 access token instead.</p>
-            <p>Check <a href="/api-documentation/docs/authorisation/application-restricted-endpoints">how to generate an OAuth 2.0 access token using your client secret</a>.</p>
-            <p><a href="@routes.Credentials.clientSecrets(app.id)">Generate a client secret</a></p>
-        </div>
+  <div class="grid-row">
+    <div class="column-three-quarters">
+      <p>Previous application-restricted endpoints used <code class="code--slim">server_token</code>, which is deprecated. You will need an OAuth 2.0 access token instead.</p>
+      <p>Check <a href="/api-documentation/docs/authorisation/application-restricted-endpoints">how to generate an OAuth 2.0 access token using your client secret</a>.</p>
+      <p><a href="@routes.Credentials.clientSecrets(app.id)">Generate a client secret</a></p>
     </div>
+  </div>
 }
 

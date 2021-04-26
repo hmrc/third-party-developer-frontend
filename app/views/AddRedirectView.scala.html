@@ -32,36 +32,38 @@
 @application = @{applicationViewModel.application}
 
 @devMain(
-    title = titleError + "Add a redirect URI",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Add a redirect URI"),
-        Crumb.application(application),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = titleError + "Add a redirect URI",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Add a redirect URI"),
+    Crumb.application(application),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
-    @errorSummary(form)
+  @errorSummary(form)
 
-    <h1 class="heading-xlarge">Add a redirect URI</h1>
+  <h1 class="govuk-heading-l">Add a redirect URI</h1>
 
-    @appEnvironment(application)
-    <br>
+  @appEnvironment(application)
+  <br>
 
-    @helper.form(action = controllers.routes.Redirects.addRedirectAction(application.id), 'class -> "form") {
-        @helper.CSRF.formField
-        <div class="form-group @if(form.errors("redirectUri").nonEmpty) {form-group-error}">
-            <label class="form-label-bold" for="redirectUri">Redirect URI</label>
-            <span class="form-hint">Must be a valid @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/reference-guide#redirect-uris", value = Some("redirect URI")).toHtml.</span>
-            @fieldError(form.errors, "redirectUri")
-            <input class="form-control @if(form.errors("redirectUri").nonEmpty) {form-control-error}" type="text" id="redirectUri" name="redirectUri">
-        </div>
+  @helper.form(action = controllers.routes.Redirects.addRedirectAction(application.id), 'class -> "form") {
+    @helper.CSRF.formField
+    <div class="govuk-form-group @if(form.errors("redirectUri").nonEmpty) {govuk-form-group--error}">
+      <label class="govuk-label" for="redirectUri">Redirect URI</label>
+      <div id="redirect-uri-hint" class="govuk-hint">
+        Must be a valid @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/reference-guide#redirect-uris", value = Some("redirect URI")).toHtml.
+      </div>
+      <span id="redirect-uri-error" class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "redirectUri")
+      </span>
+      <input class="govuk-input @if(form.errors("redirectUri").nonEmpty) {govuk-input--error}" type="text" id="redirectUri" name="redirectUri" aria-labelledby="redirect-uri-hint redirect-uri-error">
+    </div>
 
-        <div class="form-group">
-            <button id="add" class="button" type="submit">Continue</button>
-            <a href="@routes.Redirects.redirects(application.id)" class="secondary-button">Cancel</a>
-        </div>
-    }
+    <button id="add" class="govuk-button" type="submit">Continue</button>
+    <a href="@routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+  }
 }

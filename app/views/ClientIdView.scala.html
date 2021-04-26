@@ -28,38 +28,39 @@
 @clientId = @{app.clientId.value}
 
 @devMain(
-    title = "Client ID",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Client ID"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    developerSession = Some(loggedIn)
+  title = "Client ID",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Client ID"),
+    Crumb.application(app),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">Client ID</h1>
 
-    <h1 class="heading-xlarge">Client ID</h1>
-
-    <p>
-        <span class="font-medium">@clientId</span>
-        <br>
-        <a href="#"
-        class="copy-to-clip"
-        title="Copies client ID into the system clipboard."
-        data-clip-text="@clientId"
-        aria-live="polite"
-        aria-label="Copy client ID to clipboard">
-            Copy
-        </a>
-    </p>
-
-    @appEnvironment(app)
+  <div>
+    <span class="font-medium">@clientId</span>
     <br>
+    <a
+      href="#"
+      class="copy-to-clip"
+      title="Copies client ID into the system clipboard."
+      data-clip-text="@clientId"
+      aria-live="polite"
+      aria-label="Copy client ID to clipboard"
+    >
+      Copy
+    </a>
+  </div>
 
-    <p>Your client ID is a unique identifier we created when you added your application.</p>
+  @appEnvironment(app)
+  <br>
 
-    <p>Generate a client secret and use it with your client ID to test your application in the sandbox.</p>
+  <p class="govuk-body">Your client ID is a unique identifier we created when you added your application.</p>
 
-    <p><a id="continue" class="button" href="@routes.Credentials.clientSecrets(app.id)">Continue</a></p>
+  <p class="govuk-body">Generate a client secret and use it with your client ID to test your application in the sandbox.</p>
+
+  <a id="continue" class="govuk-button" href="@routes.Credentials.clientSecrets(app.id)">Continue</a>
 }

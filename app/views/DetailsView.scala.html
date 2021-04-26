@@ -38,118 +38,122 @@
 @title = @{ "Application details" }
 
 @devMain(
-    title = title,
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb(title),
-        Crumb.application(applicationViewModel.application),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = title,
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb(title),
+    Crumb.application(applicationViewModel.application),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
-    <header>
-        <h1 class="heading-xlarge">@title</h1>
-    </header>
+  <h1 class="govuk-heading-l">@title</h1>
 
-    @appEnvironment(app)
+  @appEnvironment(app)
 
-    <div class="metadata-wrapper"></div>
-    <p class="metadata">
-        Created @{formatDate(app.createdOn)}
-    </p>
-    <p class="metadata">
+  <div class="metadata-wrapper"></div>
+
+  <p class="metadata">
+    Created @{formatDate(app.createdOn)}
+  </p>
+
+  <p class="metadata">
     @{formatLastAccessDate(app.lastAccess, app.createdOn) match {
-        case Some(formattedDate) => s"Last API call $formattedDate"
-        case _ => "No API called"
+      case Some(formattedDate) => s"Last API call $formattedDate"
+      case _ => "No API called"
     }}
-    </p>
+  </p>
+
+  <br>
+
+  @if(app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED && app.isPermittedToEditAppDetails(loggedIn.developer)) {
+    <div class="govuk-warning-text">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-warning-text__assistive">Warning</span>
+        You must agree to the terms of use on this application.
+      </strong>
+    </div>
     <br>
+  }
 
-    @if(app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED && app.isPermittedToEditAppDetails(loggedIn.developer)) {
-        <div id="termsOfUseWarning" class="notice">
-            <i class="icon icon-important"><span class="visually-hidden">Warning</span></i>
-            <strong class="bold-small">You must agree to the terms of use on this application.</strong>
-        </div>
-        <br>
-    }
+  <table class="govuk-table">
+    <colgroup>
+      <col width="40%">
+      <col width="60%">
+    </colgroup>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Application details</th>
+        <th scope="col" class="govuk-table__header">
+          @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
+            <a id="change" class="govuk-link" href="@controllers.routes.Details.changeDetails(app.id)">Change <span class="visually-hidden">application details</span></a>
+          }
+        </th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Application ID</th>
+        <td class="govuk-table__cell" id="applicationId">@{app.id.value}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Application name</th>
+        <td class="govuk-table__cell" id="applicationName">@{app.name}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Application description</th>
+        <td class="govuk-table__cell" id="description">@if(app.description.nonEmpty) {@{app.description}} else {None}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Privacy policy URL</th>
+        <td class="govuk-table__cell" id="privacyPolicyUrl">@{app.privacyPolicyUrl.getOrElse("None")}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
+        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{app.termsAndConditionsUrl.getOrElse("None")}</td>
+      </tr>
+    </tbody>
+  </table>
 
-    <table>
-        <colgroup>
-            <col width="40%">
-            <col width="60%">
-        </colgroup>
-        <thead>
-            <tr>
-                <th>Application details</th>
-                <td class="numeric">
-                    @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
-                        <a id="change" href="@controllers.routes.Details.changeDetails(app.id)">Change <span class="visually-hidden">application details</span></a>
-                    }
-                </td>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th>Application ID</th>
-                <td id="applicationId">@{app.id.value}</td>
-            </tr>
-            <tr>
-                <th>Application name</th>
-                <td id="applicationName">@{app.name}</td>
-            </tr>
-            <tr>
-                <th>Application description</th>
-                <td id="description">@if(app.description.nonEmpty) {@{app.description}} else {None}</td>
-            </tr>
-            <tr>
-                <th>Privacy policy URL</th>
-                <td id="privacyPolicyUrl">@{app.privacyPolicyUrl.getOrElse("None")}</td>
-            </tr>
-            <tr>
-                <th>Terms and conditions URL</th>
-                <td id="termsAndConditionsUrl">@{app.termsAndConditionsUrl.getOrElse("None")}</td>
-            </tr>
-        </tbody>
+  @if(app.termsOfUseStatus != TermsOfUseStatus.NOT_APPLICABLE) {
+    <br>
+    <table class="govuk-table" id="termsOfUse">
+      <colgroup>
+        <col width="40%">
+        <col width="30%">
+        <col width="30%">
+      </colgroup>
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Terms of use</th>
+          <th scope="col" class="govuk-table__header"></th>
+          <th scope="col" class="govuk-table__header"></th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Terms of use</td>
+          <td class="govuk-table__cell" id="termsOfUseAagreementDetails">
+            @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
+              Agreed by @{app.termsOfUseAgreements.head.emailAddress} on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(app.termsOfUseAgreements.head.timeStamp)}
+            } else {
+              Not agreed
+            }
+          </td>
+          <td class="govuk-table__cell">
+            @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
+              @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
+                <a id="termsOfUseReadLink" class="govuk-link" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a>
+              } else {
+                <a id="termsOfUseReadLink" class="govuk-button" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>
+              }
+            }
+          </td>
+        </tr>
+      </tbody>
     </table>
-
-    @if(app.termsOfUseStatus != TermsOfUseStatus.NOT_APPLICABLE) {
-        <br>
-        <table id="termsOfUse">
-            <colgroup>
-                <col width="40%">
-                <col width="30%">
-                <col width="30%">
-            </colgroup>
-            <thead>
-                <tr>
-                    <th>Terms of use</th>
-                    <th class="numeric"></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Terms of use</td>
-                    <td id="termsOfUseAagreementDetails">
-                        @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
-                            Agreed by @{app.termsOfUseAgreements.head.emailAddress} on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(app.termsOfUseAgreements.head.timeStamp)}
-                        } else {
-                            Not agreed
-                        }
-                    </td>
-                    <td class="numeric">
-                      @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
-                          @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
-                              <a id="termsOfUseReadLink" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a>
-                          } else {
-                              <a id="termsOfUseReadLink" class="button" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>
-                          }
-                        }
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    }
+  }
 }
