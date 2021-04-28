@@ -28,13 +28,15 @@
 @import config.ApplicationConfig
 @import templates._
 @import views.templates._
+@import config.ApplicationConfig
 
 
 @this(govukTemplate: GovukTemplate,
   siteHeader: siteHeader,
   siteFooter: siteFooter,
   footerLinks: FooterLinks,
-  hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
+  hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
+  applicationConfig: config.ApplicationConfig
 )
 
 @(title: String,
@@ -95,7 +97,9 @@
   </div>
   <br />
   <br />
-  @hmrcReportTechnicalIssueHelper()
+  <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
+    Is this page not working properly?
+  </a>
 }
 
 @scripts = {
