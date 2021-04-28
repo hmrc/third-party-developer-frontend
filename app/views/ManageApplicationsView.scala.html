@@ -65,7 +65,7 @@
 @applicationTable(applications: Seq[controllers.ApplicationSummary], environmentName: String) = {
   @if(applications.nonEmpty) {
     <table class="govuk-table">
-      <caption class="visually-hidden">Applications</caption>
+      <caption class="govuk-visually-hidden">Applications</caption>
       <thead class="govuk-table__head">
         <tr class="govuk-table__row">
           <th scope="col" class="govuk-table__header">@environmentName applications</th>

@@ -88,30 +88,30 @@
 }
 
 @mainContentDefault = {
-    @if(leftNav.isDefined) {
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-one-quarter">
-                @leftNav.getOrElse(HtmlFormat.empty)
-            </div>
-            <div class="govuk-grid-column-two-thirds">
-                <div class="govuk-side-nav-content">
-                    @contentBlock
-                </div>
-            </div>
-        </div>
-        <div class="govuk-get-help-container">
-            @hmrcReportTechnicalIssueHelper()
-        </div>
-    } else {
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
+  @if(leftNav.isDefined) {
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-quarter">
+        @leftNav.getOrElse(HtmlFormat.empty)
+      </div>
+      <div class="govuk-grid-column-two-thirds">
+        <div class="govuk-side-nav-content">
           @contentBlock
         </div>
       </div>
-      <br />
-      <br />
+    </div>
+    <div class="govuk-get-help-container">
       @hmrcReportTechnicalIssueHelper()
-    }
+    </div>
+  } else {
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        @contentBlock
+      </div>
+    </div>
+    <br />
+    <br />
+    @hmrcReportTechnicalIssueHelper()
+  }
 }
 
 @scripts = {
@@ -125,10 +125,10 @@
 }
 
 @govukTemplate(
-    pageTitle = Some(title),
-    headBlock = Some(head),
-    beforeContentBlock = Some(beforeContentBlock),
-    bodyEndBlock = Some(bodyEndDefault),
-    headerBlock = siteHeader(navLinks),
-    footerBlock = footerBlock
+  pageTitle = Some(title),
+  headBlock = Some(head),
+  beforeContentBlock = Some(beforeContentBlock),
+  bodyEndBlock = Some(bodyEndDefault),
+  headerBlock = siteHeader(navLinks),
+  footerBlock = footerBlock
 )(mainContentDefault)

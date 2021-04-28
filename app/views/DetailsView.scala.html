@@ -55,7 +55,7 @@
 
   <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 
-  <p class="govuk-body">
+  <p class="govuk-body govuk-!-margin-0">
     Created @{formatDate(app.createdOn)}
   </p>
 
@@ -89,7 +89,7 @@
         <th scope="col" class="govuk-table__header">Application details</th>
         <th scope="col" class="govuk-table__header">
           @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
-            <a id="change" class="govuk-link" href="@controllers.routes.Details.changeDetails(app.id)">Change <span class="visually-hidden">application details</span></a>
+            <a id="change" class="govuk-link" href="@controllers.routes.Details.changeDetails(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
           }
         </th>
       </tr>

@@ -57,7 +57,7 @@
     <input type="hidden" id="applicationId" name="applicationId" value="@form.data("applicationId")"/>
     @if(app.hasCapability(SupportChangingAppDetails)) {
       <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
-        <label id="applicationName-label" class="govuk-label" for="applicationName">
+        <label id="applicationName-label" class="govuk-label govuk-!-font-weight-bold" for="applicationName">
           Application name
         </label>
         <span id="application-name-error" class="govuk-error-message">
@@ -77,7 +77,7 @@
     }
 
     <div class="govuk-form-group @if(form.errors("description").nonEmpty) {govuk-form-group--error}">
-      <label id="description-label" class="govuk-label" for="description">
+      <label id="description-label" class="govuk-label govuk-!-font-weight-bold" for="description">
         Application description (optional)
         <div id="description-label-hint" class="govuk-hint">We will not show this to users.</div>
         <span id="description-label-error" class="govuk-error-message">
@@ -98,7 +98,7 @@
     </div>
 
     <div class="govuk-form-group @if(form.errors("privacyPolicyUrl").nonEmpty) {govuk-form-group--error}">
-      <label id="privacyPolicyUrl-label" class="govuk-label" for="privacyPolicyUrl">
+      <label id="privacyPolicyUrl-label" class="govuk-label govuk-!-font-weight-bold" for="privacyPolicyUrl">
         Privacy policy URL (optional)
       </label>
       <div id="privacy-policy-hint" class="govuk-hint">
@@ -115,7 +115,7 @@
     </div>
 
     <div class="govuk-form-group @if(form.errors("termsAndConditionsUrl").nonEmpty) {govuk-form-group--error}">
-      <label id="termsAndConditionsUrl-label" class="govuk-label" for="termsAndConditionsUrl">
+      <label id="termsAndConditionsUrl-label" class="govuk-label govuk-!-font-weight-bold" for="termsAndConditionsUrl">
         Terms and conditions URL (optional)
       </label>
       <div id="terms-conditions-hint" class="govuk-hint">

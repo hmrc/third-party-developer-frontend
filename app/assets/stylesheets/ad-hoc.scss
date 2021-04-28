@@ -105,30 +105,6 @@ input[type=submit]:hover {
   margin-right: 0 !important;
 }
 
-// Remove right arrows on left hand navigation menu
-// They cause screen reader to read out the right arrow with not context and don't add anything to visual users
-
-.side-nav__link::after {
-  content: "";
-}
-
-// Show side navigation on mobile phone - discuss with Rory about a better solution to this, a sub navigation responsive menu
-.side-nav {
-  display: block;
-}
-
-// Remove sub navigation right border on a mobile phone
-.side-nav {
-  border-right: none;
-}
-
-// Add sub navigation right border back in for desktop application. uses breakpoint defined in GOV UK frontend toolkit.
-@media(min-width: 769px) {
-  .side-nav {
-    border-right: 1px solid #bfc1c3;
-  }
-}
-
 @media (min-width: 641px) {
   .column-three-quarters {
     float: left;
@@ -292,9 +268,6 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
 }
 
 .client-secrets {
-  #generate-another-client-secret {
-    padding: 0;
-  }
   .rotate-client-secrets {
     width: 75%;
   }

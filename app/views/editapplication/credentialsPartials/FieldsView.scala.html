@@ -136,7 +136,9 @@
       <div>
         @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
           @helper.CSRF.formField
-          <p class="govuk-body"><button id="generate-another-client-secret" class="govuk-button govuk-button--secondary" type="submit">Generate another client secret</button></p>
+          <button id="generate-another-client-secret" class="govuk-button govuk-button--secondary" type="submit">
+            Generate another client secret
+          </button>
         }
       </div>
     } else {

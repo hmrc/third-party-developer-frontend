@@ -32,5 +32,46 @@
 }
 
 .side-nav {
-    border-right: 1px solid #bfc1c3
+  border-right: 1px solid #bfc1c3;
+  display: block;
+  overflow: hidden;
+}
+
+.side-nav__component {
+  border: none;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.side-nav__list {
+  position: relative;
+  list-style: none;
+  font-size: 19px;
+  line-height: 1.31579;
+  font-family: "nta",Arial,sans-serif;
+  font-weight: 400;
+  text-transform: none;
+}
+
+.side-nav__list--selected .side-nav__link, .side-nav__list--selected:hover .side-nav__link {
+  color: #fff;
+  background-color: #005ea5;
+}
+
+.side-nav__link {
+  padding: 12px 30px 8px 15px;
+  text-decoration: none;
+  display: block;
+  background-color: transparent;
+  font-family: "nta",Arial,sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  font-size: 16px;
+  line-height: 1.25;
+  color: #2b8cc4;
+}
+
+.side-nav__link:hover {
+  color: #4c2c92;
 }
