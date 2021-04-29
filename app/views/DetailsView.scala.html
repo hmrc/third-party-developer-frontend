@@ -89,7 +89,7 @@
         <th scope="col" class="govuk-table__header">Application details</th>
         <th scope="col" class="govuk-table__header">
           @if(app.isPermittedToEditAppDetails(loggedIn.developer)) {
-            <a id="change" class="govuk-link" href="@controllers.routes.Details.changeDetails(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
+            <a id="change" class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.Details.changeDetails(app.id)">Change <span class="govuk-visually-hidden">application details</span></a>
           }
         </th>
       </tr>

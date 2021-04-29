@@ -23,51 +23,55 @@
 @(app: Application,role: CollaboratorRole, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, String) => Call)(implicit request: play.api.mvc.Request[Any])
 
 @if(role.isDeveloper) {
- <p class="alert alert--info">You need admin rights to add or remove team members.</p>
+ <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-warning-text__assistive">Warning</span>
+      You need admin rights to add or remove team members.
+    </strong>
+  </div>
 }
-<table class="table--spaced-top">
- <thead>
-  <tr>
-   <th class="hard"><span>Email address</span></th>
-   <th class="hard"><span>Role</span></th>
-   <th class="hard"><span></span></th>
+<table class="govuk-table">
+ <thead class="govuk-table__head">
+  <tr class="govuk-table__row">
+   <th scope="col" class="govuk-table__header"><span>Email address</span></th>
+   <th scope="col" class="govuk-table__header"><span>Role</span></th>
+   <th scope="col" class="govuk-table__header"><span></span></th>
   </tr>
- </thead>
+  </thead>
 
- <tbody
- data-teamMember-list
- data-teamMember-remove-url="@SpliceCSRFToken(controllers.routes.ManageTeam.removeTeamMemberAction(app.id))" >
+  <tbody
+    data-teamMember-list
+    data-teamMember-remove-url="@SpliceCSRFToken(controllers.routes.ManageTeam.removeTeamMemberAction(app.id))"
+    class="govuk-table__body"
+  >
 
- @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress).zipWithIndex) {
-  <tr data-teamMember-row="@teamMember.emailAddress">
-   <td class="table--large">@teamMember.emailAddress</td>
-   <td class="table--large text--left hard--left">
-    @if(teamMember.role.isAdministrator) {
-     <span>Admin</span>
+    @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress).zipWithIndex) {
+      <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress">
+        <td class="govuk-table__cell">@teamMember.emailAddress</td>
+        <td class="govuk-table__cell">
+          @if(teamMember.role.isAdministrator) {
+            <span>Admin</span>
+          }
+          @if(teamMember.role.isDeveloper) {
+            <span>Developer</span>
+          }
+        </td>
+        @if(role.isAdministrator && (teamMember.role.isDeveloper || teamMember.emailAddress != loggedIn.email)) {
+          <td class="govuk-table__cell">
+            <a class="govuk-link" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
+              Remove <span class="govuk-visually-hidden">@teamMember.emailAddress</span>
+            </a>
+          </td>
+        } else {
+          <td class="govuk-table__cell" aria-hidden="true"></td>
+        }
+      </tr>
     }
-    @if(teamMember.role.isDeveloper) {
-     <span>Developer</span>
-    }
-   </td>
-   @if(role.isAdministrator && (teamMember.role.isDeveloper || teamMember.emailAddress != loggedIn.email)) {
-    <td class="text--right hard--right">
-     <a href="@createRemoveLink(app.id, teamMember.emailAddress).url">
-      Remove <span class="visually-hidden">@teamMember.emailAddress</span>
-     </a>
-    </td>
-   } else {
-    <td class="text--right hard--right" aria-hidden="true"></td>
-   }
-
-  </tr>
- }
- </tbody>
+  </tbody>
 </table>
-</section>
 <br>
-<section>
-
 @if(role.isAdministrator) {
-  <a href="@addTeamMemberUrl" @if(addMemberStyle == Button) { class="button" } >Add a team member</a><br/>
+  <a href="@addTeamMemberUrl" @if(addMemberStyle == Button) { class="govuk-button" } >Add a team member</a><br/>
 }
 
