@@ -71,7 +71,7 @@
   @if(app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED && app.isPermittedToEditAppDetails(loggedIn.developer)) {
     <div class="govuk-warning-text">
       <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-      <strong class="govuk-warning-text__text">
+      <strong id="terms-of-use-header" class="govuk-warning-text__text">
         <span class="govuk-warning-text__assistive">Warning</span>
         You must agree to the terms of use on this application.
       </strong>
