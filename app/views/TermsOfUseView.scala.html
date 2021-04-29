@@ -56,7 +56,7 @@
   <br>
 
   @if(app.termsOfUseStatus == AGREED) {
-    <div id="termsOfUseAlert" class="alert alert--info">
+    <div id="termsOfUseAlert" class="govuk-inset-text">
       Terms of use accepted on @{DateTimeFormat.forPattern("dd MMMM yyyy").print(app.termsOfUseAgreements.head.timeStamp)} by @{app.termsOfUseAgreements.head.emailAddress}.
     </div>
     <br>
