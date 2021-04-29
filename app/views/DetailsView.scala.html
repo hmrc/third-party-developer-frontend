@@ -148,7 +148,7 @@
               @if(app.termsOfUseStatus == TermsOfUseStatus.AGREED) {
                 <a id="termsOfUseReadLink" class="govuk-link" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a>
               } else {
-                <a id="termsOfUseReadLink" class="govuk-button" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>
+                <a id="termsOfUseReadLink" class="govuk-button govuk-!-margin-0" href="@routes.TermsOfUse.termsOfUse(app.id)">Read and agree</a>
               }
             }
           </td>

@@ -90,7 +90,7 @@
 @mainContentDefault = {
   @if(leftNav.isDefined) {
     <div class="govuk-grid-row">
-      <div class="govuk-grid-column-one-quarter">
+      <div class="govuk-grid-column-one-quarter responsive-nav">
         @leftNav.getOrElse(HtmlFormat.empty)
       </div>
       <div class="govuk-grid-column-two-thirds">

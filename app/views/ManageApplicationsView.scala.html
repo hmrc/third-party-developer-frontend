@@ -77,7 +77,7 @@
         @for(app <- applications) {
           <tr class="govuk-table__row">
             <td class="govuk-table__cell">
-              <a href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
+              <a class="govuk-link" href="@controllers.routes.Details.details(app.id)" data-app-name>@app.name</a>
             </td>
             <td class="govuk-table__cell" data-app-user-role>
               @if(app.role.isAdministrator) {Admin}

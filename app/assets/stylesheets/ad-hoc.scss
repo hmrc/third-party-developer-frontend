@@ -193,8 +193,16 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
 .interrupt {
   margin: 1em 0;
   padding: 1em 1em 1em 2em;
-  color: #fff;
+  color: #fff !important;
   background: #1d70b8;
+}
+
+.interrupt-title {
+  color: #fff !important;
+}
+
+.interrupt-description {
+  color: #fff !important;
 }
 
 #apis-checklist {
@@ -208,7 +216,7 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
 
 @media (min-width: 1000px) {
   .interrupt {
-    padding: 1em 26em 1em 2em;
+    padding: 2em 12em 0 2em
   }
 }
 

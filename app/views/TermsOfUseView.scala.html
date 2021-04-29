@@ -67,24 +67,24 @@
   </div>
 
   @if(app.termsOfUseStatus == AGREEMENT_REQUIRED) {
-    <hr>
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
     @helper.form(action = controllers.routes.TermsOfUse.agreeTermsOfUse(app.id), 'class -> "form", 'id -> "termsOfUseForm") {
       @helper.CSRF.formField
-      <div class="form-group">
-        <fieldset>
-          <div class="form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
-            @fieldError(form.errors, "termsOfUseAgreed", true)
-            <div class="multiple-choice">
-              <input type="checkbox" id="termsOfUseAgreed" name="termsOfUseAgreed" value="true"/>
-              <label for="termsOfUseAgreed">I agree to the terms of use</label>
+      <div class="govuk-form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
+        <fieldset class="govuk-fieldset" aria-describedby="terms-agreed-error">
+          <span id="terms-agreed-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "termsOfUseAgreed", true)
+          </span>
+          <div class="govuk-checkboxes">
+            <div class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" type="checkbox" id="termsOfUseAgreed" name="termsOfUseAgreed" value="true"/>
+              <label class="govuk-label govuk-checkboxes__label" for="termsOfUseAgreed">I agree to the terms of use</label>
             </div>
           </div>
         </fieldset>
       </div>
-      <div class="form-group">
-        <button id="submit" class="button" type="submit">Save</button>
-        <a href="@controllers.routes.Details.details(app.id)" class="secondary-button">Cancel</a>
-      </div>
+        <button id="submit" class="govuk-button" type="submit">Save</button>
+        <a href="@controllers.routes.Details.details(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
     }
   }
 }
