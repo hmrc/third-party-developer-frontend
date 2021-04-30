@@ -79,12 +79,12 @@
                   @helper.CSRF.formField
                   <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
                   <input id="newRedirectUri" name="newRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
-                  <input id="change" class="govuk-button govuk-button--secondary" type="submit" value="Change"/>
+                  <input id="change" class="govuk-button govuk-button--secondary govuk-!-margin-0" type="submit" value="Change"/>
                 }
                 @helper.form(action = controllers.routes.Redirects.deleteRedirect(application.id), 'class -> "form inline-controls") {
                   @helper.CSRF.formField
                   <input id="redirectUri" name="redirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
-                  <input id="delete" class="govuk-button govuk-button--secondary" type="submit" value="Delete"/>
+                  <input id="delete" class="govuk-button govuk-button--warning govuk-!-margin-0" type="submit" value="Delete"/>
                 }
               }
             </td>

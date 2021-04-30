@@ -121,18 +121,18 @@
         To rotate your client secret:
       </p>
       <ol class="govuk-list govuk-list--number">
-          <li>
-              Generate a new client secret, in addition to the one used by your application
-          </li>
-          <li>
-              Update your application to use the new client secret
-          </li>
-          <li>
-              Check that your application is working with the new client secret
-          </li>
-          <li>
-              Delete the inactive client secret
-          </li>
+        <li>
+          Generate a new client secret, in addition to the one used by your application
+        </li>
+        <li>
+          Update your application to use the new client secret
+        </li>
+        <li>
+          Check that your application is working with the new client secret
+        </li>
+        <li>
+          Delete the inactive client secret
+        </li>
       </ol>
     </div>
 
@@ -141,7 +141,7 @@
       <div>
         @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
           @helper.CSRF.formField
-          <button id="generate-another-client-secret" class="govuk-button govuk-button--secondary" type="submit">
+          <button id="generate-another-client-secret" class="govuk-button" type="submit">
             Generate another client secret
           </button>
         }
