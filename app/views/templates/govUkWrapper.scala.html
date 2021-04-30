@@ -99,12 +99,23 @@
         </div>
       </div>
     </div>
-  </div>
-  <br />
-  <br />
-  <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
-    Is this page not working properly?
-  </a>
+    <div class="govuk-get-help-container">
+      <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
+        Is this page not working properly?
+      </a>
+    </div>
+    } else {
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        @contentBlock
+      </div>
+    </div>
+    <br />
+    <br />
+    <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
+      Is this page not working properly?
+    </a>
+  }
 }
 
 @scripts = {
