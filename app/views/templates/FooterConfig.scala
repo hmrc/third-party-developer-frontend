@@ -25,12 +25,13 @@ import views.html.helper
 class FooterConfig @Inject()(config: Configuration) {
 
   private lazy val urlFooterConfig = config.underlying.getConfig("urls.footer")
+  private lazy val baseUrl = config.underlying.getString("apidocumentation.base.url")
 
-  lazy val cookies: String         = urlFooterConfig.getString("cookies")
-  lazy val privacy: String         = urlFooterConfig.getString("privacy")
-  lazy val termsConditions: String = urlFooterConfig.getString("termsConditions")
-  lazy val govukHelp: String       = urlFooterConfig.getString("govukHelp")
+  lazy val cookies: String         = baseUrl + urlFooterConfig.getString("cookies")
+  lazy val privacy: String         = baseUrl + urlFooterConfig.getString("privacy")
+  lazy val termsConditions: String = baseUrl + urlFooterConfig.getString("termsConditions")
+  lazy val govukHelp: String       = baseUrl + urlFooterConfig.getString("govukHelp")
 
   def accessibility(implicit request: Request[_]): String =
-    s"${urlFooterConfig.getString("accessibility")}/hmrc-developer-hub?referrerUrl=${helper.urlEncode(request.uri)}"
+    s"$baseUrl +${urlFooterConfig.getString("accessibility")}/hmrc-developer-hub?referrerUrl=${helper.urlEncode(request.uri)}"
 }
