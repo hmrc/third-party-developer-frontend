@@ -66,7 +66,8 @@ class ApplicationConfig @Inject()(config: Configuration, runMode: RunMode) exten
 
   lazy val platformFrontendHost : String = getConfigDefaulted("platform.frontend.host", "http://localhost:9685")
 
-  lazy val reportProblemHost: String = config.underlying.getConfig("urls.report-a-problem").getString("problem")
+  lazy val reportProblemHost: String =
+    config.underlying.getString("report-a-problem.base.url") + config.underlying.getString("urls.report-a-problem.problem")
 
   lazy val dateOfAdminMfaMandate: Option[LocalDate] = {
     config.getOptional[String]("dateOfAdminMfaMandate") match {
