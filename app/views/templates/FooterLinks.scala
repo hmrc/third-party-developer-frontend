@@ -21,31 +21,31 @@ import play.api.i18n.Messages
 import play.api.mvc.Request
 import uk.gov.hmrc.govukfrontend.views.viewmodels.footer.FooterItem
 
-class FooterLinks @Inject()(appConfig: FooterConfig) {
+class FooterLinks @Inject()(footerConfig: FooterConfig) {
 
   def cookieLink(implicit messages: Messages): FooterItem = FooterItem(
     Some(Messages("footer.links.cookies.text")),
-    Some(appConfig.cookies)
+    Some(footerConfig.cookies)
   )
 
   def privacyLink(implicit messages: Messages): FooterItem = FooterItem(
     Some(Messages("footer.links.privacy_policy.text")),
-    Some(appConfig.privacy)
+    Some(footerConfig.privacy)
   )
 
   def termsConditionsLink(implicit messages: Messages): FooterItem = FooterItem(
     Some(Messages("footer.links.terms_and_conditions.text")),
-    Some(appConfig.termsConditions)
+    Some(footerConfig.termsConditions)
   )
 
   def govukHelpLink(implicit messages: Messages): FooterItem = FooterItem(
     Some(Messages("footer.links.help_page.text")),
-    Some(appConfig.govukHelp)
+    Some(footerConfig.govukHelp)
   )
 
   def accessibilityLink(implicit messages: Messages, request: Request[_]): FooterItem = FooterItem(
     Some(Messages("footer.links.accessibility.text")),
-    Some(appConfig.accessibility)
+    Some(footerConfig.accessibility)
   )
 
   def items(implicit messages: Messages, request: Request[_]): Seq[FooterItem] = Seq(
