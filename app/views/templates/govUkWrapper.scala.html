@@ -52,7 +52,8 @@
   developerSession: Option[DeveloperSession],
   navLinks: Seq[NavLink] = Seq.empty,
   bodyEndBlock: Option[Html] = None,
-  feedbackBanner: Option[FeedbackBanner] = None
+  feedbackBanner: Option[FeedbackBanner] = None,
+  fullWidth: Boolean = false
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
@@ -105,7 +106,18 @@
     <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
       Is this page not working properly?
     </a>
-    } else {
+  } else if(fullWidth == true) {
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        @contentBlock
+      </div>
+    </div>
+    <br />
+    <br />
+    <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
+      Is this page not working properly?
+    </a>
+  } else {
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-two-thirds">
         @contentBlock

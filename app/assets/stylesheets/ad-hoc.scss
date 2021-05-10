@@ -419,3 +419,12 @@ tr.teamMembers, th {
 .before-content-banner {
   display: flex;
 }
+
+.center-table-text {
+  vertical-align: middle;
+}
+
+.redirect-table-buttons {
+  display: flex;
+  justify-content: flex-end;
+}

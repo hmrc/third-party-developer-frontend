@@ -26,6 +26,7 @@
   isRegistering: Boolean = false,
   breadcrumbs: Seq[Crumb] = Seq.empty,
   leftNav: Option[Html] = None,
+  fullWidth: Boolean = false,
   back: BackButton = NoBackButton,
   fullWidthContent: Boolean = false,
   developerSession: Option[DeveloperSession],
@@ -40,7 +41,6 @@
   <script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
   <script>window.GOVUKFrontend.initAll();</script>
 }
-
 
 @userBanner = {
   <div class="subnav-auth">
@@ -60,6 +60,7 @@
   serviceInfoContent = Some(userBanner),
   breadcrumbs = breadcrumbs,
   leftNav = leftNav,
+  fullWidth = fullWidth,
   back = back,
   fullWidthContent = fullWidthContent,
   developerSession = developerSession,

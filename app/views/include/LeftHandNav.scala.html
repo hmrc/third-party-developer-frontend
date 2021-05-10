@@ -31,7 +31,7 @@
   case (Some(applicationView), Some(section)) => {
     @defining(applicationView.application) { app =>
       <div class="side-nav" role="navigation" aria-labelledby="nav1">
-        <span class="govuk-heading-s" id="nav1">@app.name</span>
+        <span class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav1">@app.name</span>
         <ul class="side-nav__component">
           <li class="side-nav__list @if(section == "details") { side-nav__list--selected }">
             <a id="nav-manage-details" class="side-nav__link" href="@routes.Details.details(app.id)">
@@ -111,7 +111,7 @@
 @(navSection) match {
   case (Some(section)) if (section == "manage-account") => {
     <div class="side-nav" role="navigation" aria-labelledby="nav3">
-      <span class="govuk-heading-s" id="nav3">Manage account</span>
+      <span class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav3">Manage account</span>
       <ul class="side-nav__component">
         <li class="side-nav__list @if(section == "manage-profile") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showProfile">Manage profile</a></li>
         <li class="side-nav__list @if(section == "email-preferences") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage">Email preferences</a></li>
@@ -122,7 +122,7 @@
   }
   case (Some(section)) => {
     <div class="side-nav" role="navigation" aria-labelledby="nav2">
-      <span class="govuk-heading-s" id="nav2">Manage applications</span>
+      <span class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav2">Manage applications</span>
       <ul class="side-nav__component">
         <li class="side-nav__list @if(section == "manage-applications") { side-nav__list--selected }"><a class="side-nav__link" href="@routes.AddApplication.manageApps">View all applications</a></li>
         <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationSubordinate">Add an application to @subordinateWording</a></li>
@@ -131,7 +131,7 @@
       <br>
     </div>
     <div class="side-nav" role="navigation" aria-labelledby="nav3">
-      <span class="govuk-heading-s" id="nav3">Manage account</span>
+      <span class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-2" id="nav3">Manage account</span>
       <ul class="side-nav__component">
         <li class="side-nav__list @if(section == "manage-profile") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.Profile.showProfile">Manage profile</a></li>
         <li class="side-nav__list @if(section == "email-preferences") { side-nav__list--selected }"><a class="side-nav__link" href="@controllers.profile.routes.EmailPreferences.emailPreferencesSummaryPage">Email preferences</a></li>

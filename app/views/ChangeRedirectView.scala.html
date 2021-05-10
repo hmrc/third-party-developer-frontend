@@ -58,6 +58,9 @@
         <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "newRedirectUri")
       </span>
       <input class="govuk-input @if(form.errors("newRedirectUri").nonEmpty) {govuk-input--error}" type="text" id="newRedirectUri" name="newRedirectUri" value="@form.data.get("newRedirectUri")">
+      <label class="govuk-visually-hidden" aria-hidden="true" for="originalRedirectUri">
+        Original Redirect Uri
+      </label>
       <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@form.data.get("originalRedirectUri")">
     </div>
 
