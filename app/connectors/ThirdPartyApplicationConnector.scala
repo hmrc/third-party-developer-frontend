@@ -28,7 +28,7 @@ import play.api.Logger
 import play.api.http.HeaderNames.CONTENT_LENGTH
 import play.api.http.Status._
 import service.ApplicationService.ApplicationConnector
-import uk.gov.hmrc.http.{UserId => _, _}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
@@ -102,10 +102,13 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   
   def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
     if (isEnabled) {
+      println("POME "+hc)
+      println("POME "+useProxy)
       metrics.record(api) {
         http.GET[Option[Application]](s"$serviceBaseUrl/application/${id.value}")
       }
     } else {
+      println("POME : disabled")
       Future.successful(None)
     }
 

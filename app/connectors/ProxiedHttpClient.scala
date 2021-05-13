@@ -20,8 +20,7 @@ import akka.actor.ActorSystem
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HeaderNames.ACCEPT
-import play.api.libs.ws.{WSClient, WSProxyServer, WSRequest}
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.libs.ws.{WSClient, WSProxyServer, WSRequest => PlayWSRequest}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.bootstrap.config.RunMode
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -41,18 +40,25 @@ class ProxiedHttpClient @Inject()(config: Configuration,
 
   def withHeaders(apiKey: String = ""): ProxiedHttpClient = {
     new ProxiedHttpClient(config, httpAuditing, wsClient, environment, actorSystem, runMode) {
-      override val apiKeyHeader: Option[(String, String)] = if ("" == apiKey) None else Some("x-api-key" -> apiKey)
+      override val apiKeyHeader: Option[(String, String)] = if ("" == apiKey) None else Some(ProxiedHttpClient.API_KEY_HEADER_NAME -> apiKey)
     }
   }
 
   override def wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration(s"$env.proxy", config)
 
-  override def buildRequest[A](url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): WSRequest = {
-    val extraHeaders = hc.extraHeaders :+ (ACCEPT -> "application/hmrc.vnd.1.0+json")
+  override def buildRequest[A](url: String, headers: Seq[(String, String)]): PlayWSRequest = {
+    val extraHeaders = Seq((ACCEPT -> "application/hmrc.vnd.1.0+json"))
     val extraHeadersWithMaybeApiKeyHeader =
       if (apiKeyHeader.isDefined) extraHeaders :+ apiKeyHeader.get
       else extraHeaders
-    val hcWithBearerAndAccept = hc.copy(extraHeaders = extraHeadersWithMaybeApiKeyHeader)
-    super.buildRequest(url, headers)(hcWithBearerAndAccept)
+
+      println("POME "+url)
+      println("POME "+headers)
+      println("POME "+extraHeadersWithMaybeApiKeyHeader)
+    super.buildRequest(url, headers ++ extraHeadersWithMaybeApiKeyHeader)
   }
+}
+
+object ProxiedHttpClient {
+  val API_KEY_HEADER_NAME = "x-api-key"
 }

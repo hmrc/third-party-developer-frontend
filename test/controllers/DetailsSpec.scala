@@ -25,7 +25,7 @@ import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
 import play.api.libs.json.Json
 import play.api.mvc.Result
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import service.SessionService
@@ -52,280 +52,278 @@ class DetailsSpec
     with CollaboratorTracker 
     with LocalUserIdTracker {
 
-  Helpers.running(app) {
-    "details" when {
-      "logged in as a Developer on an application" should {
-        "return the view for a standard production app with no change link" in new Setup {
-          val approvedApplication = anApplication(developerEmail = loggedInUser.email)
-          detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
-        }
-
-        "return the view for a developer on a sandbox app" in new Setup {
-          detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInUser.email))
-        }
-      }
-
-      "logged in as an Administrator on an application" should {
-        "return the view for a standard production app" in new Setup {
-          val approvedApplication = anApplication(adminEmail = loggedInUser.email)
-          detailsShouldRenderThePage(approvedApplication)
-        }
-
-        "return the view for an admin on a sandbox app" in new Setup {
-          detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInUser.email))
-        }
-
-        "return a redirect when using an application in testing state" in new Setup {
-          val testingApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.testing)
-
-          givenApplicationAction(testingApplication, loggedInUser)
-
-          val result = testingApplication.callDetails
-
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"/developer/applications/${testingApplication.id.value}/request-check")
-        }
-
-        "return the credentials requested page on an application pending approval" in new Setup {
-          val pendingApprovalApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingGatekeeperApproval("dont-care"))
-
-          givenApplicationAction(pendingApprovalApplication, loggedInUser)
-
-          val result = addToken(underTest.details(pendingApprovalApplication.id))(loggedInRequest)
-
-          status(result) shouldBe OK
-
-          val document = Jsoup.parse(contentAsString(result))
-          elementExistsByText(document, "h1", "Credentials requested") shouldBe true
-          elementExistsByText(document, "span", pendingApprovalApplication.name) shouldBe true
-        }
-
-        "return the credentials requested page on an application pending verification" in new Setup {
-          val pendingVerificationApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care"))
-
-          givenApplicationAction(pendingVerificationApplication, loggedInUser)
-
-          val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInRequest)
-
-          status(result) shouldBe OK
-
-          val document = Jsoup.parse(contentAsString(result))
-          elementExistsByText(document, "h1", "Credentials requested") shouldBe true
-          elementExistsByText(document, "span", pendingVerificationApplication.name) shouldBe true
-        }
-      }
-
-      "not a team member on an application" should {
-        "return not found" in new Setup {
-          val application = aStandardApplication
-          givenApplicationAction(application, loggedInUser)
-
-          val result = application.callDetails
-
-          status(result) shouldBe NOT_FOUND
-        }
-      }
-
-      "not logged in" should {
-        "redirect to login" in new Setup {
-          val application = aStandardApplication
-          givenApplicationAction(application, loggedInUser)
-
-          val result = application.callDetailsNotLoggedIn
-
-          redirectsToLogin(result)
-        }
-      }
-    }
-
-    "changeDetails" should {
-      "return the view for an admin on a standard production app" in new Setup {
-        changeDetailsShouldRenderThePage(
-          anApplication(adminEmail = loggedInUser.email)
-        )
+  "details" when {
+    "logged in as a Developer on an application" should {
+      "return the view for a standard production app with no change link" in new Setup {
+        val approvedApplication = anApplication(developerEmail = loggedInUser.email)
+        detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
       }
 
       "return the view for a developer on a sandbox app" in new Setup {
-        changeDetailsShouldRenderThePage(
-          aSandboxApplication(developerEmail = loggedInUser.email)
-        )
+        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInUser.email))
+      }
+    }
+
+    "logged in as an Administrator on an application" should {
+      "return the view for a standard production app" in new Setup {
+        val approvedApplication = anApplication(adminEmail = loggedInUser.email)
+        detailsShouldRenderThePage(approvedApplication)
       }
 
       "return the view for an admin on a sandbox app" in new Setup {
-        changeDetailsShouldRenderThePage(
-          aSandboxApplication(adminEmail = loggedInUser.email)
-        )
+        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInUser.email))
       }
 
-      "return forbidden for a developer on a standard production app" in new Setup {
-        val application = anApplication(developerEmail = loggedInUser.email)
-        givenApplicationAction(application, loggedInUser)
+      "return a redirect when using an application in testing state" in new Setup {
+        val testingApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.testing)
 
-        val result = application.callChangeDetails
+        givenApplicationAction(testingApplication, loggedInUser)
 
-        status(result) shouldBe FORBIDDEN
+        val result = testingApplication.callDetails
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/applications/${testingApplication.id.value}/request-check")
       }
 
-      "return not found when not a teamMember on the app" in new Setup {
-        val application = aStandardApprovedApplication
+      "return the credentials requested page on an application pending approval" in new Setup {
+        val pendingApprovalApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingGatekeeperApproval("dont-care"))
+
+        givenApplicationAction(pendingApprovalApplication, loggedInUser)
+
+        val result = addToken(underTest.details(pendingApprovalApplication.id))(loggedInRequest)
+
+        status(result) shouldBe OK
+
+        val document = Jsoup.parse(contentAsString(result))
+        elementExistsByText(document, "h1", "Credentials requested") shouldBe true
+        elementExistsByText(document, "span", pendingApprovalApplication.name) shouldBe true
+      }
+
+      "return the credentials requested page on an application pending verification" in new Setup {
+        val pendingVerificationApplication = anApplication(adminEmail = loggedInUser.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care"))
+
+        givenApplicationAction(pendingVerificationApplication, loggedInUser)
+
+        val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInRequest)
+
+        status(result) shouldBe OK
+
+        val document = Jsoup.parse(contentAsString(result))
+        elementExistsByText(document, "h1", "Credentials requested") shouldBe true
+        elementExistsByText(document, "span", pendingVerificationApplication.name) shouldBe true
+      }
+    }
+
+    "not a team member on an application" should {
+      "return not found" in new Setup {
+        val application = aStandardApplication
         givenApplicationAction(application, loggedInUser)
 
-        val result = application.callChangeDetails
+        val result = application.callDetails
 
         status(result) shouldBe NOT_FOUND
       }
+    }
 
-      "redirect to login when not logged in" in new Setup {
-        val application = aStandardApprovedApplication
+    "not logged in" should {
+      "redirect to login" in new Setup {
+        val application = aStandardApplication
         givenApplicationAction(application, loggedInUser)
 
         val result = application.callDetailsNotLoggedIn
 
         redirectsToLogin(result)
       }
+    }
+  }
 
-      "return not found for an ROPC application" in new Setup {
-        val application = anROPCApplication()
-        givenApplicationAction(application, loggedInUser)
-
-        val result = underTest.details(application.id)(loggedInRequest)
-
-        status(result) shouldBe NOT_FOUND
-      }
-
-      "return not found for a privileged application" in new Setup {
-        val application = aPrivilegedApplication()
-        givenApplicationAction(application, loggedInUser)
-
-        val result = underTest.details(application.id)(loggedInRequest)
-
-        status(result) shouldBe NOT_FOUND
-      }
+  "changeDetails" should {
+    "return the view for an admin on a standard production app" in new Setup {
+      changeDetailsShouldRenderThePage(
+        anApplication(adminEmail = loggedInUser.email)
+      )
     }
 
-    "changeDetailsAction validation" should {
-      "not pass when application is updated with empty name" in new Setup {
-        val application = anApplication(adminEmail = loggedInUser.email)
-        givenApplicationAction(application, loggedInUser)
-
-        val result = application.withName("").callChangeDetailsAction
-
-        status(result) shouldBe BAD_REQUEST
-      }
-
-      "not pass when application is updated with invalid name" in new Setup {
-        val application = anApplication(adminEmail = loggedInUser.email)
-        givenApplicationAction(application, loggedInUser)
-
-        val result = application.withName("a").callChangeDetailsAction
-
-        status(result) shouldBe BAD_REQUEST
-      }
-
-      "update name which contain HMRC should fail" in new Setup {
-        when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
-          .thenReturn(Future.successful(Invalid.invalidName))
-
-        val application = anApplication(adminEmail = loggedInUser.email)
-        givenApplicationAction(application, loggedInUser)
-
-        val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
-
-        status(result) shouldBe BAD_REQUEST
-
-        verify(underTest.applicationService).isApplicationNameValid(eqTo("my invalid HMRC application name"), eqTo(application.deployedTo), eqTo(Some(application.id)))(
-          *
-        )
-      }
+    "return the view for a developer on a sandbox app" in new Setup {
+      changeDetailsShouldRenderThePage(
+        aSandboxApplication(developerEmail = loggedInUser.email)
+      )
     }
 
-    "changeDetailsAction for production app in testing state" should {
-
-      "return not found" in new Setup {
-        val application = aStandardNonApprovedApplication()
-        givenApplicationAction(application, loggedInUser)
-
-        val result = application.callChangeDetails
-
-        status(result) shouldBe NOT_FOUND
-      }
-
-      "return not found when not a teamMember on the app" in new Setup {
-        val application = aStandardApprovedApplication
-        givenApplicationAction(application, loggedInUser)
-
-        val result = application.withDescription(newDescription).callChangeDetailsAction
-
-        status(result) shouldBe NOT_FOUND
-      }
-
-      "redirect to login when not logged in" in new Setup {
-        val application = aStandardApprovedApplication
-        givenApplicationAction(application, loggedInUser)
-
-        val result = application.withDescription(newDescription).callChangeDetailsActionNotLoggedIn
-
-        redirectsToLogin(result)
-      }
+    "return the view for an admin on a sandbox app" in new Setup {
+      changeDetailsShouldRenderThePage(
+        aSandboxApplication(adminEmail = loggedInUser.email)
+      )
     }
 
-    "changeDetailsAction for production app in uplifted state" should {
+    "return forbidden for a developer on a standard production app" in new Setup {
+      val application = anApplication(developerEmail = loggedInUser.email)
+      givenApplicationAction(application, loggedInUser)
 
-      "redirect to the details page on success for an admin" in new Setup {
-        val application = anApplication(adminEmail = loggedInUser.email)
+      val result = application.callChangeDetails
 
-        changeDetailsShouldRedirectOnSuccess(application)
-      }
-
-      "return forbidden for a developer" in new Setup {
-        val application = anApplication(developerEmail = loggedInUser.email)
-
-        givenApplicationAction(application, loggedInUser)
-
-        val result = application.withDescription(newDescription).callChangeDetailsAction
-
-        status(result) shouldBe FORBIDDEN
-      }
-
-      "keep original application name when administrator does an update" in new Setup {
-        val application = anApplication(adminEmail = loggedInUser.email)
-
-        givenApplicationAction(application, loggedInUser)
-
-        application.withName(newName).callChangeDetailsAction
-
-        val updatedApplication = captureUpdatedApplication
-        updatedApplication.name shouldBe application.name
-      }
+      status(result) shouldBe FORBIDDEN
     }
 
-    "changeDetailsAction for sandbox app" should {
+    "return not found when not a teamMember on the app" in new Setup {
+      val application = aStandardApprovedApplication
+      givenApplicationAction(application, loggedInUser)
 
-      "redirect to the details page on success for an admin" in new Setup {
-        changeDetailsShouldRedirectOnSuccess(aSandboxApplication(adminEmail = loggedInUser.email))
-      }
+      val result = application.callChangeDetails
 
-      "redirect to the details page on success for a developer" in new Setup {
-        changeDetailsShouldRedirectOnSuccess(aSandboxApplication(developerEmail = loggedInUser.email))
-      }
+      status(result) shouldBe NOT_FOUND
+    }
 
-      "update all fields for an admin" in new Setup {
-        changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInUser.email))
-      }
+    "redirect to login when not logged in" in new Setup {
+      val application = aStandardApprovedApplication
+      givenApplicationAction(application, loggedInUser)
 
-      "update all fields for a developer" in new Setup {
-        changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInUser.email))
-      }
+      val result = application.callDetailsNotLoggedIn
 
-      "update the app but not the check information" in new Setup {
-        val application = aSandboxApplication(adminEmail = loggedInUser.email)
-        givenApplicationAction(application, loggedInUser)
+      redirectsToLogin(result)
+    }
 
-        await(application.withName(newName).callChangeDetailsAction)
+    "return not found for an ROPC application" in new Setup {
+      val application = anROPCApplication()
+      givenApplicationAction(application, loggedInUser)
 
-        verify(underTest.applicationService).update(any[UpdateApplicationRequest])(*)
-        verify(underTest.applicationService, never).updateCheckInformation(eqTo(application), any[CheckInformation])(*)
-      }
+      val result = underTest.details(application.id)(loggedInRequest)
+
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "return not found for a privileged application" in new Setup {
+      val application = aPrivilegedApplication()
+      givenApplicationAction(application, loggedInUser)
+
+      val result = underTest.details(application.id)(loggedInRequest)
+
+      status(result) shouldBe NOT_FOUND
+    }
+  }
+
+  "changeDetailsAction validation" should {
+    "not pass when application is updated with empty name" in new Setup {
+      val application = anApplication(adminEmail = loggedInUser.email)
+      givenApplicationAction(application, loggedInUser)
+
+      val result = application.withName("").callChangeDetailsAction
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "not pass when application is updated with invalid name" in new Setup {
+      val application = anApplication(adminEmail = loggedInUser.email)
+      givenApplicationAction(application, loggedInUser)
+
+      val result = application.withName("a").callChangeDetailsAction
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "update name which contain HMRC should fail" in new Setup {
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+        .thenReturn(Future.successful(Invalid.invalidName))
+
+      val application = anApplication(adminEmail = loggedInUser.email)
+      givenApplicationAction(application, loggedInUser)
+
+      val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
+
+      status(result) shouldBe BAD_REQUEST
+
+      verify(underTest.applicationService).isApplicationNameValid(eqTo("my invalid HMRC application name"), eqTo(application.deployedTo), eqTo(Some(application.id)))(
+        *
+      )
+    }
+  }
+
+  "changeDetailsAction for production app in testing state" should {
+
+    "return not found" in new Setup {
+      val application = aStandardNonApprovedApplication()
+      givenApplicationAction(application, loggedInUser)
+
+      val result = application.callChangeDetails
+
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "return not found when not a teamMember on the app" in new Setup {
+      val application = aStandardApprovedApplication
+      givenApplicationAction(application, loggedInUser)
+
+      val result = application.withDescription(newDescription).callChangeDetailsAction
+
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "redirect to login when not logged in" in new Setup {
+      val application = aStandardApprovedApplication
+      givenApplicationAction(application, loggedInUser)
+
+      val result = application.withDescription(newDescription).callChangeDetailsActionNotLoggedIn
+
+      redirectsToLogin(result)
+    }
+  }
+
+  "changeDetailsAction for production app in uplifted state" should {
+
+    "redirect to the details page on success for an admin" in new Setup {
+      val application = anApplication(adminEmail = loggedInUser.email)
+
+      changeDetailsShouldRedirectOnSuccess(application)
+    }
+
+    "return forbidden for a developer" in new Setup {
+      val application = anApplication(developerEmail = loggedInUser.email)
+
+      givenApplicationAction(application, loggedInUser)
+
+      val result = application.withDescription(newDescription).callChangeDetailsAction
+
+      status(result) shouldBe FORBIDDEN
+    }
+
+    "keep original application name when administrator does an update" in new Setup {
+      val application = anApplication(adminEmail = loggedInUser.email)
+
+      givenApplicationAction(application, loggedInUser)
+
+      application.withName(newName).callChangeDetailsAction
+
+      val updatedApplication = captureUpdatedApplication
+      updatedApplication.name shouldBe application.name
+    }
+  }
+
+  "changeDetailsAction for sandbox app" should {
+
+    "redirect to the details page on success for an admin" in new Setup {
+      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(adminEmail = loggedInUser.email))
+    }
+
+    "redirect to the details page on success for a developer" in new Setup {
+      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(developerEmail = loggedInUser.email))
+    }
+
+    "update all fields for an admin" in new Setup {
+      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInUser.email))
+    }
+
+    "update all fields for a developer" in new Setup {
+      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInUser.email))
+    }
+
+    "update the app but not the check information" in new Setup {
+      val application = aSandboxApplication(adminEmail = loggedInUser.email)
+      givenApplicationAction(application, loggedInUser)
+
+      await(application.withName(newName).callChangeDetailsAction)
+
+      verify(underTest.applicationService).update(any[UpdateApplicationRequest])(*)
+      verify(underTest.applicationService, never).updateCheckInformation(eqTo(application), any[CheckInformation])(*)
     }
   }
 

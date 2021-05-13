@@ -25,7 +25,7 @@ import mocks.service._
 import org.jsoup.Jsoup
 import play.api.mvc.Result
 import play.api.test.Helpers._
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
 import service.{PushPullNotificationsService, SessionService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,6 +40,7 @@ import scala.concurrent.Future._
 import utils.LocalUserIdTracker
 import utils.TestApplications
 import utils.CollaboratorTracker
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 class PushPullNotificationsSpec 
     extends BaseControllerSpec 
@@ -48,73 +49,72 @@ class PushPullNotificationsSpec
     with TestApplications
     with CollaboratorTracker
     with DeveloperBuilder 
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with GuiceOneAppPerSuite {
 
-  Helpers.running(app) {
-    "showPushSecrets" when {
-      "logged in as a Developer on an application" should {
-        "return 403 for a prod app" in new Setup {
-          val application: Application = anApplication(developerEmail = loggedInUser.email)
-          givenApplicationAction(application, loggedInUser)
+  "showPushSecrets" when {
+    "logged in as a Developer on an application" should {
+      "return 403 for a prod app" in new Setup {
+        val application: Application = anApplication(developerEmail = loggedInUser.email)
+        givenApplicationAction(application, loggedInUser)
 
-          val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
+        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
 
-          status(result) shouldBe FORBIDDEN
-        }
-
-        "return the push secret for a sandbox app" in new Setup {
-          showPushSecretsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInUser.email))
-        }
-
-        "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-          val application: Application = aSandboxApplication(developerEmail = loggedInUser.email)
-          givenApplicationAction(application, loggedInUser)
-
-          val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
-
-          status(result) shouldBe NOT_FOUND
-        }
+        status(result) shouldBe FORBIDDEN
       }
 
-      "logged in as an Administrator on an application" should {
-        "return the push secret for a production app" in new Setup {
-          showPushSecretsShouldRenderThePage(anApplication(adminEmail = loggedInUser.email))
-        }
-
-        "return the push secret for a sandbox app" in new Setup {
-          showPushSecretsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInUser.email))
-        }
-
-        "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-          val application: Application = anApplication(adminEmail = loggedInUser.email)
-          givenApplicationAction(application, loggedInUser)
-
-          val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
-
-          status(result) shouldBe NOT_FOUND
-        }
+      "return the push secret for a sandbox app" in new Setup {
+        showPushSecretsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInUser.email))
       }
 
-      "not a team member on an application" should {
-        "return not found" in new Setup {
-          val application: Application = aStandardApplication
-          givenApplicationAction(application, loggedInUser)
+      "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
+        val application: Application = aSandboxApplication(developerEmail = loggedInUser.email)
+        givenApplicationAction(application, loggedInUser)
 
-          val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
+        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
 
-          status(result) shouldBe NOT_FOUND
-        }
+        status(result) shouldBe NOT_FOUND
+      }
+    }
+
+    "logged in as an Administrator on an application" should {
+      "return the push secret for a production app" in new Setup {
+        showPushSecretsShouldRenderThePage(anApplication(adminEmail = loggedInUser.email))
       }
 
-      "not logged in" should {
-        "redirect to login" in new Setup {
-          val application: Application = aStandardApplication
-          givenApplicationAction(application, loggedInUser)
+      "return the push secret for a sandbox app" in new Setup {
+        showPushSecretsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInUser.email))
+      }
 
-          val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedOutRequest)
+      "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
+        val application: Application = anApplication(adminEmail = loggedInUser.email)
+        givenApplicationAction(application, loggedInUser)
 
-          redirectsToLogin(result)
-        }
+        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
+
+        status(result) shouldBe NOT_FOUND
+      }
+    }
+
+    "not a team member on an application" should {
+      "return not found" in new Setup {
+        val application: Application = aStandardApplication
+        givenApplicationAction(application, loggedInUser)
+
+        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
+
+        status(result) shouldBe NOT_FOUND
+      }
+    }
+
+    "not logged in" should {
+      "redirect to login" in new Setup {
+        val application: Application = aStandardApplication
+        givenApplicationAction(application, loggedInUser)
+
+        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedOutRequest)
+
+        redirectsToLogin(result)
       }
     }
   }

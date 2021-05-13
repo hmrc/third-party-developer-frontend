@@ -26,7 +26,7 @@ import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.mvc._
 import play.api.mvc.Results._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 import service.ApplicationActionService
@@ -40,7 +40,7 @@ trait ActionBuilders {
   implicit val appConfig: ApplicationConfig
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =
-    HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+    HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
   def applicationAction(applicationId: ApplicationId, developerSession: DeveloperSession)(implicit ec: ExecutionContext): ActionRefiner[MessagesRequest, ApplicationRequest] =
     new ActionRefiner[MessagesRequest, ApplicationRequest] {
