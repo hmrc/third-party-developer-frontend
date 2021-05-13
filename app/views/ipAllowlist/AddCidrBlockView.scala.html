@@ -23,7 +23,7 @@
 @import domain.models.flows.IpAllowlistFlow
 @import model.Crumb
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application, ipAllowlistFlow: IpAllowlistFlow, form: Form[controllers.AddCidrBlockForm])(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
