@@ -35,9 +35,7 @@ import domain.models.connectors.UpdateLoggedInStateRequest
 import domain.models.developers.UpdateProfileRequest
 import domain.models.connectors.PasswordResetRequest
 import domain.models.connectors.PasswordReset
-import play.api.libs.json.JsString
 import domain.models.connectors.AccountSetupRequest
-import domain.models.developers.Developer
 import domain.models.connectors.ChangePassword
 import domain.models.connectors.VerifyMfaRequest
 

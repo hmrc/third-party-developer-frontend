@@ -52,9 +52,6 @@ class ProxiedHttpClient @Inject()(config: Configuration,
       if (apiKeyHeader.isDefined) extraHeaders :+ apiKeyHeader.get
       else extraHeaders
 
-      println("POME "+url)
-      println("POME "+headers)
-      println("POME "+extraHeadersWithMaybeApiKeyHeader)
     super.buildRequest(url, headers ++ extraHeadersWithMaybeApiKeyHeader)
   }
 }

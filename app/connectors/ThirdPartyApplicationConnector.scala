@@ -102,13 +102,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   
   def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
     if (isEnabled) {
-      println("POME "+hc)
-      println("POME "+useProxy)
       metrics.record(api) {
         http.GET[Option[Application]](s"$serviceBaseUrl/application/${id.value}")
       }
     } else {
-      println("POME : disabled")
       Future.successful(None)
     }
 

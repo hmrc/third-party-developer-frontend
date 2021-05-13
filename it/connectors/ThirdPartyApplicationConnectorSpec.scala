@@ -58,15 +58,15 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "microservice.services.third-party-application-sandbox.use-proxy" -> true,
     "microservice.services.third-party-application-sandbox.api-key" -> apiKey,
 
-    "Prod.proxy.username" -> "test",
-    "Prod.proxy.password" -> "test",
-    "Prod.proxy.host" -> "localhost",
-    "Prod.proxy.port" -> stubPort,
-    "Prod.proxy.protocol" -> "http",
-    "Prod.proxy.proxyRequiredForThisEnvironment" -> false,
+    "Test.proxy.username" -> "test",
+    "Test.proxy.password" -> "test",
+    "Test.proxy.host" -> "localhost",
+    "Test.proxy.port" -> stubPort,
+    "Test.proxy.protocol" -> "http",
+    "Test.proxy.proxyRequiredForThisEnvironment" -> true,
 
     "hasSandbox" -> true
-  )  
+  )
  
   override def fakeApplication(): PlayApplication =
     GuiceApplicationBuilder()
@@ -204,23 +204,23 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
     // TODO - test proxy somehow
     //
-    // "when useProxy is enabled returns an application from proxy" in new ProxiedSetup {
-    //   println("POME "+apiKey)
-    //   stubFor(
-    //     get(urlEqualTo(url))
-    //     .withHeader(ProxiedHttpClient.API_KEY_HEADER_NAME, equalTo(apiKey))
-    //     .willReturn(
-    //         aResponse()
-    //         .withStatus(OK)
-    //         .withJsonBody(applicationResponse(applicationId, clientId, appName))
-    //     )
-    //   )
-    //   val result = await(connector.fetchApplicationById(applicationId))
+    "when useProxy is enabled returns an application from proxy" in new ProxiedSetup {
+      stubFor(
+        get(urlEqualTo("/third-party-application"+url))
+        .withHeader(ProxiedHttpClient.API_KEY_HEADER_NAME, equalTo(apiKey))
+        .willReturn(
+            aResponse()
+            .withStatus(OK)
+            .withJsonBody(applicationResponse(applicationId, clientId, appName))
+        )
+      )
 
-    //   result shouldBe defined
-    //   result.get.id shouldBe applicationId
-    //   result.get.name shouldBe appName
-    // }
+      val result = await(connector.fetchApplicationById(applicationId))
+
+      result shouldBe defined
+      result.get.id shouldBe applicationId
+      result.get.name shouldBe appName
+    }
   }
 
   "fetch credentials for application" should {
