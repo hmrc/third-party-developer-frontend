@@ -58,12 +58,12 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     "microservice.services.third-party-application-sandbox.use-proxy" -> true,
     "microservice.services.third-party-application-sandbox.api-key" -> apiKey,
 
-    "Test.proxy.username" -> "test",
-    "Test.proxy.password" -> "test",
-    "Test.proxy.host" -> "localhost",
-    "Test.proxy.port" -> stubPort,
-    "Test.proxy.protocol" -> "http",
-    "Test.proxy.proxyRequiredForThisEnvironment" -> true,
+    "proxy.username" -> "test",
+    "proxy.password" -> "test",
+    "proxy.host" -> "localhost",
+    "proxy.port" -> stubPort,
+    "proxy.protocol" -> "http",
+    "proxy.proxyRequiredForThisEnvironment" -> true,
 
     "hasSandbox" -> true
   )
@@ -202,8 +202,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       result shouldBe empty
     }
 
-    // TODO - test proxy somehow
-    //
     "when useProxy is enabled returns an application from proxy" in new ProxiedSetup {
       stubFor(
         get(urlEqualTo("/third-party-application"+url))
