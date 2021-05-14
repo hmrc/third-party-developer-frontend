@@ -16,11 +16,11 @@
 
 @import config.ApplicationConfig
 @import domain.models.views.{BackButtonWithJavaScript, IpAllowlistFeedbackBanner}
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Application
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application)(
   implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig
