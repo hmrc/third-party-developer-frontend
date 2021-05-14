@@ -25,7 +25,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.http.HeaderNames.CONTENT_LENGTH
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.http.{UserId => _, _}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 import scala.concurrent.{ExecutionContext, Future}
@@ -172,7 +172,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def updateProfile(userId: UserId, profile: UpdateProfileRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POST[UpdateProfileRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/developer/${userId.value}", profile)
+    http.POST[UpdateProfileRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/developer/${userId.asText}", profile)
       .map {
         case Right(response) => response.status
         case Left(err) => throw err

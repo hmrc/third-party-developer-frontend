@@ -16,6 +16,8 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 import bloop.integrations.sbt.BloopDefaults
 
+bloopAggregateSourceDependencies in Global := true
+
 import scala.util.Properties
 
 lazy val appName = "third-party-developer-frontend"

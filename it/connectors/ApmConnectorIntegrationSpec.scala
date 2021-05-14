@@ -11,8 +11,16 @@ import uk.gov.hmrc.http.HeaderCarrier
 import domain.models.connectors.ExtendedApiDefinition
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import domain.models.developers.UserId
+import domain.models.emailpreferences.APICategoryDetails
+import utils.WireMockExtensions
+import domain.models.applications.ApplicationId
+import domain.models.apidefinitions.ApiIdentifier
+import domain.models.apidefinitions.ApiContext
+import domain.models.apidefinitions.ApiVersion
+import domain.ApplicationUpdateSuccessful
+import domain.ApplicationNotFound
 
-class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
+class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions {
   private val stubConfig = Configuration(
     "Test.microservice.services.api-platform-microservice.port" -> stubPort
   )
@@ -49,6 +57,27 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
     }
   }
 
+  "fetchAllAPICategories" should {
+    val category1 = APICategoryDetails("CATEGORY_1", "Category 1")
+    val category2 = APICategoryDetails("CATEGORY_2", "Category 2")
+
+    "return all API Category details" in new Setup {
+      stubFor(
+        get(urlEqualTo("/api-categories"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(Seq(category1, category2))
+          )
+      )
+    
+      val result = await(underTest.fetchAllAPICategories())
+
+      result.size should be (2)
+      result should contain only (category1, category2)
+    }
+  }
+  
   "fetchAPIDefinition" should {
       "retrieve an ApiDefinition based on a serviceName" in new Setup {
           val serviceName = "api1"
@@ -90,6 +119,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
 
   "fetchApiDefinitionsVisibleToUser" should {
+
     "retrieve a list of service a user can see" in new Setup {
       val userId = UserId.random
       val serviceName = "api1"
@@ -115,4 +145,41 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       }
     }
   }
+
+  "subscribe to api" should {
+    val applicationId = ApplicationId.random
+    val apiIdentifier = ApiIdentifier(ApiContext("app1"), ApiVersion("2.0"))
+    import domain.services.ApiDefinitionsJsonFormatters._
+    val url = s"/applications/${applicationId.value}/subscriptions"
+
+    "subscribe application to an api" in new Setup {
+      stubFor(
+        post(urlPathEqualTo(url))
+        .withJsonRequestBody(apiIdentifier)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )      
+
+      val result = await(underTest.subscribeToApi(applicationId, apiIdentifier))
+
+      result shouldBe ApplicationUpdateSuccessful
+    }
+
+    "throw ApplicationNotFound if the application cannot be found" in new Setup {
+      stubFor(
+        post(urlPathEqualTo(url))
+        .withJsonRequestBody(apiIdentifier)
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+      intercept[ApplicationNotFound](
+        await(underTest.subscribeToApi(applicationId, apiIdentifier))
+      )
+    }
+  }
+
 }

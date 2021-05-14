@@ -38,7 +38,6 @@ import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
 import views.html.include.ChangeSubscriptionConfirmationView
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
