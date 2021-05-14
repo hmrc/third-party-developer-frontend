@@ -26,117 +26,135 @@
 @this(devMain: DevMain)
 
 @(app: Application, ipAllowlistFlow: IpAllowlistFlow, form: Form[controllers.AddAnotherCidrBlockConfirmForm])(
-implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig
+)
 
 @breadcrumbs = @{
-    if(app.ipAllowlist.allowlist.isEmpty) {
-        Seq.empty
-    } else {
-        Seq(
-            Crumb("Edit IP allow list"),
-            Crumb.ipAllowlist(app),
-            Crumb.application(app),
-            Crumb.viewAllApplications
-        )
-    }
+  if(app.ipAllowlist.allowlist.isEmpty) {
+    Seq.empty
+  } else {
+    Seq(
+      Crumb("Edit IP allow list"),
+      Crumb.ipAllowlist(app),
+      Crumb.application(app),
+      Crumb.viewAllApplications
+    )
+  }
 }
 @backButton = @{
-    if(app.ipAllowlist.allowlist.isEmpty) {
-        BackButtonWithJavaScript
-    } else {
-        NoBackButton
-    }
+  if(app.ipAllowlist.allowlist.isEmpty) {
+    BackButtonWithJavaScript
+  } else {
+    NoBackButton
+  }
 }
 
 @devMain(
-    title = "Edit IP allow list",
-    userFullName = loggedIn.loggedInName,
-    back = backButton,
-    developerSession = Some(loggedIn),
-    breadcrumbs = breadcrumbs,
-    feedbackBanner = Some(IpAllowlistFeedbackBanner)
+  title = "Edit IP allow list",
+  userFullName = loggedIn.loggedInName,
+  back = backButton,
+  developerSession = Some(loggedIn),
+  breadcrumbs = breadcrumbs,
+  feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
+  <div class="ip-allowlist">
+    @errorSummary(form)
 
-    <div class="ip-allowlist">
-        @errorSummary(form)
-        <header>
-            <h1 class="heading-large">
-                @if(app.ipAllowlist.allowlist.isEmpty) {
-                    Continue setting up your IP allow list
-                } else {
-                    Edit your IP allow list
+    <h1 class="govuk-heading-l">
+      @if(app.ipAllowlist.allowlist.isEmpty) {
+        Continue setting up your IP allow list
+      } else {
+        Edit your IP allow list
+      }
+    </h1>
+
+    @appEnvironment(app)
+
+    <br>
+
+    @if(app.ipAllowlist.allowlist.nonEmpty) {
+      @if(ipAllowlistFlow.allowlist.size == 1) {
+        <div class="govuk-warning-text">
+          <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+          <strong class="govuk-warning-text__text">
+            <span class="govuk-warning-text__assistive">Warning</span>
+            Your IP allow list must include at least one IP address
+          </strong>
+        </div>
+      } else {
+        <div class="govuk-inset-text">
+          Updates to your IP allow list are not live until you make your changes active
+        </div>
+      }
+    }
+
+    @defining(ipAllowlistFlow.allowlist.size > 1 || app.ipAllowlist.allowlist.isEmpty) { canRemove =>
+      <table class="govuk-table @if(canRemove) {wide} else {narrow}">
+        <caption class="govuk-visually-hidden">Edit IP allow list table</caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">IP addresses</th>
+            <th scope="col" class="govuk-table__header"></th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          @for(ipRange <- ipAllowlistFlow.allowlist.toSeq.sorted) {
+            <tr class="govuk-table__row">
+              <td class="govuk-table__cell">@ipRange</td>
+              <td class="govuk-table__cell">
+                @if(canRemove) {
+                  <button class="govuk-button govuk-button--warning" href="@routes.IpAllowlist.removeCidrBlock(app.id, ipRange)">Remove</button>
                 }
-            </h1>
-            @appEnvironment(app)
-            <br>
-        </header>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
 
-        @if(app.ipAllowlist.allowlist.nonEmpty) {
-            @if(ipAllowlistFlow.allowlist.size == 1) {
-                <div class="notice">
-                    <i class="icon icon-important">
-                        <span class="visually-hidden">Warning</span>
-                    </i>
-                    <p><strong class="bold-small">Your IP allow list must include at least one IP address</strong></p>
-                </div>
-            } else {
-                <div class="panel panel-border-wide">
-                    <p>Updates to your IP allow list are not live until you make your changes active</p>
-                </div>
-            }
+      @helper.form(action = controllers.routes.IpAllowlist.editIpAllowlistAction(app.id)) {
+        @helper.CSRF.formField
+        <div class="govuk-form-group @if(form.errors("confirm").nonEmpty) {govuk-form-group--error}">
+          <fieldset id="confirm" class="govuk-fieldset" aria-describedby="add-ip-error">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+              <h2 class="govuk-fieldset__heading">
+                Do you want to add another IP address?
+              </h2>
+            </legend>
+            <span id="add-ip-error" class="govuk-error-message">
+              <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "confirm")
+            </span>
+            <div class="govuk-radios govuk-radios--inline">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="yes" type="radio" name="confirm" value="Yes">
+                <label class="govuk-label govuk-radios__label" for="yes">Yes</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="no" type="radio" name="confirm" value="No">
+                <label class="govuk-label govuk-radios__label" for="no">
+                  @if(app.ipAllowlist.allowlist.isEmpty) {
+                    No, I have finished adding IP addresses
+                  } else {
+                    No, I have finished updating the IP allow list
+                  }
+                </label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+
+        <button id="submit" class="govuk-button" type="submit">Continue</button>
+
+        @if(!canRemove && !app.ipAllowlist.required) {
+          <br>
+          <br>
+          <p class="govuk-body">
+            <a class="govuk-link" href="@routes.IpAllowlist.removeIpAllowlist(app.id)">
+              Remove your IP allow list
+            </a>
+          </p>
         }
-
-        @defining(ipAllowlistFlow.allowlist.size > 1 || app.ipAllowlist.allowlist.isEmpty) { canRemove =>
-            <table class="@if(canRemove) {wide} else {narrow}">
-                <thead><tr><th>IP addresses</th><th></th></tr></thead>
-                <tbody>
-                    @for(ipRange <- ipAllowlistFlow.allowlist.toSeq.sorted) {
-                        <tr>
-                            <td>@ipRange</td>
-                            <td class="numeric">
-                            @if(canRemove) {
-                                <a href="@routes.IpAllowlist.removeCidrBlock(app.id, ipRange)">Remove</a>
-                            }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-
-            @helper.form(action = controllers.routes.IpAllowlist.editIpAllowlistAction(app.id)) {
-                @helper.CSRF.formField
-                <div class="form-group @if(form.errors("confirm").nonEmpty) {form-group-error}">
-                    <fieldset id="confirm">
-                        <legend><h2 class="heading-medium">Do you want to add another IP address?</h2></legend>
-                        <div class="multiple-choice">
-                            <input id="yes" type="radio" name="confirm" value="Yes">
-                            <label for="yes">Yes</label>
-                        </div>
-                        <div class="multiple-choice">
-                            <input id="no" type="radio" name="confirm" value="No">
-                            <label for="no">
-                                @if(app.ipAllowlist.allowlist.isEmpty) {
-                                    No, I have finished adding IP addresses
-                                } else {
-                                    No, I have finished updating the IP allow list
-                                }
-                            </label>
-                        </div>
-                    </fieldset>
-                    @fieldError(form.errors, "confirm")
-                </div>
-
-                <div class="form-field">
-                    <button id="submit" class="button button--padded" type="submit">Continue</button>
-                    @if(!canRemove && !app.ipAllowlist.required) {
-                        <br>
-                        <br>
-                        <p><a href="@routes.IpAllowlist.removeIpAllowlist(app.id)">Remove your IP allow list</a></p>
-                    }
-                </div>
-
-            }
-        }
-    </div>
+      }
+    }
+  </div>
 }

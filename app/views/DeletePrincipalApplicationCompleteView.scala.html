@@ -22,19 +22,21 @@
 @this(devMain: DevMain2)
 
 @(app: Application)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
+)
 
 @devMain(
-    title = "Delete application",
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn)
+  title = "Delete application",
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn)
 ) {
+  <div class="govuk-box-highlight">
+    <h1 class="govuk-heading-l">Request submitted</h1>
+  </div>
 
-    <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge">Request submitted</h1>
-    </div>
-    <p>You have requested to delete your application.</p>
+  <p class="govuk-body">You have requested to delete your application.</p>
 
-    <h2 class="heading-large">What happens next?</h2>
-    <p>We will respond to your request within 2 working days.</p>
+  <h2 class="govuk-heading-m">What happens next?</h2>
+
+  <p class="govuk-body">We will respond to your request within 2 working days.</p>
 }

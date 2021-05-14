@@ -22,19 +22,25 @@
 @this(devMain: DevMain2)
 
 @(app: Application)(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
+)
 
 @devMain(
-    title = "Application deleted",
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn)
+  title = "Application deleted",
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn)
 ) {
+  <div class="govuk-box-highlight">
+    <h1 class="govuk-heading-l">Application deleted</h1>
+  </div>
 
-    <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge">Application deleted</h1>
-    </div>
-    <br>
-    <p>Your sandbox application <span class="bold">@app.name</span> is now deleted.</p>
+  <br>
 
-<p><a href="@routes.AddApplication.manageApps">View your applications</a> or <a href="@routes.AddApplication.addApplicationSubordinate()">add an application to the sandbox</a>.</p>
+  <p class="govuk-body">Your sandbox application <span class="govuk-body govuk-!-font-weight-bold">@app.name</span> is now deleted.</p>
+
+  <p class="govuk-body">
+    <a class="govuk-link" href="@routes.AddApplication.manageApps">
+      View your applications
+    </a> or <a class="govuk-link" href="@routes.AddApplication.addApplicationSubordinate()">add an application to the sandbox</a>.
+  </p>
 }

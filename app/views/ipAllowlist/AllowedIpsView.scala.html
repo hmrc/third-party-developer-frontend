@@ -23,37 +23,35 @@
 @this(devMain: DevMain)
 
 @(app: Application)(
-implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig
+)
 
 @devMain(
-    title = "Allowed IP addresses",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn),
-    feedbackBanner = Some(IpAllowlistFeedbackBanner)
+  title = "Allowed IP addresses",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn),
+  feedbackBanner = Some(IpAllowlistFeedbackBanner) Acne Studios
 ) {
 
-    <div class="ip-allowlist">
-        <header>
-            <h1 class="heading-large">Allowed IP addresses</h1>
-        </header>
+  <div class="ip-allowlist">
+    <h1 class="govuk-heading-l">Allowed IP addresses</h1>
 
-        <p>We allow IP address ranges represented in CIDR notation, made up of an IP address and a netmask:&nbsp;</p>
-        <p><code class="code--slim">&lt;IP Address&gt;/&lt;netmask&gt;</code></p>
-        <p>Which looks like:</p>
-        <p><code class="code--slim">1.1.1.1/24</code></p>
+    <p class="govuk-body">We allow IP address ranges represented in CIDR notation, made up of an IP address and a netmask:&nbsp;</p>
+    <p class="govuk-body"><code class="code--slim">&lt;IP Address&gt;/&lt;netmask&gt;</code></p>
+    <p class="govuk-body">Which looks like:</p>
+    <p class="govuk-body"><code class="code--slim">1.1.1.1/24</code></p>
 
-        <p>The netmask identifies how large the network is:&nbsp;</p>
-        <ul class="list list-bullet">
-            <li>1.1.1.1/32 allows access from only one IP address, for example 1.1.1.1</li>
-            <li>1.1.1.1/24 allows access from 254 IP addresses, for example 1.1.1.1 to 1.1.1.254</li>
-        </ul>
-        <p>Use /32 if you are unsure about CIDR notation but know the individual IP addresses your traffic comes from.</p>
-        <p>The largest netmask we allow is /24.</p>
+    <p class="govuk-body">The netmask identifies how large the network is:&nbsp;</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>1.1.1.1/32 allows access from only one IP address, for example 1.1.1.1</li>
+      <li>1.1.1.1/24 allows access from 254 IP addresses, for example 1.1.1.1 to 1.1.1.254</li>
+    </ul>
+    <p class="govuk-body">Use /32 if you are unsure about CIDR notation but know the individual IP addresses your traffic comes from.</p>
+    <p class="govuk-body">The largest netmask we allow is /24.</p>
 
-        <p>
-            <a class="button" href="@routes.IpAllowlist.settingUpAllowlist(app.id)">Continue</a>
-            <a class="secondary-button" href="@routes.Details.details(app.id)">Cancel</a>
-        </p>
-    </div>
+
+    <a class="govuk-button" href="@routes.IpAllowlist.settingUpAllowlist(app.id)">Continue</a>
+    <a class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</a>
+  </div>
 }

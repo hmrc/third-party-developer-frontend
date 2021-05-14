@@ -36,8 +36,9 @@
     <p class="govuk-body">This is the 6 digit code from your authentication app.</p>
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){form-group-error govuk-form-group--error}">
       <label class="govuk-label" for="accessCode" id="access-code-label">Access code</label>
-
-      @fieldError(form.errors, "accessCode", true)
+      <span id="access-code-error" class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "accessCode", true)
+      </span>
       <input 
         type="text"
         autocomplete="off"
@@ -46,6 +47,7 @@
         value="@form.data.getOrElse("accessCode", "")"
         class="govuk-input @if(form.errors("accessCode").nonEmpty){govuk-input--error}"
         aria-required="true"
+        aria-describedby="access-code-error"
       />
 
       <p class="govuk-body">
