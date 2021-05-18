@@ -650,7 +650,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       )
       intercept[Exception] {
         await(connector.deleteApplication(applicationId))
-      }.getMessage shouldBe "error deleting subordinate application"
+      }.getMessage shouldBe "error deleting subordinate application with response status 500"
     }
   }
 
