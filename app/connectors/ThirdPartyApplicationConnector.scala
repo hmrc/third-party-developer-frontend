@@ -138,7 +138,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
-    http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/verify-uplift/$verificationCode", Seq((CONTENT_LENGTH -> "0")))
+    http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/verify-uplift/$verificationCode")
     .map(_ match {
       case Right(_)                                        => ApplicationVerificationSuccessful
       case Left(UpstreamErrorResponse(_,BAD_REQUEST, _,_)) => ApplicationVerificationFailed

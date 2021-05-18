@@ -141,7 +141,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/password-reset-request", PasswordResetRequest(email), Seq((CONTENT_LENGTH -> "0")))
+    http.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/password-reset-request", PasswordResetRequest(email))
     .map {
       case Right(response) => response.status
       case Left(UpstreamErrorResponse(_,FORBIDDEN,_,_)) => throw new UnverifiedAccount
@@ -248,7 +248,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
 
   def completeAccountSetup(userId: UserId)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.POSTEmpty[Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/complete", Seq((CONTENT_LENGTH -> "0")))
+      http.POSTEmpty[Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/complete")
     }
 
   def fetchDeveloper(id: UserId)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
@@ -265,7 +265,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     implicit val CreateMfaResponseReads = Json.reads[CreateMfaResponse]
 
     metrics.record(api) {
-      http.POSTEmpty[CreateMfaResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa", Seq((CONTENT_LENGTH -> "0")))
+      http.POSTEmpty[CreateMfaResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa")
       .map(_.secret)
     }
   }
