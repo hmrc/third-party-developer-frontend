@@ -31,7 +31,7 @@
   userFullName = loggedIn.loggedInName,
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn),
-  feedbackBanner = Some(IpAllowlistFeedbackBanner) Acne Studios
+  feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
 
   <div class="ip-allowlist">
@@ -49,7 +49,6 @@
     </ul>
     <p class="govuk-body">Use /32 if you are unsure about CIDR notation but know the individual IP addresses your traffic comes from.</p>
     <p class="govuk-body">The largest netmask we allow is /24.</p>
-
 
     <a class="govuk-button" href="@routes.IpAllowlist.settingUpAllowlist(app.id)">Continue</a>
     <a class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</a>
