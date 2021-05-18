@@ -202,7 +202,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit] = {
     http
-      .POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/delete", Seq((CONTENT_LENGTH -> "0")))
+      .POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/delete")
       .map(_.status match {
           case NO_CONTENT => ()
           case _          => throw new Exception("error deleting subordinate application")
