@@ -33,6 +33,7 @@ import uk.gov.hmrc.play.http.metrics.API
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.OptionT
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import play.api.http.HeaderNames
 
 abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionContext) extends PushPullNotificationsConnector with Retries {
   protected val httpClient: HttpClient
@@ -49,15 +50,14 @@ abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionCont
 
   def fetchPushSecrets(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
     import cats.implicits._
-    OptionT(getWithAuthorization[Option[Seq[PushSecret]]](s"$serviceBaseUrl/client/${clientId.value}/secrets", hc))
+    OptionT(getWithAuthorization[Option[Seq[PushSecret]]](s"$serviceBaseUrl/client/${clientId.value}/secrets"))
     .map(ps => ps.map(_.value))
     .getOrElse(Seq.empty)
   }
 
-  private def getWithAuthorization[A](url:String, hc: HeaderCarrier)(implicit rd: HttpReads[A]): Future[A] = {
-    implicit val modifiedHeaderCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(authorizationKey)))
+  private def getWithAuthorization[A](url:String)(implicit rd: HttpReads[A], hc: HeaderCarrier): Future[A] = {
     retry {
-      http.GET[A](url)
+      http.GET[A](url, Seq.empty, Seq(HeaderNames.AUTHORIZATION -> authorizationKey))
     }
   }
 }
