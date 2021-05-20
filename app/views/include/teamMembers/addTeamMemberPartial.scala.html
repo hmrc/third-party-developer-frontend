@@ -44,7 +44,7 @@
 
   <div class="govuk-form-group @if(form.errors("role").nonEmpty) {govuk-form-group--error}">
     <fieldset class="govuk-fieldset" id="role" aria-describedby="email-permissions-error">
-        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
           <h2 class="govuk-fieldset__heading">What permissions do you want to give them?</h2>
         </legend>
         <span id="email-permissions-error" class="govuk-error-message">
@@ -81,8 +81,8 @@
     </fieldset>
   </div>
 
-  <div class="form-field">
-    <button id="submit" class="govuk-button" type="submit">@submitText</button>
+  <div class="govuk-button-group">
+    <button id="submit" class="govuk-button" type="submit">Add team member</button>
 
     @if(showCancel) {
       <a href="@routes.ManageTeam.manageTeam(app.id, None)" class="govuk-button govuk-button--secondary">Cancel</a>

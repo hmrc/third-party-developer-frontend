@@ -108,9 +108,7 @@
 
   @if(application.permits(loggedIn.developer, SandboxOrAdmin)) {
     @if(application.canAddRedirectUri) {
-      <p class="govuk-body">
-        <a href="@routes.Redirects.addRedirect(application.id)" class="govuk-link">Add a redirect URI</a>
-      </p>
+      <a href="@routes.Redirects.addRedirect(application.id)" class="govuk-button">Add a redirect URI</a>
     } else {
       <p class="govuk-inset-text">This is the maximum number of redirect URIs. To add another, delete one first.</p>
     }

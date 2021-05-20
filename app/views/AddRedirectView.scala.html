@@ -62,8 +62,9 @@
       </span>
       <input class="govuk-input @if(form.errors("redirectUri").nonEmpty) {govuk-input--error}" type="text" id="redirectUri" name="redirectUri" aria-labelledby="redirect-uri-hint redirect-uri-error">
     </div>
-
-    <button id="add" class="govuk-button" type="submit">Continue</button>
-    <a href="@routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+    <div class="govuk-button-group">
+      <button id="add" class="govuk-button" type="submit">Continue</button>
+      <a href="@routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+    </div>
   }
 }
