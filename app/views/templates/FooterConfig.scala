@@ -35,4 +35,5 @@ class FooterConfig @Inject()(config: Configuration) {
 
   def accessibility(implicit request: Request[_]): String =
     s"$accessibilityBaseUrl${urlFooterConfig.getString("accessibility")}/hmrc-developer-hub?referrerUrl=${helper.urlEncode(request.uri)}"
+
 }

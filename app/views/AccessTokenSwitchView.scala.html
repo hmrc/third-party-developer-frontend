@@ -20,51 +20,50 @@
 @import domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.urls.Link
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
-    title = "Switch to an OAuth 2.0 access token",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = "Switch to an OAuth 2.0 access token",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">Switch to an OAuth 2.0 access token</h1>
 
-    <h1 class="heading-large">
-        Switch to an OAuth 2.0 access token
-    </h1>
+  <p class="govuk-body">Using application-restricted endpoints with server tokens is now deprecated.</p>
 
-    <p>Using application-restricted endpoints with server tokens is now deprecated.</p>
+  <p class="govuk-body">To continue using your application, you need @{Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints", value = Some("an OAuth 2.0 access token")).toHtml} to make API calls. OAuth 2.0 access tokens are secure and better protect your data.</p>
 
-    <p>To continue using your application, you need @{Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints", value = Some("an OAuth 2.0 access token")).toHtml} to make API calls. OAuth 2.0 access tokens are secure and better protect your data.</p>
+  <p class="govuk-body">Server token retires on:</p>
 
-    <p>Server token retires on:</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>1 September 2020 in sandbox</li>
+    <li>1 October 2020 in production</li>
+  </ul>
 
-    <ul class="list list-bullet">
-        <li>1 September 2020 in sandbox</li>
-        <li>1 October 2020 in production</li>
-    </ul>
+  <div class="govuk-inset-text">
+    You must switch to an OAuth 2.0 access token before server token is retired. If you do nothing, your application may not work.
+  </div>
 
-    <p class="panel panel-border-wide">You must switch to an OAuth 2.0 access token before server token is retired. If you do nothing, your application may not work.</p>
+  <p class="govuk-body">These APIs have application-restricted endpoints:</p>
 
-    <p>These APIs have application-restricted endpoints:</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Hello World</li>
+    <li>Create Test User</li>
+    <li>Individual PAYE Test Support</li>
+    <li>Marriage Allowance Test Support</li>
+    <li>Pull Notifications</li>
+    <li>Bulk Data File List</li>
+    <li>Test Fraud Prevention Headers</li>
+    <li>Transit Movement</li>
+    <li>Check a UK VAT number</li>
+    <li>CDS Financials Notifications</li>
+    <li>Mobile RDS Vehicle Private</li>
+    <li>Charge Ref Notification</li>
+  </ul>
 
-    <ul class="list list-bullet">
-        <li>Hello World</li>
-        <li>Create Test User</li>
-        <li>Individual PAYE Test Support</li>
-        <li>Marriage Allowance Test Support</li>
-        <li>Pull Notifications</li>
-        <li>Bulk Data File List</li>
-        <li>Test Fraud Prevention Headers</li>
-        <li>Transit Movement</li>
-        <li>Check a UK VAT number</li>
-        <li>CDS Financials Notifications</li>
-        <li>Mobile RDS Vehicle Private</li>
-        <li>Charge Ref Notification</li>
-    </ul>
-
-    <p>@{Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints", value = Some("Get an OAuth 2.0 access token")).toHtml}</p>
+  <p class="govuk-body">@{Link.toInternalPage(url = s"${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/authorisation/application-restricted-endpoints", value = Some("Get an OAuth 2.0 access token")).toHtml}</p>
 
 }

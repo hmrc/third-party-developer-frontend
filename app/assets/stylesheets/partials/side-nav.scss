@@ -32,5 +32,59 @@
 }
 
 .side-nav {
-    border-right: 1px solid #bfc1c3
+  border-right: none;
+  display: block;
+  overflow: hidden;
+}
+
+.side-nav__component {
+  border: none;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.side-nav__list {
+  position: relative;
+  list-style: none;
+  font-size: 19px;
+  line-height: 1.31579;
+  font-family: "nta",Arial,sans-serif;
+  font-weight: 400;
+  text-transform: none;
+}
+
+.side-nav__list--selected .side-nav__link, .side-nav__list--selected:hover .side-nav__link {
+  color: #fff;
+  background-color: #005ea5;
+}
+
+.side-nav__link {
+  padding: 12px 30px 8px 15px;
+  text-decoration: none;
+  display: block;
+  background-color: transparent;
+  font-family: "GDS Transport",arial,sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  font-size: 16px;
+  line-height: 1.25;
+  color: #1d70b8;
+}
+
+.side-nav__link:hover {
+  color: #003078;
+}
+
+.responsive-nav {
+  padding-bottom: 30px !important;
+}
+
+@media (min-width: 1000px) {
+  .side-nav {
+    border-right: 1px solid #bfc1c3;
+  }
+  .responsive-nav {
+    padding-bottom: 0 !important;
+  }
 }

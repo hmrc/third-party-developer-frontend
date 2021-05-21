@@ -28,14 +28,12 @@
 @import config.ApplicationConfig
 @import templates._
 @import views.templates._
-@import config.ApplicationConfig
 
 
 @this(govukTemplate: GovukTemplate,
   siteHeader: siteHeader,
   siteFooter: siteFooter,
   footerLinks: FooterLinks,
-  hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
   applicationConfig: config.ApplicationConfig
 )
 
@@ -54,7 +52,8 @@
   developerSession: Option[DeveloperSession],
   navLinks: Seq[NavLink] = Seq.empty,
   bodyEndBlock: Option[Html] = None,
-  feedbackBanner: Option[FeedbackBanner] = None
+  feedbackBanner: Option[FeedbackBanner] = None,
+  fullWidth: Boolean = false
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
@@ -90,16 +89,46 @@
 }
 
 @mainContentDefault = {
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-      @contentBlock
+  @if(leftNav.isDefined) {
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-quarter responsive-nav">
+        @leftNav.getOrElse(HtmlFormat.empty)
+      </div>
+      <div class="govuk-grid-column-two-thirds">
+        <div class="govuk-side-nav-content">
+          @contentBlock
+        </div>
+      </div>
     </div>
-  </div>
-  <br />
-  <br />
-  <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
-    Is this page not working properly?
-  </a>
+    <br />
+    <br />
+    <br />
+    <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
+      Is this page not working properly?
+    </a>
+  } else if(fullWidth == true) {
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        @contentBlock
+      </div>
+    </div>
+    <br />
+    <br />
+    <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
+      Is this page not working properly?
+    </a>
+  } else {
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        @contentBlock
+      </div>
+    </div>
+    <br />
+    <br />
+    <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
+      Is this page not working properly?
+    </a>
+  }
 }
 
 @scripts = {
@@ -113,10 +142,10 @@
 }
 
 @govukTemplate(
-    pageTitle = Some(title),
-    headBlock = Some(head),
-    beforeContentBlock = Some(beforeContentBlock),
-    bodyEndBlock = Some(bodyEndDefault),
-    headerBlock = siteHeader(navLinks),
-    footerBlock = footerBlock
+  pageTitle = Some(title),
+  headBlock = Some(head),
+  beforeContentBlock = Some(beforeContentBlock),
+  bodyEndBlock = Some(bodyEndDefault),
+  headerBlock = siteHeader(navLinks),
+  footerBlock = footerBlock
 )(mainContentDefault)

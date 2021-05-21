@@ -35,7 +35,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken {
   case class Page(doc: Appendable) {
     lazy val body = Jsoup.parse(doc.body)
     lazy val title = body.title
-    lazy val header = body.getElementsByTag("header").last
+    lazy val header = body.getElementById("terms-of-use-header")
     lazy val alert = body.getElementById("termsOfUseAlert")
     lazy val termsOfUse = body.getElementById("termsOfUse")
     lazy val agreementForm = body.getElementById("termsOfUseForm")

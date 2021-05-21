@@ -22,44 +22,49 @@
 @import model.ApplicationViewModel
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[ChangeRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
 @application = @{applicationViewModel.application}
 
 @devMain(
-    title = "Change a redirect URI",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Change a redirect URI"),
-        Crumb.application(application),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = "Change a redirect URI",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Change a redirect URI"),
+    Crumb.application(application),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
-    @errorSummary(form)
+  @errorSummary(form)
 
-    <h1 class="heading-xlarge">Change a redirect URI</h1>
+  <h1 class="govuk-heading-l">Change a redirect URI</h1>
 
-    @appEnvironment(application)
+    @appEnvironment2(application)
     <br>
 
-    @helper.form(action = controllers.routes.Redirects.changeRedirectAction(application.id), 'class -> "form") {
-        @helper.CSRF.formField
-        <div class="form-group @if(form.errors("newRedirectUri").nonEmpty) {form-group-error}">
-            <label class="form-label-bold" for="newRedirectUri">Redirect URI</label>
-            <span class="form-hint">Must be a valid @Link.toInternalPage(url = s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/reference-guide#redirect-uris", value = Some("redirect URI")).toHtml. </span>
-            @fieldError(form.errors, "newRedirectUri")
-            <input class="form-control @if(form.errors("newRedirectUri").nonEmpty) {form-control-error}" type="text" id="newRedirectUri" name="newRedirectUri" value="@form.data.get("newRedirectUri")">
-            <input id="originalRedirectUri" name="originalRedirectUri" class="form-control" hidden aria-hidden="true" type="text" value="@form.data.get("originalRedirectUri")">
-        </div>
+  @helper.form(action = controllers.routes.Redirects.changeRedirectAction(application.id), 'class -> "form") {
+    @helper.CSRF.formField
+    <div class="govuk-form-group @if(form.errors("newRedirectUri").nonEmpty) {govuk-form-group--error}">
+      <label class="govuk-label govuk-!-font-weight-bold" for="newRedirectUri">Redirect URI</label>
+      <div class="govuk-hint">
+        Must be a valid <a class="govuk-link" href="http://localhost:9685/api-documentation/docs/reference-guide#redirect-uris" target="_self" data-sso="false">redirect URI</a>.
+      </div>
+      <span id="newRedirectUri-error" class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "newRedirectUri")
+      </span>
+      <input class="govuk-input @if(form.errors("newRedirectUri").nonEmpty) {govuk-input--error}" type="text" id="newRedirectUri" name="newRedirectUri" value="@form.data.get("newRedirectUri")">
+      <label class="govuk-visually-hidden" aria-hidden="true" for="originalRedirectUri">
+        Original Redirect Uri
+      </label>
+      <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@form.data.get("originalRedirectUri")">
+    </div>
 
-        <div class="form-group">
-            <button id="add" class="button" type="submit">Continue</button>
-            <a href="@routes.Redirects.redirects(application.id)" class="secondary-button">Cancel</a>
-        </div>
-    }
+      <button id="add" class="govuk-button" type="submit">Continue</button>
+      <a href="@routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+  }
 }

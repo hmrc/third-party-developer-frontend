@@ -23,114 +23,139 @@
 @import domain.models.developers.Developer
 
 @(app: Application, developer: Developer, clientSecrets: Seq[ClientSecret])(
-        implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash)
+  implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, flash: Flash
+)
 
 @isNewSecret = @{flash.get("newSecret").isDefined}
 @allowDeletion = @{clientSecrets.size > 1}
 
-<div aria-describedby="client-secrets-info">
-    @if(clientSecrets.isEmpty) {
-        <p>Your client secret is a unique passphrase that you generate to authorise your application.</p>
 
-        <p>Use a client secret together with your <a id="client-id" href="@routes.Credentials.clientId(app.id)">client ID</a> to test your application in the sandbox.</p>
+@if(clientSecrets.isEmpty) {
+  <p class="govuk-body">Your client secret is a unique passphrase that you generate to authorise your application.</p>
 
-        @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
-            @helper.CSRF.formField
-            <button id="submit" class="button" type="submit">Generate a client secret</button>
+  <p class="govuk-body">Use a client secret together with your <a id="client-id" class="govuk-link" href="@routes.Credentials.clientId(app.id)">client ID</a> to test your application in the sandbox.</p>
+
+  @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
+    @helper.CSRF.formField
+    <button id="submit" class="govuk-button" type="submit">Generate a client secret</button>
+  }
+} else {
+  @if(isNewSecret) {
+    <div class="govuk-inset-text">
+      We only show you a new client secret once to help keep your data secure.<br>
+      Copy the client secret immediately.
+    </div>
+  }
+  <table class="govuk-table">
+    <caption class="govuk-visually-hidden">Client secrets table</caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Client secrets</th>
+        <th scope="col" class="govuk-table__header">
+          <span class="govuk-visually-hidden">
+            Copy button column
+          </span>
+        </th>
+        <th scope="col" class="govuk-table__header">Created</th>
+        <th scope="col" class="govuk-table__header">Last used</th>
+        @if(allowDeletion) {
+          <th scope="col" class="govuk-table__header">
+            <span class="govuk-visually-hidden">
+              Delete button column
+            </span>
+          </th>
         }
-    } else {
-        @if(isNewSecret) {
-            <div class="panel panel-border-wide">
-                <p>
-                    We only show you a new client secret once to help keep your data secure.<br>
-                    Copy the client secret immediately.
-                </p>
-            </div>
-        }
-        <table>
-            <thead>
-                <tr>
-                    <th>Client secrets</th>
-                    <th></th>
-                    <th>Created</th>
-                    <th>Last used</th>
-                    @if(allowDeletion) {
-                        <th></th>
-                    }
-                    </tr>
-            </thead>
-            <tbody>
-                @for((secret, i) <- clientSecrets.zipWithIndex) {
-                    @defining(s"client secret ending with ${secret.name.takeRight(4)}") { accessibleText =>
-                        <tr>
-                            <td>
-                                @if(isNewSecret && secret.id == flash.get("newSecretId").getOrElse("")){
-                                    <span aria-label="@accessibleText">@{flash.get("newSecret").get}</span>
-                                } else {
-                                    <span aria-label="@accessibleText">••••••••••••••••••••••••••••••••@{secret.name.takeRight(4)}</span>
-                                }
-                                </td>
-                            <td>
-                            @if(isNewSecret && secret.id == flash.get("newSecretId").getOrElse("")){
-                                <a href="#"
-                                class="copy-to-clip button"
-                                title="Copies @accessibleText into the system clipboard."
-                                data-clip-text="@{flash.get("newSecret").get}"
-                                aria-live="polite"
-                                aria-label="Copy @accessibleText to clipboard">
-                                    Copy
-                                </a>
-                            }
-                            </td>
-                            <td>@{formatDateWithShortPattern(secret.createdOn)}</td>
-                            <td>@{secret.lastAccess.map(formatDateWithShortPattern).getOrElse("Not used")}</td>
-                            @if(allowDeletion) {
-                                <td><a id="delete-client-secret" href="@routes.Credentials.deleteClientSecret(app.id, secret.id)">Delete</a></td>
-                            }
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
-
-        @if(!isNewSecret) {
-            <br>
-            <p>We only show you a new client secret once to help keep your data secure.</p>
-        }
-
-        <div class="rotate-client-secrets">
-            <h2 class="heading-medium">Rotate your client secret regularly</h2>
-            <p>Rotate your application’s client secret to shorten the period an access key is active, reducing the impact to your business if it is compromised.
-            </p>
-            <p>To rotate your client secret:
-            </p>
-            <ol class="list list-number">
-                <li>
-                    Generate a new client secret, in addition to the one used by your application
-                </li>
-                <li>
-                    Update your application to use the new client secret
-                </li>
-                <li>
-                    Check that your application is working with the new client secret
-                </li>
-                <li>
-                    Delete the inactive client secret
-                </li>
-            </ol>
-        </div>
-
-        @if(clientSecrets.size < 5) {
-            <p>You can have up to 5 client secrets at any time.</p>
-            <div>
-            @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
-                @helper.CSRF.formField
-                <p><button id="generate-another-client-secret" class="secondary-button" type="submit">Generate another client secret</button></p>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      @for((secret, i) <- clientSecrets.zipWithIndex) {
+        @defining(s"client secret ending with ${secret.name.takeRight(4)}") { accessibleText =>
+          <tr class="govuk-table__row">
+            <td aria-label="@accessibleText" class="govuk-table__cell center-table-text">
+              @if(isNewSecret && secret.id == flash.get("newSecretId").getOrElse("")){
+                <span id="copy-to-clip" value="@{flash.get("newSecret").get}">@{flash.get("newSecret").get}</span>
+              } else {
+                ••••••••••••••••••••••••••••••••@{secret.name.takeRight(4)}
+              }
+            </td>
+            <td class="govuk-table__cell center-table-text">
+              @if(isNewSecret && secret.id == flash.get("newSecretId").getOrElse("")){
+                <a
+                  href="#"
+                  id="copy-to-clip-button"
+                  class="govuk-button govuk-!-margin-bottom-0"
+                  title="Copies @accessibleText into the system clipboard."
+                  value="@{flash.get("newSecret").get}"
+                  aria-live="polite"
+                  aria-label="Copy @accessibleText to clipboard"
+                >
+                  Copy
+                </a>
+              }
+            </td>
+            <td class="govuk-table__cell center-table-text">
+              @{formatDateWithShortPattern(secret.createdOn)}
+            </td>
+            <td class="govuk-table__cell center-table-text">
+              @{secret.lastAccess.map(formatDateWithShortPattern).getOrElse("Not used")}
+            </td>
+            @if(allowDeletion) {
+              <td class="govuk-table__cell center-table-text">
+                <a class="govuk-button govuk-button--warning govuk-!-margin-bottom-0" id="delete-client-secret" href="@routes.Credentials.deleteClientSecret(app.id, secret.id)">
+                  Delete secret
+                </a>
+              </td>
             }
-            </div>
-        } else {
-            <p>You cannot have more than 5 client secrets.</p>
+          </tr>
         }
-        <p><a href="@routes.Details.details(app.id)">View your application details</a></p>
-    }
-</div>
+      }
+    </tbody>
+  </table>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        @if(!isNewSecret) {
+          <br>
+          <p class="govuk-body">We only show you a new client secret once to help keep your data secure.</p>
+        }
+
+        <h2 class="govuk-heading-m">Rotate your client secret regularly</h2>
+        <p class="govuk-body">
+          Rotate your application’s client secret to shorten the period an access key is active, reducing the impact to your business if it is compromised.
+        </p>
+        <p class="govuk-body">
+          To rotate your client secret:
+        </p>
+        <ol class="govuk-list govuk-list--number">
+          <li>
+            Generate a new client secret, in addition to the one used by your application
+          </li>
+          <li>
+            Update your application to use the new client secret
+          </li>
+          <li>
+            Check that your application is working with the new client secret
+          </li>
+          <li>
+            Delete the inactive client secret
+          </li>
+        </ol>
+
+      @if(clientSecrets.size < 5) {
+        <p class="govuk-body">You can have up to 5 client secrets at any time.</p>
+        <div>
+          @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), 'class -> "form") {
+            @helper.CSRF.formField
+            <button id="generate-another-client-secret" class="govuk-button" type="submit">
+              Generate another client secret
+            </button>
+          }
+        </div>
+      } else {
+        <p class="govuk-body">You cannot have more than 5 client secrets.</p>
+      }
+      <p class="govuk-body"><a class="govuk-link" href="@routes.Details.details(app.id)">View your application details</a></p>
+    </div>
+  </div>
+}
+<script src='@routes.Assets.versioned("javascripts/copy-button.js")' type="text/javascript"></script> 

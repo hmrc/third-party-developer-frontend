@@ -67,7 +67,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
 
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe true
-      elementExistsByText(document, "p", "You need admin rights to add or remove team members.") shouldBe false
+      elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false
       elementExistsByText(document, "td", loggedInUser.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
       linkExistsWithHref(document, controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe true
@@ -78,7 +78,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Devel
 
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe false
-      elementExistsByText(document, "p", "You need admin rights to add or remove team members.") shouldBe true
+      elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe true
       elementExistsByText(document, "td", loggedInUser.email) shouldBe true
       elementExistsByText(document, "td", collaborator.email) shouldBe true
       linkExistsWithHref(document, controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.toSha256).url) shouldBe false
