@@ -20,7 +20,7 @@ import controllers.SignOutSurveyForm
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.mvc.Http.HeaderNames.REFERER
-import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
+import uk.gov.hmrc.http.HeaderCarrier
 
 
 case class Feedback(name: String,
@@ -82,10 +82,7 @@ trait FieldTransformer {
 
   def areaOfTaxOf = UNKNOWN
 
-  def userIdFrom(request: Request[AnyRef], hc: HeaderCarrier): String = request.session.get(SessionKeys.sensitiveUserId) match {
-    case Some("true") => NA
-    case _ => hc.userId.map(_.value).getOrElse(NA)
-  }
+  def userIdFrom(request: Request[AnyRef], hc: HeaderCarrier): String = NA  // TODO - userId is no longer held on header carrier
 
   def userAgentOf(request: Request[AnyRef]) = request.headers.get("User-Agent").getOrElse(NA)
 
