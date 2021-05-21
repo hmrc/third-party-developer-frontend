@@ -30,8 +30,16 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import utils.LocalUserIdTracker
+import utils.WireMockExtensions
+import domain.models.connectors.UpdateLoggedInStateRequest
+import domain.models.developers.UpdateProfileRequest
+import domain.models.connectors.PasswordResetRequest
+import domain.models.connectors.PasswordReset
+import domain.models.connectors.AccountSetupRequest
+import domain.models.connectors.ChangePassword
+import domain.models.connectors.VerifyMfaRequest
 
-class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker {
+class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
   private val stubConfig = Configuration(
     "Test.microservice.services.third-party-developer.port" -> stubPort,
     "json.encryption.key" -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
@@ -61,6 +69,23 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val encryptedLoginRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
     val encryptedTotpAuthenticationRequest: JsValue = Json.toJson(SecretRequest(payloadEncryption.encrypt(totpAuthenticationRequest).as[String]))
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
+  }
+
+  
+  "verify" should {
+    "successfully verify a developer" in new Setup {
+      val code = "A1234"
+
+      stubFor(
+        get(urlPathEqualTo("/verification"))
+          .withQueryParam("code", equalTo(code))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+      await(underTest.verify(code)) shouldBe OK
+    }
   }
 
   "fetchSession" should {
@@ -115,8 +140,363 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
         await(underTest.fetchSession(sessionId))
       }.statusCode shouldBe INTERNAL_SERVER_ERROR
     }
-
   }
+
+  "deleteSession" should {
+    "delete the session" in new Setup {
+      stubFor(
+        delete(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(NO_CONTENT)
+          )
+      )
+      await(underTest.deleteSession(sessionId)) shouldBe NO_CONTENT
+    }
+
+    "be successful when not found" in new Setup {
+      stubFor(
+        delete(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+      await(underTest.deleteSession(sessionId)) shouldBe NO_CONTENT
+    }
+  }
+
+  
+  "updateSessionLoggedInState" should {
+    val sessionId = "sessionId"
+    val url = s"/session/$sessionId/loggedInState/LOGGED_IN"
+
+    "update session logged in state" in new Setup {
+      val updateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+      val session = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
+
+      stubFor(
+        put(urlEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(session)
+          )
+      )
+      private val updatedSession = await(underTest.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
+      updatedSession shouldBe session
+    }
+
+    "error with SessionInvalid if we get a 404 response" in new Setup {
+      val updateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+      stubFor(
+        put(urlEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+      intercept[SessionInvalid]{
+        await(underTest.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
+      }
+    }
+  }
+
+  "updateProfile" should {
+
+    "update profile" in new Setup {
+      val updateProfileRequest = UpdateProfileRequest("First", "Last")
+      val url = s"/developer/${userId.asText}"
+
+      stubFor(
+        post(urlEqualTo(url))
+        .withJsonRequestBody(updateProfileRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+      await(underTest.updateProfile(userId, updateProfileRequest)) shouldBe OK
+    }
+  }
+
+  "Resend verification" should {
+    "send verification mail" in new Setup {
+      val email = "john.smith@example.com"
+      implicit val writes1 = Json.writes[ThirdPartyDeveloperConnector.FindUserIdRequest]
+      implicit val writes2 = Json.writes[ThirdPartyDeveloperConnector.FindUserIdResponse]
+
+      stubFor(
+        post(urlEqualTo("/developers/find-user-id"))
+        .withJsonRequestBody(ThirdPartyDeveloperConnector.FindUserIdRequest(email))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(ThirdPartyDeveloperConnector.FindUserIdResponse(userId))
+          )
+      )
+      stubFor(
+        post(urlEqualTo(s"/${userId.value}/resend-verification"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+      await(underTest.resendVerificationEmail(email)) shouldBe OK
+    }
+  }
+
+  "Reset password" should {
+    val email = "user@example.com"
+    val request = PasswordResetRequest(email)
+
+    "successfully request reset" in new Setup {
+      stubFor(
+        post(urlEqualTo("/password-reset-request"))
+          .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+      await(underTest.requestReset(email))
+    }
+
+    "forbidden response results in UnverifiedAccount exception for request reset" in new Setup {
+      stubFor(
+        post(urlEqualTo("/password-reset-request"))
+          .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(FORBIDDEN)
+          )
+      )
+      intercept[UnverifiedAccount] {
+        await(underTest.requestReset(email))
+      }
+    }
+
+    "successfully validate reset code" in new Setup {
+      val code = "ABC123"
+
+      import ThirdPartyDeveloperConnector.EmailForResetResponse
+      implicit val writes = Json.writes[EmailForResetResponse]
+
+      stubFor(
+        get(urlPathEqualTo("/reset-password"))
+          .withQueryParam("code", equalTo(code))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(EmailForResetResponse(email))
+          )
+      )
+      await(underTest.fetchEmailForResetCode(code)) shouldBe email
+    }
+
+    "successfully reset password" in new Setup {
+      val passwordReset = PasswordReset("user@example.com", "newPassword")
+      val payload = Json.toJson(passwordReset)
+      val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
+
+      stubFor(
+        post(urlPathEqualTo("/reset-password"))
+          .withJsonRequestBody(encryptedBody)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+      await(underTest.reset(passwordReset))
+    }
+  }
+
+  "accountSetupQuestions" should {
+    val developer = buildDeveloper()
+    val baseUrl = s"/developer/account-setup/${developer.userId.value}"
+    
+    "successfully complete a developer account setup" in new Setup {
+      stubFor(
+        post(urlPathEqualTo(s"$baseUrl/complete"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(developer)
+          )
+      )
+      await(underTest.completeAccountSetup(developer.userId)) shouldBe developer
+    }
+
+    "successfully update roles" in new Setup {
+      private val request = AccountSetupRequest(roles = Some(List("aRole")), rolesOther = Some("otherRole"))
+      stubFor(
+        put(urlPathEqualTo(s"$baseUrl/roles"))
+        .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(developer)
+          )
+      )
+      await(underTest.updateRoles(developer.userId, request)) shouldBe developer
+    }
+
+    "successfully update services" in new Setup {
+      private val request = AccountSetupRequest(services = Some(List("aService")), servicesOther = Some("otherService"))
+      stubFor(
+        put(urlPathEqualTo(s"$baseUrl/services"))
+        .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(developer)
+          )
+      )
+      await(underTest.updateServices(developer.userId, request)) shouldBe developer
+    }
+
+    "successfully update targets" in new Setup {
+      private val request = AccountSetupRequest(targets = Some(List("aTarget")), targetsOther = Some("otherTargets"))
+      stubFor(
+        put(urlPathEqualTo(s"$baseUrl/targets"))
+        .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(developer)
+          )
+      )
+      await(underTest.updateTargets(developer.userId, request)) shouldBe developer
+    }
+  }
+
+  "change password" should {
+    val changePasswordRequest = ChangePassword("email@example.com", "oldPassword123", "newPassword321")
+    val payload = Json.toJson(changePasswordRequest)
+
+    "throw Invalid Credentials if the response is Unauthorised" in new Setup {
+      val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
+      
+      stubFor(
+        post(urlPathEqualTo("/change-password"))
+        .withJsonRequestBody(encryptedBody)
+          .willReturn(
+            aResponse()
+              .withStatus(UNAUTHORIZED)
+          )
+      )
+      await(underTest.changePassword(changePasswordRequest).failed) shouldBe a[InvalidCredentials]
+    }
+
+    "throw Unverified Account if the response is Forbidden" in new Setup {
+      val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
+      
+      stubFor(
+        post(urlPathEqualTo("/change-password"))
+        .withJsonRequestBody(encryptedBody)
+          .willReturn(
+            aResponse()
+              .withStatus(FORBIDDEN)
+          )
+      )
+      await(underTest.changePassword(changePasswordRequest).failed) shouldBe a[UnverifiedAccount]
+    }
+
+    "throw Locked Account if the response is Locked" in new Setup {
+      val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
+      
+      stubFor(
+        post(urlPathEqualTo("/change-password"))
+        .withJsonRequestBody(encryptedBody)
+          .willReturn(
+            aResponse()
+              .withStatus(LOCKED)
+          )
+      )
+      await(underTest.changePassword(changePasswordRequest).failed) shouldBe a[LockedAccount]
+    }
+  }
+
+  "create MFA" should {
+
+    "return the created secret" in new Setup {
+      val expectedSecret = "ABCDEF"
+      implicit val writes = Json.writes[ThirdPartyDeveloperConnector.CreateMfaResponse]
+
+      stubFor(
+        post(urlPathEqualTo(s"/developer/${userId.value}/mfa"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(ThirdPartyDeveloperConnector.CreateMfaResponse(expectedSecret))
+          )
+      )
+      await(underTest.createMfaSecret(userId)) shouldBe expectedSecret
+    }
+  }
+
+  "verify MFA" should {
+    val code = "12341234"
+    val verifyMfaRequest = VerifyMfaRequest(code)
+
+    "return false if verification fails due to InvalidCode" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/verification"
+
+      stubFor(
+        post(urlPathEqualTo(url))
+        .withJsonRequestBody(verifyMfaRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+          )
+      )
+      await(underTest.verifyMfa(userId, code)) shouldBe false
+    }
+
+    "return true if verification is successful" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/verification"
+
+      stubFor(
+        post(urlPathEqualTo(url))
+        .withJsonRequestBody(verifyMfaRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+      await(underTest.verifyMfa(userId, code)) shouldBe true
+    }
+
+    "throw if verification fails due to error" in new Setup {
+      val url = s"/developer/${userId.value}/mfa/verification"
+
+      stubFor(
+        post(urlPathEqualTo(url))
+        .withJsonRequestBody(verifyMfaRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+      intercept[UpstreamErrorResponse] {
+        await(underTest.verifyMfa(userId, code))
+      }
+    }
+  }
+
+  "enableMFA" should {
+    "return no_content if successfully enabled" in new Setup {
+      stubFor(
+        put(urlPathEqualTo(s"/developer/${userId.value}/mfa/enable"))
+          .willReturn(
+            aResponse()
+              .withStatus(NO_CONTENT)
+          )
+      )
+      await(underTest.enableMfa(userId))
+    }
+  }
+
 
   "removeMfa" should {
     "return OK on successful removal" in new Setup {
@@ -142,7 +522,6 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   }
 
   "authenticate" should {
-
     "return the session containing the user when the credentials are valid and MFA is disabled" in new Setup {
 
       stubFor(
@@ -262,7 +641,6 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   }
 
   "authenticateTotp" should {
-
     "return the session containing the user when the TOTP and nonce are valid" in new Setup {
       stubFor(
         post(urlEqualTo("/authenticate-totp"))

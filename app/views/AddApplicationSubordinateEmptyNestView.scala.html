@@ -20,7 +20,7 @@
 @import domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-account", environmentNameService: EnvironmentNameService)
 
@@ -38,39 +38,44 @@
     leftNav = Some(leftHandNav(None, Option(navSection))),
     developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-    <h1 class="heading-xlarge">@pageHeading</h1>
-    <p>To use APIs for accessing secure data you need to:</p>
-    <ol class="list list-number">
-        <li>
-            create an application in our test environment called (@subordinateEnvName)
-        </li>
-        <li>
-            choose which APIs you want to use
-        </li>
-        <li>
-            get credentials to use our APIs
-        </li>
-        <li>
-            test your software integrates with our APIs
-        </li>
-    </ol>
-    <div class="notice">
-        <i class="icon icon-important">
-            <span class="visually-hidden">Warning</span>
-        </i>
-        <strong class="bold-small">
-            You must comply with our <a href="/api-documentation/docs/terms-of-use">terms of use</a>
-        </strong>
-    </div>
-    <br>
-    <p>
-        You do not need a sandbox application to use APIs with only <a href="/api-documentation/docs/authorisation/open-access-endpoints">open access endpoints</a>, for example, EORI Checker API.
-    </p>
+  <p class="govuk-body">To use APIs for accessing secure data you need to:</p>
 
-    <p><a href="/api-documentation/docs/api">See the full list of HMRC APIs</a></p>
+  <ol class="govuk-list govuk-list--number">
+    <li>
+      create an application in our test environment called (@subordinateEnvName)
+    </li>
+    <li>
+      choose which APIs you want to use
+    </li>
+    <li>
+      get credentials to use our APIs
+    </li>
+    <li>
+      test your software integrates with our APIs
+    </li>
+  </ol>
 
-    <p>
-        <a id="add" href="@controllers.routes.AddApplication.addApplicationName(Environment.SANDBOX)" class="button">Continue</a>
-    </p>
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-warning-text__assistive">Warning</span>
+      You must comply with our <a class="govuk-link" href="/api-documentation/docs/terms-of-use">terms of use</a>
+    </strong>
+  </div>
+
+  <br>
+
+  <p class="govuk-body">
+    You do not need a sandbox application to use APIs with only <a class="govuk-link" href="/api-documentation/docs/authorisation/open-access-endpoints">open access endpoints</a>, for example, EORI Checker API.
+  </p>
+
+  <p class="govuk-body">
+    <a class="govuk-link" href="/api-documentation/docs/api">See the full list of HMRC APIs</a>
+  </p>
+
+  <p class="govuk-body">
+    <a id="add" href="@controllers.routes.AddApplication.addApplicationName(Environment.SANDBOX)" class="govuk-button">Continue</a>
+  </p>
 }

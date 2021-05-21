@@ -25,7 +25,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.http.HeaderNames.CONTENT_LENGTH
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.http.{UserId => _, _}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 import scala.concurrent.{ExecutionContext, Future}
@@ -141,7 +141,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def requestReset(email: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/password-reset-request", PasswordResetRequest(email), Seq((CONTENT_LENGTH -> "0")))
+    http.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/password-reset-request", PasswordResetRequest(email))
     .map {
       case Right(response) => response.status
       case Left(UpstreamErrorResponse(_,FORBIDDEN,_,_)) => throw new UnverifiedAccount
@@ -172,7 +172,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   }
 
   def updateProfile(userId: UserId, profile: UpdateProfileRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POST[UpdateProfileRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/developer/${userId.value}", profile)
+    http.POST[UpdateProfileRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/developer/${userId.asText}", profile)
       .map {
         case Right(response) => response.status
         case Left(err) => throw err
@@ -248,7 +248,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
 
   def completeAccountSetup(userId: UserId)(implicit hc: HeaderCarrier): Future[Developer] =
     metrics.record(api) {
-      http.POSTEmpty[Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/complete", Seq((CONTENT_LENGTH -> "0")))
+      http.POSTEmpty[Developer](s"$serviceBaseUrl/developer/account-setup/${userId.value}/complete")
     }
 
   def fetchDeveloper(id: UserId)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
@@ -265,7 +265,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     implicit val CreateMfaResponseReads = Json.reads[CreateMfaResponse]
 
     metrics.record(api) {
-      http.POSTEmpty[CreateMfaResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa", Seq((CONTENT_LENGTH -> "0")))
+      http.POSTEmpty[CreateMfaResponse](s"$serviceBaseUrl/developer/${userId.value}/mfa")
       .map(_.secret)
     }
   }

@@ -28,7 +28,7 @@ import play.api.Logger
 import play.api.http.HeaderNames.CONTENT_LENGTH
 import play.api.http.Status._
 import service.ApplicationService.ApplicationConnector
-import uk.gov.hmrc.http.{UserId => _, _}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
 
@@ -138,7 +138,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
-    http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/verify-uplift/$verificationCode", Seq((CONTENT_LENGTH -> "0")))
+    http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/verify-uplift/$verificationCode")
     .map(_ match {
       case Right(_)                                        => ApplicationVerificationSuccessful
       case Left(UpstreamErrorResponse(_,BAD_REQUEST, _,_)) => ApplicationVerificationFailed
@@ -202,7 +202,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit] = {
     http
-      .POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/delete", Seq((CONTENT_LENGTH -> "0")))
+      .POSTEmpty[HttpResponse](s"$serviceBaseUrl/application/${applicationId.value}/delete")
       .map(_.status match {
           case NO_CONTENT => ()
           case _          => throw new Exception("error deleting subordinate application")

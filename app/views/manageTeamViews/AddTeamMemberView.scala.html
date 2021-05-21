@@ -24,7 +24,7 @@
 @import model.ApplicationViewModel
 @import views.html.include.DevMain
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession)(
 implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
@@ -35,27 +35,26 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
 @app = @{applicationView.application}
 
 @devMain(
-    title = titleError + "Add a team member",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage team members"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))(request, loggedIn, applicationConfig)),
-    developerSession = Some(loggedIn)
+  title = titleError + "Add a team member",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Manage team members"),
+    Crumb.application(app),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))(request, loggedIn, applicationConfig)),
+  developerSession = Some(loggedIn)
 ) {
 
-    @errorSummary(form)
+  @errorSummary(form)
 
-    <h1 class="heading-xlarge">Add a team member</h1>
+  <h1 class="govuk-heading-l">Add a team member</h1>
 
-    @appEnvironment(app)
-    <br>
+  @appEnvironment2(app)
+  <br>
 
-    <h2 class="heading-large">Team member</h2>
+  <h2 class="govuk-heading-m">Team member</h2>
 
-    @addTeamMemberPartial(app, form, loggedIn, "Add", true, ManageTeamMembers)
-
+  @addTeamMemberPartial(app, form, loggedIn, "Add", true, ManageTeamMembers)
 }

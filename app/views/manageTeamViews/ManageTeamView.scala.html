@@ -26,7 +26,7 @@
 @import domain.models.developers.DeveloperSession
 
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, role: CollaboratorRole, form: Form[controllers.AddTeamMemberForm])(
         implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
@@ -36,41 +36,30 @@
 @app = @{applicationView.application}
 
 @devMain(
-    title = titleError + "Manage team members",
-    userFullName = loggedIn.loggedInName,
-    breadcrumbs = Seq(
-        Crumb("Manage team members"),
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
-    developerSession = Some(loggedIn)
+  title = titleError + "Manage team members",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb("Manage team members"),
+    Crumb.application(app),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
+  developerSession = Some(loggedIn)
 ) {
+  @errorSummary(form)
 
+  <h1 class="govuk-heading-l">Manage team members</h1>
 
+  @appEnvironment2(app)
+  <br>
 
-    @errorSummary(form)
-
-    <header>
-        <h1 class="heading-xlarge">Manage team members</h1>
-    </header>
-
-    @appEnvironment(app)
-    <br>
-
-    <section class="hard--top flush--bottom">
-        <h2 class="heading-large">Team members</h2>
-
-
-    @{
-        def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
-            controllers.routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
-        }
-
-        teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button, createRemoveLink)
+  <h2 class="govuk-heading-m">Team members</h2>
+  @{
+    def createRemoveLink(appId: ApplicationId, emailAddress: String) = {
+      controllers.routes.ManageTeam.removeTeamMember(appId, emailAddress.toSha256)
     }
-
-    </section>
+    teamList(app, role, loggedIn, routes.ManageTeam.addTeamMember(app.id), Button, createRemoveLink)
+  }
 }
 

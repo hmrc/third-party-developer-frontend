@@ -86,7 +86,7 @@ class CredentialsSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "h1", "Credentials") shouldBe true
       elementExistsByText(document, "a", "Continue") shouldBe false
-      elementExistsByText(document, "p", "You cannot view or edit production credentials because you're not an administrator.") shouldBe true
+      elementExistsByText(document, "div", "You cannot view or edit production credentials because you're not an administrator.") shouldBe true
     }
   }
 }

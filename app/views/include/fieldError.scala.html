@@ -16,28 +16,28 @@
 
 @(errors: Seq[FormError], fieldName: String, onlyLast: Boolean = true)(implicit messages: Messages)
 @if(errors.exists(_.key == fieldName)) {
-    <span class="error-message" data-field-error-@fieldName>
+  <span class="govuk-error-message" data-field-error-@fieldName>
+    <span class="govuk-visually-hidden">Error:</span>
     @defining(errors.filter(_.key == fieldName)) { errors =>
-        @if(onlyLast && errors.nonEmpty) {
-            @if(errors.last.args.nonEmpty) {
-                <a data-link-error-@fieldName href="@errors.last.args.head">
-                @Messages(errors.last.message)
-                </a>
-            } else {
-                @Messages(errors.last.message)
-            }
+      @if(onlyLast && errors.nonEmpty) {
+        @if(errors.last.args.nonEmpty) {
+          <a data-link-error-@fieldName href="@errors.last.args.head">
+            @Messages(errors.last.message)
+          </a>
         } else {
-            @errors.map { err =>
-                @if(err.args.nonEmpty) {
-                    <a data-link-error-@fieldName href="@err.args.head">
-                    @Messages(err.message)
-                    </a>
-                } else {
-                    @Messages(err.message)
-                }
-            }
+          @Messages(errors.last.message)
         }
+      } else {
+        @errors.map { err =>
+          @if(err.args.nonEmpty) {
+            <a data-link-error-@fieldName href="@err.args.head">
+              @Messages(err.message)
+            </a>
+          } else {
+            @Messages(err.message)
+          }
+        }
+      }
     }
-
-    </span>
+  </span>
 }

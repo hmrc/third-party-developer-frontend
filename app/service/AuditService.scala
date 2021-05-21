@@ -24,6 +24,8 @@ import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
 import scala.concurrent.{ExecutionContext, Future}
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @Singleton
 class AuditService @Inject()(auditConnector: AuditConnector, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
@@ -36,17 +38,16 @@ class AuditService @Inject()(auditConnector: AuditConnector, appConfig: Applicat
       detail = hc.toAuditDetails(action.details.toSeq: _*)
     ))
 
-  private def userContext(hc: HeaderCarrier) =
-    userContextFromHeaders(hc.headers.toMap)
-
-  private def userContextFromHeaders(headers: Map[String, String]) = {
-
-    def mapHeader(httpKey: String, auditKey: String) = headers.get(httpKey).map(auditKey -> _)
+  def userContext(hc: HeaderCarrier): Seq[(String, String)] = {
+    def mapHeader(oldKey: String, newKey: String): Option[(String, String)] = 
+      hc.extraHeaders.toMap
+        .get(oldKey)
+        .map(value => newKey -> URLDecoder.decode(value, StandardCharsets.UTF_8.toString))
 
     val developerEmail = mapHeader("X-email-address", "developerEmail")
     val developerFullName = mapHeader("X-name", "developerFullName")
 
-    Seq(developerEmail, developerFullName).flatten.toMap
+    Seq(developerEmail, developerFullName).flatten
   }
 }
 

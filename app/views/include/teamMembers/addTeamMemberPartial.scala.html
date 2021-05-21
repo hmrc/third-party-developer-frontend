@@ -20,61 +20,72 @@
 @import domain.models.developers.DeveloperSession
 
 @(app: Application, form: Form[controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean, addTeamMemberPageMode: AddTeamMemberPageMode)(
-        implicit request: play.api.mvc.Request[Any], messages: Messages)
+  implicit request: play.api.mvc.Request[Any], messages: Messages
+)
 
 @helper.form(action = controllers.routes.ManageTeam.addTeamMemberAction(app.id, addTeamMemberPageMode)) {
-    @helper.CSRF.formField
+  @helper.CSRF.formField
 
-    <div class="form-group @if(form.errors("email").nonEmpty) {form-group-error}">
-        <label class="form-label" for="email" id="email-label">Email address</label>
-        @fieldError(form.errors, "email", form.error("submissionError").isEmpty)
-        <input type="text"
-        id="email"
-        name="email"
-        value="@form.data.getOrElse("email", "")"
-        class="form-control @if(form.errors("email").nonEmpty) {form-control-error}"
-        aria-labelledby="email-label"/>
-    </div>
+  <div class="govuk-form-group @if(form.errors("email").nonEmpty) {govuk-form-group--error}">
+    <label class="govuk-label" for="email" id="email-label">Email address</label>
+    <span id="add-email-error" class="govuk-error-message">
+      <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "email", form.error("submissionError").isEmpty)
+    </span>
+    <input
+      type="text"
+      id="email"
+      name="email"
+      value="@form.data.getOrElse("email", "")"
+      class="govuk-input @if(form.errors("email").nonEmpty) {govuk-input--error}"
+      aria-labelledby="email-label"
+      aria-describedby="add-email-error"
+    />
+  </div>
 
-    <div class="form-group @if(form.errors("role").nonEmpty) {form-group-error}">
-        @fieldError(form.errors, "role", form.error("submissionError").isEmpty)
-        <br>
-        <fieldset id="role">
-            <legend><h2 class="heading-large flush--top">What permissions do you want to give them?</h2></legend>
-            <div class="multiple-choice">
-                <input id="Developer" type="radio" name="role" value="Developer">
-                <label for="Developer"><strong>Developer</strong></label>
-
-                <span class="form-hint">
-                    <ul class="permission-list">
-                        <li>Test an application</li>
-                        <li>Subscribe to sandbox APIs</li>
-                        <li>Add redirect URIs</li>
-                        <li>View team members</li>
-                    </ul>
-                </span>
+  <div class="govuk-form-group @if(form.errors("role").nonEmpty) {govuk-form-group--error}">
+    <fieldset class="govuk-fieldset" id="role" aria-describedby="email-permissions-error">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+          <h2 class="govuk-fieldset__heading">What permissions do you want to give them?</h2>
+        </legend>
+        <span id="email-permissions-error" class="govuk-error-message">
+          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "role", form.error("submissionError").isEmpty)
+        </span>
+        <div class="govuk-radios">
+          <!-- Item 1 -->
+          <div class="govuk-radios__item">
+            <input class="govuk-radios__input" id="Developer" type="radio" name="role" value="Developer">
+            <label class="govuk-label govuk-radios__label" for="Developer">Developer</label>
+            <div class="govuk-hint govuk-radios__hint">
+              <ul class="permission-list">
+                <li>Test an application</li>
+                <li>Subscribe to sandbox APIs</li>
+                <li>Add redirect URIs</li>
+                <li>View team members</li>
+              </ul>
             </div>
-            <div class="multiple-choice">
-                <input id="Admin" type="radio" name="role" value="Administrator">
-                <label for="Admin"><strong>Administrator</strong></label>
-
-                <span class="form-hint">
-                    <ul class="permission-list">
-                        <li>Test an application</li>
-                        <li>Subscribe to sandbox APIs and request to change production APIs</li>
-                        <li>Change application details</li>
-                        <li>Add or remove team members</li>
-                    </ul>
-                </span>
+          </div>
+          <!-- Item 2 -->
+          <div class="govuk-radios__item">
+            <input class="govuk-radios__input" id="Admin" type="radio" name="role" value="Administrator">
+            <label class="govuk-label govuk-radios__label" for="Admin">Administrator</label>
+            <div class="govuk-hint govuk-radios__hint">
+              <ul class="permission-list">
+                <li>Test an application</li>
+                <li>Subscribe to sandbox APIs and request to change production APIs</li>
+                <li>Change application details</li>
+                <li>Add or remove team members</li>
+              </ul>
             </div>
-        </fieldset>
-    </div>
+          </div>
+        </div>
+    </fieldset>
+  </div>
 
-    <div class="form-field">
-        <button id="submit" class="button button--padded" type="submit">@submitText</button>
+  <div class="govuk-button-group">
+    <button id="submit" class="govuk-button" type="submit">Add team member</button>
 
-        @if(showCancel) {
-            <a href="@routes.ManageTeam.manageTeam(app.id, None)" class="secondary-button">Cancel</a>
-        }
-    </div>
+    @if(showCancel) {
+      <a href="@routes.ManageTeam.manageTeam(app.id, None)" class="govuk-button govuk-button--secondary">Cancel</a>
+    }
+  </div>
 }

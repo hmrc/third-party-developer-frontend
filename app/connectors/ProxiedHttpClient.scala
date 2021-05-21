@@ -19,40 +19,40 @@ package connectors
 import akka.actor.ActorSystem
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.http.HeaderNames.ACCEPT
-import play.api.libs.ws.{WSClient, WSProxyServer, WSRequest}
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.libs.ws.{WSClient, WSProxyServer, WSRequest => PlayWSRequest}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
-import uk.gov.hmrc.play.bootstrap.config.RunMode
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.http.ws.{WSProxy, WSProxyConfiguration}
+import play.api.http.HeaderNames
 
 @Singleton
 class ProxiedHttpClient @Inject()(config: Configuration,
                                   httpAuditing: HttpAuditing,
                                   wsClient: WSClient,
-                                  environment: play.api.Environment,
-                                  actorSystem: ActorSystem,
-                                  runMode: RunMode)
+                                  actorSystem: ActorSystem)
   extends DefaultHttpClient(config, httpAuditing, wsClient, actorSystem) with WSProxy {
 
-  val apiKeyHeader: Option[(String, String)] = None
-  private val env = runMode.env
+  val apiKeyHeader: Option[String] = None
 
   def withHeaders(apiKey: String = ""): ProxiedHttpClient = {
-    new ProxiedHttpClient(config, httpAuditing, wsClient, environment, actorSystem, runMode) {
-      override val apiKeyHeader: Option[(String, String)] = if ("" == apiKey) None else Some("x-api-key" -> apiKey)
+    new ProxiedHttpClient(config, httpAuditing, wsClient, actorSystem) {
+      override val apiKeyHeader = if (apiKey.isEmpty) None else Some(apiKey)
     }
   }
 
-  override def wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration(s"$env.proxy", config)
+  override def wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration("proxy", config)
 
-  override def buildRequest[A](url: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier): WSRequest = {
-    val extraHeaders = hc.extraHeaders :+ (ACCEPT -> "application/hmrc.vnd.1.0+json")
-    val extraHeadersWithMaybeApiKeyHeader =
-      if (apiKeyHeader.isDefined) extraHeaders :+ apiKeyHeader.get
-      else extraHeaders
-    val hcWithBearerAndAccept = hc.copy(extraHeaders = extraHeadersWithMaybeApiKeyHeader)
-    super.buildRequest(url, headers)(hcWithBearerAndAccept)
+  override def buildRequest[A](url: String, headers: Seq[(String, String)]): PlayWSRequest = {
+    val extraHeaders: Seq[(String,String)] = headers ++ 
+      apiKeyHeader.map(v => ProxiedHttpClient.API_KEY_HEADER_NAME -> v).toSeq ++
+      Seq(ProxiedHttpClient.ACCEPT_HMRC_JSON_HEADER)
+
+    super.buildRequest(url, extraHeaders)
   }
+}
+
+object ProxiedHttpClient {
+  val API_KEY_HEADER_NAME = "x-api-key"
+
+  val ACCEPT_HMRC_JSON_HEADER = HeaderNames.ACCEPT -> "application/hmrc.vnd.1.0+json"
 }

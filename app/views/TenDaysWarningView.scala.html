@@ -17,39 +17,37 @@
 @import model.Crumb
 @import domain.models.developers.DeveloperSession
 @import domain.models.applications.Environment
-@import views.html.include.DevMain
+@import views.html.include.DevMain2
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: config.ApplicationConfig)
 
 @pageHeading = @{s"We will check your application"}
 
 @devMain(
-    title = pageHeading,
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn),
-    breadcrumbs = Seq(
-        Crumb(pageHeading),
-        Crumb.viewAllApplications,
-        Crumb.home
-    ),
-    fullWidthContent = true
+  title = pageHeading,
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  breadcrumbs = Seq(
+    Crumb(pageHeading),
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  fullWidthContent = true
 ) {
-
-    <div class="grid-row">
-        <div class="interrupt">
-            <h1 class="heading-xlarge">
-                @pageHeading
-            </h1>
-            <p class="font-medium">
-                This takes up to 10 working days, and we may ask you to demonstrate it.
-            </p>
-            <br>
-            <p>
-                <a href="@controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION)" class="button interrupt-button">Continue</a>
-
-            </p>
-        </div>
+  <div class="grid-row">
+    <div class="interrupt">
+      <h1 class="govuk-heading-l interrupt-title">
+        @pageHeading
+      </h1>
+      <p class="govuk-body interrupt-description">
+        This takes up to 10 working days, and we may ask you to demonstrate it.
+      </p>
+      <br>
+      <p class="govuk-body">
+        <a href="@controllers.routes.AddApplication.addApplicationName(Environment.PRODUCTION)" class="govuk-button interrupt-button">Continue</a>
+      </p>
     </div>
+  </div>
 }

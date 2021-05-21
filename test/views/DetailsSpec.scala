@@ -46,7 +46,7 @@ class DetailsSpec
   case class Page(doc: Appendable) {
     lazy val body: Document = Jsoup.parse(doc.body)
     lazy val environmentName: Element = body.getElementById("environmentName")
-    lazy val warning: Element = body.getElementById("termsOfUseWarning")
+    lazy val warning: Element = body.getElementById("terms-of-use-header")
     lazy val termsOfUse: Element = body.getElementById("termsOfUse")
     lazy val agreementDetails: Element = termsOfUse.getElementById("termsOfUseAagreementDetails")
     lazy val readLink: Element = termsOfUse.getElementById("termsOfUseReadLink")
