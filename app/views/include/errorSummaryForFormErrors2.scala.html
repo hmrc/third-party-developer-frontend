@@ -14,25 +14,21 @@
  * limitations under the License.
  *@
 
-@import views.helper.GlobalSection._
+@(errors: Seq[FormError])(implicit messages: Messages)
 
-@(form: Form[_])(implicit messages: Messages)
-
-@if(form.hasGlobalErrors) {
+@if(errors.nonEmpty) {
   <div id="error-summary-display" class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
-    <h2 id="error-summary-heading" class="govuk-error-summary__title">
+    <h2 id="error-summary-title" class="govuk-error-summary__title">
       There is a problem
     </h2>
     <div class="govuk-error-summary__body">
       <ul class="govuk-list govuk-error-summary__list">
-        @for(error <- form.globalErrors) {
+        @for(error <- errors) {
           <li>
-            <a @dataAttribute(error.message) href="@anchor(error.message)" data-focuses="@errorField(error.message)" data-global-error>@Messages(error.message)</a>
+            <a href="#@error.key">@Messages(s"${error.messages.head}")</a>
           </li>
         }
       </ul>
     </div>
   </div>
-} else {
-  @errorSummaryForFormErrors2(form.errors)
 }
