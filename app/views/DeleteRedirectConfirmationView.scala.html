@@ -73,7 +73,9 @@
         </div>
       </fieldset>
     </div>
-    <button id="submit" class="govuk-button" type="submit">Submit</button>
-    <a id="cancel" href="@routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+    <div class="govuk-button-group">
+      <button id="submit" class="govuk-button" type="submit">Submit</button>
+      <a id="cancel" href="@routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+    </div>
   }
 }
