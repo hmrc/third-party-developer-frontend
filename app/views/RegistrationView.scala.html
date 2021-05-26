@@ -107,9 +107,7 @@
       <label class="govuk-label govuk-!-font-weight-bold" for="emailaddress" id="emailaddress-label">
         Email address
       </label>
-      <span id="email-address-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "emailaddress", form.error("submissionError").isEmpty)
-      </span>
+      @fieldError2(form.errors, "emailaddress", form.error("submissionError").isEmpty)
       <input 
         type="text"
         id="emailaddress"
