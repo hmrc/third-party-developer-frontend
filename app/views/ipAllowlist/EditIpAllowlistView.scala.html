@@ -58,7 +58,7 @@
   feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
   <div class="ip-allowlist">
-    @errorSummary(form)
+    @errorSummary2(form)
 
     <h1 class="govuk-heading-l">
       @if(app.ipAllowlist.allowlist.isEmpty) {
@@ -68,7 +68,7 @@
       }
     </h1>
 
-    @appEnvironment(app)
+    @appEnvironment2(app)
 
     <br>
 
@@ -94,7 +94,7 @@
         <thead class="govuk-table__head">
           <tr class="govuk-table__row">
             <th scope="col" class="govuk-table__header">IP addresses</th>
-            <th scope="col" class="govuk-table__header"></th>
+            <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">Remove IP Address column</span></th>
           </tr>
         </thead>
         <tbody class="govuk-table__body">
@@ -103,7 +103,7 @@
               <td class="govuk-table__cell">@ipRange</td>
               <td class="govuk-table__cell">
                 @if(canRemove) {
-                  <button class="govuk-button govuk-button--warning" href="@routes.IpAllowlist.removeCidrBlock(app.id, ipRange)">Remove</button>
+                  <a class="govuk-button govuk-button--warning govuk-!-margin-bottom-0" href="@routes.IpAllowlist.removeCidrBlock(app.id, ipRange)">Remove</a>
                 }
               </td>
             </tr>

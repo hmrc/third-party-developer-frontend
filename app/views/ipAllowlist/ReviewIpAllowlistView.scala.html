@@ -65,7 +65,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
       }
     </h1>
 
-    @appEnvironment(app)
+    @appEnvironment2(app)
 
     <br>
 
@@ -89,7 +89,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         <thead class="govuk-table__head">
           <tr class="govuk-table__row">
             <th scope="col" class="govuk-table__header">IP addresses</th>
-            <th scope="col" class="govuk-table__header"></th>
+            <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">Remove IP Address column</span></th>
           </tr>
         </thead>
         <tbody class="govuk-table__body">
@@ -98,7 +98,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
               <td class="govuk-table__cell">@ipRange</td>
               <td class="govuk-table__cell">
                 @if(canRemove) {
-                  <button class="govuk-button govuk-button--warning" href="@routes.IpAllowlist.removeCidrBlock(app.id, ipRange)">Remove</button>
+                  <a class="govuk-button govuk-button--warning govuk-!-margin-bottom-0" href="@routes.IpAllowlist.removeCidrBlock(app.id, ipRange)">Remove</a>
                 }
               </td>
             </tr>
@@ -123,18 +123,20 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     @helper.form(action = controllers.routes.IpAllowlist.activateIpAllowlist(app.id)) {
       @helper.CSRF.formField
-      <button id="submit" class="govuk-button" type="submit">
+      <div class="govuk-button-group">
+        <button id="submit" class="govuk-button" type="submit">
+          @if(app.ipAllowlist.allowlist.isEmpty) {
+            Make IP allow list active
+          } else {
+            Make changes active
+          }
+        </button>
         @if(app.ipAllowlist.allowlist.isEmpty) {
-          Make IP allow list active
+          <a class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</a>
         } else {
-          Make changes active
+          <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</a>
         }
-      </button>
-      @if(app.ipAllowlist.allowlist.isEmpty) {
-        <button class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</button>
-      } else {
-        <button class="govuk-button govuk-button--secondary" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</button>
-      }
+      </div>
     }
   </div>
 }

@@ -35,7 +35,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 ) {
   <h1 class="govuk-heading-l">Delete application</h1>
 
-  @appEnvironment(app)
+  @appEnvironment2(app)
 
   <br>
 
@@ -48,7 +48,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         </a>.
       </p>
 
-      <a class="button" href="@controllers.routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
+      <a class="govuk-button" href="@controllers.routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
         Continue
       </a>
     } else {
@@ -58,13 +58,14 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
           team members
         </a>.
       </p>
+
       <p class="govuk-body">
         We'll respond to your request within 2 working days.
       </p>
 
-      <button class="govuk-button" href="@controllers.routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
+      <a class="govuk-button" href="@controllers.routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
         Request deletion
-      </button>
+      </a>
     }
   } else {
     <div class="govuk-inset-text">

@@ -42,21 +42,21 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
   <div class="ip-allowlist">
     <div class="govuk-box-highlight">
-      <h1 class="govuk-heading-l">
+      <h1 class="govuk-heading-l govuk-highlight-text ">
         @if(app.ipAllowlist.allowlist.isEmpty) {
           Your IP allow list is active
         } else {
           IP allow list changes active
         }
       </h1>
-      <p class="govuk-body">
+      <p class="govuk-body govuk-highlight-text ">
         API requests can only be made from these IP addresses
       </p>
     </div>
 
     <br>
 
-    @appEnvironment(app)
+    @appEnvironment2(app)
 
     <br>
 
@@ -78,10 +78,10 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     <br>
 
-    <button class="govuk-button" href="@routes.IpAllowlist.editIpAllowlist(app.id)">Edit your IP allow list</button>
+    <a class="govuk-button" href="@routes.IpAllowlist.editIpAllowlist(app.id)">Edit your IP allow list</a>
 
     <p class="govuk-body">
-      <a href="@routes.Details.details(app.id)">View your application details</a>
+      <a class="govuk-link" href="@routes.Details.details(app.id)">View your application details</a>
     </p>
   </div>
 }

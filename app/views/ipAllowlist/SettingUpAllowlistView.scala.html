@@ -40,8 +40,9 @@
     <p class="govuk-body">Add the IP addresses to your IP allow list.</p>
     <p class="govuk-body">Check the IP addresses you want to use are correct before making your IP allow list active.</p>
     <p class="govuk-body">While your IP allow list is active, all other IP addresses are blocked from making API requests to HMRC.</p>
-
-    <button class="govuk-button" href="@routes.IpAllowlist.addCidrBlock(app.id)">Add an IP address</button>
-    <button class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</button>
+    <div class="govuk-button-group">
+      <a class="govuk-button" href="@routes.IpAllowlist.addCidrBlock(app.id)">Add an IP address</a>
+      <a class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</a>
+    </div>
   </div>
 }

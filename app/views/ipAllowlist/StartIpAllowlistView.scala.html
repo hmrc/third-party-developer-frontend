@@ -38,7 +38,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
   <div class="ip-allowlist">
     <h1 class="govuk-heading-l">IP allow list</h1>
 
-    @appEnvironment(app)
+    @appEnvironment2(app)
 
     <br>
 
@@ -65,7 +65,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
         <li>one or more static IP addresses</li>
       </ul>
 
-      <button class="govuk-button" href="@routes.IpAllowlist.allowedIps(app.id)">Continue</button>
+      <a class="govuk-button" href="@routes.IpAllowlist.allowedIps(app.id)">Continue</a>
     } else {
       <div class="govuk-inset-text">
         You cannot set up the IP allow list because you are not an administrator.

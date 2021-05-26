@@ -19,14 +19,16 @@
 @(app: Application)
 
 @defining(app.collaborators.filter(_.role.isAdministrator)) { administrators =>
-    @if(administrators.size == 1) {
-        <p>The administrator <a href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> has access.</p>
-    } else {
-        <p>These administrators have access:</p>
-        <ul class="list list-bullet">
-        @for(admin <- administrators) {
-            <li><a href="mailto:@admin.emailAddress">@admin.emailAddress</a></li>
-        }
-        </ul>
-    }
+  @if(administrators.size == 1) {
+    <p class="govuk-body">The administrator <a class="govuk-link" href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> has access.</p>
+  } else {
+    <p class="govuk-body">These administrators have access:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      @for(admin <- administrators) {
+        <li>
+          <a class="govuk-link" href="mailto:@admin.emailAddress">@admin.emailAddress</a>
+        </li>
+      }
+    </ul>
+  }
 }
