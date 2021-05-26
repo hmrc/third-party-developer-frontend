@@ -16,7 +16,7 @@
 
 @(errors: Seq[FormError], fieldName: String, onlyLast: Boolean = true)(implicit messages: Messages)
 @if(errors.exists(_.key == fieldName)) {
-  <span class="govuk-error-message" data-field-error-@fieldName>
+  <span class="govuk-error-message" id="data-field-error-@fieldName" data-field-error-@fieldName>
     <span class="govuk-visually-hidden">Error:</span>
     @defining(errors.filter(_.key == fieldName)) { errors =>
       @if(onlyLast && errors.nonEmpty) {

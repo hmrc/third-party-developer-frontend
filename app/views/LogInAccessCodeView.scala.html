@@ -37,7 +37,7 @@
     <div class="govuk-form-group @if(form.errors("accessCode").nonEmpty){form-group-error govuk-form-group--error}">
       <label class="govuk-label" for="accessCode" id="access-code-label">Access code</label>
 
-      @fieldError(form.errors, "accessCode", true)
+      @fieldError2(form.errors, "accessCode", true)
       <input 
         type="text"
         autocomplete="off"

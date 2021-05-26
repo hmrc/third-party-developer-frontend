@@ -40,7 +40,7 @@
   leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary(form)
+  @errorSummary2(form)
 
   <h1 class="govuk-heading-l">Delete a redirect URI</h1>
 
@@ -59,7 +59,7 @@
         @helper.CSRF.formField
         <input id="redirectUri" name="redirectUri" class="form-control" hidden aria-hidden="true" type="text" value="@redirectUri">
         <span id="deleteRedirectConfirm-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "deleteRedirectConfirm")
+          <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "deleteRedirectConfirm")
         </span>
         <div class="govuk-radios govuk-radios--inline">
           <div class="govuk-radios__item">

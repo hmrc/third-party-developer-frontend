@@ -52,11 +52,11 @@ class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {
 
       val document = Jsoup.parse(page.body)
       elementExistsByText(document, "h2", "There is a problem") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-firstname", "First name error message") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-lastname", "Last name error message") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-emailaddress", "Email address error message") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-password", "Password error message") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-organisation", "Organisation error message") shouldBe true
+      elementExistsById(document, "data-field-error-firstname") shouldBe true
+      elementExistsById(document, "data-field-error-lastname") shouldBe true
+      elementExistsById(document, "data-field-error-emailaddress") shouldBe true
+      elementExistsById(document, "data-field-error-password") shouldBe true
+      elementExistsById(document, "data-field-error-organisation") shouldBe true
     }
   }
 }
