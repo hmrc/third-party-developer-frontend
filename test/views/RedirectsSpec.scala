@@ -86,25 +86,25 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with Collaborat
     "show a button for deleting a redirect uri when logged in as an administrator" in {
       val document = Jsoup.parse(renderPageForStandardApplicationAsAdminWithRedirectUris(3).body)
 
-      elementExistsByAttrWithValue(document, "input", "value", "Delete") shouldBe true
+      elementExistsByAttrWithValue(document, "button", "value", "Delete") shouldBe true
     }
 
     "not show a button for deleting a redirect uri when logged in as a developer" in {
       val document = Jsoup.parse(renderPageForStandardApplicationAsDeveloperWithRedirectUris(3).body)
 
-      elementExistsByAttrWithValue(document, "input", "value", "Delete") shouldBe false
+      elementExistsByAttrWithValue(document, "buttom", "value", "Delete") shouldBe false
     }
 
     "show a button for changing a redirect uri when logged in as an administrator" in {
       val document = Jsoup.parse(renderPageForStandardApplicationAsAdminWithRedirectUris(3).body)
 
-      elementExistsByAttrWithValue(document, "input", "value", "Change") shouldBe true
+      elementExistsByAttrWithValue(document, "button", "value", "Change") shouldBe true
     }
 
     "not show a button for changing a redirect uri when logged in as a developer" in {
       val document = Jsoup.parse(renderPageForStandardApplicationAsDeveloperWithRedirectUris(3).body)
 
-      elementExistsByAttrWithValue(document, "input", "value", "Change") shouldBe false
+      elementExistsByAttrWithValue(document, "button", "value", "Change") shouldBe false
     }
 
     "show a message informing the user that the redirect limit has been reached" in {

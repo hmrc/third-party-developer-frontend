@@ -131,7 +131,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate another client secret") shouldBe true
-      elementExistsByText(document, "a", "Delete") shouldBe true
+      elementExistsByText(document, "a", "Delete secret") shouldBe true
     }
 
     "not show generate another client secret button when the app has reached the limit of 5 client secrets" in new Setup {
@@ -143,7 +143,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       val document: Document = Jsoup.parse(page.body)
       elementExistsByText(document, "button", "Generate another client secret") shouldBe false
       elementExistsByText(document, "p", "You cannot have more than 5 client secrets.") shouldBe true
-      elementExistsByText(document, "a", "Delete") shouldBe true
+      elementExistsByText(document, "a", "Delete secret") shouldBe true
     }
   }
 }

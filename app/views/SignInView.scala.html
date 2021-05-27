@@ -36,13 +36,13 @@
     <div @if(form.errors("invalidCredentials").nonEmpty){class="govuk-form-group--error"}>
       <span class="govuk-error-message">
         <span class="govuk-visually-hidden">Error:</span>
-        @fieldError(form.errors, "invalidCredentials", form.error("submissionError").isEmpty)
+        @fieldError2(form.errors, "invalidCredentials", form.error("submissionError").isEmpty)
       </span>
       <div class="govuk-form-group @if(form.errors("emailaddress").nonEmpty){govuk-form-group--error}">
         <label class="govuk-label govuk-!-font-weight-bold" for="emailaddress" id="emailaddress-label">Email address</label>
         <span id="login-email-error" class="govuk-error-message">
           <span class="govuk-visually-hidden">Error:</span>
-          @fieldError(form.errors, "emailaddress", form.error("submissionError").isEmpty)
+          @fieldError2(form.errors, "emailaddress", form.error("submissionError").isEmpty)
         </span>
         <input 
           type="text" 
@@ -59,7 +59,7 @@
         <label class="govuk-label govuk-!-font-weight-bold" for="password">Password</label>
         <span id="login-password-error" class="govuk-error-message">
           <span class="govuk-visually-hidden">Error:</span>
-          @fieldError(form.errors, "password", form.error("submissionError").isEmpty)
+          @fieldError2(form.errors, "password", form.error("submissionError").isEmpty)
         </span>
         <input 
           type="password" 

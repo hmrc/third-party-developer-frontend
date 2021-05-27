@@ -36,7 +36,7 @@
   ),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary(form)
+  @errorSummary2(form)
 
   <h1 class="govuk-heading-l">@pageHeading</h1>
 
@@ -53,7 +53,7 @@
 
     <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
       <label class="govuk-label" for="applicationName" id="applicationName-label">Application name</label>
-      @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
+      @fieldError2(form.errors, "applicationName", form.error("submissionError").isEmpty)
       <input
         type="text"
         id="applicationName"

@@ -48,7 +48,7 @@
   leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary(form)
+  @errorSummary2(form)
 
   <h1 id="terms-of-use-header" class="govuk-heading-l">@title</h1>
 
@@ -73,7 +73,7 @@
       <div class="govuk-form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
         <fieldset class="govuk-fieldset" aria-describedby="terms-agreed-error">
           <span id="terms-agreed-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "termsOfUseAgreed", true)
+            <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "termsOfUseAgreed", true)
           </span>
           <div class="govuk-checkboxes">
             <div class="govuk-checkboxes__item">
