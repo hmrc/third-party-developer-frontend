@@ -43,7 +43,7 @@
   leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary(form)
+  @errorSummary2(form)
 
   <h1 class="govuk-heading-l">Add a redirect URI</h1>
 
@@ -58,7 +58,7 @@
         Must be a valid <a class="govuk-link" href="http://localhost:9685/api-documentation/docs/reference-guide#redirect-uris" target="_self" data-sso="false">redirect URI</a>.
       </div>
       <span id="redirect-uri-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "redirectUri")
+        <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "redirectUri")
       </span>
       <input class="govuk-input @if(form.errors("redirectUri").nonEmpty) {govuk-input--error}" type="text" id="redirectUri" name="redirectUri" aria-labelledby="redirect-uri-hint redirect-uri-error">
     </div>

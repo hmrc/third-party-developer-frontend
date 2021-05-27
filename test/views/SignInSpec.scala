@@ -41,14 +41,14 @@ class SignInSpec extends CommonViewSpec with WithCSRFAddToken {
       val error = "Email error"
       val invalidForm = LoginForm.form.withError("emailaddress", error)
       val document = Jsoup.parse(renderPage(form = invalidForm).body)
-      elementExistsByText(document, "span", error) shouldBe true
+      elementExistsById(document, "data-field-error-emailaddress") shouldBe true
     }
 
     "show an error when password is invalid" in {
       val error = "Password error"
       val invalidForm = LoginForm.form.withError("password", error)
       val document = Jsoup.parse(renderPage(form = invalidForm).body)
-      elementExistsByText(document, "span", error) shouldBe true
+      elementExistsById(document, "data-field-error-password") shouldBe true
     }
   }
 }

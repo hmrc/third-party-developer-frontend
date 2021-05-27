@@ -122,7 +122,7 @@ class RedirectsSpec
 
       val document = Jsoup.parse(contentAsString(result))
 
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-redirecturi", "This field is required") shouldBe true
+      elementExistsById(document, "data-field-error-redirectUri") shouldBe true
     }
 
     def addRedirectActionShouldRenderAddRedirectPageWithDuplicateUriError(application: Application, redirectUri: String) = {
@@ -135,7 +135,7 @@ class RedirectsSpec
 
       val document = Jsoup.parse(contentAsString(result))
 
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-redirecturi", "You already provided that redirect URI") shouldBe true
+      elementExistsById(document, "data-field-error-redirectUri") shouldBe true
     }
 
     def addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(application: Application, redirectUriToAdd: String) = {
@@ -177,7 +177,7 @@ class RedirectsSpec
 
       val document = Jsoup.parse(contentAsString(result))
 
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-deleteredirectconfirm", "Tell us if you want to delete this redirect URI") shouldBe true
+      elementExistsById(document, "data-field-error-deleteRedirectConfirm") shouldBe true
       elementIdentifiedByIdContainsText(document, "redirectUriToDelete", redirectUriToDelete) shouldBe shouldShowDeleteControls
       elementIdentifiedByIdContainsText(document, "submit", "Submit") shouldBe shouldShowDeleteControls
     }
@@ -224,7 +224,7 @@ class RedirectsSpec
       elementIdentifiedByIdContainsText(document, "add", "Continue") shouldBe true
     }
 
-    def changeRedirectUriActionShouldRenderError(originalRedirectUri: String, newRedirectUri: String, errorMessage: String) = {
+    def changeRedirectUriActionShouldRenderError(originalRedirectUri: String, newRedirectUri: String) = {
       val application = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
       givenApplicationExists(application)
 
@@ -236,7 +236,7 @@ class RedirectsSpec
 
       val document = Jsoup.parse(contentAsString(result))
 
-      elementIdentifiedByAttrContainsText(document, "span", "data-field-error-newredirecturi", errorMessage) shouldBe true
+      elementExistsById(document, "data-field-error-newRedirectUri") shouldBe true
     }
   }
 
@@ -441,11 +441,11 @@ class RedirectsSpec
     }
 
     "return the change redirect page for an admin with a production application when submitted a duplicate uri" in new Setup {
-      changeRedirectUriActionShouldRenderError(originalRedirectUri = redirectUris.head, newRedirectUri = redirectUris.last, errorMessage = "You already provided that redirect URI")
+      changeRedirectUriActionShouldRenderError(originalRedirectUri = redirectUris.head, newRedirectUri = redirectUris.last)
     }
 
     "return the change redirect page for an admin with a production application when submitted an invalid uri" in new Setup {
-      changeRedirectUriActionShouldRenderError(originalRedirectUri = redirectUris.head, newRedirectUri = "invalidURI", errorMessage = "Provide a valid redirect URI")
+      changeRedirectUriActionShouldRenderError(originalRedirectUri = redirectUris.head, newRedirectUri = "invalidURI")
     }
   }
 }

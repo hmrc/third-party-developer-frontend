@@ -43,7 +43,7 @@
   leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary(form)
+  @errorSummary2(form)
 
   <h1 class="govuk-heading-l">Manage team members</h1>
 
@@ -62,7 +62,7 @@
           <h3 class="govuk-fieldset__heading">Are you sure you want to remove this team member from this application?</h3>
         </legend>
         <span id="remove-team-member-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "confirm", form.error("submissionError").isEmpty)
+          <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "confirm", form.error("submissionError").isEmpty)
         </span>
         <div class="govuk-radios govuk-radios--inline">
           <div class="govuk-radios__item">

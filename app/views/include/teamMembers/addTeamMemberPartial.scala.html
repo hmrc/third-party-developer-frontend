@@ -15,7 +15,7 @@
  *@
 
 @import domain.models.controllers.AddTeamMemberPageMode
-@import views.html.include.fieldError
+@import views.html.include.fieldError2
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 
@@ -29,7 +29,7 @@
   <div class="govuk-form-group @if(form.errors("email").nonEmpty) {govuk-form-group--error}">
     <label class="govuk-label" for="email" id="email-label">Email address</label>
     <span id="add-email-error" class="govuk-error-message">
-      <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "email", form.error("submissionError").isEmpty)
+      <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "email", form.error("submissionError").isEmpty)
     </span>
     <input
       type="text"
@@ -48,7 +48,7 @@
           <h2 class="govuk-fieldset__heading">What permissions do you want to give them?</h2>
         </legend>
         <span id="email-permissions-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "role", form.error("submissionError").isEmpty)
+          <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "role", form.error("submissionError").isEmpty)
         </span>
         <div class="govuk-radios">
           <!-- Item 1 -->

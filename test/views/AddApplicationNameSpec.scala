@@ -46,7 +46,7 @@ class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
       val error = "An error"
       val formWithInvalidName = AddApplicationNameForm.form.withError("applicationName", error)
       val document = Jsoup.parse(renderPage(formWithInvalidName).body)
-      elementExistsByText(document, "span", error) shouldBe true
+      elementExistsById(document, "data-field-error-applicationName") shouldBe true
     }
   }
   "Add application page in principal" should {
@@ -60,7 +60,7 @@ class AddApplicationNameSpec extends CommonViewSpec with WithCSRFAddToken {
       val error = "An error"
       val formWithInvalidName = AddApplicationNameForm.form.withError("applicationName", error)
       val document = Jsoup.parse(renderPage(formWithInvalidName).body)
-      elementExistsByText(document, "span", error) shouldBe true
+      elementExistsById(document, "data-field-error-applicationName") shouldBe true
     }
   }
 }
