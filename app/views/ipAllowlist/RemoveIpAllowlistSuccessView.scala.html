@@ -42,16 +42,16 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
   <div class="ip-allowlist">
     <div class="govuk-box-highlight">
-      <h1 class="govuk-heading-l">
+      <h1 class="govuk-heading-l govuk-highlight-text">
         IP allow list removed
       </h1>
-      <p class="govuk-body">
+      <p class="govuk-body govuk-highlight-text">
         API requests can be made from any IP addresses
       </p>
     </div>
 
     <br>
-    @appEnvironment(app)
+    @appEnvironment2(app)
     <br>
 
     <p class="govuk-body">

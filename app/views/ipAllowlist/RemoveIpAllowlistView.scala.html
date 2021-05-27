@@ -55,7 +55,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     <br>
 
-    @appEnvironment(app)
+    @appEnvironment2(app)
 
     <br>
 
@@ -63,8 +63,10 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     @helper.form(action = controllers.routes.IpAllowlist.removeIpAllowlistAction(app.id)) {
       @helper.CSRF.formField
-      <button id="submit" class="govuk-button govuk-button--warning" type="submit">Remove IP allow list</button>
-      <button class="govuk-button govuk-button--secondary" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</button>
+      <div class="govuk-button-group">
+        <button id="submit" class="govuk-button govuk-button--warning" type="submit">Remove IP allow list</button>
+        <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</a>
+      </div>
     }
   </div>
 }

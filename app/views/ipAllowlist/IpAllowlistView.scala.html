@@ -75,9 +75,9 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     <br>
 
     @if(sandboxOrAdmin) {
-      <button class="govuk-button" href="@controllers.routes.IpAllowlist.editIpAllowlist(app.id)">
+      <a class="govuk-button" href="@controllers.routes.IpAllowlist.editIpAllowlist(app.id)">
         Edit IP allow list
-      </button>
+      </a>
 
       <p class="govuk-body">
         <a class="govuk-link" href="/api-documentation/docs/reference-guide#ip-allow-list">
@@ -86,9 +86,9 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
       </p>
 
       @if(!app.ipAllowlist.required) {
-        <button class="govuk-button govuk-button--warning" href="@routes.IpAllowlist.removeIpAllowlist(app.id)">
+        <a class="govuk-button govuk-button--warning" href="@routes.IpAllowlist.removeIpAllowlist(app.id)">
           Remove your IP Allow list
-        </button>
+        </a>
       }
     } else {
       <div class="govuk-inset-text">
