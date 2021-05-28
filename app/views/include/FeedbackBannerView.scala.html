@@ -23,15 +23,15 @@
 <div class="feedback-banner">
     <div class="centered-content">
         <div id="feedback">
-            <p>Your feedback helps us improve our service</p>
-            <button id="show-survey">Tell us what you think</button>
+            <p class="govuk-body govuk-highlight-text">Your feedback helps us improve our service</p>
+            <button class="govuk-button govuk-!-margin-bottom-0" id="show-survey">Tell us what you think</button>
         </div>
         <div id="survey">
-            <button id="close-survey">Close</button>
-            <h2 class="heading-medium">Help us improve our service</h2>
-            <p>@{feedbackBanner.description}</p>
-            <p>Survey responses are anonymous and we will not ask for personal information.</p>
-            <p><a class="button" href="@{appConfig.getString(feedbackBanner.surveyUrlKey)}" target="_blank">Start survey</a></p>
+            <button class="govuk-button" id="close-survey">Close</button>
+            <h2 class="govuk-heading-m">Help us improve our service</h2>
+            <p class="govuk-body">@{feedbackBanner.description}</p>
+            <p class="govuk-body">Survey responses are anonymous and we will not ask for personal information.</p>
+            <p class="govuk-body"><a class="govuk-button" href="@{appConfig.getString(feedbackBanner.surveyUrlKey)}" target="_blank">Start survey</a></p>
         </div>
     </div>
 </div>
