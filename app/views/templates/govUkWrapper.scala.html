@@ -135,17 +135,13 @@
     <a href="@{applicationConfig.reportProblemHost}/contact/problem_reports_nonjs?newTab=false&service=third-party-developer?referrerUrl=@{helper.urlEncode(request.uri)}" class="govuk-link govuk-link--no-visited-state">
       Is this page not working properly?
     </a>
-    <br />
-    <br />
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-full">
-        @feedbackBanner match {
-          case Some(fb) => {
+    <div class="govuk-!-margin-top-8">
+      @feedbackBanner match {
+        case Some(fb) => {
           @feedbackBannerView(fb)
-          }
-          case _ => {}
-          }
-      </div>
+        }
+        case _ => {}
+      }
     </div>
   }
 }
