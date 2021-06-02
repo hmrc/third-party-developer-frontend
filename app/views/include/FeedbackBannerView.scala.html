@@ -21,17 +21,19 @@
 @(feedbackBanner: FeedbackBanner)(implicit appConfig: config.ApplicationConfig)
 
 <div class="feedback-banner">
+  <div class="govuk-width-container">
     <div class="centered-content">
-        <div id="feedback">
-            <p class="govuk-body govuk-highlight-text">Your feedback helps us improve our service</p>
-            <button class="govuk-button govuk-!-margin-bottom-0" id="show-survey">Tell us what you think</button>
-        </div>
-        <div id="survey">
-            <button class="govuk-button" id="close-survey">Close</button>
-            <h2 class="govuk-heading-m">Help us improve our service</h2>
-            <p class="govuk-body">@{feedbackBanner.description}</p>
-            <p class="govuk-body">Survey responses are anonymous and we will not ask for personal information.</p>
-            <p class="govuk-body"><a class="govuk-button" href="@{appConfig.getString(feedbackBanner.surveyUrlKey)}" target="_blank">Start survey</a></p>
-        </div>
+      <div id="feedback">
+        <p class="govuk-body govuk-highlight-text">Your feedback helps us improve our service</p>
+        <button class="govuk-button govuk-!-margin-bottom-0" id="show-survey">Tell us what you think</button>
+      </div>
+      <div id="survey">
+        <button class="govuk-button" id="close-survey">Close</button>
+        <h2 class="govuk-heading-m">Help us improve our service</h2>
+        <p class="govuk-body">@{feedbackBanner.description}</p>
+        <p class="govuk-body">Survey responses are anonymous and we will not ask for personal information.</p>
+        <p class="govuk-body"><a class="govuk-button" href="@{appConfig.getString(feedbackBanner.surveyUrlKey)}" target="_blank">Start survey</a></p>
+      </div>
     </div>
+  </div>
 </div>
