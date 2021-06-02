@@ -62,6 +62,12 @@
 }
 
 @footerBlock = {
+  @feedbackBanner match {
+    case Some(fb) => {
+    @feedbackBannerView(fb)
+  }
+    case _ => {}
+  }
   @siteFooter(new Footer(meta = Some(Meta(items = Some(footerLinks.items)))))
 }
 
