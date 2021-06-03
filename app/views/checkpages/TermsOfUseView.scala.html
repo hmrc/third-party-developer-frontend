@@ -22,7 +22,7 @@
 @import model.ApplicationViewModel
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 

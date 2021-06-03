@@ -86,7 +86,7 @@
                     <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
                     <label class="govuk-visually-hidden" for="newRedirectUri">New Redirect Uri</label>
                     <input id="newRedirectUri" name="newRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
-                    <button id="change" class="govuk-button govuk-!-margin-0" type="submit" value="Change">Change</button>
+                    <button id="@uri change" class="govuk-button govuk-!-margin-0" type="submit" value="Change">Change</button>
                   }
                 </div>
                 <div>
@@ -94,7 +94,7 @@
                     @helper.CSRF.formField
                     <label class="govuk-visually-hidden" for="redirectUri">Redirect Uri</label>
                     <input id="redirectUri" name="redirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
-                    <button id="delete" class="govuk-button govuk-button--secondary govuk-!-margin-0" type="submit" value="Delete">Delete</button>
+                    <button id="@uri delete" class="govuk-button govuk-button--secondary govuk-!-margin-0" type="submit" value="Delete">Delete</button>
                   }
                 </div>
               }
