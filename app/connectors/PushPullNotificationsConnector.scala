@@ -25,7 +25,6 @@ import helpers.Retries
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{Json, Reads}
 import service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.http.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics.API
