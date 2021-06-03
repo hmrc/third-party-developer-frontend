@@ -80,27 +80,27 @@
             <tr class="govuk-table__row">
               <td class="govuk-table__cell center-table-text">@uri</td>
               <td class="govuk-table__cell center-table-text redirect-table-buttons">
-                @if(developerCanModifyApp){
-                  <div class="govuk-!-margin-right-6">
-                    @helper.form(action = controllers.routes.Redirects.changeRedirect(application.id)) {
-                      @helper.CSRF.formField
-                      <label class="govuk-visually-hidden" for="originalRedirectUri">Original Redirect Uri</label>
-                      <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
-                      <label class="govuk-visually-hidden" for="newRedirectUri">New Redirect Uri</label>
-                      <input id="newRedirectUri" name="newRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
-                      <button id="change" class="govuk-button govuk-!-margin-0" type="submit" value="Change">Change</button>
-                    }
-                  </div>
-                  <div>
-                    @helper.form(action = controllers.routes.Redirects.deleteRedirect(application.id)) {
-                      @helper.CSRF.formField
-                      <label class="govuk-visually-hidden" for="redirectUri">Redirect Uri</label>
-                      <input id="redirectUri" name="redirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
-                      <button id="delete" class="govuk-button govuk-button--secondary govuk-!-margin-0" type="submit" value="Delete">Delete</button>
-                    }
-                  </div>
-                }
-              </td>
+              @if(application.permits(loggedIn.developer, SandboxOrAdmin)){
+                <div class="govuk-!-margin-right-6">
+                  @helper.form(action = controllers.routes.Redirects.changeRedirect(application.id)) {
+                    @helper.CSRF.formField
+                    <label class="govuk-visually-hidden" for="originalRedirectUri">Original Redirect Uri</label>
+                    <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
+                    <label class="govuk-visually-hidden" for="newRedirectUri">New Redirect Uri</label>
+                    <input id="newRedirectUri" name="newRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
+                    <button id="@uri change" class="govuk-button govuk-!-margin-0" type="submit" value="Change">Change</button>
+                  }
+                </div>
+                <div>
+                  @helper.form(action = controllers.routes.Redirects.deleteRedirect(application.id)) {
+                    @helper.CSRF.formField
+                    <label class="govuk-visually-hidden" for="redirectUri">Redirect Uri</label>
+                    <input id="redirectUri" name="redirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
+                    <button id="@uri delete" class="govuk-button govuk-button--secondary govuk-!-margin-0" type="submit" value="Delete">Delete</button>
+                  }
+                </div>
+              }
+            </td>
             </tr>
           }
         </tbody>
