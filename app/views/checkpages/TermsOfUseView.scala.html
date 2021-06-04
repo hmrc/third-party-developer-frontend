@@ -65,18 +65,22 @@
           @defining(DateTimeFormat.longDate) { dateFormatter =>
             @fieldError2(form.errors, "termsOfUseAgreed", true)
             <div class="govuk-checkboxes">
-              <input type="checkbox" id="termsOfUseAgreed" class="govuk-checkboxes__input" name="termsOfUseAgreed" value="true"/>
-              <label for="termsOfUseAgreed" class="govuk-label govuk-checkboxes__label">I agree to the terms of use</label>
+              <div class="govuk-checkboxes__item">
+                <input type="checkbox" id="termsOfUseAgreed" class="govuk-checkboxes__input" name="termsOfUseAgreed" value="true"/>
+                <label for="termsOfUseAgreed" class="govuk-label govuk-checkboxes__label">I agree to the terms of use</label>
+              </div>
             </div>
           }
         }
       </fieldset>
     </div>
 
-    @if(form("termsOfUseAgreed").value.contains("true")) {
-      <a href="@landingPageRoute" class="govuk-button">@submitButtonLabel</a>
-    } else {
-      <button id="submit" class="govuk-button" type="submit">@submitButtonLabel</button>
-    }
+    <div class="govuk-button-group">
+      @if(form("termsOfUseAgreed").value.contains("true")) {
+        <a href="@landingPageRoute" class="govuk-button">@submitButtonLabel</a>
+      } else {
+        <button id="submit" class="govuk-button" type="submit">@submitButtonLabel</button>
+      }
+    </div>
   }
 }

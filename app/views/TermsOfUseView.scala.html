@@ -72,9 +72,7 @@
       @helper.CSRF.formField
       <div class="govuk-form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
         <fieldset class="govuk-fieldset" aria-describedby="terms-agreed-error">
-          <span id="terms-agreed-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span> @fieldError2(form.errors, "termsOfUseAgreed", true)
-          </span>
+          @fieldError2(form.errors, "termsOfUseAgreed", true)
           <div class="govuk-checkboxes">
             <div class="govuk-checkboxes__item">
               <input class="govuk-checkboxes__input" type="checkbox" id="termsOfUseAgreed" name="termsOfUseAgreed" value="true"/>
@@ -83,8 +81,10 @@
           </div>
         </fieldset>
       </div>
+      <div class="govuk-button-group">
         <button id="submit" class="govuk-button" type="submit">Save</button>
         <a href="@controllers.routes.Details.details(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+      </div>
     }
   }
 }
