@@ -22,7 +22,7 @@
 @import model.ApplicationViewModel
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[TermsOfUseForm], submitButtonLabel: String, submitAction: Call, landingPageRoute: Call)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
@@ -32,61 +32,55 @@
 @app = @{applicationViewModel.application}
 
 @devMain(
-    title = titleError + "Agree to our terms of use",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = titleError + "Agree to our terms of use",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
 
-    @errorSummary(form)
+  @errorSummary2(form)
 
-    @helper.form(action = submitAction, 'class -> "form") {
-        @helper.CSRF.formField
+  @helper.form(action = submitAction, 'class -> "form") {
+    @helper.CSRF.formField
 
-        <h1 class="heading-xlarge">
-            Agree to our terms of use
-        </h1>
-        <div class="form-group">
-            <fieldset>
-                    @if(form("termsOfUseAgreed").value.contains("true")) {
+    <h1 class="govuk-heading-l">Agree to our terms of use</h1>
 
-                    @defining(DateTimeFormat.forPattern("dd MMMM yyyy")) { dateFormatter =>
+    <div class="govuk-form-group">
+      <fieldset class="govuk-fieldset">
+        @if(form("termsOfUseAgreed").value.contains("true")) {
+          @defining(DateTimeFormat.forPattern("dd MMMM yyyy")) { dateFormatter =>
+            <div class="govuk-inset-text">
+              Terms of use agreed by @{app.checkInformation.get.termsOfUseAgreements.head.emailAddress} on @{dateFormatter.print(app.checkInformation.get.termsOfUseAgreements.head.timeStamp)}.
+            </div>
+          }
+        }
+      </fieldset>
+    </div>
 
-                    <div class="panel panel-border-wide">
-                        <p>Terms of use agreed by @{app.checkInformation.get.termsOfUseAgreements.head.emailAddress} on @{dateFormatter.print(app.checkInformation.get.termsOfUseAgreements.head.timeStamp)}.</p>
-                    </div>
-                    }
-                    }
-            </fieldset>
-        </div>
-        @partials.termsOfUse()
+    @partials.termsOfUse()
 
-        <div class="form-group">
-            <fieldset>
-                @if(form("termsOfUseAgreed").value.isEmpty || form("termsOfUseAgreed").value.contains("false")) {
-                    @defining(DateTimeFormat.longDate) { dateFormatter =>
-                    <hr>
-                    <div class="form-group @if(form.errors("termsOfUseAgreed").nonEmpty){form-group-error}">
-                    @fieldError(form.errors, "termsOfUseAgreed", true)
-                        <div class="multiple-choice">
-                            <input type="checkbox" id="termsOfUseAgreed" name="termsOfUseAgreed" value="true"/>
-                            <label for="termsOfUseAgreed">I agree to the terms of use</label>
-                    </div>
-                    }
-                }
-            </fieldset>
-        </div>
+    <div class="govuk-form-group @if(form.errors("termsOfUseAgreed").nonEmpty){govuk-form-group--error}">
+      <fieldset class="govuk-fieldset">
+        @if(form("termsOfUseAgreed").value.isEmpty || form("termsOfUseAgreed").value.contains("false")) {
+          @defining(DateTimeFormat.longDate) { dateFormatter =>
+            @fieldError2(form.errors, "termsOfUseAgreed", true)
+            <div class="govuk-checkboxes">
+              <div class="govuk-checkboxes__item">
+                <input type="checkbox" id="termsOfUseAgreed" class="govuk-checkboxes__input" name="termsOfUseAgreed" value="true"/>
+                <label for="termsOfUseAgreed" class="govuk-label govuk-checkboxes__label">I agree to the terms of use</label>
+              </div>
+            </div>
+          }
+        }
+      </fieldset>
+    </div>
 
-        <div class="form-group">
-            @if(form("termsOfUseAgreed").value.contains("true")) {
-                <div>
-                    <a href="@landingPageRoute" class="button">@submitButtonLabel</a>
-                </div>
-            } else {
-                <div>
-                    <button id="submit" class="button" type="submit">@submitButtonLabel</button>
-                </div>
-            }
-        </div>
-    }
+    <div class="govuk-button-group">
+      @if(form("termsOfUseAgreed").value.contains("true")) {
+        <a href="@landingPageRoute" class="govuk-button">@submitButtonLabel</a>
+      } else {
+        <button id="submit" class="govuk-button" type="submit">@submitButtonLabel</button>
+      }
+    </div>
+  }
 }

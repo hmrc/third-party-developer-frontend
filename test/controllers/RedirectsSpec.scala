@@ -97,7 +97,7 @@ class RedirectsSpec
       val document = Jsoup.parse(contentAsString(result))
 
       application.standardAccess.redirectUris.foreach(uri => elementExistsByText(document, "td", uri) shouldBe true)
-      elementExistsById(document, "delete") shouldBe shouldShowDeleteButton
+      elementExistsByText(document, "button", "Delete") shouldBe shouldShowDeleteButton
     }
 
     def addRedirectShouldRenderThePage(application: Application, resultStatus: Int, shouldShowAmendControls: Boolean) = {
