@@ -22,7 +22,6 @@ import domain._
 import domain.models.connectors._
 import domain.models.developers._
 import javax.inject.{Inject, Singleton}
-import play.api.http.HeaderNames.CONTENT_LENGTH
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http._
@@ -196,7 +195,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
     for {
       coreUserDetails <- fetchUserId(email)
       userId = coreUserDetails.id.value
-      response <- http.POSTEmpty[ErrorOr[HttpResponse]](s"$serviceBaseUrl/$userId/resend-verification", Seq(CONTENT_LENGTH -> "0"))
+      response <- http.POSTEmpty[ErrorOr[HttpResponse]](s"$serviceBaseUrl/$userId/resend-verification")
         .map {
           case Right(response) => response.status
           case Left(err) => throw err
