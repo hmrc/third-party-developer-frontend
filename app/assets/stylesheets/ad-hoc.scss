@@ -244,9 +244,12 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
 .govuk-box-highlight {
   margin: 1em 0;
   padding: 1.4em 1em 1em;
-  color: #fff;
   background: #00703c;
   text-align: center;
+}
+
+.govuk-highlight-text {
+  color: #fff !important;
 }
 
 .column-three-quarters {
