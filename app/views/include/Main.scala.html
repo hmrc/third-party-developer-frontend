@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
 @import model.Crumb
 @import play.twirl.api.HtmlFormat
@@ -29,7 +30,7 @@
         layoutsBetaBanner: BetaBanner,
         layoutsServiceInfo: ServiceInfo,
         layoutsMainContentHeader: MainContentHeader,
-        layoutsHeadWithTrackingConsent: HeadWithTrackingConsent,
+        hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
         helpersReportAProblemLink: ReportAProblemLink,
         govUkTemplate: GovUkTemplate,
         feedbackBannerView: FeedbackBannerView
@@ -51,18 +52,10 @@
     feedbackBanner: Option[FeedbackBanner] = None
 )(mainContent: Html = HtmlFormat.empty)(implicit messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig, request: play.api.mvc.Request[Any])
 
-@headScripts = {
-<script src='@routes.Assets.versioned("javascripts/googleTagManager.js")'></script>
-}
-
 @head = {
-    @layoutsHeadWithTrackingConsent(
-        linkElem = None,
-        headScripts = Some(headScripts),
-        nonce = None
-    )
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/main.css")'/>
     <meta data-title="@applicationConfig.title"/>
+    @hmrcTrackingConsentSnippet()
 }
 
 
