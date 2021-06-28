@@ -78,10 +78,12 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
 
     <br>
 
-    <a class="govuk-button" href="@routes.IpAllowlist.editIpAllowlist(app.id)">Edit your IP allow list</a>
+    <p class="govuk-body">
+      <a class="govuk-link govuk-link--no-visited-state" href="@routes.IpAllowlist.editIpAllowlist(app.id)">Edit your IP allow list</a>
+    </p>
 
     <p class="govuk-body">
-      <a class="govuk-link" href="@routes.Details.details(app.id)">View your application details</a>
+      <a class="govuk-link govuk-link--no-visited-state" href="@routes.Details.details(app.id)">View your application details</a>
     </p>
   </div>
 }

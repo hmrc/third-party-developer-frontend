@@ -75,9 +75,11 @@ implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, message
     <br>
 
     @if(sandboxOrAdmin) {
-      <a class="govuk-button" href="@controllers.routes.IpAllowlist.editIpAllowlist(app.id)">
-        Edit IP allow list
-      </a>
+      <p class="govuk-body">
+        <a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.IpAllowlist.editIpAllowlist(app.id)">
+          Edit IP allow list
+        </a>
+      </p>
 
       <p class="govuk-body">
         <a class="govuk-link" href="/api-documentation/docs/reference-guide#ip-allow-list">

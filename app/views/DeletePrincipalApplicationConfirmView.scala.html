@@ -34,19 +34,18 @@
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  @errorSummary(form)
+  @errorSummary2(form)
   <h1 class="govuk-heading-l">Delete application</h1>
-  @appEnvironment(app)
+  @appEnvironment2(app)
+  <br>
   <br>
   @helper.form(action = controllers.routes.DeleteApplication.deletePrincipalApplicationAction(app.id), 'class -> "form") {
     <div class="govuk-form-group @if(form.errors("deleteConfirm").nonEmpty) {govuk-form-group--erro}">
-      <fieldset id="deleteConfirm" role="group" aria-describedby="delete-confirm-error">
+      <fieldset id="deleteConfirm" class="govuk-fieldset" role="group" aria-describedby="delete-confirm-error">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
           <h2 class="govuk-heading-m">Are you sure you want us to delete this application?</h2>
         </legend>
-        <span id="delete-confirm-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "deleteConfirm")
-        </span>
+        @fieldError2(form.errors, "deleteConfirm")
         <div class="govuk-radios govuk-radios--inline">
           @helper.CSRF.formField
           <div class="govuk-radios__item">
@@ -60,7 +59,9 @@
         </div>
       </fieldset>
     </div>
-    <button id="submit" class="button" type="submit">Continue</button>
-    <button id="cancel" href="@routes.DeleteApplication.deleteApplication(app.id, None)" class="govuk-heading-l">Cancel</button>
+    <div class="govuk-button-group">
+      <button id="submit" class="govuk-button" type="submit">Continue</button>
+      <a id="cancel" href="@routes.DeleteApplication.deleteApplication(app.id, None)" class="govuk-button govuk-button--secondary">Cancel</a>
+    </div>
   }
 }

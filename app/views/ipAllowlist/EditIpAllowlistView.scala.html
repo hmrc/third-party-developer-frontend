@@ -100,8 +100,8 @@
         <tbody class="govuk-table__body">
           @for(ipRange <- ipAllowlistFlow.allowlist.toSeq.sorted) {
             <tr class="govuk-table__row">
-              <td class="govuk-table__cell">@ipRange</td>
-              <td class="govuk-table__cell">
+              <td class="govuk-table__cell center-text">@ipRange</td>
+              <td class="govuk-table__cell align-right">
                 @if(canRemove) {
                   <a class="govuk-button govuk-button--warning govuk-!-margin-bottom-0" href="@routes.IpAllowlist.removeCidrBlock(app.id, ipRange)">Remove</a>
                 }
@@ -148,7 +148,7 @@
           <br>
           <br>
           <p class="govuk-body">
-            <a class="govuk-link" href="@routes.IpAllowlist.removeIpAllowlist(app.id)">
+            <a class="govuk-link govuk-link--no-visited-state" href="@routes.IpAllowlist.removeIpAllowlist(app.id)">
               Remove your IP allow list
             </a>
           </p>
