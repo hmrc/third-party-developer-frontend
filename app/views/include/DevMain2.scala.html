@@ -14,12 +14,15 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import domain.models.views.{BackButton, FeedbackBanner, NoBackButton, StaticNavLinks, UserNavLinks}
 @import model.Crumb
 @import domain.models.developers.DeveloperSession
 @import templates._
 
-@this(govUkWrapper: govUkWrapper)
+@this(govUkWrapper: govUkWrapper,
+      hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
+     )
 
 @(title: String,
   userFullName: Option[String] = None,
@@ -40,6 +43,7 @@
 @scripts = {
   <script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
   <script>window.GOVUKFrontend.initAll();</script>
+  @hmrcTrackingConsentSnippet()
 }
 
 @userBanner = {

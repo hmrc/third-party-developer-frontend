@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
+import play.api.Logger
 
 @Singleton
 class Registration @Inject()(override val sessionService: SessionService,
@@ -47,6 +48,8 @@ class Registration @Inject()(override val sessionService: SessionService,
   import ErrorFormBuilder.GlobalError
   import play.api.data._
 
+  val logger = Logger("application")
+  
   val regForm: Form[RegisterForm] = RegistrationForm.form
 
   def registration() = loggedOutAction { implicit request =>
@@ -79,7 +82,10 @@ class Registration @Inject()(override val sessionService: SessionService,
         connector.resendVerificationEmail(email)
         .map(_ => Redirect(controllers.routes.Registration.confirmation()))
         .recover {
-          case NonFatal(e) => NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
+          case NonFatal(e) => {
+            logger.warn(s"resendVerification failed with ${e.getMessage}")
+            NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
+          }
         }
       }
   }

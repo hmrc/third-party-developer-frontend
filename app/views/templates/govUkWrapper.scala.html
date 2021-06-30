@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
 @import model.Crumb
 @import play.twirl.api.HtmlFormat
@@ -36,6 +37,7 @@
   footerLinks: FooterLinks,
   applicationConfig: config.ApplicationConfig,
   feedbackBannerView: FeedbackBannerView
+  hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
 )
 
 @(title: String,
@@ -55,10 +57,11 @@
   bodyEndBlock: Option[Html] = None,
   feedbackBanner: Option[FeedbackBanner] = None,
   fullWidth: Boolean = false
-)(contentBlock: Html)(implicit request: Request[_], messages: Messages, applicationConfig: config.ApplicationConfig)
+)(contentBlock: Html)(implicit applicationConfig: config.ApplicationConfig, request: Request[_], messages: Messages)
 
 @head = {
   <link href='@controllers.routes.Assets.versioned("stylesheets/main.css")' media="screen" rel="stylesheet" type="text/css" />
+  @hmrcTrackingConsentSnippet()
 }
 
 @footerBlock = {
