@@ -62,7 +62,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "h1", "Delete application") shouldBe true
         elementExistsByText(document, "p", "We'll respond to your request within 2 working days.") shouldBe true
-        elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "govuk-button", "Request deletion") shouldBe true
+        elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "govuk-button govuk-button--warning", "Request deletion") shouldBe true
       }
 
       "on Sandbox" in {
