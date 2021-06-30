@@ -14,13 +14,12 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
 @import model.Crumb
 @import play.twirl.api.HtmlFormat
 @import views.html.include.FeedbackBannerView
 @import views.html.layouts.GovUkTemplate
-@import uk.gov.hmrc.play.views.html.layouts.{BetaBanner, Footer, Head, HeaderNav, MainContentHeader, ServiceInfo, HeadWithTrackingConsent}
+@import uk.gov.hmrc.play.views.html.layouts.{BetaBanner, Footer, Head, HeaderNav, MainContentHeader, ServiceInfo}
 @import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
 @import domain.models.developers.DeveloperSession
 
@@ -30,7 +29,6 @@
         layoutsBetaBanner: BetaBanner,
         layoutsServiceInfo: ServiceInfo,
         layoutsMainContentHeader: MainContentHeader,
-        hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
         helpersReportAProblemLink: ReportAProblemLink,
         govUkTemplate: GovUkTemplate,
         feedbackBannerView: FeedbackBannerView
@@ -53,9 +51,12 @@
 )(mainContent: Html = HtmlFormat.empty)(implicit messagesProvider: MessagesProvider, applicationConfig: config.ApplicationConfig, request: play.api.mvc.Request[Any])
 
 @head = {
+    @layoutsHead(
+        linkElem = None,
+        headScripts = None
+    )
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/main.css")'/>
     <meta data-title="@applicationConfig.title"/>
-    @hmrcTrackingConsentSnippet()
 }
 
 
