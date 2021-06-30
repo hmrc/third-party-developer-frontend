@@ -22,69 +22,73 @@
 @import domain.models.applications.Application
 @import domain.models.applications.Environment
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application, roleOfLoggedIn: CollaboratorRole)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Delete application",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = "Delete application",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
+  <h1 class="govuk-heading-l">Delete application</h1>
 
-    <header>
-        <h1 class="heading-xlarge">Delete application</h1>
-        @appEnvironment(app)
-        <br>
-    </header>
+  @appEnvironment2(app)
 
-    <div>
-        @if(roleOfLoggedIn == CollaboratorRole.ADMINISTRATOR) {
-            @if(app.deployedTo == Environment.SANDBOX) {
-            <p>
-                Before deleting this application, check with all your <a href="@routes.ManageTeam.manageTeam(app.id, None)">
-                team members</a>.
-            </p>
+  <br>
 
-            <a class="button" href="@controllers.routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
-                Continue</a>
-            } else {
-            <p>
-                Before requesting to delete this application, check with all <a href="@routes.ManageTeam.manageTeam(app.id, None)">
-                team members</a>.
-            </p>
-            <p>
-                We'll respond to your request within 2 working days.
-            </p>
+  @if(roleOfLoggedIn == CollaboratorRole.ADMINISTRATOR) {
+    @if(app.deployedTo == Environment.SANDBOX) {
+      <p class="govuk-body">
+        Before deleting this application, check with all your 
+        <a class="govuk-link" href="@routes.ManageTeam.manageTeam(app.id, None)">
+          team members
+        </a>.
+      </p>
 
-            <a class="button" href="@controllers.routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
-                Request deletion</a>
-            }
+      <a class="govuk-button" href="@controllers.routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
+        Continue
+      </a>
+    } else {
+      <p class="govuk-body">
+        Before requesting to delete this application, check with all 
+        <a class="govuk-link" href="@routes.ManageTeam.manageTeam(app.id, None)">
+          team members
+        </a>.
+      </p>
 
-        } else {
-            <div class="panel panel-border-wide">
-                <p>
-                    You cannot delete this application because you're not an administrator.
-                </p>
-            </div>
-            @defining(app.collaborators.filter(_.role.isAdministrator)) { administrators =>
-                @if(administrators.size == 1) {
-                    <p>
-                        Ask the administrator <a href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> to delete it.
-                    </p>
-                } else {
-                    <p>
-                        Ask one of these administrators to delete it:
-                    </p>
-                    <ul class="list list-bullet">
-                    @for(admin <- administrators) {
-                        <li><a href="mailto:@admin.emailAddress">@admin.emailAddress</a></li>
-                    }
-                    </ul>
-                }
-            }
-        }
+      <p class="govuk-body">
+        We'll respond to your request within 2 working days.
+      </p>
+
+      <a class="govuk-button govuk-button--warning" href="@controllers.routes.DeleteApplication.deletePrincipalApplicationConfirm(app.id, None)">
+        Request deletion
+      </a>
+    }
+  } else {
+    <div class="govuk-inset-text">
+      You cannot delete this application because you're not an administrator.
     </div>
+
+    @defining(app.collaborators.filter(_.role.isAdministrator)) { administrators =>
+      @if(administrators.size == 1) {
+        <p class="govuk-body">
+          Ask the administrator <a class="govuk-link" href="mailto:@administrators.head.emailAddress">@administrators.head.emailAddress</a> to delete it.
+        </p>
+      } else {
+        <p class="govuk-body">
+          Ask one of these administrators to delete it:
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+          @for(admin <- administrators) {
+            <li>
+              <a class="govuk-link" href="mailto:@admin.emailAddress">@admin.emailAddress</a>
+            </li>
+          }
+        </ul>
+      }
+    }
+  }
 }

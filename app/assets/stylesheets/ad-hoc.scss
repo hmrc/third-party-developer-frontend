@@ -244,7 +244,6 @@ a.interrupt-button, a.interrupt-button:visited, a.interrupt-button:link {
 .govuk-box-highlight {
   margin: 1em 0;
   padding: 1.4em 1em 1em;
-  color: #fff;
   background: #00703c;
   text-align: center;
 }
@@ -408,6 +407,14 @@ tr.teamMembers, th {
       }
     }
   }
+}
+
+.center-text {
+  vertical-align: inherit;
+}
+
+.align-right {
+  text-align: right;
 }
 
 .auth-links {

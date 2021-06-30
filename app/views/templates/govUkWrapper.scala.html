@@ -35,6 +35,8 @@
   siteHeader: siteHeader,
   siteFooter: siteFooter,
   footerLinks: FooterLinks,
+  applicationConfig: config.ApplicationConfig,
+  feedbackBannerView: FeedbackBannerView,
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
 )
 
@@ -63,6 +65,14 @@
 }
 
 @footerBlock = {
+  <div class="govuk-!-margin-top-8">
+    @feedbackBanner match {
+      case Some(fb) => {
+      @feedbackBannerView(fb)
+    }
+      case _ => {}
+    }
+  </div>
   @siteFooter(new Footer(meta = Some(Meta(items = Some(footerLinks.items)))))
 }
 
@@ -79,11 +89,11 @@
 }
 
 @beforeContentBlock = {
-<div class="before-content-banner">
-  @include.breadcrumbs2(breadcrumbs: _*)
-  @backLink
-  @serviceInfoContent
-</div>
+  <div class="before-content-banner">
+    @include.breadcrumbs2(breadcrumbs: _*)
+    @backLink
+    @serviceInfoContent
+  </div>
 }
 
 @content = {
@@ -135,6 +145,7 @@
 
 @scripts = {
   <script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+  <script src='@routes.Assets.versioned("javascripts/feedback.js")' type="text/javascript"></script>
   <script>window.GOVUKFrontend.initAll();</script>
 }
 

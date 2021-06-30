@@ -22,51 +22,51 @@
 @import domain.models.views.IpAllowlistFeedbackBanner
 @import model.Crumb
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "Remove IP allow list",
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn),
-    breadcrumbs = Seq(
-        Crumb("Remove IP allow list"),
-        Crumb.ipAllowlist(app),
-        Crumb.application(app),
-        Crumb.viewAllApplications
-    ),
-    feedbackBanner = Some(IpAllowlistFeedbackBanner)
+  title = "Remove IP allow list",
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  breadcrumbs = Seq(
+    Crumb("Remove IP allow list"),
+    Crumb.ipAllowlist(app),
+    Crumb.application(app),
+    Crumb.viewAllApplications
+  ),
+  feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
 
-    <div class="ip-allowlist">
-        <header>
-            <h1 class="heading-large">
-                Are you sure you want to remove your IP allow list?
-            </h1>
-        </header>
+  <div class="ip-allowlist">
+    <h1 class="govuk-heading-l">
+      Are you sure you want to remove your IP allow list?
+    </h1>
 
-        <div class="notice">
-            <i class="icon icon-important">
-                <span class="visually-hidden">Warning</span>
-            </i>
-            <strong class="bold-small">
-                Removing your IP allow list means your software can make API requests to HMRC from any IP address
-            </strong>
-        </div>
-
-        <br>
-        @appEnvironment(app)
-
-        <br>
-        <p>You can set up a new IP allow list at any time.</p>
-
-        @helper.form(action = controllers.routes.IpAllowlist.removeIpAllowlistAction(app.id)) {
-            @helper.CSRF.formField
-            <button id="submit" class="button" type="submit">Remove IP allow list</button>
-            <a class="secondary-button" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</a>
-        }
-
+    <div class="govuk-warning-text">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-warning-text__assistive">Warning</span>
+        Removing your IP allow list means your software can make API requests to HMRC from any IP address
+      </strong>
     </div>
+
+    <br>
+
+    @appEnvironment2(app)
+
+    <br>
+
+    <p class="govuk-body">You can set up a new IP allow list at any time.</p>
+
+    @helper.form(action = controllers.routes.IpAllowlist.removeIpAllowlistAction(app.id)) {
+      @helper.CSRF.formField
+      <div class="govuk-button-group">
+        <button id="submit" class="govuk-button govuk-button--warning" type="submit">Remove IP allow list</button>
+        <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowlist.viewIpAllowlist(app.id)">Cancel</a>
+      </div>
+    }
+  </div>
 }

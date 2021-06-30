@@ -23,56 +23,67 @@
 @import domain.models.views.IpAllowlistFeedbackBanner
 @import model.Crumb
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application, ipAllowlistFlow: IpAllowlistFlow)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "IP allow list",
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn),
-    breadcrumbs = Seq(
-        Crumb("IP allow list"),
-        Crumb.application(app),
-        Crumb.viewAllApplications
-    ),
-    feedbackBanner = Some(IpAllowlistFeedbackBanner)
+  title = "IP allow list",
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  breadcrumbs = Seq(
+    Crumb("IP allow list"),
+    Crumb.application(app),
+    Crumb.viewAllApplications
+  ),
+  feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
 
-    <div class="ip-allowlist">
-        <div class="govuk-box-highlight">
-            <h1 class="heading-xlarge">
-                @if(app.ipAllowlist.allowlist.isEmpty) {
-                    Your IP allow list is active
-                } else {
-                    IP allow list changes active
-                }
-            </h1>
-            <p class="font-medium">
-                API requests can only be made from these IP addresses
-            </p>
-        </div>
-
-        <br>
-        @appEnvironment(app)
-        <br>
-
-        <table class="narrow">
-            <thead><tr><th>IP addresses</th></tr></thead>
-            <tbody>
-            @for(ipRange <- ipAllowlistFlow.allowlist.toSeq.sorted) {
-                <tr><td>@ipRange</td></tr>
-            }
-            </tbody>
-        </table>
-
-        <br>
-        <p>
-            <a href="@routes.IpAllowlist.editIpAllowlist(app.id)">Edit your IP allow list</a>
-        </p>
-        <p>
-            <a href="@routes.Details.details(app.id)">View your application details</a>
-        </p>
+  <div class="ip-allowlist">
+    <div class="govuk-box-highlight">
+      <h1 class="govuk-heading-l govuk-highlight-text ">
+        @if(app.ipAllowlist.allowlist.isEmpty) {
+          Your IP allow list is active
+        } else {
+          IP allow list changes active
+        }
+      </h1>
+      <p class="govuk-body govuk-highlight-text ">
+        API requests can only be made from these IP addresses
+      </p>
     </div>
+
+    <br>
+
+    @appEnvironment2(app)
+
+    <br>
+
+    <table class="govuk-table narrow">
+      <caption class="govuk-visually-hidden">Change IP allow list table</caption>
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">IP addresses</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        @for(ipRange <- ipAllowlistFlow.allowlist.toSeq.sorted) {
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">@ipRange</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <br>
+
+    <p class="govuk-body">
+      <a class="govuk-link govuk-link--no-visited-state" href="@routes.IpAllowlist.editIpAllowlist(app.id)">Edit your IP allow list</a>
+    </p>
+
+    <p class="govuk-body">
+      <a class="govuk-link govuk-link--no-visited-state" href="@routes.Details.details(app.id)">View your application details</a>
+    </p>
+  </div>
 }

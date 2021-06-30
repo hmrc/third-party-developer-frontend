@@ -22,57 +22,57 @@
 @import domain.models.applications.Application
 @import model.Crumb
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application, cidrBlock: String)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @breadcrumbs = @{
-    if(app.ipAllowlist.allowlist.isEmpty) {
-        Seq.empty
-    } else {
-        Seq(
-            Crumb("Remove IP address"),
-            Crumb.ipAllowlist(app),
-            Crumb.application(app),
-            Crumb.viewAllApplications
-        )
-    }
+  if(app.ipAllowlist.allowlist.isEmpty) {
+    Seq.empty
+  } else {
+    Seq(
+      Crumb("Remove IP address"),
+      Crumb.ipAllowlist(app),
+      Crumb.application(app),
+      Crumb.viewAllApplications
+    )
+  }
 }
 @backButton = @{
-    if(app.ipAllowlist.allowlist.isEmpty) {
-        BackButtonWithJavaScript
-    } else {
-        NoBackButton
-    }
+  if(app.ipAllowlist.allowlist.isEmpty) {
+    BackButtonWithJavaScript
+  } else {
+    NoBackButton
+  }
 }
 
 @devMain(
-    title = "Remove IP address",
-    userFullName = loggedIn.loggedInName,
-    back = backButton,
-    developerSession = Some(loggedIn),
-    breadcrumbs = breadcrumbs,
-    feedbackBanner = Some(IpAllowlistFeedbackBanner)
+  title = "Remove IP address",
+  userFullName = loggedIn.loggedInName,
+  back = backButton,
+  developerSession = Some(loggedIn),
+  breadcrumbs = breadcrumbs,
+  feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
 
-    <div class="ip-allowlist">
-        <header>
-            <h1 class="heading-large">
-                Are you sure you want to remove this IP address from your IP allow list?
-            </h1>
-        </header>
+  <div class="ip-allowlist">
+    <h1 class="govuk-heading-l">
+      Are you sure you want to remove this IP address from your IP allow list?
+    </h1>
 
-        <p class="font-medium">@cidrBlock</p>
+    <p class="govuk-body">@cidrBlock</p>
 
-        @appEnvironment(app)
-        <br>
+    @appEnvironment2(app)
 
-        @helper.form(action = controllers.routes.IpAllowlist.removeCidrBlockAction(app.id, cidrBlock)) {
-            @helper.CSRF.formField
-            <button id="submit" class="button" type="submit">Remove IP address</button>
-            <a class="secondary-button" href="@routes.IpAllowlist.editIpAllowlist(app.id)">Cancel</a>
-        }
+    <br>
 
-    </div>
+    @helper.form(action = controllers.routes.IpAllowlist.removeCidrBlockAction(app.id, cidrBlock)) {
+      @helper.CSRF.formField
+      <div class="govuk-button-group">
+        <button id="submit" class="govuk-button govuk-button--warning" type="submit">Remove IP address</button>
+        <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowlist.editIpAllowlist(app.id)">Cancel</a>
+      </div>
+    }
+  </div>
 }

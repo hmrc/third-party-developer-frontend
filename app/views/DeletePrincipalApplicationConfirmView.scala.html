@@ -20,45 +20,48 @@
 @import domain.models.applications.Application
 @import domain.models.developers.DeveloperSession
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application, form: Form[DeletePrincipalApplicationForm])(
-        implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
+  implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
+)
 
 @titleError = { @if(form.errors.nonEmpty) {Error: } else {}}
 
 @devMain(
-    title = titleError + "Delete application",
-    userFullName = loggedIn.loggedInName,
-    back = BackButtonWithJavaScript,
-    developerSession = Some(loggedIn)
+  title = titleError + "Delete application",
+  userFullName = loggedIn.loggedInName,
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
-
-    @errorSummary(form)
-    <h1 class="heading-xlarge">Delete application</h1>
-    @appEnvironment(app)
-    <br>
-    @helper.form(action = controllers.routes.DeleteApplication.deletePrincipalApplicationAction(app.id), 'class -> "form") {
-        <fieldset id="deleteConfirm" class="inline @if(form.errors("deleteConfirm").nonEmpty) {form-group-error}">
-        <legend>
-            <h2 class="heading-large">Are you sure you want us to delete this application?</h2>
+  @errorSummary2(form)
+  <h1 class="govuk-heading-l">Delete application</h1>
+  @appEnvironment2(app)
+  <br>
+  <br>
+  @helper.form(action = controllers.routes.DeleteApplication.deletePrincipalApplicationAction(app.id), 'class -> "form") {
+    <div class="govuk-form-group @if(form.errors("deleteConfirm").nonEmpty) {govuk-form-group--erro}">
+      <fieldset id="deleteConfirm" class="govuk-fieldset" role="group" aria-describedby="delete-confirm-error">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+          <h2 class="govuk-heading-m">Are you sure you want us to delete this application?</h2>
         </legend>
-        <div class="form-group">
-            @helper.CSRF.formField
-            @fieldError(form.errors, "deleteConfirm")
-            <div class="multiple-choice">
-                <input id="yes" type="radio" name="deleteConfirm" value="Yes">
-                <label for="yes">Yes</label>
-            </div>
-            <div class="multiple-choice">
-                <input id="no" type="radio" name="deleteConfirm" value="No">
-                <label for="no">No</label>
-            </div>
+        @fieldError2(form.errors, "deleteConfirm")
+        <div class="govuk-radios govuk-radios--inline">
+          @helper.CSRF.formField
+          <div class="govuk-radios__item">
+            <input id="yes" class="govuk-radios__input" type="radio" name="deleteConfirm" value="Yes">
+            <label class="govuk-label govuk-radios__label" for="yes">Yes</label>
+          </div>
+          <div class="govuk-radios__item">
+            <input id="no" class="govuk-radios__input" type="radio" name="deleteConfirm" value="No">
+            <label class="govuk-label govuk-radios__label" for="no">No</label>
+          </div>
         </div>
-        <div class="form-group">
-            <button id="submit" class="button" type="submit">Continue</button>
-            <a id="cancel" href="@routes.DeleteApplication.deleteApplication(app.id, None)" class="secondary-button">Cancel</a>
-        </div>
-        </fieldset>
-    }
+      </fieldset>
+    </div>
+    <div class="govuk-button-group">
+      <button id="submit" class="govuk-button" type="submit">Continue</button>
+      <a id="cancel" href="@routes.DeleteApplication.deleteApplication(app.id, None)" class="govuk-button govuk-button--secondary">Cancel</a>
+    </div>
+  }
 }

@@ -22,40 +22,40 @@
 @import domain.models.views.IpAllowlistFeedbackBanner
 @import model.Crumb
 
-@this(devMain: DevMain)
+@this(devMain: DevMain2)
 
 @(app: Application)(
 implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
-    title = "IP allow list removed",
-    userFullName = loggedIn.loggedInName,
-    developerSession = Some(loggedIn),
-    breadcrumbs = Seq(
-        Crumb("IP allow list removed"),
-        Crumb.ipAllowlist(app),
-        Crumb.application(app),
-        Crumb.viewAllApplications
-    ),
-    feedbackBanner = Some(IpAllowlistFeedbackBanner)
+  title = "IP allow list removed",
+  userFullName = loggedIn.loggedInName,
+  developerSession = Some(loggedIn),
+  breadcrumbs = Seq(
+    Crumb("IP allow list removed"),
+    Crumb.ipAllowlist(app),
+    Crumb.application(app),
+    Crumb.viewAllApplications
+  ),
+  feedbackBanner = Some(IpAllowlistFeedbackBanner)
 ) {
 
-    <div class="ip-allowlist">
-        <div class="govuk-box-highlight">
-            <h1 class="heading-xlarge">
-                IP allow list removed
-            </h1>
-            <p class="font-medium">
-                API requests can be made from any IP addresses
-            </p>
-        </div>
-
-        <br>
-        @appEnvironment(app)
-        <br>
-
-        <p>
-            <a href="@routes.Details.details(app.id)">View your application details</a>
-        </p>
+  <div class="ip-allowlist">
+    <div class="govuk-box-highlight">
+      <h1 class="govuk-heading-l govuk-highlight-text">
+        IP allow list removed
+      </h1>
+      <p class="govuk-body govuk-highlight-text">
+        API requests can be made from any IP addresses
+      </p>
     </div>
+
+    <br>
+    @appEnvironment2(app)
+    <br>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="@routes.Details.details(app.id)">View your application details</a>
+    </p>
+  </div>
 }

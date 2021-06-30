@@ -128,7 +128,7 @@ class IpAllowlistSpec
       val body: String = contentAsString(result)
       body should include("An IP allow list is a security feature that lets you control which IP addresses are allowed to make API requests to HMRC")
       body should include("You cannot set up the IP allow list because you are not an administrator")
-      body should include("The administrator <a href=\"mailto:admin@example.com\">admin@example.com</a> has access.")
+      body should include("The administrator <a class=\"govuk-link\" href=\"mailto:admin@example.com\">admin@example.com</a> has access.")
       verifyIpAllowlistSurveyIsPresent(body)
     }
 
@@ -142,7 +142,7 @@ class IpAllowlistSpec
       val body: String = contentAsString(result)
       body should include("API requests can only be made from these IP addresses.")
       body should include("You cannot edit the IP allow list because you are not an administrator")
-      body should include("The administrator <a href=\"mailto:admin@example.com\">admin@example.com</a> has access.")
+      body should include("The administrator <a class=\"govuk-link\" href=\"mailto:admin@example.com\">admin@example.com</a> has access.")
       verifyIpAllowlistSurveyIsPresent(body)
     }
   }

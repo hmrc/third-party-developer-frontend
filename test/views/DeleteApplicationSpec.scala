@@ -62,7 +62,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "h1", "Delete application") shouldBe true
         elementExistsByText(document, "p", "We'll respond to your request within 2 working days.") shouldBe true
-        elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Request deletion") shouldBe true
+        elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "govuk-button govuk-button--warning", "Request deletion") shouldBe true
       }
 
       "on Sandbox" in {
@@ -73,7 +73,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "h1", "Delete application") shouldBe true
-        elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe true
+        elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "govuk-button", "Continue") shouldBe true
       }
     }
 
@@ -89,7 +89,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
           elementExistsByText(document, "h1", "Delete application") shouldBe true
           elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Request deletion") shouldBe false
           elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe false
-          elementExistsByText(document, "p", "You cannot delete this application because you're not an administrator.") shouldBe true
+          elementExistsByText(document, "div", "You cannot delete this application because you're not an administrator.") shouldBe true
           elementExistsByText(document, "p", s"Ask the administrator ${loggedInUser.email} to delete it.") shouldBe true
         }
       }
@@ -107,7 +107,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
             elementExistsByText(document, "h1", "Delete application") shouldBe true
             elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Request deletion") shouldBe false
             elementIdentifiedByAttrWithValueContainsText(document, "a", "class", "button", "Continue") shouldBe false
-            elementExistsByText(document, "p", "You cannot delete this application because you're not an administrator.") shouldBe true
+            elementExistsByText(document, "div", "You cannot delete this application because you're not an administrator.") shouldBe true
             elementExistsByText(document, "p", "Ask one of these administrators to delete it:") shouldBe true
             application.collaborators foreach { admin => elementExistsByText(document, "li", admin.emailAddress) shouldBe true }
           }
