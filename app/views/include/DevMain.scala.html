@@ -39,7 +39,7 @@
     @userBanner = {
     <div id="user-nav-links" class="header__menu__proposition--sub-header" data-ej>
         <ul class="header__menu__proposition-links">
-            @headerNavLinks(UserNavLinks(userFullName, isRegistering), anchorClass=Some("link-style"))
+            @headerNavLinks2(UserNavLinks(userFullName, isRegistering), anchorClass=Some("link-style"))
         </ul>
     </div>
 }
@@ -47,7 +47,7 @@
 @main(title = s"$title - HMRC Developer Hub - GOV.UK",
     navTitle = Some(applicationConfig.title),
     navTitleLink = Some(Call("GET", s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation")),
-    headerNavLinks = headerNavLinks(
+    headerNavLinks = headerNavLinks2(
         StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl),
         UserNavLinks(userFullName, isRegistering)),
     serviceInfoContent = Some(userBanner),
