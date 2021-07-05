@@ -34,6 +34,7 @@ import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.http.HeaderCarrier
+import model.ManageApplicationsViewModel
 
 @Singleton
 class AddApplication @Inject() (
@@ -60,7 +61,7 @@ class AddApplication @Inject() (
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     applicationService.fetchByTeamMember(loggedIn.developer.userId) flatMap { 
       case Nil                    => successful(Ok(addApplicationSubordinateEmptyNestView()))
-      case apps: Seq[Application] => successful(Ok(manageApplicationsView(apps.map(ApplicationSummary.from(_, loggedIn.email)))))
+      case apps: Seq[Application] => successful(Ok(manageApplicationsView(ManageApplicationsViewModel(apps.map(ApplicationSummary.from(_, loggedIn.email))))))
     }
   }
 

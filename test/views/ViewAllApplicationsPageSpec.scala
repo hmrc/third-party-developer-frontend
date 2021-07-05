@@ -30,6 +30,7 @@ import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
 import views.helper.EnvironmentNameService
 import controllers.ProductionApplicationSummary
+import model.ManageApplicationsViewModel
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
@@ -56,13 +57,12 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
-      manageApplicationsView.render(appSummaries, request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
+      manageApplicationsView.render(ManageApplicationsViewModel(appSummaries), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
 
     "show the applications page if there is more than 0 sandbox applications and environment is Prod/Sandbox" in new Setup {
 
       val appName = "App name 1"
-      val appEnvironment = "Sandbox"
       val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
@@ -101,7 +101,6 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
       val appName = "App name 1"
-      val appEnvironment = "Sandbox"
       val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
@@ -137,7 +136,6 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
     "hide Get production credentials button if there is more than 0 production applications" in new Setup {
 
       val appName = "App name 1"
-      val appEnvironment = "Production"
       val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
@@ -172,7 +170,6 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
     "show using privileged application credentials text if user is a collaborator on at least one privileged application" in {
 
       val appName = "App name 1"
-      val appEnvironment = "Production"
       val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
@@ -205,7 +202,6 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
     "hide using privileged application credentials text if user is not a collaborator on at least one privileged application" in {
 
       val appName = "App name 1"
-      val appEnvironment = "Production"
       val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn

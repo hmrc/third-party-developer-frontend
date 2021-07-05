@@ -17,13 +17,14 @@
 @import helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import model.Crumb
+@import model.ManageApplicationsViewModel
 @import controllers.ApplicationSummary.noProductionApplications
 @import domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
-@(applications: Seq[controllers.ApplicationSummary])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
+@(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
 
 @devMain(
   title = "View all applications",
@@ -37,8 +38,8 @@
 ) {
   <h1 class="govuk-heading-l">View all applications</h1>
 
-  @applicationList(applications)
-  @if(noProductionApplications(applications)) {
+  @applicationList(model.applicationSummaries)
+  @if(noProductionApplications(model.applicationSummaries)) {
     </br>
     <p class="govuk-body">
       After testing in @environmentNameService.subordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.
@@ -47,7 +48,7 @@
       Get @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials
     </a>
   }
-  @if(!applications.filter(_.accessType.isPriviledged).isEmpty) {
+  @if(!model.applicationSummaries.filter(_.accessType.isPriviledged).isEmpty) {
     <h2 class="govuk-heading-m">Using privileged application credentials</h2>
     <p class="govuk-body">Check <a class="govuk-link"href="@controllers.routes.AddApplication.usingPrivilegedApplicationCredentialsPage()">
       how to use privileged application credentials</a>.
