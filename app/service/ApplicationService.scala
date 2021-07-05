@@ -170,11 +170,11 @@ class ApplicationService @Inject() (
     } yield response
   }
 
-  def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
-    def fetchProductionApplications = connectorWrapper.productionApplicationConnector.fetchByTeamMemberUserId(userId)
+  def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
+    def fetchProductionApplications = connectorWrapper.productionApplicationConnector.fetchByTeamMember(userId)
 
     def fetchSandboxApplications: Future[Seq[Application]] = {
-      connectorWrapper.sandboxApplicationConnector.fetchByTeamMemberUserId(userId) recover {
+      connectorWrapper.sandboxApplicationConnector.fetchByTeamMember(userId) recover {
         case _ => Seq.empty
       }
     }
@@ -239,7 +239,7 @@ object ApplicationService {
   trait ApplicationConnector {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
-    def fetchByTeamMemberUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]]
+    def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]]
     def removeTeamMember(applicationId: ApplicationId, teamMemberToDelete: String, requestingEmail: String, adminsToEmail: Set[String])(
         implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful]

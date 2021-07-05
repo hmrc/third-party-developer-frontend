@@ -47,12 +47,12 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def fetchByApplicationIdReturnsNone(id: ApplicationId) =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(None))
 
-  def fetchByTeamMemberUserIdReturns(apps: Seq[Application]) =
-    when(applicationServiceMock.fetchByTeamMemberUserId(*[UserId])(*))
+  def fetchByTeamMemberReturns(apps: Seq[Application]) =
+    when(applicationServiceMock.fetchByTeamMember(*[UserId])(*))
       .thenReturn(successful(apps))
 
-  def fetchByTeamMemberUserIdReturns(userId: UserId, apps: Seq[Application]) =
-    when(applicationServiceMock.fetchByTeamMemberUserId(eqTo(userId))(*))
+  def fetchByTeamMemberReturns(userId: UserId, apps: Seq[Application]) =
+    when(applicationServiceMock.fetchByTeamMember(eqTo(userId))(*))
       .thenReturn(successful(apps))
 
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =

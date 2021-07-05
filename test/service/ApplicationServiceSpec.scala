@@ -187,34 +187,34 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     val sandboxApps = Seq(app2)
 
     "sort the returned applications by name" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMemberUserId(userId))
+      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(successful(productionApps))
 
-      when(mockSandboxApplicationConnector.fetchByTeamMemberUserId(userId))
+      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(successful(sandboxApps))
 
-      private val result = await(applicationService.fetchByTeamMemberUserId(userId))
+      private val result = await(applicationService.fetchByTeamMember(userId))
       result shouldBe Seq(app3, app2, app1)
     }
 
     "tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMemberUserId(userId))
+      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(successful(productionApps))
-      when(mockSandboxApplicationConnector.fetchByTeamMemberUserId(userId))
+      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
 
-      private val result = await(applicationService.fetchByTeamMemberUserId(userId))
+      private val result = await(applicationService.fetchByTeamMember(userId))
       result shouldBe Seq(app3, app1)
     }
 
     "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMemberUserId(userId))
+      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
-      when(mockSandboxApplicationConnector.fetchByTeamMemberUserId(userId))
+      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(successful(sandboxApps))
 
       intercept[UpstreamErrorResponse] {
-        await(applicationService.fetchByTeamMemberUserId(userId))
+        await(applicationService.fetchByTeamMember(userId))
       }
     }
   }

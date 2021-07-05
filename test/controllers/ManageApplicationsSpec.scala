@@ -121,7 +121,7 @@ class ManageApplicationsSpec
   "manageApps" should {
 
     "return the manage Applications page with the user logged in" in new Setup {
-      fetchByTeamMemberUserIdReturns(loggedInUser.developer.userId, List(application))
+      fetchByTeamMemberReturns(loggedInUser.developer.userId, List(application))
 
       private val result = addApplicationController.manageApps()(loggedInRequest)
 

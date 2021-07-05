@@ -44,7 +44,7 @@ class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicat
   }
 
   private def isAdminOnProductionApplication(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    applicationService.fetchByTeamMemberUserId(userId).map(applications => {
+    applicationService.fetchByTeamMember(userId).map(applications => {
       applications
         .filter(app => app.deployedTo.isProduction())
         .flatMap(app => app.collaborators)

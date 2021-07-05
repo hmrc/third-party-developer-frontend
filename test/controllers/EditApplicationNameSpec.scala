@@ -128,7 +128,7 @@ class EditApplicationNameSpec
     "return the Edit Applications Name Page with user logged in" in new Setup {
       givenApplicationAction(application, loggedInUser)
 
-      fetchByTeamMemberUserIdReturns(loggedInUser.developer.userId, List(application))
+      fetchByTeamMemberReturns(loggedInUser.developer.userId, List(application))
 
       private val result = underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken)
 
@@ -185,7 +185,7 @@ class EditApplicationNameSpec
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
 
-      fetchByTeamMemberUserIdReturns(loggedInUser.developer.userId, List(application))
+      fetchByTeamMemberReturns(loggedInUser.developer.userId, List(application))
 
       private val result = underTest.addApplicationName(Environment.PRODUCTION)(loggedInRequest.withCSRFToken)
 
