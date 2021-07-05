@@ -29,36 +29,84 @@ import domain.models.subscriptions.ApiData
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: Map[ApiContext, ApiData])
 
-case class ApplicationSummary(
-    id: ApplicationId,
-    name: String,
-    environment: String,
-    role: CollaboratorRole,
-    termsOfUseStatus: TermsOfUseStatus,
-    state: State,
-    lastAccess: DateTime,
-    serverTokenUsed: Boolean = false,
-    createdOn: DateTime,
-    accessType: AccessType
-)
+trait ApplicationSummary {
+  def id: ApplicationId
+  def name: String
+  final def environment: String = ApplicationSummary.environment(this)
+  def role: CollaboratorRole
+  def termsOfUseStatus: TermsOfUseStatus
+  def state: State
+  def lastAccess: DateTime
+  def serverTokenUsed: Boolean
+  def createdOn: DateTime
+  def accessType: AccessType
+}
+
+case class ProductionApplicationSummary(
+  id: ApplicationId,
+  name: String,
+  role: CollaboratorRole,
+  termsOfUseStatus: TermsOfUseStatus,
+  state: State,
+  lastAccess: DateTime,
+  serverTokenUsed: Boolean = false,
+  createdOn: DateTime,
+  accessType: AccessType
+) extends ApplicationSummary
+
+case class SandboxApplicationSummary(
+  id: ApplicationId,
+  name: String,
+  role: CollaboratorRole,
+  termsOfUseStatus: TermsOfUseStatus,
+  state: State,
+  lastAccess: DateTime,
+  serverTokenUsed: Boolean = false,
+  createdOn: DateTime,
+  accessType: AccessType,
+  isValidTargetForUplift: Boolean
+) extends ApplicationSummary
 
 object ApplicationSummary {
-  def from(app: Application, email: String) =
-    ApplicationSummary(
-      app.id,
-      app.name,
-      app.deployedTo.toString.toLowerCase.capitalize,
-      app.role(email).getOrElse(throw new NotFoundException("Role not found")),
-      app.termsOfUseStatus,
-      app.state.name,
-      app.lastAccess,
-      app.lastAccessTokenUsage.isDefined,
-      app.createdOn,
-      app.access.accessType
-    )
+  def environment(app: ApplicationSummary): String = app match {
+    case _ : ProductionApplicationSummary => "Production"
+    case _ => "Sandbox"
+  }
 
+  
   def noProductionApplications(applications: Seq[controllers.ApplicationSummary]): Boolean = {
     !applications.exists(_.environment == "Production")
+  }
+
+  def from(app: Application, email: String): ApplicationSummary = {
+    val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
+    
+    if(app.deployedTo.isProduction) {
+      ProductionApplicationSummary(
+        app.id,
+        app.name,
+        role,
+        app.termsOfUseStatus,
+        app.state.name,
+        app.lastAccess,
+        app.lastAccessTokenUsage.isDefined,
+        app.createdOn,
+        app.access.accessType        
+      )
+    } else {
+      SandboxApplicationSummary(
+        app.id,
+        app.name,
+        role,
+        app.termsOfUseStatus,
+        app.state.name,
+        app.lastAccess,
+        app.lastAccessTokenUsage.isDefined,
+        app.createdOn,
+        app.access.accessType,
+        false// TODO
+      )
+    }
   }
 }
 

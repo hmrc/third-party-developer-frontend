@@ -16,7 +16,7 @@
 
 package views
 
-import controllers.ApplicationSummary
+import controllers.{ProductionApplicationSummary, SandboxApplicationSummary, ApplicationSummary}
 import domain.models.apidefinitions.AccessType
 import domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
 import domain.models.developers.LoggedInState
@@ -29,6 +29,7 @@ import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
 import views.helper.EnvironmentNameService
+import controllers.ProductionApplicationSummary
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {
@@ -67,17 +68,17 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(
-        ApplicationSummary(
+        SandboxApplicationSummary(
           applicationId,
           appName,
-          appEnvironment,
           appUserRole,
           TermsOfUseStatus.NOT_APPLICABLE,
           State.TESTING,
           appLastAccess,
           false,
           appCreatedOn,
-          AccessType.STANDARD
+          AccessType.STANDARD,
+          false
         )
       )
 
@@ -105,8 +106,19 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(ApplicationSummary(ApplicationId("1111"), appName, appEnvironment, appUserRole,
-        TermsOfUseStatus.NOT_APPLICABLE, State.TESTING, appLastAccess, false, appCreatedOn, AccessType.STANDARD))
+      val appSummaries = Seq(
+          SandboxApplicationSummary(
+            ApplicationId("1111"), 
+            appName, 
+            appUserRole,
+            TermsOfUseStatus.NOT_APPLICABLE,
+            State.TESTING,
+            appLastAccess,
+            false,
+            appCreatedOn,
+            AccessType.STANDARD,
+            false
+          ))
 
       val document = Jsoup.parse(renderPage(appSummaries).body)
 
@@ -131,10 +143,9 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(
-        ApplicationSummary(
+        ProductionApplicationSummary(
           applicationId,
           appName,
-          appEnvironment,
           appUserRole,
           TermsOfUseStatus.NOT_APPLICABLE,
           State.TESTING,
@@ -167,10 +178,9 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(
-        ApplicationSummary(
+        ProductionApplicationSummary(
           applicationId,
           appName,
-          appEnvironment,
           appUserRole,
           TermsOfUseStatus.NOT_APPLICABLE,
           State.PRODUCTION,
@@ -201,10 +211,9 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appLastAccess = appCreatedOn
 
       val appSummaries = Seq(
-        ApplicationSummary(
+        ProductionApplicationSummary(
           applicationId,
           appName,
-          appEnvironment,
           appUserRole,
           TermsOfUseStatus.NOT_APPLICABLE,
           State.TESTING,

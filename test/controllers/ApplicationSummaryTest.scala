@@ -28,23 +28,23 @@ class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTra
 
   "noProductionApplications" should {
     val sandboxApp =
-      ApplicationSummary(
+      SandboxApplicationSummary(
         ApplicationId(""),
         "",
-        "Sandbox",
         DEVELOPER,
         TermsOfUseStatus.AGREED,
         TESTING,
         new DateTime(),
         serverTokenUsed = false,
         new DateTime(),
-        AccessType.STANDARD
+        AccessType.STANDARD,
+        false
       )
+      
     val productionApp =
-      ApplicationSummary(
+      ProductionApplicationSummary(
         ApplicationId(""),
         "",
-        "Production",
         DEVELOPER,
         TermsOfUseStatus.AGREED,
         TESTING,

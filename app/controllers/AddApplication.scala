@@ -58,12 +58,9 @@ class AddApplication @Inject() (
     extends ApplicationController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
-    applicationService.fetchByTeamMember(loggedIn.developer.userId) flatMap { apps =>
-      if (apps.isEmpty) {
-        successful(Ok(addApplicationSubordinateEmptyNestView()))
-      } else {
-        successful(Ok(manageApplicationsView(apps.map(ApplicationSummary.from(_, loggedIn.email)))))
-      }
+    applicationService.fetchByTeamMember(loggedIn.developer.userId) flatMap { 
+      case Nil                    => successful(Ok(addApplicationSubordinateEmptyNestView()))
+      case apps: Seq[Application] => successful(Ok(manageApplicationsView(apps.map(ApplicationSummary.from(_, loggedIn.email)))))
     }
   }
 
