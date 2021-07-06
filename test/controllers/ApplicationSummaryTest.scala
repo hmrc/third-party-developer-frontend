@@ -30,14 +30,26 @@ class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTra
       new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), Environment.PRODUCTION, collaborators = Set(user))
     val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(user))
 
-    "set serverTokenUsed if Application has a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(serverTokenApplication, user.emailAddress)
+    "set serverTokenUsed if SandboxApplication has a date set for lastAccessTokenUsage" in {
+      val summary = SandboxApplicationSummary.from(serverTokenApplication, user.emailAddress)
 
       summary.serverTokenUsed should be(true)
     }
 
-    "not set serverTokenUsed if Application does not have a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(noServerTokenApplication, user.emailAddress)
+    "not set serverTokenUsed if SandboxApplication does not have a date set for lastAccessTokenUsage" in {
+      val summary = SandboxApplicationSummary.from(noServerTokenApplication, user.emailAddress)
+
+      summary.serverTokenUsed should be(false)
+    }
+
+    "set serverTokenUsed if ProductionApplication has a date set for lastAccessTokenUsage" in {
+      val summary = ProductionApplicationSummary.from(serverTokenApplication, user.emailAddress)
+
+      summary.serverTokenUsed should be(true)
+    }
+
+    "not set serverTokenUsed if ProductionApplication does not have a date set for lastAccessTokenUsage" in {
+      val summary = ProductionApplicationSummary.from(noServerTokenApplication, user.emailAddress)
 
       summary.serverTokenUsed should be(false)
     }

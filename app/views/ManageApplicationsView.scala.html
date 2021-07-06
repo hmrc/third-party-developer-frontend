@@ -57,10 +57,8 @@
 }
 
 @applicationList(model: ManageApplicationsViewModel) = {
-  @defining(model.applicationSummaries.partition(_.environment.isProduction)) { case (productionApps, sandboxApps) =>
-    @applicationTable(productionApps, appConfig.nameOfPrincipalEnvironment)
-    @applicationTable(sandboxApps, appConfig.nameOfSubordinateEnvironment)
-  }
+  @applicationTable(model.productionApplicationSummaries, appConfig.nameOfPrincipalEnvironment)
+  @applicationTable(model.sandboxApplicationSummaries, appConfig.nameOfSubordinateEnvironment)
 }
 
 @applicationTable(applications: Seq[controllers.ApplicationSummary], environmentName: String) = {
