@@ -37,7 +37,8 @@
 ) {
   <h1 class="govuk-heading-l">View all applications</h1>
 
-  @applicationList(model.applicationSummaries)
+  @applicationList(model)
+  
   @if(model.hasNoProductionApplications) {
     </br>
     <p class="govuk-body">
@@ -55,8 +56,8 @@
   }
 }
 
-@applicationList(applications: Seq[controllers.ApplicationSummary]) = {
-  @defining(applications.partition(_.environment.isProduction)) { case (productionApps, sandboxApps) =>
+@applicationList(model: ManageApplicationsViewModel) = {
+  @defining(model.applicationSummaries.partition(_.environment.isProduction)) { case (productionApps, sandboxApps) =>
     @applicationTable(productionApps, appConfig.nameOfPrincipalEnvironment)
     @applicationTable(sandboxApps, appConfig.nameOfSubordinateEnvironment)
   }

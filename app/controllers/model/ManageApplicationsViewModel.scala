@@ -16,9 +16,14 @@
 
 package controllers.model
 
-import controllers.ApplicationSummary
+import controllers.{SandboxApplicationSummary, ProductionApplicationSummary}
 
-case class ManageApplicationsViewModel(applicationSummaries: Seq[ApplicationSummary]) {
-  def hasNoProductionApplications = !applicationSummaries.exists(_.environment.isProduction)
-  def hasPriviledgedApplications = applicationSummaries.exists(_.accessType.isPriviledged)
+case class ManageApplicationsViewModel(sandboxApplicationSummaries: Seq[SandboxApplicationSummary], productionApplicationSummaries: Seq[ProductionApplicationSummary]) {
+  val hasNoProductionApplications = productionApplicationSummaries.isEmpty
+  val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
+}
+
+object ManageApplicationsViewModel {
+  def from(sandboxApplicationSummaries: Seq[SandboxApplicationSummary], productionApplicationSummaries: Seq[ProductionApplicationSummary]) : ManageApplicationsViewModel = 
+    ManageApplicationsViewModel(sandboxApplicationSummaries, productionApplicationSummaries)
 }

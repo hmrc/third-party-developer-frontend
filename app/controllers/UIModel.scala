@@ -71,36 +71,44 @@ case class SandboxApplicationSummary(
   val environment = Environment.SANDBOX
 }
 
-object ApplicationSummary {
-  def from(app: Application, email: String): ApplicationSummary = {
+object SandboxApplicationSummary {
+  def from(app: Application, email: String): SandboxApplicationSummary = {
+    require(app.deployedTo.isSandbox)
+
     val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
-    
-    if(app.deployedTo.isProduction) {
-      ProductionApplicationSummary(
-        app.id,
-        app.name,
-        role,
-        app.termsOfUseStatus,
-        app.state.name,
-        app.lastAccess,
-        app.lastAccessTokenUsage.isDefined,
-        app.createdOn,
-        app.access.accessType        
-      )
-    } else {
-      SandboxApplicationSummary(
-        app.id,
-        app.name,
-        role,
-        app.termsOfUseStatus,
-        app.state.name,
-        app.lastAccess,
-        app.lastAccessTokenUsage.isDefined,
-        app.createdOn,
-        app.access.accessType,
-        false// TODO
-      )
-    }
+
+    SandboxApplicationSummary(
+      app.id,
+      app.name,
+      role,
+      app.termsOfUseStatus,
+      app.state.name,
+      app.lastAccess,
+      app.lastAccessTokenUsage.isDefined,
+      app.createdOn,
+      app.access.accessType,
+      false// TODO
+    )
+  }
+}
+
+object ProductionApplicationSummary {
+  def from(app: Application, email: String): ProductionApplicationSummary = {
+    require(app.deployedTo.isProduction)
+
+    val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
+
+    ProductionApplicationSummary(
+      app.id,
+      app.name,
+      role,
+      app.termsOfUseStatus,
+      app.state.name,
+      app.lastAccess,
+      app.lastAccessTokenUsage.isDefined,
+      app.createdOn,
+      app.access.accessType        
+    )
   }
 }
 

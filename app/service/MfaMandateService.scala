@@ -44,14 +44,12 @@ class MfaMandateService @Inject()(val appConfig: ApplicationConfig, val applicat
   }
 
   private def isAdminOnProductionApplication(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    applicationService.fetchByTeamMember(userId).map(applications => {
+    applicationService.fetchProductionAppsByTeamMember(userId).map(applications => {
       applications
-        .filter(app => app.deployedTo.isProduction())
         .flatMap(app => app.collaborators)
         .filter(collaborators => collaborators.userId == userId)
         .exists(collaborator => collaborator.role.isAdministrator)
-    }
-    )
+    })
   }
 
   def daysTillAdminMfaMandate: Option[Int] = {

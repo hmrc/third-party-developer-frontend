@@ -32,6 +32,8 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.connectors.AddTeamMemberRequest
+import controllers.ProductionApplicationSummary
+import controllers.SandboxApplicationSummary
 
 @Singleton
 class ApplicationService @Inject() (
@@ -170,22 +172,23 @@ class ApplicationService @Inject() (
     } yield response
   }
 
-  def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
-    def fetchProductionApplications = connectorWrapper.productionApplicationConnector.fetchByTeamMember(userId)
-
-    def fetchSandboxApplications: Future[Seq[Application]] = {
-      connectorWrapper.sandboxApplicationConnector.fetchByTeamMember(userId) recover {
-        case _ => Seq.empty
-      }
-    }
-
-    val productionApplicationsFuture = fetchProductionApplications
-    val sandboxApplicationsFuture = fetchSandboxApplications
-
+  def fetchSummariesByTeamMember(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[(Seq[SandboxApplicationSummary], Seq[ProductionApplicationSummary])] = {
     for {
-      productionApplications <- productionApplicationsFuture
-      sandboxApplications <- sandboxApplicationsFuture
-    } yield (productionApplications ++ sandboxApplications).sorted
+      productionApplications <- fetchProductionAppsByTeamMember(userId)
+      productionSummaries = productionApplications.sorted.map(ProductionApplicationSummary.from(_, email))
+      sandboxApplications <- fetchSandboxAppsByTeamMember(userId)
+      sandboxApplicationSummaries = sandboxApplications.sorted.map(SandboxApplicationSummary.from(_, email))
+    } yield (sandboxApplicationSummaries, productionSummaries)
+  }
+
+  def fetchProductionAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
+    connectorWrapper.productionApplicationConnector.fetchByTeamMember(userId)
+  }
+
+  def fetchSandboxAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
+    connectorWrapper.sandboxApplicationConnector.fetchByTeamMember(userId) recover {
+        case _ => Seq.empty
+    }
   }
 
   def requestDeveloperAccountDeletion(name: String, email: String)(implicit hc: HeaderCarrier): Future[TicketResult] = {
@@ -252,8 +255,6 @@ object ApplicationService {
     def deleteClientSecret(applicationId: ApplicationId, clientSecretId: String, actorEmailAddress: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
     def deleteApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Unit]
-
     def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
-
   }
 }
