@@ -32,7 +32,7 @@ case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions
 trait ApplicationSummary {
   def id: ApplicationId
   def name: String
-  final def environment: String = ApplicationSummary.environment(this)
+  def environment: Environment
   def role: CollaboratorRole
   def termsOfUseStatus: TermsOfUseStatus
   def state: State
@@ -52,7 +52,9 @@ case class ProductionApplicationSummary(
   serverTokenUsed: Boolean = false,
   createdOn: DateTime,
   accessType: AccessType
-) extends ApplicationSummary
+) extends ApplicationSummary {
+  val environment = Environment.PRODUCTION
+}
 
 case class SandboxApplicationSummary(
   id: ApplicationId,
@@ -65,19 +67,11 @@ case class SandboxApplicationSummary(
   createdOn: DateTime,
   accessType: AccessType,
   isValidTargetForUplift: Boolean
-) extends ApplicationSummary
+) extends ApplicationSummary {
+  val environment = Environment.SANDBOX
+}
 
 object ApplicationSummary {
-  def environment(app: ApplicationSummary): String = app match {
-    case _ : ProductionApplicationSummary => "Production"
-    case _ => "Sandbox"
-  }
-
-  
-  def noProductionApplications(applications: Seq[controllers.ApplicationSummary]): Boolean = {
-    !applications.exists(_.environment == "Production")
-  }
-
   def from(app: Application, email: String): ApplicationSummary = {
     val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
     

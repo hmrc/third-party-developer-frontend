@@ -16,56 +16,12 @@
 
 package controllers
 
-import domain.models.apidefinitions.AccessType
 import domain.models.applications._
-import domain.models.applications.CollaboratorRole.DEVELOPER
-import domain.models.applications.State.TESTING
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
 import utils._
 
 class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
-
-  "noProductionApplications" should {
-    val sandboxApp =
-      SandboxApplicationSummary(
-        ApplicationId(""),
-        "",
-        DEVELOPER,
-        TermsOfUseStatus.AGREED,
-        TESTING,
-        new DateTime(),
-        serverTokenUsed = false,
-        new DateTime(),
-        AccessType.STANDARD,
-        false
-      )
-      
-    val productionApp =
-      ProductionApplicationSummary(
-        ApplicationId(""),
-        "",
-        DEVELOPER,
-        TermsOfUseStatus.AGREED,
-        TESTING,
-        new DateTime(),
-        serverTokenUsed = false,
-        new DateTime(),
-        AccessType.STANDARD
-      )
-
-    "return true if only sandbox apps" in {
-      val apps = Seq(sandboxApp)
-
-      ApplicationSummary.noProductionApplications(apps) shouldBe true
-    }
-
-    "return false if there is a production app" in {
-      val apps = Seq(productionApp, sandboxApp)
-
-      ApplicationSummary.noProductionApplications(apps) shouldBe false
-    }
-  }
 
   "from" should {
     val user = "foo@bar.com".asDeveloperCollaborator

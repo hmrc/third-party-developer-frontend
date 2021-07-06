@@ -18,4 +18,6 @@ package model
 
 import controllers.ApplicationSummary
 
-case class ManageApplicationsViewModel(applicationSummaries: Seq[ApplicationSummary])
+case class ManageApplicationsViewModel(applicationSummaries: Seq[ApplicationSummary]) {
+  def noProductionApplications = !applicationSummaries.exists(_.environment.isProduction)
+}

@@ -46,7 +46,7 @@
         </svg>
         <div class="moj-banner__message">
           <strong class="bold-small">
-            @if(app.deployedTo.toString.toLowerCase() == "production") {
+            @if(app.deployedTo.isProduction) {
               Server token retires in production on 1 October 2020.
             } else {
               Server token retires on 1 September 2020 in sandbox and 1 October 2020 in production.

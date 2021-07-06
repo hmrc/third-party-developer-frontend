@@ -18,7 +18,6 @@
 @import include._
 @import model.Crumb
 @import model.ManageApplicationsViewModel
-@import controllers.ApplicationSummary.noProductionApplications
 @import domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
 
@@ -39,7 +38,7 @@
   <h1 class="govuk-heading-l">View all applications</h1>
 
   @applicationList(model.applicationSummaries)
-  @if(noProductionApplications(model.applicationSummaries)) {
+  @if(model.noProductionApplications) {
     </br>
     <p class="govuk-body">
       After testing in @environmentNameService.subordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.
@@ -57,7 +56,7 @@
 }
 
 @applicationList(applications: Seq[controllers.ApplicationSummary]) = {
-  @defining(applications.partition(_.environment == "Production")) { case (productionApps, sandboxApps) =>
+  @defining(applications.partition(_.environment.isProduction)) { case (productionApps, sandboxApps) =>
     @applicationTable(productionApps, appConfig.nameOfPrincipalEnvironment)
     @applicationTable(sandboxApps, appConfig.nameOfSubordinateEnvironment)
   }
