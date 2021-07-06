@@ -121,7 +121,8 @@ class ManageApplicationsSpec
   "manageApps" should {
 
     "return the manage Applications page with the user logged in" in new Setup {
-      fetchByTeamMemberReturns(loggedInUser.developer.userId, List(application))
+      val prodSummary = ProductionApplicationSummary.from(application, loggedInUser.email)
+      fetchSummariesByTeamMemberReturns(Nil, List(prodSummary))
 
       private val result = addApplicationController.manageApps()(loggedInRequest)
 

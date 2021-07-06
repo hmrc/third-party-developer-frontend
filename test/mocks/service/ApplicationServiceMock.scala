@@ -28,6 +28,8 @@ import scala.concurrent.Future.{failed, successful}
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.developers.UserId
 import utils._
+import controllers.SandboxApplicationSummary
+import controllers.ProductionApplicationSummary
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
   val applicationServiceMock = mock[ApplicationService]
@@ -47,13 +49,21 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def fetchByApplicationIdReturnsNone(id: ApplicationId) =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(None))
 
-  def fetchByTeamMemberReturns(apps: Seq[Application]) =
-    when(applicationServiceMock.fetchByTeamMember(*[UserId])(*))
-      .thenReturn(successful(apps))
+  def fetchProductionAppsByTeamMemberReturns(apps: Seq[Application]) =
+    when(applicationServiceMock.fetchProductionAppsByTeamMember(*[UserId])(*))
+      .thenReturn(successful(apps.map(_.copy(deployedTo = Environment.PRODUCTION))))
 
-  def fetchByTeamMemberReturns(userId: UserId, apps: Seq[Application]) =
-    when(applicationServiceMock.fetchByTeamMember(eqTo(userId))(*))
-      .thenReturn(successful(apps))
+  def fetchSandboxAppsByTeamMemberReturns(apps: Seq[Application]) =
+    when(applicationServiceMock.fetchSandboxAppsByTeamMember(*[UserId])(*))
+    .thenReturn(successful(apps.map(_.copy(deployedTo = Environment.SANDBOX))))
+
+  def fetchSummariesByTeamMemberReturns(sandboxApps: Seq[SandboxApplicationSummary], productionApps: Seq[ProductionApplicationSummary]) =
+    when(applicationServiceMock.fetchSummariesByTeamMember(*[UserId], *)(*))
+      .thenReturn(successful((sandboxApps, productionApps)))
+
+  def fetchSummariesByTeamMemberReturns(userId: UserId, sandboxApps: Seq[SandboxApplicationSummary], productionApps: Seq[ProductionApplicationSummary]) =
+    when(applicationServiceMock.fetchSummariesByTeamMember(eqTo(userId), *)(*))
+      .thenReturn(successful((sandboxApps, productionApps)))
 
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))

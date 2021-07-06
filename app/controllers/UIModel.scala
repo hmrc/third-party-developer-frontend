@@ -73,7 +73,7 @@ case class SandboxApplicationSummary(
 
 object SandboxApplicationSummary {
   def from(app: Application, email: String): SandboxApplicationSummary = {
-    require(app.deployedTo.isSandbox)
+    require(app.deployedTo.isSandbox, "SandboxApplicationSummary cannot be built from Production App")
 
     val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
 
@@ -94,7 +94,7 @@ object SandboxApplicationSummary {
 
 object ProductionApplicationSummary {
   def from(app: Application, email: String): ProductionApplicationSummary = {
-    require(app.deployedTo.isProduction)
+    require(app.deployedTo.isProduction, "ProductionApplicationSummary cannot be built from Sandbox App")
 
     val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
 

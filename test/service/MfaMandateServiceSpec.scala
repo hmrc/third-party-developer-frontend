@@ -24,6 +24,7 @@ import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.Future.successful
 import utils._
 
 class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with LocalUserIdTracker {
@@ -89,21 +90,6 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
         )
       )
     )
-
-    val applicationsWhereUserIsAdminInSandbox = Future.successful(
-      Seq(
-        Application(
-          applicationId,
-          clientId,
-          "myName",
-          new DateTime(),
-          new DateTime(),
-          None,
-          Environment.SANDBOX,
-          collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId))
-        )
-      )
-    )
   }
 
   "showAdminMfaMandateMessage" when {
@@ -139,7 +125,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
     "Mfa mandate date has not passed and they are not an admin on a principle application" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateInTheFuture))
-        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInSandbox)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(successful(Nil))
 
         await(service.showAdminMfaMandatedMessage(userId)) shouldBe false
 
@@ -212,7 +198,7 @@ class MfaMandateServiceSpec extends AsyncHmrcSpec with CollaboratorTracker with 
     "Mfa mandate date has passed and they are not an admin on a principle application" should {
       "be false" in new Setup {
         when(mockAppConfig.dateOfAdminMfaMandate).thenReturn(Some(dateAFewDaysAgo))
-        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(applicationsWhereUserIsAdminInSandbox)
+        when(mockApplicationService.fetchProductionAppsByTeamMember(*[UserId])(*)).thenReturn(successful(Nil))
 
         await(service.isMfaMandatedForUser(userId)) shouldBe false
 

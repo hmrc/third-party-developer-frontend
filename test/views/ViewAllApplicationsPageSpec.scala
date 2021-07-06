@@ -52,12 +52,12 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
   "view all applications page" should {
 
-    def renderPage(appSummaries: Seq[ApplicationSummary]) = {
+    def renderPage(sandboxAppSummaries: Seq[SandboxApplicationSummary], productionAppSummaries: Seq[ProductionApplicationSummary]) = {
       val request = FakeRequest()
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
-      manageApplicationsView.render(ManageApplicationsViewModel(appSummaries), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
+      manageApplicationsView.render(ManageApplicationsViewModel.from(sandboxAppSummaries, productionAppSummaries), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
 
     "show the applications page if there is more than 0 sandbox applications and environment is Prod/Sandbox" in new Setup {
@@ -67,7 +67,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(
+      val sandboxAppSummaries = Seq(
         SandboxApplicationSummary(
           applicationId,
           appName,
@@ -82,7 +82,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         )
       )
 
-      val document = Jsoup.parse(renderPage(appSummaries).body)
+      val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty).body)
 
       elementExistsByText(document, "h1", "View all applications") shouldBe true
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
@@ -105,7 +105,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(
+      val sandboxAppSummaries = Seq(
           SandboxApplicationSummary(
             ApplicationId("1111"), 
             appName, 
@@ -119,7 +119,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
             false
           ))
 
-      val document = Jsoup.parse(renderPage(appSummaries).body)
+      val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty).body)
 
       elementExistsByText(document, "h1", "View all applications") shouldBe true
       elementExistsByText(document, "th", "Development applications") shouldBe true
@@ -140,7 +140,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(
+      val productionAppSummaries = Seq(
         ProductionApplicationSummary(
           applicationId,
           appName,
@@ -154,7 +154,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         )
       )
 
-      val document = Jsoup.parse(renderPage(appSummaries).body)
+      val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries).body)
 
       elementExistsByText(document, "h1", "View all applications") shouldBe true
       elementExistsByText(document, "th", "Sandbox applications") shouldBe false
@@ -174,7 +174,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(
+      val productionAppSummaries = Seq(
         ProductionApplicationSummary(
           applicationId,
           appName,
@@ -188,7 +188,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         )
       )
 
-      val document = Jsoup.parse(renderPage(appSummaries).body)
+      val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries).body)
 
       elementExistsByText(document, "h1", "View all applications") shouldBe true
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
@@ -206,7 +206,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val appCreatedOn = DateTimeUtils.now
       val appLastAccess = appCreatedOn
 
-      val appSummaries = Seq(
+      val productionAppSummaries = Seq(
         ProductionApplicationSummary(
           applicationId,
           appName,
@@ -220,7 +220,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         )
       )
 
-      val document = Jsoup.parse(renderPage(appSummaries).body)
+      val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries).body)
 
       elementExistsByText(document, "h1", "View all applications") shouldBe true
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true

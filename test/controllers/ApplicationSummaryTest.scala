@@ -20,6 +20,7 @@ import domain.models.applications._
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
 import utils._
+import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
 
 class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
 
@@ -27,17 +28,17 @@ class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTra
     val user = "foo@bar.com".asDeveloperCollaborator
 
     val serverTokenApplication =
-      new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), Environment.PRODUCTION, collaborators = Set(user))
-    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(user))
+      new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, Some(DateTime.now), PRODUCTION, collaborators = Set(user))
+    val noServerTokenApplication = new Application(ApplicationId(""), ClientId(""), "", DateTime.now, DateTime.now, None, PRODUCTION, collaborators = Set(user))
 
     "set serverTokenUsed if SandboxApplication has a date set for lastAccessTokenUsage" in {
-      val summary = SandboxApplicationSummary.from(serverTokenApplication, user.emailAddress)
+      val summary = SandboxApplicationSummary.from(serverTokenApplication.copy(deployedTo = SANDBOX), user.emailAddress)
 
       summary.serverTokenUsed should be(true)
     }
 
     "not set serverTokenUsed if SandboxApplication does not have a date set for lastAccessTokenUsage" in {
-      val summary = SandboxApplicationSummary.from(noServerTokenApplication, user.emailAddress)
+      val summary = SandboxApplicationSummary.from(noServerTokenApplication.copy(deployedTo = SANDBOX), user.emailAddress)
 
       summary.serverTokenUsed should be(false)
     }

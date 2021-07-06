@@ -47,6 +47,7 @@ import domain.models.subscriptions.VersionSubscription
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import utils.LocalUserIdTracker
+import controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -179,12 +180,18 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
 
   "Fetch by teamMember userId" should {
     val userId = UserId.random
-    val app1 = Application(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION)
-    val app2 = Application(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, DateTime.now, None, Environment.SANDBOX)
-    val app3 = Application(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION)
+    val email = "bob@example.com"
+    val productionApp1 = Application(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val sandboxApp1 = Application(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, DateTime.now, None, Environment.SANDBOX, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
+    val productionApp2 = Application(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
 
-    val productionApps = Seq(app1, app3)
-    val sandboxApps = Seq(app2)
+    val productionApps = Seq(productionApp1, productionApp2)
+    val sandboxApps = Seq(sandboxApp1)
+
+    implicit class SummaryImpl(application: Application) {
+      def asProdSummary: ProductionApplicationSummary = ProductionApplicationSummary.from(application, email)
+      def asSandboxSummary: SandboxApplicationSummary = SandboxApplicationSummary.from(application, email)
+    }
 
     "sort the returned applications by name" in new Setup {
       when(mockProductionApplicationConnector.fetchByTeamMember(userId))
@@ -193,8 +200,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
       when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(successful(sandboxApps))
 
-      private val result = await(applicationService.fetchByTeamMember(userId))
-      result shouldBe Seq(app3, app2, app1)
+      private val result = await(applicationService.fetchSummariesByTeamMember(userId, email))
+      result shouldBe ((List(sandboxApp1.asSandboxSummary), List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
     }
 
     "tolerate the sandbox connector failing with a 5xx error" in new Setup {
@@ -203,8 +210,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
       when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
 
-      private val result = await(applicationService.fetchByTeamMember(userId))
-      result shouldBe Seq(app3, app1)
+      private val result = await(applicationService.fetchSummariesByTeamMember(userId, email))
+      result shouldBe ((Nil, List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
     }
 
     "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
@@ -214,7 +221,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
         .thenReturn(successful(sandboxApps))
 
       intercept[UpstreamErrorResponse] {
-        await(applicationService.fetchByTeamMember(userId))
+        await(applicationService.fetchSummariesByTeamMember(userId, email))
       }
     }
   }
