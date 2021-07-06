@@ -38,7 +38,7 @@
   <h1 class="govuk-heading-l">View all applications</h1>
 
   @applicationList(model.applicationSummaries)
-  @if(model.noProductionApplications) {
+  @if(model.hasNoProductionApplications) {
     </br>
     <p class="govuk-body">
       After testing in @environmentNameService.subordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.
@@ -47,7 +47,7 @@
       Get @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials
     </a>
   }
-  @if(!model.applicationSummaries.filter(_.accessType.isPriviledged).isEmpty) {
+  @if(model.hasPriviledgedApplications) {
     <h2 class="govuk-heading-m">Using privileged application credentials</h2>
     <p class="govuk-body">Check <a class="govuk-link"href="@controllers.routes.AddApplication.usingPrivilegedApplicationCredentialsPage()">
       how to use privileged application credentials</a>.

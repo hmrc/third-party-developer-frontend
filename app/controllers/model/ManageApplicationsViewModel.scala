@@ -19,5 +19,6 @@ package controllers.model
 import controllers.ApplicationSummary
 
 case class ManageApplicationsViewModel(applicationSummaries: Seq[ApplicationSummary]) {
-  def noProductionApplications = !applicationSummaries.exists(_.environment.isProduction)
+  def hasNoProductionApplications = !applicationSummaries.exists(_.environment.isProduction)
+  def hasPriviledgedApplications = applicationSummaries.exists(_.accessType.isPriviledged)
 }
