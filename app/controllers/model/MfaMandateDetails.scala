@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package model
+package controllers.model
 
-import domain.models.applications.Application
-
-case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean)
+case class MfaMandateDetails(showAdminMfaMandatedMessage: Boolean, daysTillAdminMfaMandate: Int)

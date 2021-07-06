@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package model
+package controllers.model
 
-import controllers.ApplicationSummary
+import domain.models.applications.Application
 
-case class ManageApplicationsViewModel(applicationSummaries: Seq[ApplicationSummary]) {
-  def noProductionApplications = !applicationSummaries.exists(_.environment.isProduction)
-}
+case class ApplicationViewModel(application: Application, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean)

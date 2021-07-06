@@ -18,7 +18,7 @@ package views.include
 
 import config.ApplicationConfig
 import domain.models.applications.{Application, ApplicationId, ClientId, Environment}
-import model.Crumb
+import controllers.model.Crumb
 import org.jsoup.Jsoup
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.Helpers.{contentAsString, contentType}

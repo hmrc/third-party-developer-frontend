@@ -22,7 +22,7 @@ import controllers.ManageSubscriptions.ApiDetails
 import domain.models.apidefinitions.{ApiContext, APISubscriptionStatus, APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField, ApiVersion}
 import domain.models.applications._
 import domain.models.developers.DeveloperSession
-import model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
+import controllers.model.{ApplicationViewModel, NoSubscriptionFieldsRefinerBehaviour}
 import play.api.mvc._
 import security.{DevHubAuthorization, ExtendedDevHubAuthorization}
 import service.SessionService

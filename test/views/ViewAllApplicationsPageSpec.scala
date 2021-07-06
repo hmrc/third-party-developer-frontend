@@ -30,7 +30,7 @@ import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
 import views.helper.EnvironmentNameService
 import controllers.ProductionApplicationSummary
-import model.ManageApplicationsViewModel
+import controllers.model.ManageApplicationsViewModel
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {

@@ -23,7 +23,7 @@ import domain.models.applications.{Application, ApplicationId, CheckInformation}
 import domain.models.controllers.SaveSubsFieldsPageMode
 import domain.models.subscriptions.ApiSubscriptionFields._
 import domain.models.subscriptions.{FieldName, FieldValue}
-import model.EditManageSubscription._
+import controllers.model.EditManageSubscription._
 import model.NoSubscriptionFieldsRefinerBehaviour
 import play.api.data.FormError
 import play.api.libs.crypto.CookieSigner

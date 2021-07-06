@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package model
+package controllers.model
 
 import config.ApplicationConfig
 import controllers.routes

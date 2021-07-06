@@ -19,7 +19,7 @@ package views
 import domain.models.applications._
 import domain.models.applications.CollaboratorRole.{ADMINISTRATOR, DEVELOPER}
 import domain.models.developers.LoggedInState
-import model.ApplicationViewModel
+import controllers.model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 import uk.gov.hmrc.time.DateTimeUtils

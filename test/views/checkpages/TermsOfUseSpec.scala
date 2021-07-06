@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import controllers.TermsOfUseForm
 import domain.models.applications._
 import domain.models.developers.LoggedInState
-import model.ApplicationViewModel
+import controllers.model.ApplicationViewModel
 import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest

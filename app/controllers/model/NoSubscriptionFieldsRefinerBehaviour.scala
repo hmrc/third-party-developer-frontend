@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
-package model
+package controllers.model
 
-case class MfaMandateDetails(showAdminMfaMandatedMessage: Boolean, daysTillAdminMfaMandate: Int)
+import play.api.mvc.Call
+
+sealed trait NoSubscriptionFieldsRefinerBehaviour
+
+object NoSubscriptionFieldsRefinerBehaviour {
+  case object BadRequest extends NoSubscriptionFieldsRefinerBehaviour
+  case class Redirect(url: Call) extends NoSubscriptionFieldsRefinerBehaviour
+}

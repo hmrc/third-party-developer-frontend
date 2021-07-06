@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package model
+package controllers.model
 
-import play.api.mvc.Call
+import controllers.ApplicationSummary
 
-sealed trait NoSubscriptionFieldsRefinerBehaviour
-
-object NoSubscriptionFieldsRefinerBehaviour {
-  case object BadRequest extends NoSubscriptionFieldsRefinerBehaviour
-  case class Redirect(url: Call) extends NoSubscriptionFieldsRefinerBehaviour
+case class ManageApplicationsViewModel(applicationSummaries: Seq[ApplicationSummary]) {
+  def noProductionApplications = !applicationSummaries.exists(_.environment.isProduction)
 }
