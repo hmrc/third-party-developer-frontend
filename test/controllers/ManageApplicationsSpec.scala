@@ -34,6 +34,7 @@ import utils.WithCSRFAddToken
 import utils.WithLoggedInSession._
 import views.helper.EnvironmentNameService
 import views.html._
+import domain.models.controllers.ProductionApplicationSummary
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import service.EmailPreferencesService

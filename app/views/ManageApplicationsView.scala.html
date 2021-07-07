@@ -17,9 +17,9 @@
 @import helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import model.Crumb
-@import model.ManageApplicationsViewModel
 @import domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
+@import domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary, ProductionApplicationSummary, SandboxApplicationSummary}
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
@@ -61,7 +61,7 @@
   @applicationTable(model.sandboxApplicationSummaries, appConfig.nameOfSubordinateEnvironment)
 }
 
-@applicationTable(applications: Seq[controllers.ApplicationSummary], environmentName: String) = {
+@applicationTable(applications: Seq[ApplicationSummary], environmentName: String) = {
   @if(applications.nonEmpty) {
     <table class="govuk-table">
       <caption class="govuk-visually-hidden">Applications</caption>

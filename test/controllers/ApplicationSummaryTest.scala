@@ -21,6 +21,7 @@ import org.joda.time.DateTime
 import org.scalatest.{Matchers, WordSpec}
 import utils._
 import domain.models.applications.Environment.{PRODUCTION, SANDBOX}
+import domain.models.controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
 
 class ApplicationSummaryTest extends WordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
 

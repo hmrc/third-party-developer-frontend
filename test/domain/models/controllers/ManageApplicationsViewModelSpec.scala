@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package controllers.model
+package domain.models.controllers
 
-import controllers.SandboxApplicationSummary
-import controllers.ProductionApplicationSummary
 import domain.models.applications._
 import org.joda.time.DateTime
 import domain.models.apidefinitions.AccessType

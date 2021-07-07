@@ -28,8 +28,7 @@ import scala.concurrent.Future.{failed, successful}
 import domain.models.apidefinitions.ApiIdentifier
 import domain.models.developers.UserId
 import utils._
-import controllers.SandboxApplicationSummary
-import controllers.ProductionApplicationSummary
+import domain.models.controllers.{SandboxApplicationSummary,ProductionApplicationSummary}
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
   val applicationServiceMock = mock[ApplicationService]

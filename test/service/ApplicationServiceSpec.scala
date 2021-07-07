@@ -47,7 +47,7 @@ import domain.models.subscriptions.VersionSubscription
 import service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import utils.LocalUserIdTracker
-import controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
+import domain.models.controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 

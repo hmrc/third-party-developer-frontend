@@ -34,7 +34,7 @@ import views.html._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.http.HeaderCarrier
-import controllers.model.ManageApplicationsViewModel
+import domain.models.controllers.ManageApplicationsViewModel
 
 @Singleton
 class AddApplication @Inject() (

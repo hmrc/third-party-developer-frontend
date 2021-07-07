@@ -16,7 +16,7 @@
 
 package views
 
-import controllers.{ProductionApplicationSummary, SandboxApplicationSummary, ApplicationSummary}
+import domain.models.controllers.{ManageApplicationsViewModel, ProductionApplicationSummary, SandboxApplicationSummary, ApplicationSummary}
 import domain.models.apidefinitions.AccessType
 import domain.models.applications.{ApplicationId, CollaboratorRole, State, TermsOfUseStatus}
 import domain.models.developers.LoggedInState
@@ -29,8 +29,6 @@ import utils.WithCSRFAddToken
 import views.helper.CommonViewSpec
 import views.html.{AddApplicationSubordinateEmptyNestView, ManageApplicationsView}
 import views.helper.EnvironmentNameService
-import controllers.ProductionApplicationSummary
-import controllers.model.ManageApplicationsViewModel
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
   def isGreenAddProductionApplicationButtonVisible(document: Document): Boolean = {

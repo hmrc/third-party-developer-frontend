@@ -32,8 +32,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import domain.models.connectors.AddTeamMemberRequest
-import controllers.ProductionApplicationSummary
-import controllers.SandboxApplicationSummary
+import domain.models.controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
 
 @Singleton
 class ApplicationService @Inject() (

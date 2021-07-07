@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.model
-
-import controllers.{SandboxApplicationSummary, ProductionApplicationSummary}
+package domain.models.controllers
 
 case class ManageApplicationsViewModel(sandboxApplicationSummaries: Seq[SandboxApplicationSummary], productionApplicationSummaries: Seq[ProductionApplicationSummary]) {
   val hasNoProductionApplications = productionApplicationSummaries.isEmpty

@@ -17,100 +17,15 @@
 package controllers
 
 import controllers.APISubscriptions.subscriptionNumberLabel
-import domain.models.apidefinitions.{AccessType, ApiContext, APISubscriptionStatus, ApiVersion}
-import domain.models.apidefinitions.APIGroup._
-import domain.models.applications._
-import org.joda.time.DateTime
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.NotFoundException
 
 import scala.collection.SortedMap
-import domain.models.subscriptions.ApiData
+import domain.models.subscriptions._
+import domain.models.apidefinitions._
+import domain.models.apidefinitions.APIGroup._
+import domain.models.applications._
 
 case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: Map[ApiContext, ApiData])
-
-trait ApplicationSummary {
-  def id: ApplicationId
-  def name: String
-  def environment: Environment
-  def role: CollaboratorRole
-  def termsOfUseStatus: TermsOfUseStatus
-  def state: State
-  def lastAccess: DateTime
-  def serverTokenUsed: Boolean
-  def createdOn: DateTime
-  def accessType: AccessType
-}
-
-case class ProductionApplicationSummary(
-  id: ApplicationId,
-  name: String,
-  role: CollaboratorRole,
-  termsOfUseStatus: TermsOfUseStatus,
-  state: State,
-  lastAccess: DateTime,
-  serverTokenUsed: Boolean = false,
-  createdOn: DateTime,
-  accessType: AccessType
-) extends ApplicationSummary {
-  val environment = Environment.PRODUCTION
-}
-
-case class SandboxApplicationSummary(
-  id: ApplicationId,
-  name: String,
-  role: CollaboratorRole,
-  termsOfUseStatus: TermsOfUseStatus,
-  state: State,
-  lastAccess: DateTime,
-  serverTokenUsed: Boolean = false,
-  createdOn: DateTime,
-  accessType: AccessType,
-  isValidTargetForUplift: Boolean
-) extends ApplicationSummary {
-  val environment = Environment.SANDBOX
-}
-
-object SandboxApplicationSummary {
-  def from(app: Application, email: String): SandboxApplicationSummary = {
-    require(app.deployedTo.isSandbox, "SandboxApplicationSummary cannot be built from Production App")
-
-    val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
-
-    SandboxApplicationSummary(
-      app.id,
-      app.name,
-      role,
-      app.termsOfUseStatus,
-      app.state.name,
-      app.lastAccess,
-      app.lastAccessTokenUsage.isDefined,
-      app.createdOn,
-      app.access.accessType,
-      false// TODO
-    )
-  }
-}
-
-object ProductionApplicationSummary {
-  def from(app: Application, email: String): ProductionApplicationSummary = {
-    require(app.deployedTo.isProduction, "ProductionApplicationSummary cannot be built from Sandbox App")
-
-    val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
-
-    ProductionApplicationSummary(
-      app.id,
-      app.name,
-      role,
-      app.termsOfUseStatus,
-      app.state.name,
-      app.lastAccess,
-      app.lastAccessTokenUsage.isDefined,
-      app.createdOn,
-      app.access.accessType        
-    )
-  }
-}
 
 case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISubscriptions], exampleApi: Option[APISubscriptions] = None)
 
