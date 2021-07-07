@@ -19,6 +19,9 @@ package domain.models.controllers
 case class ManageApplicationsViewModel(sandboxApplicationSummaries: Seq[SandboxApplicationSummary], productionApplicationSummaries: Seq[ProductionApplicationSummary]) {
   val hasNoProductionApplications = productionApplicationSummaries.isEmpty
   val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
+  val hasAppsThatCannotBeUplifted = sandboxApplicationSummaries.exists(_.isValidTargetForUplift == false)
+  lazy val sandboxApplicationsSummariesForUplift = sandboxApplicationSummaries.filter(_.isValidTargetForUplift)
+  lazy val countOfAppsThatCanBeUplifted = sandboxApplicationsSummariesForUplift.size
 }
 
 object ManageApplicationsViewModel {

@@ -68,6 +68,7 @@ object SandboxApplicationSummary {
     require(app.deployedTo.isSandbox, "SandboxApplicationSummary cannot be built from Production App")
 
     val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
+    val isValidTargetForUplift = false
 
     SandboxApplicationSummary(
       app.id,
@@ -79,7 +80,7 @@ object SandboxApplicationSummary {
       app.lastAccessTokenUsage.isDefined,
       app.createdOn,
       app.access.accessType,
-      false// TODO
+      isValidTargetForUplift
     )
   }
 }

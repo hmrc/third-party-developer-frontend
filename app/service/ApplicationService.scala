@@ -181,7 +181,7 @@ class ApplicationService @Inject() (
   }
 
   def fetchProductionAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
-    connectorWrapper.productionApplicationConnector.fetchByTeamMember(userId)
+    connectorWrapper.productionApplicationConnector.fetchByTeamMember(userId) // TODO - Should use fetchById from this file which brings back subs as well as app
   }
 
   def fetchSandboxAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {
