@@ -38,19 +38,22 @@
 ) {
   @errorSummary2(form)
 
-  <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  @if(environment.isProduction()) {
-    <p class="govuk-body">We show this name to your users when they authorise your software to interact with HMRC.</p>
-    <p class="govuk-body">It must comply with our
-      <a class="govuk-link" href="/api-documentation/docs/using-the-hub/name-guidelines">naming guidelines</a>.
-    </p>
-    <br>
-  }
 
   @helper.form(action = controllers.routes.AddApplication.editApplicationNameAction(environment)) {
-  @helper.CSRF.formField
+    @helper.CSRF.formField
+    <!-- -------------------------------------- -->
+    <!-- default -->
 
+    <h1 class="govuk-heading-l">@pageHeading</h1>
+
+    @if(environment.isProduction()) {
+      <p class="govuk-body">We show this name to your users when they authorise your software to interact with HMRC.</p>
+      <p class="govuk-body">It must comply with our
+        <a class="govuk-link" href="/api-documentation/docs/using-the-hub/name-guidelines">naming guidelines</a>.
+      </p>
+      <br>
+    }
     <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
       <label class="govuk-label" for="applicationName" id="applicationName-label">Application name</label>
       @fieldError2(form.errors, "applicationName", form.error("submissionError").isEmpty)
@@ -65,6 +68,99 @@
       />
     </div>
 
+    <!-- -------------------------------------- -->
+    <!-- multiple-valid -->
+
+    <!-- <fieldset class="govuk-fieldset">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+        <h1 class="govuk-fieldset__heading">
+          Which application do you want production credentials for?
+        </h1>
+      </legend>
+      <div class="govuk-radios">
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="myco-vat-app" name="select-application" type="radio" value="myco-vat-app">
+          <label class="govuk-label govuk-radios__label" for="myco-vat-app">
+            MyCo VAT App
+          </label>
+        </div>
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="myco-test" name="select-application" type="radio" value="myco-test">
+          <label class="govuk-label govuk-radios__label" for="myco-test">
+            MyCo Test
+          </label>
+        </div>
+      </div>
+    </fieldset> -->
+
+    <!-- -------------------------------------- -->
+    <!-- multiple-valid-and-non-valid -->
+
+    <!-- <fieldset class="govuk-fieldset">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+        <h1 class="govuk-fieldset__heading">
+          Which application do you want production credentials for?
+        </h1>
+      </legend>
+      <div class="govuk-radios">
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="myco-vat-app" name="select-application" type="radio" value="myco-vat-app">
+          <label class="govuk-label govuk-radios__label" for="myco-vat-app">
+            MyCo VAT App
+          </label>
+        </div>
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="myco-test" name="select-application" type="radio" value="myco-test">
+          <label class="govuk-label govuk-radios__label" for="myco-test">
+            MyCo Test
+          </label>
+        </div>
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="vat-test" name="select-application" type="radio" value="vat-test">
+          <label class="govuk-label govuk-radios__label" for="vat-test">
+            VAT Test
+          </label>
+        </div>
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="self-assessment-test-1" name="select-application" type="radio" value="self-assessment-test-1">
+          <label class="govuk-label govuk-radios__label" for="self-assessment-test-1">
+            Self Assessment Test 1
+          </label>
+        </div>
+      </div>
+    </fieldset>
+
+    <br />
+
+    <p class="govuk-body">
+      You can only get production credentials for applications subscribed to APIs that access secure data and require authentication.
+    </p>
+
+    <p class="govuk-body">You do not need production credentials for applications that only subscribe to:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>APIs for testing your service</li>
+      <li>APIs with only open access endpoints</li>
+      <li>Hello World API</li>
+    </ul> -->
+
+    <!-- -------------------------------------- -->
+    <!-- one-valid-and-multiple-non-valid -->
+
+    <!-- <h1 class="govuk-heading-l">You are requesting production credentials for</h1>
+
+    <p class="govuk-body-l">MyCo VAT App</p>
+
+    <p class="govuk-body">You do not need production credentials for applications that only subscribe to:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>APIs for testing your service</li>
+      <li>APIs with only open access endpoints</li>
+      <li>Hello World API</li>
+    </ul> -->
+
+    <!-- -------------------------------------- -->
+
+    <br />
+
     <button id="submit" class="govuk-button" type="submit">Continue</button>
-    }
+  }
 }
