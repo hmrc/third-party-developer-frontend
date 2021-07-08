@@ -16,7 +16,6 @@
 
 package service
 
-import java.util.UUID
 import java.util.UUID.randomUUID
 
 import builder._
@@ -28,10 +27,9 @@ import domain.models.apidefinitions._
 import domain.models.apidefinitions.APIStatus._
 import domain.models.applications._
 import domain.models.connectors.{DeskproTicket, TicketCreated}
-import domain.models.developers.{LoggedInState, User}
+import domain.models.developers.{LoggedInState}
 import domain.models.subscriptions.ApiSubscriptionFields
 import domain.models.subscriptions.ApiSubscriptionFields._
-import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import service.AuditAction.{Remove2SVRequested, UserLogoutSurveyCompleted}
 import service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
@@ -39,15 +37,12 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.time.DateTimeUtils
 import utils.AsyncHmrcSpec
-import domain.models.developers.UserId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 import domain.models.subscriptions.VersionSubscription
 import service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.http.UpstreamErrorResponse
 import utils.LocalUserIdTracker
-import domain.models.controllers.{ProductionApplicationSummary, SandboxApplicationSummary}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -178,54 +173,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     )
   }
 
-  "Fetch by teamMember userId" should {
-    val userId = UserId.random
-    val email = "bob@example.com"
-    val productionApp1 = Application(ApplicationId("id1"), ClientId("cl-id1"), "zapplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val sandboxApp1 = Application(ApplicationId("id2"), ClientId("cl-id2"), "application", DateTime.now, DateTime.now, None, Environment.SANDBOX, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-    val productionApp2 = Application(ApplicationId("id3"), ClientId("cl-id3"), "4pplication", DateTime.now, DateTime.now, None, Environment.PRODUCTION, collaborators = Set(Collaborator(email, CollaboratorRole.ADMINISTRATOR, userId)))
-
-    val productionApps = Seq(productionApp1, productionApp2)
-    val sandboxApps = Seq(sandboxApp1)
-
-    implicit class SummaryImpl(application: Application) {
-      def asProdSummary: ProductionApplicationSummary = ProductionApplicationSummary.from(application, email)
-      def asSandboxSummary: SandboxApplicationSummary = SandboxApplicationSummary.from(application, email)
-    }
-
-    "sort the returned applications by name" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(productionApps))
-
-      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(sandboxApps))
-
-      private val result = await(applicationService.fetchSummariesByTeamMember(userId, email))
-      result shouldBe ((List(sandboxApp1.asSandboxSummary), List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
-    }
-
-    "tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(productionApps))
-      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
-
-      private val result = await(applicationService.fetchSummariesByTeamMember(userId, email))
-      result shouldBe ((Nil, List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
-    }
-
-    "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
-      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(sandboxApps))
-
-      intercept[UpstreamErrorResponse] {
-        await(applicationService.fetchSummariesByTeamMember(userId, email))
-      }
-    }
-  }
-
   "Unsubscribe from API" should {
     "unsubscribe application from an API version" in new Setup {
       private val context = ApiContext("api1")
@@ -264,206 +211,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
 
       private val result = await(applicationService.update(updateApplicationRequest))
       result shouldBe ApplicationUpdateSuccessful
-    }
-  }
-
-  "addClientSecret" should {
-    val newClientSecretId = UUID.randomUUID().toString
-    val newClientSecret = UUID.randomUUID().toString
-    val actorEmailAddress = "john.requestor@example.com"
-
-    "add a client secret for app in production environment" in new Setup {
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actorEmailAddress)))
-        .thenReturn(successful((newClientSecretId, newClientSecret)))
-
-      private val updatedToken = await(applicationService.addClientSecret(productionApplication, actorEmailAddress))
-
-      updatedToken._1 shouldBe newClientSecretId
-      updatedToken._2 shouldBe newClientSecret
-    }
-
-    "propagate exceptions from connector" in new Setup {
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-      when(mockProductionApplicationConnector.addClientSecrets(productionApplicationId, ClientSecretRequest(actorEmailAddress)))
-        .thenReturn(failed(new ClientSecretLimitExceeded))
-
-      intercept[ClientSecretLimitExceeded] {
-        await(applicationService.addClientSecret(productionApplication, actorEmailAddress))
-      }
-    }
-  }
-
-  "deleteClientSecret" should {
-    val applicationId = ApplicationId(UUID.randomUUID().toString())
-    val actorEmailAddress = "john.requestor@example.com"
-    val secretToDelete = UUID.randomUUID().toString
-
-    "delete a client secret" in new Setup {
-
-      val application = productionApplication.copy(id = applicationId)
-
-      theProductionConnectorthenReturnTheApplication(applicationId, application)
-
-      when(mockProductionApplicationConnector.deleteClientSecret(eqTo(applicationId), eqTo(secretToDelete), eqTo(actorEmailAddress))(*))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
-
-      await(applicationService.deleteClientSecret(application, secretToDelete, actorEmailAddress)) shouldBe ApplicationUpdateSuccessful
-    }
-  }
-
-  "requestUplift" should {
-    val applicationId = ApplicationId("applicationId")
-    val applicationName = "applicationName"
-
-    val user =
-      utils.DeveloperSession("Firstname", "Lastname", "email@example.com", loggedInState = LoggedInState.LOGGED_IN)
-
-    "request uplift" in new Setup {
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc))).thenReturn(successful(TicketCreated))
-      when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
-        .thenReturn(successful(ApplicationUpliftSuccessful))
-      await(applicationService.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
-    }
-
-    "don't propagate error if failed to create deskpro ticket" in new Setup {
-      val testError = new scala.RuntimeException("deskpro error")
-      when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
-        .thenReturn(successful(ApplicationUpliftSuccessful))
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc))).thenReturn(failed(testError))
-
-      await(applicationService.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
-    }
-
-    "propagate ApplicationAlreadyExistsResponse from connector" in new Setup {
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc)))
-        .thenReturn(successful(TicketCreated))
-      when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
-        .thenReturn(failed(new ApplicationAlreadyExists))
-
-      intercept[ApplicationAlreadyExists] {
-        await(applicationService.requestUplift(applicationId, applicationName, user))
-      }
-
-      verifyZeroInteractions(mockDeskproConnector)
-    }
-
-    "propagate ApplicationNotFound from connector" in new Setup {
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc)))
-        .thenReturn(successful(TicketCreated))
-      when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
-        .thenReturn(failed(new ApplicationNotFound))
-
-      intercept[ApplicationNotFound] {
-        await(applicationService.requestUplift(applicationId, applicationName, user))
-      }
-
-      verifyZeroInteractions(mockDeskproConnector)
-    }
-  }
-
-  "verifyUplift" should {
-    val verificationCode = "aVerificationCode"
-
-    "verify an uplift successful" in new Setup {
-      when(mockProductionApplicationConnector.verify(verificationCode)).thenReturn(successful(ApplicationVerificationSuccessful))
-      await(applicationService.verify(verificationCode)) shouldBe ApplicationVerificationSuccessful
-    }
-
-    "verify an uplift with failure" in new Setup {
-      when(mockProductionApplicationConnector.verify(verificationCode))
-        .thenReturn(successful(ApplicationVerificationFailed))
-
-      await(applicationService.verify(verificationCode)) shouldBe ApplicationVerificationFailed
-    }
-  }
-
-  "remove teamMember" should {
-    val email = "john.bloggs@example.com"
-    val admin = "admin@example.com"
-    val adminsToEmail = Set.empty[String]
-
-    "remove teamMember successfully from production" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
-      await(applicationService.removeTeamMember(productionApplication, email, admin)) shouldBe ApplicationUpdateSuccessful
-    }
-
-    "propagate ApplicationNeedsAdmin from connector from production" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail))
-        .thenReturn(failed(new ApplicationNeedsAdmin))
-      intercept[ApplicationNeedsAdmin](await(applicationService.removeTeamMember(productionApplication, email, admin)))
-    }
-
-    "propagate ApplicationNotFound from connector from production" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-      when(mockProductionApplicationConnector.removeTeamMember(productionApplicationId, email, admin, adminsToEmail))
-        .thenReturn(failed(new ApplicationNotFound))
-      intercept[ApplicationNotFound](await(applicationService.removeTeamMember(productionApplication, email, admin)))
-    }
-
-    "remove teamMember successfully from sandbox" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      when(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
-      await(applicationService.removeTeamMember(sandboxApplication, email, admin)) shouldBe ApplicationUpdateSuccessful
-    }
-
-    "propagate ApplicationNeedsAdmin from connector from sandbox" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      when(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail))
-        .thenReturn(failed(new ApplicationNeedsAdmin))
-      intercept[ApplicationNeedsAdmin](await(applicationService.removeTeamMember(sandboxApplication, email, admin)))
-    }
-
-    "propagate ApplicationNotFound from connector from sandbox" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
-      theSandboxConnectorthenReturnTheApplication(sandboxApplicationId, sandboxApplication)
-      when(mockSandboxApplicationConnector.removeTeamMember(sandboxApplicationId, email, admin, adminsToEmail))
-        .thenReturn(failed(new ApplicationNotFound))
-      intercept[ApplicationNotFound](await(applicationService.removeTeamMember(sandboxApplication, email, admin)))
-    }
-
-    "include correct set of admins to email" in new Setup {
-
-      private val verifiedAdmin = "verified@example.com".asAdministratorCollaborator
-      private val unverifiedAdmin = "unverified@example.com".asAdministratorCollaborator
-      private val removerAdmin = "admin.email@example.com".asAdministratorCollaborator
-      private val verifiedDeveloper = "developer@example.com".asDeveloperCollaborator
-      private val teamMemberToRemove = "to.remove@example.com".asAdministratorCollaborator
-
-      val nonRemoverAdmins = Seq(
-        User("verified@example.com", Some(true)),
-        User("unverified@example.com", Some(false))
-      )
-
-      private val application = productionApplication.copy(collaborators = Set(verifiedAdmin, unverifiedAdmin, removerAdmin, verifiedDeveloper, teamMemberToRemove))
-
-      private val response = ApplicationUpdateSuccessful
-
-      when(mockDeveloperConnector.fetchByEmails(eqTo(Set("verified@example.com", "unverified@example.com")))(*))
-        .thenReturn(successful(nonRemoverAdmins))
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, application)
-      when(mockProductionApplicationConnector.removeTeamMember(*[ApplicationId], *, *, *)(*)).thenReturn(successful(response))
-
-      await(applicationService.removeTeamMember(application, teamMemberToRemove.emailAddress, removerAdmin.emailAddress)) shouldBe response
-      verify(mockProductionApplicationConnector).removeTeamMember(
-        eqTo(productionApplicationId),
-        eqTo(teamMemberToRemove.emailAddress),
-        eqTo(removerAdmin.emailAddress),
-        eqTo(Set(verifiedAdmin.emailAddress))
-      )(*)
     }
   }
 
@@ -582,24 +329,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder wit
     }
 
   }
-
-  "request delete developer" should {
-    val developerName = "Testy McTester"
-    val developerEmail = "testy@example.com"
-
-    "correctly create a deskpro ticket and audit record" in new Setup {
-      when(mockDeskproConnector.createTicket(any[DeskproTicket])(eqTo(hc)))
-        .thenReturn(successful(TicketCreated))
-      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
-        .thenReturn(successful(Success))
-
-      await(applicationService.requestDeveloperAccountDeletion(developerName, developerEmail))
-
-      verify(mockDeskproConnector, times(1)).createTicket(any[DeskproTicket])(eqTo(hc))
-      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
-    }
-  }
-
 
   "request 2SV removal" should {
 

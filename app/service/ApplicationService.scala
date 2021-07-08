@@ -175,7 +175,14 @@ class ApplicationService @Inject() (
   def identifyUpliftableSandboxAppIds(sandboxApplicationIds: Seq[ApplicationId])(implicit hc: HeaderCarrier): Future[Set[ApplicationId]] = {
     for {
       upliftableApiIdentifiers <- apmConnector.fetchUpliftableApiIdentifiers
-      mapOfAppIdsToApiIds <- Future.sequence(sandboxApplicationIds.map(id => sandboxApplicationConnector.fetchSubscription(id).map(subs => (id,subs)))).map(_.toMap)
+      mapOfAppIdsToApiIds <- Future.sequence(
+        sandboxApplicationIds.map( id => 
+          sandboxApplicationConnector.fetchSubscription(id)
+          .map(
+            subs => (id,subs)
+          )
+        )
+      ).map(_.toMap)
     } yield ApplicationService.filterSubscriptionsForUplift(upliftableApiIdentifiers)(mapOfAppIdsToApiIds)
   }
  
@@ -249,7 +256,8 @@ object ApplicationService {
   val filterSubscriptionsForUplift: (Set[ApiIdentifier]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Set[ApplicationId] = 
   (upliftableApiIdentifiers) => (appSubscriptions) =>
     appSubscriptions
-    .mapValues(apis => apis.subsetOf(upliftableApiIdentifiers))
+    // All subscribed apis are upliftable AND at least one subscribed apis is present
+    .mapValues(apis => apis.subsetOf(upliftableApiIdentifiers) && apis.nonEmpty)
     .filter{ case (_, isUpliftable) => isUpliftable}
     .keySet
 
