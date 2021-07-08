@@ -208,6 +208,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         }
       )
   }
+
+  def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
+    http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId.value}/subscription")
+  }
 }
 
 private[connectors] object ThirdPartyApplicationConnectorDomain {

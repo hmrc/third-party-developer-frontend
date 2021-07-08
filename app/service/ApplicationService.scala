@@ -171,6 +171,14 @@ class ApplicationService @Inject() (
     } yield response
   }
 
+
+  def identifyUpliftableSandboxAppIds(sandboxApplicationIds: Seq[ApplicationId])(implicit hc: HeaderCarrier): Future[Set[ApplicationId]] = {
+    for {
+      upliftableApiIdentifiers <- apmConnector.fetchUpliftableApiIdentifiers
+      mapOfAppIdsToApiIds <- Future.sequence(sandboxApplicationIds.map(id => sandboxApplicationConnector.fetchSubscription(id).map(subs => (id,subs)))).map(_.toMap)
+    } yield ApplicationService.filterSubscriptionsForUplift(upliftableApiIdentifiers)(mapOfAppIdsToApiIds)
+  }
+ 
   def fetchSummariesByTeamMember(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[(Seq[SandboxApplicationSummary], Seq[ProductionApplicationSummary])] = {
     for {
       productionApplications <- fetchProductionAppsByTeamMember(userId)
@@ -238,6 +246,13 @@ class ApplicationService @Inject() (
 }
 
 object ApplicationService {
+  val filterSubscriptionsForUplift: (Set[ApiIdentifier]) => (Map[ApplicationId, Set[ApiIdentifier]]) => Set[ApplicationId] = 
+  (upliftableApiIdentifiers) => (appSubscriptions) =>
+    appSubscriptions
+    .mapValues(apis => apis.subsetOf(upliftableApiIdentifiers))
+    .filter{ case (_, isUpliftable) => isUpliftable}
+    .keySet
+
   trait ApplicationConnector {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]

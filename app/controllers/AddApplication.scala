@@ -61,9 +61,13 @@ class AddApplication @Inject() (
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     applicationService.fetchSummariesByTeamMember(loggedIn.developer.userId, loggedIn.email) flatMap { 
       case (Nil, Nil)                                                    => successful(Ok(addApplicationSubordinateEmptyNestView()))
-      case (sandboxApplicationSummaries, productionApplicationSummaries) => successful(Ok(manageApplicationsView(
-        ManageApplicationsViewModel.from(sandboxApplicationSummaries, productionApplicationSummaries)
-      )))
+      case (sandboxApplicationSummaries, productionApplicationSummaries) => 
+        val appIds = sandboxApplicationSummaries.map(_.id)
+        applicationService.identifyUpliftableSandboxAppIds(appIds).map { upliftableApplicationIds =>
+          Ok(manageApplicationsView(
+            ManageApplicationsViewModel(sandboxApplicationSummaries, productionApplicationSummaries, upliftableApplicationIds)
+          ))
+        }
     }
   }
 

@@ -123,6 +123,7 @@ class ManageApplicationsSpec
 
     "return the manage Applications page with the user logged in" in new Setup {
       val prodSummary = ProductionApplicationSummary.from(application, loggedInUser.email)
+      identifyUpliftableSandboxAppIdsReturns(Set.empty)
       fetchSummariesByTeamMemberReturns(Nil, List(prodSummary))
 
       private val result = addApplicationController.manageApps()(loggedInRequest)

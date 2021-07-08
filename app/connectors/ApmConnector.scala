@@ -95,6 +95,11 @@ with CommonResponseHandlers {
       case Right(_) => ()
     })
   }
+
+  def fetchUpliftableApiIdentifiers(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = 
+    metrics.record(api) {
+      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/api-definitions/upliftable")
+    }
 }
 
 object ApmConnector {

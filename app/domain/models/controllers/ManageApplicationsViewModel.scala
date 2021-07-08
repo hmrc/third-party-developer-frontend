@@ -16,15 +16,16 @@
 
 package domain.models.controllers
 
-case class ManageApplicationsViewModel(sandboxApplicationSummaries: Seq[SandboxApplicationSummary], productionApplicationSummaries: Seq[ProductionApplicationSummary]) {
-  val hasNoProductionApplications = productionApplicationSummaries.isEmpty
-  val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
-  val hasAppsThatCannotBeUplifted = sandboxApplicationSummaries.exists(_.isValidTargetForUplift == false)
-  lazy val sandboxApplicationsSummariesForUplift = sandboxApplicationSummaries.filter(_.isValidTargetForUplift)
-  lazy val countOfAppsThatCanBeUplifted = sandboxApplicationsSummariesForUplift.size
-}
+import domain.models.applications.ApplicationId
 
-object ManageApplicationsViewModel {
-  def from(sandboxApplicationSummaries: Seq[SandboxApplicationSummary], productionApplicationSummaries: Seq[ProductionApplicationSummary]) : ManageApplicationsViewModel = 
-    ManageApplicationsViewModel(sandboxApplicationSummaries, productionApplicationSummaries)
+case class ManageApplicationsViewModel(
+    sandboxApplicationSummaries: Seq[SandboxApplicationSummary],
+    productionApplicationSummaries: Seq[ProductionApplicationSummary],
+    upliftableApplicationIds: Set[ApplicationId]
+) {
+  lazy val hasNoProductionApplications = productionApplicationSummaries.isEmpty
+  lazy val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
+  lazy val sandboxApplicationsSummariesForUplift = sandboxApplicationSummaries.filter(s => upliftableApplicationIds.contains(s.id))
+  lazy val countOfAppsThatCanBeUplifted = sandboxApplicationsSummariesForUplift.size
+  lazy val hasAppsThatCannotBeUplifted = countOfAppsThatCanBeUplifted < sandboxApplicationSummaries.size
 }

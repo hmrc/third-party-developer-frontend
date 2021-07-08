@@ -55,7 +55,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
-      manageApplicationsView.render(ManageApplicationsViewModel.from(sandboxAppSummaries, productionAppSummaries), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
+      manageApplicationsView.render(ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, Set.empty), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
 
     "show the applications page if there is more than 0 sandbox applications and environment is Prod/Sandbox" in new Setup {
@@ -75,8 +75,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
           appLastAccess,
           false,
           appCreatedOn,
-          AccessType.STANDARD,
-          false
+          AccessType.STANDARD
         )
       )
 
@@ -113,8 +112,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
             appLastAccess,
             false,
             appCreatedOn,
-            AccessType.STANDARD,
-            false
+            AccessType.STANDARD
           ))
 
       val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty).body)

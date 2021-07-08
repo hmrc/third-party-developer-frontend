@@ -57,8 +57,7 @@ case class SandboxApplicationSummary(
   lastAccess: DateTime,
   serverTokenUsed: Boolean = false,
   createdOn: DateTime,
-  accessType: AccessType,
-  isValidTargetForUplift: Boolean
+  accessType: AccessType
 ) extends ApplicationSummary {
   val environment = Environment.SANDBOX
 }
@@ -68,7 +67,6 @@ object SandboxApplicationSummary {
     require(app.deployedTo.isSandbox, "SandboxApplicationSummary cannot be built from Production App")
 
     val role = app.role(email).getOrElse(throw new NotFoundException("Role not found"))
-    val isValidTargetForUplift = false
 
     SandboxApplicationSummary(
       app.id,
@@ -79,8 +77,7 @@ object SandboxApplicationSummary {
       app.lastAccess,
       app.lastAccessTokenUsage.isDefined,
       app.createdOn,
-      app.access.accessType,
-      isValidTargetForUplift
+      app.access.accessType
     )
   }
 }

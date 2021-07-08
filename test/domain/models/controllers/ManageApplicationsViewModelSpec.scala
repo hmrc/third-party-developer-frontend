@@ -35,8 +35,7 @@ class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
         new DateTime(),
         serverTokenUsed = false,
         new DateTime(),
-        AccessType.STANDARD,
-        false
+        AccessType.STANDARD
       )
       
     val productionApp =
@@ -53,13 +52,13 @@ class ManageApplicationsViewModelSpec extends WordSpec with Matchers {
       )
 
     "return true if only sandbox apps" in {
-      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq.empty)
+      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq.empty, Set.empty)
 
       model.hasNoProductionApplications shouldBe true
     }
 
     "return false if there is a production app" in {
-      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq(productionApp))
+      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq(productionApp), Set.empty)
 
       model.hasNoProductionApplications shouldBe false
     }
