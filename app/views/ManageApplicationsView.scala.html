@@ -60,12 +60,11 @@
       <li>APIs for testing your service</li>
       <li>Hello World API</li>
     </ul>
-  }
-  else {
+  } else {
     <p class="govuk-body">After testing in the @subordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
-    <button class="govuk-button" data-module="govuk-button">
+    <a class="govuk-button" data-module="govuk-button" href="@routes.AddApplication.addApplicationPrincipal">
       Get production credentials
-    </button>
+    </a>
   }
 }
 
