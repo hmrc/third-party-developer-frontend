@@ -64,7 +64,8 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
     when(applicationServiceMock.fetchSummariesByTeamMember(eqTo(userId), *)(*))
       .thenReturn(successful((sandboxApps, productionApps)))
 
-  def identifyUpliftableSandboxAppIdsReturns(sandboxApplicationIds: Set[ApplicationId]) = when(applicationServiceMock.identifyUpliftableSandboxAppIds(*)(*)).thenReturn(successful(sandboxApplicationIds))
+  def identifyUpliftableSandboxAppIdsReturns(sandboxApplicationIds: Set[ApplicationId]) = 
+    when(applicationServiceMock.identifyUpliftableSandboxAppIds(*)(*)).thenReturn(successful(sandboxApplicationIds))
 
   def fetchCredentialsReturns(application: Application, tokens: ApplicationToken): Unit =
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))

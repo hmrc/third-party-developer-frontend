@@ -41,24 +41,80 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
 
   val applicationId = ApplicationId("1111")
 
-  trait Setup {
-    when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
-    when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+  trait EnvNames {
+    def principalCapitalized = principal.capitalize
+    def subordinateCapitalized = subordinate.capitalize
+    def principal: String
+    def subordinate: String
+    def subordinateWording: String
   }
   
+  trait ProdAndET extends EnvNames {
+    val principal = "Production"
+    val subordinate = "Sandbox"
+    val subordinateWording = "the sandbox"
+  }
+
+  trait QaAndDev extends EnvNames {
+    val principal = "QA"
+    val subordinate = "Development"
+    val subordinateWording = "development"
+  }
+  
+  trait Setup {
+    self: EnvNames =>
+
+    def showsHeading()(implicit document: Document) = 
+      elementExistsByText(document, "h1", "View all applications") shouldBe true
+
+    def showsAppName(appName: String)(implicit document: Document) =
+      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
+      
+    def showsSubordinateAppsHeading()(implicit document: Document) =
+      elementExistsByText(document, "th", s"$subordinateCapitalized applications") shouldBe true
+
+    def showsPrincipalAppsHeading()(implicit document: Document) =
+      elementExistsByText(document, "th", s"$principalCapitalized applications") shouldBe true
+
+    def hidesSubordinateAppsHeading()(implicit document: Document) =
+      elementExistsByText(document, "th", s"$subordinateCapitalized applications") shouldBe false
+
+    def hidesPrincipalAppsHeading()(implicit document: Document) =
+      elementExistsByText(document, "th", s"$principalCapitalized applications") shouldBe false
+    
+    def showsGetCredentialsButton()(implicit document: Document) = 
+      isGreenAddProductionApplicationButtonVisible(document) shouldBe true
+
+    def doesNotShowsGetCredentialsButton()(implicit document: Document) =
+      isGreenAddProductionApplicationButtonVisible(document) shouldBe false
+
+    def showsAfterTestingMessage()(implicit document: Document) =
+      elementExistsByText(document, "p", s"After testing in ${subordinateWording}, you can apply for ${principal.toLowerCase} credentials.") shouldBe true
+
+    def showsPriviledAppsMessage()(implicit document: Document) =
+      elementExistsByText(document, "h2", "Using privileged application credentials") shouldBe true
+
+    def hidesPriviledAppsMessage()(implicit document: Document) =
+      elementExistsByText(document, "h2", "Using privileged application credentials") shouldBe false
+
+    when(appConfig.nameOfPrincipalEnvironment).thenReturn(principal)
+    when(appConfig.nameOfSubordinateEnvironment).thenReturn(subordinate)
+  }
+
+
   val environmentNameService = new EnvironmentNameService(appConfig)
 
   "view all applications page" should {
 
-    def renderPage(sandboxAppSummaries: Seq[SandboxApplicationSummary], productionAppSummaries: Seq[ProductionApplicationSummary]) = {
+    def renderPage(sandboxAppSummaries: Seq[SandboxApplicationSummary], productionAppSummaries: Seq[ProductionApplicationSummary], upliftableApplicationIds: Set[ApplicationId]) = {
       val request = FakeRequest()
       val loggedIn = utils.DeveloperSession("developer@example.com", "firstName", "lastname", loggedInState = LoggedInState.LOGGED_IN)
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
-      manageApplicationsView.render(ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, Set.empty), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
+      manageApplicationsView.render(ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds), request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
 
-    "show the applications page if there is more than 0 sandbox applications and environment is Prod/Sandbox" in new Setup {
+    "show the applications page if there is more than 0 sandbox applications and environment is Prod/Sandbox" in new ProdAndET with Setup {
 
       val appName = "App name 1"
       val appUserRole = CollaboratorRole.ADMINISTRATOR
@@ -79,24 +135,22 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         )
       )
 
-      val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty).body)
+      implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
+      
+      showsHeading()
+      showsAppName(appName)
+      showsSubordinateAppsHeading()
+      hidesPrincipalAppsHeading()
 
-      elementExistsByText(document, "h1", "View all applications") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
-      elementExistsByText(document, "th", "Sandbox applications") shouldBe true
-      elementExistsByText(document, "th", "Production applications") shouldBe false
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
-      elementExistsByText(document, "p", "After testing in the sandbox, you can apply for production credentials.") shouldBe true
+      showsAfterTestingMessage()
 
-      isGreenAddProductionApplicationButtonVisible(document) shouldBe true
+      showsGetCredentialsButton()
     }
 
-    "show the applications page if there is more than 0 sandbox applications and environment is QA/Dev" in new Setup {
-      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
-      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-
+    "show the applications page if there is more than 0 sandbox applications and environment is QA/Dev" in new QaAndDev with Setup {
       val appName = "App name 1"
       val appUserRole = CollaboratorRole.ADMINISTRATOR
       val appCreatedOn = DateTimeUtils.now
@@ -115,55 +169,21 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
             AccessType.STANDARD
           ))
 
-      val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty).body)
+      implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
 
-      elementExistsByText(document, "h1", "View all applications") shouldBe true
-      elementExistsByText(document, "th", "Development applications") shouldBe true
-      elementExistsByText(document, "th", "QA applications") shouldBe false
-      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
+      showsHeading()
+      showsAppName(appName)
+      showsSubordinateAppsHeading()
+      hidesPrincipalAppsHeading()
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
-      elementExistsByText(document, "p", "After testing in development, you can apply for qa credentials.") shouldBe true
+      showsAfterTestingMessage()
 
-      isGreenAddProductionApplicationButtonVisible(document) shouldBe true
+      showsGetCredentialsButton()
     }
 
-    "hide Get production credentials button if there is more than 0 production applications" in new Setup {
-
-      val appName = "App name 1"
-      val appUserRole = CollaboratorRole.ADMINISTRATOR
-      val appCreatedOn = DateTimeUtils.now
-      val appLastAccess = appCreatedOn
-
-      val productionAppSummaries = Seq(
-        ProductionApplicationSummary(
-          applicationId,
-          appName,
-          appUserRole,
-          TermsOfUseStatus.NOT_APPLICABLE,
-          State.TESTING,
-          appLastAccess,
-          false,
-          appCreatedOn,
-          AccessType.STANDARD
-        )
-      )
-
-      val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries).body)
-
-      elementExistsByText(document, "h1", "View all applications") shouldBe true
-      elementExistsByText(document, "th", "Sandbox applications") shouldBe false
-      elementExistsByText(document, "th", "Production applications") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
-      elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
-
-      isGreenAddProductionApplicationButtonVisible(document) shouldBe false
-      elementExistsByText(document, "p", "After testing in the sandbox, you can apply for production credentials.") shouldBe false
-    }
-
-    "show using privileged application credentials text if user is a collaborator on at least one privileged application" in {
+    "show using privileged application credentials text if user is a collaborator on at least one privileged application" in new ProdAndET with Setup {
 
       val appName = "App name 1"
       val appUserRole = CollaboratorRole.ADMINISTRATOR
@@ -184,18 +204,19 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         )
       )
 
-      val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries).body)
+      implicit val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
 
-      elementExistsByText(document, "h1", "View all applications") shouldBe true
-      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
+      showsHeading()
+      showsAppName(appName)
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
-      isGreenAddProductionApplicationButtonVisible(document) shouldBe false
-      elementExistsByText(document, "h2", "Using privileged application credentials") shouldBe true
+      doesNotShowsGetCredentialsButton()
+
+      showsPriviledAppsMessage()
     }
 
-    "hide using privileged application credentials text if user is not a collaborator on at least one privileged application" in {
+    "hide using privileged application credentials text if user is not a collaborator on at least one privileged application" in new ProdAndET with Setup {
 
       val appName = "App name 1"
       val appUserRole = CollaboratorRole.ADMINISTRATOR
@@ -216,14 +237,15 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         )
       )
 
-      val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries).body)
+      implicit val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
 
-      elementExistsByText(document, "h1", "View all applications") shouldBe true
+      showsHeading()
+      showsAppName(appName)
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
       elementIdentifiedByAttrContainsText(document, "td", "data-app-user-role", "Admin") shouldBe true
 
-      isGreenAddProductionApplicationButtonVisible(document) shouldBe false
+      doesNotShowsGetCredentialsButton()
       elementExistsByText(document, "h2", "Using privileged application credentials") shouldBe false
     }
   }
@@ -238,7 +260,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
     }
 
-    "show the empty nest page when there are no applications when environment is Prod/Sandbox" in new Setup {
+    "show the empty nest page when there are no applications when environment is Prod/Sandbox" in new ProdAndET with Setup {
 
       val appSummaries = Seq()
 
@@ -247,7 +269,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
       elementExistsByText(document, "h1", "Start using our APIs") shouldBe true
     }
 
-    "show the empty nest page when there are no applications when environment is QA/Dev" in new Setup {
+    "show the empty nest page when there are no applications when environment is QA/Dev" in new ProdAndET with Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 

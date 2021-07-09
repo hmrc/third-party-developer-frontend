@@ -26,7 +26,8 @@
 @(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: config.ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
 
 @principalWording = @{appConfig.nameOfPrincipalEnvironment.toLowerCase}
-@subordinateWording = @{environmentNameService.subordinateWording}
+@subordinateWording = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
+@theSubordinateWording = @{environmentNameService.subordinateWording}
 
 @devMain(
   title = "View all applications",
@@ -61,7 +62,7 @@
       <li>Hello World API</li>
     </ul>
   } else {
-    <p class="govuk-body">After testing in the @subordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
+    <p class="govuk-body">After testing in @theSubordinateWording, you can apply for @appConfig.nameOfPrincipalEnvironment.toLowerCase credentials.</p>
     <a class="govuk-button" data-module="govuk-button" href="@routes.AddApplication.addApplicationPrincipal">
       Get production credentials
     </a>
