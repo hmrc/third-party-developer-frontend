@@ -231,6 +231,16 @@ object ApplicationStub {
     stubResponse(Environment.PRODUCTION, prodApps)
     stubResponse(Environment.SANDBOX, sandboxApps)
 
+    stubFor(
+      get(urlPathEqualTo("/api-definitions/all"))
+      .withQueryParam("environment", equalTo("SANDBOX"))
+      .willReturn(
+        aResponse()
+        .withStatus(OK)
+        .withBody("{}")
+      )
+    )
+
     val apisUpliftable = Set.empty[ApiIdentifier]
 
     stubFor(

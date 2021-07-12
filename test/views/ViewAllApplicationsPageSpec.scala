@@ -234,6 +234,13 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec with WithCSRFAddToken {
         hidesGetCredentialsButton()
         hidesAfterTestingMessage()
       }
+
+      "hides when production app is present even when upliftable sandbox app is present" in new ProdAndET with Setup {
+        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
+        
+        hidesGetCredentialsButton()
+        hidesAfterTestingMessage()
+      }
     }
 
     "handling of privileged applications" should {

@@ -18,6 +18,12 @@ package domain.models.subscriptions
 
 import domain.models.apidefinitions.{ApiVersion, APIStatus, APIAccess, ApiVersionDefinition}
 
+case class ApiCategory(value: String) extends AnyVal
+
+object ApiCategory {
+  val EXAMPLE = ApiCategory("EXAMPLE")
+}
+
 case class VersionSubscription(version: ApiVersionDefinition, subscribed: Boolean)
 
 case class VersionData(status: APIStatus, access: APIAccess)
@@ -26,4 +32,5 @@ case class ApiData(
     serviceName: String,
     name: String,
     isTestSupport: Boolean,
-    versions: Map[ApiVersion, VersionData])
+    versions: Map[ApiVersion, VersionData],
+    categories: List[ApiCategory])

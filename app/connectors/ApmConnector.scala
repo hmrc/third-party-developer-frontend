@@ -100,6 +100,11 @@ with CommonResponseHandlers {
     metrics.record(api) {
       http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/api-definitions/upliftable")
     }
+
+  def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext,ApiData]] = 
+    metrics.record(api) {
+      http.GET[Map[ApiContext, ApiData]](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString()))
+    }
 }
 
 object ApmConnector {
