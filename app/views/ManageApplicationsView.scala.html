@@ -29,6 +29,8 @@
 @subordinateWording = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
 @theSubordinateWording = @{environmentNameService.subordinateWording}
 
+@flags = @{ Map("IS_GET_PRODUCTION_CREDENTIALS_ENABLED" -> (model.countOfAppsThatCanBeUplifted > 0)) }
+
 @devMain(
   title = "View all applications",
   userFullName = loggedIn.loggedInName,
@@ -36,7 +38,7 @@
     Crumb("View all applications", "", Some("data-breadcrumb-manage-app")),
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(None, Option(navSection))),
+  leftNav = Some(leftHandNav(None, Option(navSection), flags)),
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">View all applications</h1>
