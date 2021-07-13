@@ -15,6 +15,8 @@
  *@
 
 @import model.ApplicationViewModel
+@import controllers.model.LeftHandNavFlags
+
 @import controllers.Credentials.serverTokenCutoffDate
 @import domain.models.developers.DeveloperSession
 
@@ -25,7 +27,7 @@
 @theSandbox = @{"the sandbox"}
 @subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}
 @getProductionCredentials = @{"Get production credentials"}
-@isGetProductionCredentialsEnabled = @{flags.getOrElse("IS_GET_PRODUCTION_CREDENTIALS_ENABLED", false)}
+@isGetProductionCredentialsEnabled = @{flags.getOrElse(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled, false)}
 
 @(application, navSection) match {
   case (Some(applicationView), Some(section)) => {
@@ -131,7 +133,7 @@
               <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationPrincipal">@getProductionCredentials</a></li>
             }
         } else {
-          <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationPrincipal">Add an application to ${appConfig.nameOfPrincipalEnvironment}</a></li>
+          <li class="side-nav__list"><a class="side-nav__link" href="@routes.AddApplication.addApplicationPrincipal">Add an application to @{appConfig.nameOfPrincipalEnvironment}</a></li>
         }
       </ul>
       <br>

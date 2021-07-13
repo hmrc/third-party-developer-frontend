@@ -193,13 +193,23 @@ class ApplicationService @Inject() (
     } yield filteredSubs2
   }
  
-  def fetchSummariesByTeamMember(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[(Seq[SandboxApplicationSummary], Seq[ProductionApplicationSummary])] = {
+  def fetchAllSummariesByTeamMember(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[(Seq[SandboxApplicationSummary], Seq[ProductionApplicationSummary])] = {
     for {
-      productionApplications <- fetchProductionAppsByTeamMember(userId)
-      productionSummaries = productionApplications.sorted.map(ProductionApplicationSummary.from(_, email))
-      sandboxApplications <- fetchSandboxAppsByTeamMember(userId)
-      sandboxApplicationSummaries = sandboxApplications.sorted.map(SandboxApplicationSummary.from(_, email))
-    } yield (sandboxApplicationSummaries, productionSummaries)
+      productionSummaries <- fetchProductionSummariesByTeamMember(userId, email)
+      sandboxSummaries <- fetchSandboxSummariesByTeamMember(userId, email)
+    } yield (sandboxSummaries, productionSummaries)
+  }
+
+  def fetchProductionSummariesByTeamMember(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[Seq[ProductionApplicationSummary]] = {
+    fetchProductionAppsByTeamMember(userId).map( apps =>
+      apps.sorted.map(ProductionApplicationSummary.from(_, email))
+    )
+  }
+  
+  def fetchSandboxSummariesByTeamMember(userId: UserId, email: String)(implicit hc: HeaderCarrier): Future[Seq[SandboxApplicationSummary]] = {
+    fetchSandboxAppsByTeamMember(userId).map( apps =>
+      apps.sorted.map(SandboxApplicationSummary.from(_, email))
+    )
   }
 
   def fetchProductionAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Application]] = {

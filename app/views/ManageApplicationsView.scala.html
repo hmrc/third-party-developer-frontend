@@ -20,6 +20,7 @@
 @import domain.models.developers.DeveloperSession
 @import views.helper.EnvironmentNameService
 @import domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary, ProductionApplicationSummary, SandboxApplicationSummary}
+@import controllers.model.LeftHandNavFlags
 
 @this(devMain: DevMain2, leftHandNav: LeftHandNav)
 
@@ -29,7 +30,7 @@
 @subordinateWording = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
 @theSubordinateWording = @{environmentNameService.subordinateWording}
 
-@flags = @{ Map("IS_GET_PRODUCTION_CREDENTIALS_ENABLED" -> (model.countOfAppsThatCanBeUplifted > 0)) }
+@flags = @{ Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> (model.countOfAppsThatCanBeUplifted > 0)) }
 
 @devMain(
   title = "View all applications",

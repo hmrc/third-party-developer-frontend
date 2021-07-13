@@ -59,7 +59,7 @@ class AddApplication @Inject() (
     extends ApplicationController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
-    applicationService.fetchSummariesByTeamMember(loggedIn.developer.userId, loggedIn.email) flatMap { 
+    applicationService.fetchAllSummariesByTeamMember(loggedIn.developer.userId, loggedIn.email) flatMap { 
       case (Nil, Nil)                                                    => successful(Ok(addApplicationSubordinateEmptyNestView()))
       case (sandboxApplicationSummaries, productionApplicationSummaries) => 
         val appIds = sandboxApplicationSummaries.map(_.id)
@@ -71,48 +71,33 @@ class AddApplication @Inject() (
     }
   }
 
-  def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(accessTokenSwitchView())) }
-
-  def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(usingPrivilegedApplicationCredentialsView())) }
-
-  def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(tenDaysWarningView())) }
-
-  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(addApplicationStartSubordinateView())) }
-
-  def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => successful(Ok(addApplicationStartPrincipalView())) }
-
-  def addApplicationSuccess(applicationId: ApplicationId): Action[AnyContent] = {
-
-    def subscriptionsNotInUserEmailPreferences(applicationSubscriptions: Seq[APISubscriptionStatus],
-                                               userEmailPreferences: EmailPreferences)(implicit hc: HeaderCarrier): Future[Set[String]] = {
-      emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
-        val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime)
-        val filteredApis = apiDetails.filter(api => api.categories.intersect(allInCategories).isEmpty)
-        filteredApis.map(_.serviceName).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
-      }
-    }
-
-    whenTeamMemberOnApp(applicationId) { implicit appRequest =>
-      import appRequest._
-
-      deployedTo match {
-        case SANDBOX    => {
-          val alreadySelectedEmailPreferences: Boolean = request.flash.get("emailPreferencesSelected").contains("true")
-          subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), user.developer.emailPreferences) map { missingSubscriptions =>
-
-          if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
-            Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
-          } else {
-            Redirect(controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsPage(applicationId))
-              .flashing("missingSubscriptions" -> missingSubscriptions.mkString(","))
-          }
-        }
-      }
-        case PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(request)))
-      }
-      
-    }
+  def accessTokenSwitchPage(): Action[AnyContent] = loggedInAction { implicit request => 
+    successful(Ok(accessTokenSwitchView())) 
   }
+
+  def usingPrivilegedApplicationCredentialsPage(): Action[AnyContent] = loggedInAction { implicit request => 
+    successful(Ok(usingPrivilegedApplicationCredentialsView())) 
+  }
+  
+  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request => 
+    successful(Ok(addApplicationStartSubordinateView())) 
+  }
+  
+  def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request => 
+    successful(Ok(addApplicationStartPrincipalView())) 
+  }
+  
+  def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request => 
+    successful(Ok(tenDaysWarningView())) 
+  }
+
+  def addApplicationProductionSwitch(): Action[AnyContent] = loggedInAction { implicit request =>
+    addApplicationName(Environment.PRODUCTION)(request)
+  }
+
+  // def addApplicationChooseWhichAppToUplift():  Action[AnyContent] = loggedInAction { implicit request =>
+  //   ???
+  // }
 
   def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
@@ -150,4 +135,37 @@ class AddApplication @Inject() (
 
     requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)
   }
+
+  def addApplicationSuccess(applicationId: ApplicationId): Action[AnyContent] = {
+
+    def subscriptionsNotInUserEmailPreferences(applicationSubscriptions: Seq[APISubscriptionStatus],
+                                               userEmailPreferences: EmailPreferences)(implicit hc: HeaderCarrier): Future[Set[String]] = {
+      emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
+        val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime)
+        val filteredApis = apiDetails.filter(api => api.categories.intersect(allInCategories).isEmpty)
+        filteredApis.map(_.serviceName).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
+      }
+    }
+
+    whenTeamMemberOnApp(applicationId) { implicit appRequest =>
+      import appRequest._
+
+      deployedTo match {
+        case SANDBOX    => {
+          val alreadySelectedEmailPreferences: Boolean = request.flash.get("emailPreferencesSelected").contains("true")
+          subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), user.developer.emailPreferences) map { missingSubscriptions =>
+
+            if(alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
+              Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
+            } else {
+              Redirect(controllers.profile.routes.EmailPreferences.selectApisFromSubscriptionsPage(applicationId))
+                .flashing("missingSubscriptions" -> missingSubscriptions.mkString(","))
+            }
+          }
+        }
+        case PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(request)))
+      }
+    }
+  }
+
 }

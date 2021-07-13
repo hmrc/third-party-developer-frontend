@@ -57,11 +57,11 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
     .thenReturn(successful(apps.map(_.copy(deployedTo = Environment.SANDBOX))))
 
   def fetchSummariesByTeamMemberReturns(sandboxApps: Seq[SandboxApplicationSummary], productionApps: Seq[ProductionApplicationSummary]) =
-    when(applicationServiceMock.fetchSummariesByTeamMember(*[UserId], *)(*))
+    when(applicationServiceMock.fetchAllSummariesByTeamMember(*[UserId], *)(*))
       .thenReturn(successful((sandboxApps, productionApps)))
 
   def fetchSummariesByTeamMemberReturns(userId: UserId, sandboxApps: Seq[SandboxApplicationSummary], productionApps: Seq[ProductionApplicationSummary]) =
-    when(applicationServiceMock.fetchSummariesByTeamMember(eqTo(userId), *)(*))
+    when(applicationServiceMock.fetchAllSummariesByTeamMember(eqTo(userId), *)(*))
       .thenReturn(successful((sandboxApps, productionApps)))
 
   def identifyUpliftableSandboxAppIdsReturns(sandboxApplicationIds: Set[ApplicationId]) = 

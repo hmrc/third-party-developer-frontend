@@ -28,6 +28,7 @@ import utils.ViewHelpers.elementExistsByText
 import utils._
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
+import controllers.model.LeftHandNavFlags
 
 class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker {
 
@@ -58,12 +59,16 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
     val applicationViewModelWithApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
     val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
+
+    def leftHandNavRender(viewModel: Option[ApplicationViewModel], navSection: Option[String], flags: Map[String, Boolean] = Map.empty) = {
+      leftHandNavView.render(viewModel, navSection, flags, request, loggedInUser, appConfig)
+    }
   }
 
   "Left Hand Nav" when {
     "working with an application with no api subscriptions" should {
       "render correctly" in new Setup {
-        val page = leftHandNavView.render(Some(applicationViewModelWithNoApiSubscriptions), Some("details"), request, loggedInUser, appConfig)
+        val page = leftHandNavRender(Some(applicationViewModelWithNoApiSubscriptions), Some("details"))
 
         page.contentType should include("text/html")
 
@@ -82,7 +87,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
-        val page = leftHandNavView.render(Some(oldAppWithoutSubsFields), Some("details"), request, loggedInUser, appConfig)
+        val page = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
 
@@ -93,7 +98,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
     "working with an application with api subscriptions" should {
       "render correctly" in new Setup {
-        val page = leftHandNavView.render(Some(applicationViewModelWithApiSubscriptions), Some("details"), request, loggedInUser, appConfig)
+        val page = leftHandNavRender(Some(applicationViewModelWithApiSubscriptions), Some("details"))
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
@@ -111,7 +116,7 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
-        val page = leftHandNavView.render(Some(oldAppWithSubsFields), Some("details"), request, loggedInUser, appConfig)
+        val page = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")
 
@@ -122,21 +127,37 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
     "on the View all applications page" should {
       "render correct wording for default environment config" in new Setup {
-        val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
+        val page = leftHandNavRender(None, Some("manage-applications"))
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to the sandbox") shouldBe true
-        elementExistsByText(document, "a", "Get production credentials") shouldBe true
 
         userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
 
+      "render get production credentials when flag is set" in new Setup {
+        val page = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> true))
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+        elementExistsByText(document, "a", "Get production credentials") shouldBe true
+      }
+
+      "do not render get production credentials when flag is clear" in new Setup {
+        val page = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> false))
+        page.contentType should include("text/html")
+
+        val document = Jsoup.parse(page.body)
+        elementExistsByText(document, "a", "Get production credentials") shouldBe false
+      }
+
       "render correct wording for QA and Development config" in new Setup {
+        reset(appConfig)
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
-        val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
+        val page = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> true))
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
@@ -150,11 +171,10 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("Staging")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Staging")
 
-        val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
+        val page = leftHandNavRender(None, Some("manage-applications"))
         page.contentType should include("text/html")
 
         val document = Jsoup.parse(page.body)
-        elementExistsByText(document, "a", "Add an application to Staging") shouldBe true
         elementExistsByText(document, "a", "Add an application to Staging") shouldBe true
 
         userProfileSectionCorrectlyDisplayed(document) shouldBe true
@@ -164,11 +184,10 @@ class LeftHandNavSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("Integration")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Integration")
 
-        val page = leftHandNavView.render(None, Some("manage-applications"), request, loggedInUser, appConfig)
+        val page = leftHandNavRender(None, Some("manage-applications"))
         page.contentType should include("text/html")
 
         val document: Document = Jsoup.parse(page.body)
-        elementExistsByText(document, "a", "Add an application to Integration") shouldBe true
         elementExistsByText(document, "a", "Add an application to Integration") shouldBe true
 
         userProfileSectionCorrectlyDisplayed(document) shouldBe true

@@ -196,7 +196,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(successful(sandboxApps))
 
-      private val result = await(applicationService.fetchSummariesByTeamMember(userId, email))
+      private val result = await(applicationService.fetchAllSummariesByTeamMember(userId, email))
       result shouldBe ((List(sandboxApp1.asSandboxSummary), List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
     }
 
@@ -206,7 +206,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
         .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
 
-      private val result = await(applicationService.fetchSummariesByTeamMember(userId, email))
+      private val result = await(applicationService.fetchAllSummariesByTeamMember(userId, email))
       result shouldBe ((Nil, List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
     }
 
@@ -217,7 +217,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
         .thenReturn(successful(sandboxApps))
 
       intercept[UpstreamErrorResponse] {
-        await(applicationService.fetchSummariesByTeamMember(userId, email))
+        await(applicationService.fetchAllSummariesByTeamMember(userId, email))
       }
     }
   }
