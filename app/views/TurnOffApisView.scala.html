@@ -1,0 +1,82 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import controllers.checkpages.DummySubscriptionsForm
+@import domain.models.views.SubscriptionRedirect._
+@import domain.models.applications._
+@import domain.models.subscriptions._
+@import include._
+@import config.ApplicationConfig
+@import controllers.checkpages.DummySubscriptionsForm
+@import domain.models.views.BackButtonWithJavaScript
+@import domain.models.developers.DeveloperSession
+@import domain.models.apidefinitions.ApiContext
+@import domain.models.subscriptions.ApiData
+
+@this(devMain: DevMain2, subscriptionGroups: SubscriptionGroups)
+@(
+    app: Application, 
+    role: CollaboratorRole,
+    subscriptions: Option[GroupedSubscriptions], 
+    openAccessApis: Map[ApiContext, ApiData],
+    id: ApplicationId, 
+    submitAction: Call, 
+    errorForm: Option[Form[DummySubscriptionsForm]] = None
+)(
+    implicit request: play.api.mvc.Request[Any],
+    loggedIn: DeveloperSession,
+    messages: Messages,
+    applicationConfig: ApplicationConfig
+)
+
+@import domain.models.applications.CollaboratorRole
+    @pageHeading = @{ "Turn off API subscriptions you don’t need" }
+
+@devMain(
+    title = pageHeading,
+    userFullName = loggedIn.loggedInName,
+    back = BackButtonWithJavaScript,
+    developerSession = Some(loggedIn)
+) {
+
+    @if(errorForm.isDefined) { @errorSummary(errorForm.get) }
+
+    <h1 class="govuk-heading-l">@pageHeading</h1>
+
+    <!-- NOTE: Below needs to only show APIs that have been selected for that application -->
+    @subscriptions match {
+        case Some(groupedSubscriptions) => {
+            @subscriptionGroups(role: CollaboratorRole, groupedSubscriptions, openAccessApis, app, APPLICATION_CHECK_PAGE, true)
+            <br/>
+            <p class="govuk-body">
+                If you want to use an API in production that you haven't already tested in sandbox, you'll need to 
+                <a class="govuk-link" href="#">add it to your sandbox application</a> 
+                and test it first.
+            </p>
+            <br/>
+            @helper.form(action = submitAction, 'class -> "form") {
+                @helper.CSRF.formField
+                <button id="submit" class="govuk-button" type="submit">Save and continue</button>
+            }
+        }
+        case _ => {
+            <div class="govuk-inset-text">We can’t load your API subscriptions at the moment. Please 
+                <a class="govuk-link govuk-link--no-visited-state" href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(app.id)}">try again</a> 
+                later
+            </div>
+        }
+    }
+}
